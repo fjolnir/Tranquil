@@ -1,4 +1,4 @@
-#include "TQSyntaxTree.h"
+#include "TQNode.h"
 #include <llvm/LLVMContext.h>
 #include <llvm/DerivedTypes.h>
 #include <llvm/Constants.h>
@@ -26,7 +26,7 @@ NSString * const kTQSyntaxErrorDomain = @"org.tranquil.syntax";
 	return [[[self alloc] init] autorelease];
 }
 
-- (BOOL)generateCodeInModule:(llvm::Module *)aModule :(NSError **)aoErr
+- (BOOL)generateCodeInModule:(llvm::Module *)aModule error:(NSError **)aoErr
 {
 	NSLog(@"Code generation has not been implemented for %@.", [self class]);
 	return NO;
@@ -513,17 +513,6 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
 - (NSString *)description
 {
 	return [NSString stringWithFormat:@"<op@ %@ %c %@>", _left, _type, _right];
-}
-@end
-
-
-
-@implementation TQProgram
-@synthesize rootNode=_rootNode;
-- (void)dealloc
-{
-	[_rootNode release];
-	[super dealloc];
 }
 @end
 

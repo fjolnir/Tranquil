@@ -1,5 +1,5 @@
 %{
-	#include "TQSyntaxTree.h"
+	#include "TQNode.h"
 	#include <stdlib.h>
 	#include "y.tab.h"
 %}

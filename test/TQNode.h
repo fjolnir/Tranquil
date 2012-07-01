@@ -4,16 +4,17 @@
 #include <Foundation/Foundation.h>
 #include <llvm/Module.h>
 
-#ifdef DEBUG
-	#define TQLog(fmt, ...) NSLog(@"%s:%u (%s): " fmt "\n", __FILE__, __LINE__, __func__, ## __VA_ARGS__)
-	#define TQLog_min(fmt, ...)  NSLog(fmt "\n", ## __VA_ARGS__)
-
 extern NSString * const kTQSyntaxErrorDomain;
 
 typedef enum {
 	kTQUnexpectedIdentifier = 1,
 	kTQInvalidClassName,
 } TQSyntaxErrorCode;
+
+#ifdef DEBUG
+	#define TQLog(fmt, ...) NSLog(@"%s:%u (%s): " fmt "\n", __FILE__, __LINE__, __func__, ## __VA_ARGS__)
+	#define TQLog_min(fmt, ...)  NSLog(fmt "\n", ## __VA_ARGS__)
+
 
 #define TQAssert(cond, fmt, ...) \
 	do { \
@@ -44,9 +45,10 @@ typedef enum {
     #define TQAssert(cond, fmt, ...)
 #endif
 
+
 @interface TQNode : NSObject
 + (TQNode *)node;
-- (BOOL)generateCodeInModule:(llvm::Module *)aModule :(NSError **)aoErr;
+- (BOOL)generateCodeInModule:(llvm::Module *)aModule error:(NSError **)aoErr;
 @end
 
 @interface TQNodeReturn : TQNode
@@ -158,12 +160,6 @@ typedef char TQOperatorType;
 @property(readwrite, retain) TQNode *right;
 + (TQNodeBinaryOperator *)nodeWithType:(TQOperatorType)aType left:(TQNode *)aLeft right:(TQNode *)aRight;
 - (id)initWithType:(TQOperatorType)aType left:(TQNode *)aLeft right:(TQNode *)aRight;
-@end
-
-
-@interface TQProgram : NSObject
-@property(readwrite, retain) TQNode *rootNode;
-
 @end
 
 #endif

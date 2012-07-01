@@ -1,6 +1,6 @@
 %{
 	#include <Foundation/Foundation.h>
-	#include "TQSyntaxTree.h"
+	#include "TQProgram.h"
 	#include <stdio.h>
 	#include <stdlib.h>
 
@@ -29,7 +29,7 @@
 
 %{
 	typedef struct {
-		TQNode *root;
+		TQProgram *program;
 		TQNode *currentNode;
 	} TQParserState;
 
@@ -73,7 +73,7 @@
 
 %%
 program: empty
-	| opt_nl statements opt_nl { state->root = $<node>2; }
+	| opt_nl statements opt_nl { [state->program setStatements:$2]; }
 	;
 
 assignment:
@@ -332,13 +332,11 @@ int yywrap(void)
 
 void parse()
 {
-	TQParserState state = { nil, nil };
+	TQParserState state = { [TQProgram programWithName:@"Test"], nil };
 	yydebug = 5;
 	yyparse(&state);
 	NSLog(@"------------------------------------------");
-	for(TQNode *node in (NSArray*)state.root) {
-		NSLog(@"%@", node);
-	}
+	NSLog(@"%@", state.program);
 	NSLog(@"------------------------------------------");
 }
 
