@@ -4,8 +4,12 @@
 
 using namespace llvm;
 
+@interface TQNodeVariable (Private)
+- (TQNodeVariable *)_getExistingIdenticalInBlock:(TQNodeBlock *)aBlock;
+@end
+
 @implementation TQNodeVariable
-@synthesize name=_name, alloca=_alloca;
+@synthesize name=_name, alloca=_alloca, forwarding=_forwarding;
 
 + (TQNodeVariable *)nodeWithName:(NSString *)aName
 {
@@ -40,15 +44,24 @@ using namespace llvm;
 
 - (llvm::Value *)_getForwardingInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock
 {
-	Value *forwarding;
-	
-	IRBuilder<> *builder = aBlock.builder;
-	forwarding = builder->CreateLoad(builder->CreateStructGEP(_alloca, 1), [self _llvmRegisterName:@"forwarding"]);
-	forwarding = builder->CreateBitCast(forwarding, PointerType::getUnqual([self captureStructTypeInProgram:aProgram]),
-	"forwardingCast");
-	forwarding =  builder->CreateLoad(builder->CreateStructGEP(forwarding, 6));
+	if(_forwarding)
+		return _forwarding;
 
-	return forwarding;
+	TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock];
+	if(existingVar) {
+		if(![existingVar _getForwardingInProgram:aProgram block:aBlock])
+			return NULL;
+		_forwarding = existingVar.forwarding;
+		return _forwarding;
+	}
+
+	IRBuilder<> *builder = aBlock.builder;
+	_forwarding = builder->CreateLoad(builder->CreateStructGEP(_alloca, 1), [self _llvmRegisterName:@"forwarding"]);
+	_forwarding = builder->CreateBitCast(_forwarding, PointerType::getUnqual([self captureStructTypeInProgram:aProgram]),
+	"forwardingCast");
+	_forwarding =  builder->CreateLoad(builder->CreateStructGEP(_forwarding, 6));
+
+	return _forwarding;
 }
 
 - (llvm::Type *)captureStructTypeInProgram:(TQProgram *)aProgram
@@ -165,24 +178,24 @@ using namespace llvm;
 		return _alloca;
 
 	IRBuilder<> *builder = aBlock.builder;
-	TQNodeVariable *existingVar = nil;
-	if((existingVar = [aBlock.locals objectForKey:_name]) && existingVar != self) {
+	TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock];
+	if(existingVar) {
 		if(![existingVar generateCodeInProgram:aProgram block:aBlock error:aoError])
 			return NULL;
 		_alloca = existingVar.alloca;
-		return _alloca;
-	} else
-		[aBlock.locals setObject:self forKey:_name];
 
+		return _alloca;
+	}
 	Type *intTy   = aProgram.llIntTy;
 	Type *i8PtrTy = aProgram.llInt8PtrTy;
 
 	Type *byRefType = [self captureStructTypeInProgram:aProgram];
-	AllocaInst *alloca = builder->CreateAlloca(byRefType, 0, [self _llvmRegisterName:@"alloca"]);
+	IRBuilder<> entryBuilder(&aBlock.function->getEntryBlock(), aBlock.function->getEntryBlock().begin());
+	AllocaInst *alloca = entryBuilder.CreateAlloca(byRefType, 0, [self _llvmRegisterName:@"alloca"]);
 	Value *keepHelper = builder->CreateBitCast([self _generateKeepHelperInProgram:aProgram], i8PtrTy);
 	Value *disposeHelper = builder->CreateBitCast([self _generateDisposeHelperInProgram:aProgram], i8PtrTy);
 
-	
+
 	// Initialize the variable to nil
 	builder->CreateStore(builder->CreateBitCast(alloca, i8PtrTy),        builder->CreateStructGEP(alloca, 1, [self _llvmRegisterName:@"forwarding"]));
 	builder->CreateStore(ConstantInt::get(intTy, TQ_BLOCK_HAS_COPY_DISPOSE), builder->CreateStructGEP(alloca, 2, [self _llvmRegisterName:@"flags"]));
@@ -218,14 +231,24 @@ using namespace llvm;
 			return NULL;
 	}
 	IRBuilder<> *builder = aBlock.builder;
-	
+
 	Value *forwarding = builder->CreateLoad(builder->CreateStructGEP(_alloca, 1), [self _llvmRegisterName:@"forwarding"]);
 	forwarding = builder->CreateBitCast(forwarding, PointerType::getUnqual([self captureStructTypeInProgram:aProgram]));
 
 	return aBlock.builder->CreateStore(aValue, builder->CreateStructGEP(forwarding, 6));
-	
+
 //	return builder->CreateCall2(aProgram.TQStoreStrongInByref, builder->CreateBitCast(_alloca, aProgram.llInt8PtrTy), aValue);
 }
+
+- (TQNodeVariable *)_getExistingIdenticalInBlock:(TQNodeBlock *)aBlock
+{
+	TQNodeVariable *existingVar = nil;
+	if((existingVar = [aBlock.locals objectForKey:_name]) && existingVar != self)
+		return existingVar;
+	[aBlock.locals setObject:self forKey:_name];
+	return nil;
+}
+
 @end
 
 

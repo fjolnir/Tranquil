@@ -2,7 +2,7 @@
 
 @interface TQNodeVariable : TQNode
 @property(readwrite, retain) NSString *name;
-@property(readwrite, assign) llvm::Value *alloca;
+@property(readwrite, assign) llvm::Value *alloca, *forwarding;
 
 + (TQNodeVariable *)nodeWithName:(NSString *)aName;
 - (id)initWithName:(NSString *)aName;
