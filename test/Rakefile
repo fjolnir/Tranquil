@@ -1,0 +1,61 @@
+CC  = 'clang'
+CXX = 'clang++'
+LD  = CC
+LEX = 'lex'
+YACC = 'yacc'
+
+LEX_OUTPATH  = "lex.yy.m"
+YACC_OUTPATH = "y.tab.m"
+
+LEXFLAGS = [
+	'-f',
+	"-o #{LEX_OUTPATH}"
+#	'-d'
+].join(' ')
+
+YACCFLAGS = [
+	'-t',
+	'-d',
+	'-v',
+	"-o #{YACC_OUTPATH}"
+].join(' ')
+
+CFLAGS = [
+	'-DDEBUG',
+	'-std=gnu99',
+	'-mmacosx-version-min=10.7'
+].join(' ')
+
+LIBS = ['-framework Foundation'].join(' ')
+
+OBJC_SOURCES = FileList['*.m']
+O_FILES = OBJC_SOURCES.ext('.o')
+LEX_SOURCE = FileList['*.l'].first
+YACC_SOURCE = FileList['*.y'].first
+
+def compile(file)
+	  sh "#{CC} #{file[:in]} #{CFLAGS} -c -o #{file[:out]}"
+end
+
+rule '.o' => ['.m'] { |t| compile :in => t.source, :out => t.name }
+rule '.o' => ['.c'] { |t| compile :in => t.source, :out => t.name }
+
+OBJC_SOURCES.each { |src| file src.ext('.o') => src }
+
+file  "lex.yy.o" =>  LEX_OUTPATH
+file  "y.tab.o" =>  YACC_OUTPATH
+
+task :build_parser do |t|
+	sh "#{LEX} #{LEXFLAGS} #{LEX_SOURCE}"
+	sh "#{YACC} #{YACCFLAGS} #{YACC_SOURCE}"
+end
+
+file :tranquil => O_FILES do |t|
+	sh "#{LD} #{LIBS} #{O_FILES} -o #{t.name}"
+end
+
+task :default => [:build_parser, :tranquil]
+
+task :run => [:default] do 
+	sh "./tranquil"
+end
