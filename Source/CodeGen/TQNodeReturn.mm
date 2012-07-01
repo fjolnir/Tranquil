@@ -80,8 +80,8 @@ using namespace llvm;
 	// to the heap if necessary)
 	if(![_value isKindOfClass:[TQNodeMessage class]] && ![_value isKindOfClass:[TQNodeCall class]])
 		retVal = builder->CreateCall(aProgram.TQPrepareObjectForReturn, retVal);
-	//else if([_value isKindOfClass:[TQNodeCall class]])
-		//((CallInst*)retVal)->setTailCall(true);
+	else if([_value isKindOfClass:[TQNodeCall class]] && ![aBlock isKindOfClass:[TQNodeRootBlock class]])
+		((CallInst*)retVal)->setTailCall(true);
 	return builder->CreateRet(retVal);
 }
 @end
