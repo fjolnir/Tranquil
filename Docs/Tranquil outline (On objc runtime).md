@@ -34,11 +34,10 @@ aDict  = #{ key = value, anotherKey = value } \ Initialises a dictionary
 \ Blocks
 
 aBlock = { ..body.. } \ A block. Defines scope
-aBlockWith = { :arg0 and: arg1 | ..body.. } \ A block that takes two arguments
-                                            \ (First argument is always anonymous)                                            aBlock = { :arg0 :arg1 :arg2 |  ..body.. } \ A block that only takes anonymous arguments
-aBlock = { :&arg |  ..body.. } \ Prefixing an argument with & indicates that rather than evaluating it,
+aBlockWith = { arg0, arg1 | ..body.. } \ A block that takes two arguments
+aBlock = { &arg |  ..body.. } \ Prefixing an argument with & indicates that rather than evaluating it,
                                \ a block with it as it's body should be passed
-aBlock = { :arg=123 |  ..body.. } \ Assignment in the argument list indicates a default value
+aBlock = { arg=123 |  ..body.. } \ Assignment in the argument list indicates a default value
                                   \ for that argument
 
 
