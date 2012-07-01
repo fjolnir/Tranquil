@@ -9,6 +9,9 @@
 @property(readwrite, retain) NSString *name;
 @property(readwrite, retain) TQNodeBlock *root;
 @property(readonly) llvm::Module *llModule;
+@property(readonly) llvm::IRBuilder<> *irBuilder;
+
+#pragma mark - Cached types
 // void
 @property(readonly) llvm::Type *llVoidTy;
 // i8, i16, i32, and i64
@@ -28,11 +31,15 @@
 // The size and alignment of a pointer into the generic address space.
 @property(readonly) unsigned char llPointerAlignInBytes, llPointerSizeInBytes;
 
+#pragma mark - Cached functions
+@property(readonly) llvm::Function *objc_msgSend, *objc_storeStrong, *objc_storeWeak, *objc_loadWeak, *objc_destroyWeak, *objc_retain, *objc_release, *objc_allocateClassPair, *objc_registerClassPair, *class_addIvar, *class_addMethod, *objc_getClass, *sel_registerName, *sel_getName;
+
+#pragma mark - Methods
 
 + (TQProgram *)programWithName:(NSString *)aName;
 - (id)initWithName:(NSString *)aName;
 - (BOOL)run;
 
 @end
-
+extern void _tq_objc_storeStrong(id *object, id value);
 #endif

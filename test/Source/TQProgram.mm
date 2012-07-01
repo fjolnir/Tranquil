@@ -1,30 +1,14 @@
 #include "TQProgram.h"
-
-#include <llvm/LLVMContext.h>
-#include <llvm/DerivedTypes.h>
-#include <llvm/Constants.h>
-#include <llvm/GlobalVariable.h>
-#include <llvm/Function.h>
-#include <llvm/CallingConv.h>
-#include <llvm/BasicBlock.h>
-#include <llvm/Instructions.h>
-#include <llvm/InlineAsm.h>
-#include <llvm/Support/FormattedStream.h>
-#include <llvm/Support/MathExtras.h>
-#include <llvm/Pass.h>
-#include <llvm/PassManager.h>
-#include <llvm/ADT/SmallVector.h>
-#include <llvm/Analysis/Verifier.h>
-#include <llvm/Assembly/PrintModulePass.h>
+#include "TQNode.h"
 
 using namespace llvm;
 
 
-
-
 @implementation TQProgram
-@synthesize  root=_root, name=_name, llModule=_llModule, llVoidTy=_llVoidTy, llInt8Ty=_llInt8Ty, llInt16Ty=_llInt16Ty,
-llInt32Ty=_llInt32Ty, llInt64Ty=_llInt64Ty, llFloatTy=_llFloatTy, llDoubleTy=_llDoubleTy, llIntTy=_llIntTy, llIntPtrTy=_llIntPtrTy, llSizeTy=_llSizeTy, llPtrDiffTy=_llPtrDiffTy, llVoidPtrTy=_llVoidPtrTy, llInt8PtrTy=_llInt8PtrTy, llVoidPtrPtrTy=_llVoidPtrPtrTy, llInt8PtrPtrTy=_llInt8PtrPtrTy, llPointerWidthInBits=_llPointerWidthInBits, llPointerAlignInBytes=_llPointerAlignInBytes, llPointerSizeInBytes=_llPointerSizeInBytes;
+@synthesize  root=_root, name=_name, llModule=_llModule, irBuilder=_irBuilder;
+@synthesize llVoidTy=_llVoidTy, llInt8Ty=_llInt8Ty, llInt16Ty=_llInt16Ty, llInt32Ty=_llInt32Ty, llInt64Ty=_llInt64Ty, llFloatTy=_llFloatTy, llDoubleTy=_llDoubleTy, llIntTy=_llIntTy, llIntPtrTy=_llIntPtrTy, llSizeTy=_llSizeTy, llPtrDiffTy=_llPtrDiffTy, llVoidPtrTy=_llVoidPtrTy, llInt8PtrTy=_llInt8PtrTy, llVoidPtrPtrTy=_llVoidPtrPtrTy, llInt8PtrPtrTy=_llInt8PtrPtrTy, llPointerWidthInBits=_llPointerWidthInBits, llPointerAlignInBytes=_llPointerAlignInBytes, llPointerSizeInBytes=_llPointerSizeInBytes;
+
+@synthesize objc_msgSend=_func_objc_msgSend, objc_storeStrong=_func_objc_storeStrong, objc_storeWeak=_func_objc_storeWeak, objc_loadWeak=_func_objc_loadWeak, objc_allocateClassPair=_func_objc_allocateClassPair, objc_registerClassPair=_func_objc_registerClassPair, objc_destroyWeak=_func_objc_destroyWeak, class_addIvar=_func_class_addIvar, class_addMethod=_func_class_addMethod, sel_registerName=_func_sel_registerName, sel_getName=_func_sel_getName, objc_getClass=_func_objc_getClass, objc_retain=_func_objc_retain, objc_release=_func_objc_release;
 
 + (TQProgram *)programWithName:(NSString *)aName
 {
@@ -38,8 +22,10 @@ llInt32Ty=_llInt32Ty, llInt64Ty=_llInt64Ty, llFloatTy=_llFloatTy, llDoubleTy=_ll
 
 	_name = [aName retain];
 	_llModule = new Module([_name UTF8String], getGlobalContext());
-
 	llvm::LLVMContext &ctx = _llModule->getContext();
+	_irBuilder = new IRBuilder<>(ctx);
+
+	// Cache the types
 	_llVoidTy               = llvm::Type::getVoidTy(ctx);
 	_llInt8Ty               = llvm::Type::getInt8Ty(ctx);
 	_llInt16Ty              = llvm::Type::getInt16Ty(ctx);
@@ -54,64 +40,129 @@ llInt32Ty=_llInt32Ty, llInt64Ty=_llInt64Ty, llFloatTy=_llFloatTy, llDoubleTy=_ll
 	_llInt8PtrTy            = _llInt8Ty->getPointerTo(0);
 	_llInt8PtrPtrTy         = _llInt8PtrTy->getPointerTo(0);
 
+	// Cache commonly used functions
+	#define DEF_EXTERNAL_FUN(name, type) \
+	_func_##name = _llModule->getFunction(#name); \
+	if(!_func_##name) { \
+		_func_##name = Function::Create((type), GlobalValue::ExternalLinkage, #name, _llModule); \
+		_func_##name->setCallingConv(CallingConv::C); \
+	}
+
+	Type *size_tTy = llvm::TypeBuilder<size_t, false>::get(ctx);
+
+	// id(id, char*, int64)
+	std::vector<Type*> args_i8Ptr_i8Ptr_sizeT;
+	args_i8Ptr_i8Ptr_sizeT.push_back(_llInt8PtrTy);
+	args_i8Ptr_i8Ptr_sizeT.push_back(_llInt8PtrTy);
+	args_i8Ptr_i8Ptr_sizeT.push_back(size_tTy);
+	FunctionType *ft_void__i8Ptr_i8Ptr_sizeT = FunctionType::get(_llVoidTy, args_i8Ptr_i8Ptr_sizeT, false);
+
+	// void(id)
+	std::vector<Type*> args_i8Ptr;
+	args_i8Ptr.push_back(_llInt8PtrTy);
+	FunctionType *ft_void__i8Ptr = FunctionType::get(_llVoidTy, args_i8Ptr, false);
+
+	// BOOL(Class, char *, size_t, uint8_t, char *)
+	std::vector<Type*> args_i8Ptr_i8Ptr_sizeT_i8_i8Ptr;
+	args_i8Ptr_i8Ptr_sizeT_i8_i8Ptr.push_back(_llInt8PtrTy);
+	args_i8Ptr_i8Ptr_sizeT_i8_i8Ptr.push_back(_llInt8PtrTy);
+	args_i8Ptr_i8Ptr_sizeT_i8_i8Ptr.push_back(size_tTy);
+	args_i8Ptr_i8Ptr_sizeT_i8_i8Ptr.push_back(_llInt8Ty);
+	args_i8Ptr_i8Ptr_sizeT_i8_i8Ptr.push_back(_llInt8PtrTy);
+	FunctionType *ft_i8__i8Ptr_i8Ptr_sizeT_i8_i8Ptr = FunctionType::get(_llInt8Ty, args_i8Ptr_i8Ptr_sizeT_i8_i8Ptr, false);
+
+	// BOOL(Class, SEL, IMP, char *)
+	std::vector<Type*> args_i8Ptr_i8Ptr_i8Ptr_i8Ptr;
+	args_i8Ptr_i8Ptr_i8Ptr_i8Ptr.push_back(_llInt8PtrTy);
+	args_i8Ptr_i8Ptr_i8Ptr_i8Ptr.push_back(_llInt8PtrTy);
+	args_i8Ptr_i8Ptr_i8Ptr_i8Ptr.push_back(_llInt8PtrTy);
+	args_i8Ptr_i8Ptr_i8Ptr_i8Ptr.push_back(_llInt8PtrTy);
+	FunctionType *ft_i8__i8Ptr_i8Ptr_i8Ptr_i8Ptr = FunctionType::get(_llInt8Ty, args_i8Ptr_i8Ptr_i8Ptr_i8Ptr, false);
+
+	// id(id, char*, ...)
+	std::vector<Type*> args_i8Ptr_i8Ptr_variadic;
+	args_i8Ptr_i8Ptr_variadic.push_back(_llInt8PtrTy);
+	args_i8Ptr_i8Ptr_variadic.push_back(_llInt8PtrTy);
+	FunctionType *ft_i8ptr__i8ptr_i8ptr_variadic = FunctionType::get(_llInt8PtrTy, args_i8Ptr_i8Ptr_variadic, true);
+
+	// id(id*, id)
+	std::vector<Type*> args_i8PtrPtr_i8Ptr;
+	args_i8PtrPtr_i8Ptr.push_back(_llInt8PtrPtrTy);
+	args_i8PtrPtr_i8Ptr.push_back(_llInt8PtrTy);
+	FunctionType *ft_i8Ptr__i8PtrPtr_i8Ptr = FunctionType::get(_llInt8PtrTy, args_i8PtrPtr_i8Ptr, false);
+
+	// void(id*, id)
+	FunctionType *ft_void__i8PtrPtr_i8Ptr = FunctionType::get(_llVoidTy, args_i8PtrPtr_i8Ptr, false);
+
+	// id(id*)
+	std::vector<Type*> args_i8PtrPtr;
+	args_i8PtrPtr.push_back(_llInt8PtrPtrTy);
+	FunctionType *ft_i8Ptr__i8PtrPtr = FunctionType::get(_llInt8PtrTy, args_i8PtrPtr, false);
+
+	// void(id*)
+	FunctionType *ft_void__i8PtrPtr = FunctionType::get(_llVoidTy, args_i8PtrPtr, false);
+
+	// id(id)
+	FunctionType *ft_i8Ptr__i8Ptr = FunctionType::get(_llInt8PtrTy, args_i8Ptr, false);
+
+	DEF_EXTERNAL_FUN(objc_allocateClassPair, ft_void__i8Ptr_i8Ptr_sizeT)
+	DEF_EXTERNAL_FUN(objc_registerClassPair, ft_void__i8Ptr)
+	DEF_EXTERNAL_FUN(class_addIvar, ft_i8__i8Ptr_i8Ptr_sizeT_i8_i8Ptr)
+	DEF_EXTERNAL_FUN(class_addMethod, ft_i8__i8Ptr_i8Ptr_i8Ptr_i8Ptr)
+	DEF_EXTERNAL_FUN(objc_msgSend, ft_i8ptr__i8ptr_i8ptr_variadic)
+	DEF_EXTERNAL_FUN(objc_storeStrong, ft_void__i8PtrPtr_i8Ptr)
+	DEF_EXTERNAL_FUN(objc_storeWeak, ft_i8Ptr__i8PtrPtr_i8Ptr)
+	DEF_EXTERNAL_FUN(objc_loadWeak, ft_i8Ptr__i8PtrPtr)
+	DEF_EXTERNAL_FUN(objc_destroyWeak, ft_void__i8PtrPtr)
+	DEF_EXTERNAL_FUN(objc_retain, ft_i8Ptr__i8Ptr)
+	DEF_EXTERNAL_FUN(objc_release, ft_void__i8Ptr)
+	DEF_EXTERNAL_FUN(sel_registerName, ft_i8Ptr__i8Ptr)
+	DEF_EXTERNAL_FUN(sel_getName, ft_i8Ptr__i8Ptr)
+	DEF_EXTERNAL_FUN(objc_getClass, ft_i8Ptr__i8Ptr)
+
+#undef DEF_EXTERNAL_FUN
+
 	return self;
 }
 
 - (void)dealloc
 {
+	delete _irBuilder;
 	delete _llModule;
 	[super dealloc];
 }
 
 - (BOOL)run
 {
-	// Create the main function
-	// int()
-	//std::vector<Type*>ft_i32__void_args;
-	//FunctionType* ft_i32__void = FunctionType::get(
-		//[>Result=<]IntegerType::get(_llModule->getContext(), 32),
-		//[>Params=<]ft_i32__void_args,
-		//[>isVarArg=<]false);
-	
-	//Function* func_main = _llModule->getFunction("main");
-	//if (!func_main) {
-		//func_main = Function::Create(
-			//[>Type=<]ft_i32__void,
-			//[>Linkage=<]GlobalValue::ExternalLinkage,
-			//[>Name=<]"main", _llModule); 
-		//func_main->setCallingConv(CallingConv::C);
-	//}
-	//AttrListPtr func_main_PAL;
-	//{
-		//SmallVector<AttributeWithIndex, 4> Attrs;
-		//AttributeWithIndex PAWI;
-		//PAWI.Index = 4294967295U; PAWI.Attrs = 0  | Attribute::StackProtect | Attribute::UWTable;
-		//Attrs.push_back(PAWI);
-		//func_main_PAL = AttrListPtr::get(Attrs.begin(), Attrs.end());
-	//}
-	//func_main->setAttributes(func_main_PAL);
+	InitializeNativeTarget();
 
-	//BasicBlock *block = BasicBlock::Create(_llModule->getContext(), "", func_main, 0);
-
-NSLog(@"Testing objc_storeWeak");
-	//llvm::GlobalValue *strw = _llModule->getNamedValue("objc_storeWeak");
-	//NSLog(@"Returned %p", strw);
 	NSError *err = nil;
-	_root.name = @"main";
+	_root.name = @"root";
 	[_root generateCodeInProgram:self block:nil error:&err];
 	if(err) {
 		NSLog(@"Error: %@", err);
 		//return NO;
 	}
-	// Return from main
-	//ConstantInt* const_int32_zero = ConstantInt::get(_llModule->getContext(), APInt(32, StringRef("0"), 10));
-	//ReturnInst::Create(_llModule->getContext(), const_int32_zero, block);
 
-	//  Output LLVM - IR
+	// Output LLVM - IR
 	verifyModule(*_llModule, PrintMessageAction);
 	PassManager PM;
 	PM.add(createPrintModulePass(&outs()));
 	PM.run(*_llModule);
+
+	// Execute program
+	ExecutionEngine *engine = EngineBuilder(_llModule).create();
+	std::vector<GenericValue> noargs;
+
+	//GenericValue val = engine->runFunction(_root.function, noargs);
+	//void *ret = val.PointerVal;
+	//NSLog(@"'root' ret:  %p: %@\n", ret, ret ? ret : nil);
+
+	//return YES;
+	id(*rootPtr)() = (id(*)())engine->getPointerToFunction(_root.function);
+
+	id ret = rootPtr();
+	NSLog(@"'root' retval:  %p: %@\n", ret, ret ? ret : nil);
 
 	return YES;
 }
@@ -127,4 +178,5 @@ NSLog(@"Testing objc_storeWeak");
 //{
 //}
 @end
+
 
