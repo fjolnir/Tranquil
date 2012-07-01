@@ -392,7 +392,7 @@ using namespace llvm;
     {
         IRBuilder<> tempBuilder(&_function->getEntryBlock(), _function->getEntryBlock().begin());
         TQNodeArgumentDef *argDef = [_arguments objectAtIndex:i];
-        if(!argDef)
+        if(![argDef name])
             continue;
 
         // Load the default argument if the argument was not passed

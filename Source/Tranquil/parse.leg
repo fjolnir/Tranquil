@@ -254,7 +254,7 @@ MethodImpl   = arguments:MethodArgs  --
                )
                {
                    NSError *err = nil;
-                   for(TQNodeArgumentDef *arg in arguments) {
+                   for(TQNodeMethodArgumentDef *arg in arguments) {
                        [(TQNodeMethod*)$$ addArgument:arg error:&err];
                        if(err)
                            assert(false);
@@ -266,7 +266,11 @@ MethodArgs   = selIdentifier:SelIdent
                    PushStack([NSMutableArray array]);
                    [StackTop addObject:[TQNodeMethodArgumentDef nodeWithName:nil selectorPart:selIdentifier]];
                }
-               (':' -- name:Identifier -- MethodArg*)?
+               (':' -- name:Identifier
+                {
+                    [[StackTop lastObject] setName:name];
+                }
+               -- MethodArg*)?
                {
                    ExtendToken();
                    $$ = PopStack();

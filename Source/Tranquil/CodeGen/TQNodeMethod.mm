@@ -26,7 +26,7 @@ using namespace llvm;
     _type = aType;
 
     // Methods must take a self argument
-    //[[self arguments] removeAllObjects];
+	[[self arguments] removeAllObjects];
     [self addArgument:[TQNodeMethodArgumentDef nodeWithName:@"self" selectorPart:nil] error:nil];
 
     return self;
