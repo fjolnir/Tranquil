@@ -40,20 +40,14 @@ using namespace llvm;
 
 - (llvm::Value *)_getForwardingInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock
 {
-	//static NSMapTable *forwards;
-	//if(!forwards)
-		//forwards = [NSCreateMapTable(NSNonRetainedObjectMapKeyCallBacks, NSOwnedPointerMapValueCallBacks, 16) retain];
 	Value *forwarding;
-	//if((forwarding = (Value*)NSMapGet(forwards, aBlock)) != NULL)
-		//return forwarding;
 	
-	NSLog(@"GETTING FORWARDING -----------------------------");
 	IRBuilder<> *builder = aBlock.builder;
 	forwarding = builder->CreateLoad(builder->CreateStructGEP(_alloca, 1), [self _llvmRegisterName:@"forwarding"]);
 	forwarding = builder->CreateBitCast(forwarding, PointerType::getUnqual([self captureStructTypeInProgram:aProgram]),
 	"forwardingCast");
 	forwarding =  builder->CreateLoad(builder->CreateStructGEP(forwarding, 6));
-	//NSMapInsert(forwards, aBlock, forwarding);
+
 	return forwarding;
 }
 
