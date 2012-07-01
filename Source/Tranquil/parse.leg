@@ -69,8 +69,8 @@ Statement    = (
              | BreakStmt
              | SkipStmt
              | Call
-             | IncrDecrOp
              | Message
+             | IncrDecrOp
              | Class
              | Assignment
              | Return
@@ -350,12 +350,12 @@ Equation     = a:Sum                 { UpdateToken(); PushStack(a);             
                | - "!=" - b:Equation { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorInequal        left:StackTop right:b]); }
                )*                    { $$ = PopStack();                                                                                               }
 
-Assignment     = a:AssgnLhs - "=" -- { UpdateToken(); PushStack(a);    }
-                 (AssgnRhs -)+       { $$ = PopStack();                }
+Assignment     = a:AssgnLhs -   { UpdateToken(); PushStack(a);    }
+                 (AssgnRhs -)+  { $$ = PopStack();                }
 AssgnLhs       = Property
                | SubscriptExp
                | Variable
-AssgnRhs       = b:Expression
+AssgnRhs       = ( -"=" -- b:Expression)
                {
                    ExtendToken();
                    ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAssign left:StackTop right:b]);
