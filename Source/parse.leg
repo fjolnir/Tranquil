@@ -44,7 +44,9 @@ Program      = (Statement --)+ EOF
 
 
 # Statement
-Statement    = (Call
+Statement    = (
+               If
+             | Call
              | Message
              | Class
              | Assignment
@@ -209,7 +211,7 @@ MethodImpl   = arguments:MethodArgs  --
                        if(err)
                            assert(false);
                    }
-                }
+               }
 MethodArgs   = selIdentifier:SelIdent
                {
                    PushStack([NSMutableArray array]);
@@ -224,6 +226,33 @@ MethodArg    = identifier:Identifier':' -- name:Identifier
                {
                    [StackTop addObject:[TQNodeArgumentDef nodeWithName:name selectorPart:identifier]];
                }
+
+
+# Conditionals
+If           = "if" -- cond:Expression -- '{' --
+                {
+                    PushStack([TQNodeIfBlock node]);
+                    [StackTop setCondition:cond];
+                    PushStack([NSMutableArray array]);
+                }
+                ( Statement --)* '}'
+                  {
+                      //NSMutableArray *statements = PopStack();
+                  }
+                ( -- "else" - If)*
+                  {
+                  }
+                ( "else" "{" --
+                  (Statement --)* "}"
+                  {
+                  }
+                )?
+                {
+                    NSMutableArray *statements = PopStack();
+                    $$ = PopStack();
+                    [$$ setStatements:statements];
+                }
+
 
 
 # Equations
@@ -246,8 +275,8 @@ Equation     = a:Sum                 { PushStack(a);                            
                | - "!=" - b:Equation { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorInequal        left:StackTop right:b]); }
                )*                    { $$ = PopStack();                                                                                }
 
-Assignment     = a:AssgnLhs - "=" -- { PushStack(a);                                                                           }
-                 (AssgnRhs -)+       { $$ = PopStack();                                                                        }
+Assignment     = a:AssgnLhs - "=" -- { PushStack(a);    }
+                 (AssgnRhs -)+       { $$ = PopStack(); }
 AssgnLhs       = Property
                | SubscriptExp
                | Variable
@@ -260,6 +289,7 @@ AssgnRhs       = b:Expression        { ReplaceStackTop([TQNodeOperator nodeWithT
                      TQNodeOperator *newOp = [TQNodeOperator nodeWithType:kTQOperatorAssign left:oldOp.right right:b];
                      ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAssign left:oldOp.left right:newOp]);
                  }
+
 
 # Accessors
 
@@ -291,6 +321,7 @@ Property     = obj:Variable
                    }
                }
 PropSubscr   = "#" - prop:Identifier { [StackTop addObject:prop]; }
+
 
 # Built-in constructors
 Array        = "#["
@@ -336,27 +367,23 @@ Variable     = name:Identifier
 Literal      = Number
              | String
 
-IfOp         = 'if'
-ElseOp       = 'else'
-WhileO       = 'while'
-UntilOp      = 'until'
 BreakStmt    = 'break'
 SkipStmt     = 'skip'
-Nil          = 'nil'
-Self         = 'self'
-Super        = 'super'
+Nil          = 'nil'   { $$ = [TQNodeNil node];   }
+Self         = 'self'  { $$ = [TQNodeSelf node];  }
+Super        = 'super' { $$ = [TQNodeSuper node]; }
 
 Operator     = '==' { $$ = @"=="; }
              | '!=' { $$ = @"!="; }
-             | '='  { $$ = @"="; }
+             | '='  { $$ = @"=";  }
              | '>=' { $$ = @">="; }
              | '<=' { $$ = @"<="; }
-             | '<'  { $$ = @"<"; }
-             | '>'  { $$ = @">"; }
-             | '*'  { $$ = @"*"; }
-             | '/'  { $$ = @"/"; }
-             | '+'  { $$ = @"+"; }
-             | '-'  { $$ = @"-"; }
+             | '<'  { $$ = @"<";  }
+             | '>'  { $$ = @">";  }
+             | '*'  { $$ = @"*";  }
+             | '/'  { $$ = @"/";  }
+             | '+'  { $$ = @"+";  }
+             | '-'  { $$ = @"-";  }
 SelIdent     = Identifier | Operator
 
 Number       = (< '-'? [0-9]+ ('.' [0-9]*)? ('e'[0-9]+)? >
@@ -368,7 +395,6 @@ String       = '"' < [^\"]* > '"'                          { $$ = [TQNodeString 
 Comment      = "\\" !"\\" (!EOL .)* EOL { NSLog(@"Comment"); }
 -            = [ \t]*
 --           = (Comment | EOL)? -
-WS           = [ \t]+
 EOL          = (- ('\n' | '\r\n' | '\r'))+
 EOF          = - !.
 %%
