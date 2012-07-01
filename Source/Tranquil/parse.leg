@@ -200,7 +200,7 @@ Block        = '{' --
                    [$$ setStatements:[NSMutableArray arrayWithObject:[TQNodeReturn nodeWithValue:expr]]];
                }
 BlockArgDef  = name:Identifier { [StackTop addObject:[TQNodeArgumentDef nodeWithName:name selectorPart:nil]]; }
-               (- "=" -- default:Expression { [[StackTop lastObject] setDefaultArgument:default]; })? 
+                (- "=" -- default:Expression { [[StackTop lastObject] setDefaultArgument:default]; })? 
 
 
 # Class
