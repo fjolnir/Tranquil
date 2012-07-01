@@ -241,11 +241,32 @@ using namespace llvm;
 	verifyModule(*_llModule, PrintMessageAction);
 
 	// Compile program
-    std::string engineErr;
+	llvm::TargetOptions Opts;
+	Opts.JITEmitDebugInfo = true;
+	Opts.GuaranteedTailCallOpt = true;
 
-	ExecutionEngine *engine = ExecutionEngine::createJIT(_llModule, &engineErr, JITMemoryManager::CreateDefaultMemManager(), CodeGenOpt::Aggressive, false);
-	engine->DisableLazyCompilation();
-	//create(_llModule, false, &engineErr, CodeGenOpt::Aggressive, false);//EngineBuilder(_llModule).create();
+	PassRegistry &Registry = *PassRegistry::getPassRegistry();
+	initializeCore(Registry);
+	initializeScalarOpts(Registry);
+	initializeVectorization(Registry);
+	initializeIPO(Registry);
+	initializeAnalysis(Registry);
+	initializeIPA(Registry);
+	initializeTransformUtils(Registry);
+	initializeInstCombine(Registry);
+	initializeInstrumentation(Registry);
+	initializeTarget(Registry);
+
+	PassManager modulePasses;
+	
+
+	llvm::EngineBuilder factory(_llModule);
+	factory.setEngineKind(llvm::EngineKind::JIT);
+	factory.setTargetOptions(Opts);
+	factory.setOptLevel(CodeGenOpt::Aggressive);
+	llvm::ExecutionEngine *engine = factory.create();
+
+	//engine->DisableLazyCompilation();
 	engine->addGlobalMapping(_func_TQPrepareObjectForReturn, (void*)&TQPrepareObjectForReturn);
 	engine->addGlobalMapping(_func_TQStoreStrongInByref, (void*)&TQStoreStrongInByref);
 	engine->addGlobalMapping(_func_TQRetainObject, (void*)&TQRetainObject);
@@ -257,8 +278,17 @@ using namespace llvm;
 	//NSLog(@"'root' ret:  %p: %@\n", ret, ret ? ret : nil);
 	//return YES;
 	// Optimization pass
+
+
 	FunctionPassManager fpm = FunctionPassManager(_llModule);
 	fpm.add(new TargetData(*engine->getTargetData()));
+	PassManagerBuilder builder = PassManagerBuilder();
+	builder.OptLevel = 3;
+	PassManagerBuilder Builder;
+    builder.Inliner = createFunctionInliningPass(275);
+	builder.populateFunctionPassManager(fpm);
+	builder.populateModulePassManager(modulePasses);
+
 	fpm.add(createInstructionCombiningPass());
 	// Eliminate unnecessary alloca.
 	fpm.add(createPromoteMemoryToRegisterPass());
@@ -271,10 +301,9 @@ using namespace llvm;
 	// Eliminate tail calls.
 	fpm.add(createTailCallEliminationPass());
 
-	PassManagerBuilder builder = PassManagerBuilder();
-	builder.OptLevel = 3;
-	builder.populateFunctionPassManager(fpm);
+
 	fpm.run(*_root.function);
+	modulePasses.run(*_llModule);
 
 	_llModule->dump();
 	llvm::PrintStatistics();

@@ -38,7 +38,7 @@ CXXFLAGS = [
 
 LDFLAGS = [
 	'-lstdc++',
-	'`llvm-config --libs core jit nativecodegen bitwriter ipo`',
+	'`llvm-config --libs core jit nativecodegen bitwriter ipo instrumentation`',
 	'`llvm-config --ldflags`',
 	'-framework Foundation'
 ].join(' ')
