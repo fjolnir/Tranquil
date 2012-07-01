@@ -13,7 +13,6 @@
 
 %%
 \\[^\r\n]*                          { /* Do nothing */ }
-return                              { UPDATE_LOC return tRETURN; }
 \.?[0-9]+(\.[0-9]+)?(e[0-9]+)?      {
                                     	UPDATE_LOC
                                     	yylval->dbl = atof(yytext);
@@ -34,7 +33,7 @@ return                              { UPDATE_LOC return tRETURN; }
                                     	yylval->cStr = strndup(yytext, yyleng);
                                     	return tCONSTANT;
                                     }
-[.\,=\.:\{\}\(\)\|<>\#\+\-]         { UPDATE_LOC return *yytext; }
+[.\,=\.:\{\}\(\)\|<>\#\+\-\^]         { UPDATE_LOC return *yytext; }
 \n                                  { RESET_COL  return *yytext; }
 %%
 
