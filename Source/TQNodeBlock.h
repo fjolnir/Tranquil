@@ -37,7 +37,7 @@ enum TQBlockFieldFlag_t {
 @property(readonly) llvm::IRBuilder<> *builder;
 
 + (TQNodeBlock *)node;
-
+- (NSString *)signature;
 - (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoError;
 @end
 

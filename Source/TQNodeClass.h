@@ -6,6 +6,7 @@
 @property(readwrite, retain) NSString *superClassName;
 @property(readwrite, copy) NSMutableArray *classMethods;
 @property(readwrite, copy) NSMutableArray *instanceMethods;
+@property(readwrite, assign) llvm::Value *classPtr;
 + (TQNodeClass *)nodeWithName:(NSString *)aName superClass:(NSString *)aSuperClass error:(NSError **)aoError;
 - (id)initWithName:(NSString *)aName superClass:(NSString *)aSuperClass error:(NSError **)aoError;
 @end

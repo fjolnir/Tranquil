@@ -1,13 +1,23 @@
 captureMePlease = "hey I was defined in the root! "
-a = { :arg |
-		block = { :arg |
+a = { arg |
+		block = { arg |
 			arg = arg stringByAppendingString:captureMePlease.
-			return arg.
+			return arg
 		}
-		return (block:arg.).
+		return block(arg).
 }
 myBlock = a
-numAsStr = a:(321 stringValue.).
+numAsStr = a("foo" stringByAppendingString: 321 stringValue.)
 numAsStr = numAsStr stringByAppendingString:" Three Two One".
-print: numAsStr.
+print(numAsStr)
+
+class Foo
+	+ classMethod {
+		print("I'm a class method %@", captureMePlease)
+	}
+	- instanceMethod: iMethArg {
+		print("From: %@ To: %@", iMethArg, self)
+	}
+end
+
 return myBlock.

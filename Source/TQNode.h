@@ -27,11 +27,14 @@
 @class TQNodeBlock, TQProgram;
 
 extern NSString * const kTQSyntaxErrorDomain;
+extern NSString * const kTQGenericErrorDomain;
+
 
 typedef enum {
 	kTQUnexpectedIdentifier = 1,
 	kTQInvalidClassName,
-	kTQInvalidAssignee
+	kTQInvalidAssignee,
+	kTQGenericError
 } TQSyntaxErrorCode;
 
 #ifdef DEBUG

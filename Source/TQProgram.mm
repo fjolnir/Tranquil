@@ -16,10 +16,11 @@ using namespace llvm;
 @synthesize objc_msgSend=_func_objc_msgSend, objc_storeStrong=_func_objc_storeStrong, objc_storeWeak=_func_objc_storeWeak,
 	objc_loadWeak=_func_objc_loadWeak, objc_allocateClassPair=_func_objc_allocateClassPair,
 	objc_registerClassPair=_func_objc_registerClassPair, objc_destroyWeak=_func_objc_destroyWeak, class_addIvar=_func_class_addIvar,
-	class_addMethod=_func_class_addMethod, sel_registerName=_func_sel_registerName, sel_getName=_func_sel_getName,
+	class_replaceMethod=_func_class_replaceMethod, sel_registerName=_func_sel_registerName, sel_getName=_func_sel_getName,
 	objc_getClass=_func_objc_getClass, objc_retain=_func_objc_retain, objc_release=_func_objc_release,
 	_Block_copy=_func__Block_copy, _Block_object_assign=_func__Block_object_assign,
-	_Block_object_dispose=_func__Block_object_dispose;
+	_Block_object_dispose=_func__Block_object_dispose, imp_implementationWithBlock=_func_imp_implementationWithBlock,
+	object_getClass=_func_object_getClass;
 
 + (TQProgram *)programWithName:(NSString *)aName
 {
@@ -46,9 +47,9 @@ using namespace llvm;
 	_llDoubleTy             = llvm::Type::getDoubleTy(ctx);
 	_llPointerWidthInBits   = 64;
 	_llPointerAlignInBytes  = 8;
-	_llIntTy                = llvm::IntegerType::get(ctx, 32);
+	_llIntTy                = TypeBuilder<int, false>::get(ctx); //llvm::IntegerType::get(ctx, 32);
 	_llIntPtrTy             = llvm::IntegerType::get(ctx, _llPointerWidthInBits);
-	_llInt8PtrTy            = _llInt8Ty->getPointerTo(0);
+	_llInt8PtrTy            = TypeBuilder<char*, false>::get(ctx); //_llInt8Ty->getPointerTo(0);
 	_llInt8PtrPtrTy         = _llInt8PtrTy->getPointerTo(0);
 
 	// Block types
@@ -73,7 +74,7 @@ using namespace llvm;
 	args_i8Ptr_i8Ptr_sizeT.push_back(_llInt8PtrTy);
 	args_i8Ptr_i8Ptr_sizeT.push_back(_llInt8PtrTy);
 	args_i8Ptr_i8Ptr_sizeT.push_back(size_tTy);
-	FunctionType *ft_void__i8Ptr_i8Ptr_sizeT = FunctionType::get(_llVoidTy, args_i8Ptr_i8Ptr_sizeT, false);
+	FunctionType *ft_i8Ptr__i8Ptr_i8Ptr_sizeT = FunctionType::get(_llInt8PtrTy, args_i8Ptr_i8Ptr_sizeT, false);
 
 	// void(id)
 	std::vector<Type*> args_i8Ptr;
@@ -137,10 +138,12 @@ using namespace llvm;
 	// id(id)
 	FunctionType *ft_i8Ptr__i8Ptr = FunctionType::get(_llInt8PtrTy, args_i8Ptr, false);
 
-	//DEF_EXTERNAL_FUN(objc_allocateClassPair, ft_void__i8Ptr_i8Ptr_sizeT)
-	//DEF_EXTERNAL_FUN(objc_registerClassPair, ft_void__i8Ptr)
+	DEF_EXTERNAL_FUN(objc_allocateClassPair, ft_i8Ptr__i8Ptr_i8Ptr_sizeT)
+	DEF_EXTERNAL_FUN(objc_registerClassPair, ft_void__i8Ptr)
 	//DEF_EXTERNAL_FUN(class_addIvar, ft_i8__i8Ptr_i8Ptr_sizeT_i8_i8Ptr)
-	//DEF_EXTERNAL_FUN(class_addMethod, ft_i8__i8Ptr_i8Ptr_i8Ptr_i8Ptr)
+	DEF_EXTERNAL_FUN(class_replaceMethod, ft_i8__i8Ptr_i8Ptr_i8Ptr_i8Ptr)
+	DEF_EXTERNAL_FUN(imp_implementationWithBlock, ft_i8Ptr__i8Ptr)
+	DEF_EXTERNAL_FUN(object_getClass, ft_i8Ptr__i8Ptr)
 	DEF_EXTERNAL_FUN(objc_msgSend, ft_i8ptr__i8ptr_i8ptr_variadic)
 	//DEF_EXTERNAL_FUN(objc_storeStrong, ft_void__i8PtrPtr_i8Ptr)
 	//DEF_EXTERNAL_FUN(objc_storeWeak, ft_i8Ptr__i8PtrPtr_i8Ptr)
@@ -219,17 +222,24 @@ using namespace llvm;
 	mach_timebase_info(&timebase);
 	double sec = ns * timebase.numer / timebase.denom / 1000000000.0;
 
-	NSLog(@"Run time: %f sec\n", sec);
-	NSLog(@"%p", ret);
-	NSLog(@"'root' retval:  %p: %@ (%@)\n", ret, ret ? ret : nil, [ret class]);
+	TQLog(@"Run time: %f sec\n", sec);
+	TQLog(@"%p", ret);
+	TQLog(@"'root' retval:  %p: %@ (%@)\n", ret, ret ? ret : nil, [ret class]);
 
 	if([ret isKindOfClass:NSClassFromString(@"NSBlock")]) {
 		id (^test)(NSString *) = ret;
 		NSNumber *num = test(@"hoya");
-		NSLog(@"Block retval: %@ (%@)", num, [num class]);
+		TQLog(@"Block retval: %@ (%@)", num, [num class]);
 		[test release];
 	}
-
+	
+	Class fooCls = NSClassFromString(@"Foo");
+	if(fooCls)
+	{
+		[fooCls classMethod];
+		id foo = [[fooCls alloc] init];
+		[foo instanceMethod:@"Hey I'm objective-c"];
+	}
 	return YES;
 }
 

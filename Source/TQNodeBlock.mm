@@ -395,14 +395,15 @@ using namespace llvm;
 	}
 	argumentIterator++;
 
+
 	for (unsigned i = 1; i < _arguments.count; ++i, ++argumentIterator)
 	{
 		IRBuilder<> tempBuilder(&_function->getEntryBlock(), _function->getEntryBlock().begin());
 		NSString *argVarName = [[_arguments objectAtIndex:i] localName];
-
+		if(!argVarName)
+			continue;
 		TQNodeVariable *local = [TQNodeVariable nodeWithName:argVarName];
 		[local store:argumentIterator inProgram:aProgram block:self error:aoErr];
-		NSLog(@"registering arg local %@: %@", argVarName, local);
 		[_locals setObject:local forKey:argVarName];
 	}
 
@@ -423,7 +424,7 @@ using namespace llvm;
 	Value *val;
 	for(TQNode *node in _statements) {
 		val = [node generateCodeInProgram:aProgram block:self error:aoErr];
-		if(!val) {
+		if(*aoErr) {
 			NSLog(@"Error: %@", *aoErr);
 			return NULL;
 		}
