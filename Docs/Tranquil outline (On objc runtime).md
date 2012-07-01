@@ -25,8 +25,8 @@ super
 a = b \ Variables are local in scope
 
 \ Arrays & Dictionaries
-anArray = #[ a, b, c ] \ Initializes an array containing 3 elements
-aDict  = #{ key = value, anotherKey = value } \ Initializes a dictionary
+anArray = #[ a, b, c ] \ Initialises an array containing 3 elements
+aDict  = #{ key = value, anotherKey = value } \ Initialises a dictionary
 
 \ Blocks
 
