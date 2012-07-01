@@ -1,3 +1,4 @@
+// Note: TQNumber is not safe to subclass. It makes certain assumptions for the sake of performance
 #import "TQPooledObject.h"
 
 typedef id (^condBlock)();
