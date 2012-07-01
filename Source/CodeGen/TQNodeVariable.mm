@@ -69,9 +69,9 @@ using namespace llvm;
 	}
 
 	IRBuilder<> *builder = aBlock.builder;
-	_forwarding = builder->CreateLoad(builder->CreateStructGEP(_alloca, 1), [self _llvmRegisterName:@"forwarding"]);
+	_forwarding = builder->CreateLoad(builder->CreateStructGEP(_alloca, 1), [self _llvmRegisterName:@"forwardingPtr"]);
 	_forwarding = builder->CreateBitCast(_forwarding, PointerType::getUnqual([self captureStructTypeInProgram:aProgram]),
-	"forwardingCast");
+	[self _llvmRegisterName:@"forwarding"]);
 	_forwarding =  builder->CreateLoad(builder->CreateStructGEP(_forwarding, 6));
 
 	return _forwarding;
