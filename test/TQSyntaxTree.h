@@ -10,7 +10,8 @@
 extern NSString * const kTQSyntaxErrorDomain;
 
 typedef enum {
-	kTQUnexpectedIdentifier = 1
+	kTQUnexpectedIdentifier = 1,
+	kTQInvalidClassName,
 } TQSyntaxErrorCode;
 
 #define TQAssert(cond, fmt, ...) \
@@ -21,13 +22,19 @@ typedef enum {
 		} \
 	} while(0)
 
-	#define TQAssertSoft(cond, errDomain, errCode, fmt, ...) \
+	#define TQAssertSoft(cond, errDomain, errCode, retVal, fmt, ...) \
 	do { \
 		if(!(cond)) { \
-			if(aoError) \
-				*aoError = [NSError errorWithDomain:(errDomain) code:(errCode) userInfo:nil]; \
+			if(aoError) { \
+				NSString *errorDesc = [[NSString alloc] initWithFormat:fmt, ##__VA_ARGS__]; \
+				NSDictionary *userInfo = [NSDictionary dictionaryWithObject:errorDesc \
+				                                                     forKey:NSLocalizedDescriptionKey]; \
+				[errorDesc release]; \
+				*aoError = [NSError errorWithDomain:(errDomain) code:(errCode) userInfo:userInfo]; \
+				[userInfo release]; \
+			} \
 			TQLog(fmt, ##__VA_ARGS__); \
-			return NO; \
+			return retVal; \
 		} \
 	} while(0)
 
@@ -60,9 +67,9 @@ typedef enum {
 
 // An argument to block (name: arg)
 @interface TQSyntaxNodeArgument : TQSyntaxNode
-@property(readwrite, retain) NSString *identifier; // The argument identifier, that is, the portion before ':'
-@property(readwrite, retain) NSString *name;       // The variable name for the argument
-- (id)initWithName:(NSString *)aName identifier:(NSString *)aIdentifier;
+@property(readwrite, retain) NSString *identifier;     // The argument identifier, that is, the portion before ':'
+@property(readwrite, retain) TQSyntaxNode *passedNode; // The node after ':'
+- (id)initWithPassedNode:(TQSyntaxNode *)aNode identifier:(NSString *)aIdentifier;
 @end
 
 // A block definition ({ :arg | body })
@@ -86,7 +93,7 @@ typedef enum {
 @property(readwrite, retain) NSString *superClassName;
 @property(readwrite, copy) NSMutableArray *classMethods;
 @property(readwrite, copy) NSMutableArray *instanceMethods;
-- (id)initWithName:(NSString *)aName superClass:(NSString *)aSuperClass;
+- (id)initWithName:(NSString *)aName superClass:(NSString *)aSuperClass error:(NSError **)aoError;
 @end
 
 typedef enum {
@@ -131,8 +138,7 @@ typedef enum {
 @end
 
 
-@interface TQSyntaxTree : NSObject {
-}
+@interface TQSyntaxTree : NSObject
 @end
 
 #endif

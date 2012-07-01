@@ -1,8 +1,8 @@
 CC  = 'clang'
 CXX = 'clang++'
 LD  = CC
-LEX = 'lex'
-YACC = 'bison --yacc'
+LEX = 'flex'
+YACC = 'bison'
 
 BUILD_DIR = 'build'
 
@@ -20,6 +20,7 @@ YACCFLAGS = [
 	'-d',
 	'-v',
 	"-o #{YACC_OUTPATH}",
+	#'-g',
 	"--defines=#{BUILD_DIR}/y.tab.h"
 ].join(' ')
 
@@ -27,7 +28,9 @@ CFLAGS = [
 	'-DDEBUG',
 	'-std=gnu99',
 	'-mmacosx-version-min=10.7',
-	'-I`pwd`'
+	'-I`pwd`',
+	'-O0',
+	'-g'
 #	'--analyze'
 ].join(' ')
 
@@ -41,20 +44,14 @@ LEX_SOURCE = FileList['*.l'].first
 YACC_SOURCE = FileList['*.y'].first
 
 def compile(file)
-	  sh "#{CC} #{file[:in]} #{CFLAGS} -c -o #{file[:out]}"
+	  sh "#{CC} #{file[:in].join(' ')} #{CFLAGS} -c -o #{file[:out]}"
 end
-
-rule '.o' => ['.m'] { |t| compile :in => t.source, :out => t.name }
 
 OBJC_SOURCES.each { |src|
 	file src.pathmap(PATHMAP) => src do |f|
-		compile :in => f.prerequisites.first, :out => f.name
+		compile :in => f.prerequisites, :out => f.name
 	end
 }
-
-
-#file LEX_OUTPATH.pathmap(PATHMAP)  =>  LEX_OUTPATH
-#file YACC_OUTPATH.pathmap(PATHMAP) =>  YACC_OUTPATH
 
 task :build_parser do |t|
 	sh "#{LEX} #{LEXFLAGS} #{LEX_SOURCE}"
