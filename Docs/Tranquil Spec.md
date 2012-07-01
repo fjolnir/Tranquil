@@ -19,7 +19,7 @@ a = b \ Variables are local in scope
       \ are reserved for classes
 
 \ Arrays & Dictionaries
-anArray = #[ a, b, c ]                        \ Initialises an array containing 3 elements
+anArray = #[ a, b, c ]                          \ Initialises an array containing 3 elements
 aDict  = #{ key => value, anotherKey => value } \ Initializes a dictionary
 
 \ Blocks
@@ -37,6 +37,22 @@ aBlock = { arg=123 |  ..statements.. } \ Assignment in the argument list indicat
 
 aBlock()                         \ Calls a block with no arguments
 aBlock(something, somethingElse) \ Calls a block with a two arguments
+
+\ Flow control
+ 
+if ..expression.. {      \ Executes the passed literal block if the expression is non-nil
+	..statements..
+} elseif ..expression.. {
+	..statements..
+} else {
+	..statements..
+}
+
+unless ..expression.. {  \ Executes the passed literal block if the expression is nil
+	..statements..
+} else {
+	..statements..
+}
 
 \ Objects
 
@@ -152,20 +168,20 @@ var = instanceOfKlass - something \ Equivalent to: var = instanceOfKlass subtrac
 ### Flow control
 ```
 #Object {
-	- ifValid: ifBlock else: elseBlock {
+	- ifTrue: ifBlock else: elseBlock {
 		^ifBlock()
 	}
-	- unless: unlessBlock else: elseBlock {
+	- ifFalse: unlessBlock else: elseBlock {
 		^elseBlock()
 	}
 	<snip>
 }
 
 #Nil {
-	- ifValid: ifBlock else: elseBlock {
+	- ifTrue: ifBlock else: elseBlock {
 		^elseBlock()
 	}
-	- unless:unlessBlock else:elseBlock {
+	- ifFalse: unlessBlock else: elseBlock {
 		^unlessBlock()
 	}
 }
@@ -175,7 +191,7 @@ var = instanceOfKlass - something \ Equivalent to: var = instanceOfKlass subtrac
 ```
 fibonacci = { index, curr=0, succ=1 |
 	num = curr + succ
-	^(index > 2) ifValid: {
+	^(index > 2) ifTrue: {
 		^fibonacci(index - 1, succ, num)
 	} else: {
 		^num
@@ -183,3 +199,38 @@ fibonacci = { index, curr=0, succ=1 |
 }
 fib = fibonacci(50) \ Calculate the 50th number in the fibonacci sequence
 ```
+
+### Map/Reduce
+
+	#Iterator {
+		- map: lambda {
+			^self reduce: { obj accum=#[] |
+				accum push lambda(obj)
+				^accum
+			}
+		}
+	
+		- _reduce: lambda accumulator: accum {
+			^self empty? ifTrue: {
+				^accum
+			} else: {
+				accum = lambda(self next)
+				^self _reduce:lambda accumulator:accum			}
+		}
+	
+		- reduce: lambda {
+			accum = lambda(self next)
+			^self _reduce result accum
+		}
+	
+		- map: mapLambda reduce: reduceLambda {
+			(self map: mapLambda) reduce: reduceLambda
+		}
+	
+		- next   `nil` \ Implemented in subclasses
+		- empty? `yes` \ Implemented in subclasses
+	}
+	
+	sum = #[1,2,3] reduce:`n, sum=0| sum + n`
+	\ Sum now equals 0+1+2+3 = 6
+	
