@@ -7,19 +7,19 @@ using namespace llvm;
 
 + (TQNodeNil *)node
 {
-	return (TQNodeNil *)[super node];
+    return (TQNodeNil *)[super node];
 }
 
 
 - (NSString *)description
 {
-	return [NSString stringWithFormat:@"<nil>"];
+    return [NSString stringWithFormat:@"<nil>"];
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                  error:(NSError **)aoError
 {
-	return ConstantPointerNull::get(aProgram.llInt8PtrTy);
+    return ConstantPointerNull::get(aProgram.llInt8PtrTy);
 }
 @end

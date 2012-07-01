@@ -20,7 +20,7 @@
 @property(readonly) llvm::Type *llFloatTy, *llDoubleTy;
 // int
 @property(readonly) llvm::IntegerType *llIntTy;
-	// intptr_t, size_t, and ptrdiff_t, which we assume are the same size.
+    // intptr_t, size_t, and ptrdiff_t, which we assume are the same size.
 @property(readonly) llvm::IntegerType *llIntPtrTy, *llSizeTy, *llPtrDiffTy;
 // void* in address space 0
 @property(readonly) llvm::PointerType *llVoidPtrTy, *llInt8PtrTy;
@@ -35,12 +35,12 @@
 
 #pragma mark - Cached functions
 @property(readonly) llvm::Function *objc_msgSend, *TQStoreStrongInByref, *objc_storeWeak,
-	*objc_loadWeak, *objc_destroyWeak, *TQRetainObject, *TQReleaseObject, *objc_allocateClassPair,
-	*objc_registerClassPair, *class_addIvar, *class_replaceMethod, *objc_getClass,
-	*sel_registerName, *sel_getName, *_Block_copy,
-	*_Block_object_assign, *_Block_object_dispose, *imp_implementationWithBlock,
-	*object_getClass, *TQPrepareObjectForReturn, *TQAutoreleaseObject,
-	*objc_autoreleasePoolPush, *objc_autoreleasePoolPop, *TQSetValueForKey, *TQValueForKey;
+    *objc_loadWeak, *objc_destroyWeak, *TQRetainObject, *TQReleaseObject, *objc_allocateClassPair,
+    *objc_registerClassPair, *class_addIvar, *class_replaceMethod, *objc_getClass,
+    *sel_registerName, *sel_getName, *_Block_copy,
+    *_Block_object_assign, *_Block_object_dispose, *imp_implementationWithBlock,
+    *object_getClass, *TQPrepareObjectForReturn, *TQAutoreleaseObject,
+    *objc_autoreleasePoolPush, *objc_autoreleasePoolPop, *TQSetValueForKey, *TQValueForKey;
 
 #pragma mark - Methods
 

@@ -7,40 +7,40 @@ using namespace llvm;
 
 + (TQNodeArgumentDef *)nodeWithName:(NSString *)aName selectorPart:(NSString *)aIdentifier
 {
-	return [[[self alloc] initWithName:aName selectorPart:aIdentifier] autorelease];
+    return [[[self alloc] initWithName:aName selectorPart:aIdentifier] autorelease];
 }
 
 - (id)initWithName:(NSString *)aName selectorPart:(NSString *)aIdentifier
 {
-	if(!(self = [super init]))
-		return nil;
+    if(!(self = [super init]))
+        return nil;
 
-	_name = [aName retain];
-	_selectorPart = [aIdentifier retain];
+    _name = [aName retain];
+    _selectorPart = [aIdentifier retain];
 
-	return self;
+    return self;
 }
 
 - (NSUInteger)hash
 {
-	return [_name hash];
+    return [_name hash];
 }
 
 - (NSString *)description
 {
-	return [NSString stringWithFormat:@"<argdef@ %@: %@>", _selectorPart, _name];
+    return [NSString stringWithFormat:@"<argdef@ %@: %@>", _selectorPart, _name];
 }
 
 - (void)dealloc
 {
-	[_selectorPart release];
-	[_name release];
-	[super dealloc];
+    [_selectorPart release];
+    [_name release];
+    [super dealloc];
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
 {
-	TQAssert(NO, "Argument definitions do not generate code");
-	return NULL;
+    TQAssert(NO, "Argument definitions do not generate code");
+    return NULL;
 }
 @end

@@ -42,10 +42,10 @@ extern "C" {
  * A `void (^)(int, char)' block will be encoded as <@vic>.
  */
 
-#define _MR_C_LAMBDA_B		'<'
-#define _MR_C_LAMBDA_FUNCPTR  	'^'
-#define _MR_C_LAMBDA_BLOCK	'@'
-#define _MR_C_LAMBDA_E		'>'
+#define _MR_C_LAMBDA_B        '<'
+#define _MR_C_LAMBDA_FUNCPTR      '^'
+#define _MR_C_LAMBDA_BLOCK    '@'
+#define _MR_C_LAMBDA_E        '>'
 
 /* Attribute and element representations.
  * See BridgeSupport(5) for more information.
@@ -272,9 +272,9 @@ bool bs_parser_parse(bs_parser_t *parser, const char *path,
  */
 unsigned int bs_parser_current_version_number(bs_parser_t *parser);
 
-#define BS_VERSION_UNKNOWN 	0
-#define BS_VERSION_0_9 		9	// Leopard or above
-#define BS_VERSION_1_0 		10	// Preview 1-3
+#define BS_VERSION_UNKNOWN     0
+#define BS_VERSION_0_9         9    // Leopard or above
+#define BS_VERSION_1_0         10    // Preview 1-3
 
 /* bs_element_free()
  *

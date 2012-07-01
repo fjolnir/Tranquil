@@ -4,8 +4,8 @@
 @class TQNodeClass, TQNodeArgumentDef;
 
 typedef enum {
-	kTQClassMethod,
-	kTQInstanceMethod
+    kTQClassMethod,
+    kTQInstanceMethod
 } TQMethodType;
 
 // A method definition (+ aMethod: argument { body })

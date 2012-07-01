@@ -30,11 +30,11 @@ typedef struct _TQPoolInfo {
 
 @interface TQPooledObject : NSObject
 {
-	TQPooledObject *mPoolPredecessor;
-	NSUInteger _retainCount;
-	IMP _poolInfoImp;
+    TQPooledObject *mPoolPredecessor;
+    NSUInteger _retainCount;
+    IMP _poolInfoImp;
 }
-	
+    
 + (TQPoolInfo *)poolInfo;
 + (int)purgePool;
 @end

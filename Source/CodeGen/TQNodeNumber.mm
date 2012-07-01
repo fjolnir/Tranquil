@@ -8,46 +8,46 @@ using namespace llvm;
 
 + (TQNodeNumber *)nodeWithDouble:(double)aDouble
 {
-	return [[[self alloc] initWithDouble:aDouble] autorelease];
+    return [[[self alloc] initWithDouble:aDouble] autorelease];
 }
 
 - (id)initWithDouble:(double)aDouble
 {
-	if(!(self = [super init]))
-		return nil;
+    if(!(self = [super init]))
+        return nil;
 
-	_value = [[NSNumber alloc] initWithDouble:aDouble];
+    _value = [[NSNumber alloc] initWithDouble:aDouble];
 
-	return self;
+    return self;
 }
 
 - (void)dealloc
 {
-	[_value release];
-	[super dealloc];
+    [_value release];
+    [super dealloc];
 }
 
 - (NSString *)description
 {
-	return [NSString stringWithFormat:@"<num@ %f>", _value.doubleValue];
+    return [NSString stringWithFormat:@"<num@ %f>", _value.doubleValue];
 }
 
 - (TQNode *)referencesNode:(TQNode *)aNode
 {
-	return [aNode isEqual:self] ? self : nil;
+    return [aNode isEqual:self] ? self : nil;
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
 {
-	Module *mod = aProgram.llModule;
-	llvm::IRBuilder<> *builder = aBlock.builder;
+    Module *mod = aProgram.llModule;
+    llvm::IRBuilder<> *builder = aBlock.builder;
 
-	// Returns [NSNumber numberWithDouble:_value]
-	Value *selector = builder->CreateLoad(mod->getOrInsertGlobal("TQNumberWithDoubleSel", aProgram.llInt8PtrTy));
-	Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_TQNumber", aProgram.llInt8Ty);
+    // Returns [NSNumber numberWithDouble:_value]
+    Value *selector = builder->CreateLoad(mod->getOrInsertGlobal("TQNumberWithDoubleSel", aProgram.llInt8PtrTy));
+    Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_TQNumber", aProgram.llInt8Ty);
 
-	ConstantFP *doubleValue = ConstantFP::get(aProgram.llModule->getContext(), APFloat([_value doubleValue]));
+    ConstantFP *doubleValue = ConstantFP::get(aProgram.llModule->getContext(), APFloat([_value doubleValue]));
 
-	return builder->CreateCall3(aProgram.objc_msgSend, klass, selector, doubleValue);
+    return builder->CreateCall3(aProgram.objc_msgSend, klass, selector, doubleValue);
 }
 @end

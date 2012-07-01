@@ -260,6 +260,7 @@ AssgnRhs       = b:Expression        { ReplaceStackTop([TQNodeOperator nodeWithT
                      TQNodeOperator *newOp = [TQNodeOperator nodeWithType:kTQOperatorAssign left:oldOp.right right:b];
                      ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAssign left:oldOp.left right:newOp]);
                  }
+
 # Accessors
 
 SubscriptExp = obj:Variable

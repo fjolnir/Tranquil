@@ -87,7 +87,7 @@ _bs_main_bundle_bs_path(void)
       if (url != NULL) {
         CFStringRef str = CFURLCopyPath(url);
         path = (char *)malloc(sizeof(char) * PATH_MAX);
-	ASSERT_ALLOC(path);
+    ASSERT_ALLOC(path);
         CFStringGetFileSystemRepresentation(str, path, PATH_MAX);
         CFRelease(str);
         CFRelease(url);
@@ -322,9 +322,9 @@ undecorate_struct_type(const char *src, char *dest, size_t dest_len,
       int nested;
 
       opposite = 
-	  *p_src == '{' ? '}' :
-	  *p_src == '(' ? ')' :
-	  *p_src == '[' ? ']' : 0;
+      *p_src == '{' ? '}' :
+      *p_src == '(' ? ')' :
+      *p_src == '[' ? ']' : 0;
 
       for (i = 0, ok = false, nested = 0;
            i < src_len - (p_src - src) && !ok; 
@@ -494,7 +494,7 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
 #else
 # define CHECK_TYPE_ATTRIBUTE(var) \
     if (var == NULL && get_type64_attribute(reader) != NULL) { \
-	break; \
+    break; \
     } \
     CHECK_ATTRIBUTE(var, "type")
 #endif
@@ -612,7 +612,7 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
                                  callback, context, error)) {
               free(depends_on_path);
               return false;
-	    }
+        }
           }
           free(depends_on_path);
           break;
@@ -679,10 +679,10 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
           CHECK_ATTRIBUTE(enum_name, "name");
 
 #if __LP64__
-	  enum_value = get_attribute(reader, "value64");
-	  if (enum_value == NULL)
+      enum_value = get_attribute(reader, "value64");
+      if (enum_value == NULL)
 #endif
-	    enum_value = get_attribute(reader, "value");
+        enum_value = get_attribute(reader, "value");
 
 #if BYTE_ORDER == BIG_ENDIAN
 # define BYTE_ORDER_VALUE_ATTR_NAME "be_value"
@@ -828,8 +828,8 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
         
         case BS_XML_INFORMAL_PROTOCOL: 
         {
-	  if (protocol_name != NULL)
-	    free(protocol_name);
+      if (protocol_name != NULL)
+        free(protocol_name);
           protocol_name = get_attribute(reader, "name");
           CHECK_ATTRIBUTE(protocol_name, "name");
           break;
@@ -923,9 +923,9 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
                      "for method '%s'", MAX_ARGS, (char *)method->name);
             } 
 
-	    bs_element_arg_t *args_from =
-		(func_ptr == NULL ? args : fptr_args);
-	    bs_arg = &args_from[(*argc)++];
+        bs_element_arg_t *args_from =
+        (func_ptr == NULL ? args : fptr_args);
+        bs_arg = &args_from[(*argc)++];
 
             if (method != NULL && func_ptr == NULL) {
               char *index = get_attribute(reader, "index");
@@ -957,18 +957,18 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
             if (get_boolean_attribute(reader, "function_pointer", false)) {
               if (func_ptr != NULL) {
                 func_ptr = NULL; 
-		nested_func_ptr = true;
-		break;
-	      }
+        nested_func_ptr = true;
+        break;
+          }
               bs_arg->function_pointer = (bs_element_function_pointer_t *)
                 calloc(1, sizeof(bs_element_function_pointer_t));
               ASSERT_ALLOC(bs_arg->function_pointer);
               func_ptr = bs_arg->function_pointer;
               func_ptr_arg_depth = xmlTextReaderDepth(reader);
             }
-	    else {
+        else {
               bs_arg->function_pointer = NULL;
-	    }
+        }
           }
           else {
             BAIL("argument defined outside of a " \
@@ -1025,12 +1025,12 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
               else {
                 free(bs_retval);
 #if !defined(__LP64__)
-		if (get_type64_attribute(reader) != NULL) {
-		    // The function has no 32-bit return value type and we
-		    // run in 32-bit mode. We just ignore it.
-		    func = NULL;
-		    break;
-		}
+        if (get_type64_attribute(reader) != NULL) {
+            // The function has no 32-bit return value type and we
+            // run in 32-bit mode. We just ignore it.
+            func = NULL;
+            break;
+        }
 #endif
                 BAIL("function '%s' return value defined without type", 
                      func->name);
@@ -1043,8 +1043,8 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
             if (get_boolean_attribute(reader, "function_pointer", false)) {
               if (func_ptr != NULL) {
                 func_ptr = NULL; 
-		nested_func_ptr = true;
-		break;
+        nested_func_ptr = true;
+        break;
               }
               bs_retval->function_pointer = (bs_element_function_pointer_t *)
                 calloc(1, sizeof(bs_element_function_pointer_t));
@@ -1052,9 +1052,9 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
               func_ptr = bs_retval->function_pointer;
               func_ptr_arg_depth = xmlTextReaderDepth(reader);
             }
-	    else {
+        else {
               bs_retval->function_pointer = NULL;
-	    }
+        }
           }
           else {
             BAIL("return value defined outside a function/method");
@@ -1080,7 +1080,7 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
             ASSERT_ALLOC(bs_informal_method);
 
             bs_informal_method->name = sel_registerName(selector);
-	    free(selector);
+        free(selector);
             bs_informal_method->class_method = 
               get_boolean_attribute(reader, "class_method", false);
             bs_informal_method->type = method_type;
@@ -1100,7 +1100,7 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
             ASSERT_ALLOC(method);
 
             method->name = sel_registerName(selector);
-	    free(selector);
+        free(selector);
             method->class_method = 
               get_boolean_attribute(reader, "class_method", false);
             method->variadic = 
@@ -1137,64 +1137,64 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
           if (func_ptr != NULL 
               && func_ptr_arg_depth == xmlTextReaderDepth(reader)) {
 
-	      bs_element_retval_t *retval = NULL;
-	      bs_element_arg_t *arg = NULL;
-	      unsigned args_count;
+          bs_element_retval_t *retval = NULL;
+          bs_element_arg_t *arg = NULL;
+          unsigned args_count;
 
-	      if (atom->val == BS_XML_RETVAL) {
-		  retval = func != NULL ? func->retval : method->retval;
-	      }
-	      else {
-		  args_count = func != NULL ? func->args_count
-		      : method->args_count;
-		  arg = &args[args_count - 1];
-	      }
+          if (atom->val == BS_XML_RETVAL) {
+          retval = func != NULL ? func->retval : method->retval;
+          }
+          else {
+          args_count = func != NULL ? func->args_count
+              : method->args_count;
+          arg = &args[args_count - 1];
+          }
 
               // Determine if we deal with a block or a function pointer.
-	      const char *old_type = (retval ? retval->type : arg->type);
+          const char *old_type = (retval ? retval->type : arg->type);
               const char lambda_type = *old_type == '@'
-		? _MR_C_LAMBDA_BLOCK
-		: _MR_C_LAMBDA_FUNCPTR;
+        ? _MR_C_LAMBDA_BLOCK
+        : _MR_C_LAMBDA_FUNCPTR;
 
-	      char tmp_type[1025]; // 3 less to fit <, type and >
-	      char new_type[1028];
+          char tmp_type[1025]; // 3 less to fit <, type and >
+          char new_type[1028];
 
-	      // Function ptr return type
-	      strlcpy(tmp_type, func_ptr->retval->type, sizeof(tmp_type));
-	      // Function ptr args
-	      for (i = 0; i < func_ptr->args_count; i++) {
-		  strlcat(tmp_type, fptr_args[i].type, sizeof(tmp_type));
-	      }
-	      // Clear the final type string
-	      memset(new_type, 0, sizeof(new_type));
-	      // Append the function pointer type
-	      snprintf(new_type, sizeof(new_type), "%c%c%s%c",
-		      _MR_C_LAMBDA_B, lambda_type, tmp_type, _MR_C_LAMBDA_E);
+          // Function ptr return type
+          strlcpy(tmp_type, func_ptr->retval->type, sizeof(tmp_type));
+          // Function ptr args
+          for (i = 0; i < func_ptr->args_count; i++) {
+          strlcat(tmp_type, fptr_args[i].type, sizeof(tmp_type));
+          }
+          // Clear the final type string
+          memset(new_type, 0, sizeof(new_type));
+          // Append the function pointer type
+          snprintf(new_type, sizeof(new_type), "%c%c%s%c",
+              _MR_C_LAMBDA_B, lambda_type, tmp_type, _MR_C_LAMBDA_E);
 
-	      // Free the old values
-	      if (retval) {
-		  free(retval->type);
-		  retval->type = strdup(new_type);
-	      }
-	      else {
-		  free(arg->type);
-		  arg->type = strdup(new_type);
-	      }
+          // Free the old values
+          if (retval) {
+          free(retval->type);
+          retval->type = strdup(new_type);
+          }
+          else {
+          free(arg->type);
+          arg->type = strdup(new_type);
+          }
             
-	      if (func_ptr->args_count > 0) {
-		  size_t len;
+          if (func_ptr->args_count > 0) {
+          size_t len;
       
-		  len = sizeof(bs_element_arg_t) * func_ptr->args_count;
-		  func_ptr->args = (bs_element_arg_t *)malloc(len);
-		  ASSERT_ALLOC(func_ptr->args);
-		  memcpy(func_ptr->args, fptr_args, len);
-	      }
-	      else {
-		  func_ptr->args = NULL;
-	      }
+          len = sizeof(bs_element_arg_t) * func_ptr->args_count;
+          func_ptr->args = (bs_element_arg_t *)malloc(len);
+          ASSERT_ALLOC(func_ptr->args);
+          memcpy(func_ptr->args, fptr_args, len);
+          }
+          else {
+          func_ptr->args = NULL;
+          }
                         
-	      func_ptr = NULL;
-	      func_ptr_arg_depth = -1;
+          func_ptr = NULL;
+          func_ptr_arg_depth = -1;
           }
           break;
         }
@@ -1297,13 +1297,13 @@ bails:
 
   if (!success) {
       for (unsigned i = 0, count = CFArrayGetCount(parser->loaded_paths);
-	      i < count; i++) {
-	  CFStringRef s = (CFStringRef)CFArrayGetValueAtIndex(parser->loaded_paths, i);
-	  if (CFStringCompare(cf_path, s, kCFCompareCaseInsensitive)
-		  == kCFCompareEqualTo) {
-	      CFArrayRemoveValueAtIndex(parser->loaded_paths, i);
-	      break;
-	  }
+          i < count; i++) {
+      CFStringRef s = (CFStringRef)CFArrayGetValueAtIndex(parser->loaded_paths, i);
+      if (CFStringCompare(cf_path, s, kCFCompareCaseInsensitive)
+          == kCFCompareEqualTo) {
+          CFArrayRemoveValueAtIndex(parser->loaded_paths, i);
+          break;
+      }
       }
   }
 
@@ -1485,7 +1485,7 @@ bs_element_free(bs_element_type_t type, void *value)
 
     default:
       fprintf(stderr, "unknown value %p of type %d passed to bs_free()", 
-	      value, type);
+          value, type);
   }
   free(value);
 }

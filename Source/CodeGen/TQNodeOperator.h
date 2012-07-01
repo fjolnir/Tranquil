@@ -1,20 +1,20 @@
 #import "TQNode.h"
 
 enum {
-	kTQOperatorMultiply,
-	kTQOperatorAdd,
-	kTQOperatorSubtract,
-	kTQOperatorDivide,
-	kTQOperatorLesser,
-	kTQOperatorAssign,
-	kTQOperatorGreater,
-	kTQOperatorLesserOrEqual,
-	kTQOperatorGreaterOrEqual,
-	kTQOperatorEqual,
-	kTQOperatorInequal,
-	kTQOperatorUnaryMinus,
-	kTQOperatorGetter,
-	kTQOperatorSetter
+    kTQOperatorMultiply,
+    kTQOperatorAdd,
+    kTQOperatorSubtract,
+    kTQOperatorDivide,
+    kTQOperatorLesser,
+    kTQOperatorAssign,
+    kTQOperatorGreater,
+    kTQOperatorLesserOrEqual,
+    kTQOperatorGreaterOrEqual,
+    kTQOperatorEqual,
+    kTQOperatorInequal,
+    kTQOperatorUnaryMinus,
+    kTQOperatorGetter,
+    kTQOperatorSetter
 };
 typedef char TQOperatorType;
 // Binary operator (a <operator> b)

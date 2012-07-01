@@ -14,87 +14,87 @@ using namespace llvm;
 
 + (TQNodeMethod *)nodeWithType:(TQMethodType)aType
 {
-	return [[[self alloc] initWithType:aType] autorelease];
+    return [[[self alloc] initWithType:aType] autorelease];
 }
 
 - (id)initWithType:(TQMethodType)aType
 {
-	if(!(self = [super init]))
-		return nil;
+    if(!(self = [super init]))
+        return nil;
 
-	_type = aType;
+    _type = aType;
 
-	// Methods must take a self argument
+    // Methods must take a self argument
     [[self arguments] removeAllObjects];
-	[self addArgument:[TQNodeArgumentDef nodeWithName:@"self" selectorPart:nil] error:nil];
+    [self addArgument:[TQNodeArgumentDef nodeWithName:@"self" selectorPart:nil] error:nil];
 
-	return self;
+    return self;
 }
 
 - (id)init
 {
-	return [self initWithType:kTQInstanceMethod];
+    return [self initWithType:kTQInstanceMethod];
 }
 
 - (BOOL)addArgument:(TQNodeArgument *)aArgument error:(NSError **)aoError
 {
-	if(self.arguments.count == 2)
-		TQAssertSoft(aArgument.selectorPart != nil,
-		             kTQSyntaxErrorDomain, kTQUnexpectedIdentifier, NO,
-		             @"No name given for method");
-	[self.arguments addObject:aArgument];
+    if(self.arguments.count == 2)
+        TQAssertSoft(aArgument.selectorPart != nil,
+                     kTQSyntaxErrorDomain, kTQUnexpectedIdentifier, NO,
+                     @"No name given for method");
+    [self.arguments addObject:aArgument];
 
-	return YES;
+    return YES;
 }
 
 - (void)dealloc
 {
-	[super dealloc];
+    [super dealloc];
 }
 
 - (NSString *)description
 {
-	NSMutableString *out = [NSMutableString stringWithString:@"<meth@ "];
-	switch(_type) {
-		case kTQClassMethod:
-			[out appendString:@"+ "];
-			break;
-		case kTQInstanceMethod:
-		default:
-			[out appendString:@"- "];
-	}
-	for(TQNodeArgument *arg in self.arguments) {
-		[out appendFormat:@"%@ ", arg];
-	}
-	[out appendString:@"{"];
-	if(self.statements.count > 0) {
-		[out appendString:@"\n"];
-		for(TQNode *stmt in self.statements) {
-			[out appendFormat:@"\t%@\n", stmt];
-		}
-	}
-	[out appendString:@"}>"];
-	return out;
+    NSMutableString *out = [NSMutableString stringWithString:@"<meth@ "];
+    switch(_type) {
+        case kTQClassMethod:
+            [out appendString:@"+ "];
+            break;
+        case kTQInstanceMethod:
+        default:
+            [out appendString:@"- "];
+    }
+    for(TQNodeArgument *arg in self.arguments) {
+        [out appendFormat:@"%@ ", arg];
+    }
+    [out appendString:@"{"];
+    if(self.statements.count > 0) {
+        [out appendString:@"\n"];
+        for(TQNode *stmt in self.statements) {
+            [out appendFormat:@"\t%@\n", stmt];
+        }
+    }
+    [out appendString:@"}>"];
+    return out;
 }
 
 
 - (NSString *)_selectorString
 {
-	NSMutableString *selector = [NSMutableString string];
-	for(TQNodeArgumentDef *arg in self.arguments) {
-		if([arg.name isEqualToString:@"self"] || [arg.name isEqualToString:@"__blk"])
-			continue;
-		if(arg.selectorPart)
-			[selector appendString:arg.selectorPart];
-		if(arg.name)
-			[selector appendString:@":"];
-	}
-	return selector;
+    NSMutableString *selector = [NSMutableString string];
+    for(TQNodeArgumentDef *arg in self.arguments) {
+        if([arg.name isEqualToString:@"self"] || [arg.name isEqualToString:@"__blk"])
+            continue;
+        if(arg.selectorPart)
+            [selector appendString:arg.selectorPart];
+        if(arg.name)
+            [selector appendString:@":"];
+    }
+    return selector;
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
 {
-	TQAssertSoft(NO, kTQGenericErrorDomain, kTQGenericError, NULL, @"Methods require their class to be passed to generate code.");
+    TQAssertSoft(NO, kTQGenericErrorDomain, kTQGenericError, NULL, @"Methods require their class to be passed to generate code.");
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
@@ -102,21 +102,21 @@ using namespace llvm;
                                  class:(TQNodeClass *)aClass
                                  error:(NSError **)aoErr
 {
-	Value *block = [super generateCodeInProgram:aProgram block:aBlock error:aoErr];
-	if(*aoErr)
-		return NULL;
-	IRBuilder<> *builder = aBlock.builder;
+    Value *block = [super generateCodeInProgram:aProgram block:aBlock error:aoErr];
+    if(*aoErr)
+        return NULL;
+    IRBuilder<> *builder = aBlock.builder;
 
-	Value *imp = builder->CreateCall(aProgram.imp_implementationWithBlock, block);
-	Value *signature = builder->CreateGlobalStringPtr([[self signature] UTF8String]);
-	Value *selector = builder->CreateCall(aProgram.sel_registerName, builder->CreateGlobalStringPtr([[self _selectorString] UTF8String]));
+    Value *imp = builder->CreateCall(aProgram.imp_implementationWithBlock, block);
+    Value *signature = builder->CreateGlobalStringPtr([[self signature] UTF8String]);
+    Value *selector = builder->CreateCall(aProgram.sel_registerName, builder->CreateGlobalStringPtr([[self _selectorString] UTF8String]));
 
-	Value *classPtr = aClass.classPtr;
-	if(_type == kTQClassMethod)
-		classPtr = builder->CreateCall(aProgram.object_getClass, classPtr);
-	builder->CreateCall4(aProgram.class_replaceMethod, classPtr, selector, imp, signature);
+    Value *classPtr = aClass.classPtr;
+    if(_type == kTQClassMethod)
+        classPtr = builder->CreateCall(aProgram.object_getClass, classPtr);
+    builder->CreateCall4(aProgram.class_replaceMethod, classPtr, selector, imp, signature);
 
-	return NULL;
+    return NULL;
 }
 
 @end
