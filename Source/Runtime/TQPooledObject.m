@@ -2,54 +2,54 @@
 #import <malloc/malloc.h>
 #import <objc/runtime.h>
 
-#define COMPLAIN_MISSING_IMP @"Class %@ needs this code:\n\
+#define COMPLAIN_MISSING_SUPPORT @"Class %@ needs this code:\n\
+static TQPoolInfo poolInfo;\n\
+static IMP superAllocImp = NULL;\n\
++ (void)load {\n\
+    superAllocImp = method_getImplementation(class_getClassMethod(self, @selector(allocWithPoolInfo:)));\n\
+}\n\
 + (TQPoolInfo *) poolInfo\n\
 {\n\
-  static TQPoolInfo *poolInfo = nil;\n\
-  if (!poolInfo) poolInfo = [[TQPoolInfo alloc] init];\n\
   return poolInfo;\n\
-}"
-
-#define COMPLAIN_MISSING_ALLOC @"Class %@ needs this code:\n\
+}\n\
 + (id)allocWithZone:(NSZone *)zone\n\
 {\n\
-	static IMP superAllocImp = NULL;\n\
-	if(!superAllocImp)\n\
-		superAllocImp = method_getImplementation(class_getClassMethod(self, @selector(allocWithPoolInfo:)));\n\
-	return superAllocImp(self, @selector(allocWithPoolInfo:), poolInfo);\n\
+    return superAllocImp(self, @selector(allocWithPoolInfo:), &poolInfo);\n\
 }"
 
-
-@implementation TQPoolInfo
-// empty
-@end
-
-#ifndef DISABLE_MEMORY_POOLING
+#ifndef DISABLE_OBJECT_POOL
 
 @implementation TQPooledObject
 
 + (id)allocWithZone:(NSZone *)zone
 {
-	[NSException raise:NSGenericException format:COMPLAIN_MISSING_IMP, self];
+    // Implemented by subclasses
+	[NSException raise:NSGenericException format:COMPLAIN_MISSING_SUPPORT, self];
 	return nil;
+}
+
++ (TQPoolInfo *)poolInfo
+{
+    // Implemented by subclasses
+	[NSException raise:NSGenericException format:COMPLAIN_MISSING_SUPPORT, self];
+	return 0;
 }
 
 + (id)allocWithPoolInfo:(TQPoolInfo *)poolInfo
 {
-	if(!poolInfo->poolClass) // first allocation
+	if(!poolInfo->poolClass)
 	{
+        // First use of the pool
 		poolInfo->poolClass = self;
 		poolInfo->lastElement = NULL;
 	}
-	else
-	{
-		if (poolInfo->poolClass != self)
-			[NSException raise:NSGenericException format:COMPLAIN_MISSING_IMP, self];
-	}
+	else if(poolInfo->poolClass != self)
+        [NSException raise:NSGenericException
+                    format:COMPLAIN_MISSING_SUPPORT, self];
 
-	if (!poolInfo->lastElement)
+	if(!poolInfo->lastElement)
 	{
-		// pool is empty -> allocate
+		// Pool is empty => allocate new object
 		TQPooledObject *object = NSAllocateObject(self, 0, NULL);
 		object->_retainCount = 1;
 		object->_poolInfoImp = method_getImplementation(class_getClassMethod(self, @selector(poolInfo)));
@@ -57,14 +57,12 @@
 	}
 	else
 	{
-		// recycle element, update poolInfo
+		// Recycle element, update poolInfo
 		TQPooledObject *object = poolInfo->lastElement;
 		poolInfo->lastElement = object->mPoolPredecessor;
 
-		// Subclasses should reset necessary properties when reinitialized. so disregard the following 3 lines
-		// zero out memory. (do not overwrite isa & mPoolPredecessor, thus the offset)
-		//unsigned int sizeOfFields = sizeof(Class) + sizeof(TQPooledObject *);
-		//memset((char*)(id)object + sizeOfFields, 0, malloc_size(object) - sizeOfFields);
+		// Subclasses should reset necessary properties when reinitialized.
+        // So we do NOT zero out the object because it is quite expensive.
 		object->_retainCount = 1;
 		return object;
 	}
@@ -83,9 +81,9 @@
 
 - (oneway void)release
 {
-	if (!__sync_sub_and_fetch(&_retainCount, 1))
+	if(!__sync_sub_and_fetch(&_retainCount, 1))
 	{
-		TQPoolInfo *poolInfo = _poolInfoImp(self->isa, @selector(poolInfo));
+		TQPoolInfo *poolInfo = (TQPoolInfo *)_poolInfoImp(self->isa, @selector(poolInfo));
 		self->mPoolPredecessor = poolInfo->lastElement;
 		poolInfo->lastElement = self;
 	}
@@ -93,8 +91,7 @@
 
 - (void)purge
 {
-	// will call 'dealloc' internally --
-	// which should not be called directly.
+	// Actually deallocates the object
 	[super release];
 }
 
@@ -110,14 +107,7 @@
 		poolInfo->lastElement = lastElement->mPoolPredecessor;
 		[lastElement purge];
 	}
-
 	return count;
-}
-
-+ (TQPoolInfo *)poolInfo
-{
-	[NSException raise:NSGenericException format:COMPLAIN_MISSING_IMP, self];
-	return 0;
 }
 
 @end
@@ -125,7 +115,6 @@
 #else
 
 @implementation TQPooledObject
-
 + (TQPoolInfo *)poolInfo
 {
 	return nil;
@@ -135,8 +124,6 @@
 {
 	return 0;
 }
-
 @end
-
 
 #endif

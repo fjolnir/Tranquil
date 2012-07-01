@@ -2,7 +2,7 @@
 #import <objc/runtime.h>
 #import "TQRuntime.h"
 
-static TQPoolInfo *poolInfo = nil;
+static TQPoolInfo poolInfo = { nil, nil };
 static IMP superAllocImp = NULL;
 
 TQNumber *TQNumberTrue;
@@ -17,8 +17,6 @@ extern id _objc_msgSend_hack2(id, SEL, id)     asm("_objc_msgSend");
 
 + (void)load
 {
-	if(!poolInfo)
-		poolInfo = [[TQPoolInfo alloc] init];
 	if(!superAllocImp)
 		superAllocImp = method_getImplementation(class_getClassMethod(self, @selector(allocWithPoolInfo:)));
 
@@ -83,12 +81,12 @@ extern id _objc_msgSend_hack2(id, SEL, id)     asm("_objc_msgSend");
 
 + (TQPoolInfo *)poolInfo
 {
-	return poolInfo;
+	return &poolInfo;
 }
 
 + (id)allocWithZone:(NSZone *)zone
 {
-	return superAllocImp(self, @selector(allocWithPoolInfo:), poolInfo);
+	return superAllocImp(self, @selector(allocWithPoolInfo:), &poolInfo);
 }
 
 + (TQNumber *)numberWithDouble:(double)aValue
