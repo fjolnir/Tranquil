@@ -1,0 +1,10 @@
+#Foo < NSObject {
+    - foo: bar baz:hey {}
+	- +: b {
+		print("Adding (Not really)")
+		^1
+	}
+}
+
+foo = Foo new
+unused = foo + 3

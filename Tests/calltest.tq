@@ -3,28 +3,5 @@ a = { arg |
 		^`arg stringByAppendingString:captureMePlease`(arg)
 }
 myBlock = a
-numAsStr = a("foo" stringByAppendingString: (321 stringValue))
-numAsStr = numAsStr stringByAppendingString:" Three Two One"
+numAsStr = "Three Two One"
 print("%@ %@", myBlock, numAsStr)
-
-#Foo < NSObject {
-	+ classMethod {
-		print("I'm a class method %@", captureMePlease)
-	}
-	- instanceMethod: iMethArg {
-		print("From: %@ To: %@", iMethArg, self)
-	}
-	- if: ifBlk else: elseBlk `ifBlk()`
-	- +: b {
-		print("Adding (Not really)")
-		^1
-	}
-}
-
-foo = Foo new
-unuse = foo + 3
-^foo if: `myBlock` else: myBlock
-
-#Foo < NSObject {
-	- if: ifBlk else: elseBlk {ifBlk()}
-}
