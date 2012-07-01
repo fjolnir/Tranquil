@@ -1,10 +1,9 @@
-#Foo < NSObject {
-    - foo: bar baz:hey {}
+#Klass < NSObject {
 	- +: b {
 		print("Adding (Not really)")
 		^1
 	}
 }
 
-foo = Foo new
-unused = foo + 3
+obj = Klass new
+unused = obj + 3

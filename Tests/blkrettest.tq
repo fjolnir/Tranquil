@@ -1,2 +1,1 @@
-a = { b | return b. }
-return a.
+^{ b | ^b }

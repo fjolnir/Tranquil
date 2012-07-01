@@ -8,6 +8,6 @@
 		}
 	}
 }
-#[1,2] each: { obj | print("%@", obj) }
+#[1,2,3,4] each: { obj | print("%@", obj) }
 
 

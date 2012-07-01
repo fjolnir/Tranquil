@@ -52,7 +52,7 @@ typedef struct _TQParserState TQParserState;
 //#define YY_DEBUG
 %}
 
-Program      = (Statement --)+ EOF
+Program      = -- (Statement --)+ EOF
                {
                    NSMutableArray *statements = PopStack();
                    TQNodeBlock *root = [TQNodeRootBlock node];
