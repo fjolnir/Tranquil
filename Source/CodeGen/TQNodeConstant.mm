@@ -6,7 +6,7 @@ using namespace llvm;
 
 @implementation TQNodeConstant
 
-+ (TQNodeConstant *)nodeWithCString:(const char *)aStr { return (TQNodeConstant *)[super nodeWithCString:aStr]; }
++ (TQNodeConstant *)nodeWithString:(NSString *)aStr{ return (TQNodeConstant *)[super nodeWithString:aStr]; }
 
 - (NSString *)description
 {

@@ -9,7 +9,6 @@
 #import "CodeGen/TQNodeBlock.h"
 #import "CodeGen/TQNodeCall.h"
 #import "CodeGen/TQNodeClass.h"
-#import "CodeGen/TQNodeIdentifier.h"
 #import "CodeGen/TQNodeMemberAccess.h"
 #import "CodeGen/TQNodeMessage.h"
 #import "CodeGen/TQNodeMethod.h"

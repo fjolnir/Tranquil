@@ -45,7 +45,7 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
 {
 	IRBuilder<> *builder = aBlock.builder;
-	if(_type == '=') {
+	if(_type == kTQOperatorAssign) {
 		BOOL isVar = [_left isMemberOfClass:[TQNodeVariable class]];
 		BOOL isProperty = [_left isMemberOfClass:[TQNodeMemberAccess class]];
 		BOOL isGetterOp = [_left isMemberOfClass:[self class]] && [(TQNodeOperator*)_left type] == kTQOperatorGetter;

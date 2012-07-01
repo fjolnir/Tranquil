@@ -1,6 +1,6 @@
 #import "TQNode.h"
-#import "TQNodeIdentifier.h"
+#import "TQNodeString.h"
 
-@interface TQNodeConstant : TQNodeIdentifier
-+ (TQNodeConstant *)nodeWithCString:(const char *)aStr;
+@interface TQNodeConstant : TQNodeString
++ (TQNodeConstant *)nodeWithString:(NSString *)aStr;
 @end

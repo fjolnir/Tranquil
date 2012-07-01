@@ -8,19 +8,11 @@ static Value *_StringWithUTF8StringSel, *_NSStringClassNameConst;
 @implementation TQNodeString
 @synthesize value=_value;
 
-+ (TQNodeString *)nodeWithCString:(const char *)aStr
++ (TQNodeString *)nodeWithString:(NSString *)aStr
 {
-	return [[[self alloc] initWithCString:aStr] autorelease];
-}
-
-- (id)initWithCString:(const char *)aStr
-{
-	if(!(self = [super init]))
-		return nil;
-
-	_value = [[NSString alloc] initWithUTF8String:aStr];
-
-	return self;
+	TQNodeString *node = [[self alloc] init];
+    node.value = aStr;
+    return [node autorelease];
 }
 
 - (NSString *)description

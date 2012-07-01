@@ -24,3 +24,7 @@ print("%@ %@", myBlock, numAsStr)
 foo = Foo new
 unuse = foo + 3
 ^foo if: `myBlock` else: myBlock
+
+#Foo < NSObject {
+	- if: ifBlk else: elseBlk {ifBlk()}
+}

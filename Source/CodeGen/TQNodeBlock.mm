@@ -1,7 +1,6 @@
 #import "TQNodeBlock.h"
 #import "TQNodeArgumentDef.h"
 #import "TQProgram.h"
-#import "TQNodeIdentifier.h"
 #import "TQNodeVariable.h"
 // Block invoke functions are numbered from 0
 #define TQ_BLOCK_FUN_PREFIX @"__tq_block_invoke_"

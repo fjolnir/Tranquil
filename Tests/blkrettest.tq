@@ -1,2 +1,2 @@
-a = { :b | return b. }
+a = { b | return b. }
 return a.
