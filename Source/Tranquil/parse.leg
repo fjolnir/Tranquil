@@ -282,22 +282,22 @@ MethodArg    = identifier:Identifier':' -- name:Identifier
 If           = ( "if"        { UpdateToken();  PushStack([TQNodeIfBlock node]);     }
                | "unless"    { UpdateToken();  PushStack([TQNodeUnlessBlock node]); }
                )
-               -- cond:Expression -- '{' --
+               -- cond:Expression --
                {
                    ExtendToken();
                    [StackTop setCondition:cond];
                    PushStack([NSMutableArray array]);
                }
-               ( Statement --)* '}'
+               ('{' -- ( Statement --)* '}' | -- Statement)
                ( -- "else" - elsif:If
                  {
                      [StackGet(-1) setElseBlockStatements:[NSMutableArray arrayWithObject:elsif]];
                  }
-               | -- "else" -- "{" --
+               | -- "else" --
                  {
                      PushStack([NSMutableArray array]);
                  }
-                 (Statement --)* "}"
+                 ("{" -- (Statement --)* "}" | -- Statement)
                  {
                      NSMutableArray *statements = PopStack();
                      [StackGet(-1) setElseBlockStatements:statements];
