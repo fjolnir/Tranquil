@@ -6,7 +6,6 @@ BUILD_DIR = 'Build'
 
 PARSER_OUTPATH = "#{BUILD_DIR}/parse.mm"
 
-
 PEGFLAGS = [
     "-o #{PARSER_OUTPATH}",
     #"-v"
@@ -40,9 +39,12 @@ LIBS = ['-framework Foundation'].join(' ')
 
 PATHMAP = "build/%n.o"
 
-OBJC_SOURCES = FileList['Source/Tranquil/**/*.m*'].add('Source/Tranquil/**/*.c').add(PARSER_OUTPATH)
+STUB_OUTPATH = 'Build/block_stubs.mm'
+STUB_SCRIPT = 'Source/Tranquil/gen_stubs.rb'
+OBJC_SOURCES = FileList['Source/Tranquil/**/*.m*'].add('Source/Tranquil/**/*.c').add(PARSER_OUTPATH).add(STUB_OUTPATH)
 O_FILES = OBJC_SOURCES.pathmap(PATHMAP)
 PEG_SOURCE = FileList['Source/Tranquil/*.leg'].first
+
 
 def compile(file, flags=CXXFLAGS, cc=CXX)
     sh "#{cc} #{file[:in].join(' ')} #{flags} -c -o #{file[:out]}"
@@ -51,6 +53,11 @@ end
 file PARSER_OUTPATH => PEG_SOURCE do |f|
     sh "#{PEG} #{PEGFLAGS} #{PEG_SOURCE}"
 end
+
+file STUB_OUTPATH => STUB_SCRIPT do |f|
+    sh "ruby #{STUB_SCRIPT} > #{STUB_OUTPATH}"
+end
+
 
 OBJC_SOURCES.each { |src|
     file src.pathmap(PATHMAP) => src do |f|

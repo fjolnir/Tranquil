@@ -35,9 +35,11 @@ struct TQBlockLiteral {
     // optional helper functions
         void (*copy_helper)(void *dst, void *src);
         void (*dispose_helper)(void *src);
+        char *signature;
+        void *gcInfo; // Unused in objc2
         // Only applicable if flags & TQ_BLOCK_IS_TRANQUIL_BLOCK is true
-        short numArgs;
-        bool isVariadic;
+        int32_t numArgs;
+        BOOL isVariadic;
     } *descriptor;
     // imported variables
 };

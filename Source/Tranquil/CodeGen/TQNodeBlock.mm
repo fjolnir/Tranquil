@@ -102,6 +102,7 @@ using namespace llvm;
 
     Type *i8PtrTy = aProgram.llInt8PtrTy;
     Type *i8Ty = aProgram.llInt8Ty;
+    Type *int32Ty = aProgram.llInt32Ty;
     Type *longTy  = aProgram.llInt64Ty; // Should be unsigned
 
     descriptorType = StructType::create("struct.__block_descriptor",
@@ -113,7 +114,7 @@ using namespace llvm;
                                         i8PtrTy, // GC info (Unused in objc2 => always NULL)
                                         // Following are only read if the block's flags indicate TQ_BLOCK_IS_TRANQUIL_BLOCK
                                         // (Which they do for all tranquil blocks)
-                                        i8Ty,    // numArgs
+                                        int32Ty,    // numArgs
                                         i8Ty,    // isVariadic
                                         NULL);
     descriptorType = PointerType::getUnqual(descriptorType);
@@ -156,6 +157,8 @@ using namespace llvm;
 
     llvm::Module *mod = aProgram.llModule;
     Type *int8Ty = aProgram.llInt8Ty;
+    Type *int32Ty = aProgram.llInt32Ty;
+
     SmallVector<llvm::Constant*, 6> elements;
 
     // reserved
@@ -173,7 +176,7 @@ using namespace llvm;
     // GC Layout (unused in objc 2)
     elements.push_back(llvm::Constant::getNullValue(aProgram.llInt8PtrTy));
 
-    elements.push_back(llvm::ConstantInt::get(int8Ty, [_arguments count]));
+    elements.push_back(llvm::ConstantInt::get(int32Ty, [_arguments count]));
     elements.push_back(llvm::ConstantInt::get(int8Ty, 0)); // isVariadic? always false for now
 
     llvm::Constant *init = llvm::ConstantStruct::getAnon(elements);

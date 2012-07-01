@@ -65,22 +65,20 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
 {
     IRBuilder<> *builder = aBlock.builder;
 
-    // Extract the invoke function pointer
-    Type *blockPtrTy = PointerType::getUnqual(aProgram.llBlockLiteralType);
     Value *callee = [_callee generateCodeInProgram:aProgram block:aBlock error:aoErr];
     aArgs.insert(aArgs.begin(), callee);
 
-    Value *blockLiteral = builder->CreateBitCast(callee, blockPtrTy);
-    Value *funPtr = builder->CreateStructGEP(blockLiteral, 3);
+    // Load&Call the dispatcher
+    NSString *dispatcherName = [NSString stringWithFormat:@"TQDispatchBlock%ld", aArgs.size()];
+    Function *dispatcher = aProgram.llModule->getFunction([dispatcherName UTF8String]);
+    if(!dispatcher) {
+        std::vector<Type*> argtypes(aArgs.size(), aProgram.llInt8PtrTy);
+        FunctionType *funType = FunctionType::get(aProgram.llInt8PtrTy, argtypes, false);
+        dispatcher = Function::Create(funType, GlobalValue::ExternalLinkage, [dispatcherName UTF8String], aProgram.llModule);
+        dispatcher->setCallingConv(CallingConv::C);
+    }
 
-    // Load the function and cast it to the correct type
-    Value *fun = builder->CreateLoad(funPtr);
-    std::vector<Type *> paramTypes(_arguments.count+1,  aProgram.llInt8PtrTy);
-    FunctionType *funType = FunctionType::get(aProgram.llInt8PtrTy, paramTypes, false);
-    Type *funPtrType = PointerType::getUnqual(funType);
-
-    CallInst *call = builder->CreateCall(builder->CreateBitCast(fun, funPtrType), aArgs);
-    return call;
+    return builder->CreateCall(dispatcher, aArgs);
 }
 
 
