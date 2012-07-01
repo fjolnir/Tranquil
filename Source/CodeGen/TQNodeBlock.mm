@@ -383,20 +383,13 @@ using namespace llvm;
 	_basicBlock = BasicBlock::Create(mod->getContext(), "entry", _function, 0);
 	_builder = new IRBuilder<>(_basicBlock);
 
-	//Value *nsobj = _builder->CreateCall(aProgram.objc_getClass, _builder->CreateGlobalStringPtr("NSObject"));
-	//_builder->CreateCall(aProgram.TQAugmentClassWithOperators, nsobj);
-	
 	// Load the arguments
 	llvm::Function::arg_iterator argumentIterator = _function->arg_begin();
 	Value *thisBlock = NULL;
 	if([_arguments count] > 0) {
-		//AllocaInst *blkAlloca = _builder->CreateAlloca(int8PtrTy);
-		//_builder->CreateStore(argumentIterator, blkAlloca);
-		//thisBlock = _builder->CreateBitCast(_builder->CreateLoad(blkAlloca), PointerType::getUnqual([self _blockLiteralTypeInProgram:aProgram]));
 		thisBlock = _builder->CreateBitCast(argumentIterator, PointerType::getUnqual([self _blockLiteralTypeInProgram:aProgram]));
+		argumentIterator++;
 	}
-	argumentIterator++;
-
 
 	for (unsigned i = 1; i < _arguments.count; ++i, ++argumentIterator)
 	{
