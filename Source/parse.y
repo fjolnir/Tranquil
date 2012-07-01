@@ -105,6 +105,8 @@ Call:
 	;
 Callee:
 	  Variable
+	| Property
+	| Block
 	;
 CallArgs:
 	  CallArg {
@@ -151,7 +153,7 @@ MessageArgs:
 		$$ = [NSMutableArray arrayWithObjects:arg, nil];
 	}
 	| MessageArgs Identifier ':'  MessageArg {
-		TQNodeArgument *arg = [TQNodeArgument nodeWithPassedNode:$4 identifier:nil];
+		TQNodeArgument *arg = [TQNodeArgument nodeWithPassedNode:$4 identifier:[$2 value]];
 		[$$ addObject:arg];
 	}
 	;
@@ -160,6 +162,7 @@ MessageArg:
 	  Call
 	| Variable
 	| Literal
+	| Block
 	| '(' Expression ')' { $$ = $2; }
 	;
 
@@ -274,6 +277,7 @@ MethodBody:
 	   Statements Ln
 	 '}' { $$ = $3; }
 	| '{' OptLn '}' { $$ = nil; }
+	| '`' Expression '`' { $$ = [NSMutableArray arrayWithObject:[TQNodeReturn nodeWithValue:$2]]; }
 	;
 
 Block:
@@ -295,6 +299,20 @@ Block:
 	}
 	| '{' OptLn '}' { $$ = [TQNodeBlock node]; }
 	| '{' OptLn BlockArgs '|'  OptLn '}' { $$ = [TQNodeBlock node]; }
+	| '`' BlockArgs '|' Expression '`' {
+		NSError *err = nil;
+		$$ = [TQNodeBlock node];
+		for(TQNodeArgumentDef *arg in $2) {
+			[$$ addArgument:arg error:&err];
+			if(err)
+				yyerror(&yylloc, state, [[err localizedDescription] UTF8String]);
+		}
+		[$$ setStatements:[NSArray arrayWithObject:[TQNodeReturn nodeWithValue:$4]]];
+	}
+	| '`' Expression '`' {
+		$$ = [TQNodeBlock node];
+		[$$ setStatements:[NSArray arrayWithObject:[TQNodeReturn nodeWithValue:$2]]];
+	}
 	;
 BlockArgs:
 	  Identifier OptLn {
