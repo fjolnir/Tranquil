@@ -23,7 +23,7 @@
 	TQNodeMethod *method;
 	TQNodeMessage *message;
 	TQNodeMemberAccess *memberAccess;
-	TQNodeOperator *binOp;
+	TQNodeOperator *op;
 	TQNodeIdentifier *identifier;
 	TQNodeReturn *ret;
 	TQNodeConstant *constant;
@@ -68,7 +68,7 @@
 %type <method> Method ClassMethod InstanceMethod MethodDef
 %type <message> Message
 %type <memberAccess> Property
-%type <binOp> Assignment
+%type <op> Assignment SubscriptExpression
 %type <ret> Return
 
 %type <node> Literal Statement Expression Callee Lhs CallArg MessageArg MessageReceiver
@@ -183,6 +183,7 @@ Assignment:
 Lhs:
 	  Variable
 	| Property
+	| SubscriptExpression
 	;
 
 Return:
@@ -206,10 +207,12 @@ Expression:
 	| Expression tINEQUALOP Expression        { $$ = [TQNodeOperator nodeWithType:kTQOperatorInequal left:$1 right:$3]; }
 	| Expression tGREATEROREQUALOP Expression { $$ = [TQNodeOperator nodeWithType:kTQOperatorGreaterOrEqual left:$1 right:$3]; }
 	| Expression tLESSEROREQUALOP Expression  { $$ = [TQNodeOperator nodeWithType:kTQOperatorLesserOrEqual left:$1 right:$3]; }
-	| Expression '[' Expression ']'           { $$ = [TQNodeOperator nodeWithType:kTQOperatorGetter left:$1 right:$3]; }
+	| SubscriptExpression
 	| '(' Expression ')' { $$ = $2; }
 	;
-
+SubscriptExpression:
+	  Expression '[' Expression ']'           { $$ = [TQNodeOperator nodeWithType:kTQOperatorGetter left:$1 right:$3]; }
+	;
 Property:
 	 Variable '#' Identifier
 	| Property '#' Identifier

@@ -36,13 +36,25 @@ using namespace llvm;
 {
 	BOOL isVar = [_left isMemberOfClass:[TQNodeVariable class]];
 	BOOL isProperty = [_left isMemberOfClass:[TQNodeMemberAccess class]];
+	BOOL isGetterOp = [_left isMemberOfClass:[self class]] && [(TQNodeOperator*)_left type] == kTQOperatorGetter;
 
 	if(_type == '=') {
-		TQAssertSoft(isVar || isProperty, kTQSyntaxErrorDomain, kTQInvalidAssignee, NO, @"Only variables and object properties can be assigned to");
+		TQAssertSoft(isVar || isProperty || isGetterOp, kTQSyntaxErrorDomain, kTQInvalidAssignee, NO, @"Only variables and object properties can be assigned to");
 
 		Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
-
-		[(TQNodeVariable *)_left store:right inProgram:aProgram block:aBlock error:aoError];
+		
+		if(isGetterOp) {
+			// Call []=::
+			TQNodeOperator *setterOp = (TQNodeOperator *)_left;
+			Value *selector  = aProgram.llModule->getOrInsertGlobal("TQSetterOpSel", aProgram.llInt8PtrTy);
+			IRBuilder<> *builder = aBlock.builder;
+			Value *key = [setterOp.right generateCodeInProgram:aProgram block:aBlock error:aoError];
+			Value *settee = [setterOp.left generateCodeInProgram:aProgram block:aBlock error:aoError];
+			if(*aoError)
+				return NULL;
+			return builder->CreateCall4(aProgram.objc_msgSend, settee, builder->CreateLoad(selector), right, key);
+		} else
+			[(TQNodeVariable *)_left store:right inProgram:aProgram block:aBlock error:aoError];
 		return [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
 	} else {
 		Value *left  = [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
