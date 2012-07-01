@@ -158,7 +158,7 @@ Class        = '#' name:Constant --
                {
                    PushStack([TQNodeClass nodeWithName:name]);
                }
-               '{' -- (Method --)* '}'
+               ( "<" -- SuperClsName -- )? '{' -- (Method --)* '}'
                {
                   $$ = PopStack();
                }
