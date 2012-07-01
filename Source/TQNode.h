@@ -23,6 +23,7 @@
 #include <llvm/Support/TargetSelect.h>
 #include <Foundation/Foundation.h>
 
+
 @class TQNodeBlock, TQProgram;
 
 extern NSString * const kTQSyntaxErrorDomain;
@@ -64,7 +65,7 @@ typedef enum {
 
 #else
 	#define TQLog(fmt, ...)
-    #define TQAssert(cond, fmt, ...)
+	#define TQAssert(cond, fmt, ...)
 #endif
 
 @interface TQNode : NSObject

@@ -68,8 +68,8 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
 {
 	// -- Type definitions
-	// -- Function definitions
-	
+	// -- Method definitions
+
 	return NULL;
 }
 

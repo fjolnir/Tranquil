@@ -39,12 +39,10 @@ using namespace llvm;
 	TQAssertSoft(isVar || isProperty, kTQSyntaxErrorDomain, kTQInvalidAssignee, NO, @"Only variables and object properties can be assigned to");
 
 	NSLog(@"> Assigning to %@", _left);
-	Value *left = [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
 	Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
+	[(TQNodeVariable *)_left store:right inProgram:aProgram block:aBlock error:aoError];
 
-	//aBlock.builder->CreateCall2(aProgram.objc_storeStrong, left, right);
-	aBlock.builder->CreateStore(right, ((TQNodeVariable*)_left).alloca);
-	return left;
+	return [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
 }
 
 - (NSString *)description

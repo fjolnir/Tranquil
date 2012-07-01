@@ -3,12 +3,19 @@
 
 using namespace llvm;
 
-
 @implementation TQProgram
-@synthesize  root=_root, name=_name, llModule=_llModule, irBuilder=_irBuilder;
-@synthesize llVoidTy=_llVoidTy, llInt8Ty=_llInt8Ty, llInt16Ty=_llInt16Ty, llInt32Ty=_llInt32Ty, llInt64Ty=_llInt64Ty, llFloatTy=_llFloatTy, llDoubleTy=_llDoubleTy, llIntTy=_llIntTy, llIntPtrTy=_llIntPtrTy, llSizeTy=_llSizeTy, llPtrDiffTy=_llPtrDiffTy, llVoidPtrTy=_llVoidPtrTy, llInt8PtrTy=_llInt8PtrTy, llVoidPtrPtrTy=_llVoidPtrPtrTy, llInt8PtrPtrTy=_llInt8PtrPtrTy, llPointerWidthInBits=_llPointerWidthInBits, llPointerAlignInBytes=_llPointerAlignInBytes, llPointerSizeInBytes=_llPointerSizeInBytes;
+@synthesize root=_root, name=_name, llModule=_llModule, irBuilder=_irBuilder;
+@synthesize llVoidTy=_llVoidTy, llInt8Ty=_llInt8Ty, llInt16Ty=_llInt16Ty, llInt32Ty=_llInt32Ty, llInt64Ty=_llInt64Ty,
+	llFloatTy=_llFloatTy, llDoubleTy=_llDoubleTy, llIntTy=_llIntTy, llIntPtrTy=_llIntPtrTy, llSizeTy=_llSizeTy,
+	llPtrDiffTy=_llPtrDiffTy, llVoidPtrTy=_llVoidPtrTy, llInt8PtrTy=_llInt8PtrTy, llVoidPtrPtrTy=_llVoidPtrPtrTy,
+	llInt8PtrPtrTy=_llInt8PtrPtrTy, llPointerWidthInBits=_llPointerWidthInBits, llPointerAlignInBytes=_llPointerAlignInBytes,
+	llPointerSizeInBytes=_llPointerSizeInBytes;
 @synthesize llBlockDescriptorTy=_blockDescriptorTy, llBlockLiteralType=_blockLiteralType;
-@synthesize objc_msgSend=_func_objc_msgSend, objc_storeStrong=_func_objc_storeStrong, objc_storeWeak=_func_objc_storeWeak, objc_loadWeak=_func_objc_loadWeak, objc_allocateClassPair=_func_objc_allocateClassPair, objc_registerClassPair=_func_objc_registerClassPair, objc_destroyWeak=_func_objc_destroyWeak, class_addIvar=_func_class_addIvar, class_addMethod=_func_class_addMethod, sel_registerName=_func_sel_registerName, sel_getName=_func_sel_getName, objc_getClass=_func_objc_getClass, objc_retain=_func_objc_retain, objc_release=_func_objc_release;
+@synthesize objc_msgSend=_func_objc_msgSend, objc_storeStrong=_func_objc_storeStrong, objc_storeWeak=_func_objc_storeWeak,
+	objc_loadWeak=_func_objc_loadWeak, objc_allocateClassPair=_func_objc_allocateClassPair,
+	objc_registerClassPair=_func_objc_registerClassPair, objc_destroyWeak=_func_objc_destroyWeak, class_addIvar=_func_class_addIvar,
+	class_addMethod=_func_class_addMethod, sel_registerName=_func_sel_registerName, sel_getName=_func_sel_getName,
+	objc_getClass=_func_objc_getClass, objc_retain=_func_objc_retain, objc_release=_func_objc_release;
 
 + (TQProgram *)programWithName:(NSString *)aName
 {
@@ -171,7 +178,7 @@ using namespace llvm;
 	id ret = rootPtr();
 	printf("--\n");
 	NSLog(@"'root' retval:  %p: %@ (%@)\n", ret, ret ? ret : nil, [ret class]);
-	
+
 	if([ret isKindOfClass:NSClassFromString(@"NSBlock")]) {
 		id (^test)(id obj) = ret;
 		NSNumber *num = test([NSNumber numberWithInt:1337]);
@@ -186,11 +193,6 @@ using namespace llvm;
 	return [NSString stringWithFormat:@"<prog@\n%@\n}>", _root];
 }
 
-#pragma mark - ARC Operations
-
-//- ()retainValue:(llvm::Value *)aValue
-//{
-//}
 @end
 
 

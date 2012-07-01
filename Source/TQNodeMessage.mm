@@ -16,7 +16,7 @@ using namespace llvm;
 {
 	if(!(self = [super init]))
 		return nil;
-	
+
 	_receiver = [aNode retain];
 	_arguments = [[NSMutableArray alloc] init];
 

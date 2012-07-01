@@ -38,7 +38,9 @@ using namespace llvm;
 	[super dealloc];
 }
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                 error:(NSError **)aoError
 {
 	TQNodeVariable *existingVar = nil;
 
@@ -55,5 +57,18 @@ using namespace llvm;
 	builder->CreateStore(ConstantPointerNull::get(aProgram.llInt8PtrTy), alloca);
 	_alloca = alloca;
 	return builder->CreateLoad(alloca);
+}
+
+- (llvm::Value *)store:(llvm::Value *)aValue
+             inProgram:(TQProgram *)aProgram
+                 block:(TQNodeBlock *)aBlock
+                 error:(NSError **)aoError
+{
+	if(!_alloca) {
+		if(![self generateCodeInProgram:aProgram block:aBlock error:aoError])
+			return NULL;
+	}
+	return aBlock.builder->CreateStore(aValue, _alloca);
+	//aBlock.builder->CreateCall2(aProgram.objc_storeStrong, _alloca, aValue);
 }
 @end

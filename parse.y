@@ -94,8 +94,14 @@ variable:
 	  identifier { $$ = [TQNodeVariable nodeWithName:[$1 value]]; }
 	;
 
-statements: statement             { NSLog(NSSTR("----------- %@"), $1); $$ = [NSMutableArray arrayWithObjects:$1, nil]; }
-	| statements opt_nl statement { NSLog(NSSTR("----------- %@"), $3); [$$ addObject:$3]; }
+statements: statement {
+		NSLog(NSSTR("----------- %@"), $1);
+		$$ = [NSMutableArray arrayWithObjects:$1, nil];
+	}
+	| statements opt_nl statement {
+		NSLog(NSSTR("----------- %@"), $3);
+		[$$ addObject:$3];
+	}
 	;
 
 statement:
@@ -128,9 +134,9 @@ callee:
 
 /* Block definition */
 block:
-	  '{' opt_nl block_args '|' opt_nl
-	      statements
-	  opt_nl '}' {
+	'{' opt_nl block_args '|' opt_nl
+		statements
+	opt_nl '}' {
 		NSError *err = nil;
 		$$ = [TQNodeBlock node];
 		for(TQNodeArgumentDef *arg in $3) {
@@ -238,7 +244,7 @@ methods: method             { $$ = [NSMutableArray arrayWithObjects:$1, nil]; }
 method: class_method
 	| instance_method
 	;
-class_method: '+' method_def    { $$ = $2; [$$ setType:kTQClassMethod]; }
+class_method:    '+' method_def { $$ = $2; [$$ setType:kTQClassMethod]; }
 	;
 instance_method: '-' method_def { $$ = $2; [$$ setType:kTQInstanceMethod]; }
 	;
@@ -270,7 +276,7 @@ member_access:
 	;
 
 /* Message sending */
-message:  message_receiver identifier  '.' {
+message:  message_receiver identifier '.' {
 		$$ = [TQNodeMessage nodeWithReceiver:$1];
 		TQNodeArgument *arg = [TQNodeArgument nodeWithPassedNode:nil identifier:[$2 value]];
 		NSMutableArray *args = [NSMutableArray arrayWithObjects:arg, nil];

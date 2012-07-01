@@ -72,7 +72,7 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
 
 	// Extract the invoke function pointer and call it.
 	Type *blockPtrTy = PointerType::getUnqual(aProgram.llBlockLiteralType);
-	
+
 	Value *callee = [_callee generateCodeInProgram:aProgram block:aBlock error:aoErr];
 
 	Value *blockLiteral = builder->CreateBitCast(callee, blockPtrTy);

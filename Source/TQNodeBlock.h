@@ -5,8 +5,9 @@
 
 // A block definition ({ :arg | body })
 @interface TQNodeBlock : TQNode
+@property(readwrite, retain) TQNodeBlock *parent;
 @property(readwrite, copy) NSMutableArray *arguments;
-@property(readwrite, copy) NSMutableArray *statements;
+@property(readwrite, copy, nonatomic) NSMutableArray *statements;
 @property(readwrite, copy) NSMutableDictionary *locals;
 @property(readwrite, copy) NSString *name;
 @property(readonly) llvm::BasicBlock *basicBlock;

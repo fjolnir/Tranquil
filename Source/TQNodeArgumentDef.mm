@@ -21,6 +21,11 @@ using namespace llvm;
 	return self;
 }
 
+- (NSUInteger)hash
+{
+	return [_localName hash];
+}
+
 - (NSString *)description
 {
 	return [NSString stringWithFormat:@"<argdef@ %@: %@>", _identifier, _localName];

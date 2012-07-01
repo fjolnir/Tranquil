@@ -34,7 +34,10 @@
 @property(readonly) llvm::Type *llBlockDescriptorTy, *llBlockLiteralType;
 
 #pragma mark - Cached functions
-@property(readonly) llvm::Function *objc_msgSend, *objc_storeStrong, *objc_storeWeak, *objc_loadWeak, *objc_destroyWeak, *objc_retain, *objc_release, *objc_allocateClassPair, *objc_registerClassPair, *class_addIvar, *class_addMethod, *objc_getClass, *sel_registerName, *sel_getName;
+@property(readonly) llvm::Function *objc_msgSend, *objc_storeStrong, *objc_storeWeak,
+	*objc_loadWeak, *objc_destroyWeak, *objc_retain, *objc_release, *objc_allocateClassPair,
+	*objc_registerClassPair, *class_addIvar, *class_addMethod, *objc_getClass,
+	*sel_registerName, *sel_getName;
 
 #pragma mark - Methods
 
@@ -43,5 +46,4 @@
 - (BOOL)run;
 
 @end
-extern void _tq_objc_storeStrong(id *object, id value);
 #endif
