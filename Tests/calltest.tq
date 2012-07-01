@@ -11,13 +11,13 @@ numAsStr = a("foo" stringByAppendingString: 321 stringValue.)
 numAsStr = numAsStr stringByAppendingString:" Three Two One".
 print(numAsStr)
 
-class Foo
+#Foo < NSObject {
 	+ classMethod {
 		print("I'm a class method %@", captureMePlease)
 	}
 	- instanceMethod: iMethArg {
 		print("From: %@ To: %@", iMethArg, self)
 	}
-end
+}
 
 return myBlock.

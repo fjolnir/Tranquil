@@ -29,7 +29,7 @@ a = b \ Variables are local in scope
 
 \ Arrays & Dictionaries
 anArray = #[ a, b, c ] \ Initialises an array containing 3 elements
-aDict  = #{ key = value, anotherKey = value } \ Initialises a dictionary
+aDict  = #{ key = value, anotherKey = value } \ Initializes a dictionary
 
 \ Blocks
 
@@ -48,7 +48,7 @@ aBlock(something, somethingElse) \ Calls a block with a two arguments
 
 \ Objects
 
-class Klass < Object
+#Klass < Object {
 	+ new {               \ Class method
 		self = super new. \ Calls superclass method
 		self#ivar = 123   \ Sets instance variable
@@ -57,7 +57,7 @@ class Klass < Object
 	- aMethod: a and: b { \ Instance method taking two arguments
 		#ivar = a + b     \ Shorthand for self#ivar
 	}
-end
+}
 
 \ Passing messages to objects
 instance = Klass new

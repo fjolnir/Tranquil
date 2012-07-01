@@ -204,9 +204,9 @@ call_arg:
 	;
 
 /* Class definition */
-class: tCLASS class_def opt_nl
+class: '#' class_def opt_nl '{' opt_nl
 	      methods opt_nl
-	   tEND {
+	   '}' {
 		NSError *err = nil;
 		$$ = [TQNodeClass nodeWithName:[[$2 objectAtIndex:0] value]
 		                    superClass:[$2 count] == 2 ? [[$2 objectAtIndex:1] value] : nil
@@ -214,15 +214,15 @@ class: tCLASS class_def opt_nl
 		if(err)
 			yyerror(&yylloc, state, [[err localizedDescription] UTF8String]);
 
-		for(TQNodeMethod *method in $4) {
+		for(TQNodeMethod *method in $6) {
 			if([method type] == kTQClassMethod)
 				[[$$ classMethods] addObject:method];
 			else
 				[[$$ instanceMethods] addObject:method];
 		}
 	}
-	|  tCLASS class_def opt_nl
-	   tEND {
+	|  '#' class_def opt_nl '{' opt_nl
+	   '}' {
 		NSError *err = nil;
 		$$ = [TQNodeClass nodeWithName:[[$2 objectAtIndex:0] value]
 		                    superClass:[$2 count] == 2 ? [[$2 objectAtIndex:1] value] : nil
