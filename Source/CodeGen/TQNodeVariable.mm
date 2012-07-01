@@ -252,7 +252,6 @@ using namespace llvm;
     TQNodeVariable *existingVar = nil;
     if((existingVar = [aBlock.locals objectForKey:_name]) && existingVar != self)
         return existingVar;
-    NSLog(@"%@", self);
     [aBlock.locals setObject:self forKey:_name];
     return nil;
 }

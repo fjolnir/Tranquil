@@ -36,7 +36,7 @@ using namespace llvm;
     return [self initWithType:kTQInstanceMethod];
 }
 
-- (BOOL)addArgument:(TQNodeArgument *)aArgument error:(NSError **)aoError
+- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoError
 {
     if(self.arguments.count == 2)
         TQAssertSoft(aArgument.selectorPart != nil,

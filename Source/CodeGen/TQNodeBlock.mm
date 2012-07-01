@@ -198,14 +198,11 @@ using namespace llvm;
 
     // Build the block struct
     int BlockHeaderSize = 5;
-    //llvm::Constant *fields[BlockHeaderSize];
     std::vector<Constant *> fields;
 
     // isa
-    Value *isaPtr;
-    if(mod->getNamedValue("_NSConcreteStackBlock"))
-        isaPtr = llvm::ConstantExpr::getBitCast(mod->getNamedValue("_NSConcreteStackBlock"), i8PtrPtrTy);
-    else
+    Value *isaPtr = mod->getNamedValue("_NSConcreteStackBlock");
+    if(!isaPtr)
         isaPtr = new llvm::GlobalVariable(*mod, i8PtrTy, false,
                              llvm::GlobalValue::ExternalLinkage,
                              0, "_NSConcreteStackBlock", 0,
@@ -443,7 +440,6 @@ using namespace llvm;
 
     if((ref = [_statements tq_referencesNode:aNode]))
         return ref;
-    NSLog(@"%@ did NOT reference %@",self, aNode);
     return nil;
 }
 

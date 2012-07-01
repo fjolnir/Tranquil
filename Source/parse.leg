@@ -267,7 +267,6 @@ MethodArgs   = selIdentifier:SelIdent
                {
                    ExtendToken();
                    $$ = PopStack();
-                   [[$$ objectAtIndex:0] setName:name];
                }
 MethodArg    = identifier:Identifier':' -- name:Identifier
                {
