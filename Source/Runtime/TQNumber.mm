@@ -3,10 +3,11 @@
 
 @implementation TQNumber
 
-+ (volatile BunchInfo *) bunchInfo
++ (TQPoolInfo *)poolInfo
 {
-   static volatile BunchInfo bunchInfo;
-   return( &bunchInfo);
+  static TQPoolInfo *poolInfo = nil;
+  if (!poolInfo) poolInfo = [[TQPoolInfo alloc] init];
+  return poolInfo;
 }
 
 + (TQNumber *)numberWithDouble:(double)aValue

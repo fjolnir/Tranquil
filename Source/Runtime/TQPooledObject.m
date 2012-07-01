@@ -1,216 +1,126 @@
 #import "TQPooledObject.h"
-#import <objc/objc.h>
-#import <objc/objc-class.h>
+#import <malloc/malloc.h>
 
-//
-// The structure at the beginning of
-// every Bunch
-//
-typedef struct {
-	long         instance_size_;
-	unsigned int freed_;
-	unsigned int allocated_; // allocated by "user"
-	unsigned int reserved_; // reserved from malloc
-} Bunch;
+#define COMPLAIN_MISSING_IMP @"Class %@ needs this code:\n\
++ (TQPoolInfo *) poolInfo\n\
+{\n\
+  static TQPoolInfo *poolInfo = nil;\n\
+  if (!poolInfo) poolInfo = [[TQPoolInfo alloc] init];\n\
+  return poolInfo;\n\
+}"
 
-//
-// the size needed for the bunch
-// with proper alignment for objects
-//
-#define S_Bunch             ((sizeof(Bunch) + (ALIGNMENT - 1)) & ~(ALIGNMENT - 1))
-#define ALIGNMENT           8
-#define OBJECTS_PER_MALLOC  64
+@implementation TQPoolInfo
+// empty
+@end
 
+#ifndef DISABLE_MEMORY_POOLING
 
 @implementation TQPooledObject
 
-
-static Bunch *newBunch(long bunchInstanceSize)
-{
-	unsigned int  len;
-	unsigned int  nBunches;
-	unsigned long size;
-	Bunch         *p;
-
-	bunchInstanceSize = (bunchInstanceSize + (ALIGNMENT - 1)) & ~(ALIGNMENT - 1);
-	size = bunchInstanceSize + sizeof(int);
-
-	nBunches = OBJECTS_PER_MALLOC;
-	len = size * nBunches + S_Bunch;
-	if(!(p = (Bunch*)calloc(len, 1)))	// calloc, for compatibility
-		return nil;
-
-	p->instance_size_ = bunchInstanceSize;
-	return p;
-}
-
-
-static inline void freeBunch(Bunch *p)
-{
-	free(p);
-}
-
-
-static inline BOOL	canBunchHandleSize(Bunch *p, size_t size)
-{
-	//
-	// We can't deal with subclasses, that are larger then what we
-	// first allocated.
-	//
-	return p && size <= p->instance_size_;
-}
-
-
-static inline unsigned int nObjectsABunch(Bunch *p)
-{
-	return OBJECTS_PER_MALLOC;
-}
-
-
-static inline BOOL isBunchExhausted(Bunch *p)
-{
-	return p->allocated_ == nObjectsABunch(p);
-}
-
-
-static inline id	newTQPooledObject(Bunch *p)
-{
-	id				 obj;
-	unsigned int	offset;
-
-	//
-	// Build an object
-	// put offset to the bunch structure ahead of the isa pointer.
-	//
-	offset = S_Bunch + (sizeof(int) + p->instance_size_) * p->allocated_;
-	obj	 = (id)((char *)p + offset);
-	unsigned int *temp = (unsigned int *)obj;
-	*temp++ = offset + sizeof(int);
-
-	//
-	// up the allocation count
-	//
-	p->allocated_++;
-
-	return obj;
-}
-
-
-//
-// determine Bunch adress from object adress
-//
-static inline Bunch *bunchForObject(id self)
-{
-	int offset;
-	Bunch *p;
-
-	offset = ((int *)self)[ -1];
-	p = (Bunch *)&((char *)self)[-offset];
-	return p;
-}
-
-
-+ (volatile BunchInfo *)bunchInfo
-{
-	static volatile BunchInfo bunchInfo;
-
-	return &bunchInfo;
-}
-
-
-/*
-##
-##	override alloc, dealloc, retain and release
-##
-*/
-static inline TQPooledObject *alloc_object(Class self)
-{
-	TQPooledObject *obj;
-	BOOL flag;
-	volatile BunchInfo *p;
-
-	obj = nil;
-
-	p = [self bunchInfo]; // this hurts a little, because we call it every time
-
-	//
-	// first time ? malloc and initialize a new bunch
-	//
-	if(!p->currentBunch)
-		p->currentBunch = newBunch(class_getInstanceSize(self));
-
-	if(canBunchHandleSize((Bunch*)p->currentBunch, class_getInstanceSize(self)))
-	{
-		//
-		// grab an object from the current bunch
-		// and place isa pointer there
-		//
-		obj = newTQPooledObject((Bunch*)p->currentBunch);
-
-		obj->isa = self;
-	}
-
-	//
-	// bunch full ? then make a new one for next time
-	//
-	if(isBunchExhausted((Bunch*)p->currentBunch))
-		p->currentBunch = newBunch(class_getInstanceSize(self));
-
-	//
-	// Failed means, some subclass is calling...
-	//
-	if(!obj)
-		[NSException raise:NSGenericException
-		            format:@"To be able to allocate an instance,\
- your class %@ needs this code:\n\
-\n\
-+ (volatile BunchInfo *)bunchInfo\n\
-{\n\
-	static BunchInfo	bunchInfo;\n\
-\n\
-	return &bunchInfo;\n\
-}\
-", self];
-
-	return obj;
-}
-
-
 + (id)allocWithZone:(NSZone *)zone
 {
-	TQPooledObject *obj;
+	TQPoolInfo *poolInfo = [self poolInfo];
+	if (!poolInfo->poolClass) // first allocation
+	{
+		poolInfo->poolClass = self;
+		poolInfo->lastElement = NULL;
+	}
+	else 
+	{
+		if (poolInfo->poolClass != self)
+			[NSException raise:NSGenericException format:COMPLAIN_MISSING_IMP, self];
+	}
+	
+	if (!poolInfo->lastElement) 
+	{
+		// pool is empty -> allocate
+		TQPooledObject *object = NSAllocateObject(self, 0, NULL);
+		object->mRetainCount = 1;
+		return object;
+	}
+	else 
+	{
+		// recycle element, update poolInfo
+		TQPooledObject *object = poolInfo->lastElement;
+		poolInfo->lastElement = object->mPoolPredecessor;
 
-	obj = alloc_object(self);
-	return obj;
+		// zero out memory. (do not overwrite isa & mPoolPredecessor, thus the offset)
+		unsigned int sizeOfFields = sizeof(Class) + sizeof(TQPooledObject *);
+		memset((char*)(id)object + sizeOfFields, 0, malloc_size(object) - sizeOfFields);
+		object->mRetainCount = 1;
+		return object;
+	}
 }
 
-
-//
-// Only free a bunch, if all objects are
-// allocated(!) and freed
-//
-- (void)dealloc
+- (uint)retainCount
 {
-	Bunch *p;
-
-	p = bunchForObject(self);
-	if(++p->freed_ == nObjectsABunch(p))
-		freeBunch(p);
+	return mRetainCount;
 }
-
 
 - (id)retain
 {
-	++_retainCountMinusOne;
+	++mRetainCount;
 	return self;
 }
 
-
 - (oneway void)release
 {
-	if(!_retainCountMinusOne--)
-		[self dealloc];
-	//NSLog(@"releasing num %d", _retainCountMinusOne);
+	--mRetainCount;
+	
+	if (!mRetainCount)
+	{
+		TQPoolInfo *poolInfo = [isa poolInfo];
+		self->mPoolPredecessor = poolInfo->lastElement;
+		poolInfo->lastElement = self;
+	}
+}
+
+- (void)purge
+{
+	// will call 'dealloc' internally --
+	// which should not be called directly.
+	[super release];
+}
+
++ (int)purgePool
+{
+	TQPoolInfo *poolInfo = [self poolInfo];	
+	TQPooledObject *lastElement;	
+	
+	int count=0;
+	while ((lastElement = poolInfo->lastElement))
+	{
+		++count;		
+		poolInfo->lastElement = lastElement->mPoolPredecessor;
+		[lastElement purge];
+	}
+	
+	return count;
+}
+
++ (TQPoolInfo *)poolInfo
+{
+	[NSException raise:NSGenericException format:COMPLAIN_MISSING_IMP, self];
+	return 0;
 }
 
 @end
+
+#else
+
+@implementation TQPooledObject
+
++ (TQPoolInfo *)poolInfo 
+{
+	return nil;
+}
+
++ (int)purgePool
+{
+	return 0;
+}
+
+@end
+
+
+#endif
