@@ -96,6 +96,7 @@ NoEqExpr     = Call
              | RegExp
              | Self
              | Literal
+             | Constant
              | Variable
              | ParenExpr
 
