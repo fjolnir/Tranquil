@@ -1,4 +1,6 @@
 #import "TQNodeMemberAccess.h"
+#import "TQNodeBlock.h"
+#import "TQProgram.h"
 
 using namespace llvm;
 
@@ -44,4 +46,24 @@ using namespace llvm;
 	return [NSString stringWithFormat:@"<acc@ %@#%@>", _receiver, _property];
 }
 
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                 error:(NSError **)aoError
+{
+	IRBuilder<> *builder = aBlock.builder;
+	Value *key = builder->CreateGlobalStringPtr([_property UTF8String]);
+	Value *object = [_receiver generateCodeInProgram:aProgram block:aBlock error:aoError];
+	return builder->CreateCall2(aProgram.TQValueForKey, object, key);
+}
+
+- (llvm::Value *)store:(llvm::Value *)aValue
+             inProgram:(TQProgram *)aProgram
+                 block:(TQNodeBlock *)aBlock
+                 error:(NSError **)aoError
+{
+	IRBuilder<> *builder = aBlock.builder;
+	Value *key = builder->CreateGlobalStringPtr([_property UTF8String]);
+	Value *object = [_receiver generateCodeInProgram:aProgram block:aBlock error:aoError];
+	return builder->CreateCall3(aProgram.TQSetValueForKey, object, key, aValue);
+}
 @end

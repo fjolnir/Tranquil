@@ -1,0 +1,7 @@
+a = b = 123
+a#foo = "bar"
+b = 321
+a#foo = "baz"
+print("%@ %@", a#foo, b)
+a#foo = nil
+^a#foo

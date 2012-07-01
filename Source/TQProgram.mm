@@ -58,7 +58,8 @@ using namespace llvm;
 	_Block_object_dispose=_func__Block_object_dispose, imp_implementationWithBlock=_func_imp_implementationWithBlock,
 	object_getClass=_func_object_getClass, TQPrepareObjectForReturn=_func_TQPrepareObjectForReturn,
 	TQAutoreleaseObject=_func_TQAutoreleaseObject, objc_autoreleasePoolPush=_func_objc_autoreleasePoolPush,
-	objc_autoreleasePoolPop=_func_objc_autoreleasePoolPop;
+	objc_autoreleasePoolPop=_func_objc_autoreleasePoolPop, TQSetValueForKey=_func_TQSetValueForKey,
+	TQValueForKey=_func_TQValueForKey;
 
 + (TQProgram *)programWithName:(NSString *)aName
 {
@@ -170,6 +171,15 @@ using namespace llvm;
 	// void(id*, id)
 	FunctionType *ft_void__i8PtrPtr_i8Ptr = FunctionType::get(_llVoidTy, args_i8PtrPtr_i8Ptr, false);
 
+	// id(id, id, id)
+	std::vector<Type*> args_i8Ptr_i8Ptr_i8Ptr;
+	args_i8Ptr_i8Ptr_i8Ptr.push_back(_llInt8PtrTy);
+	args_i8Ptr_i8Ptr_i8Ptr.push_back(_llInt8PtrTy);
+	args_i8Ptr_i8Ptr_i8Ptr.push_back(_llInt8PtrTy);
+	FunctionType *ft_void__i8PtrPtr_i8Ptr_i8Ptr = FunctionType::get(_llVoidTy, args_i8Ptr_i8Ptr_i8Ptr, false);
+
+	// void(id, id)
+	FunctionType *ft_void__i8Ptr_i8Ptr = FunctionType::get(_llVoidTy, args_i8Ptr_i8Ptr, false);
 
 	// id(id*)
 	std::vector<Type*> args_i8PtrPtr;
@@ -209,6 +219,8 @@ using namespace llvm;
 	DEF_EXTERNAL_FUN(TQPrepareObjectForReturn, ft_i8Ptr__i8Ptr);
 	DEF_EXTERNAL_FUN(objc_autoreleasePoolPush, ft_i8Ptr__void);
 	DEF_EXTERNAL_FUN(objc_autoreleasePoolPop, ft_void__i8Ptr);
+	DEF_EXTERNAL_FUN(TQSetValueForKey, ft_void__i8PtrPtr_i8Ptr_i8Ptr);
+	DEF_EXTERNAL_FUN(TQValueForKey, ft_i8Ptr__i8Ptr_i8Ptr);
 
 #undef DEF_EXTERNAL_FUN
 
@@ -271,6 +283,8 @@ using namespace llvm;
 	engine->addGlobalMapping(_func_TQStoreStrongInByref, (void*)&TQStoreStrongInByref);
 	engine->addGlobalMapping(_func_TQRetainObject, (void*)&TQRetainObject);
 	engine->addGlobalMapping(_func_TQAutoreleaseObject, (void*)&TQAutoreleaseObject);
+	engine->addGlobalMapping(_func_TQSetValueForKey, (void*)&TQSetValueForKey);
+	engine->addGlobalMapping(_func_TQValueForKey, (void*)&TQValueForKey);
 
 	//std::vector<GenericValue> noargs;
 	//GenericValue val = engine->runFunction(_root.function, noargs);

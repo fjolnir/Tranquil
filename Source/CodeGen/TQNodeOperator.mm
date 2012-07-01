@@ -65,12 +65,13 @@ using namespace llvm;
 		} else {
 			// We must make sure the storage exists before evaluating the right side, so that if the assigned value is a
 			// block, it can reference itself
-			[(TQNodeVariable *)_left createStorageInProgram:aProgram block:aBlock error:aoError];
+			if(isVar)
+				[(TQNodeVariable *)_left createStorageInProgram:aProgram block:aBlock error:aoError];
 			Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
 			[(TQNodeVariable *)_left store:right inProgram:aProgram block:aBlock error:aoError];
 			if(*aoError)
 				return NULL;
-			return [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
+			return right;
 		}
 	} else if(_type == kTQOperatorUnaryMinus) {
 		Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];

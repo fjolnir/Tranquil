@@ -200,6 +200,7 @@ Expression:
 	| Literal
 	| Block
 	| Self
+	| Property
 	| Expression '>' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorGreater left:$1 right:$3]; }
 	| Expression '<' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorLesser left:$1 right:$3]; }
 	| Expression '*' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorMultiply left:$1 right:$3]; }
@@ -218,8 +219,8 @@ SubscriptExpression:
 	  Expression '[' Expression ']'           { $$ = [TQNodeOperator nodeWithType:kTQOperatorGetter left:$1 right:$3]; }
 	;
 Property:
-	 Variable '#' Identifier
-	| Property '#' Identifier
+	 Variable '#' Identifier                  { $$ = [TQNodeMemberAccess nodeWithReceiver:$1 property:[$3 value]]; }
+	| Property '#' Identifier                 { $$ = [TQNodeMemberAccess nodeWithReceiver:$1 property:[$3 value]]; }
 	;
 
 Class: '#' ClassDef OptLn '{' OptLn
