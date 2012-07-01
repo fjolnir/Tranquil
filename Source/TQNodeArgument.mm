@@ -32,4 +32,9 @@ using namespace llvm;
 	[_passedNode release];
 	[super dealloc];
 }
+
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
+{
+	return [_passedNode generateCodeInProgram:aProgram block:aBlock error:aoError];
+}
 @end

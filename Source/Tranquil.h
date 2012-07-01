@@ -1,6 +1,7 @@
 #import <TQProgram.h>
 #import <TQNode.h>
 #import <TQNodeArgument.h>
+#import <TQNodeArgumentDef.h>
 #import <TQNodeBinaryOperator.h>
 #import <TQNodeBlock.h>
 #import <TQNodeCall.h>

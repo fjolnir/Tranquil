@@ -1,5 +1,6 @@
 #import "TQNodeReturn.h"
 #import "TQProgram.h"
+#import "TQNodeVariable.h"
 
 using namespace llvm;
 
@@ -28,7 +29,6 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
 {
 	Value *retVal = [_value generateCodeInProgram:aProgram block:aBlock error:aoError];
-	ReturnInst::Create(aProgram.llModule->getContext(), retVal, aBlock.basicBlock);
-	return NULL;
+	return ReturnInst::Create(aProgram.llModule->getContext(), retVal, aBlock.basicBlock);
 }
 @end

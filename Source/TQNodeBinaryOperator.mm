@@ -42,9 +42,8 @@ using namespace llvm;
 	Value *left = [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
 	Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
 
-	IRBuilder<> *builder = aBlock.builder;
-	builder->CreateCall2(aProgram.objc_storeStrong, left, right);
-
+	//aBlock.builder->CreateCall2(aProgram.objc_storeStrong, left, right);
+	aBlock.builder->CreateStore(right, ((TQNodeVariable*)_left).alloca);
 	return left;
 }
 

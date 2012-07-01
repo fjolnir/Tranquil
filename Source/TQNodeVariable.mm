@@ -5,7 +5,7 @@
 using namespace llvm;
 
 @implementation TQNodeVariable
-@synthesize name=_name;
+@synthesize name=_name, alloca=_alloca;
 
 + (TQNodeVariable *)nodeWithName:(NSString *)aName
 {
@@ -40,9 +40,20 @@ using namespace llvm;
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
 {
-	AllocaInst *alloca = aBlock.builder->CreateAlloca(aProgram.llInt8PtrTy);
+	TQNodeVariable *existingVar = nil;
+
+	if((existingVar = [aBlock.locals objectForKey:_name]) && existingVar != self)
+		return [existingVar generateCodeInProgram:aProgram block:aBlock error:aoError];
+	else
+		[aBlock.locals setObject:self forKey:_name];
+
+	IRBuilder<> *builder = aBlock.builder;
+	if(_alloca)
+		return  builder->CreateLoad(_alloca);
+	AllocaInst *alloca = builder->CreateAlloca(aProgram.llInt8PtrTy);
 	// Initialize to nil
-	aBlock.builder->CreateStore(ConstantPointerNull::get(aProgram.llInt8PtrTy), alloca);
-	return alloca;
+	builder->CreateStore(ConstantPointerNull::get(aProgram.llInt8PtrTy), alloca);
+	_alloca = alloca;
+	return builder->CreateLoad(alloca);
 }
 @end

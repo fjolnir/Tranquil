@@ -1,7 +1,7 @@
 #import "TQNode.h"
 #include <llvm/Support/IRBuilder.h>
 
-@class TQNodeArgument;
+@class TQNodeArgumentDef;
 
 // A block definition ({ :arg | body })
 @interface TQNodeBlock : TQNode
@@ -15,5 +15,5 @@
 
 + (TQNodeBlock *)node;
 
-- (BOOL)addArgument:(TQNodeArgument *)aArgument error:(NSError **)aoError;
+- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoError;
 @end

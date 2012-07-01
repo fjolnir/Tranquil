@@ -1,9 +1,9 @@
 %{
+	#include <llvm/Support/CommandLine.h>
 	#include <Foundation/Foundation.h>
 	#include <Tranquil.h>
 	#include <stdio.h>
 	#include <stdlib.h>
-
 %}
 
 %union {
@@ -16,6 +16,7 @@
 	TQNodeString *string;
 	TQNodeVariable *variable;
 	TQNodeArgument *arg;
+	TQNodeArgumentDef *argDef;
 	TQNodeBlock *block;
 	TQNodeCall *call;
 	TQNodeClass *klass;
@@ -132,7 +133,7 @@ block:
 	  opt_nl '}' {
 		NSError *err = nil;
 		$$ = [TQNodeBlock node];
-		for(TQNodeArgument *arg in $3) {
+		for(TQNodeArgumentDef *arg in $3) {
 			[$$ addArgument:arg error:&err];
 			if(err)
 				yyerror(&yylloc, state, [[err localizedDescription] UTF8String]);
@@ -147,15 +148,15 @@ block:
 	;
 block_args:
 	  ':' block_arg opt_nl {
-		TQNodeArgument *arg = [TQNodeArgument nodeWithPassedNode:$2 identifier:nil];
+		TQNodeArgumentDef *arg = [TQNodeArgumentDef nodeWithLocalName:[$2 value] identifier:nil];
 		$$ = [NSMutableArray arrayWithObjects:arg, nil];
 	} 
 	| block_args ':' block_arg opt_nl {
-		TQNodeArgument *arg = [TQNodeArgument nodeWithPassedNode:$3 identifier:nil];
+		TQNodeArgumentDef *arg = [TQNodeArgumentDef nodeWithLocalName:[$3 value] identifier:nil];
 		[$$ addObject:arg];
 	}
 	| block_args block_arg_identifier ':' block_arg opt_nl {
-		TQNodeArgument *arg = [TQNodeArgument nodeWithPassedNode:$4 identifier:[$2 value]];
+		TQNodeArgumentDef *arg = [TQNodeArgumentDef nodeWithLocalName:[$4 value] identifier:[$2 value]];
 		[$$ addObject:arg];
 	}
 	;
@@ -250,7 +251,7 @@ method_def: block_arg_identifier block_args method_body {
 	| block_arg_identifier method_body {
 		NSError *err = nil;
 		$$ = [TQNodeMethod node];
-		TQNodeArgument *arg = [TQNodeArgument nodeWithPassedNode:nil identifier:[$1 value]];
+		TQNodeArgumentDef *arg = [TQNodeArgumentDef nodeWithLocalName:nil identifier:[$1 value]];
 		[$$ addArgument:arg error:&err];
 		if(err)
 			yyerror(&yylloc, state, [[err localizedDescription] UTF8String]);
@@ -345,8 +346,9 @@ void parse()
 	[state.program run];
 }
 
-int main()
+int main(int argc, char **argv)
 {
+	llvm::cl::ParseCommandLineOptions(argc, argv, 0, true);
 	@autoreleasepool {
 		parse();
 	}

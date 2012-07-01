@@ -1,7 +1,8 @@
 #import "TQNodeBlock.h"
-#import <TQNodeArgument.h>
-#import <TQProgram.h>
-
+#import "TQNodeArgumentDef.h"
+#import "TQProgram.h"
+#import "TQNodeIdentifier.h"
+#import "TQNodeVariable.h"
 // Block invoke functions are numbered from 0
 #define BLOCK_FUN_PREFIX @"__tq_block_invoke_"
 
@@ -42,8 +43,12 @@ enum BlockFieldFlag_t {
 
 	_arguments = [[NSMutableArray alloc] init];
 	_statements = [[NSMutableArray alloc] init];
+	_locals = [[NSMutableDictionary alloc] init];
 	_function = NULL;
 	_basicBlock = NULL;
+
+	// Block invocations are always passed the block itself as the first argument
+	[self addArgument:[TQNodeArgumentDef nodeWithLocalName:@"__blk" identifier:nil] error:nil];
 
 	return self;
 }
@@ -52,7 +57,7 @@ enum BlockFieldFlag_t {
 {
 	NSMutableString *out = [NSMutableString stringWithString:@"<blk@ {"];
 	if(_arguments.count > 0) {
-		for(TQNodeArgument *arg in _arguments) {
+		for(TQNodeArgumentDef *arg in _arguments) {
 			[out appendFormat:@"%@ ", arg];
 		}
 		[out appendString:@"|"];
@@ -78,9 +83,14 @@ enum BlockFieldFlag_t {
 	[super dealloc];
 }
 
-- (BOOL)addArgument:(TQNodeArgument *)aArgument error:(NSError **)aoError
+- (NSString *)signature
 {
-	if(_arguments.count == 0)
+	return @"%@:%@";
+}
+
+- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoError
+{
+	if([_arguments count] < 2)
 		TQAssertSoft(aArgument.identifier == nil,
 		             kTQSyntaxErrorDomain, kTQUnexpectedIdentifier, NO,
 		             @"First argument of a block can not have an identifier");
@@ -88,9 +98,86 @@ enum BlockFieldFlag_t {
 
 	return YES;
 }
+- (llvm::Constant *)generateCBlockDescriptorInProgram:(TQProgram *)aProgram
+{
+	llvm::Module *mod = aProgram.llModule;
+	SmallVector<llvm::Constant*, 6> elements;
 
+	// reserved
+	elements.push_back(llvm::ConstantInt::get( aProgram.llInt64Ty, 0));  // TODO: Use 32bit on x86
+
+	// Size
+	 elements.push_back(llvm::ConstantInt::get(aProgram.llInt64Ty, 0)); // TODO: Use actual size
+
+	 // TODO: Add Copy helper
+	 // TODO: Add Dispose helper
+
+	 // Signature
+	 elements.push_back(ConstantExpr::getBitCast((GlobalVariable*)_builder->CreateGlobalString([[self signature]
+	 UTF8String]), aProgram.llInt8PtrTy));
+
+	// GC Layout (unused in objc 2)
+	elements.push_back(llvm::Constant::getNullValue(aProgram.llInt8PtrTy));
+
+	llvm::Constant *init = llvm::ConstantStruct::getAnon(elements);
+
+	llvm::GlobalVariable *global = new llvm::GlobalVariable(*mod, init->getType(), true,
+	                             	llvm::GlobalValue::InternalLinkage,
+	                             	init, "__tq_block_descriptor_tmp");
+
+	return llvm::ConstantExpr::getBitCast(global, aProgram.llInt8PtrTy);
+	
+}
+- (llvm::Constant *)generateCBlockInProgram:(TQProgram *)aProgram
+{
+	llvm::Module *mod = aProgram.llModule;
+	// Build the block struct
+	int BlockHeaderSize = 5;
+	//llvm::Constant *fields[BlockHeaderSize];
+	std::vector<Constant *> fields;
+
+	// isa
+	Constant *nsc;
+	if(mod->getNamedValue("_NSConcreteGlobalBlock"))
+		nsc = llvm::ConstantExpr::getBitCast(mod->getNamedValue("_NSConcreteGlobalBlock"), aProgram.llInt8PtrPtrTy);
+	else
+		nsc = new llvm::GlobalVariable(*mod, aProgram.llInt8PtrTy, false,
+                             llvm::GlobalValue::ExternalLinkage,
+                             0, "_NSConcreteGlobalBlock", 0,
+                             false, 0);
+	fields.push_back(nsc);
+
+	// __flags
+	int flags = BLOCK_IS_GLOBAL | BLOCK_HAS_SIGNATURE;
+	//if (blockInfo.UsesStret) flags |= BLOCK_USE_STRET;
+
+	fields.push_back(ConstantInt::get(aProgram.llIntTy, flags));
+
+	// Reserved
+	fields.push_back(Constant::getNullValue(aProgram.llIntTy));
+
+	// Function
+	fields.push_back(_function);//ConstantExpr::getBitCast(_function, aProgram.llInt8PtrTy));
+
+	// Descriptor
+	fields.push_back([self generateCBlockDescriptorInProgram:aProgram]);
+
+	llvm::Constant *init = ConstantStruct::getAnon(fields);
+
+	GlobalVariable *global = new llvm::GlobalVariable(*mod,
+                             init->getType(),
+                             /*constant*/ true,
+                             llvm::GlobalVariable::InternalLinkage,
+                             init,
+                             "__tq_block_literal_global");
+
+	return llvm::ConstantExpr::getBitCast(global, aProgram.llInt8PtrTy);
+}
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
 {
+	static int blockId = -1; // TODO: implement this in a proper fashion
+	++blockId;
+
 	TQAssert(!_basicBlock && !_function, @"Tried to regenerate code for block %@", _name);
 	llvm::Module *mod = aProgram.llModule;
 	llvm::PointerType *int8PtrTy = aProgram.llInt8PtrTy;
@@ -99,7 +186,7 @@ enum BlockFieldFlag_t {
 	std::vector<Type *> paramTypes(_arguments.count, int8PtrTy);
 	FunctionType* funType = FunctionType::get(int8PtrTy, paramTypes, false); // TODO: Support variadics
 
-	const char *funName = [_name UTF8String];
+	const char *funName = [[NSString stringWithFormat:@"__tq_block_invoke_%d", blockId] UTF8String];
 	
 	_function = mod->getFunction(funName);
 	if (!_function) {
@@ -109,6 +196,21 @@ enum BlockFieldFlag_t {
 
 	_basicBlock = BasicBlock::Create(mod->getContext(), "entry", _function, 0);
 	_builder = new IRBuilder<>(_basicBlock);
+
+	llvm::Function::arg_iterator argumentIterator = _function->arg_begin();
+	for (unsigned i = 0; i < _arguments.count; ++i, ++argumentIterator)
+	{
+		IRBuilder<> tempBuilder(&_function->getEntryBlock(), _function->getEntryBlock().begin());
+		NSString *argVarName = [[_arguments objectAtIndex:i] localName];
+
+		AllocaInst *allocaInst = tempBuilder.CreateAlloca(int8PtrTy, 0, [argVarName UTF8String]);
+		_builder->CreateStore(argumentIterator, allocaInst);
+
+		TQNodeVariable *local = [TQNodeVariable nodeWithName:argVarName];
+		local.alloca = allocaInst;
+		NSLog(@"registering arg local %@: %@ alloca: %p", argVarName, local, allocaInst);
+		[_locals setObject:local forKey:argVarName];
+	}
 	
 
 	NSError *err = nil;
@@ -125,49 +227,8 @@ enum BlockFieldFlag_t {
 	if(!_basicBlock->getTerminator())
 		ReturnInst::Create(mod->getContext(), ConstantPointerNull::get(int8PtrTy), _basicBlock);
 
-	// Build the block struct
-	int BlockHeaderSize = 5;
-	//llvm::Constant *fields[BlockHeaderSize];
-	std::vector<Constant *> fields;
+	Constant *literal = [self generateCBlockInProgram:aProgram];
 
-	// isa
-	Constant *nsc;
-	if(mod->getNamedValue("_NSConcreteGlobalBlock"))
-		llvm::ConstantExpr::getBitCast(mod->getNamedValue("_NSConcreteGlobalBlock"), aProgram.llInt8PtrPtrTy);
-	else
-		nsc = new llvm::GlobalVariable(*mod, aProgram.llInt8PtrPtrTy, false,
-                             llvm::GlobalValue::ExternalLinkage,
-                             0, "_NSConcreteGlobalBlock", 0,
-                             false, 0);
-	printf("---------------------------------------%p\n", nsc);
-	//fields[0] = mod->getNamedValue("_NSConcreteGlobalBlock");// CGM.getNSConcreteGlobalBlock();
-	fields.push_back(nsc);
-	// __flags
-	int flags = BLOCK_IS_GLOBAL | BLOCK_HAS_SIGNATURE;
-	//if (blockInfo.UsesStret) flags |= BLOCK_USE_STRET;
-									  
-	fields.push_back(ConstantInt::get(aProgram.llIntTy, flags));
-
-	// Reserved
-	fields.push_back(Constant::getNullValue(aProgram.llIntTy));
-
-	// Function
-	fields.push_back(_function);
-
-	// Descriptor
-	//fields[4] = buildBlockDescriptor(CGM, blockInfo);
-
-	llvm::Constant *init = ConstantStruct::getAnon(fields);
-
-	GlobalVariable *literal =
-    new llvm::GlobalVariable(*mod,
-                             init->getType(),
-                             /*constant*/ true,
-                             llvm::GlobalVariable::InternalLinkage,
-                             init,
-                             "__block_literal_global");
-
-
-	return _function;
+	return literal;
 }
 @end

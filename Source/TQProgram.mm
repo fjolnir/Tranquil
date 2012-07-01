@@ -7,7 +7,7 @@ using namespace llvm;
 @implementation TQProgram
 @synthesize  root=_root, name=_name, llModule=_llModule, irBuilder=_irBuilder;
 @synthesize llVoidTy=_llVoidTy, llInt8Ty=_llInt8Ty, llInt16Ty=_llInt16Ty, llInt32Ty=_llInt32Ty, llInt64Ty=_llInt64Ty, llFloatTy=_llFloatTy, llDoubleTy=_llDoubleTy, llIntTy=_llIntTy, llIntPtrTy=_llIntPtrTy, llSizeTy=_llSizeTy, llPtrDiffTy=_llPtrDiffTy, llVoidPtrTy=_llVoidPtrTy, llInt8PtrTy=_llInt8PtrTy, llVoidPtrPtrTy=_llVoidPtrPtrTy, llInt8PtrPtrTy=_llInt8PtrPtrTy, llPointerWidthInBits=_llPointerWidthInBits, llPointerAlignInBytes=_llPointerAlignInBytes, llPointerSizeInBytes=_llPointerSizeInBytes;
-
+@synthesize llBlockDescriptorTy=_blockDescriptorTy, llBlockLiteralType=_blockLiteralType;
 @synthesize objc_msgSend=_func_objc_msgSend, objc_storeStrong=_func_objc_storeStrong, objc_storeWeak=_func_objc_storeWeak, objc_loadWeak=_func_objc_loadWeak, objc_allocateClassPair=_func_objc_allocateClassPair, objc_registerClassPair=_func_objc_registerClassPair, objc_destroyWeak=_func_objc_destroyWeak, class_addIvar=_func_class_addIvar, class_addMethod=_func_class_addMethod, sel_registerName=_func_sel_registerName, sel_getName=_func_sel_getName, objc_getClass=_func_objc_getClass, objc_retain=_func_objc_retain, objc_release=_func_objc_release;
 
 + (TQProgram *)programWithName:(NSString *)aName
@@ -39,6 +39,13 @@ using namespace llvm;
 	_llIntPtrTy             = llvm::IntegerType::get(ctx, _llPointerWidthInBits);
 	_llInt8PtrTy            = _llInt8Ty->getPointerTo(0);
 	_llInt8PtrPtrTy         = _llInt8PtrTy->getPointerTo(0);
+
+	// Block types
+	_blockDescriptorTy = llvm::StructType::create("struct.__tq_block_descriptor",
+	                          _llInt64Ty, _llInt64Ty, NULL);
+	Type *blockDescriptorPtrTy = llvm::PointerType::getUnqual(_blockDescriptorTy);
+	_blockLiteralType = llvm::StructType::create("struct.__block_literal_generic",
+	                              _llInt8PtrTy, _llIntTy, _llIntTy, _llInt8PtrTy, blockDescriptorPtrTy, NULL);
 
 	// Cache commonly used functions
 	#define DEF_EXTERNAL_FUN(name, type) \
@@ -152,17 +159,24 @@ using namespace llvm;
 
 	// Execute program
 	ExecutionEngine *engine = EngineBuilder(_llModule).create();
-	std::vector<GenericValue> noargs;
 
+	//std::vector<GenericValue> noargs;
 	//GenericValue val = engine->runFunction(_root.function, noargs);
 	//void *ret = val.PointerVal;
 	//NSLog(@"'root' ret:  %p: %@\n", ret, ret ? ret : nil);
-
 	//return YES;
+
 	id(*rootPtr)() = (id(*)())engine->getPointerToFunction(_root.function);
 
 	id ret = rootPtr();
-	NSLog(@"'root' retval:  %p: %@\n", ret, ret ? ret : nil);
+	printf("--\n");
+	NSLog(@"'root' retval:  %p: %@ (%@)\n", ret, ret ? ret : nil, [ret class]);
+	
+	if([ret isKindOfClass:NSClassFromString(@"NSBlock")]) {
+		id (^test)(id obj) = ret;
+		NSNumber *num = test([NSNumber numberWithInt:1337]);
+		NSLog(@"Block retval: %@ (%@)", num, [num class]);
+	}
 
 	return YES;
 }
