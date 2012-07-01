@@ -60,6 +60,31 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
 	return nil;
 }
 
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock
+                         withArguments:(std::vector<llvm::Value*>)aArgs error:(NSError **)aoErr
+{
+	IRBuilder<> *builder = aBlock.builder;
+
+	// Extract the invoke function pointer
+	Type *blockPtrTy = PointerType::getUnqual(aProgram.llBlockLiteralType);
+	Value *callee = [_callee generateCodeInProgram:aProgram block:aBlock error:aoErr];
+	aArgs.insert(aArgs.begin(), callee);
+
+	Value *blockLiteral = builder->CreateBitCast(callee, blockPtrTy);
+	Value *funPtr = builder->CreateStructGEP(blockLiteral, 3);
+	
+
+	// Load the function and cast it to the correct type
+	Value *fun = builder->CreateLoad(funPtr);
+	std::vector<Type *> paramTypes(_arguments.count+1,  aProgram.llInt8PtrTy);
+	FunctionType *funType = FunctionType::get(aProgram.llInt8PtrTy, paramTypes, false);
+	Type *funPtrType = PointerType::getUnqual(funType);
+
+	CallInst *call = builder->CreateCall(builder->CreateBitCast(fun, funPtrType), aArgs);
+	return call;
+}
+
+
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
 {
 	IRBuilder<> *builder = aBlock.builder;
@@ -82,28 +107,11 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
 		return builder->CreateCall(func_nslog, args);
 	}
 
-	// Extract the invoke function pointer and call it.
-	Type *blockPtrTy = PointerType::getUnqual(aProgram.llBlockLiteralType);
-
-	Value *callee = [_callee generateCodeInProgram:aProgram block:aBlock error:aoErr];
-
-	Value *blockLiteral = builder->CreateBitCast(callee, blockPtrTy);
-
-	Value *funPtr = builder->CreateStructGEP(blockLiteral, 3);
 
 	std::vector<Value*> args;
-	args.push_back(callee);
 	for(TQNodeArgument *arg in _arguments) {
 		args.push_back([arg generateCodeInProgram:aProgram block:aBlock error:aoErr]);
 	}
-
-	// Load the function and cast it to the correct type
-	Value *fun = builder->CreateLoad(funPtr);
-	std::vector<Type *> paramTypes(_arguments.count+1,  aProgram.llInt8PtrTy);
-	FunctionType *funType = FunctionType::get(aProgram.llInt8PtrTy, paramTypes, false);
-	Type *funPtrType = PointerType::getUnqual(funType);
-
-	CallInst *call = builder->CreateCall(builder->CreateBitCast(fun, funPtrType), args);
-	return call;
+	return [self generateCodeInProgram:aProgram block:aBlock withArguments:args error:aoErr];
 }
 @end

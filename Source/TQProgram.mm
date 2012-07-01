@@ -242,7 +242,7 @@ using namespace llvm;
 
 	// Compile program
     std::string engineErr;
-	
+
 	ExecutionEngine *engine = ExecutionEngine::createJIT(_llModule, &engineErr, JITMemoryManager::CreateDefaultMemManager(), CodeGenOpt::Aggressive, false);
 	engine->DisableLazyCompilation();
 	//create(_llModule, false, &engineErr, CodeGenOpt::Aggressive, false);//EngineBuilder(_llModule).create();

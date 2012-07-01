@@ -36,6 +36,9 @@ enum TQBlockFieldFlag_t {
 @property(readonly) llvm::Function *function;
 @property(readonly) llvm::IRBuilder<> *builder;
 
+// This property is only valid when called from a block's subnode within it's generateCode: method
+@property(readonly) llvm::Value *autoreleasePool;
+
 + (TQNodeBlock *)node;
 - (NSString *)signature;
 - (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoError;

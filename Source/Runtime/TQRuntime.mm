@@ -2,7 +2,7 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
-
+#import "TQNumber.h"
 
 static const NSString *_TQDynamicIvarTableKey = @"TQDynamicIvarTableKey";
 
@@ -45,9 +45,9 @@ id TQRetainObject(id obj)
 	return _objc_msgSend_hack(obj, @selector(retain));
 }
 
-id TQReleaseObject(id obj)
+void TQReleaseObject(id obj)
 {
-	return _objc_msgSend_hack(obj, @selector(release));
+	_objc_msgSend_hack(obj, @selector(release));
 }
 
 id TQAutoreleaseObject(id obj)
@@ -166,10 +166,10 @@ id TQPrepareObjectForReturn(id obj)
 BOOL TQAugmentClassWithOperators(Class klass)
 {
 	// ==
-	IMP imp = imp_implementationWithBlock(^(id a, id b) { return [a isEqual:b] ? @YES : @NO; });
+	IMP imp = imp_implementationWithBlock(^(id a, id b) { return [a isEqual:b] ? TQNumberTrue : TQNumberFalse; });
 	class_addMethod(klass, TQEqOpSel, imp, "@@:@");
 	// !=
-	imp = imp_implementationWithBlock(^(id a, id b)     { return [a isEqual:b] ? @NO : @YES; });
+	imp = imp_implementationWithBlock(^(id a, id b)     { return [a isEqual:b] ? TQNumberFalse : TQNumberTrue; });
 	class_addMethod(klass, TQNeqOpSel, imp, "@@:@");
 
 	// + (Unimplemented by default)
@@ -186,20 +186,20 @@ BOOL TQAugmentClassWithOperators(Class klass)
 	imp = imp_implementationWithBlock(^(id a, id b) { return _objc_msgSend_hack2(a, @selector(multiply:), b); });
 	class_addMethod(klass, TQMultOpSel, imp, "@@:@");
 	// / (Unimplemented by default)
-	imp = imp_implementationWithBlock(^(id a, id b) { return  _objc_msgSend_hack2(a, @selector(divide:), b); });
+	imp = imp_implementationWithBlock(^(id a, id b) { return  _objc_msgSend_hack2(a, @selector(divideBy:), b); });
 	class_addMethod(klass, TQDivOpSel, imp, "@@:@");
 
 	// <
-	imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] == NSOrderedAscending) ? @YES : @NO; });
+	imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] == NSOrderedAscending) ? TQNumberTrue : TQNumberFalse; });
 	class_addMethod(klass, TQLTOpSel, imp, "@@:@");
 	// >
-	imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] == NSOrderedDescending) ? @YES : @NO; });
+	imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] == NSOrderedDescending) ? TQNumberTrue : TQNumberFalse; });
 	class_addMethod(klass, TQGTOpSel, imp, "@@:@");
 	// <=
-	imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] != NSOrderedDescending) ? @YES : @NO; });
+	imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] != NSOrderedDescending) ? TQNumberTrue : TQNumberFalse; });
 	class_addMethod(klass, TQLTEOpSel, imp, "@@:@");
 	// >=
-	imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] != NSOrderedAscending) ? @YES : @NO; });
+	imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] != NSOrderedAscending) ? TQNumberTrue : TQNumberFalse; });
 	class_addMethod(klass, TQGTEOpSel, imp, "@@:@");
 
 

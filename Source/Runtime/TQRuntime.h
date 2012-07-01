@@ -3,7 +3,7 @@
 #import <Foundation/Foundation.h>
 
 id TQRetainObject(id obj);
-id TQReleaseObject(id obj);
+void TQReleaseObject(id obj);
 id TQAutoreleaseObject(id obj);
 id TQRetainAutoreleaseObject(id obj);
 

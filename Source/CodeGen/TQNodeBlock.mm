@@ -13,7 +13,7 @@ using namespace llvm;
 
 @implementation TQNodeBlock
 @synthesize arguments=_arguments, statements=_statements, locals=_locals, name=_name,
-	basicBlock=_basicBlock, function=_function, builder=_builder;
+	basicBlock=_basicBlock, function=_function, builder=_builder, autoreleasePool=_autoreleasePool;
 
 + (TQNodeBlock *)node { return (TQNodeBlock *)[super node]; }
 
@@ -383,7 +383,7 @@ using namespace llvm;
 	_basicBlock = BasicBlock::Create(mod->getContext(), "entry", _function, 0);
 	_builder = new IRBuilder<>(_basicBlock);
 
-	Value *autoreleasePool = _builder->CreateCall(aProgram.objc_autoreleasePoolPush);
+	_autoreleasePool = _builder->CreateCall(aProgram.objc_autoreleasePoolPush);
 
 	// Load the arguments
 	llvm::Function::arg_iterator argumentIterator = _function->arg_begin();
@@ -427,12 +427,10 @@ using namespace llvm;
 		}
 	}
 
-	Instruction *terminator = _basicBlock->getTerminator();
-	if(!terminator)
-		terminator = ReturnInst::Create(mod->getContext(), ConstantPointerNull::get(int8PtrTy), _basicBlock);
-	
-	Instruction *poolPopInst = CallInst::Create(aProgram.objc_autoreleasePoolPop, autoreleasePool);
-	_basicBlock->getInstList().insert(terminator, poolPopInst);
+	if(!_basicBlock->getTerminator()) {
+		_builder->CreateCall(aProgram.objc_autoreleasePoolPop, _autoreleasePool);
+		ReturnInst::Create(mod->getContext(), ConstantPointerNull::get(int8PtrTy), _basicBlock);
+	}
 	return _function;
 }
 
