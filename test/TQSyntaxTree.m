@@ -1,12 +1,48 @@
 #include "TQSyntaxTree.h"
+#include <iostream>
+#include <llvm/LLVMContext.h>
+#include <llvm/DerivedTypes.h>
+#include <llvm/Constants.h>
+#include <llvm/GlobalVariable.h>
+#include <llvm/Function.h>
+#include <llvm/CallingConv.h>
+#include <llvm/BasicBlock.h>
+#include <llvm/Instructions.h>
+#include <llvm/InlineAsm.h>
+#include <llvm/Support/FormattedStream.h>
+#include <llvm/Support/MathExtras.h>
+#include <llvm/Pass.h>
+#include <llvm/PassManager.h>
+#include <llvm/ADT/SmallVector.h>
+#include <llvm/Analysis/Verifier.h>
+#include <llvm/Assembly/PrintModulePass.h>
+#include <algorithm>
 
 NSString * const kTQSyntaxErrorDomain = @"org.tranquil.syntax";
 
 @implementation TQSyntaxNode
-- (BOOL)generateCode:(NSError **)aoErr
+- (BOOL)generateCodeInModule:(llvm::Module *)aModule :(NSError **)aoErr
 {
 	NSLog(@"Code generation has not been implemented for %@.", [self class]);
 	return NO;
+}
+@end
+
+@implementation TQSyntaxNodeReturn
+@synthesize value=_value;
+- (id)initWithValue:(TQSyntaxNode *)aValue
+{
+	if(!(self = [super init]))
+		return nil;
+
+	_value = [aValue retain];
+
+	return self;
+}
+
+- (NSString *)description
+{
+	return [NSString stringWithFormat:@"<ret@ %@>", _value];
 }
 @end
 

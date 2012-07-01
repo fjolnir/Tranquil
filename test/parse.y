@@ -76,9 +76,7 @@ program: empty
 
 assignment:
 	  lhs '=' expression {
-		$$ = [[TQSyntaxNodeBinaryOperator alloc] initWithType:'='
-		                                                 left:$1
-		                                                right:$3];
+		$$ = [[TQSyntaxNodeBinaryOperator alloc] initWithType:'=' left:$1 right:$3];
 		[$1 release];
 		[$3 release];
 	}
@@ -110,6 +108,8 @@ statements: statement {
 
 statement:
 	  class                 { $$ = $<node>1; }
+	| tRETURN call_arg '.'  { $$ = [[TQSyntaxNodeReturn alloc] initWithValue:$2]; [$2 release]; }
+	| tRETURN '.'           { $$ = [[TQSyntaxNodeReturn alloc] initWithValue:nil]; }
 	| message               { $$ = $<node>1; }
 	| call                  { $$ = $<node>1; }
 	| assignment '\n'       { $$ = $<node>1; }
@@ -221,7 +221,11 @@ call_args:
 	;
 call_arg:
 	  block              { $$ = $<node>1; }
-	/*| lhs '=' call_arg*/
+	| lhs '=' call_arg   {
+		$$ = [[TQSyntaxNodeBinaryOperator alloc] initWithType:'=' left:$1 right:$3];
+		[$1 release];
+		[$3 release];
+	}
 	| member_access      { $$ = $<node>1; }
 	| variable           { $$ = $<node>1; }
 	| literal            { $$ = $<node>1; }

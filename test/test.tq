@@ -7,9 +7,9 @@ object#truthValue if: {
 
 class MyClass < NSObject
 - init {
-	self = super init.
+	super init.
 	self#ivar = "initialized"
-	return: self.
+	return self.
 }
 - doThis: this withThat: that andThat: otherThing {
 	this: that :otherThing.

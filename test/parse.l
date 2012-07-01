@@ -11,9 +11,9 @@
 
 %%
 \\[^\r\n]*                          { /* Do nothing */ }
-\class                              { return tCLASS; }
-\end                                { return tEND; }
-\return                             { return tRETURN; }
+class                               { return tCLASS; }
+end                                 { return tEND; }
+return                              { return tRETURN; }
 \.?[0-9]+(\.[0-9]+)?(e[0-9]+)?      {
                                     	yylval->dbl = atof(yytext);
                                     	return tNUMBER;
@@ -26,6 +26,6 @@
                                     	yylval->cStr = strndup(yytext, yyleng);
                                     	return tIDENTIFIER;
                                     }
-[.=\.:\n\{\}\(\)\|<>\#+-]             { return *yytext; }
+[.=\.:\n\{\}\(\)\|<>\#+-]           { return *yytext; }
 %%
 

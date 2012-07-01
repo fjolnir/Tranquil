@@ -2,6 +2,7 @@
 #define _TQ_SYNTAXTREE_H_
 
 #include <Foundation/Foundation.h>
+#include <llvm/Module.h>
 
 #ifdef DEBUG
 	#define TQLog(fmt, ...) NSLog(@"%s:%u (%s): " fmt "\n", __FILE__, __LINE__, __func__, ## __VA_ARGS__)
@@ -44,7 +45,12 @@ typedef enum {
 #endif
 
 @interface TQSyntaxNode : NSObject
-- (BOOL)generateCode:(NSError **)aoErr;
+- (BOOL)generateCodeInModule:(llvm::Module *)aModule :(NSError **)aoErr;
+@end
+
+@interface TQSyntaxNodeReturn : TQSyntaxNode
+@property(readwrite, retain) TQSyntaxNode *value;
+- (id)initWithValue:(TQSyntaxNode *)aValue;
 @end
 
 @interface TQSyntaxNodeVariable : TQSyntaxNode
