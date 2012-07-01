@@ -18,4 +18,4 @@ end
 
 instance = MyClass new.
 instance doThis: someOtherObject#this withThat: somethingElse
-        andThat: 1234
+        andThat: 1234.

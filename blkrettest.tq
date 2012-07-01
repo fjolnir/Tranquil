@@ -1,0 +1,2 @@
+a = { :b | return b. }
+return a.

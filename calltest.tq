@@ -1,0 +1,7 @@
+a = { :b |
+	return ({ :c |
+		return c.
+	}:b.).
+}
+123 doubleValue.
+return (a:123.).
