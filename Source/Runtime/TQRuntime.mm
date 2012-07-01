@@ -183,7 +183,7 @@ id TQPrepareObjectForReturn(id obj)
 {
     if(TQObjectIsStackBlock(obj))
         return TQAutoreleaseObject(_objc_msgSend_hack(obj, @selector(copy)));
-    return TQRetainAutoreleaseObject(obj);
+    return obj;
 }
 
 #pragma mark - Operators
@@ -202,7 +202,7 @@ BOOL TQAugmentClassWithOperators(Class klass)
     class_addMethod(klass, TQAddOpSel, imp, "@@:@");
     // - (Unimplemented by default)
     imp = imp_implementationWithBlock(^(id a, id b) { return _objc_msgSend_hack2(a, @selector(subtract:), b); });
-    class_addMethod(klass, TQSubOpSel, imp, "@@:@");
+    //class_addMethod(klass, TQSubOpSel, imp, "@@:@");
     // unary - (Unimplemented by default)
     imp = imp_implementationWithBlock(^(id a)       { return _objc_msgSend_hack(a, @selector(negate)); });
     class_addMethod(klass, TQUnaryMinusOpSel, imp, "@@:");
@@ -282,4 +282,24 @@ void TQInitializeRuntime()
     });
     class_addMethod([NSMutableArray class], TQSetterOpSel, imp, "@@:@");
     class_addMethod([NSPointerArray class], TQSetterOpSel, imp, "@@:@");
+
+    // Add optimized operators to TQNumber
+        // ==
+    imp = imp_implementationWithBlock(^(TQNumber *a, TQNumber *b) { return a->_value == b->_value ? TQNumberTrue : TQNumberFalse; });
+    class_replaceMethod(TQNumberClass, TQEqOpSel, imp, "@@:@");
+    // !=
+    imp = imp_implementationWithBlock(^(TQNumber *a, TQNumber *b)     { return  a->_value != b->_value? TQNumberFalse : TQNumberTrue; });
+    class_replaceMethod(TQNumberClass, TQNeqOpSel, imp, "@@:@");
+
+    class_replaceMethod(TQNumberClass, TQAddOpSel, class_getMethodImplementation(TQNumberClass, @selector(add:)),              "@@:@");
+    class_replaceMethod(TQNumberClass, TQSubOpSel, class_getMethodImplementation(TQNumberClass, @selector(subtract:)),         "@@:@");
+    class_replaceMethod(TQNumberClass, TQUnaryMinusOpSel, class_getMethodImplementation(TQNumberClass, @selector(negate:)),    "@@:");
+    class_replaceMethod(TQNumberClass, TQMultOpSel, class_getMethodImplementation(TQNumberClass, @selector(multiply:)),        "@@:@");
+    class_replaceMethod(TQNumberClass, TQDivOpSel, class_getMethodImplementation(TQNumberClass, @selector(divideBy:)),         "@@:@");
+
+    class_replaceMethod(TQNumberClass, TQLTOpSel, class_getMethodImplementation(TQNumberClass, @selector(isLesser:)),          "@@:@");
+    class_replaceMethod(TQNumberClass, TQGTOpSel, class_getMethodImplementation(TQNumberClass, @selector(isGreater:)),         "@@:@");
+    class_replaceMethod(TQNumberClass, TQLTEOpSel, class_getMethodImplementation(TQNumberClass, @selector(isLesserOrEqual:)),  "@@:@");
+    class_replaceMethod(TQNumberClass, TQGTEOpSel, class_getMethodImplementation(TQNumberClass, @selector(isGreaterOrEqual:)), "@@:@");
+
 }

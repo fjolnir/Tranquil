@@ -1,13 +1,14 @@
 // Note: TQNumber is not safe to subclass. It makes certain assumptions for the sake of performance
-#import "TQPooledObject.h"
 
-typedef id (^condBlock)();
+#import <Foundation/Foundation.h>
 
-@class TQNumber;
-
-extern TQNumber *TQNumberTrue, *TQNumberFalse;
-
-@interface TQNumber : TQPooledObject
+@interface TQNumber : NSObject {
+    @public
+    double _value;
+    @private
+    TQNumber *_poolPredecessor;
+    NSUInteger _retainCount;
+}
 @property(readonly) double doubleValue;
 
 + (TQNumber *)numberWithDouble:(double)aValue;
@@ -18,10 +19,8 @@ extern TQNumber *TQNumberTrue, *TQNumberFalse;
 - (TQNumber *)multiply:(TQNumber *)b;
 - (TQNumber *)divideBy:(TQNumber *)b;
 
-- (TQNumber *)addDouble:(double)b;
-- (TQNumber *)subtractDouble:(double)b;
-- (TQNumber *)multiplyDouble:(double)b;
-- (TQNumber *)divideByDouble:(double)b;
-
-- (id)if:(condBlock)ifBlock else:(condBlock)elseBlock;
++ (int)purgeCache;
 @end
+
+extern TQNumber *TQNumberTrue, *TQNumberFalse;
+

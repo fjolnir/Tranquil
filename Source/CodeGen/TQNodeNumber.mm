@@ -43,11 +43,24 @@ using namespace llvm;
     llvm::IRBuilder<> *builder = aBlock.builder;
 
     // Returns [NSNumber numberWithDouble:_value]
-    Value *selector = builder->CreateLoad(mod->getOrInsertGlobal("TQNumberWithDoubleSel", aProgram.llInt8PtrTy));
-    Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_TQNumber", aProgram.llInt8Ty);
+    NSString *globalName = [NSString stringWithFormat:@"TQConstantNum%ld", [_value hash]];
+    Value *num =  mod->getGlobalVariable([globalName UTF8String], false);
+    if(!num) {
+        Function *rootFunction = aProgram.root.function;
+        IRBuilder<> rootBuilder(&rootFunction->getEntryBlock(), rootFunction->getEntryBlock().begin());
 
-    ConstantFP *doubleValue = ConstantFP::get(aProgram.llModule->getContext(), APFloat([_value doubleValue]));
+        Value *selector = rootBuilder.CreateLoad(mod->getOrInsertGlobal("TQNumberWithDoubleSel", aProgram.llInt8PtrTy));
+        Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_TQNumber", aProgram.llInt8Ty);
+        ConstantFP *doubleValue = ConstantFP::get(aProgram.llModule->getContext(), APFloat([_value doubleValue]));
 
-    return builder->CreateCall3(aProgram.objc_msgSend, klass, selector, doubleValue);
-}
+        Value *result = rootBuilder.CreateCall3(aProgram.objc_msgSend, klass, selector, doubleValue);
+        result = rootBuilder.CreateCall(aProgram.TQRetainObject, result);
+
+        num =  new GlobalVariable(*mod, aProgram.llInt8PtrTy, false, GlobalVariable::InternalLinkage,
+                                   ConstantPointerNull::get(aProgram.llInt8PtrTy), [globalName UTF8String]);
+
+        rootBuilder.CreateStore(result, num);
+    }
+    return builder->CreateLoad(num);
+   }
 @end
