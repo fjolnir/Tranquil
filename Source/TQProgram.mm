@@ -227,6 +227,7 @@ using namespace llvm;
 	printf("---------------------\n");
 	uint64_t startTime = mach_absolute_time();
 	// Execute code
+	TQAugmentClassWithOperators([NSObject class]);
 	id ret = rootPtr();
 
 	uint64_t ns = mach_absolute_time() - startTime;
