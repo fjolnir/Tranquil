@@ -36,13 +36,11 @@ Program      = (Statement --)+ EOF
 
 
 # Statement
-Statement    = stmt:Call    { NSLog(@"stmt> %@", stmt); [StackTop addObject:stmt]; }
-             | stmt:Message { NSLog(@"stmt> %@", stmt); [StackTop addObject:stmt]; }
-             | stmt:Block   { NSLog(@"stmt> %@", stmt); [StackTop addObject:stmt]; } # Remove me
-             | stmt:Class   { NSLog(@"stmt> %@", stmt); [StackTop addObject:stmt]; }
-             | stmt:SubscriptExp   { NSLog(@"stmt> %@", stmt); [StackTop addObject:stmt]; }
-             | stmt:Assignment   { NSLog(@"stmt> %@", stmt); [StackTop addObject:stmt]; }
-             | stmt:Return   { NSLog(@"stmt> %@", stmt); [StackTop addObject:stmt]; }
+Statement    = Call    { NSLog(@"stmt> %@", $$); [StackTop addObject:$$]; }
+             | Message { NSLog(@"stmt> %@", $$); [StackTop addObject:$$]; }
+             | Class   { NSLog(@"stmt> %@", $$); [StackTop addObject:$$]; }
+             | Assignment   { NSLog(@"stmt> %@", $$); [StackTop addObject:$$]; }
+             | Return   { NSLog(@"stmt> %@", $$); [StackTop addObject:$$]; }
 
 
 Return       = "^" retVal:Expression { $$ = [TQNodeReturn nodeWithValue:retVal]; }
@@ -51,10 +49,20 @@ Return       = "^" retVal:Expression { $$ = [TQNodeReturn nodeWithValue:retVal];
 # Expression
 Expression   = Call
              | Message
-             | Variable
-             | Literal
-             | ParenExpr
              | Block
+             | Self
+             | Nil
+             | SubscriptExp
+             | Property
+             | Array
+             | Dictionary
+             | Equation
+#             | RegExp
+             | Literal
+             | Variable
+             | ParenExpr
+
+
 ParenExpr    = '(' expr:Expression ')' { $$ = expr; }
 
 
@@ -224,7 +232,9 @@ Equation     = a:Sum                 { PushStack(a);                            
 
 Assignment     = a:Lhs - "=" --      { PushStack(a);                                                                           }
                  (Rhs -)+            { $$ = PopStack();                                                                        }
-Lhs            = Variable
+Lhs            = Property
+               | SubscriptExp
+               | Variable
 Rhs            = b:Equation          { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAssign left:StackTop right:b]); }
                  | "=" -- b:Equation
                  {
