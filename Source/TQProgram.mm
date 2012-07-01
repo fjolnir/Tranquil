@@ -231,6 +231,7 @@ using namespace llvm;
 {
     delete _irBuilder;
     delete _llModule;
+    [_root release];
     [super dealloc];
 }
 
@@ -295,6 +296,7 @@ using namespace llvm;
 
 
     FunctionPassManager fpm = FunctionPassManager(_llModule);
+
     fpm.add(new TargetData(*engine->getTargetData()));
     PassManagerBuilder builder = PassManagerBuilder();
     builder.OptLevel = 3;
@@ -325,7 +327,7 @@ using namespace llvm;
     id(*rootPtr)() = (id(*)())engine->getPointerToFunction(_root.function);
 
 
-    printf("---------------------\n");
+    fprintf(stderr, "---------------------\n");
     uint64_t startTime = mach_absolute_time();
     // Execute code
     id ret = rootPtr();
@@ -335,23 +337,10 @@ using namespace llvm;
     mach_timebase_info(&timebase);
     double sec = ns * timebase.numer / timebase.denom / 1000000000.0;
 
-    TQLog(@"Run time: %f sec\n", sec);
-    TQLog(@"%p", ret);
-    TQLog(@"'root' retval:  %p: %@ (%@)\n", ret, ret ? ret : nil, [ret class]);
+    fprintf(stderr, "---------------------\n");
+    TQLog(@"Run time: %f sec. Ret: %p", sec, ret);
+    TQLog(@"'root' retval:  %p: %@ (%@)", ret, ret ? ret : nil, [ret class]);
 
-    if([ret isKindOfClass:NSClassFromString(@"NSBlock")]) {
-        id (^test)(NSString *) = ret;
-        id num = test(@"hoya");
-        TQLog(@"Block retval: %@ (%@)", num, [num class]);
-    }
-
-    Class fooCls = NSClassFromString(@"Foo");
-    if(fooCls)
-    {
-        [fooCls classMethod];
-        id foo = [[fooCls alloc] init];
-        [foo instanceMethod:@"Hey I'm objective-c"];
-    }
     return YES;
 }
 

@@ -33,6 +33,17 @@ using namespace llvm;
     return self;
 }
 
+- (void)dealloc
+{
+    [_locals release];
+    [_arguments release];
+    [_statements release];
+    delete _basicBlock;
+    delete _function;
+    delete _builder;
+    [super dealloc];
+}
+
 - (NSString *)description
 {
     NSMutableString *out = [NSMutableString stringWithString:@"<blk@ {"];
@@ -50,17 +61,6 @@ using namespace llvm;
     }
     [out appendString:@"}>"];
     return out;
-}
-
-- (void)dealloc
-{
-    [_locals release];
-    [_arguments release];
-    [_statements release];
-    delete _basicBlock;
-    delete _function;
-    delete _builder;
-    [super dealloc];
 }
 
 - (NSString *)signature
@@ -204,6 +204,7 @@ using namespace llvm;
                                     init, "__tq_block_descriptor_tmp");
 
     _blockDescriptor = llvm::ConstantExpr::getBitCast(global, [self _blockDescriptorTypeInProgram:aProgram]);
+
     return _blockDescriptor;
 }
 
