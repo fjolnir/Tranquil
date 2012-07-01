@@ -127,7 +127,36 @@ using namespace llvm;
 {
 	if(_type == kTQOperatorGetter)
 		return [NSString stringWithFormat:@"<op@ %@[%@]>", _left, _right];
-	else
-		return [NSString stringWithFormat:@"<op@ %@ %c %@>", _left, _type, _right];
+    else if(_type == kTQOperatorUnaryMinus)
+        return [NSString stringWithFormat:@"<op@ -%@>", _right];
+	else {
+        NSString *opStr = nil;
+        switch(_type) {
+            case kTQOperatorMultiply: opStr = @"*";
+            break;
+            case kTQOperatorAdd: opStr = @"+";
+            break;
+            case kTQOperatorSubtract: opStr = @"-";
+            break;
+            case kTQOperatorDivide: opStr = @"/";
+            break;
+            case kTQOperatorLesser: opStr = @"<";
+            break;
+            case kTQOperatorAssign: opStr = @"=";
+            break;
+            case kTQOperatorGreater: opStr = @">";
+            break;
+            case kTQOperatorLesserOrEqual: opStr = @"<=";
+            break;
+            case kTQOperatorGreaterOrEqual: opStr = @"=>";
+            break;
+            case kTQOperatorEqual: opStr = @"==";
+            break;
+            case kTQOperatorInequal: opStr = @"!=";
+            break;
+            default: opStr = @"<unknown>";
+        }
+		return [NSString stringWithFormat:@"<op@ %@ %@ %@>", _left, opStr, _right];
+    }
 }
 @end

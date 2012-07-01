@@ -3,20 +3,20 @@
 using namespace llvm;
 
 @implementation TQNodeArgument
-@synthesize identifier=_identifier, passedNode=_passedNode;
+@synthesize passedNode=_passedNode, selectorPart=_selectorPart;
 
-+ (TQNodeArgument *)nodeWithPassedNode:(TQNode *)aNode identifier:(NSString *)aIdentifier
++ (TQNodeArgument *)nodeWithPassedNode:(TQNode *)aNode selectorPart:(NSString *)aIdentifier
 {
-	return [[[self alloc] initWithPassedNode:aNode identifier:aIdentifier] autorelease];
+	return [[[self alloc] initWithPassedNode:aNode selectorPart:aIdentifier] autorelease];
 }
 
-- (id)initWithPassedNode:(TQNode *)aNode identifier:(NSString *)aIdentifier
+- (id)initWithPassedNode:(TQNode *)aNode selectorPart:(NSString *)aIdentifier
 {
 	if(!(self = [super init]))
 		return nil;
 
 	_passedNode = [aNode retain];
-	_identifier = [aIdentifier retain];
+	_selectorPart = [aIdentifier retain];
 
 	return self;
 }
@@ -33,12 +33,12 @@ using namespace llvm;
 
 - (NSString *)description
 {
-	return [NSString stringWithFormat:@"<arg@ %@: %@>", _identifier, _passedNode];
+	return [NSString stringWithFormat:@"<arg@ %@: %@>", _selectorPart, _passedNode];
 }
 
 - (void)dealloc
 {
-	[_identifier release];
+	[_selectorPart release];
 	[_passedNode release];
 	[super dealloc];
 }

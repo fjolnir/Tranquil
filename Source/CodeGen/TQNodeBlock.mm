@@ -29,7 +29,7 @@ using namespace llvm;
 	_basicBlock = NULL;
 
 	// Block invocations are always passed the block itself as the first argument
-	[self addArgument:[TQNodeArgumentDef nodeWithLocalName:@"__blk" identifier:nil] error:nil];
+	[self addArgument:@"__blk" error:nil];
 
 	return self;
 }
@@ -38,8 +38,8 @@ using namespace llvm;
 {
 	NSMutableString *out = [NSMutableString stringWithString:@"<blk@ {"];
 	if(_arguments.count > 0) {
-		for(TQNodeArgumentDef *arg in _arguments) {
-			[out appendFormat:@"%@ ", arg];
+		for(NSString *arg in _arguments) {
+			[out appendFormat:@"%@, ", arg];
 		}
 		[out appendString:@"|"];
 	}
@@ -74,15 +74,11 @@ using namespace llvm;
 	return sig;
 }
 
-- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoError
+- (BOOL)addArgument:(NSString *)aArgument error:(NSError **)aoError
 {
-	if([_arguments count] < 2)
-		TQAssertSoft(aArgument.identifier == nil,
-		             kTQSyntaxErrorDomain, kTQUnexpectedIdentifier, NO,
-		             @"First argument of a block can not have an identifier");
 	TQAssertSoft(![_arguments containsObject:aArgument],
 	             kTQSyntaxErrorDomain, kTQUnexpectedIdentifier, NO,
-	             @"Duplicate arguments for '%@'", aArgument.localName);
+	             @"Duplicate arguments for '%@'", aArgument);
 
 	[_arguments addObject:aArgument];
 
@@ -396,12 +392,10 @@ using namespace llvm;
 	for (unsigned i = 1; i < _arguments.count; ++i, ++argumentIterator)
 	{
 		IRBuilder<> tempBuilder(&_function->getEntryBlock(), _function->getEntryBlock().begin());
-		NSString *argVarName = [[_arguments objectAtIndex:i] localName];
-		if(!argVarName)
-			continue;
-		TQNodeVariable *local = [TQNodeVariable nodeWithName:argVarName];
+        NSString *argument = [_arguments objectAtIndex:i];
+		TQNodeVariable *local = [TQNodeVariable nodeWithName:argument];
 		[local store:argumentIterator inProgram:aProgram block:self error:aoErr];
-		[_locals setObject:local forKey:argVarName];
+		[_locals setObject:local forKey:argument];
 	}
 
 	// Load captured variables

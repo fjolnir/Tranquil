@@ -1,9 +1,9 @@
 #import "TQNode.h"
 
 @interface TQNodeArgumentDef : TQNode
-@property(readwrite, retain) NSString *identifier;
-@property(readwrite, retain) NSString *localName;
+@property(readwrite, retain) NSString *selectorPart;
+@property(readwrite, retain) NSString *name;
 
-+ (TQNodeArgumentDef *)nodeWithLocalName:(NSString *)aName identifier:(NSString *)aIdentifier;
-- (id)initWithLocalName:(NSString *)aName identifier:(NSString *)aIdentifier;
++ (TQNodeArgumentDef *)nodeWithName:(NSString *)aName selectorPart:(NSString *)aIdentifier;
+- (id)initWithName:(NSString *)aName selectorPart:(NSString *)aIdentifier;
 @end

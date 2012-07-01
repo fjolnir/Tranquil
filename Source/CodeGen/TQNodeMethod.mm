@@ -25,7 +25,7 @@ using namespace llvm;
 	_type = aType;
 
 	// Methods must take a self argument
-	[self addArgument:[TQNodeArgumentDef nodeWithLocalName:@"self" identifier:nil] error:nil];
+	[self addArgument:[TQNodeArgumentDef nodeWithName:@"self" selectorPart:nil] error:nil];
 
 	return self;
 }
@@ -38,7 +38,7 @@ using namespace llvm;
 - (BOOL)addArgument:(TQNodeArgument *)aArgument error:(NSError **)aoError
 {
 	if(self.arguments.count == 2)
-		TQAssertSoft(aArgument.identifier != nil,
+		TQAssertSoft(aArgument.selectorPart != nil,
 		             kTQSyntaxErrorDomain, kTQUnexpectedIdentifier, NO,
 		             @"No name given for method");
 	[self.arguments addObject:aArgument];
@@ -81,11 +81,11 @@ using namespace llvm;
 {
 	NSMutableString *selector = [NSMutableString string];
 	for(TQNodeArgumentDef *arg in self.arguments) {
-		if([arg.localName isEqualToString:@"self"] || [arg.localName isEqualToString:@"__blk"])
+		if([arg.name isEqualToString:@"self"] || [arg.name isEqualToString:@"__blk"])
 			continue;
-		if(arg.identifier)
-			[selector appendString:arg.identifier];
-		if(arg.localName)
+		if(arg.selectorPart)
+			[selector appendString:arg.selectorPart];
+		if(arg.name)
 			[selector appendString:@":"];
 	}
 	return selector;

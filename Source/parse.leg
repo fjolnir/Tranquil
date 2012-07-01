@@ -21,6 +21,7 @@ typedef struct _TQParserState TQParserState;
 #define StackTop [state->stack lastObject]
 #define PushStack(obj) [state->stack addObject:(obj)]
 #define PopStack() StackTop; [state->stack removeLastObject]
+#define ReplaceStackTop(val) do { id repl = val; PopStack(); PushStack(repl); } while(0)
 
 #define UpdatePos() do { \
     ((CLParserState *)(G->data))->currentToken.begin  = thunk->begin + G->offset;  \
@@ -30,11 +31,21 @@ typedef struct _TQParserState TQParserState;
 //#define YY_DEBUG
 %}
 
-Program      = --
-                 Statement* EOL EOF
+Program      = (Statement --)+ EOF
+             | - ( !EOL . )* EOL
+
+
 # Statement
-Statement    = stmt:Call    { NSLog(@"stmt> %@", stmt); }
-             | stmt:Message { NSLog(@"stmt> %@", stmt); }
+Statement    = stmt:Call    { NSLog(@"stmt> %@", stmt); [StackTop addObject:stmt]; }
+             | stmt:Message { NSLog(@"stmt> %@", stmt); [StackTop addObject:stmt]; }
+             | stmt:Block   { NSLog(@"stmt> %@", stmt); [StackTop addObject:stmt]; } # Remove me
+             | stmt:Class   { NSLog(@"stmt> %@", stmt); [StackTop addObject:stmt]; }
+             | stmt:SubscriptExp   { NSLog(@"stmt> %@", stmt); [StackTop addObject:stmt]; }
+             | stmt:Assignment   { NSLog(@"stmt> %@", stmt); [StackTop addObject:stmt]; }
+             | stmt:Return   { NSLog(@"stmt> %@", stmt); [StackTop addObject:stmt]; }
+
+
+Return       = "^" retVal:Expression { $$ = [TQNodeReturn nodeWithValue:retVal]; }
 
 
 # Expression
@@ -43,7 +54,9 @@ Expression   = Call
              | Variable
              | Literal
              | ParenExpr
-ParenExpr    = "(" expr:Expression ")" { $$ = expr; }
+             | Block
+ParenExpr    = '(' expr:Expression ')' { $$ = expr; }
+
 
 # Message
 Message      = rcvr:MessageRecvr -
@@ -57,24 +70,26 @@ Message      = rcvr:MessageRecvr -
                    $$ = PopStack();
                    [$$ setArguments:arguments];
                }
-               "."?
-             | rcvr:MessageRecvr - name:Identifier - "."?
+               '.'?
+             | rcvr:MessageRecvr - name:Identifier - '.'?
                {
                     $$ = [TQNodeMessage nodeWithReceiver:rcvr];
                     NSError *err = nil;
-                    [[$$ arguments] addObject:[TQNodeArgument nodeWithPassedNode:nil identifier:name]];
+                    [(NSMutableArray*)[$$ arguments] addObject:[TQNodeArgument nodeWithPassedNode:nil
+                                                                                     selectorPart:name]];
                }
 MessageRecvr = Variable
              | Literal
-SelectorPart = name:Identifier? - ":" - param:MessageArg --
+SelectorPart = name:Identifier? - ':' - param:MessageArg --
                {
-                    [StackTop addObject:[TQNodeArgument nodeWithPassedNode:param identifier:name]];
+                    [StackTop addObject:[TQNodeArgument nodeWithPassedNode:param selectorPart:name]];
                }
 MessageArg   = ParenExpr
              | Call
              | Message
              | Variable
              | Literal
+
 
 # Call
 ## callee(expr, expr)
@@ -83,12 +98,12 @@ Call         = callee:Callee
                     PushStack([TQNodeCall nodeWithCallee:callee]);
                     PushStack([NSMutableArray array]);
                }
-               "(" -- (CallArg (-- "," -- CallArg)*)? -- ")"
+               '(' -- (CallArg (-- ',' -- CallArg)*)? -- ')'
                {
-                   NSMutableArray *arguments = PopStack();
-                   TQNodeMessage *call = PopStack();
-                   [call setArguments:arguments];
-                   NSLog(@"call> %@", call);
+                    NSMutableArray *arguments = PopStack();
+                    $$ = PopStack();
+                    [$$ setArguments:arguments];
+                    NSLog(@"call> %@", $$);
                }
 Callee       = Variable
 CallArg      = arg:Call       { [StackTop addObject:arg]; }
@@ -97,42 +112,232 @@ CallArg      = arg:Call       { [StackTop addObject:arg]; }
              | arg:ParenExpr  { [StackTop addObject:arg]; }
 
 
+# Block
+Block        = '{' --
+               {
+                 PushStack([TQNodeBlock node]);
+                 PushStack([NSMutableArray array]);
+               }
+               ( (BlockArgDef - (',' -- BlockArgDef --)*)? '|' --)?
+               {
+                   NSMutableArray *arguments = PopStack();
+                   [StackTop setArguments:arguments];
+                   PushStack([NSMutableArray array]);
+               }
+               (Statement --)*
+               {
+                   NSMutableArray *statements = PopStack();
+                   $$ = PopStack();
+                   [$$ setStatements:statements];
+               }
+               '}'
+             | '`' -
+               {
+                   PushStack([NSMutableArray array]);
+               }
+               ( (BlockArgDef - (',' - BlockArgDef --)*)? '|' -)? expr:Expression - '`'
+               {
+                   NSMutableArray *arguments = PopStack();
+                   $$ = [TQNodeBlock node];
+                   [$$ setArguments:arguments];
+                   [$$ setStatements:[NSMutableArray arrayWithObject:[TQNodeReturn nodeWithValue:expr]]];
+               }
+BlockArgDef  = name:Identifier { [StackTop addObject:name]; }
+
+
+# Class
+Class        = '#' name:Constant --
+               {
+                   PushStack([TQNodeClass nodeWithName:name]);
+               }
+               '{' -- (Method --)* '}'
+               {
+                  $$ = PopStack();
+               }
+SuperClsName = superName:Constant
+               {
+                   [StackTop setSuperClassName:superName];
+               }
+Method       = '+' -- method:MethodImpl
+               {
+                   [(TQNodeMethod *)method setType:kTQClassMethod];
+                   NSLog(@"meth> %@ %@", method, StackTop);
+                   [[StackTop classMethods] addObject:method];
+               }
+             | '-' -- method:MethodImpl
+               {
+                   [(TQNodeMethod *)method setType:kTQInstanceMethod];
+                   [[StackTop instanceMethods] addObject:method];
+                   NSLog(@"meth> %@", method);
+               }
+MethodImpl   = arguments:MethodArgs  --
+               {
+                   PushStack([NSMutableArray array]);
+               }
+               '{' -- Statement* -- '}'
+               {
+                   NSMutableArray *statements = PopStack();
+                   $$ = [TQNodeMethod node];
+                   [$$ setStatements:statements];
+                   NSError *err = nil;
+                   for(TQNodeArgumentDef *arg in arguments) {
+                       [(TQNodeMethod*)$$ addArgument:arg error:&err];
+                       if(err)
+                           assert(false);
+                   }
+               }
+MethodArgs   = selIdentifier:Identifier
+               {
+                   PushStack([NSMutableArray array]);
+                   [StackTop addObject:[TQNodeArgumentDef nodeWithName:nil selectorPart:selIdentifier]];
+               }
+               (':' -- name:Identifier -- MethodArg*)?
+               {
+                   $$ = PopStack();
+                   [[$$ objectAtIndex:0] setName:name];
+               }
+MethodArg    = identifier:Identifier ':' name:Identifier
+               {
+                   [StackTop addObject:[TQNodeArgumentDef nodeWithName:name selectorPart:identifier]];
+               }
+
+
+# Equations
+Sum          = a:Product             { PushStack(a);                                                                             }
+               ( - "+" - b:Product   { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAdd      left:StackTop right:b]); }
+               | - "-" - b:Product   { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorSubtract left:StackTop right:b]); }
+               )*                    { $$ = PopStack();                                                                          }
+
+Product      = a:Variable            { PushStack(a);                                                                             }
+               ( - "*" - b:Product   { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorMultiply left:StackTop right:b]); }
+               | - "/" - b:Product   { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorDivide   left:StackTop right:b]); }
+               )*                    { $$ = PopStack();                                                                          }
+
+Equation     = a:Sum                 { PushStack(a);                                                                                   }
+               ( - "<" -  b:Equation { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorLesser         left:StackTop right:b]); }
+               | - ">" -  b:Equation { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorGreater        left:StackTop right:b]); }
+               | - "<=" - b:Equation { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorLesserOrEqual  left:StackTop right:b]); }
+               | - "=>" - b:Equation { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorGreaterOrEqual left:StackTop right:b]); }
+               | - "==" - b:Equation { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorEqual          left:StackTop right:b]); }
+               | - "!=" - b:Equation { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorInequal        left:StackTop right:b]); }
+               )*                    { $$ = PopStack();                                                                                }
+
+Assignment     = a:Lhs - "=" --      { PushStack(a);                                                                           }
+                 (Rhs -)+            { $$ = PopStack();                                                                        }
+Lhs            = Variable
+Rhs            = b:Equation          { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAssign left:StackTop right:b]); }
+                 | "=" -- b:Equation
+                 {
+                     // (a=b) = c doesn't make sense so we must transform it to a = (b=c)
+                     TQNodeOperator *oldOp = StackTop;
+                     assert([oldOp isKindOfClass:[TQNodeOperator class]] && oldOp.type == kTQOperatorAssign);
+                     TQNodeOperator *newOp = [TQNodeOperator nodeWithType:kTQOperatorAssign left:oldOp.right right:b];
+                     ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAssign left:oldOp.left right:newOp]); 
+                 }
+# Accessors
+
+SubscriptExp = obj:Variable
+               {
+                   PushStack([NSMutableArray array]);
+               }
+               - (Subscript -)+
+               {
+                   NSMutableArray *subscripts = PopStack();
+                   $$ = [TQNodeOperator nodeWithType:kTQOperatorGetter left:obj right:[subscripts objectAtIndex:0]];
+                   for(int i = 1; i < [subscripts count]; ++i) {
+                      $$ = [TQNodeOperator nodeWithType:kTQOperatorGetter left:$$ right:[subscripts objectAtIndex:i]];
+                   }
+
+               }
+Subscript    = "[" -- subscript:Variable -- "]" { [StackTop addObject:subscript]; }
+
+Property     = obj:Variable
+               {
+                   PushStack([NSMutableArray array]);
+               }
+               - (PropSubscr -)+
+               {
+                   NSMutableArray *subscripts = PopStack();
+                   $$ = [TQNodeMemberAccess nodeWithReceiver:obj property:[subscripts objectAtIndex:0]];
+                   for(int i = 1; i < [subscripts count]; ++i) {
+                      $$ = [TQNodeMemberAccess nodeWithReceiver:$$ property:[subscripts objectAtIndex:i]];
+                   }
+               }
+PropSubscr   = "#" - prop:Identifier { [StackTop addObject:prop]; }
+
+# Built-in constructors
+Array        = "#["
+               {
+                   PushStack([NSMutableArray array]);
+               }
+               (ArrItem -- ("," -- ArrItem)*)?  -- "]"
+               {
+                   $$ = [TQNodeArray node];
+                   NSMutableArray *items = PopStack();
+                   [$$ setItems:items];
+                   NSLog(@"arr> %@", $$);
+               }
+ArrItem      = item:Variable
+             {
+                 [StackTop addObject:item];
+             }
+
+Dictionary   = "#{" --
+               {
+                   PushStack([NSMapTable mapTableWithStrongToStrongObjects]);
+               }
+               (DictItem -- ("," -- DictItem)*)? -- "}"
+               {
+                   $$ = [TQNodeDictionary node];
+                   NSMutableArray *items = PopStack();
+                   [$$ setItems:items];
+                   NSLog(@"dict> %@", $$);
+
+               }
+DictItem     = key:Variable -- "=>" -- value:Variable
+               {
+                   [StackTop setObject:value forKey:key];
+               }
+
+#RegExp TODO
+
+
 # Basic components
 Variable     = name:Identifier
-             {
-                 $$ = [TQNodeVariable nodeWithName:name];
-             }
+               {
+                   $$ = [TQNodeVariable nodeWithName:name];
+               }
 
 Literal      = Number
              | String
 
-tIF          = 'if'
-tELSE        = 'else'
-tWHILE       = 'while'
-tUNTIL       = 'until'
-tBREAK       = 'break'
-tSKIP        = 'skip'
-tNIL         = 'nil'
-tSELF        = 'self'
-tSUPER       = 'super'
+IfOp         = 'if'
+ElseOp       = 'else'
+WhileO       = 'while'
+UntilOp      = 'until'
+BreakStmt    = 'break'
+SkipStmt     = 'skip'
+Nil          = 'nil'
+Self         = 'self'
+Super        = 'super'
 
-OpEq         = '=='
-OpNeq        = '!='
-OpAssign     = '='
-OpGEq        = '>='
-OpLEq        = '<='
-OpLesser     = '<'
-OpGreater    = '>'
-OpMul        = '*'
-OpDiv        = '/'
-OpAdd        = '+'
-OpSub        = '-'
+#OpEq         = '=='
+#OpNeq        = '!='
+#OpAssign     = '='
+#OpGEq        = '>='
+#OpLEq        = '<='
+#OpLesser     = '<'
+#OpGreater    = '>'
+#OpMul        = '*'
+#OpDiv        = '/'
+#OpAdd        = '+'
+#OpSub        = '-'
 
-Number       = < "-"? [0-9]+ ("." [0-9]*)? ("e"[0-9]+)? >  { $$ = YYNSNUM; }
-             | < "-"? "." [0-9]+ ("e"[0-9]+)? >            { $$ = YYNSNUM; }
+Number       = < '-'? [0-9]+ ('.' [0-9]*)? ('e'[0-9]+)? >  { $$ = YYNSNUM; }
+             | < '-'? '.' [0-9]+ ('e'[0-9]+)? >            { $$ = YYNSNUM; }
 Identifier   = < [a-z_][A-Za-z0-9_]* >                     { $$ = YYNSSTR; }
 Constant     = < [A-Z][A-Za-z0-9_]* >                      { $$ = YYNSSTR; }
-String       = '"' < [^\"]* > '"'                          { $$ = YYNSSTR; }
+String       = '"' < [^\']* > '"'                          { $$ = YYNSSTR; }
 
 -            = [ \t]*
 --           = EOL? -
@@ -153,6 +358,8 @@ int main()
     parserState.stack = [NSMutableArray array];
     greg.data = &parserState;
 
+    [parserState.stack addObject:[NSMutableArray array]];
+
     while(yyparse(&greg));
     yydeinit(&greg);
 
@@ -160,4 +367,4 @@ int main()
 }
 
 
-/*tREGEX      = "/" < ((\\/)|[^/])* > "/" < [im]* >*/
+/*tREGEX      = '/' < ((\\/)|[^/])* > '/' < [im]* >*/

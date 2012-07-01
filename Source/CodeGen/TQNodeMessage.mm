@@ -60,10 +60,10 @@ using namespace llvm;
 {
 	NSMutableString *selStr = [NSMutableString string];
 	if(_arguments.count == 1 && ![[_arguments objectAtIndex:0] passedNode])
-		[selStr appendString:[[_arguments objectAtIndex:0] identifier]];
+		[selStr appendString:[[_arguments objectAtIndex:0] selectorPart]];
 	else {
 		for(TQNodeArgument *arg in _arguments) {
-			[selStr appendFormat:@"%@:", arg.identifier ? arg.identifier : @""];
+			[selStr appendFormat:@"%@:", arg.selectorPart ? arg.selectorPart : @""];
 		}
 	}
 	return selStr;

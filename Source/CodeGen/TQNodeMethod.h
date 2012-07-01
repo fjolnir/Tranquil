@@ -1,7 +1,7 @@
 #import "TQNode.h"
 #import "TQNodeBlock.h"
 
-@class TQNodeClass;
+@class TQNodeClass, TQNodeArgumentDef;
 
 typedef enum {
 	kTQClassMethod,
@@ -14,6 +14,7 @@ typedef enum {
 + (TQNodeMethod *)node;
 + (TQNodeMethod *)nodeWithType:(TQMethodType)aType;
 - (id)initWithType:(TQMethodType)aType;
+- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoError;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                  class:(TQNodeClass *)aClass

@@ -3,38 +3,38 @@
 using namespace llvm;
 
 @implementation TQNodeArgumentDef
-@synthesize identifier=_identifier, localName=_localName;
+@synthesize name=_name, selectorPart=_selectorPart;
 
-+ (TQNodeArgumentDef *)nodeWithLocalName:(NSString *)aName identifier:(NSString *)aIdentifier
++ (TQNodeArgumentDef *)nodeWithName:(NSString *)aName selectorPart:(NSString *)aIdentifier
 {
-	return [[[self alloc] initWithLocalName:aName identifier:aIdentifier] autorelease];
+	return [[[self alloc] initWithName:aName selectorPart:aIdentifier] autorelease];
 }
 
-- (id)initWithLocalName:(NSString *)aName identifier:(NSString *)aIdentifier
+- (id)initWithName:(NSString *)aName selectorPart:(NSString *)aIdentifier
 {
 	if(!(self = [super init]))
 		return nil;
 
-	_localName = [aName retain];
-	_identifier = [aIdentifier retain];
+	_name = [aName retain];
+	_selectorPart = [aIdentifier retain];
 
 	return self;
 }
 
 - (NSUInteger)hash
 {
-	return [_localName hash];
+	return [_name hash];
 }
 
 - (NSString *)description
 {
-	return [NSString stringWithFormat:@"<argdef@ %@: %@>", _identifier, _localName];
+	return [NSString stringWithFormat:@"<argdef@ %@: %@>", _selectorPart, _name];
 }
 
 - (void)dealloc
 {
-	[_identifier release];
-	[_localName release];
+	[_selectorPart release];
+	[_name release];
 	[super dealloc];
 }
 

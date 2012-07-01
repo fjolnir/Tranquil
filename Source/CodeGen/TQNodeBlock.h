@@ -41,7 +41,7 @@ enum TQBlockFieldFlag_t {
 
 + (TQNodeBlock *)node;
 - (NSString *)signature;
-- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoError;
+- (BOOL)addArgument:(NSString *)aArgument error:(NSError **)aoError;
 @end
 
 @interface TQNodeRootBlock : TQNodeBlock

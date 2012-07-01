@@ -8,29 +8,17 @@ using namespace llvm;
 @synthesize name=_name, superClassName=_superClassName, classMethods=_classMethods, instanceMethods=_instanceMethods,
 	classPtr=_classPtr;
 
-+ (TQNodeClass *)nodeWithName:(NSString *)aName superClass:(NSString *)aSuperClass error:(NSError **)aoError
++ (TQNodeClass *)nodeWithName:(NSString *)aName
 {
-	return [[[self alloc] initWithName:aName superClass:aSuperClass error:aoError] autorelease];
+	return [[[self alloc] initWithName:aName] autorelease];
 }
 
-- (id)initWithName:(NSString *)aName superClass:(NSString *)aSuperClass error:(NSError **)aoError
+- (id)initWithName:(NSString *)aName
 {
-	NSString *first = [aName substringToIndex:1];
-	TQAssertSoft([first isEqualToString:[first capitalizedString]],
-	             kTQSyntaxErrorDomain, kTQInvalidClassName, nil,
-	             @"Classes must be capitalized, %@ was not.", aName);
-	if(aSuperClass) {
-		first = [aSuperClass substringToIndex:1];
-		TQAssertSoft([first isEqualToString:[first capitalizedString]],
-		             kTQSyntaxErrorDomain, kTQInvalidClassName, nil,
-		             @"Classes must be capitalized, %@ was not.", aName);
-	}
-
 	if(!(self = [super init]))
 		return nil;
 
 	_name = [aName retain];
-	_superClassName = [aSuperClass retain];
 
 	_classMethods = [[NSMutableArray alloc] init];
 	_instanceMethods = [[NSMutableArray alloc] init];
