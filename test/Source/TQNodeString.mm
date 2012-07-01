@@ -1,6 +1,9 @@
 #import "TQNodeString.h"
+#import "TQProgram.h"
 
 using namespace llvm;
+
+static Value *_StringWithUTF8StringSel, *_NSStringClassNameConst;
 
 @implementation TQNodeString
 @synthesize value=_value;
@@ -29,5 +32,23 @@ using namespace llvm;
 {
 	[_value release];
 	[super dealloc];
+}
+
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
+{
+	llvm::Module *mod = aProgram.llModule;
+	llvm::IRBuilder<> *builder = aBlock.builder;
+
+	// Returns [NSNumber numberWithDouble:_value]
+	if(!_NSStringClassNameConst)
+		_NSStringClassNameConst = builder->CreateGlobalStringPtr("NSString", "className_NSString");
+	if(!_StringWithUTF8StringSel)
+		_StringWithUTF8StringSel = builder->CreateGlobalStringPtr("stringWithUTF8String:", "sel_stringWithUTF8String");
+
+	CallInst *classLookup = builder->CreateCall(aProgram.objc_getClass, _NSStringClassNameConst);
+	CallInst *selReg = builder->CreateCall(aProgram.sel_registerName, _StringWithUTF8StringSel);
+	Value *strValue = builder->CreateGlobalStringPtr([_value UTF8String]);
+
+	return builder->CreateCall3(aProgram.objc_msgSend, classLookup, selReg, strValue);
 }
 @end
