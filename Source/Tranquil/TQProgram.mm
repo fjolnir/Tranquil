@@ -252,7 +252,7 @@ using namespace llvm;
     llvm::EnableStatistics();
 
 
-    //_llModule->dump();
+    _llModule->dump();
     // Verify that the program is valid
     verifyModule(*_llModule, PrintMessageAction);
 
@@ -325,7 +325,7 @@ using namespace llvm;
     //fpm.run(*_root.function);
     //modulePasses.run(*_llModule);
 
-    _llModule->dump();
+    //_llModule->dump();
     llvm::PrintStatistics();
 
     id(*rootPtr)() = (id(*)())engine->getPointerToFunction(_root.function);
