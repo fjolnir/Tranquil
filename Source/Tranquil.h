@@ -21,3 +21,4 @@
 #import "CodeGen/TQNodeNil.h"
 #import "CodeGen/TQNodeArray.h"
 #import "CodeGen/TQNodeDictionary.h"
+#import "CodeGen/TQNodeRegex.h"

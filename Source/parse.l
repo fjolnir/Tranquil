@@ -12,7 +12,12 @@
 %option bison-locations
 
 %%
-\\[^\r\n]*                          { /* Do nothing */ }
+\\[^\r\n]*                          { UPDATE_LOC }
+\/((\\\/)|[^\/])*\/[im]*                     {
+                                    	UPDATE_LOC
+                                    	yylval->cStr = strndup(yytext, yyleng);
+                                    	return tREGEX;
+                                    }
 (super)                             { UPDATE_LOC return tSUPER; }
 (self)                              { UPDATE_LOC return tSELF; }
 \.?[0-9]+(\.[0-9]+)?(e[0-9]+)?      {

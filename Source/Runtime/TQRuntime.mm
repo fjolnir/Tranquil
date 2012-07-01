@@ -24,6 +24,7 @@ SEL TQNumberWithDoubleSel             = @selector(numberWithDouble:);
 SEL TQStringWithUTF8StringSel         = @selector(stringWithUTF8String:);
 SEL TQPointerArrayWithObjectsSel      = @selector(tq_pointerArrayWithObjects:);
 SEL TQMapWithObjectsAndKeysSel        = @selector(tq_mapTableWithObjectsAndKeys:);
+SEL TQRegexWithPatSel                 = @selector(tq_regularExpressionWithUTF8String:options:);
 
 struct TQBlock_byref {
 	void *isa;

@@ -30,6 +30,7 @@
 	TQNodeNil *nil_;
 	TQNodeArray *array;
 	TQNodeDictionary *dict;
+	TQNodeRegex *regex;
 	NSMutableArray *nsarr;
 	NSMapTable *nsmap;
 }
@@ -55,7 +56,7 @@
 %parse-param { TQParserState *state }
 
 %token <dbl>  tNUMBER
-%token <cStr> tSTRING
+%token <cStr> tSTRING tREGEX
 %token <cStr> tCONSTANT
 %token <cStr> tIDENTIFIER
 %token <cStr> tGREATEROREQUALOP tLESSEROREQUALOP tEQUALOP tINEQUALOP
@@ -78,6 +79,7 @@
 %type <nil_> Nil
 %type <array> Array
 %type <dict> Dictionary
+%type <regex> RegularExpression
 
 %type <node> Literal Statement Expression Callee Lhs CallArg MessageArg MessageReceiver Rhs
 %type <nsarr> Statements CallArgs MessageArgs ClassBody ClassDef MethodArgs MethodBody BlockArgs ArrayItems
@@ -218,6 +220,7 @@ Expression:
 	| Nil
 	| Array
 	| Dictionary
+	| RegularExpression
 	| Expression '>' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorGreater left:$1 right:$3]; }
 	| Expression '<' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorLesser left:$1 right:$3]; }
 	| Expression '*' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorMultiply left:$1 right:$3]; }
@@ -257,6 +260,9 @@ DictionaryItems:
 		[$$ setObject:$3 forKey:$1];
 	}
 	| DictionaryItems ',' Expression tMAPPINGOP Expression { [$$ setObject:$5 forKey:$3]; }
+	;
+RegularExpression:
+	 tREGEX                                  { $$ = [TQNodeRegex nodeWithPattern:[NSString stringWithUTF8String:$1]]; }
 	;
 
 
