@@ -1,0 +1,44 @@
+"Tranquil Grammar" {
+expression         = call
+                   | literal
+                   | variable
+                   | variable_def
+                   | block
+                   | member_access
+                   | object_def
+                   | '(' expression ')'.
+
+lhs                = variable
+                   | member_access.
+
+block              = '{' [ [arguments] PIPE ] expression '}'.
+call               = lhs [arguments] '.'.
+arguments          = ':' argument
+                   | arguments [argument_name] ':' argument.
+argument           = expression.
+argument_name      = IDENTIFIER.
+
+
+variable_def       = lhs '=' expression.
+variable           = identifier.
+
+object_def         = '[' [object_methods] ']'.
+object_method      = identifier '->' expression.
+object_methods     = [object_methods] object_method.
+
+member_access      = lhs '#' identifier.
+message            = lhs call
+
+
+literal            = number
+                   | string.
+
+string             = '"' { character } '"'
+                   | "'" { character } "'".
+
+identifier         = (letter | '_') { letter | DIGIT | '_' }.
+letter             = '[a-zA-z]'.
+digit              = '[0-9]'.
+number             = {digit} [ '.' {digit}] [ 'e' {digit} ]
+                   | '.' {digit}.
+}

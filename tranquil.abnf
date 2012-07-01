@@ -1,0 +1,57 @@
+; Grammar
+
+ROOT            = EXPR CRLF CRLF [ROOT]
+
+ARG_NAME        = IDENTIFIER
+ARGS            = EXPR [ [ARG_NAME] COLON ARGS ]
+CALL            = EXPR [COLON ARGS] SEMICOLON
+
+BLOCK           = LBRACE [ ARG_DEFS PIPE ] CRLF EXPR CRLF RBRACE
+ARG_DEFS        = ARG_DEF [ [ARG_NAME] COLON ARG_DEFS ]
+ARG_DEF         = IDENTIFIER
+
+VAR_DEF         = VAR OP_ASGN EXPR
+VAR             = IDENTIFIER
+
+EXPR            = CALL
+                / LITERAL
+                / VAR
+                / VAR_DEF
+                / BLOCK
+                / LPAREN EXPR RPAREN
+                / OBJ_ACCESS
+                / OBJ
+
+OBJ_MEMBER      = IDENTIFIER OP_ASGN EXPR
+OBJ_MEMBERS     = OBJ_MEMBER [COMMA OBJ_MEMBERS]
+OBJ             = LBRACKET [OBJ_MEMBERS] RBRACKET CRLF
+
+OBJ_ACCESS      = VAR DOT IDENTIFIER
+
+LITERAL         = NUMBER
+                / STRING
+
+; Tokens
+
+LPAREN          = '('
+RPAREN          = ')'
+LBRACE          = '{'
+RBRACE          = '}'
+LBRACKET        = '['
+RBRACKET        = ']'
+
+COLON           = ':'
+SEMICOLON       = ';'
+PIPE            = '|'
+DOT             = '.'
+COMMA           = ','
+
+OP_ASGN         = "="
+
+NUMBER          = 1*3DIGIT
+                / 1*3DIGIT"."1*3DIGIT
+
+STRING          = '"string"'
+                / "'" 'string' "'"
+
+IDENTIFIER      = 'identifier'
