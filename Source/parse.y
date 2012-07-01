@@ -59,7 +59,7 @@
 
 %type <number> Number
 %type <string> String
-%type <identifier> Identifier
+%type <identifier> Identifier MethodName Operator
 %type <constant> Constant ClassName
 %type <variable> Variable Super Self
 %type <block> Block
@@ -265,7 +265,7 @@ ClassMethod:    '+' MethodDef { $$ = $2; [$$ setType:kTQClassMethod]; }
 InstanceMethod: '-' MethodDef { $$ = $2; [$$ setType:kTQInstanceMethod]; }
 	;
 MethodDef:
-	Identifier MethodArgs MethodBody {
+	MethodName MethodArgs MethodBody {
 		NSError *err = nil;
 		$$ = [TQNodeMethod node];
 		[[$2 objectAtIndex:0] setIdentifier:[$1 value]];
@@ -285,6 +285,10 @@ MethodDef:
 			yyerror(&yylloc, state, [[err localizedDescription] UTF8String]);
 		[$$ setStatements:$2];
 	}
+	;
+MethodName:
+	  Identifier
+	| Operator
 	;
 MethodArgs:
 	':' Identifier OptLn {
@@ -389,6 +393,19 @@ Identifier: tIDENTIFIER {  $$ = [TQNodeIdentifier nodeWithCString:$1]; }
 	;
 
 Constant: tCONSTANT     {  $$ = [TQNodeConstant nodeWithCString:$1]; }
+	;
+
+Operator:
+	  '>'               { $$ = [TQNodeIdentifier nodeWithCString:">"]; }
+	| '<'               { $$ = [TQNodeIdentifier nodeWithCString:"<"]; }
+	| '*'               { $$ = [TQNodeIdentifier nodeWithCString:"*"]; }
+	| '/'               { $$ = [TQNodeIdentifier nodeWithCString:"/"]; }
+	| '+'               { $$ = [TQNodeIdentifier nodeWithCString:"+"]; }
+	| '-'               { $$ = [TQNodeIdentifier nodeWithCString:"-"]; }
+	| tEQUALOP          { $$ = [TQNodeIdentifier nodeWithCString:"=="]; }
+	| tINEQUALOP        { $$ = [TQNodeIdentifier nodeWithCString:"!="]; }
+	| tGREATEROREQUALOP { $$ = [TQNodeIdentifier nodeWithCString:">="]; }
+	| tLESSEROREQUALOP  { $$ = [TQNodeIdentifier nodeWithCString:"<="]; }
 	;
 
 %%

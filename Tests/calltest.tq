@@ -15,7 +15,12 @@ print("%@ %@", myBlock, numAsStr)
 		print("From: %@ To: %@", iMethArg, self)
 	}
 	- if: ifBlk else: elseBlk `ifBlk()`
+	- +: b {
+		print("Adding (Not really)")
+		^1
+	}
 }
 
 foo = Foo new
+unuse = foo + 3
 ^foo if: `myBlock` else: myBlock
