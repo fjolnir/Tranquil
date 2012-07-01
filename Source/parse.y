@@ -27,6 +27,7 @@
 	TQNodeIdentifier *identifier;
 	TQNodeReturn *ret;
 	TQNodeConstant *constant;
+	TQNodeNil *nil_;
 	NSMutableArray *array;
 }
 
@@ -56,6 +57,7 @@
 %token <cStr> tIDENTIFIER
 %token <cStr> tGREATEROREQUALOP tLESSEROREQUALOP tEQUALOP tINEQUALOP
 %token <cStr> tSUPER tSELF
+%token tNIL
 
 %type <number> Number
 %type <string> String
@@ -70,8 +72,9 @@
 %type <memberAccess> Property
 %type <op> Assignment SubscriptExpression
 %type <ret> Return
+%type <nil_> Nil
 
-%type <node> Literal Statement Expression Callee Lhs CallArg MessageArg MessageReceiver
+%type <node> Literal Statement Expression Callee Lhs CallArg MessageArg MessageReceiver Rhs
 %type <array> Statements CallArgs MessageArgs ClassBody ClassDef MethodArgs MethodBody BlockArgs
 
 %left '>' '<'
@@ -180,13 +183,18 @@ MessageArg:
 	;
 
 Assignment:
-	Lhs '=' Expression  { $$ = [TQNodeOperator nodeWithType:'=' left:$1 right:$3]; }
+	Lhs '=' Rhs  { $$ = [TQNodeOperator nodeWithType:'=' left:$1 right:$3]; }
 	;
 
 Lhs:
 	  Variable
 	| Property
 	| SubscriptExpression
+	;
+
+Rhs:
+      Expression
+	| Assignment
 	;
 
 Return:
@@ -201,6 +209,7 @@ Expression:
 	| Block
 	| Self
 	| Property
+	| Nil
 	| Expression '>' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorGreater left:$1 right:$3]; }
 	| Expression '<' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorLesser left:$1 right:$3]; }
 	| Expression '*' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorMultiply left:$1 right:$3]; }
@@ -397,6 +406,9 @@ Identifier: tIDENTIFIER {  $$ = [TQNodeIdentifier nodeWithCString:$1]; }
 Constant: tCONSTANT     {  $$ = [TQNodeConstant nodeWithCString:$1]; }
 	;
 
+Nil: tNIL               { $$ = [TQNodeNil node]; }
+	;
+
 Operator:
 	  '>'               { $$ = [TQNodeIdentifier nodeWithCString:">"]; }
 	| '<'               { $$ = [TQNodeIdentifier nodeWithCString:"<"]; }
@@ -425,10 +437,17 @@ int yywrap(void)
 	return 1;
 }
 
+void *yy_scan_string (const char *yy_str  );
 void parse()
 {
-	yydebug = true;
+	yydebug = false;
 	TQParserState state = { [TQProgram programWithName:@"Test"], nil };
+	char test[] = "fib = { n |\n"
+	"^(n <= 1) if: `n` else: `fib(n-1) + fib(n-2)`\n"
+"}\n"
+"^fib(35)\n";
+    /*void *my_string_buffer = yy_scan_string (test);*/
+
 	yyparse(&state);
 	NSLog(@"------------------------------------------");
 	NSLog(@"%@", state.program);

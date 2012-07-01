@@ -17,3 +17,4 @@
 #import "CodeGen/TQNodeString.h"
 #import "CodeGen/TQNodeVariable.h"
 #import "CodeGen/TQNodeConstant.h"
+#import "CodeGen/TQNodeNil.h"
