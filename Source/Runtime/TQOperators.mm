@@ -1,4 +1,4 @@
-#import "NSNumber+TQOperators.h"
+#import "TQOperators.h"
 
 @implementation NSNumber (TQOperators)
 - (NSNumber *)add:(NSNumber *)b

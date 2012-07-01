@@ -36,13 +36,13 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
 {
 	NSMutableString *out = [NSMutableString stringWithString:@"<call@ "];
 	if(_callee)
-		[out appendFormat:@"%@: ", _callee];
+		[out appendFormat:@"%@(", _callee];
 
 	for(TQNodeArgument *arg in _arguments) {
 		[out appendFormat:@"%@ ", arg];
 	}
 
-	[out appendString:@".>"];
+	[out appendString:@")>"];
 	return out;
 }
 

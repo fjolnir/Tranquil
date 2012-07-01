@@ -1,14 +1,14 @@
 captureMePlease = "hey I was defined in the root block!"
 a = { arg |
 		block = { arg |
-			arg = arg stringByAppendingString:captureMePlease.
-			return arg
+			arg = arg stringByAppendingString:captureMePlease
+			^arg
 		}
-		return block(arg).
+		^block(arg)
 }
 myBlock = a
-numAsStr = a("foo" stringByAppendingString: 321 stringValue.)
-numAsStr = numAsStr stringByAppendingString:" Three Two One".
+numAsStr = a("foo" stringByAppendingString: (321 stringValue))
+numAsStr = numAsStr stringByAppendingString:" Three Two One"
 print("%@ %@", myBlock, numAsStr)
 
 #Foo < NSObject {
@@ -20,4 +20,4 @@ print("%@ %@", myBlock, numAsStr)
 	}
 }
 
-return myBlock.
+^myBlock
