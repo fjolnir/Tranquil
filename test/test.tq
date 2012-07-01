@@ -1,0 +1,20 @@
+\ Parser test
+object#truthValue if: {
+	("String with spaces" downcase.) split: a#b.
+} else: {
+	"Foobar" print.
+}.
+
+class MyClass < NSObject
+- init {
+	self = super init.
+	self#ivar = "initialized"
+	return: self.
+}
+- doThis: this withThat: that andThat: otherThing {
+	this: that :otherThing.
+}
+end
+
+instance = MyClass new.
+instance doThis: someOtherObject#this withThat: somethingElse andThat: 1234.
