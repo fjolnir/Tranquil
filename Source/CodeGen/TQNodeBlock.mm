@@ -100,6 +100,7 @@ using namespace llvm;
         return descriptorType;
 
     Type *i8PtrTy = aProgram.llInt8PtrTy;
+    Type *i8Ty = aProgram.llInt8Ty;
     Type *longTy  = aProgram.llInt64Ty; // Should be unsigned
 
     descriptorType = StructType::create("struct.__block_descriptor",
@@ -107,6 +108,12 @@ using namespace llvm;
                                         longTy,  // size ( = sizeof(literal))
                                         i8PtrTy, // copy_helper(void *dst, void *src)
                                         i8PtrTy, // dispose_helper(void *blk)
+                                        i8PtrTy, // signature
+                                        i8PtrTy, // GC info (Unused in objc2 => always NULL)
+                                        // Following are only read if the block's flags indicate TQ_BLOCK_IS_TRANQUIL_BLOCK
+                                        // (Which they do for all tranquil blocks)
+                                        i8Ty,    // numArgs
+                                        i8Ty,    // isVariadic
                                         NULL);
     descriptorType = PointerType::getUnqual(descriptorType);
     return descriptorType;
@@ -147,6 +154,7 @@ using namespace llvm;
         return _blockDescriptor;
 
     llvm::Module *mod = aProgram.llModule;
+    Type *int8Ty = aProgram.llInt8Ty;
     SmallVector<llvm::Constant*, 6> elements;
 
     // reserved
@@ -162,13 +170,16 @@ using namespace llvm;
     elements.push_back(ConstantExpr::getBitCast((GlobalVariable*)_builder->CreateGlobalString([[self signature] UTF8String]), aProgram.llInt8PtrTy));
 
     // GC Layout (unused in objc 2)
-    //elements.push_back(llvm::Constant::getNullValue(aProgram.llInt8PtrTy));
+    elements.push_back(llvm::Constant::getNullValue(aProgram.llInt8PtrTy));
+
+    elements.push_back(llvm::ConstantInt::get(int8Ty, [_arguments count]));
+    elements.push_back(llvm::ConstantInt::get(int8Ty, 0)); // isVariadic? always false for now
 
     llvm::Constant *init = llvm::ConstantStruct::getAnon(elements);
 
     llvm::GlobalVariable *global = new llvm::GlobalVariable(*mod, init->getType(), true,
                                     llvm::GlobalValue::InternalLinkage,
-                                    init, "__tq_block_descriptor_tmp");
+                                    init, "__tq_block_descriptor");
 
     _blockDescriptor = llvm::ConstantExpr::getBitCast(global, [self _blockDescriptorTypeInProgram:aProgram]);
 
@@ -202,7 +213,7 @@ using namespace llvm;
     isaPtr =  pBuilder->CreateBitCast(isaPtr, i8PtrTy);
 
     // __flags
-    int flags = TQ_BLOCK_HAS_COPY_DISPOSE | TQ_BLOCK_HAS_SIGNATURE;
+    int flags = TQ_BLOCK_HAS_COPY_DISPOSE | TQ_BLOCK_HAS_SIGNATURE | TQ_BLOCK_IS_TRANQUIL_BLOCK;
     Value *invoke = pBuilder->CreateBitCast(_function, i8PtrTy, "invokePtr");
     Constant *descriptor = [self _generateBlockDescriptorInProgram:aProgram];
 
