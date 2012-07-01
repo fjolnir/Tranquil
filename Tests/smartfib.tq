@@ -1,0 +1,11 @@
+fib = { index, curr, succ |
+	num = curr + succ
+	^(index > 2) if: {
+		^fib(index - 1, succ, num)
+	} else: {
+		^num
+	}
+}
+
+r = fib(1000000, 0, 1) \ Calculate the 50th number in the fibonacci sequence
+^r
