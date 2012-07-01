@@ -210,7 +210,8 @@ using namespace llvm;
 
 
 	// Initialize the variable to nil
-	builder->CreateStore(builder->CreateBitCast(alloca, i8PtrTy),        builder->CreateStructGEP(alloca, 1, [self _llvmRegisterName:@"forwarding"]));
+	builder->CreateStore(builder->CreateBitCast(alloca, i8PtrTy),        builder->CreateStructGEP(alloca, 1, [self
+	_llvmRegisterName:@"forwardingAssign"]));
 	builder->CreateStore(ConstantInt::get(intTy, TQ_BLOCK_HAS_COPY_DISPOSE), builder->CreateStructGEP(alloca, 2, [self _llvmRegisterName:@"flags"]));
 	Constant *size = ConstantExpr::getTruncOrBitCast(ConstantExpr::getSizeOf(byRefType), intTy);
 	builder->CreateStore(size,                                           builder->CreateStructGEP(alloca, 3, [self _llvmRegisterName:@"size"]));

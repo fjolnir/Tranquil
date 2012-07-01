@@ -69,7 +69,9 @@ using namespace llvm;
 	return selStr;
 }
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
+
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock
+                         withArguments:(std::vector<llvm::Value*>)aArgs error:(NSError **)aoErr
 {
 	llvm::IRBuilder<> *builder = aBlock.builder;
 
@@ -96,24 +98,33 @@ using namespace llvm;
 	}
 	selectorGlobal = builder->CreateLoad(selectorGlobal);
 
-	std::vector<Value*> args;
-	args.push_back([_receiver generateCodeInProgram:aProgram block:aBlock error:aoErr]);
-	args.push_back(selectorGlobal);
 
+	aArgs.insert(aArgs.begin(), selectorGlobal);
+	aArgs.insert(aArgs.begin(), [_receiver generateCodeInProgram:aProgram block:aBlock error:aoErr]);
+
+
+	Value *ret;
+	//if([_receiver isMemberOfClass:[TQNodeSuper class]])
+		//return NULL; // TODO: implement super calls
+	//else
+		ret = builder->CreateCall(aProgram.objc_msgSend, aArgs);
+	if(needsAutorelease)
+		ret = builder->CreateCall(aProgram.TQAutoreleaseObject, ret);
+	return ret;
+}
+
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
+{
+	llvm::IRBuilder<> *builder = aBlock.builder;
+
+	std::vector<Value*> args;
 	for(TQNodeArgument *arg in _arguments) {
 		if(!arg.passedNode)
 			break;
 		args.push_back([arg generateCodeInProgram:aProgram block:aBlock error:aoErr]);
 	}
 
-	Value *ret;
-	if([_receiver isMemberOfClass:[TQNodeSuper class]])
-		return NULL; // TODO: implement super calls
-	else
-		ret = builder->CreateCall(aProgram.objc_msgSend, args);
-	if(needsAutorelease)
-		ret = builder->CreateCall(aProgram.TQAutoreleaseObject, ret);
-	return ret;
+	return [self generateCodeInProgram:aProgram block:aBlock withArguments:args error:aoErr];
 }
 
 @end
