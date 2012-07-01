@@ -1,9 +1,10 @@
 // Note: TQNumber is not safe to subclass. It makes certain assumptions for the sake of performance
 
 #import <Foundation/Foundation.h>
+#import "TQObject.h"
 #import "TQPooling.h"
 
-@interface TQNumber : NSObject {
+@interface TQNumber : TQObject {
     @public
     double _value;
     TQ_POOL_IVARS

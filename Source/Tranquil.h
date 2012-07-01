@@ -1,3 +1,4 @@
+#import "TQObject.h"
 #import "TQProgram.h"
 #import "Runtime/TQRuntime.h"
 #import "Runtime/TQOperators.h"
