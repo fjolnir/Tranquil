@@ -30,7 +30,7 @@ using namespace llvm;
     _basicBlock = NULL;
 
     // Block invocations are always passed the block itself as the first argument
-    [self addArgument:[TQNodeArgumentDef nodeWithName:@"__blk" selectorPart:nil] error:nil];
+    [self addArgument:[TQNodeArgumentDef nodeWithName:@"__blk"] error:nil];
 
     return self;
 }

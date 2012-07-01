@@ -4,22 +4,14 @@
 using namespace llvm;
 
 @implementation TQNodeArgumentDef
-@synthesize name=_name, selectorPart=_selectorPart, defaultArgument=_defaultArgument;
+@synthesize name=_name, defaultArgument=_defaultArgument;
 
-+ (TQNodeArgumentDef *)nodeWithName:(NSString *)aName selectorPart:(NSString *)aIdentifier
++ (TQNodeArgumentDef *)nodeWithName:(NSString *)aName
 {
-    return [[[self alloc] initWithName:aName selectorPart:aIdentifier] autorelease];
-}
+    TQNodeArgumentDef *ret = [[self alloc] init];
+    ret.name = aName;
 
-- (id)initWithName:(NSString *)aName selectorPart:(NSString *)aIdentifier
-{
-    if(!(self = [super init]))
-        return nil;
-
-    _name = [aName retain];
-    _selectorPart = [aIdentifier retain];
-
-    return self;
+    return [ret autorelease];
 }
 
 - (NSUInteger)hash
@@ -29,12 +21,11 @@ using namespace llvm;
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<argdef@ %@: %@>", _selectorPart, _name];
+    return [NSString stringWithFormat:@"<argdef@ %@>", _name];
 }
 
 - (void)dealloc
 {
-    [_selectorPart release];
     [_name release];
     [super dealloc];
 }
@@ -54,4 +45,29 @@ using namespace llvm;
         return ref;
     return nil;
 }
+@end
+
+@implementation TQNodeMethodArgumentDef
+@synthesize selectorPart=_selectorPart;
+
++ (TQNodeMethodArgumentDef *)nodeWithName:(NSString *)aName selectorPart:(NSString *)aSelectorPart
+{
+    TQNodeMethodArgumentDef *ret = [[self alloc] init];
+    ret.name = aName;
+    ret.selectorPart = aSelectorPart;
+
+    return [ret autorelease];
+}
+
+- (void)dealloc
+{
+    [_selectorPart release];
+    [super dealloc];
+}
+
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<argdef@ %@: %@>", _selectorPart, _name];
+}
+
 @end

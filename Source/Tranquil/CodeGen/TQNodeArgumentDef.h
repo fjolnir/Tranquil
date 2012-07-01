@@ -1,10 +1,17 @@
 #import <Tranquil/CodeGen/TQNode.h>
 
-@interface TQNodeArgumentDef : TQNode
-@property(readwrite, retain) NSString *selectorPart;
+@interface TQNodeArgumentDef : TQNode {
+	@protected
+		NSString *_name;
+}
 @property(readwrite, retain) NSString *name;
 @property(readwrite, retain) TQNode *defaultArgument;
 
-+ (TQNodeArgumentDef *)nodeWithName:(NSString *)aName selectorPart:(NSString *)aIdentifier;
-- (id)initWithName:(NSString *)aName selectorPart:(NSString *)aIdentifier;
++ (TQNodeArgumentDef *)nodeWithName:(NSString *)aName;
+@end
+
+@interface TQNodeMethodArgumentDef : TQNodeArgumentDef
+@property(readwrite, retain) NSString *selectorPart;
+
++ (TQNodeArgumentDef *)nodeWithName:(NSString *)aName selectorPart:(NSString *)aSelectorPart;
 @end

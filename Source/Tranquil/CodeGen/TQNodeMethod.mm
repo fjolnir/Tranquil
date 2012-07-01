@@ -27,7 +27,7 @@ using namespace llvm;
 
     // Methods must take a self argument
     //[[self arguments] removeAllObjects];
-    [self addArgument:[TQNodeArgumentDef nodeWithName:@"self" selectorPart:nil] error:nil];
+    [self addArgument:[TQNodeMethodArgumentDef nodeWithName:@"self" selectorPart:nil] error:nil];
 
     return self;
 }
@@ -37,7 +37,7 @@ using namespace llvm;
     return [self initWithType:kTQInstanceMethod];
 }
 
-- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoError
+- (BOOL)addArgument:(TQNodeMethodArgumentDef *)aArgument error:(NSError **)aoError
 {
     if(self.arguments.count == 2)
         TQAssertSoft(aArgument.selectorPart != nil,
@@ -64,7 +64,7 @@ using namespace llvm;
         default:
             [out appendString:@"- "];
     }
-    for(TQNodeArgument *arg in self.arguments) {
+    for(TQNodeMethodArgumentDef *arg in self.arguments) {
         [out appendFormat:@"%@ ", arg];
     }
     [out appendString:@"{"];
@@ -82,7 +82,7 @@ using namespace llvm;
 - (NSString *)_selectorString
 {
     NSMutableString *selector = [NSMutableString string];
-    for(TQNodeArgumentDef *arg in self.arguments) {
+    for(TQNodeMethodArgumentDef *arg in self.arguments) {
         if([arg isEqual:@"__blk"] || [arg.name isEqualToString:@"self"])
             continue;
         if(arg.selectorPart)

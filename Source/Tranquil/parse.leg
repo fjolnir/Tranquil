@@ -199,7 +199,7 @@ Block        = '{' --
                    }
                    [$$ setStatements:[NSMutableArray arrayWithObject:[TQNodeReturn nodeWithValue:expr]]];
                }
-BlockArgDef  = name:Identifier { [StackTop addObject:[TQNodeArgumentDef nodeWithName:name selectorPart:nil]]; }
+BlockArgDef  = name:Identifier { [StackTop addObject:[TQNodeArgumentDef nodeWithName:name]]; }
                 (- "=" -- default:Expression { [[StackTop lastObject] setDefaultArgument:default]; })? 
 
 
@@ -262,7 +262,7 @@ MethodArgs   = selIdentifier:SelIdent
                {
                    ExtendToken();
                    PushStack([NSMutableArray array]);
-                   [StackTop addObject:[TQNodeArgumentDef nodeWithName:nil selectorPart:selIdentifier]];
+                   [StackTop addObject:[TQNodeMethodArgumentDef nodeWithName:nil selectorPart:selIdentifier]];
                }
                (':' -- name:Identifier -- MethodArg*)?
                {
@@ -272,7 +272,7 @@ MethodArgs   = selIdentifier:SelIdent
 MethodArg    = identifier:Identifier':' -- name:Identifier
                {
                    ExtendToken();
-                   [StackTop addObject:[TQNodeArgumentDef nodeWithName:name selectorPart:identifier]];
+                   [StackTop addObject:[TQNodeMethodArgumentDef nodeWithName:name selectorPart:identifier]];
                }
 
 
