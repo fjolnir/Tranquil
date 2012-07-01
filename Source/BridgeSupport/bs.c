@@ -46,20 +46,20 @@ get_framework_name(const char *path)
   char *base;
   char *name;
   char *p;
-  
+
   base = basename((char *)path);
   if (base == NULL)
     return NULL;
-    
+
   p = strrchr(base, '.');
   if (p == NULL)
     return NULL;
 
   if (strcmp(p + 1, "framework") != 0)
     return NULL;
-  
+
   assert(p - base > 0);
-  
+
   name = (char *)malloc(p - base + 1);
   ASSERT_ALLOC(name);
   strncpy(name, base, p - base);
@@ -82,7 +82,7 @@ _bs_main_bundle_bs_path(void)
     if (bundle != NULL) {
       CFURLRef url;
 
-      url = CFBundleCopyResourceURL(bundle, CFSTR("BridgeSupport"), 
+      url = CFBundleCopyResourceURL(bundle, CFSTR("BridgeSupport"),
                                     NULL, NULL);
       if (url != NULL) {
         CFStringRef str = CFURLCopyPath(url);
@@ -105,7 +105,7 @@ _bs_find_path(const char *framework_path, char *path, const size_t path_len,
   char *framework_name;
   char *home;
 
-  if (framework_path == NULL || *framework_path == '\0' 
+  if (framework_path == NULL || *framework_path == '\0'
       || path == NULL || path_len == 0)
     return false;
 
@@ -139,7 +139,7 @@ _bs_find_path(const char *framework_path, char *path, const size_t path_len,
       home, framework_name, ext);
     CHECK_IF_EXISTS();
   }
-  
+
   snprintf(path, path_len, "/Library/BridgeSupport/%s.%s",
     framework_name, ext);
   CHECK_IF_EXISTS();
@@ -151,10 +151,10 @@ _bs_find_path(const char *framework_path, char *path, const size_t path_len,
 #undef CHECK_IF_EXISTS
 
   free(framework_name);
-  return false;  
+  return false;
 }
 
-bool 
+bool
 bs_find_path(const char *framework_path, char *path, const size_t path_len)
 {
   return _bs_find_path(framework_path, path, path_len, "bridgesupport");
@@ -184,7 +184,7 @@ get_type_attribute(xmlTextReaderPtr reader)
 }
 
 static void
-get_c_ary_type_attribute(xmlTextReaderPtr reader, bs_carray_arg_type_t *type, 
+get_c_ary_type_attribute(xmlTextReaderPtr reader, bs_carray_arg_type_t *type,
                          int *value)
 {
   char *c_ary_type;
@@ -193,17 +193,17 @@ get_c_ary_type_attribute(xmlTextReaderPtr reader, bs_carray_arg_type_t *type,
     *type = BS_CARRAY_ARG_LENGTH_IN_ARG;
     *value = atoi(c_ary_type);
   }
-  else if ((c_ary_type = get_attribute(reader, "c_array_of_fixed_length")) 
+  else if ((c_ary_type = get_attribute(reader, "c_array_of_fixed_length"))
            != NULL) {
     *type = BS_CARRAY_ARG_FIXED_LENGTH;
     *value = atoi(c_ary_type);
   }
-  else if ((c_ary_type = get_attribute(reader, "c_array_of_variable_length")) 
+  else if ((c_ary_type = get_attribute(reader, "c_array_of_variable_length"))
            != NULL && strcmp(c_ary_type, "true") == 0) {
     *type = BS_CARRAY_ARG_VARIABLE_LENGTH;
     *value = -1;
   }
-  else if ((c_ary_type = get_attribute(reader, "c_array_delimited_by_null")) 
+  else if ((c_ary_type = get_attribute(reader, "c_array_delimited_by_null"))
            != NULL && strcmp(c_ary_type, "true") == 0) {
     *type = BS_CARRAY_ARG_DELIMITED_BY_NULL;
     *value = -1;
@@ -221,9 +221,9 @@ static void
 get_type_modifier_attribute(xmlTextReaderPtr reader, bs_type_modifier_t *type)
 {
   char *type_modifier = get_attribute(reader, "type_modifier");
-  
+
   *type = BS_TYPE_MODIFIER_UNDEFINED;
-  
+
   if (type_modifier != NULL && strlen(type_modifier) == 1) {
     switch (*type_modifier) {
       case 'n':
@@ -238,10 +238,10 @@ get_type_modifier_attribute(xmlTextReaderPtr reader, bs_type_modifier_t *type)
     }
   }
   free(type_modifier);
-} 
+}
 
 static inline bool
-get_boolean_attribute(xmlTextReaderPtr reader, const char *name, 
+get_boolean_attribute(xmlTextReaderPtr reader, const char *name,
                       bool default_value)
 {
   char *value;
@@ -261,9 +261,9 @@ get_boolean_attribute(xmlTextReaderPtr reader, const char *name,
 # define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
-static bool 
-undecorate_struct_type(const char *src, char *dest, size_t dest_len, 
-                       bs_element_struct_field_t *fields, 
+static bool
+undecorate_struct_type(const char *src, char *dest, size_t dest_len,
+                       bs_element_struct_field_t *fields,
                        size_t fields_count, int *out_fields_count)
 {
   const char *p_src;
@@ -303,16 +303,16 @@ undecorate_struct_type(const char *src, char *dest, size_t dest_len,
     pos = strchr(p_src, '"');
     if (pos == NULL) {
       fprintf(stderr, "Can't find the end of field delimiter starting at %d\n", (int)(p_src - src));
-      goto bails; 
+      goto bails;
     }
     if (field != NULL) {
       field->name = (char *)malloc((sizeof(char) * (pos - p_src)) + 1);
       ASSERT_ALLOC(field->name);
       strncpy(field->name, p_src, pos - p_src);
       field->name[pos - p_src] = '\0';
-      field_idx++; 
+      field_idx++;
     }
-    p_src = pos + 1; 
+    p_src = pos + 1;
     pos = NULL;
 
     /* Save the field encoding if necessary. */
@@ -321,13 +321,13 @@ undecorate_struct_type(const char *src, char *dest, size_t dest_len,
       bool ok;
       int nested;
 
-      opposite = 
+      opposite =
       *p_src == '{' ? '}' :
       *p_src == '(' ? ')' :
       *p_src == '[' ? ']' : 0;
 
       for (i = 0, ok = false, nested = 0;
-           i < src_len - (p_src - src) && !ok; 
+           i < src_len - (p_src - src) && !ok;
            i++) {
 
         char c = p_src[i];
@@ -340,7 +340,7 @@ undecorate_struct_type(const char *src, char *dest, size_t dest_len,
             if (nested == 0)
               ok = true;
             else
-              nested--;  
+              nested--;
           }
           else if (c == *p_src && i > 0)
             nested++;
@@ -352,7 +352,7 @@ undecorate_struct_type(const char *src, char *dest, size_t dest_len,
           if (c == '"' || c == '}') {
             i--;
             ok = true;
-          } 
+          }
         }
       }
 
@@ -364,16 +364,16 @@ undecorate_struct_type(const char *src, char *dest, size_t dest_len,
       if (opposite == '}' || opposite == ')') {
         char buf[MAX_ENCODE_LEN];
         char buf2[MAX_ENCODE_LEN];
- 
+
         strncpy(buf, p_src, MIN(sizeof buf, i));
-        buf[MIN(sizeof buf, i)] = '\0';        
-     
+        buf[MIN(sizeof buf, i)] = '\0';
+
         if (!undecorate_struct_type(buf, buf2, sizeof buf2, NULL, 0, NULL)) {
           fprintf(stderr, "Can't un-decode the field encoding '%s'\n", buf);
           goto bails;
         }
 
-        len = strlen(buf2); 
+        len = strlen(buf2);
         field->type = (char *)malloc((sizeof(char) * len) + 1);
         ASSERT_ALLOC(field->type);
         strncpy(field->type, buf2, len);
@@ -410,7 +410,7 @@ bails:
 
 struct _bs_parser {
   unsigned int version_number;
-  CFMutableArrayRef loaded_paths; 
+  CFMutableArrayRef loaded_paths;
 };
 
 bs_parser_t *
@@ -420,7 +420,7 @@ bs_parser_new(void)
 
   parser = (struct _bs_parser *)malloc(sizeof(struct _bs_parser));
   ASSERT_ALLOC(parser);
-  parser->loaded_paths = 
+  parser->loaded_paths =
     CFArrayCreateMutable(kCFAllocatorMalloc, 0, &kCFTypeArrayCallBacks);
 
   return parser;
@@ -433,9 +433,9 @@ bs_parser_free(bs_parser_t *parser)
   free(parser);
 }
 
-bool 
-bs_parser_parse(bs_parser_t *parser, const char *path, 
-                const char *framework_path, bs_parse_options_t options, 
+bool
+bs_parser_parse(bs_parser_t *parser, const char *path,
+                const char *framework_path, bs_parse_options_t options,
                 bs_parse_callback_t callback, void *context, char **error)
 {
   xmlTextReaderPtr reader;
@@ -549,14 +549,14 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
 
       node_type = xmlTextReaderNodeType(reader);
     }
-    while (node_type != XML_READER_TYPE_ELEMENT 
-           && node_type != XML_READER_TYPE_END_ELEMENT);    
-    
+    while (node_type != XML_READER_TYPE_ELEMENT
+           && node_type != XML_READER_TYPE_END_ELEMENT);
+
     if (eof)
       break;
 
     name = (const char *)xmlTextReaderConstName(reader);
-    namelen = strlen(name); 
+    namelen = strlen(name);
 
     bs_element = NULL;
 
@@ -599,16 +599,16 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
           char *depends_on_path;
           char bs_path[PATH_MAX];
           bool bs_path_found;
-          
+
           depends_on_path = get_attribute(reader, "path");
           CHECK_ATTRIBUTE(depends_on_path, "path");
 
 //printf("depends of %s\n", depends_on_path);
-          
-          bs_path_found = bs_find_path(depends_on_path, bs_path, 
+
+          bs_path_found = bs_find_path(depends_on_path, bs_path,
                                        sizeof bs_path);
           if (bs_path_found) {
-            if (!bs_parser_parse(parser, bs_path, depends_on_path, options, 
+            if (!bs_parser_parse(parser, bs_path, depends_on_path, options,
                                  callback, context, error)) {
               free(depends_on_path);
               return false;
@@ -618,8 +618,8 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
           break;
         }
 
-        case BS_XML_CONSTANT: 
-        { 
+        case BS_XML_CONSTANT:
+        {
           bs_element_constant_t *bs_const;
           char *const_name;
           char *const_type;
@@ -662,7 +662,7 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
 
           bs_strconst->name = strconst_name;
           bs_strconst->value = strconst_value;
-          bs_strconst->nsstring = get_boolean_attribute(reader, "nsstring", 
+          bs_strconst->nsstring = get_boolean_attribute(reader, "nsstring",
             false);
 
           bs_element = bs_strconst;
@@ -670,10 +670,10 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
           break;
         }
 
-        case BS_XML_ENUM: 
-        { 
+        case BS_XML_ENUM:
+        {
           char *enum_name;
-          char *enum_value;        
+          char *enum_value;
 
           enum_name = get_attribute(reader, "name");
           CHECK_ATTRIBUTE(enum_name, "name");
@@ -691,11 +691,11 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
 #endif
 
           if (enum_value == NULL)
-            enum_value = get_attribute(reader, BYTE_ORDER_VALUE_ATTR_NAME); 
-          
+            enum_value = get_attribute(reader, BYTE_ORDER_VALUE_ATTR_NAME);
+
           if (enum_value != NULL) {
             bs_element_enum_t *bs_enum;
-   
+
             bs_enum = (bs_element_enum_t *)malloc(sizeof(bs_element_enum_t));
             ASSERT_ALLOC(bs_enum);
 
@@ -703,14 +703,14 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
             bs_enum->value = enum_value;
             bs_enum->ignore = get_boolean_attribute(reader, "ignore", false);
             bs_enum->suggestion = get_attribute(reader, "suggestion");
-            
+
             bs_element = bs_enum;
             bs_element_type = BS_ELEMENT_ENUM;
           }
           break;
         }
 
-        case BS_XML_STRUCT: 
+        case BS_XML_STRUCT:
         {
           bs_element_struct_t *bs_struct;
           char *struct_decorated_type;
@@ -724,28 +724,28 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
           struct_name = get_attribute(reader, "name");
           CHECK_ATTRIBUTE(struct_name, "name");
 
-          if (!undecorate_struct_type(struct_decorated_type, type, 
-                                      sizeof type, fields, 128, 
+          if (!undecorate_struct_type(struct_decorated_type, type,
+                                      sizeof type, fields, 128,
                                       &field_count)) {
-            BAIL("Can't handle structure '%s' with type '%s'", 
+            BAIL("Can't handle structure '%s' with type '%s'",
                  struct_name, struct_decorated_type);
           }
 
           free(struct_decorated_type);
 
-          bs_struct = 
+          bs_struct =
             (bs_element_struct_t *)malloc(sizeof(bs_element_struct_t));
           ASSERT_ALLOC(bs_struct);
 
           bs_struct->name = struct_name;
           bs_struct->type = strdup(type);
-          
+
           bs_struct->fields = (bs_element_struct_field_t *)malloc(
             sizeof(bs_element_struct_field_t) * field_count);
           ASSERT_ALLOC(bs_struct->fields);
-          memcpy(bs_struct->fields, fields, 
-                 sizeof(bs_element_struct_field_t) * field_count); 
-          
+          memcpy(bs_struct->fields, fields,
+                 sizeof(bs_element_struct_field_t) * field_count);
+
           bs_struct->fields_count = field_count;
           bs_struct->opaque = get_boolean_attribute(reader, "opaque", false);
 
@@ -765,18 +765,18 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
           opaque_type = get_type_attribute(reader);
           CHECK_TYPE_ATTRIBUTE(opaque_type);
 
-          bs_opaque = 
+          bs_opaque =
             (bs_element_opaque_t *)malloc(sizeof(bs_element_opaque_t));
           ASSERT_ALLOC(bs_opaque);
-          
+
           bs_opaque->name = opaque_name;
           bs_opaque->type = opaque_type;
-          
+
           bs_element = bs_opaque;
           bs_element_type = BS_ELEMENT_OPAQUE;
           break;
         }
-        
+
         case BS_XML_CFTYPE:
         {
           bs_element_cftype_t *bs_cftype;
@@ -788,7 +788,7 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
           cftype_type = get_type_attribute(reader);
           CHECK_TYPE_ATTRIBUTE(cftype_type);
 
-          bs_cftype = 
+          bs_cftype =
             (bs_element_cftype_t *)malloc(sizeof(bs_element_cftype_t));
           ASSERT_ALLOC(bs_cftype);
 
@@ -825,8 +825,8 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
           bs_element_type = BS_ELEMENT_CFTYPE;
           break;
         }
-        
-        case BS_XML_INFORMAL_PROTOCOL: 
+
+        case BS_XML_INFORMAL_PROTOCOL:
         {
       if (protocol_name != NULL)
         free(protocol_name);
@@ -835,14 +835,14 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
           break;
         }
 
-        case BS_XML_FUNCTION: 
+        case BS_XML_FUNCTION:
         {
           char *func_name;
-          
+
           func_name = get_attribute(reader, "name");
           CHECK_ATTRIBUTE(func_name, "name");
 
-          func = 
+          func =
             (bs_element_function_t *)malloc(sizeof(bs_element_function_t));
           ASSERT_ALLOC(func);
 
@@ -860,13 +860,13 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
           break;
         }
 
-        case BS_XML_FUNCTION_ALIAS: 
+        case BS_XML_FUNCTION_ALIAS:
         {
           bs_element_function_alias_t *bs_func_alias;
           char *alias_name;
           char *alias_original;
 
-          alias_name = get_attribute(reader, "name"); 
+          alias_name = get_attribute(reader, "name");
           CHECK_ATTRIBUTE(alias_name, "name");
           alias_original = get_attribute(reader, "original");
           CHECK_ATTRIBUTE(alias_original, "original");
@@ -874,7 +874,7 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
           bs_func_alias = (bs_element_function_alias_t *)malloc(
             sizeof(bs_element_function_alias_t));
           ASSERT_ALLOC(bs_func_alias);
-          
+
           bs_func_alias->name = alias_name;
           bs_func_alias->original = alias_original;
 
@@ -883,16 +883,16 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
           break;
         }
 
-        case BS_XML_CLASS: 
+        case BS_XML_CLASS:
         {
           char *class_name;
-          
+
           class_name = get_attribute(reader, "name");
           CHECK_ATTRIBUTE(class_name, "name");
-        
+
           klass = (bs_element_class_t *)malloc(sizeof(bs_element_class_t));
           ASSERT_ALLOC(klass);
-            
+
           klass->name = class_name;
           klass->class_methods = klass->instance_methods = NULL;
           klass->class_methods_count = klass->instance_methods_count = 0;
@@ -902,13 +902,13 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
         case BS_XML_ARG:
         {
           if (func != NULL || method != NULL || func_ptr != NULL) {
-            bs_element_arg_t *bs_arg; 
+            bs_element_arg_t *bs_arg;
             unsigned *argc;
 
             argc = func_ptr != NULL
               ? &func_ptr->args_count
-              : func != NULL 
-                ? &func->args_count 
+              : func != NULL
+                ? &func->args_count
                 : &method->args_count;
 
             if (*argc >= MAX_ARGS) {
@@ -921,7 +921,7 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
               else
                 BAIL("maximum number of arguments (%d) reached " \
                      "for method '%s'", MAX_ARGS, (char *)method->name);
-            } 
+            }
 
         bs_element_arg_t *args_from =
         (func_ptr == NULL ? args : fptr_args);
@@ -936,7 +936,7 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
             else {
               bs_arg->index = -1;
             }
-            
+
             get_type_modifier_attribute(reader, &bs_arg->type_modifier);
 
 #if __LP64__
@@ -945,18 +945,18 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
 #endif
               bs_arg->sel_of_type = get_attribute(reader, "sel_of_type");
 
-            bs_arg->printf_format = get_boolean_attribute(reader, 
-                "printf_format", false); 
-            bs_arg->null_accepted = get_boolean_attribute(reader, 
+            bs_arg->printf_format = get_boolean_attribute(reader,
+                "printf_format", false);
+            bs_arg->null_accepted = get_boolean_attribute(reader,
                 "null_accepted", true);
-            get_c_ary_type_attribute(reader, 
-                &bs_arg->carray_type, &bs_arg->carray_type_value); 
-  
+            get_c_ary_type_attribute(reader,
+                &bs_arg->carray_type, &bs_arg->carray_type_value);
+
             bs_arg->type = get_type_attribute(reader);
 
             if (get_boolean_attribute(reader, "function_pointer", false)) {
               if (func_ptr != NULL) {
-                func_ptr = NULL; 
+                func_ptr = NULL;
         nested_func_ptr = true;
         break;
           }
@@ -977,10 +977,10 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
           break;
         }
 
-        case BS_XML_RETVAL: 
+        case BS_XML_RETVAL:
         {
           if (func != NULL || method != NULL || func_ptr != NULL) {
-            bs_element_retval_t *bs_retval;  
+            bs_element_retval_t *bs_retval;
 
             if (func_ptr != NULL) {
               if (func_ptr->retval != NULL)
@@ -988,25 +988,25 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
             }
             else if (func != NULL) {
               if (func->retval != NULL)
-                BAIL("function '%s' return value defined more than once", 
+                BAIL("function '%s' return value defined more than once",
                      func->name);
             }
             else if (method != NULL) {
               if (method->retval != NULL)
-                BAIL("method '%s' return value defined more than once", 
+                BAIL("method '%s' return value defined more than once",
                      (char *)method->name);
             }
-    
-            bs_retval = 
+
+            bs_retval =
               (bs_element_retval_t *)malloc(sizeof(bs_element_retval_t));
             ASSERT_ALLOC(bs_retval);
 
-            get_c_ary_type_attribute(reader, &bs_retval->carray_type, 
+            get_c_ary_type_attribute(reader, &bs_retval->carray_type,
               &bs_retval->carray_type_value);
 
             bs_retval->type = get_type_attribute(reader);
             if (bs_retval->type != NULL)
-              bs_retval->already_retained = 
+              bs_retval->already_retained =
                 get_boolean_attribute(reader, "already_retained", false);
 
             if (func_ptr != NULL) {
@@ -1015,7 +1015,7 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
               }
               else {
                 free(bs_retval);
-                BAIL("function pointer return value defined without type"); 
+                BAIL("function pointer return value defined without type");
               }
             }
             else if (func != NULL) {
@@ -1032,7 +1032,7 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
             break;
         }
 #endif
-                BAIL("function '%s' return value defined without type", 
+                BAIL("function '%s' return value defined without type",
                      func->name);
               }
             }
@@ -1042,7 +1042,7 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
 
             if (get_boolean_attribute(reader, "function_pointer", false)) {
               if (func_ptr != NULL) {
-                func_ptr = NULL; 
+                func_ptr = NULL;
         nested_func_ptr = true;
         break;
               }
@@ -1062,7 +1062,7 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
           break;
         }
 
-        case BS_XML_METHOD: 
+        case BS_XML_METHOD:
         {
           if (protocol_name != NULL) {
             bs_element_informal_protocol_method_t *bs_informal_method;
@@ -1071,7 +1071,7 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
 
             selector = get_attribute(reader, "selector");
             CHECK_ATTRIBUTE(selector, "selector");
-            
+
             method_type = get_type_attribute(reader);
             CHECK_TYPE_ATTRIBUTE(method_type);
 
@@ -1081,7 +1081,7 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
 
             bs_informal_method->name = sel_registerName(selector);
         free(selector);
-            bs_informal_method->class_method = 
+            bs_informal_method->class_method =
               get_boolean_attribute(reader, "class_method", false);
             bs_informal_method->type = method_type;
             bs_informal_method->protocol_name = strdup(protocol_name);
@@ -1089,23 +1089,23 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
             bs_element = bs_informal_method;
             bs_element_type = BS_ELEMENT_INFORMAL_PROTOCOL_METHOD;
           }
-          else if (klass != NULL) {  
+          else if (klass != NULL) {
             char *selector;
 
             selector = get_attribute(reader, "selector");
             CHECK_ATTRIBUTE(selector, "selector");
 
-            method = 
+            method =
               (bs_element_method_t *)malloc(sizeof(bs_element_method_t));
             ASSERT_ALLOC(method);
 
             method->name = sel_registerName(selector);
         free(selector);
-            method->class_method = 
+            method->class_method =
               get_boolean_attribute(reader, "class_method", false);
-            method->variadic = 
+            method->variadic =
               get_boolean_attribute(reader, "variadic", false);
-            method->ignore = 
+            method->ignore =
               get_boolean_attribute(reader, "ignore", false);
             method->suggestion = get_attribute(reader, "suggestion");
             method->args_count = 0;
@@ -1125,16 +1125,16 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
     }
     else if (node_type == XML_READER_TYPE_END_ELEMENT) {
       switch (atom->val) {
-        case BS_XML_INFORMAL_PROTOCOL: 
+        case BS_XML_INFORMAL_PROTOCOL:
         {
           protocol_name = NULL;
           break;
         }
 
         case BS_XML_RETVAL:
-        case BS_XML_ARG: 
+        case BS_XML_ARG:
         {
-          if (func_ptr != NULL 
+          if (func_ptr != NULL
               && func_ptr_arg_depth == xmlTextReaderDepth(reader)) {
 
           bs_element_retval_t *retval = NULL;
@@ -1180,10 +1180,10 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
           free(arg->type);
           arg->type = strdup(new_type);
           }
-            
+
           if (func_ptr->args_count > 0) {
           size_t len;
-      
+
           len = sizeof(bs_element_arg_t) * func_ptr->args_count;
           func_ptr->args = (bs_element_arg_t *)malloc(len);
           ASSERT_ALLOC(func_ptr->args);
@@ -1192,27 +1192,27 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
           else {
           func_ptr->args = NULL;
           }
-                        
+
           func_ptr = NULL;
           func_ptr_arg_depth = -1;
           }
           break;
         }
- 
-        case BS_XML_FUNCTION: 
+
+        case BS_XML_FUNCTION:
         {
           if (func == NULL) {
             break;
           }
           for (i = 0; i < func->args_count; i++) {
             if (args[i].type == NULL)
-              BAIL("function '%s' argument #%d type not provided", 
+              BAIL("function '%s' argument #%d type not provided",
                    func->name, i);
           }
-    
+
           if (func->args_count > 0) {
             size_t len;
-    
+
             len = sizeof(bs_element_arg_t) * func->args_count;
             func->args = (bs_element_arg_t *)malloc(len);
             ASSERT_ALLOC(func->args);
@@ -1225,14 +1225,14 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
           break;
         }
 
-        case BS_XML_METHOD: 
+        case BS_XML_METHOD:
         {
           bs_element_method_t *methods;
           unsigned *methods_count;
-          
+
           if (method->args_count > 0) {
             size_t len;
-      
+
             len = sizeof(bs_element_arg_t) * method->args_count;
             method->args = (bs_element_arg_t *)malloc(len);
             ASSERT_ALLOC(method->args);
@@ -1240,7 +1240,7 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
           }
 
 index_method:
-          methods = method->class_method 
+          methods = method->class_method
             ? klass->class_methods : klass->instance_methods;
 
           methods_count = method->class_method
@@ -1251,29 +1251,29 @@ index_method:
               sizeof(bs_element_method_t) * (*methods_count + 1));
           }
           else {
-            methods = (bs_element_method_t *)realloc(methods, 
+            methods = (bs_element_method_t *)realloc(methods,
               sizeof(bs_element_method_t) * (*methods_count + 1));
           }
           ASSERT_ALLOC(methods);
 
     //      methods[*methods_count] = method;
     // FIXME this is inefficient
-          memcpy(&methods[*methods_count], method, 
+          memcpy(&methods[*methods_count], method,
             sizeof(bs_element_method_t));
 
           (*methods_count)++;
-          
+
           if (method->class_method)
             klass->class_methods = methods;
           else
             klass->instance_methods = methods;
-         
+
           free(method);
           method = NULL;
           break;
         }
 
-        case BS_XML_CLASS: 
+        case BS_XML_CLASS:
         {
           bs_element = klass;
           bs_element_type = BS_ELEMENT_CLASS;
@@ -1286,7 +1286,7 @@ index_method:
     if (bs_element != NULL)
       (*callback)(parser, path, bs_element_type, bs_element, context);
   }
-  
+
   success = true;
 
 bails:
@@ -1364,7 +1364,7 @@ bs_free_arg(bs_element_arg_t *bs_arg)
   bs_free_function_pointer(bs_arg->function_pointer);
 }
 
-static void 
+static void
 bs_free_method(bs_element_method_t *bs_method)
 {
   unsigned i;
@@ -1372,10 +1372,10 @@ bs_free_method(bs_element_method_t *bs_method)
     bs_free_arg(&bs_method->args[i]);
   SAFE_FREE(bs_method->args);
   bs_free_retval(bs_method->retval);
-  SAFE_FREE(bs_method->suggestion); 
+  SAFE_FREE(bs_method->suggestion);
 }
 
-void 
+void
 bs_element_free(bs_element_type_t type, void *value)
 {
   assert(value != NULL);
@@ -1409,7 +1409,7 @@ bs_element_free(bs_element_type_t type, void *value)
       bs_element_opaque_t *bs_opaque = (bs_element_opaque_t *)value;
       SAFE_FREE(bs_opaque->name);
       SAFE_FREE(bs_opaque->type);
-      break;    
+      break;
     }
 
     case BS_ELEMENT_CONSTANT:
@@ -1423,7 +1423,7 @@ bs_element_free(bs_element_type_t type, void *value)
 
     case BS_ELEMENT_STRING_CONSTANT:
     {
-      bs_element_string_constant_t *bs_str_const = 
+      bs_element_string_constant_t *bs_str_const =
         (bs_element_string_constant_t *)value;
       SAFE_FREE(bs_str_const->name);
       SAFE_FREE(bs_str_const->value);
@@ -1453,7 +1453,7 @@ bs_element_free(bs_element_type_t type, void *value)
 
     case BS_ELEMENT_FUNCTION_ALIAS:
     {
-      bs_element_function_alias_t *bs_func_alias = 
+      bs_element_function_alias_t *bs_func_alias =
         (bs_element_function_alias_t *)value;
       SAFE_FREE(bs_func_alias->name);
       SAFE_FREE(bs_func_alias->original);
@@ -1476,7 +1476,7 @@ bs_element_free(bs_element_type_t type, void *value)
 
     case BS_ELEMENT_INFORMAL_PROTOCOL_METHOD:
     {
-      bs_element_informal_protocol_method_t *bs_iprotm = 
+      bs_element_informal_protocol_method_t *bs_iprotm =
         (bs_element_informal_protocol_method_t *)value;
       SAFE_FREE(bs_iprotm->protocol_name);
       SAFE_FREE(bs_iprotm->type);
@@ -1484,7 +1484,7 @@ bs_element_free(bs_element_type_t type, void *value)
     }
 
     default:
-      fprintf(stderr, "unknown value %p of type %d passed to bs_free()", 
+      fprintf(stderr, "unknown value %p of type %d passed to bs_free()",
           value, type);
   }
   free(value);

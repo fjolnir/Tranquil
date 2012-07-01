@@ -109,7 +109,7 @@ typedef struct {
   char *name;
   char *value;
   bool ignore;
-  char *suggestion;  
+  char *suggestion;
 } bs_element_enum_t;
 
 struct __bs_element_arg;
@@ -192,7 +192,7 @@ typedef enum {
   BS_ELEMENT_FUNCTION,          /* bs_element_function_t */
   BS_ELEMENT_FUNCTION_ALIAS,    /* bs_element_function_alias_t */
   BS_ELEMENT_CLASS,             /* bs_element_class_t */
-  BS_ELEMENT_INFORMAL_PROTOCOL_METHOD  
+  BS_ELEMENT_INFORMAL_PROTOCOL_METHOD
                                 /* bs_element_informal_protocol_method_t */
 } bs_element_type_t;
 
@@ -215,7 +215,7 @@ typedef enum {
 bool bs_find_path(const char *framework_path, char *path, const size_t path_len);
 
 /* bs_parser_new()
- * 
+ *
  * Creates and returns a parser object, required for bs_parser_parse().
  * Use bs_parser_free() when you're done.
  */
@@ -229,7 +229,7 @@ bs_parser_t *bs_parser_new(void);
 void bs_parser_free(bs_parser_t *parser);
 
 typedef void (*bs_parse_callback_t)
-  (bs_parser_t *parser, const char *path, bs_element_type_t type, void *value, 
+  (bs_parser_t *parser, const char *path, bs_element_type_t type, void *value,
    void *context);
 
 typedef enum {
@@ -239,29 +239,29 @@ typedef enum {
   BS_PARSE_OPTIONS_LOAD_DYLIBS
 } bs_parse_options_t;
 
-/* bs_parse() 
+/* bs_parse()
  *
- * Parses a given bridge support file, calling back a given function pointer 
- * for every parsed element. You are responsible to free every element passed 
+ * Parses a given bridge support file, calling back a given function pointer
+ * for every parsed element. You are responsible to free every element passed
  * to the callback function, using bs_element_free().
  * Returns true on success, otherwise false.
  *
  * parser: the parser object.
  * path: the full path of the bridge support file to parse.
- * framework_path: the full path of the framework this bridge support file 
+ * framework_path: the full path of the framework this bridge support file
  * comes from. This is only required if options is BS_PARSE_OPTIONS_LOAD_DYLIBS
- * in order to locate the dylib files. Pass NULL if you are passing the 
+ * in order to locate the dylib files. Pass NULL if you are passing the
  * default BS_PARSE_OPTIONS_DEFAULT option.
  * options: parsing options.
  * callback: a callback function pointer.
- * context: a contextual data pointer that will be passed to the callback 
+ * context: a contextual data pointer that will be passed to the callback
  * function.
- * error: in case this function returns false, this variable is set to a newly 
- * allocated error message. You are responsible to free it. Pass NULL if you 
- * don't need it.  
+ * error: in case this function returns false, this variable is set to a newly
+ * allocated error message. You are responsible to free it. Pass NULL if you
+ * don't need it.
  */
-bool bs_parser_parse(bs_parser_t *parser, const char *path, 
-  const char *framework_path, bs_parse_options_t options, 
+bool bs_parser_parse(bs_parser_t *parser, const char *path,
+  const char *framework_path, bs_parse_options_t options,
   bs_parse_callback_t callback, void *context, char **error);
 
 /* bs_parser_current_version_number()
@@ -278,7 +278,7 @@ unsigned int bs_parser_current_version_number(bs_parser_t *parser);
 
 /* bs_element_free()
  *
- * Frees a bridge support element that was returned by bs_parse() through the 
+ * Frees a bridge support element that was returned by bs_parse() through the
  * callback method.
  *
  * type: the type of the bridge support element.

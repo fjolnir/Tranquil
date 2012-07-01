@@ -51,7 +51,7 @@ using namespace llvm;
         BOOL isGetterOp = [_left isMemberOfClass:[self class]] && [(TQNodeOperator*)_left type] == kTQOperatorGetter;
         TQAssertSoft(isVar || isProperty || isGetterOp, kTQSyntaxErrorDomain, kTQInvalidAssignee, NO, @"Only variables and object properties can be assigned to");
 
-        
+
         if(isGetterOp) {
             // Call []=::
             TQNodeOperator *setterOp = (TQNodeOperator *)_left;
@@ -80,7 +80,7 @@ using namespace llvm;
     } else {
         Value *left  = [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
         Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
-        
+
         Value *selector = NULL;
         switch(_type) {
             case kTQOperatorLesser:

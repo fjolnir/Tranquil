@@ -69,7 +69,7 @@ using namespace llvm;
     }
     assert(count%2 == 0);
     args.push_back(builder->CreateLoad(mod->getOrInsertGlobal("TQSentinel", aProgram.llInt8PtrTy)));
-    
+
     CallInst *call = builder->CreateCall(aProgram.objc_msgSend, args);
     return call;
 }

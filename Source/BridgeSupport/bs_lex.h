@@ -190,7 +190,7 @@ bs_xml_element (register const char *str, register unsigned int len)
 #define BS_XML_ENUM               2
 #define BS_XML_STRUCT             3
 #define BS_XML_INFORMAL_PROTOCOL  4
-#define BS_XML_ARG                5 
+#define BS_XML_ARG                5
 #define BS_XML_RETVAL             6
 #define BS_XML_FUNCTION           7
 #define BS_XML_CLASS              8

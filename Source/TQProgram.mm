@@ -270,7 +270,7 @@ using namespace llvm;
     initializeTarget(Registry);
 
     PassManager modulePasses;
-    
+
 
     llvm::EngineBuilder factory(_llModule);
     factory.setEngineKind(llvm::EngineKind::JIT);
@@ -344,7 +344,7 @@ using namespace llvm;
         id num = test(@"hoya");
         TQLog(@"Block retval: %@ (%@)", num, [num class]);
     }
-    
+
     Class fooCls = NSClassFromString(@"Foo");
     if(fooCls)
     {

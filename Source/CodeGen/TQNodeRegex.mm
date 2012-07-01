@@ -47,7 +47,7 @@ using namespace llvm;
         opts |= NSRegularExpressionCaseInsensitive;
     if([optStr rangeOfString:@"m"].location != NSNotFound)
         opts |= NSRegularExpressionAnchorsMatchLines;
-    
+
     Value *selector = builder->CreateLoad(mod->getOrInsertGlobal("TQRegexWithPatSel", aProgram.llInt8PtrTy));
     Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_NSRegularExpression", aProgram.llInt8Ty);
     Value *patVal   = builder->CreateGlobalStringPtr([pattern UTF8String]);

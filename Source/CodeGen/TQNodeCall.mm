@@ -72,7 +72,7 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
 
     Value *blockLiteral = builder->CreateBitCast(callee, blockPtrTy);
     Value *funPtr = builder->CreateStructGEP(blockLiteral, 3);
-    
+
 
     // Load the function and cast it to the correct type
     Value *fun = builder->CreateLoad(funPtr);

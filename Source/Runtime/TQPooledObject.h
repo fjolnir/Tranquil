@@ -34,7 +34,7 @@ typedef struct _TQPoolInfo {
     NSUInteger _retainCount;
     IMP _poolInfoImp;
 }
-    
+
 + (TQPoolInfo *)poolInfo;
 + (int)purgePool;
 @end

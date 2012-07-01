@@ -68,7 +68,7 @@ using namespace llvm;
     Value *superClassPtr = builder->CreateCall(aProgram.objc_getClass, builder->CreateGlobalStringPtr([superClassName UTF8String]));
     // Allocate the class
     _classPtr = builder->CreateCall3(aProgram.objc_allocateClassPair, superClassPtr, name, extraBytes, [_name UTF8String]);
-    
+
     // Add the methods for the class
     for(TQNodeMethod *method in [_classMethods arrayByAddingObjectsFromArray:_instanceMethods]) {
         [method generateCodeInProgram:aProgram block:aBlock class:self error:aoErr];

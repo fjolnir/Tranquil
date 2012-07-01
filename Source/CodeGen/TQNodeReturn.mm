@@ -49,9 +49,9 @@ using namespace llvm;
         //if(![stmt isKindOfClass:[TQNodeBlock class]])
             //continue;
         //TQNodeBlock *blk = (TQNodeBlock*)stmt;
-        
+
     //}
-    
+
     // Evaluate retain the value or if it's a call, it's arguments before popping the block's autorelease pool
     Value *retVal;
     std::vector<Value*> args;
@@ -70,7 +70,7 @@ using namespace llvm;
     }
     // Pop
     builder->CreateCall(aProgram.objc_autoreleasePoolPop, aBlock.autoreleasePool);
-    
+
     // Return
     if(isTailCall)
         retVal = [(TQNodeCall *)_value generateCodeInProgram:aProgram block:aBlock withArguments:args error:aoErr];
