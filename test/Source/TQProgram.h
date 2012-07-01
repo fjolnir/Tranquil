@@ -1,8 +1,9 @@
 #ifndef _TQ_PROGRAM_H_
 #define _TQ_PROGRAM_H_
 
-#include <Foundation/Foundation.h>
 #include <TQNodeBlock.h>
+#include <llvm/Support/IRBuilder.h>
+#include <Foundation/NSObject.h>
 
 @interface TQProgram : NSObject
 @property(readwrite, retain) NSString *name;
