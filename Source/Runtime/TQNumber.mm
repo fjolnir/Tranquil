@@ -4,6 +4,9 @@
 static TQPoolInfo *poolInfo = nil;
 static IMP superAllocImp = NULL;
 
+TQNumber *TQNumberTrue;
+TQNumber *TQNumberFalse;
+
 @implementation TQNumber
 
 + (void)load
@@ -12,6 +15,11 @@ static IMP superAllocImp = NULL;
 		poolInfo = [[TQPoolInfo alloc] init];
 	if(!superAllocImp)
 		superAllocImp = method_getImplementation(class_getClassMethod(self, @selector(allocWithPoolInfo:)));
+
+	TQNumberTrue = [[self alloc] init];
+	TQNumberTrue->_doubleValue = 1;
+	TQNumberFalse = [[self alloc] init];
+	TQNumberFalse->_doubleValue = 0;
 }
 
 + (TQPoolInfo *)poolInfo

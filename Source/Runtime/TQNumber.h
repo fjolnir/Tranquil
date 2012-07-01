@@ -2,6 +2,10 @@
 
 typedef id (^condBlock)();
 
+@class TQNumber;
+
+extern TQNumber *TQNumberTrue, *TQNumberFalse;
+
 @interface TQNumber : TQPooledObject
 @property(readonly) double doubleValue;
 
