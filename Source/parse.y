@@ -54,7 +54,8 @@
 %token <cStr> tSTRING
 %token <cStr> tCONSTANT
 %token <cStr> tIDENTIFIER
-%token <cStr> tBINOPERATOR
+%token <cStr> tGREATEROREQUALOP tLESSEROREQUALOP tEQUALOP tINEQUALOP
+%token <cStr> 
 
 %type <number> Number
 %type <string> String
@@ -72,6 +73,14 @@
 
 %type <node> Literal Statement Expression Callee Lhs CallArg MessageArg MessageReceiver
 %type <array> Statements CallArgs MessageArgs ClassBody ClassDef MethodArgs MethodBody BlockArgs
+
+%left '>' '<'
+%left tGREATEROREQUALOP tLESSEROREQUALOP
+%left tEQUALOP
+%left tINEQUALOP
+%left '-' '+'
+%left '*' '/'
+%left UNARY
 
 %start Program
 
@@ -185,6 +194,17 @@ Expression:
 	| Variable
 	| Literal
 	| Block
+	| Expression '>' Expression               { $$ = [TQNodeBinaryOperator nodeWithType:kTQOperatorGreater left:$1 right:$3]; }
+	| Expression '<' Expression               { $$ = [TQNodeBinaryOperator nodeWithType:kTQOperatorLesser left:$1 right:$3]; }
+	| Expression '*' Expression               { $$ = [TQNodeBinaryOperator nodeWithType:kTQOperatorMultiply left:$1 right:$3]; }
+	| Expression '/' Expression               { $$ = [TQNodeBinaryOperator nodeWithType:kTQOperatorDivide left:$1 right:$3]; }
+	| Expression '+' Expression               { $$ = [TQNodeBinaryOperator nodeWithType:kTQOperatorAdd left:$1 right:$3]; }
+	| Expression '-' Expression               { $$ = [TQNodeBinaryOperator nodeWithType:kTQOperatorSubtract left:$1 right:$3]; }
+	| '-' Expression %prec UNARY
+	| Expression tEQUALOP Expression          { $$ = [TQNodeBinaryOperator nodeWithType:kTQOperatorEqual left:$1 right:$3]; }
+	| Expression tINEQUALOP Expression        { $$ = [TQNodeBinaryOperator nodeWithType:kTQOperatorInequal left:$1 right:$3]; }
+	| Expression tGREATEROREQUALOP Expression { $$ = [TQNodeBinaryOperator nodeWithType:kTQOperatorGreaterOrEqual left:$1 right:$3]; }
+	| Expression tLESSEROREQUALOP Expression  { $$ = [TQNodeBinaryOperator nodeWithType:kTQOperatorLesserOrEqual left:$1 right:$3]; }
 	| '(' Expression ')' { $$ = $2; }
 	;
 

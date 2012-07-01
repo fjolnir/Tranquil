@@ -33,7 +33,24 @@
                                     	yylval->cStr = strndup(yytext, yyleng);
                                     	return tCONSTANT;
                                     }
-[.\,=\.:\{\}\(\)\|<>\#\+\-\^`]         { UPDATE_LOC return *yytext; }
+(<=)                                {
+                                    	UPDATE_LOC
+                                    	return tLESSEROREQUALOP;
+                                    }
+(>=)                                {
+                                    	UPDATE_LOC
+                                    	return tGREATEROREQUALOP;
+                                    }
+(==)                                {
+                                    	UPDATE_LOC
+                                    	return tEQUALOP;
+                                    }
+(!=)                                {
+                                    	UPDATE_LOC
+                                    	return tINEQUALOP;
+                                    }
+
+[.\,=\.:\{\}\(\)\|<>\#\+\-\*\/\^`]  { UPDATE_LOC return *yytext; }
 \n                                  { RESET_COL  return *yytext; }
 %%
 

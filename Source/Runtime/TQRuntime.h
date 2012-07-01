@@ -19,3 +19,17 @@ id TQPrepareObjectForReturn(id obj);
 
 // Adds operator methods to the passed class (such as ==:, >=:, []: etc)
 BOOL TQAugmentClassWithOperators(Class klass);
+
+extern SEL TQEqOpSel;
+extern SEL TQNeqOpSel;
+extern SEL TQLTOpSel;
+extern SEL TQGTOpSel;
+extern SEL TQGTEOpSel;
+extern SEL TQLTEOpSel;
+extern SEL TQMultOpSel;
+extern SEL TQDivOpSel;
+extern SEL TQAddOpSel;
+extern SEL TQSubOpSel;
+extern SEL TQUnaryMinusOpSel;
+extern SEL TQSetterOpSel;
+extern SEL TQGetterOpSel;

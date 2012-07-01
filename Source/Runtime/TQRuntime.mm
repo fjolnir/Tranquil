@@ -6,6 +6,20 @@
 
 static const NSString *_TQDynamicIvarTableKey = @"TQDynamicIvarTableKey";
 
+SEL TQEqOpSel;
+SEL TQNeqOpSel;
+SEL TQLTOpSel;
+SEL TQGTOpSel;
+SEL TQGTEOpSel;
+SEL TQLTEOpSel;
+SEL TQMultOpSel;
+SEL TQDivOpSel;
+SEL TQAddOpSel;
+SEL TQSubOpSel;
+SEL TQUnaryMinusOpSel;
+SEL TQSetterOpSel;
+SEL TQGetterOpSel;
+
 struct TQBlock_byref {
 	void *isa;
 	struct TQBlock_byref *forwarding;
@@ -150,48 +164,61 @@ BOOL TQAugmentClassWithOperators(Class klass)
 {
 	// ==
 	IMP imp = imp_implementationWithBlock(^(id a, id b) { return [a isEqual:b] ? @YES : @NO; });
-	class_addMethod(klass, sel_registerName("==:"), imp, "@@:@");
+	TQEqOpSel = sel_registerName("==:");
+	class_addMethod(klass, TQEqOpSel, imp, "@@:@");
 	// !=
 	imp = imp_implementationWithBlock(^(id a, id b)     { return [a isEqual:b] ? @NO : @YES; });
-	class_addMethod(klass, sel_registerName("==:"), imp, "@@:@");
+	TQNeqOpSel = sel_registerName("!=:");
+	class_addMethod(klass, TQNeqOpSel, imp, "@@:@");
 
 	// + (Unimplemented by default)
 	imp = imp_implementationWithBlock(^(id a, id b) { return _objc_msgSend_hack2(a, @selector(add:), b); });
-	class_addMethod(klass, sel_registerName("+:"), imp, "@@:@");
+	TQAddOpSel = sel_registerName("+:");
+	class_addMethod(klass, TQAddOpSel, imp, "@@:@");
 	// - (Unimplemented by default)
 	imp = imp_implementationWithBlock(^(id a, id b) { return _objc_msgSend_hack2(a, @selector(subtract:), b); });
-	class_addMethod(klass, sel_registerName("-:"), imp, "@@:@");
+	TQSubOpSel = sel_registerName("-:");
+	class_addMethod(klass, TQSubOpSel, imp, "@@:@");
 	// unary - (Unimplemented by default)
 	imp = imp_implementationWithBlock(^(id a)       { return _objc_msgSend_hack(a, @selector(negate)); });
-	class_addMethod(klass, sel_registerName("-"), imp, "@@:");
+	TQUnaryMinusOpSel = sel_registerName("-");
+	class_addMethod(klass, TQUnaryMinusOpSel, imp, "@@:");
 
 	// * (Unimplemented by default)
 	imp = imp_implementationWithBlock(^(id a, id b) { return _objc_msgSend_hack2(a, @selector(multiply:), b); });
-	class_addMethod(klass, sel_registerName("*:"), imp, "@@:@");
+	TQMultOpSel = sel_registerName("*:");
+	class_addMethod(klass, TQMultOpSel, imp, "@@:@");
 	// / (Unimplemented by default)
 	imp = imp_implementationWithBlock(^(id a, id b) { return  _objc_msgSend_hack2(a, @selector(divide:), b); });
-	class_addMethod(klass, sel_registerName("/:"), imp, "@@:@");
+	TQDivOpSel = sel_registerName("/:");
+	class_addMethod(klass, TQDivOpSel, imp, "@@:@");
 
 	// <
 	imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] == NSOrderedAscending) ? @YES : @NO; });
-	class_addMethod(klass, sel_registerName("<:"), imp, "@@:@");
+	TQLTOpSel = sel_registerName("<:");
+	class_addMethod(klass, TQLTOpSel, imp, "@@:@");
 	// >
 	imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] == NSOrderedDescending) ? @YES : @NO; });
-	class_addMethod(klass, sel_registerName("<:"), imp, "@@:@");
+	TQGTOpSel = sel_registerName(">:");
+	class_addMethod(klass, TQGTOpSel, imp, "@@:@");
 	// <=
 	imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] != NSOrderedDescending) ? @YES : @NO; });
-	class_addMethod(klass, sel_registerName("<:"), imp, "@@:@");
+	TQLTEOpSel = sel_registerName("<=:");
+	class_addMethod(klass, TQLTEOpSel, imp, "@@:@");
 	// >=
 	imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] != NSOrderedAscending) ? @YES : @NO; });
-	class_addMethod(klass, sel_registerName("<:"), imp, "@@:@");
+	TQGTEOpSel = sel_registerName(">=:");
+	class_addMethod(klass, TQGTEOpSel, imp, "@@:@");
 
 
 	// []
 	imp = imp_implementationWithBlock(^(id a, id key)         { return _objc_msgSend_hack2(a, @selector(valueForKey:), key); });
-	class_addMethod(klass, sel_registerName("[]:"), imp, "@@:@");
+	TQGetterOpSel = sel_registerName("[]:");
+	class_addMethod(klass, TQGetterOpSel, imp, "@@:@");
 	// []=
 	imp = imp_implementationWithBlock(^(id a, id key, id val) { return _objc_msgSend_hack3(a, @selector(setValue:forKey:), val, key); });
-	class_addMethod(klass, sel_registerName("[]=::"), imp, "@@:@@");
+	TQSetterOpSel = sel_registerName("[]=::");
+	class_addMethod(klass, TQSetterOpSel, imp, "@@:@@");
 
 	return YES;
 }
