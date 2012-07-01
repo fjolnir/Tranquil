@@ -3,6 +3,7 @@
 	#include "TQSyntaxTree.h"
 	#include <stdio.h>
 	#include <stdlib.h>
+
 %}
 
 %union {
@@ -17,7 +18,7 @@
 	TQSyntaxNodeArgument *arg;
 	TQSyntaxNodeBlock *block;
 	TQSyntaxNodeCall *call;
-	TQSyntaxNodeClass *class;
+	TQSyntaxNodeClass *klass;
 	TQSyntaxNodeMethod *method;
 	TQSyntaxNodeMessage *message;
 	TQSyntaxNodeMemberAccess *memberAccess;
@@ -33,7 +34,8 @@
 	} TQParserState;
 
 	int yylex(YYSTYPE *lvalp, YYLTYPE *llocp);
-	int yyerror(YYLTYPE *yylocp, TQParserState *state,  const char *str);
+	extern "C" int yywrap(void);
+	extern "C" int yyerror(YYLTYPE *yylocp, TQParserState *state,  const char *str);
 
 	// Bison doesn't like @'s very much
 	#define NSSTR(str) (@str)
@@ -58,7 +60,7 @@
 %type <variable> variable
 %type <block> block
 %type <call> call
-%type <class> class
+%type <klass> class
 %type <method> method class_method instance_method method_def
 %type <message> message
 %type <memberAccess> member_access

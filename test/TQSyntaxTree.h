@@ -106,6 +106,7 @@ typedef enum {
 	kTQClassMethod,
 	kTQInstanceMethod
 } TQMethodType;
+
 // A method definition (+ aMethod: argument { body })
 @interface TQSyntaxNodeMethod : TQSyntaxNodeBlock
 @property(readwrite, assign) TQMethodType type;
@@ -126,7 +127,7 @@ typedef enum {
 - (id)initWithReceiver:(TQSyntaxNode *)aReceiver property:(NSString *)aKey;
 @end
 
-typedef enum {
+enum {
 	kTQOperatorAssign = '=',
 	kTQOperatorPlus = '+',
 	kTQOperatorMinus = '-',
@@ -134,7 +135,8 @@ typedef enum {
 	kTQOperatorDivide = '/',
 	kTQOperatorGreater = '>',
 	kTQOperatorLesser = '<'
-} TQOperatorType;
+};
+typedef char TQOperatorType;
 // Binary operator (a <operator> b)
 @interface TQSyntaxNodeBinaryOperator : TQSyntaxNode
 @property(readwrite, assign) TQOperatorType type;

@@ -1,13 +1,12 @@
-CC  = 'clang'
 CXX = 'clang++'
-LD  = CC
+LD  = CXX
 LEX = 'flex'
 YACC = 'bison'
 
 BUILD_DIR = 'build'
 
-LEX_OUTPATH  = "#{BUILD_DIR}/lex.yy.m"
-YACC_OUTPATH = "#{BUILD_DIR}/y.tab.m"
+LEX_OUTPATH  = "#{BUILD_DIR}/lex.yy.mm"
+YACC_OUTPATH = "#{BUILD_DIR}/y.tab.mm"
 
 LEXFLAGS = [
 	'-f',
@@ -24,27 +23,36 @@ YACCFLAGS = [
 	"--defines=#{BUILD_DIR}/y.tab.h"
 ].join(' ')
 
-CFLAGS = [
+CXXFLAGS = [
 	'-DDEBUG',
-	'-std=gnu99',
+	'-std=gnu++98',
 	'-mmacosx-version-min=10.7',
 	'-I`pwd`',
+	'`llvm-config --cflags`',
 	'-O0',
-	'-g'
-#	'--analyze'
+	'-g',
+	'-std=gnu++98',
+	'-ObjC++',
+].join(' ')
+
+
+LDFLAGS = [
+	'-lstdc++',
+	'`llvm-config --libs`',
+	'`llvm-config --ldflags`'
 ].join(' ')
 
 LIBS = ['-framework Foundation'].join(' ')
 
 PATHMAP = "build/%n.o"
 
-OBJC_SOURCES = FileList['*.m'].add('build/*.m')
+OBJC_SOURCES = FileList['*.m'].add('*.mm').add('build/*.mm')
 O_FILES = OBJC_SOURCES.pathmap(PATHMAP)
 LEX_SOURCE = FileList['*.l'].first
 YACC_SOURCE = FileList['*.y'].first
 
-def compile(file)
-	  sh "#{CC} #{file[:in].join(' ')} #{CFLAGS} -c -o #{file[:out]}"
+def compile(file, flags=CXXFLAGS, cc=CXX)
+	sh "#{cc} #{file[:in].join(' ')} #{flags} -c -o #{file[:out]}"
 end
 
 OBJC_SOURCES.each { |src|
@@ -59,7 +67,7 @@ task :build_parser do |t|
 end
 
 file :tranquil => O_FILES do |t|
-	sh "#{LD} #{LIBS} #{O_FILES} -o #{BUILD_DIR}/#{t.name}"
+	sh "#{LD} #{LDFLAGS} #{LIBS} #{O_FILES} -o #{BUILD_DIR}/#{t.name}"
 end
 
 task :default => [:build_parser, :tranquil]
