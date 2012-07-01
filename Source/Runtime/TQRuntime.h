@@ -1,5 +1,7 @@
 // Tranquil runtime functions
 
+#import <Foundation/Foundation.h>
+
 id TQRetainObject(id obj);
 id TQReleaseObject(id obj);
 id TQAutoreleaseObject(id obj);
@@ -12,7 +14,7 @@ id TQStoreStrongInByref(void *dstPtr, id obj);
 id TQValueForKey(id obj, char *key);
 void TQSetValueForKey(id obj, char *key, id value);
 
-bool TQObjectIsStackBlock(id obj);
+BOOL TQObjectIsStackBlock(id obj);
 id TQPrepareObjectForReturn(id obj);
 
 // Adds operator methods to the passed class (such as ==:, >=:, []: etc)

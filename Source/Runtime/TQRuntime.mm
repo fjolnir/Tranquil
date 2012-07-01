@@ -19,7 +19,9 @@ struct TQBlock_byref {
 #pragma mark - Utilities
 
 // Hack from libobjc, allows tail call optimization for objc_msgSend
-extern id _objc_msgSend_hack(id, SEL) asm("_objc_msgSend");
+extern id _objc_msgSend_hack(id, SEL)          asm("_objc_msgSend");
+extern id _objc_msgSend_hack2(id, SEL, id)     asm("_objc_msgSend");
+extern id _objc_msgSend_hack3(id, SEL, id, id) asm("_objc_msgSend");
 
 id TQRetainObject(id obj)
 {
@@ -130,7 +132,7 @@ void TQSetValueForKey(id obj, char *key, id value)
 
 #pragma mark -
 
-bool TQObjectIsStackBlock(id obj)
+BOOL TQObjectIsStackBlock(id obj)
 {
 	return obj != nil && *(void**)obj == _NSConcreteStackBlock;
 }
@@ -148,61 +150,48 @@ BOOL TQAugmentClassWithOperators(Class klass)
 {
 	// ==
 	IMP imp = imp_implementationWithBlock(^(id a, id b) { return [a isEqual:b] ? @YES : @NO; });
-	SEL sel = sel_registerName("==:");
-	class_addMethod(klass, sel, imp, "@@:@");
+	class_addMethod(klass, sel_registerName("==:"), imp, "@@:@");
 	// !=
 	imp = imp_implementationWithBlock(^(id a, id b)     { return [a isEqual:b] ? @NO : @YES; });
-	sel = sel_registerName("==:");
-	class_addMethod(klass, sel, imp, "@@:@");
+	class_addMethod(klass, sel_registerName("==:"), imp, "@@:@");
 
 	// + (Unimplemented by default)
-	imp = imp_implementationWithBlock(^(id a, id b) { return [a add:b]; });
-	sel = sel_registerName("+:");
-	class_addMethod(klass, sel, imp, "@@:@");
+	imp = imp_implementationWithBlock(^(id a, id b) { return _objc_msgSend_hack2(a, @selector(add:), b); });
+	class_addMethod(klass, sel_registerName("+:"), imp, "@@:@");
 	// - (Unimplemented by default)
-	imp = imp_implementationWithBlock(^(id a, id b) { return [a subtract: b]; });
-	sel = sel_registerName("-:");
-	class_addMethod(klass, sel, imp, "@@:@");
+	imp = imp_implementationWithBlock(^(id a, id b) { return _objc_msgSend_hack2(a, @selector(subtract:), b); });
+	class_addMethod(klass, sel_registerName("-:"), imp, "@@:@");
 	// unary - (Unimplemented by default)
-	imp = imp_implementationWithBlock(^(id a)       { return [a negate]; });
-	sel = sel_registerName("-");
-	class_addMethod(klass, sel, imp, "@@:");
+	imp = imp_implementationWithBlock(^(id a)       { return _objc_msgSend_hack(a, @selector(negate)); });
+	class_addMethod(klass, sel_registerName("-"), imp, "@@:");
 
 	// * (Unimplemented by default)
-	imp = imp_implementationWithBlock(^(id a, id b) { return [a multiply:b]; });
-	sel = sel_registerName("*:");
-	class_addMethod(klass, sel, imp, "@@:@");
+	imp = imp_implementationWithBlock(^(id a, id b) { return _objc_msgSend_hack2(a, @selector(multiply:), b); });
+	class_addMethod(klass, sel_registerName("*:"), imp, "@@:@");
 	// / (Unimplemented by default)
-	imp = imp_implementationWithBlock(^(id a, id b) { return [a divide:b]; });
-	sel = sel_registerName("/:");
-	class_addMethod(klass, sel, imp, "@@:@");
+	imp = imp_implementationWithBlock(^(id a, id b) { return  _objc_msgSend_hack2(a, @selector(divide:), b); });
+	class_addMethod(klass, sel_registerName("/:"), imp, "@@:@");
 
 	// <
 	imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] == NSOrderedAscending) ? @YES : @NO; });
-	sel = sel_registerName("<:");
-	class_addMethod(klass, sel, imp, "@@:@");
+	class_addMethod(klass, sel_registerName("<:"), imp, "@@:@");
 	// >
 	imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] == NSOrderedDescending) ? @YES : @NO; });
-	sel = sel_registerName("<:");
-	class_addMethod(klass, sel, imp, "@@:@");
+	class_addMethod(klass, sel_registerName("<:"), imp, "@@:@");
 	// <=
 	imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] != NSOrderedDescending) ? @YES : @NO; });
-	sel = sel_registerName("<:");
-	class_addMethod(klass, sel, imp, "@@:@");
+	class_addMethod(klass, sel_registerName("<:"), imp, "@@:@");
 	// >=
 	imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] != NSOrderedAscending) ? @YES : @NO; });
-	sel = sel_registerName("<:");
-	class_addMethod(klass, sel, imp, "@@:@");
+	class_addMethod(klass, sel_registerName("<:"), imp, "@@:@");
 
 
 	// []
-	imp = imp_implementationWithBlock(^(id a, id key)         { return [a valueForKey:key]; });
-	sel = sel_registerName("[]:");
-	class_addMethod(klass, sel, imp, "@@:@");
+	imp = imp_implementationWithBlock(^(id a, id key)         { return _objc_msgSend_hack2(a, @selector(valueForKey:), key); });
+	class_addMethod(klass, sel_registerName("[]:"), imp, "@@:@");
 	// []=
-	imp = imp_implementationWithBlock(^(id a, id key, id val) { return [a setValue:val forKey:key]; });
-	sel = sel_registerName("[]=::");
-	class_addMethod(klass, sel, imp, "@@:@@");
+	imp = imp_implementationWithBlock(^(id a, id key, id val) { return _objc_msgSend_hack3(a, @selector(setValue:forKey:), val, key); });
+	class_addMethod(klass, sel_registerName("[]=::"), imp, "@@:@@");
 
 	return YES;
 }
