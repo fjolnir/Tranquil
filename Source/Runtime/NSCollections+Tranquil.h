@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-extern void *TQSentinel;
+extern id TQSentinel;
 
 @class TQNumber;
 
@@ -15,4 +15,14 @@ extern void *TQSentinel;
 - (void)setObject:(void*)aPtr atIndexedSubscript:(NSUInteger)aIdx;
 - (id)objectAtIndexedSubscript:(NSUInteger)aIdx;
 - (TQNumber *)tqCount;
+
+- (id)push:(id)aObj;
+- (id)last;
+- (id)first;
+- (id)pop;
+
+- (id)each:(id (^)(id))aBlock;
+- (NSPointerArray *)map:(id (^)(id))aBlock;
+- (id)reduce:(id (^)(id, id))aBlock;
+- (id)map:(id (^)(id))mapBlock reduce:(id (^)(id, id))reduceBlock;
 @end

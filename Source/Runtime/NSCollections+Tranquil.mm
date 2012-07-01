@@ -3,7 +3,7 @@
 #import <objc/runtime.h>
 
 // Just a unique address
-void *TQSentinel = (void*)@"3d2c9ac0bf3911e1afa70800200c9a66aaaaaaaaa";
+id TQSentinel = @"3d2c9ac0bf3911e1afa70800200c9a66aaaaaaaaa";
 
 @implementation NSMapTable (Tranquil)
 + (NSMapTable *)tq_mapTableWithObjectsAndKeys:(id)firstObject , ...
@@ -76,4 +76,64 @@ void *TQSentinel = (void*)@"3d2c9ac0bf3911e1afa70800200c9a66aaaaaaaaa";
 {
     return [TQNumber numberWithDouble:(double)[self count]];
 }
+
+#pragma mark - Helpers
+
+- (id)push:(id)aObj
+{
+    [self addPointer:aObj];
+    return nil;
+}
+
+- (id)last
+{
+    return (id)[self pointerAtIndex:[self count]-1];
+}
+
+- (id)first
+{
+    return (id)[self pointerAtIndex:0];
+}
+
+- (id)pop
+{
+    id val = [self last];
+    [self removePointerAtIndex:[self count]-1];
+    return val;
+}
+#pragma mark - Iterators
+
+- (id)each:(id (^)(id))aBlock
+{
+    for(id obj in self) {
+        aBlock(obj);
+    }
+    return nil;
+}
+
+- (NSPointerArray *)map:(id (^)(id))aBlock
+{
+    NSPointerArray *ret = [NSPointerArray pointerArrayWithStrongObjects];
+
+    for(id obj in self) {
+        [ret addPointer:aBlock(obj)];
+    }
+    return ret;
+}
+
+- (id)reduce:(id (^)(id, id))aBlock
+{
+    // The default args are not implemented so this method won't actually work yet.
+    id accum = TQSentinel; // Make the block use it's default accumulator on the first call
+    for(id obj in self) {
+        accum = aBlock(obj, accum);
+    }
+    return accum;
+}
+
+- (id)map:(id (^)(id))mapBlock reduce:(id (^)(id, id))reduceBlock
+{
+    return [[self map:mapBlock] reduce:reduceBlock];
+}
+
 @end
