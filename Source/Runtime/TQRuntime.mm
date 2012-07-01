@@ -6,29 +6,52 @@
 
 static const NSString *_TQDynamicIvarTableKey = @"TQDynamicIvarTableKey";
 
+struct TQBlock_byref {
+	void *isa;
+	struct TQBlock_byref *forwarding;
+	int flags;
+	int size;
+	void (*byref_keep)(struct TQBlock_byref *dst, struct TQBlock_byref *src);
+	void (*byref_destroy)(struct TQBlock_byref *);
+	id capture;
+};
+
 #pragma mark - Utilities
 
 // Hack from libobjc, allows tail call optimization for objc_msgSend
 extern id _objc_msgSend_hack(id, SEL) asm("_objc_msgSend");
 
-static inline id _retainObject(id obj)
+id TQRetainObject(id obj)
 {
-	return _objc_msgSend_hack(obj, @selector(autorelease));
+	return _objc_msgSend_hack(obj, @selector(retain));
 }
 
-static inline id _releaseObject(id obj)
+id TQReleaseObject(id obj)
 {
 	return _objc_msgSend_hack(obj, @selector(release));
 }
 
-static inline id _autoreleaseObject(id obj)
+id TQAutoreleaseObject(id obj)
 {
 	return _objc_msgSend_hack(obj, @selector(autorelease));
 }
 
-static inlien id _retainAutoreleaseObject(id obj)
+id TQRetainAutoreleaseObject(id obj)
 {
-	return _autoreleaseObject(_retainObject(obj));
+	return TQAutoreleaseObject(TQRetainObject(obj));
+}
+
+id TQStoreStrongInByref(void *dstPtr, id obj)
+{
+	struct TQBlock_byref *dst = (struct TQBlock_byref *)dstPtr;
+	id prev = dst->forwarding->capture;
+	if(prev == obj)
+		return prev;
+	TQRetainObject(obj);
+	dst->forwarding->capture = obj;
+	TQReleaseObject(prev);
+
+	return obj;
 }
 
 #pragma mark - Dynamic instance variables
@@ -115,6 +138,6 @@ bool TQObjectIsStackBlock(id obj)
 id TQPrepareObjectForReturn(id obj)
 {
 	if(TQObjectIsStackBlock(obj))
-		return _autoreleaseObject((id)_Block_copy(obj));
-	return _retainAutoreleaseObject(obj);
+		return TQAutoreleaseObject(_objc_msgSend_hack(obj, @selector(copy)));
+	return TQRetainAutoreleaseObject(obj);
 }

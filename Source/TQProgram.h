@@ -34,12 +34,12 @@
 @property(readonly) llvm::Type *llBlockDescriptorTy, *llBlockLiteralType;
 
 #pragma mark - Cached functions
-@property(readonly) llvm::Function *objc_msgSend, *objc_storeStrong, *objc_storeWeak,
-	*objc_loadWeak, *objc_destroyWeak, *objc_retain, *objc_release, *objc_allocateClassPair,
+@property(readonly) llvm::Function *objc_msgSend, *TQStoreStrongInByref, *objc_storeWeak,
+	*objc_loadWeak, *objc_destroyWeak, *TQRetainObject, *TQReleaseObject, *objc_allocateClassPair,
 	*objc_registerClassPair, *class_addIvar, *class_replaceMethod, *objc_getClass,
 	*sel_registerName, *sel_getName, *_Block_copy,
 	*_Block_object_assign, *_Block_object_dispose, *imp_implementationWithBlock,
-	*object_getClass;
+	*object_getClass, *TQPrepareObjectForReturn;
 
 #pragma mark - Methods
 

@@ -39,14 +39,8 @@ using namespace llvm;
 	TQAssertSoft(isVar || isProperty, kTQSyntaxErrorDomain, kTQInvalidAssignee, NO, @"Only variables and object properties can be assigned to");
 
 	Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
-	// Currently we must move blocks to the heap if assigned to a variable, this is because after assigned to a var
-	// there is no mechanism in place to track the block value. So if the variable is returned, the value would still be
-	// on the stack resulting in a crash TODO: Implement this properly (only move to heap when the block is actually returned)
-	if([_right isKindOfClass:[TQNodeBlock class]])
-		right = aBlock.builder->CreateCall(aProgram._Block_copy, right);
 
 	[(TQNodeVariable *)_left store:right inProgram:aProgram block:aBlock error:aoError];
-
 	return [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
 }
 

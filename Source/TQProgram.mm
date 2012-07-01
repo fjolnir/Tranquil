@@ -2,6 +2,7 @@
 #include "CodeGen/TQNode.h"
 #include <llvm/Transforms/IPO/PassManagerBuilder.h>
 #import <mach/mach_time.h>
+#import "Runtime/TQRuntime.h"
 
 using namespace llvm;
 
@@ -13,14 +14,14 @@ using namespace llvm;
 	llInt8PtrPtrTy=_llInt8PtrPtrTy, llPointerWidthInBits=_llPointerWidthInBits, llPointerAlignInBytes=_llPointerAlignInBytes,
 	llPointerSizeInBytes=_llPointerSizeInBytes;
 @synthesize llBlockDescriptorTy=_blockDescriptorTy, llBlockLiteralType=_blockLiteralType;
-@synthesize objc_msgSend=_func_objc_msgSend, objc_storeStrong=_func_objc_storeStrong, objc_storeWeak=_func_objc_storeWeak,
+@synthesize objc_msgSend=_func_objc_msgSend, TQStoreStrongInByref=_func_TQStoreStrongInByref, objc_storeWeak=_func_objc_storeWeak,
 	objc_loadWeak=_func_objc_loadWeak, objc_allocateClassPair=_func_objc_allocateClassPair,
 	objc_registerClassPair=_func_objc_registerClassPair, objc_destroyWeak=_func_objc_destroyWeak, class_addIvar=_func_class_addIvar,
 	class_replaceMethod=_func_class_replaceMethod, sel_registerName=_func_sel_registerName, sel_getName=_func_sel_getName,
-	objc_getClass=_func_objc_getClass, objc_retain=_func_objc_retain, objc_release=_func_objc_release,
+	objc_getClass=_func_objc_getClass, TQRetainObject=_func_TQRetainObject, TQReleaseObject=_func_TQReleaseObject,
 	_Block_copy=_func__Block_copy, _Block_object_assign=_func__Block_object_assign,
 	_Block_object_dispose=_func__Block_object_dispose, imp_implementationWithBlock=_func_imp_implementationWithBlock,
-	object_getClass=_func_object_getClass;
+	object_getClass=_func_object_getClass, TQPrepareObjectForReturn=_func_TQPrepareObjectForReturn;
 
 + (TQProgram *)programWithName:(NSString *)aName
 {
@@ -123,6 +124,12 @@ using namespace llvm;
 	args_i8PtrPtr_i8Ptr.push_back(_llInt8PtrTy);
 	FunctionType *ft_i8Ptr__i8PtrPtr_i8Ptr = FunctionType::get(_llInt8PtrTy, args_i8PtrPtr_i8Ptr, false);
 
+	// id(id, id)
+	std::vector<Type*> args_i8Ptr_i8Ptr;
+	args_i8Ptr_i8Ptr.push_back(_llInt8PtrTy);
+	args_i8Ptr_i8Ptr.push_back(_llInt8PtrTy);
+	FunctionType *ft_i8Ptr__i8Ptr_i8Ptr = FunctionType::get(_llInt8PtrTy, args_i8Ptr_i8Ptr, false);
+
 	// void(id*, id)
 	FunctionType *ft_void__i8PtrPtr_i8Ptr = FunctionType::get(_llVoidTy, args_i8PtrPtr_i8Ptr, false);
 
@@ -145,19 +152,19 @@ using namespace llvm;
 	DEF_EXTERNAL_FUN(imp_implementationWithBlock, ft_i8Ptr__i8Ptr)
 	DEF_EXTERNAL_FUN(object_getClass, ft_i8Ptr__i8Ptr)
 	DEF_EXTERNAL_FUN(objc_msgSend, ft_i8ptr__i8ptr_i8ptr_variadic)
-	//DEF_EXTERNAL_FUN(objc_storeStrong, ft_void__i8PtrPtr_i8Ptr)
+	DEF_EXTERNAL_FUN(TQStoreStrongInByref, ft_i8Ptr__i8Ptr_i8Ptr)
 	//DEF_EXTERNAL_FUN(objc_storeWeak, ft_i8Ptr__i8PtrPtr_i8Ptr)
 	//DEF_EXTERNAL_FUN(objc_loadWeak, ft_i8Ptr__i8PtrPtr)
 	//DEF_EXTERNAL_FUN(objc_destroyWeak, ft_void__i8PtrPtr)
-	//DEF_EXTERNAL_FUN(objc_retain, ft_i8Ptr__i8Ptr)
-	//DEF_EXTERNAL_FUN(objc_release, ft_void__i8Ptr)
+	//DEF_EXTERNAL_FUN(TQRetainObject, ft_i8Ptr__i8Ptr)
+	//DEF_EXTERNAL_FUN(TQReleaseObject, ft_void__i8Ptr)
 	DEF_EXTERNAL_FUN(sel_registerName, ft_i8Ptr__i8Ptr)
 	//DEF_EXTERNAL_FUN(sel_getName, ft_i8Ptr__i8Ptr)
 	DEF_EXTERNAL_FUN(objc_getClass, ft_i8Ptr__i8Ptr)
 	DEF_EXTERNAL_FUN(_Block_copy, ft_i8Ptr__i8Ptr);
 	DEF_EXTERNAL_FUN(_Block_object_assign, ft_void__i8Ptr_i8Ptr_int);
 	DEF_EXTERNAL_FUN(_Block_object_dispose, ft_void__i8Ptr_int);
-
+	DEF_EXTERNAL_FUN(TQPrepareObjectForReturn, ft_i8Ptr__i8Ptr);
 
 #undef DEF_EXTERNAL_FUN
 
@@ -201,7 +208,8 @@ using namespace llvm;
 
 	// Compile program
 	ExecutionEngine *engine = EngineBuilder(_llModule).create();
-
+	engine->addGlobalMapping(_func_TQPrepareObjectForReturn, (void*)&TQPrepareObjectForReturn);
+	engine->addGlobalMapping(_func_TQStoreStrongInByref, (void*)&TQStoreStrongInByref);
 
 	//std::vector<GenericValue> noargs;
 	//GenericValue val = engine->runFunction(_root.function, noargs);
@@ -230,7 +238,6 @@ using namespace llvm;
 		id (^test)(NSString *) = ret;
 		NSNumber *num = test(@"hoya");
 		TQLog(@"Block retval: %@ (%@)", num, [num class]);
-		[test release];
 	}
 	
 	Class fooCls = NSClassFromString(@"Foo");

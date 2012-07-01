@@ -31,10 +31,7 @@ using namespace llvm;
 {
 	IRBuilder<> *builder = aBlock.builder;
 	Value *retVal = [_value generateCodeInProgram:aProgram block:aBlock error:aoError];
-	// If the return value is a block we must move it to the heap before returning
-	if([_value isKindOfClass:[TQNodeBlock class]]) {
-		retVal = builder->CreateCall(aProgram._Block_copy, retVal);
-	}
+	retVal = builder->CreateCall(aProgram.TQPrepareObjectForReturn, retVal);
 	return builder->CreateRet(retVal);
 }
 @end

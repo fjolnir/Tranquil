@@ -223,9 +223,7 @@ using namespace llvm;
 			return NULL;
 	}
 	IRBuilder<> *builder = aBlock.builder;
-	Value *forwarding = builder->CreateLoad(builder->CreateStructGEP(_alloca, 1), [self _llvmRegisterName:@"forwarding"]);
-	forwarding = builder->CreateBitCast(forwarding, PointerType::getUnqual([self captureStructTypeInProgram:aProgram]));
-
-	return aBlock.builder->CreateStore(aValue, builder->CreateStructGEP(forwarding, 6));
+	
+	return builder->CreateCall2(aProgram.TQStoreStrongInByref, builder->CreateBitCast(_alloca, aProgram.llInt8PtrTy), aValue);
 }
 @end

@@ -1,4 +1,4 @@
-captureMePlease = "hey I was defined in the root! "
+captureMePlease = "hey I was defined in the root block!"
 a = { arg |
 		block = { arg |
 			arg = arg stringByAppendingString:captureMePlease.
@@ -9,7 +9,7 @@ a = { arg |
 myBlock = a
 numAsStr = a("foo" stringByAppendingString: 321 stringValue.)
 numAsStr = numAsStr stringByAppendingString:" Three Two One".
-print(numAsStr)
+print("%@ %@", myBlock, numAsStr)
 
 #Foo < NSObject {
 	+ classMethod {
