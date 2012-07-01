@@ -1,4 +1,6 @@
 #import "TQNodeVariable.h"
+#import "TQProgram.h"
+#import <llvm/Support/IRBuilder.h>
 
 using namespace llvm;
 
@@ -34,5 +36,13 @@ using namespace llvm;
 {
 	[_name release];
 	[super dealloc];
+}
+
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
+{
+	AllocaInst *alloca = aBlock.builder->CreateAlloca(aProgram.llInt8PtrTy);
+	// Initialize to nil
+	aBlock.builder->CreateStore(ConstantPointerNull::get(aProgram.llInt8PtrTy), alloca);
+	return alloca;
 }
 @end
