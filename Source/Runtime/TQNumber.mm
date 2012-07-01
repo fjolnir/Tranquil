@@ -1,4 +1,5 @@
 #import "TQNumber.h"
+#import <objc/runtime.h>
 
 @implementation TQNumber
 
@@ -10,9 +11,16 @@
 
 + (TQNumber *)numberWithDouble:(double)aValue
 {
-	TQNumber *ret = [[self alloc] init];
+	// This one gets called quite frequently, so we cache the imps required to allocate
+	static IMP allocImp, initImp, autoreleaseImp;
+	if(!allocImp) {
+		allocImp = method_getImplementation(class_getClassMethod(self, @selector(alloc)));
+		initImp = class_getMethodImplementation(self, @selector(init));
+		autoreleaseImp = class_getMethodImplementation(self, @selector(autorelease));
+	}
+	TQNumber *ret = initImp(allocImp(self, @selector(alloc)), @selector(init));
 	ret->_doubleValue = aValue;
-	return [ret autorelease];
+	return autoreleaseImp(ret, @selector(autorelease));
 }
 
 - (TQNumber *)add:(TQNumber *)b
