@@ -82,7 +82,7 @@ task :run => [:default] do
 end
 
 task :gdb => [:default] do
-	sh "sudo gdb #{BUILD_DIR}/tranquil"
+	sh "gdb #{BUILD_DIR}/tranquil"
 end
 
 task :lldb => [:default] do
