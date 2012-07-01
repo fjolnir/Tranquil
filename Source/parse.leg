@@ -35,13 +35,17 @@ typedef struct _TQParserState TQParserState;
 
 #define SyntaxError(msg) do { \
     NSString *source = [NSString stringWithUTF8String:G->buf]; \
-    NSRange tokRange         = state->currentToken; \
-    NSRange interestingRange = NSIntersectionRange(NSMakeRange(0, [source length]), NSMakeRange(tokRange.location - 10, tokRange.length + 20)); \
-    NSMutableString *errStr = [[[source substringWithRange:interestingRange] mutableCopy] autorelease]; \
-    NSRange errRange = NSMakeRange(tokRange.location - interestingRange.location, tokRange.length); \
-    [errStr insertString:@" >> " atIndex:errRange.location]; \
-    [errStr insertString:@" << " atIndex:NSMaxRange(errRange) + 4]; \
-    NSLog(@"Syntax error! %@ near %@", (msg), errStr); \
+        NSRange tokRange         = state->currentToken; \
+        NSRange interestingRange = NSIntersectionRange(NSMakeRange(0, [source length]), NSMakeRange(tokRange.location - 10, tokRange.length + 20)); \
+        if(interestingRange.length > 0) { \
+            NSMutableString *errStr = [[[source substringWithRange:interestingRange] mutableCopy] autorelease]; \
+            NSLog(@"%@", errStr);\
+            NSRange errRange = NSMakeRange(tokRange.location - interestingRange.location, tokRange.length); \
+            [errStr insertString:@" >> " atIndex:errRange.location]; \
+            [errStr insertString:@" << " atIndex:NSMaxRange(errRange) + 4]; \
+            NSLog(@"Syntax error! %@ near %@", (msg), errStr); \
+        } else \
+            NSLog(@"Syntax error! %@", (msg)); \
     exit(1); \
 } while(0)
 
@@ -61,6 +65,7 @@ Program      = (Statement --)+ EOF
 # Statement
 Statement    = (
                If
+             | While
              | Call
              | Message
              | Class
@@ -76,7 +81,8 @@ Return       = "^" retVal:Expression { UpdateToken(); $$ = [TQNodeReturn nodeWit
 
 
 # Expression
-Expression   = Equation
+Expression   = Assignment
+             | Equation
              | NoEqExpr
 
 NoEqExpr     = Call
@@ -165,7 +171,9 @@ Block        = '{' --
                {
                     ExtendToken();
                     NSMutableArray *arguments = PopStack();
-                    [StackTop setArguments:arguments];
+                    for(NSString *arg in arguments) {
+                       [StackTop addArgument:arg error:nil];
+                    }
                     PushStack([NSMutableArray array]);
                }
                (Statement --)*
@@ -185,7 +193,9 @@ Block        = '{' --
                    ExtendToken();
                    NSMutableArray *arguments = PopStack();
                    $$ = [TQNodeBlock node];
-                   [$$ setArguments:arguments];
+                   for(NSString *arg in arguments) {
+                       [$$ addArgument:arg error:nil];
+                   }
                    [$$ setStatements:[NSMutableArray arrayWithObject:[TQNodeReturn nodeWithValue:expr]]];
                }
 BlockArgDef  = name:Identifier { [StackTop addObject:name]; }
@@ -297,6 +307,24 @@ If           = ( "if"        { UpdateToken();  PushStack([TQNodeIfBlock node]); 
                    [$$ setStatements:statements];
                }
 
+# Loops
+
+While        = ( "while"  { UpdateToken(); PushStack([TQNodeWhileBlock node]); }
+               | "until"  { UpdateToken(); PushStack([TQNodeUntilBlock node]); }
+               )
+               -- cond:Expression -- '{' --
+               {
+                   ExtendToken();
+                   [StackTop setCondition:cond];
+                   PushStack([NSMutableArray array]);
+               }
+               ( Statement --)* '}'
+               {
+                   ExtendToken();
+                   NSMutableArray *statements = PopStack();
+                   $$ = PopStack();
+                   [$$ setStatements:statements];
+               }
 
 
 # Equations
@@ -324,16 +352,11 @@ Assignment     = a:AssgnLhs - "=" -- { UpdateToken(); PushStack(a);    }
 AssgnLhs       = Property
                | SubscriptExp
                | Variable
-AssgnRhs       = b:Expression        { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAssign left:StackTop right:b]); }
-                 | "=" -- b:Expression
-                 {
-                     ExtendToken();
-                     // (a=b) = c doesn't make sense so we must transform it to a = (b=c)
-                     TQNodeOperator *oldOp = StackTop;
-                     assert([oldOp isKindOfClass:[TQNodeOperator class]] && oldOp.type == kTQOperatorAssign);
-                     TQNodeOperator *newOp = [TQNodeOperator nodeWithType:kTQOperatorAssign left:oldOp.right right:b];
-                     ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAssign left:oldOp.left right:newOp]);
-                 }
+AssgnRhs       = b:Expression
+               {
+                   ExtendToken(); 
+                   ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAssign left:StackTop right:b]);
+               }
 
 
 # Accessors

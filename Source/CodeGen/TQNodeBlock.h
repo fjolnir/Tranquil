@@ -1,4 +1,5 @@
 #import "TQNode.h"
+#include "TQNodeReturn.h"
 #include <llvm/Support/IRBuilder.h>
 
 @class TQNodeArgumentDef;
@@ -30,7 +31,7 @@ enum TQBlockFieldFlag_t {
 @property(readwrite, retain) TQNodeBlock *parent;
 @property(readwrite, copy) NSMutableArray *arguments;
 @property(readwrite, copy, nonatomic) NSMutableArray *statements;
-@property(readwrite, copy) NSMutableDictionary *locals;
+@property(readwrite, retain) NSMutableDictionary *locals;
 @property(readwrite, copy) NSString *name;
 @property(readwrite, assign) llvm::BasicBlock *basicBlock;
 @property(readwrite, assign) llvm::Function *function;

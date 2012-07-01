@@ -413,12 +413,14 @@ using namespace llvm;
     }
 
     Value *val;
-    for(TQNode *node in _statements) {
-        [node generateCodeInProgram:aProgram block:self error:aoErr];
+    for(TQNode *stmt in _statements) {
+        [stmt generateCodeInProgram:aProgram block:self error:aoErr];
         if(*aoErr) {
             NSLog(@"Error: %@", *aoErr);
             return NULL;
         }
+        if([stmt isKindOfClass:[TQNodeReturn class]])
+            break;
     }
 
     if(!_basicBlock->getTerminator()) {

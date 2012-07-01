@@ -41,3 +41,5 @@ extern SEL TQStringWithUTF8StringSel;
 extern SEL TQPointerArrayWithObjectsSel;
 extern SEL TQMapWithObjectsundKeysSel;
 extern SEL TQRegexWithPatSel;
+
+extern Class TQNumberClass;

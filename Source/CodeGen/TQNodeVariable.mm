@@ -9,7 +9,7 @@ using namespace llvm;
 @end
 
 @implementation TQNodeVariable
-@synthesize name=_name, alloca=_alloca, forwarding=_forwarding;
+@synthesize name=_name, alloca=_alloca;
 
 + (TQNodeVariable *)nodeWithName:(NSString *)aName
 {
@@ -57,21 +57,16 @@ using namespace llvm;
 
 - (llvm::Value *)_getForwardingInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock
 {
+    TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock];
+    if(existingVar)
+        return [existingVar _getForwardingInProgram:aProgram block:aBlock];
+
     IRBuilder<> *builder = aBlock.builder;
+    Value *forwarding;
+    forwarding = builder->CreateLoad(builder->CreateStructGEP(_alloca, 1), [self _llvmRegisterName:@"forwardingPtr"]);
+    forwarding = builder->CreateBitCast(forwarding, PointerType::getUnqual([self captureStructTypeInProgram:aProgram]), [self _llvmRegisterName:@"forwarding"]);
 
-    if(!_forwarding) {
-        TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock];
-        if(existingVar) {
-            if(![existingVar _getForwardingInProgram:aProgram block:aBlock])
-                return NULL;
-            _forwarding = existingVar.forwarding;
-        } else {
-        _forwarding = builder->CreateLoad(builder->CreateStructGEP(_alloca, 1), [self _llvmRegisterName:@"forwardingPtr"]);
-        _forwarding = builder->CreateBitCast(_forwarding, PointerType::getUnqual([self captureStructTypeInProgram:aProgram]), [self _llvmRegisterName:@"forwarding"]);
-        }
-    }
-
-    return builder->CreateLoad(builder->CreateStructGEP(_forwarding, 6));
+    return builder->CreateLoad(builder->CreateStructGEP(forwarding, 6));
 }
 
 - (llvm::Type *)captureStructTypeInProgram:(TQProgram *)aProgram
@@ -217,6 +212,7 @@ using namespace llvm;
     builder->CreateStore(ConstantPointerNull::get(aProgram.llInt8PtrTy), builder->CreateStructGEP(alloca, 6, [self _llvmRegisterName:@"marked_variable"]));
 
     _alloca = alloca;
+
     return _alloca;
 }
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram

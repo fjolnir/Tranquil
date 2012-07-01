@@ -1,15 +1,14 @@
 #import "TQNodeBlock.h"
 #include <llvm/Support/IRBuilder.h>
 
-@interface TQNodeIfBlock : TQNodeBlock
+@interface TQNodeWhileBlock : TQNodeBlock
 @property(readwrite, retain) TQNode *condition;
-@property(readwrite, copy) NSMutableArray *elseBlockStatements;
 
-+ (TQNodeIfBlock *)node;
++ (TQNodeWhileBlock *)node;
 - (llvm::Value *)generateTestExpressionInProgram:(TQProgram *)aProgram
-                                           block:(TQNodeBlock *)aBlock
+                                     withBuilder:(llvm::IRBuilder<> *)aBuilder
                                            value:(llvm::Value *)aValue;
 @end
 
-@interface TQNodeUnlessBlock : TQNodeIfBlock
+@interface TQNodeUntilBlock : TQNodeWhileBlock
 @end

@@ -1,4 +1,14 @@
 fib = { n |
-	^(n <= 1) if: `n` else: `fib(n-1) + fib(n-2)`
+	if n <= 1 {
+		^n
+	} else {
+		^fib(n-1) + fib(n-2)
+	}
 }
-^fib(30)
+^fib(5)
+
+fib = { n |
+	^n
+}
+^fib(5)
+

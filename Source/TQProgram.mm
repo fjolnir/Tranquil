@@ -287,6 +287,8 @@ using namespace llvm;
     engine->addGlobalMapping(_func_TQAutoreleaseObject, (void*)&TQAutoreleaseObject);
     engine->addGlobalMapping(_func_TQSetValueForKey, (void*)&TQSetValueForKey);
     engine->addGlobalMapping(_func_TQValueForKey, (void*)&TQValueForKey);
+    GlobalVariable *glbl = new GlobalVariable(*_llModule, _llInt8Ty, false, GlobalValue::ExternalLinkage, NULL, "TQNumberClass");
+    engine->addGlobalMapping(glbl, (void*)&TQNumberClass);
 
     //std::vector<GenericValue> noargs;
     //GenericValue val = engine->runFunction(_root.function, noargs);
@@ -319,8 +321,8 @@ using namespace llvm;
     fpm.add(createTailCallEliminationPass());
 
 
-    //fpm.run(*_root.function);
-    //modulePasses.run(*_llModule);
+    fpm.run(*_root.function);
+    modulePasses.run(*_llModule);
 
     //_llModule->dump();
     llvm::PrintStatistics();

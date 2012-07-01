@@ -21,4 +21,5 @@
 #import "CodeGen/TQNodeArray.h"
 #import "CodeGen/TQNodeDictionary.h"
 #import "CodeGen/TQNodeRegex.h"
-#import "CodeGen/TQNodeIfBlock.h"
+#import "CodeGen/TQNodeConditionalBlock.h"
+#import "CodeGen/TQNodeLoopBlock.h"

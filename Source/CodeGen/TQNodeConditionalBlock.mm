@@ -1,7 +1,7 @@
-#import "TQNodeIfBlock.h"
+#import "TQNodeConditionalBlock.h"
 #import "TQProgram.h"
 #import "TQNodeVariable.h"
-
+#import "TQNodeReturn.h"
 
 using namespace llvm;
 
@@ -56,8 +56,11 @@ using namespace llvm;
 
     if((ref = [_condition referencesNode:aNode]))
         return ref;
-    if((ref = [self.statements tq_referencesNode:aNode]))
+    else if((ref = [self.statements tq_referencesNode:aNode]))
         return ref;
+    else if((ref = [_elseBlockStatements tq_referencesNode:aNode]))
+        return ref;
+
     return nil;
 }
 
@@ -65,10 +68,10 @@ using namespace llvm;
 #pragma mark - Code generation
 
 - (llvm::Value *)generateTestExpressionInProgram:(TQProgram *)aProgram
-                                           block:(TQNodeBlock *)aBlock
+                                     withBuilder:(IRBuilder<> *)aBuilder
                                            value:(llvm::Value *)aValue
 {
-    return aBlock.builder->CreateICmpNE(aValue, ConstantPointerNull::get(aProgram.llInt8PtrTy), "ifTest");
+    return aBuilder->CreateICmpNE(aValue, ConstantPointerNull::get(aProgram.llInt8PtrTy), "ifTest");
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
@@ -79,11 +82,12 @@ using namespace llvm;
     // Pose as the parent block for the duration of code generation
     self.function = aBlock.function;
     self.autoreleasePool = aBlock.autoreleasePool;
+    self.locals = aBlock.locals;
 
     Value *testExpr = [_condition generateCodeInProgram:aProgram block:aBlock error:aoErr];
     if(*aoErr)
         return NULL;
-    Value *testResult = [self generateTestExpressionInProgram:aProgram block:aBlock value:testExpr];
+    Value *testResult = [self generateTestExpressionInProgram:aProgram withBuilder:aBlock.builder value:testExpr];
 
     BOOL hasElse = (_elseBlockStatements.count > 0);
 
@@ -99,6 +103,8 @@ using namespace llvm;
         [stmt generateCodeInProgram:aProgram block:self error:aoErr];
         if(*aoErr)
             return NULL;
+        if([stmt isKindOfClass:[TQNodeReturn class]])
+            break;
     }
 
     if(hasElse) {

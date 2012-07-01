@@ -22,8 +22,7 @@ extern id _objc_msgSend_hack2(id, SEL, id)     asm("_objc_msgSend");
 
     TQNumberTrue = [[self alloc] init];
     TQNumberTrue->_doubleValue = 1;
-    TQNumberFalse = [[self alloc] init];
-    TQNumberFalse->_doubleValue = 0;
+    TQNumberFalse = nil;
 
     IMP operatorImp;
 

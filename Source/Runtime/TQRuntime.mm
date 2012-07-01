@@ -26,6 +26,8 @@ SEL TQPointerArrayWithObjectsSel      = @selector(tq_pointerArrayWithObjects:);
 SEL TQMapWithObjectsAndKeysSel        = @selector(tq_mapTableWithObjectsAndKeys:);
 SEL TQRegexWithPatSel                 = @selector(tq_regularExpressionWithUTF8String:options:);
 
+Class TQNumberClass;
+
 struct TQBlock_byref {
     void *isa;
     struct TQBlock_byref *forwarding;
@@ -221,19 +223,22 @@ BOOL TQAugmentClassWithOperators(Class klass)
 
 void TQInitializeRuntime()
 {
-    TQEqOpSel                 = sel_registerName("==:");
-    TQNeqOpSel                = sel_registerName("!=:");
-    TQAddOpSel                = sel_registerName("+:");
-    TQSubOpSel                = sel_registerName("-:");
-    TQUnaryMinusOpSel         = sel_registerName("-");
-    TQMultOpSel               = sel_registerName("*:");
-    TQDivOpSel                = sel_registerName("/:");
-    TQLTOpSel                 = sel_registerName("<:");
-    TQGTOpSel                 = sel_registerName(">:");
-    TQLTEOpSel                = sel_registerName("<=:");
-    TQGTEOpSel                = sel_registerName(">=:");
-    TQGetterOpSel             = sel_registerName("[]:");
-    TQSetterOpSel             = sel_registerName("[]=::");
+    TQNumber *foo = [TQNumber numberWithDouble:3]; // TODO: remove me
+    TQEqOpSel         = sel_registerName("==:");
+    TQNeqOpSel        = sel_registerName("!=:");
+    TQAddOpSel        = sel_registerName("+:");
+    TQSubOpSel        = sel_registerName("-:");
+    TQUnaryMinusOpSel = sel_registerName("-");
+    TQMultOpSel       = sel_registerName("*:");
+    TQDivOpSel        = sel_registerName("/:");
+    TQLTOpSel         = sel_registerName("<:");
+    TQGTOpSel         = sel_registerName(">:");
+    TQLTEOpSel        = sel_registerName("<=:");
+    TQGTEOpSel        = sel_registerName(">=:");
+    TQGetterOpSel     = sel_registerName("[]:");
+    TQSetterOpSel     = sel_registerName("[]=::");
+
+    TQNumberClass     = [TQNumber class];
 
     TQAugmentClassWithOperators([NSObject class]);
 
