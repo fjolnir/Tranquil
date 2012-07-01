@@ -1,3 +1,5 @@
+#import <Foundation/Foundation.h>
+
 #ifdef DEBUG
     #define TQLog(fmt, ...) NSLog(@"%s:%u (%s): " fmt "\n", __FILE__, __LINE__, __func__, ## __VA_ARGS__)
     #define TQLog_min(fmt, ...)  NSLog(fmt "\n", ## __VA_ARGS__)
@@ -29,4 +31,16 @@
     #define TQLog(fmt, ...)
     #define TQAssert(cond, fmt, ...)
 #endif
+
+extern NSString * const kTQSyntaxErrorDomain;
+extern NSString * const kTQGenericErrorDomain;
+
+
+typedef enum {
+    kTQUnexpectedIdentifier = 1,
+    kTQInvalidClassName,
+    kTQInvalidAssignee,
+    kTQUnexpectedStatement,
+    kTQGenericError
+} TQSyntaxErrorCode;
 

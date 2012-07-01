@@ -2,9 +2,6 @@
 
 using namespace llvm;
 
-NSString * const kTQSyntaxErrorDomain = @"org.tranquil.syntax";
-NSString * const kTQGenericErrorDomain = @"org.tranquil.generic";
-
 @implementation TQNode
 + (TQNode *)node
 {

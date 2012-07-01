@@ -34,7 +34,6 @@ aDict  = #{ key => value, anotherKey => value } \ Initializes a dictionary
 
 aBlock = { ..body.. } \ A block. Defines scope
 aBlockWith = { arg0, arg1 | ..body.. } \ A block that takes two arguments
-aBlock = { &arg |  ..statements.. } \ Prefixing an argument with & indicates that rather than evaluating it,
                               \ a block with it as it's body should be passed
 aBlock = { arg=123 |  ..statements.. } \ Assignment in the argument list indicates a default value
                                  \ for that argument

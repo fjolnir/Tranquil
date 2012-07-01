@@ -26,17 +26,6 @@
 
 @class TQNodeBlock, TQProgram;
 
-extern NSString * const kTQSyntaxErrorDomain;
-extern NSString * const kTQGenericErrorDomain;
-
-
-typedef enum {
-    kTQUnexpectedIdentifier = 1,
-    kTQInvalidClassName,
-    kTQInvalidAssignee,
-    kTQGenericError
-} TQSyntaxErrorCode;
-
 @interface TQNode : NSObject
 + (TQNode *)node;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr;
