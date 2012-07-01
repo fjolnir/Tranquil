@@ -38,6 +38,27 @@ using namespace llvm;
 	[super dealloc];
 }
 
+- (llvm::Type *)captureStructTypeInProgram:(TQProgram *)aProgram
+{
+	static Type *captureType = NULL;
+	if(captureType)
+		return captureType;
+
+	Type *i8PtrTy = aProgram.llInt8PtrTy;
+	Type *intTy   = aProgram.llIntTy;
+
+	captureType = StructType::create("struct._block_byref",
+	                                 i8PtrTy, // isa
+	                                 i8PtrTy, // forwarding
+	                                 intTy,   // flags (refcount)
+	                                 intTy,   // size ( = sizeof(id))
+	                                 i8PtrTy, // byref_keep(void *dest, void *src)
+	                                 i8PtrTy, // byref_dispose(void *)
+	                                 i8PtrTy, // Captured variable (id)
+	                                 NULL);
+	return captureType;
+}
+
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                  error:(NSError **)aoError
