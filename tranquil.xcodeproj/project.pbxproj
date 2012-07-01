@@ -7,73 +7,15 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		C7B6E3FD159608A9001A9250 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		C7B6E403159608A9001A9250 /* tranquil-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "tranquil-Prefix.pch"; sourceTree = "<group>"; };
-		C7B6E410159608DE001A9250 /* CodeGen */ = {isa = PBXFileReference; lastKnownFileType = folder; name = CodeGen; path = Source/CodeGen; sourceTree = SOURCE_ROOT; };
-		C7B6E411159608DE001A9250 /* Runtime */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Runtime; path = Source/Runtime; sourceTree = SOURCE_ROOT; };
-		C7B6E412159608DE001A9250 /* TQProgram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TQProgram.h; path = Source/TQProgram.h; sourceTree = SOURCE_ROOT; };
-		C7B6E413159608DE001A9250 /* TQProgram.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = TQProgram.mm; path = Source/TQProgram.mm; sourceTree = SOURCE_ROOT; };
-		C7B6E414159608DE001A9250 /* Tranquil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Tranquil.h; path = Source/Tranquil.h; sourceTree = SOURCE_ROOT; };
-		C7B6E416159608EC001A9250 /* lex.yy.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = lex.yy.mm; path = Build/lex.yy.mm; sourceTree = SOURCE_ROOT; };
-		C7B6E417159608EC001A9250 /* y.tab.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = y.tab.h; path = Build/y.tab.h; sourceTree = SOURCE_ROOT; };
-		C7B6E418159608EC001A9250 /* y.tab.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = y.tab.mm; path = Build/y.tab.mm; sourceTree = SOURCE_ROOT; };
+		C78C63F415A087AF0064F9FC /* Tranquil */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Tranquil; path = Source/Tranquil; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
 		C7B6E3EE159608A9001A9250 = {
 			isa = PBXGroup;
 			children = (
-				C7B6E3FF159608A9001A9250 /* tranquil */,
-				C7B6E3FC159608A9001A9250 /* Frameworks */,
-				C7B6E3FA159608A9001A9250 /* Products */,
+				C78C63F415A087AF0064F9FC /* Tranquil */,
 			);
-			sourceTree = "<group>";
-		};
-		C7B6E3FA159608A9001A9250 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		C7B6E3FC159608A9001A9250 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				C7B6E3FD159608A9001A9250 /* Foundation.framework */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		C7B6E3FF159608A9001A9250 /* tranquil */ = {
-			isa = PBXGroup;
-			children = (
-				C7B6E410159608DE001A9250 /* CodeGen */,
-				C7B6E411159608DE001A9250 /* Runtime */,
-				C7B6E412159608DE001A9250 /* TQProgram.h */,
-				C7B6E413159608DE001A9250 /* TQProgram.mm */,
-				C7B6E414159608DE001A9250 /* Tranquil.h */,
-				C7B6E41B159608F1001A9250 /* Generated */,
-				C7B6E402159608A9001A9250 /* Supporting Files */,
-			);
-			path = tranquil;
-			sourceTree = "<group>";
-		};
-		C7B6E402159608A9001A9250 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				C7B6E403159608A9001A9250 /* tranquil-Prefix.pch */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		C7B6E41B159608F1001A9250 /* Generated */ = {
-			isa = PBXGroup;
-			children = (
-				C7B6E416159608EC001A9250 /* lex.yy.mm */,
-				C7B6E417159608EC001A9250 /* y.tab.h */,
-				C7B6E418159608EC001A9250 /* y.tab.mm */,
-			);
-			name = Generated;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -110,7 +52,7 @@
 				en,
 			);
 			mainGroup = C7B6E3EE159608A9001A9250;
-			productRefGroup = C7B6E3FA159608A9001A9250 /* Products */;
+			productRefGroup = C7B6E3EE159608A9001A9250;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -177,7 +119,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
-				PATH = "/usr/local/llvm/bin:$PATH";
+				PATH = "/usr/local/llvm/bin:/usr/local/bin:$PATH";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -187,7 +129,7 @@
 			buildSettings = {
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
-				PATH = "/usr/local/llvm/bin:$PATH";
+				PATH = "/usr/local/llvm/bin:/usr/local/bin:$PATH";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -211,6 +153,7 @@
 				C7B6E41F15960A91001A9250 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
