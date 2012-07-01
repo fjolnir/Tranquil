@@ -35,18 +35,28 @@ using namespace llvm;
     llvm::IRBuilder<> *builder = aBlock.builder;
 
     // Returns [NSRegularExpression tq_regularExpressionWithUTF8String:options:]
-    NSRegularExpression *splitRegex = [NSRegularExpression regularExpressionWithPattern:@"\\/((\\\\\\/)|[^\\/])*\\/[im]*"
+    NSRegularExpression *splitRegex = [NSRegularExpression regularExpressionWithPattern:@"/(([\\/]|[^/])*)/([im]*)"
                                                                                 options:0
                                                                                   error:nil];
     NSTextCheckingResult *match = [splitRegex firstMatchInString:_pattern options:0 range:NSMakeRange(0, [_pattern length])];
     assert(match != nil);
-    NSString *pattern = [_pattern substringWithRange:[match rangeAtIndex:1]];
-    NSString *optStr  = [_pattern substringWithRange:[match rangeAtIndex:2]];
+    NSRange patRange = [match rangeAtIndex:1];
+    NSRange optRange = [match rangeAtIndex:2];
+
+    NSString *pattern;
+    if(patRange.length > 0)
+        pattern = [_pattern substringWithRange:patRange];
+    else
+        pattern = @"";
+
     NSRegularExpressionOptions opts = 0;
-    if([optStr rangeOfString:@"i"].location != NSNotFound)
-        opts |= NSRegularExpressionCaseInsensitive;
-    if([optStr rangeOfString:@"m"].location != NSNotFound)
-        opts |= NSRegularExpressionAnchorsMatchLines;
+    if(optRange.length > 0) {
+        NSString *optStr  = [_pattern substringWithRange:[match rangeAtIndex:2]];
+        if([optStr rangeOfString:@"i"].location != NSNotFound)
+            opts |= NSRegularExpressionCaseInsensitive;
+        if([optStr rangeOfString:@"m"].location != NSNotFound)
+            opts |= NSRegularExpressionAnchorsMatchLines;
+    }
 
     Value *selector = builder->CreateLoad(mod->getOrInsertGlobal("TQRegexWithPatSel", aProgram.llInt8PtrTy));
     Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_NSRegularExpression", aProgram.llInt8Ty);

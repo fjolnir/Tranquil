@@ -94,7 +94,7 @@ NoEqExpr     = Call
              | Property
              | Array
              | Dictionary
-#             | RegExp
+             | RegExp
              | Literal
              | Variable
              | ParenExpr
@@ -429,9 +429,6 @@ DictItem     = key:Variable -- "=>" -- value:Variable
                    [StackTop setObject:value forKey:key];
                }
 
-#RegExp TODO
-
-
 # Basic components
 Variable     = name:Identifier
                {
@@ -461,10 +458,11 @@ Operator     = '==' { ExtendToken(); $$ = @"=="; }
 SelIdent     = Identifier | Operator
 
 Number       = (< '-'? [0-9]+ ('.' [0-9]*)? ('e'[0-9]+)? >
-             | < '-'? '.' [0-9]+ ('e'[0-9]+)? > )          { ExtendToken(); $$ = [TQNodeNumber nodeWithDouble:YYNUM];       }
-Identifier   = < [a-z_][A-Za-z0-9_]* >                     { ExtendToken(); $$ = YYNSSTR;                                   }
-Constant     = < [A-Z][A-Za-z0-9_]* >                      { ExtendToken(); $$ = [TQNodeConstant   nodeWithString:YYNSSTR]; }
-String       = '"' < [^\"]* > '"'                          { ExtendToken(); $$ = [TQNodeString     nodeWithString:YYNSSTR]; }
+             | < '-'? '.' [0-9]+ ('e'[0-9]+)? > )          { ExtendToken(); $$ = [TQNodeNumber nodeWithDouble:YYNUM];     }
+Identifier   = < [a-z_][A-Za-z0-9_]* >                     { ExtendToken(); $$ = YYNSSTR;                                 }
+Constant     = < [A-Z][A-Za-z0-9_]* >                      { ExtendToken(); $$ = [TQNodeConstant nodeWithString:YYNSSTR]; }
+String       = '"' < [^\"]* > '"'                          { ExtendToken(); $$ = [TQNodeString   nodeWithString:YYNSSTR]; }
+RegExp       = < "/" ("\\/"|[^/])* "/"[im]* >              { ExtendToken(); $$ = [TQNodeRegex nodeWithPattern:YYNSSTR];   }
 
 Comment      = "\\" !"\\" (!EOL .)* EOL { NSLog(@"Comment"); }
 -            = [ \t]*
@@ -494,6 +492,3 @@ int main()
 
     return 0;
 }
-
-
-/*tREGEX      = '/' < ((\\/)|[^/])* > '/' < [im]* >*/
