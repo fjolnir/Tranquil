@@ -47,7 +47,9 @@ Return       = "^" retVal:Expression { $$ = [TQNodeReturn nodeWithValue:retVal];
 
 
 # Expression
-Expression   = Call
+Expression   = Equation
+             | NoEqExpr
+NoEqExpr     = Call
              | Message
              | Block
              | Self
@@ -56,7 +58,6 @@ Expression   = Call
              | Property
              | Array
              | Dictionary
-             | Equation
 #             | RegExp
              | Literal
              | Variable
@@ -216,7 +217,7 @@ Sum          = a:Product             { PushStack(a);                            
                | - "-" - b:Product   { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorSubtract left:StackTop right:b]); }
                )*                    { $$ = PopStack();                                                                          }
 
-Product      = a:EqLhs               { PushStack(a);                                                                             }
+Product      = a:NoEqExpr               { PushStack(a);                                                                             }
                ( - "*" - b:Product   { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorMultiply left:StackTop right:b]); }
                | - "/" - b:Product   { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorDivide   left:StackTop right:b]); }
                )*                    { $$ = PopStack();                                                                          }
@@ -229,10 +230,6 @@ Equation     = a:Sum                 { PushStack(a);                            
                | - "==" - b:Equation { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorEqual          left:StackTop right:b]); }
                | - "!=" - b:Equation { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorInequal        left:StackTop right:b]); }
                )*                    { $$ = PopStack();                                                                                }
-
-EqLhs          = Variable
-               | Literal
-               | ParenExpr
 
 Assignment     = a:AssgnLhs - "=" -- { PushStack(a);                                                                           }
                  (AssgnRhs -)+       { $$ = PopStack();                                                                        }
