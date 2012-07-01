@@ -216,7 +216,7 @@ Sum          = a:Product             { PushStack(a);                            
                | - "-" - b:Product   { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorSubtract left:StackTop right:b]); }
                )*                    { $$ = PopStack();                                                                          }
 
-Product      = a:Variable            { PushStack(a);                                                                             }
+Product      = a:EqLhs               { PushStack(a);                                                                             }
                ( - "*" - b:Product   { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorMultiply left:StackTop right:b]); }
                | - "/" - b:Product   { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorDivide   left:StackTop right:b]); }
                )*                    { $$ = PopStack();                                                                          }
@@ -230,12 +230,16 @@ Equation     = a:Sum                 { PushStack(a);                            
                | - "!=" - b:Equation { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorInequal        left:StackTop right:b]); }
                )*                    { $$ = PopStack();                                                                                }
 
-Assignment     = a:Lhs - "=" --      { PushStack(a);                                                                           }
-                 (Rhs -)+            { $$ = PopStack();                                                                        }
-Lhs            = Property
+EqLhs          = Variable
+               | Literal
+               | ParenExpr
+
+Assignment     = a:AssgnLhs - "=" -- { PushStack(a);                                                                           }
+                 (AssgnRhs -)+       { $$ = PopStack();                                                                        }
+AssgnLhs       = Property
                | SubscriptExp
                | Variable
-Rhs            = b:Equation          { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAssign left:StackTop right:b]); }
+AssgnRhs       = b:Equation          { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAssign left:StackTop right:b]); }
                  | "=" -- b:Equation
                  {
                      // (a=b) = c doesn't make sense so we must transform it to a = (b=c)
