@@ -40,9 +40,9 @@ LIBS = ['-framework Foundation'].join(' ')
 
 PATHMAP = "build/%n.o"
 
-OBJC_SOURCES = FileList['Source/*.m*'].add('Source/*/*.m*').add('Source/*/*.c').add(PARSER_OUTPATH)
+OBJC_SOURCES = FileList['Source/Tranquil/**/*.m*'].add('Source/Tranquil/**/*.c').add(PARSER_OUTPATH)
 O_FILES = OBJC_SOURCES.pathmap(PATHMAP)
-PEG_SOURCE = FileList['Source/*.leg'].first
+PEG_SOURCE = FileList['Source/Tranquil/*.leg'].first
 
 def compile(file, flags=CXXFLAGS, cc=CXX)
     sh "#{cc} #{file[:in].join(' ')} #{flags} -c -o #{file[:out]}"
