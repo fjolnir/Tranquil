@@ -113,7 +113,7 @@ using namespace llvm;
 	Value *classPtr = aClass.classPtr;
 	if(_type == kTQClassMethod)
 		classPtr = builder->CreateCall(aProgram.object_getClass, classPtr);
-	Value *oldImp = builder->CreateCall4(aProgram.class_replaceMethod, classPtr, selector, imp, signature);
+	builder->CreateCall4(aProgram.class_replaceMethod, classPtr, selector, imp, signature);
 
 	return NULL;
 }

@@ -34,11 +34,10 @@ using namespace llvm;
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
 {
-	BOOL isVar = [_left isMemberOfClass:[TQNodeVariable class]];
-	BOOL isProperty = [_left isMemberOfClass:[TQNodeMemberAccess class]];
-	BOOL isGetterOp = [_left isMemberOfClass:[self class]] && [(TQNodeOperator*)_left type] == kTQOperatorGetter;
-
 	if(_type == '=') {
+		BOOL isVar = [_left isMemberOfClass:[TQNodeVariable class]];
+		BOOL isProperty = [_left isMemberOfClass:[TQNodeMemberAccess class]];
+		BOOL isGetterOp = [_left isMemberOfClass:[self class]] && [(TQNodeOperator*)_left type] == kTQOperatorGetter;
 		TQAssertSoft(isVar || isProperty || isGetterOp, kTQSyntaxErrorDomain, kTQInvalidAssignee, NO, @"Only variables and object properties can be assigned to");
 
 		Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];

@@ -418,7 +418,7 @@ using namespace llvm;
 
 	Value *val;
 	for(TQNode *node in _statements) {
-		val = [node generateCodeInProgram:aProgram block:self error:aoErr];
+		[node generateCodeInProgram:aProgram block:self error:aoErr];
 		if(*aoErr) {
 			NSLog(@"Error: %@", *aoErr);
 			return NULL;
