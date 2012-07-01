@@ -10,9 +10,9 @@ NSString * const kTQSyntaxErrorDomain = @"org.tranquil.syntax";
 	return [[[self alloc] init] autorelease];
 }
 
-- (BOOL)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
 {
 	NSLog(@"Code generation has not been implemented for %@.", [self class]);
-	return NO;
+	return NULL;
 }
 @end

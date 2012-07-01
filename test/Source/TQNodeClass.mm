@@ -65,12 +65,12 @@ using namespace llvm;
 	return out;
 }
 
-- (BOOL)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
 {
 	// -- Type definitions
 	// -- Function definitions
 	
-	return YES;
+	return NULL;
 }
 
 @end

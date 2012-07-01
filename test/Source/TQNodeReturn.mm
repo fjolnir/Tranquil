@@ -1,4 +1,5 @@
 #import "TQNodeReturn.h"
+#import "TQProgram.h"
 
 using namespace llvm;
 
@@ -22,5 +23,10 @@ using namespace llvm;
 - (NSString *)description
 {
 	return [NSString stringWithFormat:@"<ret@ %@>", _value];
+}
+
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
+{
+	return NULL;
 }
 @end

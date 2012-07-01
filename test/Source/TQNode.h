@@ -64,5 +64,5 @@ typedef enum {
 
 @interface TQNode : NSObject
 + (TQNode *)node;
-- (BOOL)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr;
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr;
 @end

@@ -66,9 +66,7 @@ using namespace llvm;
 	return YES;
 }
 
-
-
-- (BOOL)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
 {
 	TQAssert(!_basicBlock && !_function, @"Tried to regenerate code for block %@", _name);
 	llvm::Module *mod = aProgram.llModule;
@@ -104,8 +102,5 @@ using namespace llvm;
 	}
 
 	// Return (TODO: Actually support returning values)
-	ReturnInst::Create(mod->getContext(), ConstantPointerNull::get(int8PtrTy), _basicBlock);
-
-	return YES;
 }
 @end

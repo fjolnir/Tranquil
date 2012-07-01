@@ -20,14 +20,18 @@ using namespace llvm;
 	return self;
 }
 
+- (void)dealloc
+{
+	[_value release];
+	[super dealloc];
+}
+
 - (NSString *)description
 {
 	return [NSString stringWithFormat:@"<num@ %f>", _value.doubleValue];
 }
 
-- (void)dealloc
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
 {
-	[_value release];
-	[super dealloc];
 }
 @end
