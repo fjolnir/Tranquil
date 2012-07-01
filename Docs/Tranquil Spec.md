@@ -116,27 +116,27 @@ Operator methods are methods that follow this calling syntax: a <operator> b. Th
 ```
 Meaning          |  Operator  | Resulting message    Notes
 ---------------- | ---------- | ------------------ | -----
-Equality         |  ==        | isEqual:           |
-Inequality       |  !=        |                    | Syntax sugar for !(a == b) so you can not actually define it
-Addition         |  +         | add:               | 
-Subtraction      |  -         | subtract:          |
-Negation         |  -         | negate             | Prefix operator
-Multiplication   |  *         | multiply:          | 
-Division         |  /         | divide:            | 
-Less than        |  <         | compare:           |
-Greater than     |  >         | compare:           |
-Lesser or equal  |  <=        | compare:           |
-Greater or equal |  >=        | compare:           |
-Index            |  []        | valueForKey:       | Postfix operator (a[b])
-Index assign     |  []=       | setValue:forKey:   | Postfix operator (a[b] = c)
+Equality         |  ==        | ==:                |
+Inequality       |  !=        | !=:                |
+Addition         |  +         | +:                 | 
+Subtraction      |  -         | -:                 |
+Negation         |  -         | -                  | Prefix operator
+Multiplication   |  *         | *:                 | 
+Division         |  /         | /:                 | 
+Less than        |  <         | <:                 |
+Greater than     |  >         | >:                 |
+Lesser or equal  |  <=        | <=:                |
+Greater or equal |  >=        | >=:                |
+Index            |  []        | []:                | Postfix operator (a[b])
+Index assign     |  []=       | []=::              | Postfix operator (a[b] = c)
 
 \ Example
 #Klass {
-	- add: b {
+	- +: b {
 		^self plus: b
 	},
-	- subtract: b {
-		^self#implementationDetail - b
+	- -: b {
+		^self subtract: b
 	}
 }
 
