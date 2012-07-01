@@ -2,13 +2,8 @@
 #import <objc/runtime.h>
 #import "TQRuntime.h"
 
-static struct {
-    TQNumber *lastElement;
-} _Pool = { nil };
-
 static id (*numberWithDoubleImp)(id, SEL, double)  ;
 static IMP allocImp, initImp, autoreleaseImp;
-
 
 TQNumber *TQNumberTrue;
 TQNumber *TQNumberFalse;
@@ -124,60 +119,6 @@ extern id _objc_msgSend_hack2(id, SEL, id)     asm("_objc_msgSend");
     return [NSString stringWithFormat:@"%f", _value];
 }
 
-#pragma mark - Allocation pooling
+TQ_POOL_IMPLEMENTATION
 
-+ (id)allocWithZone:(NSZone *)aZone
-{
-    if(!_Pool.lastElement) {
-        TQNumber *object = NSAllocateObject(self, 0, aZone);
-        object->_retainCount = 1;
-        return object;
-    }
-    else {
-        TQNumber *object = _Pool.lastElement;
-        _Pool.lastElement = object->_poolPredecessor;
-
-        object->_retainCount = 1;
-        return object;
-    }
-}
-
-- (NSUInteger)retainCount
-{
-    return _retainCount;
-}
-
-- (id)retain
-{
-    __sync_add_and_fetch(&_retainCount, 1);
-    return self;
-}
-
-- (oneway void)release
-{
-    if(!__sync_sub_and_fetch(&_retainCount, 1))
-    {
-        _poolPredecessor = _Pool.lastElement;
-        _Pool.lastElement = self;
-    }
-}
-
-- (void)_purge
-{
-    // Actually deallocate the object
-    [super release];
-}
-
-+ (int)purgeCache
-{
-    TQNumber *lastElement;
-    int count=0;
-    while ((lastElement = _Pool.lastElement))
-    {
-        ++count;
-        _Pool.lastElement = lastElement->_poolPredecessor;
-        [lastElement _purge];
-    }
-    return count;
-}
 @end

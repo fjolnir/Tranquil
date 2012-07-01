@@ -1,13 +1,12 @@
 // Note: TQNumber is not safe to subclass. It makes certain assumptions for the sake of performance
 
 #import <Foundation/Foundation.h>
+#import "TQPooling.h"
 
 @interface TQNumber : NSObject {
     @public
     double _value;
-    @private
-    TQNumber *_poolPredecessor;
-    NSUInteger _retainCount;
+    TQ_POOL_IVARS
 }
 @property(readonly) double doubleValue;
 
@@ -19,7 +18,7 @@
 - (TQNumber *)multiply:(TQNumber *)b;
 - (TQNumber *)divideBy:(TQNumber *)b;
 
-+ (int)purgeCache;
+TQ_POOL_INTERFACE
 @end
 
 extern TQNumber *TQNumberTrue, *TQNumberFalse;
