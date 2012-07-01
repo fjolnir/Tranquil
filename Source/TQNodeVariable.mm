@@ -38,6 +38,16 @@ using namespace llvm;
 	[super dealloc];
 }
 
+- (llvm::Value *)_getForwardingInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock
+{
+	NSLog(@"GETTING FORWARDING -----------------------------");
+	IRBuilder<> *builder = aBlock.builder;
+	Value *forwarding = builder->CreateLoad(builder->CreateStructGEP(_alloca, 1), "forwarding");
+	forwarding = builder->CreateBitCast(forwarding, PointerType::getUnqual([self captureStructTypeInProgram:aProgram]),
+	"forwardingCast");
+	return builder->CreateLoad(builder->CreateStructGEP(forwarding, 6));
+}
+
 - (llvm::Type *)captureStructTypeInProgram:(TQProgram *)aProgram
 {
 	static Type *captureType = NULL;
@@ -59,13 +69,100 @@ using namespace llvm;
 	return captureType;
 }
 
+- (llvm::Function *)_generateKeepHelperInProgram:(TQProgram *)aProgram
+{
+	static Function *keepHelper;
+	if(keepHelper)
+		return keepHelper;
+
+	Type *int8PtrTy = aProgram.llInt8PtrTy;
+	Type *intTy = aProgram.llIntTy;
+	std::vector<Type *> paramTypes;
+	paramTypes.push_back(int8PtrTy);
+	paramTypes.push_back(int8PtrTy);
+
+	FunctionType* funType = FunctionType::get(aProgram.llVoidTy, paramTypes, false);
+
+	llvm::Module *mod = aProgram.llModule;
+
+	const char *funName = [[NSString stringWithFormat:@"__tq_byref_obj_keep_helper"] UTF8String];
+	keepHelper = Function::Create(funType, GlobalValue::ExternalLinkage, funName, mod);
+	keepHelper->setCallingConv(CallingConv::C);
+
+	BasicBlock *basicBlock = BasicBlock::Create(mod->getContext(), "entry", keepHelper, 0);
+	IRBuilder<> *builder = new IRBuilder<>(basicBlock);
+
+	Type *byrefPtrTy = PointerType::getUnqual([self captureStructTypeInProgram:aProgram]);
+
+	// Load the passed arguments
+	AllocaInst *dstAlloca = builder->CreateAlloca(int8PtrTy);
+	AllocaInst *srcAlloca = builder->CreateAlloca(int8PtrTy);
+
+	Function::arg_iterator args = keepHelper->arg_begin();
+	builder->CreateStore(args, dstAlloca);
+	builder->CreateStore(++args, srcAlloca);
+
+	Value *dstByRef = builder->CreateBitCast(builder->CreateLoad(dstAlloca), byrefPtrTy);
+	Value *srcByRef = builder->CreateBitCast(builder->CreateLoad(srcAlloca), byrefPtrTy);
+	Value *flags = ConstantInt::get(intTy, TQ_BLOCK_BYREF_CALLER | TQ_BLOCK_FIELD_IS_OBJECT);
+
+	Value *destAddr  = builder->CreateBitCast(builder->CreateStructGEP(dstByRef, 6), int8PtrTy);
+	Value *srcPtr = builder->CreateLoad(builder->CreateStructGEP(srcByRef, 6));
+
+	[aProgram insertLogUsingBuilder:builder withStr:[NSString stringWithFormat:@"Storing %@", _name]];
+	builder->CreateCall3(aProgram._Block_object_assign, destAddr, srcPtr, flags);
+	[aProgram insertLogUsingBuilder:builder withStr:[NSString stringWithFormat:@"/Stored %@", _name]];
+	builder->CreateRetVoid();
+	return keepHelper;
+}
+
+- (llvm::Function *)_generateDisposeHelperInProgram:(TQProgram *)aProgram
+{
+	static Function *disposeHelper;
+	if(disposeHelper)
+		return disposeHelper;
+
+	Type *int8PtrTy = aProgram.llInt8PtrTy;
+	std::vector<Type *> paramTypes;
+	paramTypes.push_back(int8PtrTy);
+
+	FunctionType* funType = FunctionType::get(aProgram.llVoidTy, paramTypes, false);
+
+	llvm::Module *mod = aProgram.llModule;
+
+	const char *funName = [[NSString stringWithFormat:@"__tq_byref_obj_dispose_helper"] UTF8String];
+	disposeHelper = Function::Create(funType, GlobalValue::ExternalLinkage, funName, mod);
+	disposeHelper->setCallingConv(CallingConv::C);
+
+	BasicBlock *basicBlock = BasicBlock::Create(mod->getContext(), "entry", disposeHelper, 0);
+	IRBuilder<> *builder = new IRBuilder<>(basicBlock);
+
+	//Type *byrefPtrTy = PointerType::getUnqual([self captureStructTypeInProgram:aProgram]);
+
+	// Load the passed arguments
+	//AllocaInst *dstAlloca = builder->CreateAlloca(int8PtrTy); 
+
+	//Function::arg_iterator args = function->arg_begin();
+	//builder->CreateStore(args, dstAlloca);
+
+	//Value *dstByRef = builder->CreateBitCast(builder->CreateLoad(dstAlloca), byrefPtrTy);
+	//Value *flags = ConstantInt::get(intTy, TQ_BLOCK_BYREF_CALLER | TQ_BLOCK_FIELD_IS_OBJECT);
+
+	//Value *srcPtr = builder->CreateLoad(builder->CreateStructGEP(srcByRef, 6));
+
+	//builder->CreateCall3(aProgram._Block_object_assign, destAddr, srcPtr, flags);
+
+	builder->CreateRetVoid();
+	return disposeHelper;
+}
+
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                  error:(NSError **)aoError
 {
-	IRBuilder<> *builder = aBlock.builder;
+		IRBuilder<> *builder = aBlock.builder;
 	if(_alloca)
-		return builder->CreateLoad(builder->CreateStructGEP(_alloca, 6));
+		return [self _getForwardingInProgram:aProgram block:aBlock];
 
 	TQNodeVariable *existingVar = nil;
 	if((existingVar = [aBlock.locals objectForKey:_name]) && existingVar != self) {
@@ -80,18 +177,21 @@ using namespace llvm;
 
 	Type *byRefType = [self captureStructTypeInProgram:aProgram];
 	AllocaInst *alloca = builder->CreateAlloca(byRefType, 0);
-	// Initialize the variable to nil
-	builder->CreateStore(ConstantPointerNull::get(aProgram.llInt8PtrTy), builder->CreateStructGEP(alloca, 0, "capture.isa"));
-	builder->CreateStore(builder->CreateBitCast(alloca, i8PtrTy), builder->CreateStructGEP(alloca, 1, "capture.forwarding"));
-	builder->CreateStore(ConstantInt::get(intTy, TQ_BLOCK_HAS_COPY_DISPOSE), builder->CreateStructGEP(alloca, 2, "capture.flags"));
-	Constant *size = ConstantExpr::getTruncOrBitCast(ConstantExpr::getSizeOf(byRefType), intTy);
-	builder->CreateStore(size, builder->CreateStructGEP(alloca, 3, "capture.size"));
-	builder->CreateStore(ConstantPointerNull::get(aProgram.llInt8PtrTy), builder->CreateStructGEP(alloca, 4, "capture.byref_keep"));
-	builder->CreateStore(ConstantPointerNull::get(aProgram.llInt8PtrTy), builder->CreateStructGEP(alloca, 5, "capture.byref_dispose"));
-	builder->CreateStore(ConstantPointerNull::get(aProgram.llInt8PtrTy), builder->CreateStructGEP(alloca, 6, "capture.marked_variable"));
+	Value *keepHelper = builder->CreateBitCast([self _generateKeepHelperInProgram:aProgram], i8PtrTy);
+	Value *disposeHelper = ConstantPointerNull::get(aProgram.llInt8PtrTy);//builder->CreateBitCast([self _generateDisposeHelperInProgram:aProgram], i8PtrTy);
+
 	
+	// Initialize the variable to nil
+	builder->CreateStore(builder->CreateBitCast(alloca, i8PtrTy),        builder->CreateStructGEP(alloca, 1, "capture.forwarding"));
+	builder->CreateStore(ConstantInt::get(intTy, TQ_BLOCK_HAS_COPY_DISPOSE),                     builder->CreateStructGEP(alloca, 2, "capture.flags"));
+	Constant *size = ConstantExpr::getTruncOrBitCast(ConstantExpr::getSizeOf(byRefType), intTy);
+	builder->CreateStore(size,                                           builder->CreateStructGEP(alloca, 3, "capture.size"));
+	builder->CreateStore(keepHelper,                                     builder->CreateStructGEP(alloca, 4, "capture.byref_keep"));
+	builder->CreateStore(disposeHelper,                                  builder->CreateStructGEP(alloca, 5, "capture.byref_dispose"));
+	builder->CreateStore(ConstantPointerNull::get(aProgram.llInt8PtrTy), builder->CreateStructGEP(alloca, 6, "capture.marked_variable"));
+
 	_alloca = alloca;
-	return builder->CreateLoad(builder->CreateStructGEP(alloca, 6));
+	return [self _getForwardingInProgram:aProgram block:aBlock];
 }
 
 - (llvm::Value *)store:(llvm::Value *)aValue
@@ -104,8 +204,9 @@ using namespace llvm;
 			return NULL;
 	}
 	IRBuilder<> *builder = aBlock.builder;
-	Value *forwarding = builder->CreateStructGEP(_alloca, 1);
+	Value *forwarding = builder->CreateLoad(builder->CreateStructGEP(_alloca, 1), "forwarding");
+	forwarding = builder->CreateBitCast(forwarding, PointerType::getUnqual([self captureStructTypeInProgram:aProgram]));
 
-	return aBlock.builder->CreateStore(aValue, builder->CreateStructGEP(_alloca, 6));
+	return aBlock.builder->CreateStore(aValue, builder->CreateStructGEP(forwarding, 6, "storeAddr"));
 }
 @end

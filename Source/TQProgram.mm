@@ -18,7 +18,8 @@ using namespace llvm;
 	objc_registerClassPair=_func_objc_registerClassPair, objc_destroyWeak=_func_objc_destroyWeak, class_addIvar=_func_class_addIvar,
 	class_addMethod=_func_class_addMethod, sel_registerName=_func_sel_registerName, sel_getName=_func_sel_getName,
 	objc_getClass=_func_objc_getClass, objc_retain=_func_objc_retain, objc_release=_func_objc_release,
-	objc_retainBlock=_func_objc_retainBlock;
+	_Block_copy=_func__Block_copy, _Block_object_assign=_func__Block_object_assign,
+	_Block_object_dispose=_func__Block_object_dispose;
 
 + (TQProgram *)programWithName:(NSString *)aName
 {
@@ -79,6 +80,19 @@ using namespace llvm;
 	args_i8Ptr.push_back(_llInt8PtrTy);
 	FunctionType *ft_void__i8Ptr = FunctionType::get(_llVoidTy, args_i8Ptr, false);
 
+	// void(id, int)
+	std::vector<Type*> args_i8Ptr_int;
+	args_i8Ptr_int.push_back(_llInt8PtrTy);
+	args_i8Ptr_int.push_back(_llIntTy);
+	FunctionType *ft_void__i8Ptr_int = FunctionType::get(_llVoidTy, args_i8Ptr_int, false);
+
+	// void(id, id, int)
+	std::vector<Type*> args_i8Ptr_i8Ptr_int;
+	args_i8Ptr_i8Ptr_int.push_back(_llInt8PtrTy);
+	args_i8Ptr_i8Ptr_int.push_back(_llInt8PtrTy);
+	args_i8Ptr_i8Ptr_int.push_back(_llIntTy);
+	FunctionType *ft_void__i8Ptr_i8Ptr_int = FunctionType::get(_llVoidTy, args_i8Ptr_i8Ptr_int, false);
+
 	// BOOL(Class, char *, size_t, uint8_t, char *)
 	std::vector<Type*> args_i8Ptr_i8Ptr_sizeT_i8_i8Ptr;
 	args_i8Ptr_i8Ptr_sizeT_i8_i8Ptr.push_back(_llInt8PtrTy);
@@ -111,6 +125,7 @@ using namespace llvm;
 	// void(id*, id)
 	FunctionType *ft_void__i8PtrPtr_i8Ptr = FunctionType::get(_llVoidTy, args_i8PtrPtr_i8Ptr, false);
 
+
 	// id(id*)
 	std::vector<Type*> args_i8PtrPtr;
 	args_i8PtrPtr.push_back(_llInt8PtrPtrTy);
@@ -136,7 +151,10 @@ using namespace llvm;
 	DEF_EXTERNAL_FUN(sel_registerName, ft_i8Ptr__i8Ptr)
 	DEF_EXTERNAL_FUN(sel_getName, ft_i8Ptr__i8Ptr)
 	DEF_EXTERNAL_FUN(objc_getClass, ft_i8Ptr__i8Ptr)
-	DEF_EXTERNAL_FUN(objc_retainBlock, ft_i8Ptr__i8Ptr);
+	DEF_EXTERNAL_FUN(_Block_copy, ft_i8Ptr__i8Ptr);
+	DEF_EXTERNAL_FUN(_Block_object_assign, ft_void__i8Ptr_i8Ptr_int);
+	DEF_EXTERNAL_FUN(_Block_object_dispose, ft_void__i8Ptr_int);
+
 
 #undef DEF_EXTERNAL_FUN
 
@@ -162,6 +180,11 @@ using namespace llvm;
 		return NO;
 	}
 
+	PassManager PM;
+	PM.add(createPrintModulePass(&outs()));
+	PM.run(*_llModule);
+	printf("---------------------\n");
+
 	// Verify that the program is valid
 	verifyModule(*_llModule, PrintMessageAction);
 
@@ -176,9 +199,7 @@ using namespace llvm;
 	//builder.populateFunctionPassManager(fpm);
 	//fpm.run(*_root.function);
 
-	PassManager PM;
-	PM.add(createPrintModulePass(&outs()));
-	PM.run(*_llModule);
+
 
 	//std::vector<GenericValue> noargs;
 	//GenericValue val = engine->runFunction(_root.function, noargs);
@@ -196,9 +217,10 @@ using namespace llvm;
 	uint64_t ns = mach_absolute_time() - startTime;
 	struct mach_timebase_info timebase;
 	mach_timebase_info(&timebase);
-	double sec = sec * timebase.numer / timebase.denom / 1000000000.0;
+	double sec = ns * timebase.numer / timebase.denom / 1000000000.0;
 
 	NSLog(@"Run time: %f sec\n", sec);
+	NSLog(@"%p", ret);
 	NSLog(@"'root' retval:  %p: %@ (%@)\n", ret, ret ? ret : nil, [ret class]);
 
 	if([ret isKindOfClass:NSClassFromString(@"NSBlock")]) {
@@ -213,6 +235,22 @@ using namespace llvm;
 - (NSString *)description
 {
 	return [NSString stringWithFormat:@"<prog@\n%@\n}>", _root];
+}
+
+- (void)insertLogUsingBuilder:(llvm::IRBuilder<> *)aBuilder withStr:(NSString *)txt
+{
+	std::vector<Type*> nslog_args;
+	nslog_args.push_back(_llInt8PtrTy);
+	FunctionType *printf_type = FunctionType::get(_llIntTy, nslog_args, true);
+	Function *func_printf = _llModule->getFunction("printf");
+	if(!func_printf) {
+		func_printf = Function::Create(printf_type, GlobalValue::ExternalLinkage, "printf", _llModule);
+		func_printf->setCallingConv(CallingConv::C);
+	}
+	std::vector<Value*> args;
+	args.push_back(aBuilder->CreateGlobalStringPtr("> %s\n"));
+	args.push_back(aBuilder->CreateGlobalStringPtr([txt UTF8String]));
+	aBuilder->CreateCall(func_printf, args);
 }
 
 @end

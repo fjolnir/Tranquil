@@ -79,10 +79,8 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
 
 	Value *funPtr = builder->CreateStructGEP(blockLiteral, 3);
 
-	blockLiteral = builder->CreateBitCast(blockLiteral, aProgram.llInt8PtrTy);
-
 	std::vector<Value*> args;
-	args.push_back(blockLiteral);
+	args.push_back(callee);
 	for(TQNodeArgument *arg in _arguments) {
 		args.push_back([arg generateCodeInProgram:aProgram block:aBlock error:aoErr]);
 	}

@@ -36,8 +36,6 @@ static Value *_NSNumberNameConst = NULL, *_NumWithDblSel = NULL;
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
 {
-	llvm::Module *mod = aProgram.llModule;
-	//llvm::BasicBlock *block = aBlock.basicBlock;
 	llvm::IRBuilder<> *builder = aBlock.builder;
 
 	// Returns [NSNumber numberWithDouble:_value]

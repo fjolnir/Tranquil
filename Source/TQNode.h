@@ -51,12 +51,10 @@ typedef enum {
 	do { \
 		if(!(cond)) { \
 			if(aoError) { \
-				NSString *errorDesc = [[NSString alloc] initWithFormat:fmt, ##__VA_ARGS__]; \
+				NSString *errorDesc = [NSString stringWithFormat:fmt, ##__VA_ARGS__]; \
 				NSDictionary *userInfo = [NSDictionary dictionaryWithObject:errorDesc \
 				                                                     forKey:NSLocalizedDescriptionKey]; \
-				[errorDesc release]; \
 				*aoError = [NSError errorWithDomain:(errDomain) code:(errCode) userInfo:userInfo]; \
-				[userInfo release]; \
 			} \
 			TQLog(fmt, ##__VA_ARGS__); \
 			return retVal; \

@@ -29,6 +29,7 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
 {
 	Value *retVal = [_value generateCodeInProgram:aProgram block:aBlock error:aoError];
-	return ReturnInst::Create(aProgram.llModule->getContext(), retVal, aBlock.basicBlock);
+	[aProgram insertLogUsingBuilder:aBlock.builder withStr:[NSString stringWithFormat:@"Returning"]];
+	return aBlock.builder->CreateRet(retVal);
 }
 @end

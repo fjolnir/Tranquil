@@ -25,6 +25,7 @@ enum TQBlockFieldFlag_t {
 @interface TQNodeBlock : TQNode {
 	llvm::Constant *_blockDescriptor;
 	llvm::Type *_literalType;
+	NSMutableDictionary *_capturedVariables;
 }
 @property(readwrite, retain) TQNodeBlock *parent;
 @property(readwrite, copy) NSMutableArray *arguments;

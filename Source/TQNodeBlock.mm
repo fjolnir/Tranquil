@@ -6,6 +6,9 @@
 // Block invoke functions are numbered from 0
 #define TQ_BLOCK_FUN_PREFIX @"__tq_block_invoke_"
 
+// The struct index where captured variables begin
+#define TQ_CAPTURE_IDX 5
+
 using namespace llvm;
 
 @implementation TQNodeBlock
@@ -63,7 +66,12 @@ using namespace llvm;
 
 - (NSString *)signature
 {
-	return @"@:@";
+	// Return type
+	NSMutableString *sig = [NSMutableString stringWithString:@"@"];
+	// Argument types
+	for(int i = 0; i < _arguments.count; ++i)
+		[sig appendString:@"@"];
+	return sig;
 }
 
 - (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoError
@@ -127,7 +135,7 @@ using namespace llvm;
 	return literalType;
 }
 
-- (llvm::Type *)_blockLiteralTypeInProgram:(TQProgram *)aProgram parentBlock:(TQNodeBlock *)aParentBlock
+- (llvm::Type *)_blockLiteralTypeInProgram:(TQProgram *)aProgram
 {
 	if(_literalType)
 		return _literalType;
@@ -143,8 +151,10 @@ using namespace llvm;
 	fields.push_back([self _blockDescriptorTypeInProgram:aProgram]);
 
 	// Fields for captured vars
-	for(int i = 0; i < [aParentBlock.locals count]; ++i)
+	Type *captureType;
+	for(TQNodeVariable *var in [_capturedVariables allValues]) {
 		fields.push_back(i8PtrTy);
+	}
 
 	_literalType = StructType::get(aProgram.llModule->getContext(), fields, true);
 	return _literalType;
@@ -166,16 +176,8 @@ using namespace llvm;
 }
 
 
-#pragma mark - Code generationi
+#pragma mark - Code generation
 
-
-struct dummy {
-    void *isa; // initialized to &_NSConcreteStackBlock or &_NSConcreteGlobalBlock
-    int flags;
-    int reserved;
-    void (*invoke)(void *, ...);
-    void * foo;    // imported variables
-};
 // Descriptor is a constant struct describing all instances of this block
 - (llvm::Constant *)_generateBlockDescriptorInProgram:(TQProgram *)aProgram
 {
@@ -189,14 +191,13 @@ struct dummy {
 	elements.push_back(llvm::ConstantInt::get( aProgram.llInt64Ty, 0));  // TODO: Use 32bit on x86
 
 	// Size
-	elements.push_back(llvm::ConstantInt::get(aProgram.llInt64Ty, sizeof(struct dummy))); // TODO: Use actual size
+	elements.push_back(ConstantExpr::getSizeOf([self _blockLiteralTypeInProgram:aProgram]));
 
-	// TODO: Add Copy helper
-	// TODO: Add Dispose helper
+	elements.push_back([self _generateCopyHelperInProgram:aProgram]);
+	elements.push_back([self _generateDisposeHelperInProgram:aProgram]);
 
 	// Signature
-	//elements.push_back(ConstantExpr::getBitCast((GlobalVariable*)_builder->CreateGlobalString([[self signature]
-	//UTF8String]), aProgram.llInt8PtrTy));
+	elements.push_back(ConstantExpr::getBitCast((GlobalVariable*)_builder->CreateGlobalString([[self signature] UTF8String]), aProgram.llInt8PtrTy));
 
 	// GC Layout (unused in objc 2)
 	//elements.push_back(llvm::Constant::getNullValue(aProgram.llInt8PtrTy));
@@ -209,13 +210,6 @@ struct dummy {
 
 	_blockDescriptor = llvm::ConstantExpr::getBitCast(global, [self _blockDescriptorTypeInProgram:aProgram]);
 	return _blockDescriptor;
-}
-
-// Captures a parent block variable by wrapping it in a byref struct
-- (llvm::Value *)_captureLocal:(TQNode *)aLocal fromParent:(TQNodeBlock *)aParent
-{
-	NSLog(@"------- Capturing %@ from %p", aLocal, aParent);
-	return NULL;
 }
 
 // The block literal is a stack allocated struct representing a single instance of this block
@@ -242,17 +236,16 @@ struct dummy {
 		                     llvm::GlobalValue::ExternalLinkage,
 		                     0, "_NSConcreteStackBlock", 0,
 		                     false, 0);
-	Constant *temp = (Constant*)isaPtr;
 	isaPtr =  pBuilder->CreateBitCast(isaPtr, i8PtrTy);
 
 	// __flags
-	int flags = 0;//TQ_BLOCK_HAS_SIGNATURE;// | TQ_BLOCK_HAS_COPY_DISPOSE;
+	int flags = TQ_BLOCK_HAS_COPY_DISPOSE | TQ_BLOCK_HAS_SIGNATURE;
 	//if (blockInfo.UsesStret) flags |= TQ_BLOCK_USE_STRET;
 	Value *invoke = pBuilder->CreateBitCast(_function, i8PtrTy, "invokePtr");
 	Constant *descriptor = [self _generateBlockDescriptorInProgram:aProgram];
 
 	IRBuilder<> entryBuilder(&aParentBlock.function->getEntryBlock(), aParentBlock.function->getEntryBlock().begin());
-	Type *literalTy = [self _blockLiteralTypeInProgram:aProgram parentBlock:aParentBlock];
+	Type *literalTy = [self _blockLiteralTypeInProgram:aProgram];
 	AllocaInst *alloca = entryBuilder.CreateAlloca(literalTy, 0, "block");
 	alloca->setAlignment(8);
 
@@ -263,35 +256,112 @@ struct dummy {
 	pBuilder->CreateStore(descriptor,                     pBuilder->CreateStructGEP(alloca, 4 , "block.descriptor"));
 
 	// Now that we've initialized the basic block info, we need to capture the variables in the parent block scope
-	if(aParentBlock) {
-		int captureStartIdx = 4;
-		for(NSString *name in aParentBlock.locals) {
-			if([_locals objectForKey:name])
-				continue; // Arguments to this block override locals in the parent (Not that  you should write code like that)
-
-			Value *capturedLocal = [self _captureLocal:[aParentBlock.locals objectForKey:name] fromParent:aParentBlock];
+	if(_capturedVariables) {
+		int i = TQ_CAPTURE_IDX;
+		for(NSString *name in _capturedVariables) {
+			TQNodeVariable *varToCapture = [_capturedVariables objectForKey:name];
+			//[varToCapture generateCodeInProgram:aProgram block:aParentBlock error:nil];
 			NSString *fieldName = [NSString stringWithFormat:@"block.%@", name];
-
-			//pBuilder->CreateStore(isaPtr, pBuilder->CreateStructGEP(alloca, captureStartIdx++, [fieldName UTF8String]));
+			pBuilder->CreateStore(pBuilder->CreateBitCast(varToCapture.alloca, i8PtrTy), pBuilder->CreateStructGEP(alloca, i++, [fieldName UTF8String]));
 		}
 	}
 
 	//return pBuilder->CreateBitCast(alloca, i8PtrTy);
-	return pBuilder->CreateCall(aProgram.objc_retainBlock, pBuilder->CreateBitCast(alloca, i8PtrTy));
+	return pBuilder->CreateCall(aProgram._Block_copy, pBuilder->CreateBitCast(alloca, i8PtrTy));
 }
 
 // Copies the captured variables when this block is copied to the heap
 - (llvm::Function *)_generateCopyHelperInProgram:(TQProgram *)aProgram
 {
 	// void (*copy_helper)(void *dst, void *src)
-	return NULL;
+	Type *int8PtrTy = aProgram.llInt8PtrTy;
+	Type *intTy = aProgram.llIntTy;
+	std::vector<Type *> paramTypes;
+	paramTypes.push_back(int8PtrTy);
+	paramTypes.push_back(int8PtrTy);
+	//paramTypes.push_back(intTy);
+
+	FunctionType* funType = FunctionType::get(aProgram.llVoidTy, paramTypes, false);
+
+	llvm::Module *mod = aProgram.llModule;
+
+	const char *funName = [[NSString stringWithFormat:@"__tq_block_copy"] UTF8String];
+	Function *function;
+	function = Function::Create(funType, GlobalValue::ExternalLinkage, funName, mod);
+	function->setCallingConv(CallingConv::C);
+
+	BasicBlock *basicBlock = BasicBlock::Create(mod->getContext(), "entry", function, 0);
+	IRBuilder<> *builder = new IRBuilder<>(basicBlock);
+
+	Type *blockPtrTy = PointerType::getUnqual([self _blockLiteralTypeInProgram:aProgram]);
+
+	// Load the passed arguments
+	AllocaInst *dstAlloca = builder->CreateAlloca(int8PtrTy);
+	AllocaInst *srcAlloca = builder->CreateAlloca(int8PtrTy);
+
+	[aProgram insertLogUsingBuilder:builder withStr:[NSString stringWithFormat:@"Copying block"]];
+
+	Function::arg_iterator args = function->arg_begin();
+	builder->CreateStore(args, dstAlloca);
+	builder->CreateStore(++args, srcAlloca);
+
+	Value *dstBlock = builder->CreateBitCast(builder->CreateLoad(dstAlloca), blockPtrTy, "dstBlk");
+	Value *srcBlock = builder->CreateBitCast(builder->CreateLoad(srcAlloca), blockPtrTy, "srcBlk");
+	Value *flags = ConstantInt::get(intTy, TQ_BLOCK_FIELD_IS_BYREF);
+
+	[aProgram insertLogUsingBuilder:builder withStr:[NSString stringWithFormat:@"Copying block captures"]];
+	int i = TQ_CAPTURE_IDX;
+	Value *varToCopy, *destAddr;
+	for(TQNodeVariable *var in [_capturedVariables allValues]) {
+		destAddr  = builder->CreateBitCast(builder->CreateStructGEP(dstBlock, i), int8PtrTy);
+		varToCopy = builder->CreateLoad(builder->CreateStructGEP(srcBlock, i++), [var.name UTF8String]);
+
+		builder->CreateCall3(aProgram._Block_object_assign, destAddr, varToCopy, flags);
+	}
+	[aProgram insertLogUsingBuilder:builder withStr:[NSString stringWithFormat:@"/Copied block"]];
+
+	builder->CreateRetVoid();
+	return function;
 }
 
 // Releases the captured variables when this block's retain count reaches 0
 - (llvm::Function *)_generateDisposeHelperInProgram:(TQProgram *)aProgram
 {
-	// void (*dispose_helper)(void *src)
-	return NULL;
+	// void dispose_helper(void *src)
+	Type *int8PtrTy = aProgram.llInt8PtrTy;
+	std::vector<Type *> paramTypes;
+	Type *intTy = aProgram.llIntTy;
+	paramTypes.push_back(int8PtrTy);
+	//paramTypes.push_back(intTy);
+
+	FunctionType *funType = FunctionType::get(aProgram.llVoidTy, paramTypes, false);
+
+	llvm::Module *mod = aProgram.llModule;
+
+	const char *funName = [[NSString stringWithFormat:@"__tq_block_dispose"] UTF8String];
+	Function *function;
+	function = Function::Create(funType, GlobalValue::ExternalLinkage, funName, mod);
+	function->setCallingConv(CallingConv::C);
+
+	BasicBlock *basicBlock = BasicBlock::Create(mod->getContext(), "entry", function, 0);
+	IRBuilder<> *builder = new IRBuilder<>(basicBlock);
+
+	// Load the block
+	AllocaInst *srcAlloca = builder->CreateAlloca(int8PtrTy);
+	builder->CreateStore(function->arg_begin(), srcAlloca);
+
+	Value *srcBlock = builder->CreateBitCast(builder->CreateLoad(srcAlloca), PointerType::getUnqual([self _blockLiteralTypeInProgram:aProgram]), "blk");
+	Value *flags = ConstantInt::get(intTy, TQ_BLOCK_FIELD_IS_BYREF);
+
+	int i = TQ_CAPTURE_IDX;
+	Value *varToDisposeOf;
+	for(TQNodeVariable *var in [_capturedVariables allValues]) {
+		varToDisposeOf =  builder->CreateLoad(builder->CreateStructGEP(srcBlock, i++), [var.name UTF8String]);
+		builder->CreateCall2(aProgram._Block_object_dispose, varToDisposeOf, flags);
+	}
+
+	builder->CreateRetVoid();
+	return function;
 }
 
 // Invokes the body of this block
@@ -299,9 +369,6 @@ struct dummy {
 {
 	if(_function)
 		return _function;
-
-	static int blockId = -1; // TODO: implement this in a proper fashion
-	++blockId;
 
 	llvm::PointerType *int8PtrTy = aProgram.llInt8PtrTy;
 
@@ -311,20 +378,28 @@ struct dummy {
 
 	llvm::Module *mod = aProgram.llModule;
 
-	const char *funName = [[NSString stringWithFormat:@"__tq_block_invoke_%d", blockId] UTF8String];
+	const char *funName = [[NSString stringWithFormat:@"__tq_block_invoke"] UTF8String];
 
-	_function = mod->getFunction(funName);
-	if (!_function) {
-		_function = Function::Create(funType, GlobalValue::ExternalLinkage, funName, mod);
-		_function->setCallingConv(CallingConv::C);
-	}
+	_function = Function::Create(funType, GlobalValue::ExternalLinkage, funName, mod);
+	_function->setCallingConv(CallingConv::C);
 
 	_basicBlock = BasicBlock::Create(mod->getContext(), "entry", _function, 0);
 	_builder = new IRBuilder<>(_basicBlock);
+	[aProgram insertLogUsingBuilder:_builder withStr:[NSString stringWithFormat:@"Invoking block"]];
 
 	// Load the arguments
 	llvm::Function::arg_iterator argumentIterator = _function->arg_begin();
-	for (unsigned i = 0; i < _arguments.count; ++i, ++argumentIterator)
+	Value *thisBlock = NULL;
+	if([_arguments count] > 0) {
+		//AllocaInst *blkAlloca = _builder->CreateAlloca(int8PtrTy);
+		//_builder->CreateStore(argumentIterator, blkAlloca);
+		//thisBlock = _builder->CreateBitCast(_builder->CreateLoad(blkAlloca), PointerType::getUnqual([self _blockLiteralTypeInProgram:aProgram]));
+		thisBlock = _builder->CreateBitCast(argumentIterator, PointerType::getUnqual([self _blockLiteralTypeInProgram:aProgram]));
+	}
+	argumentIterator++;
+
+	[aProgram insertLogUsingBuilder:_builder withStr:[NSString stringWithFormat:@"Loading arguments"]];
+	for (unsigned i = 1; i < _arguments.count; ++i, ++argumentIterator)
 	{
 		IRBuilder<> tempBuilder(&_function->getEntryBlock(), _function->getEntryBlock().begin());
 		NSString *argVarName = [[_arguments objectAtIndex:i] localName];
@@ -335,9 +410,22 @@ struct dummy {
 		[_locals setObject:local forKey:argVarName];
 	}
 
+	[aProgram insertLogUsingBuilder:_builder withStr:[NSString stringWithFormat:@"Loading captures"]];
 	// Load captured variables
-	// TODO
+	if(thisBlock) {
+		int i = TQ_CAPTURE_IDX;
+		TQNodeVariable *varToLoad;
+		for(NSString *name in [_capturedVariables allKeys]) {
+			varToLoad = [TQNodeVariable nodeWithName:name];
+			Value *valueToLoad = _builder->CreateLoad(_builder->CreateStructGEP(thisBlock, i++), [name UTF8String]);
+			valueToLoad = _builder->CreateBitCast(valueToLoad, PointerType::getUnqual([varToLoad captureStructTypeInProgram:aProgram]));
+			varToLoad.alloca = (AllocaInst *)valueToLoad;
 
+			[_locals setObject:varToLoad forKey:name];
+		}
+	}
+
+	[aProgram insertLogUsingBuilder:_builder withStr:[NSString stringWithFormat:@"Executing statements"]];
 	Value *val;
 	for(TQNode *node in _statements) {
 		val = [node generateCodeInProgram:aProgram block:self error:aoErr];
@@ -358,9 +446,16 @@ struct dummy {
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
 {
 	TQAssert(!_basicBlock && !_function, @"Tried to regenerate code for block %@", _name);
-	llvm::Module *mod = aProgram.llModule;
 
-	// First we must
+	// Generate a list of variables to capture
+	if(aBlock) {
+		_capturedVariables = [[NSMutableDictionary alloc] init];
+		for(NSString *name in aBlock.locals) {
+			if([_locals objectForKey:name])
+				continue; // Arguments to this block override locals in the parent (Not that  you should write code like that)
+			[_capturedVariables setObject:[aBlock.locals objectForKey:name] forKey:name];
+		}
+	}
 
 	if(![self _generateInvokeInProgram:aProgram error:aoErr])
 		return NULL;

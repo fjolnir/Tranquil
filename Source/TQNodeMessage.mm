@@ -50,7 +50,7 @@ using namespace llvm;
 		[selStr appendString:[[_arguments objectAtIndex:0] identifier]];
 	else {
 		for(TQNodeArgument *arg in _arguments) {
-			[selStr appendFormat:@"%@:", arg.identifier];
+			[selStr appendFormat:@"%@:", arg.identifier ? arg.identifier : @""];
 		}
 	}
 	return selStr;

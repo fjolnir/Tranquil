@@ -1,0 +1,4 @@
+capturedVar = 123
+blk = { return capturedVar. }
+
+return (blk.).

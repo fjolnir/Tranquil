@@ -36,12 +36,11 @@ static Value *_StringWithUTF8StringSel, *_NSStringClassNameConst;
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
 {
-	llvm::Module *mod = aProgram.llModule;
 	llvm::IRBuilder<> *builder = aBlock.builder;
 
-	// Returns [NSNumber numberWithDouble:_value]
+	// Returns [NSMutableString stringWithUTF8String:_value]
 	if(!_NSStringClassNameConst)
-		_NSStringClassNameConst = builder->CreateGlobalStringPtr("NSString", "className_NSString");
+		_NSStringClassNameConst = builder->CreateGlobalStringPtr("NSMutableString", "className_NSMutableString");
 	if(!_StringWithUTF8StringSel)
 		_StringWithUTF8StringSel = builder->CreateGlobalStringPtr("stringWithUTF8String:", "sel_stringWithUTF8String");
 

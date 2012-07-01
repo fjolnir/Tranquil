@@ -11,4 +11,6 @@
              inProgram:(TQProgram *)aProgram
                  block:(TQNodeBlock *)aBlock
                  error:(NSError **)aoError;
+
+- (llvm::Type *)captureStructTypeInProgram:(TQProgram *)aProgram;
 @end

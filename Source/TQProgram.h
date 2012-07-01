@@ -37,7 +37,8 @@
 @property(readonly) llvm::Function *objc_msgSend, *objc_storeStrong, *objc_storeWeak,
 	*objc_loadWeak, *objc_destroyWeak, *objc_retain, *objc_release, *objc_allocateClassPair,
 	*objc_registerClassPair, *class_addIvar, *class_addMethod, *objc_getClass,
-	*sel_registerName, *sel_getName, *objc_retainBlock;
+	*sel_registerName, *sel_getName, *_Block_copy,
+	*_Block_object_assign, *_Block_object_dispose;
 
 #pragma mark - Methods
 
@@ -45,5 +46,6 @@
 - (id)initWithName:(NSString *)aName;
 - (BOOL)run;
 
+- (void)insertLogUsingBuilder:(llvm::IRBuilder<> *)aBuilder withStr:(NSString *)txt;
 @end
 #endif
