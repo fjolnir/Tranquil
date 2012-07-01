@@ -76,11 +76,11 @@ using namespace llvm;
     self.autoreleasePool = aBlock.autoreleasePool;
     self.locals          = aBlock.locals;
 
-    BasicBlock *condBB = BasicBlock::Create(mod->getContext(), "whileCond", aBlock.function);
+    BasicBlock *condBB = BasicBlock::Create(mod->getContext(), "loopCond", aBlock.function);
     IRBuilder<> *condBuilder = new IRBuilder<>(condBB);
     aBlock.builder->CreateBr(condBB);
 
-    BasicBlock *loopBB = BasicBlock::Create(mod->getContext(), "whileBody", aBlock.function);
+    BasicBlock *loopBB = BasicBlock::Create(mod->getContext(), "loopBody", aBlock.function);
     IRBuilder<> *loopBuilder = new IRBuilder<>(loopBB);
     self.basicBlock = loopBB;
     self.builder = loopBuilder;
@@ -93,7 +93,7 @@ using namespace llvm;
             break;
     }
 
-    BasicBlock *endloopBB = BasicBlock::Create(mod->getContext(), "endwhile", aBlock.function);
+    BasicBlock *endloopBB = BasicBlock::Create(mod->getContext(), "endloop", aBlock.function);
     IRBuilder<> *endloopBuilder = new IRBuilder<>(endloopBB);
 
     // If our basic block has been changed that means there was a nested conditional/loop

@@ -65,7 +65,7 @@ Program      = (Statement --)+ EOF
 # Statement
 Statement    = (
                If
-             | While
+             | Loop
              | Call
              | Message
              | Class
@@ -309,7 +309,7 @@ If           = ( "if"        { UpdateToken();  PushStack([TQNodeIfBlock node]); 
 
 # Loops
 
-While        = ( "while"  { UpdateToken(); PushStack([TQNodeWhileBlock node]); }
+Loop         = ( "while"  { UpdateToken(); PushStack([TQNodeWhileBlock node]); }
                | "until"  { UpdateToken(); PushStack([TQNodeUntilBlock node]); }
                )
                -- cond:Expression -- '{' --
