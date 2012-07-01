@@ -39,7 +39,7 @@
 
 	// Bison doesn't like @'s very much
 	#define NSSTR(str) (@str)
-	%}
+%}
 
 %pure_parser
 %locations
@@ -72,7 +72,7 @@
 %start program
 
 %%
-program: empty
+program: empty { [state->program setRoot:[TQNodeBlock node]]; }
 	| opt_nl statements opt_nl {
 		TQNodeBlock *root = [TQNodeBlock node];
 		[root setStatements:$2];
