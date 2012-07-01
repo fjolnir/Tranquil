@@ -3,12 +3,14 @@
 
 #include <Foundation/Foundation.h>
 #include <llvm/Module.h>
+#include <llvm/BasicBlock.h>
 
 extern NSString * const kTQSyntaxErrorDomain;
 
 typedef enum {
 	kTQUnexpectedIdentifier = 1,
 	kTQInvalidClassName,
+	kTQInvalidAssignee
 } TQSyntaxErrorCode;
 
 #ifdef DEBUG
@@ -48,7 +50,7 @@ typedef enum {
 
 @interface TQNode : NSObject
 + (TQNode *)node;
-- (BOOL)generateCodeInModule:(llvm::Module *)aModule error:(NSError **)aoErr;
+- (BOOL)generateCodeInModule:(llvm::Module *)aModule block:(llvm::BasicBlock *)aBlock error:(NSError **)aoErr;
 @end
 
 @interface TQNodeReturn : TQNode
@@ -91,6 +93,7 @@ typedef enum {
 @interface TQNodeBlock : TQNode
 @property(readwrite, copy) NSMutableArray *arguments;
 @property(readwrite, copy) NSMutableArray *statements;
+@property(readwrite, copy) NSMutableDictionary *locals;
 + (TQNodeBlock *)node;
 - (BOOL)addArgument:(TQNodeArgument *)aArgument error:(NSError **)aoError;
 @end

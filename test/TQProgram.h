@@ -10,7 +10,7 @@
 	llvm::Module *_module;
 }
 @property(readwrite, retain) NSString *name;
-@property(readwrite, retain) NSMutableArray *statements;
+@property(readwrite, retain) TQNodeBlock *root;
 
 + (TQProgram *)programWithName:(NSString *)aName;
 - (id)initWithName:(NSString *)aName;

@@ -20,7 +20,7 @@
 using namespace llvm;
 
 @implementation TQProgram
-@synthesize statements=_statements, name=_name;
+@synthesize root=_root, name=_name;
 
 + (TQProgram *)programWithName:(NSString *)aName
 {
@@ -46,26 +46,56 @@ using namespace llvm;
 
 - (BOOL)run
 {
-	NSError *err = nil;
-	for(TQNode *node in _statements) {
-		[node generateCodeInModule:_module error:&err];
-		if(err) {
-			NSLog(@"Error: %@", err);
-			return NO;
-		}
+	// Create the main function
+	// int()
+	std::vector<Type*>ft_i32__void_args;
+	FunctionType* ft_i32__void = FunctionType::get(
+		/*Result=*/IntegerType::get(_module->getContext(), 32),
+		/*Params=*/ft_i32__void_args,
+		/*isVarArg=*/false);
+	
+	Function* func_main = _module->getFunction("main");
+	if (!func_main) {
+		func_main = Function::Create(
+			/*Type=*/ft_i32__void,
+			/*Linkage=*/GlobalValue::ExternalLinkage,
+			/*Name=*/"main", _module); 
+		func_main->setCallingConv(CallingConv::C);
 	}
-	// TODO: run the thing
+	AttrListPtr func_main_PAL;
+	{
+		SmallVector<AttributeWithIndex, 4> Attrs;
+		AttributeWithIndex PAWI;
+		PAWI.Index = 4294967295U; PAWI.Attrs = 0  | Attribute::StackProtect | Attribute::UWTable;
+		Attrs.push_back(PAWI);
+		func_main_PAL = AttrListPtr::get(Attrs.begin(), Attrs.end());
+	}
+	func_main->setAttributes(func_main_PAL);
+
+	BasicBlock *block = BasicBlock::Create(_module->getContext(), "", func_main, 0);
+
+	NSError *err = nil;
+	[_root generateCodeInModule:_module block:block error:&err];
+	if(err) {
+		NSLog(@"Error: %@", err);
+		//return NO;
+	}
+	// Return from main
+	ConstantInt* const_int32_zero = ConstantInt::get(_module->getContext(), APInt(32, StringRef("0"), 10));
+	ReturnInst::Create(_module->getContext(), const_int32_zero, block);
+
+	//  Output LLVM - IR
+	verifyModule(*_module, PrintMessageAction);
+	PassManager PM;
+	PM.add(createPrintModulePass(&outs()));
+	PM.run(*_module);
+
 	return YES;
 }
 
 - (NSString *)description
 {
-	NSMutableString *out = [NSMutableString stringWithString:@"<prog@\n"];
-	for(TQNode *node in _statements) {
-		[out appendFormat:@"%@\n", node];
-	}
-	[out appendString:@"}>"];
-	return out;
+	return [NSString stringWithFormat:@"<prog@\n%@\n}>", _root];
 }
 @end
 

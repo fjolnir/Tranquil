@@ -73,7 +73,11 @@
 
 %%
 program: empty
-	| opt_nl statements opt_nl { [state->program setStatements:$2]; }
+	| opt_nl statements opt_nl {
+		TQNodeBlock *root = [TQNodeBlock node];
+		[root setStatements:$2];
+		[state->program setRoot:root];
+	}
 	;
 
 assignment:
@@ -338,6 +342,7 @@ void parse()
 	NSLog(@"------------------------------------------");
 	NSLog(@"%@", state.program);
 	NSLog(@"------------------------------------------");
+	[state.program run];
 }
 
 int main()
