@@ -284,11 +284,17 @@ void TQInitializeRuntime()
     class_addMethod([NSPointerArray class], TQSetterOpSel, imp, "@@:@");
 
     // Add optimized operators to TQNumber
-        // ==
-    imp = imp_implementationWithBlock(^(TQNumber *a, TQNumber *b) { return a->_value == b->_value ? TQNumberTrue : TQNumberFalse; });
+     // ==
+    imp = imp_implementationWithBlock(^(TQNumber *a, TQNumber *b) {
+        return object_getClass(a) == object_getClass(b) && a->_value == b->_value ? TQNumberTrue : TQNumberFalse;
+    });
     class_replaceMethod(TQNumberClass, TQEqOpSel, imp, "@@:@");
     // !=
-    imp = imp_implementationWithBlock(^(TQNumber *a, TQNumber *b) { return  a->_value != b->_value? TQNumberFalse : TQNumberTrue; });
+    imp = imp_implementationWithBlock(^(TQNumber *a, TQNumber *b) {
+        if(object_getClass(a) != object_getClass(b))
+            return TQNumberFalse;
+        return  a->_value != b->_value? TQNumberFalse : TQNumberTrue;
+    });
     class_replaceMethod(TQNumberClass, TQNeqOpSel, imp, "@@:@");
 
     class_replaceMethod(TQNumberClass, TQAddOpSel, class_getMethodImplementation(TQNumberClass, @selector(add:)),              "@@:@");
