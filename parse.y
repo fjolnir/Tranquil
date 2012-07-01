@@ -73,9 +73,9 @@
 %start program
 
 %%
-program: empty { [state->program setRoot:[TQNodeBlock node]]; }
+program: empty { [state->program setRoot:[TQNodeRootBlock node]]; }
 	| opt_nl statements opt_nl {
-		TQNodeBlock *root = [TQNodeBlock node];
+		TQNodeBlock *root = [TQNodeRootBlock node];
 		[root setStatements:$2];
 		[state->program setRoot:root];
 	}

@@ -15,7 +15,8 @@ using namespace llvm;
 	objc_loadWeak=_func_objc_loadWeak, objc_allocateClassPair=_func_objc_allocateClassPair,
 	objc_registerClassPair=_func_objc_registerClassPair, objc_destroyWeak=_func_objc_destroyWeak, class_addIvar=_func_class_addIvar,
 	class_addMethod=_func_class_addMethod, sel_registerName=_func_sel_registerName, sel_getName=_func_sel_getName,
-	objc_getClass=_func_objc_getClass, objc_retain=_func_objc_retain, objc_release=_func_objc_release;
+	objc_getClass=_func_objc_getClass, objc_retain=_func_objc_retain, objc_release=_func_objc_release,
+	objc_retainBlock=_func_objc_retainBlock;
 
 + (TQProgram *)programWithName:(NSString *)aName
 {
@@ -133,6 +134,7 @@ using namespace llvm;
 	DEF_EXTERNAL_FUN(sel_registerName, ft_i8Ptr__i8Ptr)
 	DEF_EXTERNAL_FUN(sel_getName, ft_i8Ptr__i8Ptr)
 	DEF_EXTERNAL_FUN(objc_getClass, ft_i8Ptr__i8Ptr)
+	DEF_EXTERNAL_FUN(objc_retainBlock, ft_i8Ptr__i8Ptr);
 
 #undef DEF_EXTERNAL_FUN
 

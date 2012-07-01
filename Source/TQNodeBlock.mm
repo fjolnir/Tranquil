@@ -4,27 +4,9 @@
 #import "TQNodeIdentifier.h"
 #import "TQNodeVariable.h"
 // Block invoke functions are numbered from 0
-#define BLOCK_FUN_PREFIX @"__tq_block_invoke_"
+#define TQ_BLOCK_FUN_PREFIX @"__tq_block_invoke_"
 
 using namespace llvm;
-
-enum BlockFlag_t {
-	BLOCK_HAS_COPY_DISPOSE =  (1 << 25),
-	BLOCK_HAS_CXX_OBJ =       (1 << 26),
-	BLOCK_IS_GLOBAL =         (1 << 28),
-	BLOCK_USE_STRET =         (1 << 29),
-	BLOCK_HAS_SIGNATURE  =    (1 << 30)
-};
-
-enum BlockFieldFlag_t {
-	BLOCK_FIELD_IS_OBJECT   = 0x03,  // id, NSObject, __attribute__((NSObject)), block, ..
-	BLOCK_FIELD_IS_BLOCK    = 0x07,  // a block variable
-	BLOCK_FIELD_IS_BYREF    = 0x08,  // the on stack structure holding the __block variable
-	BLOCK_FIELD_IS_WEAK     = 0x10,  // declared __weak, only used in byref copy helpers
-	BLOCK_FIELD_IS_ARC      = 0x40,  // field has ARC-specific semantics */
-	BLOCK_BYREF_CALLER      = 128,   // called from __block (byref) copy/dispose support routines
-	BLOCK_BYREF_CURRENT_MAX = 256
-};
 
 @implementation TQNodeBlock
 @synthesize arguments=_arguments, statements=_statements, locals=_locals, name=_name,
@@ -107,11 +89,99 @@ enum BlockFieldFlag_t {
 }
 
 
-#pragma mark - Code generation
+- (llvm::Type *)_blockDescriptorTypeInProgram:(TQProgram *)aProgram
+{
+	static Type *descriptorType = NULL;
+	if(descriptorType)
+		return descriptorType;
 
+	Type *i8PtrTy = aProgram.llInt8PtrTy;
+	Type *longTy  = aProgram.llInt64Ty; // Should be unsigned
+
+	descriptorType = StructType::create("struct.__block_descriptor",
+	                                    longTy,  // reserved
+	                                    longTy,  // size ( = sizeof(literal))
+	                                    i8PtrTy, // copy_helper(void *dst, void *src)
+	                                    i8PtrTy, // dispose_helper(void *blk)
+	                                    NULL);
+	descriptorType = PointerType::getUnqual(descriptorType);
+	return descriptorType;
+}
+
+- (llvm::Type *)_genericBlockLiteralTypeInProgram:(TQProgram *)aProgram
+{
+	static Type *literalType = NULL;
+	if(literalType)
+		return literalType;
+
+	Type *i8PtrTy = aProgram.llInt8PtrTy;
+	Type *intTy   = aProgram.llIntTy;
+
+	literalType = StructType::create("struct.__block_literal_generic",
+	                                 aProgram.llInt8PtrTy, // isa
+	                                 intTy,                // flags
+	                                 intTy,                // reserved
+	                                 i8PtrTy,              // invoke(void *blk, ...)
+	                                 [self _blockDescriptorTypeInProgram:aProgram],
+	                                 NULL);
+	return literalType;
+}
+
+- (llvm::Type *)_blockLiteralTypeInProgram:(TQProgram *)aProgram parentBlock:(TQNodeBlock *)aParentBlock
+{
+	if(_literalType)
+		return _literalType;
+
+	Type *i8PtrTy = aProgram.llInt8PtrTy;
+	Type *intTy   = aProgram.llIntTy;
+
+	std::vector<Type*> fields;
+	fields.push_back(i8PtrTy); // isa
+	fields.push_back(intTy);   // flags
+	fields.push_back(intTy);   // reserved
+	fields.push_back(i8PtrTy); // invoke(void *blk, ...)
+	fields.push_back([self _blockDescriptorTypeInProgram:aProgram]);
+
+	// Fields for captured vars
+	for(int i = 0; i < [aParentBlock.locals count]; ++i)
+		fields.push_back(i8PtrTy);
+
+	_literalType = StructType::get(aProgram.llModule->getContext(), fields, true);
+	return _literalType;
+}
+
+- (llvm::Type *)_byRefTypeInProgram:(TQProgram *)aProgram
+{
+	static Type *byRefType = NULL;
+	if(byRefType)
+		return byRefType;
+
+	Type *i8PtrTy = aProgram.llInt8PtrTy;
+	Type *intTy  = aProgram.llIntTy;
+
+	byRefType = StructType::create("struct.__block_descriptor",
+	                               i8PtrTy, i8PtrTy, intTy, intTy, i8PtrTy, NULL);
+	//byRefType = PointerType::getUnqual(byRefType);
+	return byRefType;
+}
+
+
+#pragma mark - Code generationi
+
+
+struct dummy {
+    void *isa; // initialized to &_NSConcreteStackBlock or &_NSConcreteGlobalBlock
+    int flags;
+    int reserved;
+    void (*invoke)(void *, ...);
+    void * foo;    // imported variables
+};
 // Descriptor is a constant struct describing all instances of this block
 - (llvm::Constant *)_generateBlockDescriptorInProgram:(TQProgram *)aProgram
 {
+	if(_blockDescriptor)
+		return _blockDescriptor;
+
 	llvm::Module *mod = aProgram.llModule;
 	SmallVector<llvm::Constant*, 6> elements;
 
@@ -119,17 +189,17 @@ enum BlockFieldFlag_t {
 	elements.push_back(llvm::ConstantInt::get( aProgram.llInt64Ty, 0));  // TODO: Use 32bit on x86
 
 	// Size
-	elements.push_back(llvm::ConstantInt::get(aProgram.llInt64Ty, 0)); // TODO: Use actual size
+	elements.push_back(llvm::ConstantInt::get(aProgram.llInt64Ty, sizeof(struct dummy))); // TODO: Use actual size
 
 	// TODO: Add Copy helper
 	// TODO: Add Dispose helper
 
 	// Signature
-	elements.push_back(ConstantExpr::getBitCast((GlobalVariable*)_builder->CreateGlobalString([[self signature]
-	UTF8String]), aProgram.llInt8PtrTy));
+	//elements.push_back(ConstantExpr::getBitCast((GlobalVariable*)_builder->CreateGlobalString([[self signature]
+	//UTF8String]), aProgram.llInt8PtrTy));
 
 	// GC Layout (unused in objc 2)
-	elements.push_back(llvm::Constant::getNullValue(aProgram.llInt8PtrTy));
+	//elements.push_back(llvm::Constant::getNullValue(aProgram.llInt8PtrTy));
 
 	llvm::Constant *init = llvm::ConstantStruct::getAnon(elements);
 
@@ -137,62 +207,77 @@ enum BlockFieldFlag_t {
 	                                llvm::GlobalValue::InternalLinkage,
 	                                init, "__tq_block_descriptor_tmp");
 
-	return llvm::ConstantExpr::getBitCast(global, aProgram.llInt8PtrTy);
+	_blockDescriptor = llvm::ConstantExpr::getBitCast(global, [self _blockDescriptorTypeInProgram:aProgram]);
+	return _blockDescriptor;
+}
+
+// Captures a parent block variable by wrapping it in a byref struct
+- (llvm::Value *)_captureLocal:(TQNode *)aLocal fromParent:(TQNodeBlock *)aParent
+{
+	NSLog(@"------- Capturing %@ from %p", aLocal, aParent);
+	return NULL;
 }
 
 // The block literal is a stack allocated struct representing a single instance of this block
-- (llvm::Constant *)_generateBlockLiteralInProgram:(TQProgram *)aProgram
+- (llvm::Value *)_generateBlockLiteralInProgram:(TQProgram *)aProgram parentBlock:(TQNodeBlock *)aParentBlock
 {
-	llvm::Module *mod = aProgram.llModule;
+	Module *mod = aProgram.llModule;
+	IRBuilder<> *pBuilder = aParentBlock.builder;
+
+	Type *i8PtrTy = aProgram.llInt8PtrTy;
+	Type *i8PtrPtrTy = aProgram.llInt8PtrPtrTy;
+	Type *intTy   = aProgram.llIntTy;
+
 	// Build the block struct
 	int BlockHeaderSize = 5;
 	//llvm::Constant *fields[BlockHeaderSize];
 	std::vector<Constant *> fields;
 
 	// isa
-	Constant *nsc;
+	Value *isaPtr;
 	if(mod->getNamedValue("_NSConcreteStackBlock"))
-		nsc = llvm::ConstantExpr::getBitCast(mod->getNamedValue("_NSConcreteGlobalBlock"), aProgram.llInt8PtrPtrTy);
+		isaPtr = llvm::ConstantExpr::getBitCast(mod->getNamedValue("_NSConcreteStackBlock"), i8PtrPtrTy);
 	else
-		nsc = new llvm::GlobalVariable(*mod, aProgram.llInt8PtrTy, false,
+		isaPtr = new llvm::GlobalVariable(*mod, i8PtrTy, false,
 		                     llvm::GlobalValue::ExternalLinkage,
-		                     0, "_NSConcreteGlobalBlock", 0,
+		                     0, "_NSConcreteStackBlock", 0,
 		                     false, 0);
-	fields.push_back(nsc);
+	Constant *temp = (Constant*)isaPtr;
+	isaPtr =  pBuilder->CreateBitCast(isaPtr, i8PtrTy);
 
 	// __flags
-	int flags = BLOCK_HAS_SIGNATURE | BLOCK_HAS_COPY_DISPOSE;
-	//if (blockInfo.UsesStret) flags |= BLOCK_USE_STRET;
+	int flags = 0;//TQ_BLOCK_HAS_SIGNATURE;// | TQ_BLOCK_HAS_COPY_DISPOSE;
+	//if (blockInfo.UsesStret) flags |= TQ_BLOCK_USE_STRET;
+	Value *invoke = pBuilder->CreateBitCast(_function, i8PtrTy, "invokePtr");
+	Constant *descriptor = [self _generateBlockDescriptorInProgram:aProgram];
 
-	fields.push_back(ConstantInt::get(aProgram.llIntTy, flags));
+	IRBuilder<> entryBuilder(&aParentBlock.function->getEntryBlock(), aParentBlock.function->getEntryBlock().begin());
+	Type *literalTy = [self _blockLiteralTypeInProgram:aProgram parentBlock:aParentBlock];
+	AllocaInst *alloca = entryBuilder.CreateAlloca(literalTy, 0, "block");
+	alloca->setAlignment(8);
 
-	// Reserved
-	fields.push_back(Constant::getNullValue(aProgram.llIntTy));
+	pBuilder->CreateStore(isaPtr,                         pBuilder->CreateStructGEP(alloca, 0 , "block.isa"));
+	pBuilder->CreateStore(ConstantInt::get(intTy, flags), pBuilder->CreateStructGEP(alloca, 1, "block.flags"));
+	pBuilder->CreateStore(ConstantInt::get(intTy, 0),     pBuilder->CreateStructGEP(alloca, 2, "block.reserved"));
+	pBuilder->CreateStore(invoke,                         pBuilder->CreateStructGEP(alloca, 3 , "block.invoke"));
+	pBuilder->CreateStore(descriptor,                     pBuilder->CreateStructGEP(alloca, 4 , "block.descriptor"));
 
-	// Function
-	fields.push_back(_function);//ConstantExpr::getBitCast(_function, aProgram.llInt8PtrTy));
+	// Now that we've initialized the basic block info, we need to capture the variables in the parent block scope
+	if(aParentBlock) {
+		int captureStartIdx = 4;
+		for(NSString *name in aParentBlock.locals) {
+			if([_locals objectForKey:name])
+				continue; // Arguments to this block override locals in the parent (Not that  you should write code like that)
 
-	// Descriptor
-	fields.push_back([self _generateBlockDescriptorInProgram:aProgram]);
+			Value *capturedLocal = [self _captureLocal:[aParentBlock.locals objectForKey:name] fromParent:aParentBlock];
+			NSString *fieldName = [NSString stringWithFormat:@"block.%@", name];
 
-	llvm::Constant *init = ConstantStruct::getAnon(fields);
+			//pBuilder->CreateStore(isaPtr, pBuilder->CreateStructGEP(alloca, captureStartIdx++, [fieldName UTF8String]));
+		}
+	}
 
-	std::vector<Type *> structTypes;
-	structTypes.push_back(aProgram.llInt8PtrTy);
-	structTypes.push_back(aProgram.llIntTy);
-	structTypes.push_back(aProgram.llIntTy);
-	structTypes.push_back(aProgram.llInt8PtrTy);
-	structTypes.push_back(aProgram.llInt8PtrTy);
-	StructType *structType = StructType::get(mod->getContext(), structTypes, true);
-
-	GlobalVariable *global = new llvm::GlobalVariable(*mod,
-	                         init->getType(),
-	                         /*constant*/ true,
-	                         llvm::GlobalVariable::InternalLinkage,
-	                         init,
-	                         "__tq_block_literal_global");
-
-	return llvm::ConstantExpr::getBitCast(global, aProgram.llInt8PtrTy);
+	//return pBuilder->CreateBitCast(alloca, i8PtrTy);
+	return pBuilder->CreateCall(aProgram.objc_retainBlock, pBuilder->CreateBitCast(alloca, i8PtrTy));
 }
 
 // Copies the captured variables when this block is copied to the heap
@@ -237,6 +322,7 @@ enum BlockFieldFlag_t {
 	_basicBlock = BasicBlock::Create(mod->getContext(), "entry", _function, 0);
 	_builder = new IRBuilder<>(_basicBlock);
 
+	// Load the arguments
 	llvm::Function::arg_iterator argumentIterator = _function->arg_begin();
 	for (unsigned i = 0; i < _arguments.count; ++i, ++argumentIterator)
 	{
@@ -251,6 +337,9 @@ enum BlockFieldFlag_t {
 		NSLog(@"registering arg local %@: %@ alloca: %p", argVarName, local, allocaInst);
 		[_locals setObject:local forKey:argVarName];
 	}
+
+	// Load captured variables
+	// TODO
 
 	Value *val;
 	for(TQNode *node in _statements) {
@@ -279,8 +368,33 @@ enum BlockFieldFlag_t {
 	if(![self _generateInvokeInProgram:aProgram error:aoErr])
 		return NULL;
 
-	Constant *literal = [self _generateBlockLiteralInProgram:aProgram];
+	Value *literal = [self _generateBlockLiteralInProgram:aProgram parentBlock:aBlock];
 
 	return literal;
 }
+@end
+
+
+#pragma mark - Root block
+
+@implementation TQNodeRootBlock
+
+- (id)init
+{
+	if(!(self = [super init]))
+		return nil;
+
+	// No arguments for the root block ([super init] adds the block itself as an arg)
+	[self.arguments removeAllObjects];
+
+	return self;
+}
+
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
+{
+	// The root block is just a function that executes the body of the program
+	// so we only need to create&return it's invocation function
+	return [self _generateInvokeInProgram:aProgram error:aoErr];
+}
+
 @end

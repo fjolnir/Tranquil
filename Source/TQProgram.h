@@ -37,7 +37,7 @@
 @property(readonly) llvm::Function *objc_msgSend, *objc_storeStrong, *objc_storeWeak,
 	*objc_loadWeak, *objc_destroyWeak, *objc_retain, *objc_release, *objc_allocateClassPair,
 	*objc_registerClassPair, *class_addIvar, *class_addMethod, *objc_getClass,
-	*sel_registerName, *sel_getName;
+	*sel_registerName, *sel_getName, *objc_retainBlock;
 
 #pragma mark - Methods
 
