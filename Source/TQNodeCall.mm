@@ -66,8 +66,7 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
 		for(TQNodeArgument *arg in _arguments) {
 			args.push_back([arg generateCodeInProgram:aProgram block:aBlock error:aoErr]);
 		}
-		builder->CreateCall(func_nslog, args);
-		return NULL;
+		return builder->CreateCall(func_nslog, args);
 	}
 
 	// Extract the invoke function pointer and call it.
@@ -91,7 +90,6 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
 	FunctionType *funType = FunctionType::get(aProgram.llInt8PtrTy, paramTypes, false);
 	Type *funPtrType = PointerType::getUnqual(funType);
 
-	fun = builder->CreateBitCast(fun, funPtrType);
-	return builder->CreateCall(fun, args);
+	return builder->CreateCall(builder->CreateBitCast(fun, funPtrType), args);
 }
 @end

@@ -1,6 +1,7 @@
 #import "TQNodeReturn.h"
 #import "TQProgram.h"
 #import "TQNodeVariable.h"
+#import "TQNodeBlock.h"
 
 using namespace llvm;
 
@@ -28,8 +29,12 @@ using namespace llvm;
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
 {
+	IRBuilder<> *builder = aBlock.builder;
 	Value *retVal = [_value generateCodeInProgram:aProgram block:aBlock error:aoError];
-	[aProgram insertLogUsingBuilder:aBlock.builder withStr:[NSString stringWithFormat:@"Returning"]];
-	return aBlock.builder->CreateRet(retVal);
+	// If the return value is a block we must move it to the heap before returning
+	if([_value isKindOfClass:[TQNodeBlock class]]) {
+		retVal = builder->CreateCall(aProgram._Block_copy, retVal);
+	}
+	return builder->CreateRet(retVal);
 }
 @end

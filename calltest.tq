@@ -9,5 +9,5 @@ a = { :arg |
 myBlock = a
 numAsStr = a:(321 stringValue.).
 numAsStr = numAsStr stringByAppendingString:" Three Two One".
-
-return (myBlock:numAsStr.).
+print: numAsStr.
+return myBlock.

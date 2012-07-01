@@ -137,19 +137,19 @@ using namespace llvm;
 	// id(id)
 	FunctionType *ft_i8Ptr__i8Ptr = FunctionType::get(_llInt8PtrTy, args_i8Ptr, false);
 
-	DEF_EXTERNAL_FUN(objc_allocateClassPair, ft_void__i8Ptr_i8Ptr_sizeT)
-	DEF_EXTERNAL_FUN(objc_registerClassPair, ft_void__i8Ptr)
-	DEF_EXTERNAL_FUN(class_addIvar, ft_i8__i8Ptr_i8Ptr_sizeT_i8_i8Ptr)
-	DEF_EXTERNAL_FUN(class_addMethod, ft_i8__i8Ptr_i8Ptr_i8Ptr_i8Ptr)
+	//DEF_EXTERNAL_FUN(objc_allocateClassPair, ft_void__i8Ptr_i8Ptr_sizeT)
+	//DEF_EXTERNAL_FUN(objc_registerClassPair, ft_void__i8Ptr)
+	//DEF_EXTERNAL_FUN(class_addIvar, ft_i8__i8Ptr_i8Ptr_sizeT_i8_i8Ptr)
+	//DEF_EXTERNAL_FUN(class_addMethod, ft_i8__i8Ptr_i8Ptr_i8Ptr_i8Ptr)
 	DEF_EXTERNAL_FUN(objc_msgSend, ft_i8ptr__i8ptr_i8ptr_variadic)
-	DEF_EXTERNAL_FUN(objc_storeStrong, ft_void__i8PtrPtr_i8Ptr)
-	DEF_EXTERNAL_FUN(objc_storeWeak, ft_i8Ptr__i8PtrPtr_i8Ptr)
-	DEF_EXTERNAL_FUN(objc_loadWeak, ft_i8Ptr__i8PtrPtr)
-	DEF_EXTERNAL_FUN(objc_destroyWeak, ft_void__i8PtrPtr)
-	DEF_EXTERNAL_FUN(objc_retain, ft_i8Ptr__i8Ptr)
-	DEF_EXTERNAL_FUN(objc_release, ft_void__i8Ptr)
+	//DEF_EXTERNAL_FUN(objc_storeStrong, ft_void__i8PtrPtr_i8Ptr)
+	//DEF_EXTERNAL_FUN(objc_storeWeak, ft_i8Ptr__i8PtrPtr_i8Ptr)
+	//DEF_EXTERNAL_FUN(objc_loadWeak, ft_i8Ptr__i8PtrPtr)
+	//DEF_EXTERNAL_FUN(objc_destroyWeak, ft_void__i8PtrPtr)
+	//DEF_EXTERNAL_FUN(objc_retain, ft_i8Ptr__i8Ptr)
+	//DEF_EXTERNAL_FUN(objc_release, ft_void__i8Ptr)
 	DEF_EXTERNAL_FUN(sel_registerName, ft_i8Ptr__i8Ptr)
-	DEF_EXTERNAL_FUN(sel_getName, ft_i8Ptr__i8Ptr)
+	//DEF_EXTERNAL_FUN(sel_getName, ft_i8Ptr__i8Ptr)
 	DEF_EXTERNAL_FUN(objc_getClass, ft_i8Ptr__i8Ptr)
 	DEF_EXTERNAL_FUN(_Block_copy, ft_i8Ptr__i8Ptr);
 	DEF_EXTERNAL_FUN(_Block_object_assign, ft_void__i8Ptr_i8Ptr_int);
@@ -180,10 +180,17 @@ using namespace llvm;
 		return NO;
 	}
 
+	// Optimization pass
+	//FunctionPassManager fpm = FunctionPassManager(_llModule);
+	//PassManagerBuilder builder = PassManagerBuilder();
+	//builder.OptLevel = 3;
+	//builder.SizeLevel = 2;
+	//builder.populateFunctionPassManager(fpm);
+	//fpm.run(*_root.function);
+
 	PassManager PM;
 	PM.add(createPrintModulePass(&outs()));
 	PM.run(*_llModule);
-	printf("---------------------\n");
 
 	// Verify that the program is valid
 	verifyModule(*_llModule, PrintMessageAction);
@@ -191,14 +198,6 @@ using namespace llvm;
 
 	// Compile program
 	ExecutionEngine *engine = EngineBuilder(_llModule).create();
-
-	// Optimization pass
-	//FunctionPassManager fpm = FunctionPassManager(_llModule);
-	//PassManagerBuilder builder = PassManagerBuilder();
-	//builder.OptLevel = 2;
-	//builder.populateFunctionPassManager(fpm);
-	//fpm.run(*_root.function);
-
 
 
 	//std::vector<GenericValue> noargs;
@@ -210,6 +209,7 @@ using namespace llvm;
 	id(*rootPtr)() = (id(*)())engine->getPointerToFunction(_root.function);
 
 
+	printf("---------------------\n");
 	uint64_t startTime = mach_absolute_time();
 	// Execute code
 	id ret = rootPtr();
@@ -224,9 +224,10 @@ using namespace llvm;
 	NSLog(@"'root' retval:  %p: %@ (%@)\n", ret, ret ? ret : nil, [ret class]);
 
 	if([ret isKindOfClass:NSClassFromString(@"NSBlock")]) {
-		id (^test)() = ret;
-		NSNumber *num = test();
+		id (^test)(NSString *) = ret;
+		NSNumber *num = test(@"hoya");
 		NSLog(@"Block retval: %@ (%@)", num, [num class]);
+		[test release];
 	}
 
 	return YES;
