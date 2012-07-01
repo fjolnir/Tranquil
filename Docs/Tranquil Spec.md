@@ -148,7 +148,7 @@ var = instanceOfKlass - something \ Equivalent to: var = instanceOfKlass subtrac
 ### Flow control
 ```
 #Object {
-	- if: ifBlock else: elseBlock {
+	- ifValid: ifBlock else: elseBlock {
 		^ifBlock()
 	}
 	- unless: unlessBlock else: elseBlock {
@@ -158,7 +158,7 @@ var = instanceOfKlass - something \ Equivalent to: var = instanceOfKlass subtrac
 }
 
 #Nil {
-	- if: ifBlock else: elseBlock {
+	- ifValid: ifBlock else: elseBlock {
 		^elseBlock()
 	}
 	- unless:unlessBlock else:elseBlock {
@@ -169,14 +169,13 @@ var = instanceOfKlass - something \ Equivalent to: var = instanceOfKlass subtrac
 
 ### Fibonacci
 ```
-fibonacci = { index, last=1, beforeLast=0 |
-	num = last + beforeLast			
-	(index > 0) if: {
-		^fibonacci(--index, num, last)
+fibonacci = { index, curr=0, succ=1 |
+	num = curr + succ
+	^(index > 2) ifValid: {
+		^fibonacci(index - 1, succ, num)
 	} else: {
 		^num
 	}
 }
-
 fib = fibonacci(50) \ Calculate the 50th number in the fibonacci sequence
 ```
