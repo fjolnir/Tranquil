@@ -26,8 +26,8 @@ typedef struct _TQParserState TQParserState;
 #define ReplaceStackTop(val) do { id repl = val; PopStack(); PushStack(repl); } while(0)
 
 #define UpdatePos() do { \
-    ((CLParserState *)(G->data))->currentToken.begin  = thunk->begin + G->offset;  \
-    ((CLParserState *)(G->data))->currentToken.length = thunk->end - thunk->begin; \
+    ((_TQParserState *)state->currentToken.begin  = thunk->begin + G->offset;  \
+    ((_TQParserState *)state->currentToken.length = thunk->end - thunk->begin; \
 } while(0)
 
 //#define YY_DEBUG
