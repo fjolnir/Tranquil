@@ -31,7 +31,6 @@ CXXFLAGS = [
 	'`llvm-config --cflags`',
 	'-O0',
 	'-g',
-	'-std=gnu++98',
 	'-ObjC++',
 	#'--analyze'
 ].join(' ')
@@ -39,7 +38,7 @@ CXXFLAGS = [
 
 LDFLAGS = [
 	'-lstdc++',
-	'`llvm-config --libs`',
+	'`llvm-config --libs core jit nativecodegen bitwriter ipo`',
 	'`llvm-config --ldflags`',
 	'-framework Foundation'
 ].join(' ')
