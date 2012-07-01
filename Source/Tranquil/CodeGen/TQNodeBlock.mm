@@ -359,13 +359,29 @@ using namespace llvm;
 
     _autoreleasePool = _builder->CreateCall(aProgram.objc_autoreleasePoolPush);
 
-    // Load the arguments
+    // Load the block pointer argument (must do this before captures, which must be done before arguments in case a default value references a capture)
     llvm::Function::arg_iterator argumentIterator = _function->arg_begin();
     Value *thisBlock = NULL;
     if([_arguments count] > 0) {
         thisBlock = _builder->CreateBitCast(argumentIterator, PointerType::getUnqual([self _blockLiteralTypeInProgram:aProgram]));
         argumentIterator++;
     }
+
+    // Load captured variables
+    if(thisBlock) {
+        int i = TQ_CAPTURE_IDX;
+        TQNodeVariable *varToLoad;
+        for(NSString *name in [_capturedVariables allKeys]) {
+            varToLoad = [TQNodeVariable nodeWithName:name];
+            Value *valueToLoad = _builder->CreateLoad(_builder->CreateStructGEP(thisBlock, i++), [name UTF8String]);
+            valueToLoad = _builder->CreateBitCast(valueToLoad, PointerType::getUnqual([varToLoad captureStructTypeInProgram:aProgram]));
+            varToLoad.alloca = (AllocaInst *)valueToLoad;
+
+            [_locals setObject:varToLoad forKey:name];
+        }
+    }
+
+    // Load the rest of arguments
     Value *sentinel = _builder->CreateLoad(mod->getOrInsertGlobal("TQSentinel", aProgram.llInt8PtrTy));
     for (unsigned i = 1; i < _arguments.count; ++i, ++argumentIterator)
     {
@@ -385,20 +401,7 @@ using namespace llvm;
         [_locals setObject:local forKey:argument];
     }
 
-    // Load captured variables
-    if(thisBlock) {
-        int i = TQ_CAPTURE_IDX;
-        TQNodeVariable *varToLoad;
-        for(NSString *name in [_capturedVariables allKeys]) {
-            varToLoad = [TQNodeVariable nodeWithName:name];
-            Value *valueToLoad = _builder->CreateLoad(_builder->CreateStructGEP(thisBlock, i++), [name UTF8String]);
-            valueToLoad = _builder->CreateBitCast(valueToLoad, PointerType::getUnqual([varToLoad captureStructTypeInProgram:aProgram]));
-            varToLoad.alloca = (AllocaInst *)valueToLoad;
-
-            [_locals setObject:varToLoad forKey:name];
-        }
-    }
-
+    
     Value *val;
     for(TQNode *stmt in _statements) {
         [stmt generateCodeInProgram:aProgram block:self error:aoErr];
