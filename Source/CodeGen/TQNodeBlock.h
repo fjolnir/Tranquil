@@ -32,12 +32,12 @@ enum TQBlockFieldFlag_t {
 @property(readwrite, copy, nonatomic) NSMutableArray *statements;
 @property(readwrite, copy) NSMutableDictionary *locals;
 @property(readwrite, copy) NSString *name;
-@property(readonly) llvm::BasicBlock *basicBlock;
-@property(readonly) llvm::Function *function;
-@property(readonly) llvm::IRBuilder<> *builder;
+@property(readwrite, assign) llvm::BasicBlock *basicBlock;
+@property(readwrite, assign) llvm::Function *function;
+@property(readwrite, assign) llvm::IRBuilder<> *builder;
 
 // This property is only valid when called from a block's subnode within it's generateCode: method
-@property(readonly) llvm::Value *autoreleasePool;
+@property(readwrite, assign) llvm::Value *autoreleasePool;
 
 + (TQNodeBlock *)node;
 - (NSString *)signature;

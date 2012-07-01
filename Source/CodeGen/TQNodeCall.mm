@@ -90,7 +90,7 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
     IRBuilder<> *builder = aBlock.builder;
 
     // Debug print (TODO: Remove and implement actual function bridging)
-    if([_callee isMemberOfClass:[TQNodeVariable class]] && [[_callee name] isEqualToString:@"print"]) {
+    if([_callee isMemberOfClass:[TQNodeVariable class]] && [[(TQNodeVariable *)_callee name] isEqualToString:@"print"]) {
         std::vector<Type*> nslog_args;
         nslog_args.push_back(aProgram.llInt8PtrTy);
         FunctionType *nslog_type = FunctionType::get(aProgram.llVoidTy, nslog_args, true);

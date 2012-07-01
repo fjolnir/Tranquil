@@ -6,7 +6,8 @@
 using namespace llvm;
 
 @implementation TQNodeIfBlock
-@synthesize condition=_condition;
+@synthesize condition=_condition, elseBlockStatements=_elseBlockStatements;
+
 
 + (TQNodeIfBlock *)node { return (TQNodeIfBlock *)[super node]; }
 
@@ -21,6 +22,12 @@ using namespace llvm;
     return self;
 }
 
+- (void)dealloc
+{
+    [_condition release];
+    [super dealloc];
+}
+
 - (NSString *)description
 {
     NSMutableString *out = [NSMutableString stringWithString:@"<if@ "];
@@ -33,14 +40,14 @@ using namespace llvm;
             [out appendFormat:@"\t%@\n", stmt];
         }
     }
+    if(_elseBlockStatements.count > 0) {
+        [out appendString:@"}\n else {\n"];
+        for(TQNode *stmt in _elseBlockStatements) {
+            [out appendFormat:@"\t%@\n", stmt];
+        }
+    }
     [out appendString:@"}>"];
     return out;
-}
-
-- (void)dealloc
-{
-    [_condition release];
-    [super dealloc];
 }
 
 - (TQNode *)referencesNode:(TQNode *)aNode
@@ -59,7 +66,76 @@ using namespace llvm;
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
 {
-    return NULL;
+    IRBuilder<> *builder = aBlock.builder;
+    Module *mod = aProgram.llModule;
+
+    // Pose as the parent block for the duration of code generation
+    self.function = aBlock.function;
+    self.autoreleasePool = aBlock.autoreleasePool;
+
+    Value *testExpr = [_condition generateCodeInProgram:aProgram block:aBlock error:aoErr];
+    if(*aoErr)
+        return NULL;
+    Value *testResult = builder->CreateICmpNE(testExpr, ConstantPointerNull::get(aProgram.llInt8PtrTy), "ifTest");
+
+    BOOL hasElse = (_elseBlockStatements.count > 0);
+
+    BasicBlock *thenBB = BasicBlock::Create(mod->getContext(), "then", aBlock.function);
+    IRBuilder<> *thenBuilder = NULL;
+    BasicBlock *elseBB = NULL;
+    IRBuilder<> *elseBuilder = NULL;
+
+    thenBuilder = new IRBuilder<>(thenBB);
+    self.basicBlock = thenBB;
+    self.builder = thenBuilder;
+    for(TQNode *stmt in self.statements) {
+        [stmt generateCodeInProgram:aProgram block:self error:aoErr];
+        if(*aoErr)
+            return NULL;
+    }
+
+    if(hasElse) {
+        elseBB = BasicBlock::Create(mod->getContext(), "else", aBlock.function);
+        elseBuilder = new IRBuilder<>(elseBB);
+        self.basicBlock = elseBB;
+        self.builder = elseBuilder;
+        for(TQNode *stmt in _elseBlockStatements) {
+            [stmt generateCodeInProgram:aProgram block:self error:aoErr];
+            if(*aoErr)
+                return NULL;
+        }
+    }
+
+    BasicBlock *endifBB = BasicBlock::Create(mod->getContext(), "endif", aBlock.function);
+    IRBuilder<> *endifBuilder = new IRBuilder<>(endifBB);
+
+    // If our basic block has been changed that means there was a nested conditional
+    // We need to fix it by adding a br pointing to the endif
+    if(self.basicBlock != thenBB && self.basicBlock != elseBB) {
+        BasicBlock *tailBlock = self.basicBlock;
+        IRBuilder<> *tailBuilder = self.builder;
+
+        if(!tailBlock->getTerminator())
+            tailBuilder->CreateBr(endifBB);
+    }
+    if(!thenBB->getTerminator())
+        thenBuilder->CreateBr(endifBB);
+    if(elseBB && !elseBB->getTerminator())
+        elseBuilder->CreateBr(endifBB);
+
+    delete thenBuilder;
+    delete elseBuilder;
+
+    builder->CreateCondBr(testResult, thenBB, elseBB ? elseBB : endifBB);
+
+    // Make the parent block continue from the end of the statement
+    aBlock.basicBlock = endifBB;
+    aBlock.builder = endifBuilder;
+
+    self.builder = NULL;
+    self.function = NULL;
+
+    return testResult;
 }
 
 

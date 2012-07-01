@@ -18,6 +18,7 @@ typedef struct _TQParserState TQParserState;
 #define YYNSNUM [NSNumber numberWithDouble:YYNUM]
 
 #define StackTop [state->stack lastObject]
+#define StackGet(ofs) [state->stack objectAtIndex:[state->stack count] + (ofs) - 1]
 #define PushStack(obj) [state->stack addObject:(obj)]
 #define PopStack() StackTop; [state->stack removeLastObject]
 #define ReplaceStackTop(val) do { id repl = val; PopStack(); PushStack(repl); } while(0)
@@ -273,12 +274,18 @@ If           = "if" -- cond:Expression -- '{' --
                     PushStack([NSMutableArray array]);
                 }
                 ( Statement --)* '}'
-                ( -- "else" - If)*
+                ( -- "else" - elsif:If
                   {
+                      [StackGet(-1) setElseBlockStatements:[NSMutableArray arrayWithObject:elsif]];
                   }
-                ( "else" "{" --
+                | -- "else" -- "{" --
+                  {
+                      PushStack([NSMutableArray array]);
+                  }
                   (Statement --)* "}"
                   {
+                      NSMutableArray *statements = PopStack();
+                      [StackGet(-1) setElseBlockStatements:statements];
                   }
                 )?
                 {
