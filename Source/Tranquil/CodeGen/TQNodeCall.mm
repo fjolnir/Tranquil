@@ -52,8 +52,8 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
 
     if([self isEqual:aNode])
         return self;
-    else if([_callee isEqual:aNode])
-        return _callee;
+    else if((ref = [_callee referencesNode:aNode]))
+        return ref;
     if((ref = [_arguments tq_referencesNode:aNode]))
         return ref;
 
