@@ -321,8 +321,8 @@ using namespace llvm;
     fpm.add(createTailCallEliminationPass());
 
 
-    fpm.run(*_root.function);
-    modulePasses.run(*_llModule);
+    //fpm.run(*_root.function);
+    //modulePasses.run(*_llModule);
 
     _llModule->dump();
     llvm::PrintStatistics();

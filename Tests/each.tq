@@ -1,0 +1,13 @@
+#NSPointerArray {
+	- each: lambda {
+		i = 0
+		count = self tqCount
+		until (i >= count) {
+			lambda(self[i])
+			++i
+		}
+	}
+}
+#[1,2] each: { obj | print("%@", obj) }
+
+
