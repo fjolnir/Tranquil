@@ -72,9 +72,13 @@ using namespace llvm;
     builder->CreateCall(aProgram.objc_autoreleasePoolPop, aBlock.autoreleasePool);
 
     // Return
-    if(isTailCall)
+    if(isTailCall) {
+        // Autorelease the arguments
+        for(int i = 0; i < [[(TQNodeCall *)_value arguments] count]; ++i) {
+            retVal = builder->CreateCall(aProgram.TQAutoreleaseObject, args[i]);
+        }
         retVal = [(TQNodeCall *)_value generateCodeInProgram:aProgram block:aBlock withArguments:args error:aoErr];
-    else
+    } else
         retVal = builder->CreateCall(aProgram.TQAutoreleaseObject, retVal);
     //Value *retVal = [_value generateCodeInProgram:aProgram block:aBlock error:aoError];
     // If the returned instruction is not a call, then it's our responsibility to prepare for return (For example to copy a block
