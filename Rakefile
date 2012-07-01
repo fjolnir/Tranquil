@@ -28,6 +28,8 @@ CXXFLAGS = [
 	'-std=gnu++98',
 	'-mmacosx-version-min=10.7',
 	'-I`pwd`/Source',
+	'-I/usr/include/libxml2',
+	'-Wno-deprecated-writable-strings', # BridgeSupport uses this in a few places
 	'`llvm-config --cflags`',
 	'-O0',
 	'-g',
@@ -40,14 +42,15 @@ LDFLAGS = [
 	'-lstdc++',
 	'`llvm-config --libs core jit nativecodegen bitwriter ipo instrumentation`',
 	'`llvm-config --ldflags`',
-	'-framework Foundation'
+	'-framework Foundation',
+	'-lxml2'
 ].join(' ')
 
 LIBS = ['-framework Foundation'].join(' ')
 
 PATHMAP = "build/%n.o"
 
-OBJC_SOURCES = FileList['Source/*.m*'].add('Source/*/*.m*').add(YACC_OUTPATH).add(LEX_OUTPATH)
+OBJC_SOURCES = FileList['Source/*.m*'].add('Source/*/*.m*').add('Source/*/*.c').add(YACC_OUTPATH).add(LEX_OUTPATH)
 O_FILES = OBJC_SOURCES.pathmap(PATHMAP)
 LEX_SOURCE = FileList['Source/*.l'].first
 YACC_SOURCE = FileList['Source/*.y'].first
