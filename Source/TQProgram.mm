@@ -1,9 +1,43 @@
 #include "TQProgram.h"
 #include "CodeGen/TQNode.h"
 #include <llvm/Transforms/IPO/PassManagerBuilder.h>
+#include <llvm/Target/TargetData.h>
 #import <mach/mach_time.h>
 #import "Runtime/TQRuntime.h"
 #import <objc/runtime.h>
+
+# include <llvm/Module.h>
+# include <llvm/DerivedTypes.h>
+# include <llvm/Constants.h>
+# include <llvm/CallingConv.h>
+# include <llvm/Instructions.h>
+# include <llvm/PassManager.h>
+# include <llvm/Analysis/DebugInfo.h>
+# if !defined(LLVM_TOT)
+#  include <llvm/Analysis/DIBuilder.h>
+# endif
+# include <llvm/Analysis/Verifier.h>
+# include <llvm/Target/TargetData.h>
+//# include <llvm/CodeGen/MachineFunction.h>
+# include <llvm/ExecutionEngine/JIT.h>
+# include <llvm/ExecutionEngine/JITMemoryManager.h>
+# include <llvm/ExecutionEngine/JITEventListener.h>
+# include <llvm/ExecutionEngine/GenericValue.h>
+# include <llvm/Target/TargetData.h>
+# include <llvm/Target/TargetMachine.h>
+# include <llvm/Target/TargetOptions.h>
+# include <llvm/Transforms/Scalar.h>
+# include <llvm/Transforms/IPO.h>
+# include <llvm/Support/raw_ostream.h>
+# if !defined(LLVM_TOT)
+#  include <llvm/Support/system_error.h>
+# endif
+# include <llvm/Support/PrettyStackTrace.h>
+# include <llvm/Support/MemoryBuffer.h>
+# include <llvm/Intrinsics.h>
+# include <llvm/Bitcode/ReaderWriter.h>
+# include <llvm/LLVMContext.h>
+# include "llvm/ADT/Statistic.h"
 
 using namespace llvm;
 
@@ -200,25 +234,18 @@ using namespace llvm;
 		NSLog(@"Error: %@", err);
 		return NO;
 	}
+	llvm::EnableStatistics();
 
-	// Optimization pass
-	FunctionPassManager fpm = FunctionPassManager(_llModule);
-	PassManagerBuilder builder = PassManagerBuilder();
-	builder.OptLevel = 3;
-	builder.SizeLevel = 2;
-	builder.populateFunctionPassManager(fpm);
-	fpm.run(*_root.function);
-
-	PassManager PM;
-	PM.add(createPrintModulePass(&outs()));
-	PM.run(*_llModule);
 
 	// Verify that the program is valid
 	verifyModule(*_llModule, PrintMessageAction);
 
-
 	// Compile program
-	ExecutionEngine *engine = EngineBuilder(_llModule).create();
+    std::string engineErr;
+	
+	ExecutionEngine *engine = ExecutionEngine::createJIT(_llModule, &engineErr, JITMemoryManager::CreateDefaultMemManager(), CodeGenOpt::Aggressive, false);
+	engine->DisableLazyCompilation();
+	//create(_llModule, false, &engineErr, CodeGenOpt::Aggressive, false);//EngineBuilder(_llModule).create();
 	engine->addGlobalMapping(_func_TQPrepareObjectForReturn, (void*)&TQPrepareObjectForReturn);
 	engine->addGlobalMapping(_func_TQStoreStrongInByref, (void*)&TQStoreStrongInByref);
 	engine->addGlobalMapping(_func_TQRetainObject, (void*)&TQRetainObject);
@@ -229,6 +256,28 @@ using namespace llvm;
 	//void *ret = val.PointerVal;
 	//NSLog(@"'root' ret:  %p: %@\n", ret, ret ? ret : nil);
 	//return YES;
+	// Optimization pass
+	FunctionPassManager fpm = FunctionPassManager(_llModule);
+	fpm.add(new TargetData(*engine->getTargetData()));
+	fpm.add(createInstructionCombiningPass());
+	// Eliminate unnecessary alloca.
+	fpm.add(createPromoteMemoryToRegisterPass());
+	// Reassociate expressions.
+	fpm.add(createReassociatePass());
+	// Eliminate Common SubExpressions.
+	fpm.add(createGVNPass());
+	// Simplify the control flow graph (deleting unreachable blocks, etc).
+	fpm.add(createCFGSimplificationPass());
+	// Eliminate tail calls.
+	fpm.add(createTailCallEliminationPass());
+
+	PassManagerBuilder builder = PassManagerBuilder();
+	builder.OptLevel = 3;
+	builder.populateFunctionPassManager(fpm);
+	fpm.run(*_root.function);
+
+	_llModule->dump();
+	llvm::PrintStatistics();
 
 	id(*rootPtr)() = (id(*)())engine->getPointerToFunction(_root.function);
 
