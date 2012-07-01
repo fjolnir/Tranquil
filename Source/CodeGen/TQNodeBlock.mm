@@ -341,10 +341,11 @@ using namespace llvm;
 
 	BasicBlock *basicBlock = BasicBlock::Create(mod->getContext(), "entry", function, 0);
 	IRBuilder<> *builder = new IRBuilder<>(basicBlock);
-[aProgram insertLogUsingBuilder:builder withStr:@"Disposing of block"];
 	// Load the block
 	AllocaInst *blkAlloca = builder->CreateAlloca(int8PtrTy, 0, "block.alloca");
 	builder->CreateStore(function->arg_begin(), blkAlloca);
+
+	[aProgram insertLogUsingBuilder:builder withStr:@"Disposing of block"];
 
 	Value *block = builder->CreateBitCast(builder->CreateLoad(blkAlloca), PointerType::getUnqual([self _blockLiteralTypeInProgram:aProgram]), "block");
 	Value *flags = ConstantInt::get(intTy, TQ_BLOCK_FIELD_IS_BYREF);//|TQ_BLOCK_FIELD_IS_OBJECT);
@@ -378,7 +379,6 @@ using namespace llvm;
 	const char *funName = [[NSString stringWithFormat:@"__tq_block_invoke"] UTF8String];
 
 	_function = Function::Create(funType, GlobalValue::ExternalLinkage, funName, mod);
-	_function->setCallingConv(CallingConv::C);
 
 	_basicBlock = BasicBlock::Create(mod->getContext(), "entry", _function, 0);
 	_builder = new IRBuilder<>(_basicBlock);
@@ -435,7 +435,6 @@ using namespace llvm;
 	//_basicBlock->getInstList().insert(terminator, poolPopInst);
 	return _function;
 }
-
 
 // Generates a block on the stack
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr

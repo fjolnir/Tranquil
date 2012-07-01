@@ -437,7 +437,7 @@ void parse()
 
 int main(int argc, char **argv)
 {
-	llvm::cl::ParseCommandLineOptions(argc, argv, 0, true);
+	/*llvm::cl::ParseCommandLineOptions(argc, argv, 0, true);*/
 	@autoreleasepool {
 		parse();
 	}
