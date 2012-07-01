@@ -329,12 +329,9 @@ struct dummy {
 		IRBuilder<> tempBuilder(&_function->getEntryBlock(), _function->getEntryBlock().begin());
 		NSString *argVarName = [[_arguments objectAtIndex:i] localName];
 
-		AllocaInst *allocaInst = tempBuilder.CreateAlloca(int8PtrTy, 0, [argVarName UTF8String]);
-		_builder->CreateStore(argumentIterator, allocaInst);
-
 		TQNodeVariable *local = [TQNodeVariable nodeWithName:argVarName];
-		local.alloca = allocaInst;
-		NSLog(@"registering arg local %@: %@ alloca: %p", argVarName, local, allocaInst);
+		[local store:argumentIterator inProgram:aProgram block:self error:aoErr];
+		NSLog(@"registering arg local %@: %@", argVarName, local);
 		[_locals setObject:local forKey:argVarName];
 	}
 
