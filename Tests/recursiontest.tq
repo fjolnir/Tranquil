@@ -1,6 +1,0 @@
-\ This won't work till we have actual scope
-a = {
-	print: "hey %@" :a.
-	a.
-}
-a.

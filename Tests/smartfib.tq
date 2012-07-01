@@ -1,11 +1,9 @@
-fib = { index, curr, succ |
+fib = { index, curr=0, succ=1 |
 	num = curr + succ
-	^(index > 2) if: {
+	if index > 2
 		^fib(index - 1, succ, num)
-	} else: {
+	else
 		^num
-	}
 }
 
-r = fib(1000000, 0, 1) \ Calculate the 50th number in the fibonacci sequence
-^r
+^fib(35)
