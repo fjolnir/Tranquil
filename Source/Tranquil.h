@@ -1,5 +1,6 @@
 #import "TQProgram.h"
 #import "Runtime/TQRuntime.h"
+#import "Runtime/TQOperators.h"
 #import "CodeGen/TQNode.h"
 #import "CodeGen/TQNodeArgument.h"
 #import "CodeGen/TQNodeArgumentDef.h"
