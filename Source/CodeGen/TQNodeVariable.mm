@@ -227,3 +227,10 @@ using namespace llvm;
 //	return builder->CreateCall2(aProgram.TQStoreStrongInByref, builder->CreateBitCast(_alloca, aProgram.llInt8PtrTy), aValue);
 }
 @end
+
+
+@implementation TQNodeSelf
+@end
+
+@implementation TQNodeSuper
+@end

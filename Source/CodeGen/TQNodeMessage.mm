@@ -1,6 +1,7 @@
 #import "TQNodeMessage.h"
 #import "TQProgram.h"
 #import "TQNodeArgument.h"
+#import "TQNodeVariable.h"
 
 using namespace llvm;
 
@@ -84,7 +85,11 @@ using namespace llvm;
 		args.push_back([arg generateCodeInProgram:aProgram block:aBlock error:aoErr]);
 	}
 
-	Value *ret = builder->CreateCall(aProgram.objc_msgSend, args);
+	Value *ret;
+	if([_receiver isMemberOfClass:[TQNodeSuper class]])
+		return NULL; // TODO: implement super calls
+	else
+		ret = builder->CreateCall(aProgram.objc_msgSend, args);
 	if(needsAutorelease)
 		ret = builder->CreateCall(aProgram.TQAutoreleaseObject, ret);
 	return ret;

@@ -13,6 +13,8 @@
 
 %%
 \\[^\r\n]*                          { /* Do nothing */ }
+(super)                             { UPDATE_LOC return tSUPER; }
+(self)                              { UPDATE_LOC return tSELF; }
 \.?[0-9]+(\.[0-9]+)?(e[0-9]+)?      {
                                     	UPDATE_LOC
                                     	yylval->dbl = atof(yytext);

@@ -55,13 +55,13 @@
 %token <cStr> tCONSTANT
 %token <cStr> tIDENTIFIER
 %token <cStr> tGREATEROREQUALOP tLESSEROREQUALOP tEQUALOP tINEQUALOP
-%token <cStr> 
+%token <cStr> tSUPER tSELF
 
 %type <number> Number
 %type <string> String
 %type <identifier> Identifier
 %type <constant> Constant ClassName
-%type <variable> Variable
+%type <variable> Variable Super Self
 %type <block> Block
 %type <call> Call
 %type <klass> Class
@@ -153,6 +153,7 @@ MessageReceiver:
 	  Callee
 	| ClassName
 	| Call
+	| Super
 	| Literal
 	;
 /* TODO: Figure out how to relax this so a message can be split into multiple lines
@@ -173,6 +174,7 @@ MessageArg:
 	| Variable
 	| Literal
 	| Block
+	| Self
 	| '(' Expression ')' { $$ = $2; }
 	;
 
@@ -196,6 +198,7 @@ Expression:
 	| Variable
 	| Literal
 	| Block
+	| Self
 	| Expression '>' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorGreater left:$1 right:$3]; }
 	| Expression '<' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorLesser left:$1 right:$3]; }
 	| Expression '*' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorMultiply left:$1 right:$3]; }
@@ -354,6 +357,8 @@ BlockArgs:
 
 ClassName: Constant;
 Variable: Identifier { $$ = [TQNodeVariable nodeWithName:[$1 value]]; };
+Super: tSUPER  { $$ = [TQNodeSuper nodeWithName:NSSTR("self")]; };
+Self: tSELF  { $$ = [TQNodeSelf nodeWithName:NSSTR("self")]; };
 
 /* Basics */
 

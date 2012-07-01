@@ -17,3 +17,9 @@
                                    error:(NSError **)aoError;
 - (llvm::Type *)captureStructTypeInProgram:(TQProgram *)aProgram;
 @end
+
+@interface TQNodeSelf : TQNodeVariable
+@end
+
+@interface TQNodeSuper : TQNodeVariable
+@end
