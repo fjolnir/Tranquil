@@ -22,11 +22,4 @@
 {
     return [NSNumber numberWithDouble:self.doubleValue / b.doubleValue];
 }
-- (id)if:(condBlock)ifBlock else:(condBlock)elseBlock
-{
-    if([self boolValue])
-        return ifBlock();
-    else
-        return elseBlock();
-}
 @end

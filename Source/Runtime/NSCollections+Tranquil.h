@@ -2,6 +2,8 @@
 
 extern void *TQSentinel;
 
+@class TQNumber;
+
 @interface NSMapTable (Tranquil)
 + (NSMapTable *)tq_mapTableWithObjectsAndKeys:(id)firstObject , ...; // Arguments terminated by TQSentinel
 - (id)objectForKeyedSubscript:(id)key;
@@ -12,4 +14,5 @@ extern void *TQSentinel;
 + (NSPointerArray *)tq_pointerArrayWithObjects:(id)firstObject , ...;  // Arguments terminated by TQSentinel
 - (void)setObject:(void*)aPtr atIndexedSubscript:(NSUInteger)aIdx;
 - (id)objectAtIndexedSubscript:(NSUInteger)aIdx;
+- (TQNumber *)tqCount;
 @end

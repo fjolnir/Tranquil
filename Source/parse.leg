@@ -88,13 +88,11 @@ Expression   = Assignment
 NoEqExpr     = Call
              | Message
              | Block
-             | Self
              | Nil
              | SubscriptExp
              | Property
-             | Array
-             | Dictionary
              | RegExp
+             | Self
              | Literal
              | Variable
              | ParenExpr
@@ -205,7 +203,7 @@ BlockArgDef  = name:Identifier { [StackTop addObject:name]; }
 Class        = '#' name:Constant --
                {
                    UpdateToken();
-                   PushStack([TQNodeClass nodeWithName:name]);
+                   PushStack([TQNodeClass nodeWithName:[name value]]);
                }
                ( "<" -- SuperClsName -- )? '{' -- (Method --)* '}'
                {
@@ -215,7 +213,7 @@ Class        = '#' name:Constant --
 SuperClsName = superName:Constant
                {
                    ExtendToken();
-                   [StackTop setSuperClassName:superName];
+                   [StackTop setSuperClassName:[superName value]];
                }
 Method       = '+' -- method:MethodImpl
                {
@@ -342,7 +340,7 @@ Equation     = a:Sum                 { UpdateToken(); PushStack(a);             
                ( - "<" -  b:Equation { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorLesser         left:StackTop right:b]); }
                | - ">" -  b:Equation { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorGreater        left:StackTop right:b]); }
                | - "<=" - b:Equation { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorLesserOrEqual  left:StackTop right:b]); }
-               | - "=>" - b:Equation { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorGreaterOrEqual left:StackTop right:b]); }
+               | - ">=" - b:Equation { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorGreaterOrEqual left:StackTop right:b]); }
                | - "==" - b:Equation { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorEqual          left:StackTop right:b]); }
                | - "!=" - b:Equation { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorInequal        left:StackTop right:b]); }
                )*                    { $$ = PopStack();                                                                                               }
@@ -358,10 +356,9 @@ AssgnRhs       = b:Expression
                    ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAssign left:StackTop right:b]);
                }
 
-
 # Accessors
 
-SubscriptExp = obj:Variable
+SubscriptExp = obj:SubscriptLhs
                {
                    UpdateToken();
                    PushStack([NSMutableArray array]);
@@ -375,9 +372,12 @@ SubscriptExp = obj:Variable
                    }
 
                }
-Subscript    = "[" -- subscript:Variable -- "]" { ExtendToken(); [StackTop addObject:subscript]; }
+SubscriptLhs = Property
+             | Self
+             | Variable
+Subscript    = "[" -- subscript:Expression -- "]" { ExtendToken(); [StackTop addObject:subscript]; }
 
-Property     = obj:Variable
+Property     = obj:PropLhs
                {
                    UpdateToken();
                    PushStack([NSMutableArray array]);
@@ -390,6 +390,9 @@ Property     = obj:Variable
                       $$ = [TQNodeMemberAccess nodeWithReceiver:$$ property:[subscripts objectAtIndex:i]];
                    }
                }
+PropLhs      = Self
+             | Variable
+
 PropSubscr   = "#" - prop:Identifier { ExtendToken(); [StackTop addObject:prop]; }
 
 
@@ -406,7 +409,7 @@ Array        = "#["
                    NSMutableArray *items = PopStack();
                    [$$ setItems:items];
                }
-ArrItem      = item:Variable
+ArrItem      = item:Expression
              {
                  [StackTop addObject:item];
              }
@@ -423,7 +426,7 @@ Dictionary   = "#{" --
                    [$$ setItems:items];
 
                }
-DictItem     = key:Variable -- "=>" -- value:Variable
+DictItem     = key:Expression -- "=>" -- value:Expression
                {
                    ExtendToken();
                    [StackTop setObject:value forKey:key];
@@ -437,6 +440,8 @@ Variable     = name:Identifier
 
 Literal      = Number
              | String
+             | Array
+             | Dictionary
 
 BreakStmt    = 'break'              { ExtendToken();                          }
 SkipStmt     = 'skip'               { ExtendToken();                          }

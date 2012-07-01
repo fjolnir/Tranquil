@@ -17,6 +17,9 @@ void TQSetValueForKey(id obj, char *key, id value);
 BOOL TQObjectIsStackBlock(id obj);
 id TQPrepareObjectForReturn(id obj);
 
+// Looks up a class if it exists, otherwise registers it
+Class TQGetOrCreateClass(const char *name, const char *superName);
+
 // Adds operator methods to the passed class (such as ==:, >=:, []: etc)
 BOOL TQAugmentClassWithOperators(Class klass);
 

@@ -252,6 +252,7 @@ using namespace llvm;
     TQNodeVariable *existingVar = nil;
     if((existingVar = [aBlock.locals objectForKey:_name]) && existingVar != self)
         return existingVar;
+    NSLog(@"%@", self);
     [aBlock.locals setObject:self forKey:_name];
     return nil;
 }
@@ -260,7 +261,21 @@ using namespace llvm;
 
 
 @implementation TQNodeSelf
+- (id)init
+{
+    if(!(self = [super init]))
+        return nil;
+    self.name = @"self";
+    return self;
+}
 @end
 
 @implementation TQNodeSuper
+- (id)init
+{
+    if(!(self = [super init]))
+        return nil;
+    self.name = @"super";
+    return self;
+}
 @end

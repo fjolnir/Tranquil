@@ -171,10 +171,6 @@ using namespace llvm;
 {
     return NULL;
 }
-- (llvm::Type *)_byRefTypeInProgram:(TQProgram *)aProgram
-{
-    return NULL;
-}
 @end
 
 @implementation TQNodeUntilBlock

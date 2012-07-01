@@ -1,7 +1,8 @@
 #import "TQNodeBlock.h"
-#import "TQNodeArgumentDef.h"
 #import "TQProgram.h"
 #import "TQNodeVariable.h"
+#import "TQNodeArgumentDef.h"
+
 // Block invoke functions are numbered from 0
 #define TQ_BLOCK_FUN_PREFIX @"__tq_block_invoke_"
 
@@ -111,25 +112,6 @@ using namespace llvm;
     return descriptorType;
 }
 
-- (llvm::Type *)_genericBlockLiteralTypeInProgram:(TQProgram *)aProgram
-{
-    static Type *literalType = NULL;
-    if(literalType)
-        return literalType;
-
-    Type *i8PtrTy = aProgram.llInt8PtrTy;
-    Type *intTy   = aProgram.llIntTy;
-
-    literalType = StructType::create("struct.__block_literal_generic",
-                                     aProgram.llInt8PtrTy, // isa
-                                     intTy,                // flags
-                                     intTy,                // reserved
-                                     i8PtrTy,              // invoke(void *blk, ...)
-                                     [self _blockDescriptorTypeInProgram:aProgram],
-                                     NULL);
-    return literalType;
-}
-
 - (llvm::Type *)_blockLiteralTypeInProgram:(TQProgram *)aProgram
 {
     if(_literalType)
@@ -153,21 +135,6 @@ using namespace llvm;
 
     _literalType = StructType::get(aProgram.llModule->getContext(), fields, true);
     return _literalType;
-}
-
-- (llvm::Type *)_byRefTypeInProgram:(TQProgram *)aProgram
-{
-    static Type *byRefType = NULL;
-    if(byRefType)
-        return byRefType;
-
-    Type *i8PtrTy = aProgram.llInt8PtrTy;
-    Type *intTy  = aProgram.llIntTy;
-
-    byRefType = StructType::create("struct.__block_descriptor",
-                                   i8PtrTy, i8PtrTy, intTy, intTy, i8PtrTy, NULL);
-    //byRefType = PointerType::getUnqual(byRefType);
-    return byRefType;
 }
 
 
@@ -236,7 +203,6 @@ using namespace llvm;
 
     // __flags
     int flags = TQ_BLOCK_HAS_COPY_DISPOSE | TQ_BLOCK_HAS_SIGNATURE;
-    //if (blockInfo.UsesStret) flags |= TQ_BLOCK_USE_STRET;
     Value *invoke = pBuilder->CreateBitCast(_function, i8PtrTy, "invokePtr");
     Constant *descriptor = [self _generateBlockDescriptorInProgram:aProgram];
 
@@ -279,9 +245,9 @@ using namespace llvm;
 
     llvm::Module *mod = aProgram.llModule;
 
-    const char *funName = [[NSString stringWithFormat:@"__tq_block_copy"] UTF8String];
+    const char *functionName = [[NSString stringWithFormat:@"__tq_block_copy"] UTF8String];
     Function *function;
-    function = Function::Create(funType, GlobalValue::ExternalLinkage, funName, mod);
+    function = Function::Create(funType, GlobalValue::ExternalLinkage, functionName, mod);
     function->setCallingConv(CallingConv::C);
 
     BasicBlock *basicBlock = BasicBlock::Create(mod->getContext(), "entry", function, 0);
@@ -330,9 +296,9 @@ using namespace llvm;
 
     llvm::Module *mod = aProgram.llModule;
 
-    const char *funName = [[NSString stringWithFormat:@"__tq_block_dispose"] UTF8String];
+    const char *functionName = [[NSString stringWithFormat:@"__tq_block_dispose"] UTF8String];
     Function *function;
-    function = Function::Create(funType, GlobalValue::ExternalLinkage, funName, mod);
+    function = Function::Create(funType, GlobalValue::ExternalLinkage, functionName, mod);
     function->setCallingConv(CallingConv::C);
 
     BasicBlock *basicBlock = BasicBlock::Create(mod->getContext(), "entry", function, 0);
@@ -372,9 +338,9 @@ using namespace llvm;
 
     llvm::Module *mod = aProgram.llModule;
 
-    const char *funName = [[NSString stringWithFormat:@"__tq_block_invoke"] UTF8String];
+    const char *functionName = [[NSString stringWithFormat:@"__tq_block_invoke"] UTF8String];
 
-    _function = Function::Create(funType, GlobalValue::ExternalLinkage, funName, mod);
+    _function = Function::Create(funType, GlobalValue::ExternalLinkage, functionName, mod);
 
     _basicBlock = BasicBlock::Create(mod->getContext(), "entry", _function, 0);
     _builder = new IRBuilder<>(_basicBlock);
@@ -393,6 +359,10 @@ using namespace llvm;
     {
         IRBuilder<> tempBuilder(&_function->getEntryBlock(), _function->getEntryBlock().begin());
         NSString *argument = [_arguments objectAtIndex:i];
+        if([argument isKindOfClass:[TQNodeArgumentDef class]])
+            argument = [(TQNodeArgumentDef *)argument name];
+        if(!argument)
+            continue;
         TQNodeVariable *local = [TQNodeVariable nodeWithName:argument];
         [local store:argumentIterator inProgram:aProgram block:self error:aoErr];
         [_locals setObject:local forKey:argument];

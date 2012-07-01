@@ -61,21 +61,16 @@ using namespace llvm;
     // -- Method definitions
     IRBuilder<> *builder = aBlock.builder;
 
-    Value *extraBytes = ConstantInt::get( aProgram.llInt64Ty, 0);
-    Value *name = builder->CreateGlobalStringPtr([_name UTF8String]);
-    // Find the superclass
-    NSString *superClassName = _superClassName ? _superClassName : @"NSObject";
-    Value *superClassPtr = builder->CreateCall(aProgram.objc_getClass, builder->CreateGlobalStringPtr([superClassName UTF8String]));
-    // Allocate the class
-    _classPtr = builder->CreateCall3(aProgram.objc_allocateClassPair, superClassPtr, name, extraBytes, [_name UTF8String]);
+    Value *name       = builder->CreateGlobalStringPtr([_name UTF8String]);
+    Value *superName  = builder->CreateGlobalStringPtr([(_superClassName ? _superClassName : @"NSObject") UTF8String]);
+
+    _classPtr = builder->CreateCall2(aProgram.TQGetOrCreateClass, name, superName);
 
     // Add the methods for the class
     for(TQNodeMethod *method in [_classMethods arrayByAddingObjectsFromArray:_instanceMethods]) {
         [method generateCodeInProgram:aProgram block:aBlock class:self error:aoErr];
         if(*aoErr) return NULL;
     }
-    // Register the class
-    _classPtr = builder->CreateCall(aProgram.objc_registerClassPair, _classPtr);
 
     return _classPtr;
 }

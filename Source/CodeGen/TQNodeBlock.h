@@ -2,8 +2,6 @@
 #include "TQNodeReturn.h"
 #include <llvm/Support/IRBuilder.h>
 
-@class TQNodeArgumentDef;
-
 enum TQBlockFlag_t {
     TQ_BLOCK_HAS_COPY_DISPOSE =  (1 << 25),
     TQ_BLOCK_HAS_CXX_OBJ =       (1 << 26),

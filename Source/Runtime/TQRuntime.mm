@@ -81,6 +81,23 @@ id TQStoreStrongInByref(void *dstPtr, id obj)
     return obj;
 }
 
+
+#pragma mark -
+Class TQGetOrCreateClass(const char *name, const char *superName)
+{
+    Class klass = objc_getClass(name);
+    if(klass)
+        return klass;
+    Class superKlass = objc_getClass(superName);
+    assert(superKlass != nil);
+    klass = objc_allocateClassPair(superKlass, name, 0);
+    assert(klass != nil);
+    objc_registerClassPair(klass);
+
+    return klass;
+}
+
+
 #pragma mark - Dynamic instance variables
 
 static inline NSMapTable *_TQGetDynamicIvarTable(id obj)
@@ -223,7 +240,6 @@ BOOL TQAugmentClassWithOperators(Class klass)
 
 void TQInitializeRuntime()
 {
-    TQNumber *foo = [TQNumber numberWithDouble:3]; // TODO: remove me
     TQEqOpSel         = sel_registerName("==:");
     TQNeqOpSel        = sel_registerName("!=:");
     TQAddOpSel        = sel_registerName("+:");

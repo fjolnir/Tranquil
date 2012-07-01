@@ -25,7 +25,7 @@ using namespace llvm;
     _type = aType;
 
     // Methods must take a self argument
-    [[self arguments] removeAllObjects];
+    //[[self arguments] removeAllObjects];
     [self addArgument:[TQNodeArgumentDef nodeWithName:@"self" selectorPart:nil] error:nil];
 
     return self;
@@ -82,7 +82,7 @@ using namespace llvm;
 {
     NSMutableString *selector = [NSMutableString string];
     for(TQNodeArgumentDef *arg in self.arguments) {
-        if([arg.name isEqualToString:@"self"] || [arg.name isEqualToString:@"__blk"])
+        if([arg isEqual:@"__blk"] || [arg.name isEqualToString:@"self"])
             continue;
         if(arg.selectorPart)
             [selector appendString:arg.selectorPart];

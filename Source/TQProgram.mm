@@ -59,7 +59,7 @@ using namespace llvm;
     object_getClass=_func_object_getClass, TQPrepareObjectForReturn=_func_TQPrepareObjectForReturn,
     TQAutoreleaseObject=_func_TQAutoreleaseObject, objc_autoreleasePoolPush=_func_objc_autoreleasePoolPush,
     objc_autoreleasePoolPop=_func_objc_autoreleasePoolPop, TQSetValueForKey=_func_TQSetValueForKey,
-    TQValueForKey=_func_TQValueForKey;
+    TQValueForKey=_func_TQValueForKey, TQGetOrCreateClass=_func_TQGetOrCreateClass;
 
 + (TQProgram *)programWithName:(NSString *)aName
 {
@@ -221,6 +221,7 @@ using namespace llvm;
     DEF_EXTERNAL_FUN(objc_autoreleasePoolPop, ft_void__i8Ptr);
     DEF_EXTERNAL_FUN(TQSetValueForKey, ft_void__i8PtrPtr_i8Ptr_i8Ptr);
     DEF_EXTERNAL_FUN(TQValueForKey, ft_i8Ptr__i8Ptr_i8Ptr);
+    DEF_EXTERNAL_FUN(TQGetOrCreateClass, ft_i8Ptr__i8Ptr_i8Ptr);
 
 #undef DEF_EXTERNAL_FUN
 
@@ -287,8 +288,7 @@ using namespace llvm;
     engine->addGlobalMapping(_func_TQAutoreleaseObject, (void*)&TQAutoreleaseObject);
     engine->addGlobalMapping(_func_TQSetValueForKey, (void*)&TQSetValueForKey);
     engine->addGlobalMapping(_func_TQValueForKey, (void*)&TQValueForKey);
-    GlobalVariable *glbl = new GlobalVariable(*_llModule, _llInt8Ty, false, GlobalValue::ExternalLinkage, NULL, "TQNumberClass");
-    engine->addGlobalMapping(glbl, (void*)&TQNumberClass);
+    engine->addGlobalMapping(_func_TQGetOrCreateClass, (void*)&TQGetOrCreateClass);
 
     //std::vector<GenericValue> noargs;
     //GenericValue val = engine->runFunction(_root.function, noargs);

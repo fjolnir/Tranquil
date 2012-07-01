@@ -7,6 +7,4 @@ typedef id (^condBlock)();
 - (NSNumber *)negate;
 - (NSNumber *)multiply:(NSNumber *)b;
 - (NSNumber *)divide:(NSNumber *)b;
-
-- (id)if:(condBlock)ifBlock else:(condBlock)elseBlock;
 @end

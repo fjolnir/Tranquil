@@ -40,7 +40,8 @@
     *sel_registerName, *sel_getName, *_Block_copy,
     *_Block_object_assign, *_Block_object_dispose, *imp_implementationWithBlock,
     *object_getClass, *TQPrepareObjectForReturn, *TQAutoreleaseObject,
-    *objc_autoreleasePoolPush, *objc_autoreleasePoolPop, *TQSetValueForKey, *TQValueForKey;
+    *objc_autoreleasePoolPush, *objc_autoreleasePoolPop, *TQSetValueForKey, *TQValueForKey,
+    *TQGetOrCreateClass;
 
 #pragma mark - Methods
 

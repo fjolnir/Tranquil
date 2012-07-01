@@ -1,4 +1,5 @@
 #import "NSCollections+Tranquil.h"
+#import "TQNumber.h"
 #import <objc/runtime.h>
 
 // Just a unique address
@@ -69,5 +70,10 @@ void *TQSentinel = (void*)@"3d2c9ac0bf3911e1afa70800200c9a66aaaaaaaaa";
 - (id)objectAtIndexedSubscript:(NSUInteger)aIdx
 {
     return (id)[self pointerAtIndex:aIdx];
+}
+
+- (TQNumber *)tqCount
+{
+    return [TQNumber numberWithDouble:(double)[self count]];
 }
 @end
