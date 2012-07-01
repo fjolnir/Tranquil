@@ -1184,7 +1184,9 @@ YY_RULE_SETUP
 #line 12 "parse.l"
 {
                                     	yylval.number = ]]TQSyntaxNodeNumber alloc] init];
-										yylval.number.value = atof(yytext);
+										NSNumber *num = ]]NSNumber alloc] initWithDouble:atof(yytext)];
+										yylval.number.value = num;
+										[num release];
 										NSLog(@"Num: %@\n", yylval.number);
                                     	return tNUMBER;
                                     }
@@ -1192,7 +1194,7 @@ YY_RULE_SETUP
 case 5:
 /* rule 5 can match eol */
 YY_RULE_SETUP
-#line 18 "parse.l"
+#line 20 "parse.l"
 {
                                     	yylval.string = ]]TQSyntaxNodeString alloc] init];
                                     	NSString *str = ]]NSString alloc] initWithBytesNoCopy:yytext+1 length:yylen-2
@@ -1205,7 +1207,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 27 "parse.l"
+#line 29 "parse.l"
 {
                                     	yylval.string = ]]TQSyntaxNodeString alloc] init];
                                     	NSString *str = ]]NSString alloc] initWithBytesNoCopy:yytext length:yylen
@@ -1219,15 +1221,15 @@ YY_RULE_SETUP
 case 7:
 /* rule 7 can match eol */
 YY_RULE_SETUP
-#line 36 "parse.l"
+#line 38 "parse.l"
 { printf("> Other: %c\n", *yytext); return *yytext; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 37 "parse.l"
+#line 39 "parse.l"
 ECHO;
 	YY_BREAK
-#line 1231 "lex.yy.m"
+#line 1233 "lex.yy.m"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2220,7 +2222,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 37 "parse.l"
+#line 39 "parse.l"
 
 
 

@@ -11,7 +11,9 @@
 \end                                { return tEND; }
 \.?[0-9]+(\.[0-9]+)?(e[0-9]+)?      {
                                     	yylval.number = [[TQSyntaxNodeNumber alloc] init];
-										yylval.number.value = atof(yytext);
+										NSNumber *num = [[NSNumber alloc] initWithDouble:atof(yytext)];
+										yylval.number.value = num;
+										[num release];
 										NSLog(@"Num: %@\n", yylval.number);
                                     	return tNUMBER;
                                     }

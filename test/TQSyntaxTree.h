@@ -7,21 +7,21 @@
 @end
 
 @interface TQSyntaxNodeVariable : TQSyntaxNode
-@property(readwrite, copy) NSString *name;
+@property(readwrite, retain) NSString *name;
 @end
 
 @interface TQSyntaxNodeString : TQSyntaxNode
-@property(readwrite, copy) NSString *value;
+@property(readwrite, retain) NSString *value;
 @end
 
 @interface TQSyntaxNodeNumber : TQSyntaxNode
-@property(readwrite, assign) double value;
+@property(readwrite, retain) NSNumber *value;
 @end
 
 // An argument to block (name: arg)
 @interface TQSyntaxNodeArgument : TQSyntaxNode
-@property(readwrite, copy) NSString *identifier; // The argument identifier, that is, the portion before ':'
-@property(readwrite, copy) NSString *name;       // The variable name for the argument
+@property(readwrite, retain) NSString *identifier; // The argument identifier, that is, the portion before ':'
+@property(readwrite, retain) NSString *name;       // The variable name for the argument
 @end
 
 // A block definition ({ :arg | body })
@@ -41,8 +41,8 @@
 
 // A class definition (class Name < SuperClass\n methods\n end)
 @interface TQSyntaxNodeClass : TQSyntaxNode
-@property(readwrite, copy) NSString *name;
-@property(readwrite, copy) NSString *superClassName;
+@property(readwrite, retain) NSString *name;
+@property(readwrite, retain) NSString *superClassName;
 @property(readwrite, copy) NSMutableArray *classMethods;
 @property(readwrite, copy) NSMutableArray *instanceMethods;
 @end
