@@ -32,6 +32,16 @@ using namespace llvm;
 	[super dealloc];
 }
 
+- (TQNode *)referencesNode:(TQNode *)aNode
+{
+	TQNode *ref = nil;
+	if((ref = [_left referencesNode:aNode]))
+		return ref;
+	else if((ref = [_right referencesNode:aNode]))
+		return ref;
+	return nil;
+}
+
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
 {
 	IRBuilder<> *builder = aBlock.builder;

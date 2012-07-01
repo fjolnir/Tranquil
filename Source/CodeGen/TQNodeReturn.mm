@@ -29,6 +29,16 @@ using namespace llvm;
 	return [NSString stringWithFormat:@"<ret@ %@>", _value];
 }
 
+- (TQNode *)referencesNode:(TQNode *)aNode
+{
+	TQNode *ref = nil;
+	if([aNode isEqual:self])
+		return self;
+	else if((ref = [_value referencesNode:aNode]))
+		return ref;
+	return nil;
+}
+
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
 {
 	IRBuilder<> *builder = aBlock.builder;

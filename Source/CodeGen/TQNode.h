@@ -72,4 +72,11 @@ typedef enum {
 @interface TQNode : NSObject
 + (TQNode *)node;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr;
+// Checks if this node references a node equal to aNode and returns it if it does
+- (TQNode *)referencesNode:(TQNode *)aNode;
+@end
+
+@interface NSArray (TQReferencesNode)
+// Checks if any node in an array of nodes references aNode
+- (TQNode *)tq_referencesNode:(TQNode *)aNode;
 @end

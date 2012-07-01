@@ -46,6 +46,20 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
 	return out;
 }
 
+- (TQNode *)referencesNode:(TQNode *)aNode
+{
+	TQNode *ref = nil;
+
+	if([self isEqual:aNode])
+		return self;
+	else if([_callee isEqual:aNode])
+		return _callee;
+	if((ref = [_arguments tq_referencesNode:aNode]))
+		return ref;
+
+	return nil;
+}
+
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
 {
 	IRBuilder<> *builder = aBlock.builder;
@@ -89,6 +103,7 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
 	FunctionType *funType = FunctionType::get(aProgram.llInt8PtrTy, paramTypes, false);
 	Type *funPtrType = PointerType::getUnqual(funType);
 
-	return builder->CreateCall(builder->CreateBitCast(fun, funPtrType), args);
+	CallInst *call = builder->CreateCall(builder->CreateBitCast(fun, funPtrType), args);
+	return call;
 }
 @end

@@ -36,6 +36,19 @@ using namespace llvm;
 	return [_name hash];
 }
 
+- (BOOL)isEqual:(id)aObj
+{
+	if([aObj isKindOfClass:[TQNodeVariable class]] && [[(TQNodeVariable *)aObj name] isEqualToString:_name])
+		return YES;
+	else
+		return NO;
+}
+- (TQNode *)referencesNode:(TQNode *)aNode
+{
+	return [aNode isEqual:self] ? self : nil;
+}
+
+
 - (void)dealloc
 {
 	[_name release];

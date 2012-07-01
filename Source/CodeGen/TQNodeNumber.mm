@@ -32,6 +32,11 @@ using namespace llvm;
 	return [NSString stringWithFormat:@"<num@ %f>", _value.doubleValue];
 }
 
+- (TQNode *)referencesNode:(TQNode *)aNode
+{
+	return [aNode isEqual:self] ? self : nil;
+}
+
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
 {
 	Module *mod = aProgram.llModule;

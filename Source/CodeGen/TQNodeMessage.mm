@@ -31,6 +31,18 @@ using namespace llvm;
 	[super dealloc];
 }
 
+- (TQNode *)referencesNode:(TQNode *)aNode
+{
+	TQNode *ref = nil;
+	if([aNode isEqual:self])
+		return self;
+	else if((ref = [_receiver referencesNode:aNode]))
+		return ref;
+	else if((ref = [_arguments tq_referencesNode:aNode]))
+		return ref;
+	return nil;
+}
+
 - (NSString *)description
 {
 	NSMutableString *out = [NSMutableString stringWithString:@"<msg@ "];

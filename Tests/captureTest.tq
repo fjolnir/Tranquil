@@ -1,4 +1,5 @@
 capturedVar = 123
-blk = { return capturedVar. }
+nonCapturedVar = 321
+blk = `capturedVar`
 
-return (blk.).
+^blk()

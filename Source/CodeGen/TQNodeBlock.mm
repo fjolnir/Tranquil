@@ -444,9 +444,12 @@ using namespace llvm;
 	// Generate a list of variables to capture
 	if(aBlock) {
 		_capturedVariables = [[NSMutableDictionary alloc] init];
-		for(NSString *name in aBlock.locals) {
+		for(NSString *name in [aBlock.locals allKeys]) {
 			if([_locals objectForKey:name])
 				continue; // Arguments to this block override locals in the parent (Not that  you should write code like that)
+			TQNodeVariable *parentVar = [aBlock.locals objectForKey:name];
+			if(![self referencesNode:parentVar])
+				continue;
 			[_capturedVariables setObject:[aBlock.locals objectForKey:name] forKey:name];
 		}
 	}
@@ -458,6 +461,18 @@ using namespace llvm;
 
 	return literal;
 }
+
+- (TQNode *)referencesNode:(TQNode *)aNode
+{
+	TQNode *ref = nil;
+
+	if((ref = [_statements tq_referencesNode:aNode]))
+		return ref;
+	NSLog(@"%@ did NOT reference %@",self, aNode);
+	return nil;
+}
+
+
 @end
 
 

@@ -34,6 +34,13 @@ static Value *_StringWithUTF8StringSel, *_NSStringClassNameConst;
 	[super dealloc];
 }
 
+- (TQNode *)referencesNode:(TQNode *)aNode
+{
+	// All string refs must be unique since they are mutable
+	return nil;
+}
+
+
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
 {
 	Module *mod = aProgram.llModule;

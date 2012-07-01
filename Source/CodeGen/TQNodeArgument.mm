@@ -21,6 +21,16 @@ using namespace llvm;
 	return self;
 }
 
+- (TQNode *)referencesNode:(TQNode *)aNode
+{
+	TQNode *ref = nil;
+	if([aNode isEqual:self])
+		ref = self;
+	else if((ref = [_passedNode referencesNode:aNode]))
+		return ref;
+	return ref;
+}
+
 - (NSString *)description
 {
 	return [NSString stringWithFormat:@"<arg@ %@: %@>", _identifier, _passedNode];
