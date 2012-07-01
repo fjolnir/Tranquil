@@ -14,6 +14,9 @@
 %token <text> tASSIGN              /* = */
 %token <text> tARROW               /* -> */
 %token <text> tHASH                /* # */
+%token <text> tLESSTHAN            /* < */
+%token <text> tGREATERTHAN         /* > *.
+%token tCLASS                      /* class */
 %token <dbl> tNUMBER               /* <number> */
 %token <text> tSTRING              /* Contents of a quoted string */
 %token <text> tIDENTIFIER          /* An identifier, non quoted string matching [a-zA-Z0-9_]+ */

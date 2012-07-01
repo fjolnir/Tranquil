@@ -21,6 +21,9 @@
 =                                   { yylval.text = "="; return tASSIGN; }
 \->                                 { yylval.text = "->"; return tARROW; }
 \#                                  { yylval.text = "#"; return tHASH; }
+\<                                  { yylval.text = "<"; return tLESSTHAN; }
+\>                                  { yylval.text = ">"; return tGREATERTHAN; }
+\class                              { yylval.text ="class"; return tCLASS; }
 \.?[0-9]+(\.[0-9]+)?(e[0-9]+)?      {
                                     	yylval.dbl = atof(yytext);
                                     	return tNUMBER;
