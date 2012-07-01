@@ -38,3 +38,5 @@ extern SEL TQGetterOpSel;
 
 extern SEL TQNumberWithDoubleSel;
 extern SEL TQStringWithUTF8StringSel;
+extern SEL TQPointerArrayWithObjectsSel;
+extern SEL TQMapWithObjectsAndKeysSel;

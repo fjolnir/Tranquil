@@ -20,8 +20,10 @@ SEL TQUnaryMinusOpSel;
 SEL TQSetterOpSel;
 SEL TQGetterOpSel;
 
-SEL TQNumberWithDoubleSel;
-SEL TQStringWithUTF8StringSel;
+SEL TQNumberWithDoubleSel             = @selector(numberWithDouble:);
+SEL TQStringWithUTF8StringSel         = @selector(stringWithUTF8String:);
+SEL TQPointerArrayWithObjectsSel      = @selector(tq_pointerArrayWithObjects:);
+SEL TQMapWithObjectsAndKeysSel        = @selector(tq_mapTableWithObjectsAndKeys:);
 
 struct TQBlock_byref {
 	void *isa;
@@ -230,8 +232,6 @@ void TQInitializeRuntime()
 	TQGTEOpSel                = sel_registerName(">=:");
 	TQGetterOpSel             = sel_registerName("[]:");
 	TQSetterOpSel             = sel_registerName("[]=::");
-	TQNumberWithDoubleSel     = @selector(numberWithDouble:);
-	TQStringWithUTF8StringSel = @selector(stringWithUTF8String:);
 
 	TQAugmentClassWithOperators([NSObject class]);
 }

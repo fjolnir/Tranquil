@@ -28,7 +28,10 @@
 	TQNodeReturn *ret;
 	TQNodeConstant *constant;
 	TQNodeNil *nil_;
-	NSMutableArray *array;
+	TQNodeArray *array;
+	TQNodeDictionary *dict;
+	NSMutableArray *nsarr;
+	NSMapTable *nsmap;
 }
 
 %{
@@ -57,7 +60,7 @@
 %token <cStr> tIDENTIFIER
 %token <cStr> tGREATEROREQUALOP tLESSEROREQUALOP tEQUALOP tINEQUALOP
 %token <cStr> tSUPER tSELF
-%token tNIL
+%token tNIL tMAPPINGOP
 
 %type <number> Number
 %type <string> String
@@ -73,9 +76,12 @@
 %type <op> Assignment SubscriptExpression
 %type <ret> Return
 %type <nil_> Nil
+%type <array> Array
+%type <dict> Dictionary
 
 %type <node> Literal Statement Expression Callee Lhs CallArg MessageArg MessageReceiver Rhs
-%type <array> Statements CallArgs MessageArgs ClassBody ClassDef MethodArgs MethodBody BlockArgs
+%type <nsarr> Statements CallArgs MessageArgs ClassBody ClassDef MethodArgs MethodBody BlockArgs ArrayItems
+%type <nsmap> DictionaryItems
 
 %left '>' '<'
 %left tGREATEROREQUALOP tLESSEROREQUALOP
@@ -210,6 +216,8 @@ Expression:
 	| Self
 	| Property
 	| Nil
+	| Array
+	| Dictionary
 	| Expression '>' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorGreater left:$1 right:$3]; }
 	| Expression '<' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorLesser left:$1 right:$3]; }
 	| Expression '*' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorMultiply left:$1 right:$3]; }
@@ -231,6 +239,26 @@ Property:
 	 Variable '#' Identifier                  { $$ = [TQNodeMemberAccess nodeWithReceiver:$1 property:[$3 value]]; }
 	| Property '#' Identifier                 { $$ = [TQNodeMemberAccess nodeWithReceiver:$1 property:[$3 value]]; }
 	;
+Array:
+	  '#' '[' ']'                             { $$ = [TQNodeArray node]; }
+	| '#' '[' ArrayItems ']'                  { $$ = [TQNodeArray node]; [$$ setItems:$3]; }
+	;
+ArrayItems:
+	  Expression                              { $$ = [NSMutableArray arrayWithObject:$1]; }
+	| ArrayItems ',' Expression               { [$$ addObject:$3]; }
+	;
+Dictionary:
+	  '#''{' '}'                             { $$ = [TQNodeDictionary node]; }
+	| '#''{' DictionaryItems '}'             { $$ = [TQNodeDictionary node]; [$$ setItems: $3]; }
+	;
+DictionaryItems:
+	  Expression tMAPPINGOP Expression       {
+		$$ = [NSMapTable mapTableWithStrongToStrongObjects];
+		[$$ setObject:$3 forKey:$1];
+	}
+	| DictionaryItems ',' Expression tMAPPINGOP Expression { [$$ setObject:$5 forKey:$3]; }
+	;
+
 
 Class: '#' ClassDef OptLn '{' OptLn
 	      ClassBody OptLn

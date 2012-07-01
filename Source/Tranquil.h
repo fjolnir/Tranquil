@@ -1,6 +1,7 @@
 #import "TQProgram.h"
 #import "Runtime/TQRuntime.h"
 #import "Runtime/TQOperators.h"
+#import "Runtime/TQNumber.h"
 #import "CodeGen/TQNode.h"
 #import "CodeGen/TQNodeArgument.h"
 #import "CodeGen/TQNodeArgumentDef.h"
@@ -18,3 +19,5 @@
 #import "CodeGen/TQNodeVariable.h"
 #import "CodeGen/TQNodeConstant.h"
 #import "CodeGen/TQNodeNil.h"
+#import "CodeGen/TQNodeArray.h"
+#import "CodeGen/TQNodeDictionary.h"

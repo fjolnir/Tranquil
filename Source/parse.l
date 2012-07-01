@@ -35,6 +35,10 @@
                                     	yylval->cStr = strndup(yytext, yyleng);
                                     	return tCONSTANT;
                                     }
+(=>)                                {
+                                    	UPDATE_LOC
+                                    	return tMAPPINGOP;
+                                    }
 (<=)                                {
                                     	UPDATE_LOC
                                     	return tLESSEROREQUALOP;
