@@ -366,7 +366,7 @@ using namespace llvm;
         thisBlock = _builder->CreateBitCast(argumentIterator, PointerType::getUnqual([self _blockLiteralTypeInProgram:aProgram]));
         argumentIterator++;
     }
-
+    Value *sentinel = _builder->CreateLoad(mod->getOrInsertGlobal("TQSentinel", aProgram.llInt8PtrTy));
     for (unsigned i = 1; i < _arguments.count; ++i, ++argumentIterator)
     {
         IRBuilder<> tempBuilder(&_function->getEntryBlock(), _function->getEntryBlock().begin());
@@ -375,8 +375,13 @@ using namespace llvm;
             argument = [(TQNodeArgumentDef *)argument name];
         if(!argument)
             continue;
+
+        // Load the default argument if the argument was not passed
+        Value *isMissingCond = _builder->CreateICmpEQ(argumentIterator, sentinel);
+        Value *argValue = _builder->CreateSelect(isMissingCond, ConstantPointerNull::get(aProgram.llInt8PtrTy), argumentIterator);
+
         TQNodeVariable *local = [TQNodeVariable nodeWithName:argument];
-        [local store:argumentIterator inProgram:aProgram block:self error:aoErr];
+        [local store:argValue inProgram:aProgram block:self error:aoErr];
         [_locals setObject:local forKey:argument];
     }
 
