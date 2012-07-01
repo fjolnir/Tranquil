@@ -43,7 +43,7 @@ using namespace llvm;
     llvm::IRBuilder<> *builder = aBlock.builder;
 
     // Returns [NSNumber numberWithDouble:_value]
-    NSString *globalName = [NSString stringWithFormat:@"TQConstantNum%f", [_value doubleValue]];
+    NSString *globalName = [NSString stringWithFormat:@"TQConstNum_%f", [_value doubleValue]];
     Value *num =  mod->getGlobalVariable([globalName UTF8String], false);
     if(!num) {
         Function *rootFunction = aProgram.root.function;

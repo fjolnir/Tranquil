@@ -61,8 +61,8 @@ using namespace llvm;
     // -- Method definitions
     IRBuilder<> *builder = aBlock.builder;
 
-    Value *name       = builder->CreateGlobalStringPtr([_name UTF8String]);
-    Value *superName  = builder->CreateGlobalStringPtr([(_superClassName ? _superClassName : @"TQObject") UTF8String]);
+    Value *name       = [aProgram getGlobalStringPtr:_name inBlock:aBlock];
+    Value *superName  = [aProgram getGlobalStringPtr:_superClassName ? _superClassName : @"TQObject" inBlock:aBlock];
 
     _classPtr = builder->CreateCall2(aProgram.TQGetOrCreateClass, name, superName);
 

@@ -51,7 +51,7 @@ using namespace llvm;
                                  error:(NSError **)aoError
 {
     IRBuilder<> *builder = aBlock.builder;
-    Value *key = builder->CreateGlobalStringPtr([_property UTF8String]);
+	Value *key = [aProgram getGlobalStringPtr:_property inBlock:aBlock];
     Value *object = [_receiver generateCodeInProgram:aProgram block:aBlock error:aoError];
     return builder->CreateCall2(aProgram.TQValueForKey, object, key);
 }
@@ -62,7 +62,16 @@ using namespace llvm;
                  error:(NSError **)aoError
 {
     IRBuilder<> *builder = aBlock.builder;
-    Value *key = builder->CreateGlobalStringPtr([_property UTF8String]);
+	NSString *keyVarName = [NSString stringWithFormat:@"TQPropertyKey_%@", _property];
+
+    //Value *key = aProgram.llModule->getGlobalVariable([keyVarName UTF8String], true);
+	//NSLog(@"var for %@: %p", keyVarName, key);
+	//if(!key)
+		//key = builder->CreateGlobalString([_property UTF8String], [keyVarName UTF8String]);
+    //Value *zero = ConstantInt::get(Type::getInt32Ty(aProgram.llModule->getContext()), 0);
+    //Value *Args[] = { zero, zero };
+    //key = builder->CreateInBoundsGEP(key, Args, );
+	Value *key = [aProgram getGlobalStringPtr:_property inBlock:aBlock];
     Value *object = [_receiver generateCodeInProgram:aProgram block:aBlock error:aoError];
     return builder->CreateCall3(aProgram.TQSetValueForKey, object, key, aValue);
 }

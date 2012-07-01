@@ -42,7 +42,7 @@ static Value *_StringWithUTF8StringSel, *_NSStringClassNameConst;
     Value *selector = builder->CreateLoad(mod->getOrInsertGlobal("TQStringWithUTF8StringSel", aProgram.llInt8PtrTy));
     Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_NSMutableString", aProgram.llInt8Ty);
 
-    Value *strValue = builder->CreateGlobalStringPtr([_value UTF8String]);
+    Value *strValue = [aProgram getGlobalStringPtr:_value inBlock:aBlock];
 
     return builder->CreateCall3(aProgram.objc_msgSend, klass, selector, strValue);
 }

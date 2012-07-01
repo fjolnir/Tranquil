@@ -25,9 +25,10 @@ using namespace llvm;
 
     _type = aType;
 
-    // Methods must take a self argument
-	[[self arguments] removeAllObjects];
-    [self addArgument:[TQNodeMethodArgumentDef nodeWithName:@"self" selectorPart:nil] error:nil];
+    [[self arguments] removeAllObjects];
+    [self addArgument:[TQNodeMethodArgumentDef nodeWithName:@"__blk"] error:nil];
+    [self addArgument:[TQNodeMethodArgumentDef nodeWithName:@"self"] error:nil];
+
 
     return self;
 }
@@ -83,7 +84,7 @@ using namespace llvm;
 {
     NSMutableString *selector = [NSMutableString string];
     for(TQNodeMethodArgumentDef *arg in self.arguments) {
-        if([arg isEqual:@"__blk"] || [arg.name isEqualToString:@"self"])
+        if([arg.name isEqualToString:@"__blk"] || [arg.name isEqualToString:@"self"])
             continue;
         if(arg.selectorPart)
             [selector appendString:arg.selectorPart];
@@ -109,8 +110,8 @@ using namespace llvm;
     IRBuilder<> *builder = aBlock.builder;
 
     Value *imp = builder->CreateCall(aProgram.imp_implementationWithBlock, block);
-    Value *signature = builder->CreateGlobalStringPtr([[self signature] UTF8String]);
-    Value *selector = builder->CreateCall(aProgram.sel_registerName, builder->CreateGlobalStringPtr([[self _selectorString] UTF8String]));
+    Value *signature = [aProgram getGlobalStringPtr:[self signature] inBlock:aBlock];
+    Value *selector = builder->CreateCall(aProgram.sel_registerName, [aProgram getGlobalStringPtr:[self _selectorString] inBlock:aBlock]);
 
     Value *classPtr = aClass.classPtr;
     if(_type == kTQClassMethod)

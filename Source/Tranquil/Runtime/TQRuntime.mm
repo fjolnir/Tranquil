@@ -170,7 +170,10 @@ void TQSetValueForKey(id obj, char *key, id value)
         }
     } else {
         NSMapTable *ivarTable = _TQGetDynamicIvarTable(obj);
-        NSMapInsert(ivarTable, key, value);
+        if(value)
+            NSMapInsert(ivarTable, key, value);
+        else
+            NSMapRemove(ivarTable, key);
     }
 }
 

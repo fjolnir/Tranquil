@@ -90,7 +90,8 @@ using namespace llvm;
     if(!selectorGlobal) {
         Function *rootFunction = aProgram.root.function;
         IRBuilder<> rootBuilder(&rootFunction->getEntryBlock(), rootFunction->getEntryBlock().begin());
-        Value *selector =  rootBuilder.CreateGlobalStringPtr([selStr UTF8String], "selector");
+        Value *selector = [aProgram getGlobalStringPtr:selStr inBlock:aBlock];
+
         CallInst *selReg = rootBuilder.CreateCall(aProgram.sel_registerName, selector);
         selectorGlobal =  new GlobalVariable(*mod, aProgram.llInt8PtrTy, false, GlobalVariable::InternalLinkage,
                                              ConstantPointerNull::get(aProgram.llInt8PtrTy), [selStr UTF8String]);

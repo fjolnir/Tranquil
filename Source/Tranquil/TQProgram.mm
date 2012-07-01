@@ -369,6 +369,21 @@ using namespace llvm;
     aBuilder->CreateCall(func_printf, args);
 }
 
+- (llvm::Value *)getGlobalStringPtr:(NSString *)aStr inBlock:(TQNodeBlock *)aBlock
+{
+    NSString *globalName = [NSString stringWithFormat:@"TQConstStr_%@", aStr];
+    GlobalVariable *global = _llModule->getGlobalVariable([globalName UTF8String], true);
+    if(!global) {
+        Constant *strConst = ConstantDataArray::getString(_llModule->getContext(), [aStr UTF8String]);
+        global = new GlobalVariable(*_llModule, strConst->getType(),
+                                    true, GlobalValue::PrivateLinkage,
+                                    strConst, [globalName UTF8String], 0, false);
+    }
+
+    Value *zero = ConstantInt::get(Type::getInt32Ty(_llModule->getContext()), 0);
+    Value *indices[] = { zero, zero };
+    return aBlock.builder->CreateInBoundsGEP(global, indices);
+}
 @end
 
 

@@ -177,7 +177,7 @@ using namespace llvm;
     elements.push_back([self _generateDisposeHelperInProgram:aProgram]);
 
     // Signature
-    elements.push_back(ConstantExpr::getBitCast((GlobalVariable*)_builder->CreateGlobalString([[self signature] UTF8String]), aProgram.llInt8PtrTy));
+    elements.push_back(ConstantExpr::getBitCast((GlobalVariable*)[aProgram getGlobalStringPtr:[self signature] inBlock:self], aProgram.llInt8PtrTy));
 
     // GC Layout (unused in objc 2)
     elements.push_back(llvm::Constant::getNullValue(aProgram.llInt8PtrTy));

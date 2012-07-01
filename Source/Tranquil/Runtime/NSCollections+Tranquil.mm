@@ -71,6 +71,7 @@
 
 - (TQNumber *)tqCount
 {
+    NSLog(@"count %f", (double)[self count]);
     return [TQNumber numberWithDouble:(double)[self count]];
 }
 
