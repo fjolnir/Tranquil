@@ -306,7 +306,7 @@ MethodArgs:
 	}
 	;
 MethodBody:
-	'{' OptLn
+	 '{' OptLn
 	   Statements Ln
 	 '}' { $$ = $3; }
 	| '{' OptLn '}' { $$ = nil; }
