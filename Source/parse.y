@@ -54,11 +54,12 @@
 %token tRETURN
 %token <dbl>  tNUMBER
 %token <cStr> tSTRING
+%token <cStr> tCONSTANT
 %token <cStr> tIDENTIFIER
 
 %type <number> number
 %type <string> string
-%type <identifier> identifier
+%type <identifier> identifier constant
 %type <variable> variable
 %type <block> block
 %type <call> call
@@ -230,8 +231,8 @@ class: tCLASS class_def opt_nl
 			yyerror(&yylloc, state, [[err localizedDescription] UTF8String]);
 	}
 	;
-class_def: identifier '<' identifier { $$ = [NSMutableArray arrayWithObjects:$1, $3, nil]; }
-	| identifier                     { $$ = [NSMutableArray arrayWithObjects:$1, nil]; }
+class_def: constant '<' constant { $$ = [NSMutableArray arrayWithObjects:$1, $3, nil]; }
+	| constant                   { $$ = [NSMutableArray arrayWithObjects:$1, nil]; }
 	;
 
 methods: method             { $$ = [NSMutableArray arrayWithObjects:$1, nil]; }
@@ -363,6 +364,9 @@ string: tSTRING { $$ = [TQNodeString nodeWithCString:$1]; }
 	;
 
 identifier: tIDENTIFIER {  $$ = [TQNodeIdentifier nodeWithCString:$1]; }
+	;
+
+constant: tCONSTANT     {  $$ = [TQNodeIdentifier nodeWithCString:$1]; }
 	;
 %%
 

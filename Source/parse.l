@@ -26,10 +26,15 @@ return                              { UPDATE_LOC return tRETURN; }
                                     	yylval->cStr = strndup(yytext+1, yyleng-2);
                                     	return tSTRING;
                                     }
-[a-zA-Z_][a-zA-Z_0-9]*              {
+[a-z_][a-zA-Z_0-9]*                 {
                                     	UPDATE_LOC
                                     	yylval->cStr = strndup(yytext, yyleng);
                                     	return tIDENTIFIER;
+                                    }
+[A-Z][a-zA-Z_0-9]*                  {
+                                    	UPDATE_LOC
+                                    	yylval->cStr = strndup(yytext, yyleng);
+                                    	return tCONSTANT;
                                     }
 [.\,=\.:\{\}\(\)\|<>\#\+\-]             { UPDATE_LOC return *yytext; }
 \n                                  { RESET_COL  return *yytext; }
