@@ -5,6 +5,7 @@
 
 ```
 \ A backslash outside a string is a comment 
+¥ The Yen sign can also be used (See Japanese keyboard layouts to understand why)
 
 \ Keywords
 yes
@@ -18,11 +19,13 @@ super
 	block = {
 		a:foo.
 	}
-	return: block.
+	return block
 }
 
 \ Variable assignment
 a = b \ Variables are local in scope
+      \ Variables must begin with a lowercase letter, as uppercase names
+      \ are reserved for classes
 
 \ Arrays & Dictionaries
 anArray = #[ a, b, c ] \ Initialises an array containing 3 elements
@@ -41,13 +44,8 @@ aBlock = { :arg=123 |  ..body.. } \ Assignment in the argument list indicates a 
 
 \ Block calls
 
-aBlock. \ Calls a block with no arguments
-aBlockWith: "something" and: "something else".   \ Calling a block using named arguments
-                                                 \ (Names do not need to be unique)
-aBlock: arg0 :arg1 :arg2. \ Calls a block passing in 3 anonymous arguments
-
-aBlock: arg1 :(bar.methodWith: arg1 and: arg2.). \ To nest block calls you must wrap the
-                                                 \  nested calls in parentheses
+aBlock()                            \ Calls a block with no arguments
+aBlock(something, somethingElse) \ Calls a block with a two arguments
 
 \ Objects
 
@@ -63,8 +61,9 @@ class Klass < Object
 end
 
 \ Passing messages to objects
-instance = Klass new.
-instance aMethod: 123 and: 456.
+instance = Klass new
+instance aMethod: 123 and: 456
+instance aMethod: 123. \ To explicitly terminate a message you use a period
 
 \ Accessing member variables
 obj#member = 123
@@ -84,7 +83,7 @@ If in a block one wishes to access arguments beyond those defined by the block c
 variadicBlock = {
 	... each: { :pair |
 		print pair.name + " -> " + pair.value.
-	}.
+	}
 }
 
 variadicBlock: "foo" bar: "baz" :"baaz".
@@ -142,10 +141,10 @@ Index assign     |  []=       | setValue:forKey:   | Postfix operator (a[b] = c)
 \ Example
 class Klass
 	+: b {
-		self plus: b.
+		self plus: b
 	},
 	[]: key {
-		self lookUp: key.
+		self lookUp: key
 	}
 end
 ```
@@ -156,20 +155,20 @@ end
 ```
 class Object
 	- if: ifBlock else: elseBlock {
-		ifBlock.
+		ifBlock()
 	}
 	- unless: unlessBlock else: elseBlock {
-		elseBlock.
+		elseBlock()
 	}
 	<snip>
 end
 
 class Nil
 	- if: ifBlock else: elseBlock {
-		elseBlock.
+		elseBlock()
 	}
 	- unless:unlessBlock else:elseBlock {
-		unlessBlock.
+		unlessBlock()
 	}
 end
 ```
@@ -182,8 +181,8 @@ fibonacci = { :index :last=1 :beforeLast=0 |
 		fibonacci: --index :num :last.
 	} else: {
 		num
-	}.
+	}
 }
 
-fib = fibonacci: 50. \ Calculate the 50th number in the fibonacci sequence
+fib = fibonacci(50) \ Calculate the 50th number in the fibonacci sequence
 ```
