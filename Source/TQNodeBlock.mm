@@ -109,6 +109,7 @@ enum BlockFieldFlag_t {
 
 #pragma mark - Code generation
 
+// Descriptor is a constant struct describing all instances of this block
 - (llvm::Constant *)_generateBlockDescriptorInProgram:(TQProgram *)aProgram
 {
 	llvm::Module *mod = aProgram.llModule;
@@ -138,6 +139,8 @@ enum BlockFieldFlag_t {
 
 	return llvm::ConstantExpr::getBitCast(global, aProgram.llInt8PtrTy);
 }
+
+// The block literal is a stack allocated struct representing a single instance of this block
 - (llvm::Constant *)_generateBlockLiteralInProgram:(TQProgram *)aProgram
 {
 	llvm::Module *mod = aProgram.llModule;
@@ -192,18 +195,21 @@ enum BlockFieldFlag_t {
 	return llvm::ConstantExpr::getBitCast(global, aProgram.llInt8PtrTy);
 }
 
+// Copies the captured variables when this block is copied to the heap
 - (llvm::Function *)_generateCopyHelperInProgram:(TQProgram *)aProgram
 {
 	// void (*copy_helper)(void *dst, void *src)
 	return NULL;
 }
 
+// Releases the captured variables when this block's retain count reaches 0
 - (llvm::Function *)_generateDisposeHelperInProgram:(TQProgram *)aProgram
 {
 	// void (*dispose_helper)(void *src)
 	return NULL;
 }
 
+// Invokes the body of this block
 - (llvm::Function *)_generateInvokeInProgram:(TQProgram *)aProgram error:(NSError **)aoErr
 {
 	if(_function)
