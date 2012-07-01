@@ -63,21 +63,35 @@ using namespace llvm;
                                  block:(TQNodeBlock *)aBlock
                                  error:(NSError **)aoError
 {
-	TQNodeVariable *existingVar = nil;
-
-	if((existingVar = [aBlock.locals objectForKey:_name]) && existingVar != self)
-		return [existingVar generateCodeInProgram:aProgram block:aBlock error:aoError];
-	else
-		[aBlock.locals setObject:self forKey:_name];
-
 	IRBuilder<> *builder = aBlock.builder;
 	if(_alloca)
-		return  builder->CreateLoad(_alloca);
-	AllocaInst *alloca = builder->CreateAlloca(aProgram.llInt8PtrTy);
-	// Initialize to nil
-	builder->CreateStore(ConstantPointerNull::get(aProgram.llInt8PtrTy), alloca);
+		return builder->CreateLoad(builder->CreateStructGEP(_alloca, 6));
+
+	TQNodeVariable *existingVar = nil;
+	if((existingVar = [aBlock.locals objectForKey:_name]) && existingVar != self) {
+		Value *ret = [existingVar generateCodeInProgram:aProgram block:aBlock error:aoError];
+		_alloca = existingVar.alloca;
+		return ret;
+	} else
+		[aBlock.locals setObject:self forKey:_name];
+
+	Type *intTy   = aProgram.llIntTy;
+	Type *i8PtrTy = aProgram.llInt8PtrTy;
+
+	Type *byRefType = [self captureStructTypeInProgram:aProgram];
+	AllocaInst *alloca = builder->CreateAlloca(byRefType, 0);
+	// Initialize the variable to nil
+	builder->CreateStore(ConstantPointerNull::get(aProgram.llInt8PtrTy), builder->CreateStructGEP(alloca, 0, "capture.isa"));
+	builder->CreateStore(builder->CreateBitCast(alloca, i8PtrTy), builder->CreateStructGEP(alloca, 1, "capture.forwarding"));
+	builder->CreateStore(ConstantInt::get(intTy, TQ_BLOCK_HAS_COPY_DISPOSE), builder->CreateStructGEP(alloca, 2, "capture.flags"));
+	Constant *size = ConstantExpr::getTruncOrBitCast(ConstantExpr::getSizeOf(byRefType), intTy);
+	builder->CreateStore(size, builder->CreateStructGEP(alloca, 3, "capture.size"));
+	builder->CreateStore(ConstantPointerNull::get(aProgram.llInt8PtrTy), builder->CreateStructGEP(alloca, 4, "capture.byref_keep"));
+	builder->CreateStore(ConstantPointerNull::get(aProgram.llInt8PtrTy), builder->CreateStructGEP(alloca, 5, "capture.byref_dispose"));
+	builder->CreateStore(ConstantPointerNull::get(aProgram.llInt8PtrTy), builder->CreateStructGEP(alloca, 6, "capture.marked_variable"));
+	
 	_alloca = alloca;
-	return builder->CreateLoad(alloca);
+	return builder->CreateLoad(builder->CreateStructGEP(alloca, 6));
 }
 
 - (llvm::Value *)store:(llvm::Value *)aValue
@@ -89,7 +103,9 @@ using namespace llvm;
 		if(![self generateCodeInProgram:aProgram block:aBlock error:aoError])
 			return NULL;
 	}
-	return aBlock.builder->CreateStore(aValue, _alloca);
-	//aBlock.builder->CreateCall2(aProgram.objc_storeStrong, _alloca, aValue);
+	IRBuilder<> *builder = aBlock.builder;
+	Value *forwarding = builder->CreateStructGEP(_alloca, 1);
+
+	return aBlock.builder->CreateStore(aValue, builder->CreateStructGEP(_alloca, 6));
 }
 @end
