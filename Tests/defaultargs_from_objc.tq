@@ -1,0 +1,4 @@
+sum = #[1,2,3,4,5] reduce: `obj, accum=0 | obj+accum`
+
+print("Sum: %@", sum)
+

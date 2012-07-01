@@ -120,7 +120,6 @@
 
 - (id)reduce:(id (^)(id, id))aBlock
 {
-    // The default args are not implemented so this method won't actually work yet.
     id accum = TQSentinel; // Make the block use it's default accumulator on the first call
     for(id obj in self) {
         accum = aBlock(obj, accum);
