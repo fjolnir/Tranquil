@@ -18,7 +18,8 @@ yes    \ Evaluates to 1.0
 no     \ Evaluates to nil
 self   \ Available inside method blocks
 super  \ Available inside method blocks as a message receiver
-       \that calls methods as defined by the current class's superclass
+       \ that calls methods as defined by the current class's superclass
+...    \ Array of passed variadic arguments
 
 \ Variable assignment
 a = b \ Variables are local in scope
