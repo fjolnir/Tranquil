@@ -69,7 +69,7 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
     aArgs.insert(aArgs.begin(), callee);
 
     // Load&Call the dispatcher
-    NSString *dispatcherName = [NSString stringWithFormat:@"TQDispatchBlock%ld", aArgs.size()];
+    NSString *dispatcherName = [NSString stringWithFormat:@"TQDispatchBlock%ld", aArgs.size() - 1];
     Function *dispatcher = aProgram.llModule->getFunction([dispatcherName UTF8String]);
     if(!dispatcher) {
         std::vector<Type*> argtypes(aArgs.size(), aProgram.llInt8PtrTy);
