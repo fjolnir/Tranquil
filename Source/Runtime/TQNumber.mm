@@ -22,8 +22,13 @@ extern id _objc_msgSend_hack2(id, SEL, id)     asm("_objc_msgSend");
 
 + (void)load
 {
-    if(self != [TQNumber class])
-        return;
+    if(self != [TQNumber class]) {
+        NSLog(@"Warning: Subclassing TQNumber is a bad idea!");
+        // These cannot be overridden
+        assert(method_getImplementation(class_getClassMethod(self, @selector(allocWithZone:))) == allocImp);
+        assert(class_getMethodImplementation(self, @selector(init)) == initImp);
+        assert(class_getMethodImplementation(self, @selector(autorelease)) == autoreleaseImp);
+    }
     numberWithDoubleImp = (id (*)(id, SEL, double))method_getImplementation(class_getClassMethod(self, @selector(numberWithDouble:)));
     allocImp = method_getImplementation(class_getClassMethod(self, @selector(allocWithZone:)));
     initImp = class_getMethodImplementation(self, @selector(init));

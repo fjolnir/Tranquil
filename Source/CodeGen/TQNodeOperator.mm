@@ -43,23 +43,6 @@ using namespace llvm;
     return nil;
 }
 
-- (llvm::Value *)store:(llvm::Value *)aValue
-             inProgram:(TQProgram *)aProgram
-                 block:(TQNodeBlock *)aBlock
-                 error:(NSError **)aoError
-{
-    assert(_type == kTQOperatorGetter);
-    IRBuilder<> *builder = aBlock.builder;
-
-    // Call []=::
-    Value *selector  = aProgram.llModule->getOrInsertGlobal("TQSetterOpSel", aProgram.llInt8PtrTy);
-    Value *key = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
-    Value *settee = [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
-    if(*aoError)
-        return NULL;
-    return builder->CreateCall4(aProgram.objc_msgSend, settee, builder->CreateLoad(selector), key, aValue);
-}
-
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
 {
     IRBuilder<> *builder = aBlock.builder;
@@ -184,5 +167,22 @@ using namespace llvm;
         }
         return [NSString stringWithFormat:@"<op@ %@ %@ %@>", _left, opStr, _right];
     }
+}
+
+- (llvm::Value *)store:(llvm::Value *)aValue
+             inProgram:(TQProgram *)aProgram
+                 block:(TQNodeBlock *)aBlock
+                 error:(NSError **)aoError
+{
+    assert(_type == kTQOperatorGetter);
+    IRBuilder<> *builder = aBlock.builder;
+
+    // Call []=::
+    Value *selector  = aProgram.llModule->getOrInsertGlobal("TQSetterOpSel", aProgram.llInt8PtrTy);
+    Value *key = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
+    Value *settee = [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
+    if(*aoError)
+        return NULL;
+    return builder->CreateCall4(aProgram.objc_msgSend, settee, builder->CreateLoad(selector), key, aValue);
 }
 @end

@@ -288,12 +288,12 @@ void TQInitializeRuntime()
     imp = imp_implementationWithBlock(^(TQNumber *a, TQNumber *b) { return a->_value == b->_value ? TQNumberTrue : TQNumberFalse; });
     class_replaceMethod(TQNumberClass, TQEqOpSel, imp, "@@:@");
     // !=
-    imp = imp_implementationWithBlock(^(TQNumber *a, TQNumber *b)     { return  a->_value != b->_value? TQNumberFalse : TQNumberTrue; });
+    imp = imp_implementationWithBlock(^(TQNumber *a, TQNumber *b) { return  a->_value != b->_value? TQNumberFalse : TQNumberTrue; });
     class_replaceMethod(TQNumberClass, TQNeqOpSel, imp, "@@:@");
 
     class_replaceMethod(TQNumberClass, TQAddOpSel, class_getMethodImplementation(TQNumberClass, @selector(add:)),              "@@:@");
     class_replaceMethod(TQNumberClass, TQSubOpSel, class_getMethodImplementation(TQNumberClass, @selector(subtract:)),         "@@:@");
-    class_replaceMethod(TQNumberClass, TQUnaryMinusOpSel, class_getMethodImplementation(TQNumberClass, @selector(negate:)),    "@@:");
+    class_replaceMethod(TQNumberClass, TQUnaryMinusOpSel, class_getMethodImplementation(TQNumberClass, @selector(negate)),     "@@:" );
     class_replaceMethod(TQNumberClass, TQMultOpSel, class_getMethodImplementation(TQNumberClass, @selector(multiply:)),        "@@:@");
     class_replaceMethod(TQNumberClass, TQDivOpSel, class_getMethodImplementation(TQNumberClass, @selector(divideBy:)),         "@@:@");
 

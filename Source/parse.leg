@@ -361,7 +361,8 @@ AssgnRhs       = b:Expression
 UnaryOp        = UnaryPrefixOp | UnaryMinusOp | UnaryPostfixOp
 IncrDecrOp     = UnaryPrefixOp | UnaryPostfixOp
 
-UnaryMinusOp   =  "-" a:AssgnLhs    { ExtendToken(); PushStack([TQNodeOperator nodeWithType:kTQOperatorUnaryMinus left:nil right:a]); }
+UnaryMinusOp   =  "-" a:AssgnLhs    { ExtendToken(); $$ = [TQNodeOperator nodeWithType:kTQOperatorUnaryMinus left:nil right:a]; }
+               |  "-" a:ParenExpr   { ExtendToken(); $$ = [TQNodeOperator nodeWithType:kTQOperatorUnaryMinus left:nil right:a]; }
 
 UnaryPrefixOp  = ( "++"             { ExtendToken(); PushStack([TQNodeOperator nodeWithType:kTQOperatorIncrement left:nil right:nil]);  }
                  | "--"             { ExtendToken(); PushStack([TQNodeOperator nodeWithType:kTQOperatorDecrement left:nil right:nil]);  }

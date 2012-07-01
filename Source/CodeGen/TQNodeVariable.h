@@ -7,11 +7,6 @@
 + (TQNodeVariable *)nodeWithName:(NSString *)aName;
 - (id)initWithName:(NSString *)aName;
 
-- (llvm::Value *)store:(llvm::Value *)aValue
-             inProgram:(TQProgram *)aProgram
-                 block:(TQNodeBlock *)aBlock
-                 error:(NSError **)aoError;
-
  - (llvm::Value *)createStorageInProgram:(TQProgram *)aProgram
                                    block:(TQNodeBlock *)aBlock
                                    error:(NSError **)aoError;

@@ -17,6 +17,15 @@ NSString * const kTQGenericErrorDomain = @"org.tranquil.generic";
     return NULL;
 }
 
+- (llvm::Value *)store:(llvm::Value *)aValue
+             inProgram:(TQProgram *)aProgram
+                 block:(TQNodeBlock *)aBlock
+                 error:(NSError **)aoError
+{
+    NSLog(@"Store has not been implemented for %@.", [self class]);
+    return NULL;
+}
+
 - (TQNode *)referencesNode:(TQNode *)aNode
 {
     NSLog(@"Node reference check has not been implemented for %@.", [self class]);
