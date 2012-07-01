@@ -64,6 +64,13 @@ using namespace llvm;
 
 #pragma mark - Code generation
 
+- (llvm::Value *)generateTestExpressionInProgram:(TQProgram *)aProgram
+                                           block:(TQNodeBlock *)aBlock
+                                           value:(llvm::Value *)aValue
+{
+    return aBlock.builder->CreateICmpNE(aValue, ConstantPointerNull::get(aProgram.llInt8PtrTy), "ifTest");
+}
+
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
 {
     IRBuilder<> *builder = aBlock.builder;
@@ -76,7 +83,7 @@ using namespace llvm;
     Value *testExpr = [_condition generateCodeInProgram:aProgram block:aBlock error:aoErr];
     if(*aoErr)
         return NULL;
-    Value *testResult = builder->CreateICmpNE(testExpr, ConstantPointerNull::get(aProgram.llInt8PtrTy), "ifTest");
+    Value *testResult = [self generateTestExpressionInProgram:aProgram block:aBlock value:testExpr];
 
     BOOL hasElse = (_elseBlockStatements.count > 0);
 
@@ -186,4 +193,11 @@ using namespace llvm;
 }
 @end
 
-
+@implementation TQNodeUnlessBlock
+- (llvm::Value *)generateTestExpressionInProgram:(TQProgram *)aProgram
+                                           block:(TQNodeBlock *)aBlock
+                                           value:(llvm::Value *)aValue
+{
+    return aBlock.builder->CreateICmpEQ(aValue, ConstantPointerNull::get(aProgram.llInt8PtrTy), "ifTest");
+}
+@end

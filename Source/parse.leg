@@ -266,34 +266,36 @@ MethodArg    = identifier:Identifier':' -- name:Identifier
 
 
 # Conditionals
-If           = "if" -- cond:Expression -- '{' --
-                {
-                    UpdateToken();
-                    PushStack([TQNodeIfBlock node]);
-                    [StackTop setCondition:cond];
-                    PushStack([NSMutableArray array]);
-                }
-                ( Statement --)* '}'
-                ( -- "else" - elsif:If
-                  {
-                      [StackGet(-1) setElseBlockStatements:[NSMutableArray arrayWithObject:elsif]];
-                  }
-                | -- "else" -- "{" --
-                  {
-                      PushStack([NSMutableArray array]);
-                  }
-                  (Statement --)* "}"
-                  {
-                      NSMutableArray *statements = PopStack();
-                      [StackGet(-1) setElseBlockStatements:statements];
-                  }
-                )?
-                {
-                    ExtendToken();
-                    NSMutableArray *statements = PopStack();
-                    $$ = PopStack();
-                    [$$ setStatements:statements];
-                }
+If           = ( "if"        { UpdateToken();  PushStack([TQNodeIfBlock node]);     }
+               | "unless"    { UpdateToken();  PushStack([TQNodeUnlessBlock node]); }
+               )
+               -- cond:Expression -- '{' --
+               {
+                   ExtendToken();
+                   [StackTop setCondition:cond];
+                   PushStack([NSMutableArray array]);
+               }
+               ( Statement --)* '}'
+               ( -- "else" - elsif:If
+                 {
+                     [StackGet(-1) setElseBlockStatements:[NSMutableArray arrayWithObject:elsif]];
+                 }
+               | -- "else" -- "{" --
+                 {
+                     PushStack([NSMutableArray array]);
+                 }
+                 (Statement --)* "}"
+                 {
+                     NSMutableArray *statements = PopStack();
+                     [StackGet(-1) setElseBlockStatements:statements];
+                 }
+               )?
+               {
+                   ExtendToken();
+                   NSMutableArray *statements = PopStack();
+                   $$ = PopStack();
+                   [$$ setStatements:statements];
+               }
 
 
 
