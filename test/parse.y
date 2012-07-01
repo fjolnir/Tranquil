@@ -6,6 +6,8 @@
 	extern int yylineno;
 	extern char* yytext;
 	int yylex(void);
+	// Bison doesn't like  @'s very much
+	#define NSSTR(str) (@str)
 %}
 
 %union {
@@ -21,16 +23,32 @@
 	TQSyntaxNodeMessage *message;
 	TQSyntaxNodeMemberAccess *memberAccess;
 	TQSyntaxNodeBinaryOperator *binOp;
+	TQSyntaxNodeIdentifier *identifier;
+	NSMutableArray *array;
 }
 
-%token tCLASS                      /* class */
-%token tEND                        /* end */
-%token <dbl> tNUMBER               /* <number> */
-%token <text> tSTRING              /* Contents of a quoted string */
-%token <text> tIDENTIFIER          /* An identifier, non quoted string matching [a-zA-Z0-9_]+ */
+%token tCLASS
+%token tEND
+%token tNUMBER
+%token tSTRING
+%token tIDENTIFIER
 
-%type<text> variable assignment expression lhs literal class member_access block_arg_identifier methods method accessable
-%type<block> block
+%type <number> number
+%type <string> string
+%type <identifier> identifier block_arg block_arg_identifier class_name
+%type <variable> variable
+/*%type <arg> arg*/
+%type <block> block
+%type <call> call
+%type <class> class
+/*%type <method> */
+%type <message> message
+%type <memberAccess> member_access
+/*%type <binOp> */
+
+%type <node> callee call_arg
+%type <array> block_args call_args class_def methods
+
 %start statements
 
 %%
@@ -44,7 +62,7 @@ lhs:
 	;
 
 variable:
-	  tIDENTIFIER { }
+	  identifier { }
 	;
 
 statements: empty
@@ -81,21 +99,45 @@ block:
 	| '{' statements '}' { $$ = [[TQSyntaxNodeBlock alloc] init]; }
 	;
 block_args:
-	  ':' block_arg opt_nl
-	| block_args ':' block_arg opt_nl
-	| block_args block_arg_identifier ':' block_arg opt_nl
+	  ':' block_arg opt_nl {
+		TQSyntaxNodeArgument *arg = [[TQSyntaxNodeArgument alloc] initWithName:[$2 value] identifier:nil];
+		$$ = [[NSMutableArray alloc] initWithObjects:arg, nil];
+		[arg release];
+		[$2 release];
+	} 
+	| block_args ':' block_arg opt_nl {
+		TQSyntaxNodeArgument *arg = [[TQSyntaxNodeArgument alloc] initWithName:[$3 value] identifier:nil];
+		[$$ addObject:arg];
+		[arg release];
+		[$3 release];
+	}
+	| block_args block_arg_identifier ':' block_arg opt_nl {
+		TQSyntaxNodeArgument *arg = [[TQSyntaxNodeArgument alloc] initWithName:[$4 value] identifier:[$2 value]];
+		[$$ addObject:arg];
+		[arg release];
+		[$2 release];
+		[$4 release];
+	}
 	;
 block_arg:
-	  tIDENTIFIER {  }
+	  identifier {  }
 	;
 block_arg_identifier:
-	  tIDENTIFIER {  }
+	  identifier {  }
 	;
 
 /* Block call */
 call:
-	  callee '.'
-	| callee call_args '.'
+	  callee '.' {
+		$$ = [[TQSyntaxNodeCall alloc] initWithCallee:$1];
+		[$1 release];
+	}
+	| callee call_args '.' {
+		$$ = [[TQSyntaxNodeCall alloc] initWithCallee:$1];
+		[$$ setArguments:$2];
+		[$1 release];
+		[$2 release];
+	}
 	;
 call_args:
 	  ':' call_arg opt_nl
@@ -113,15 +155,31 @@ call_arg:
 /* Class definition */
 class: tCLASS class_def
 	      methods opt_nl
-	   tEND opt_nl
+	   tEND opt_nl {
+		$$ = [[TQSyntaxNodeClass alloc] initWithName:[$2 objectAtIndex:0]
+		                                  superClass:[$2 count] == 2 ? [$2 objectAtIndex:1] : nil];
+		// TODO: Add methods
+		if($3) {
+			
+		}
+		[$2 release];
+		[$3 release];
+	}
 	;
-class_def: class_name '<' tIDENTIFIER
-	| class_name
+class_def: class_name '<' class_name {
+		$$ = [[NSMutableArray alloc] initWithObjects:$1, $3, nil];
+		[$1 release];
+		[$3 release];
+	}
+	| class_name {
+		$$ = [[NSMutableArray alloc] initWithObjects:$1, nil];
+		[$1 release];
+	}
 	;
-class_name: tIDENTIFIER
+class_name: identifier
 	;
 
-methods: empty
+methods: empty { $$ = nil; }
 	| methods opt_nl method
 	;
 method: class_method
@@ -139,7 +197,7 @@ method_body: '{'
 
 /* Object member access */
 member_access:
-	  accessable '#' tIDENTIFIER {  }
+	  accessable '#' identifier {  }
 	;
 accessable: lhs
 	| '(' expression rparen
@@ -170,10 +228,14 @@ rparen: opt_nl ')'
 	/*;*/
 
 literal:
-	  tNUMBER
-	| tSTRING
-	;
+	  number
+	| string;
 
+number: tNUMBER { $$ = [[TQSyntaxNodeNumber alloc] initWithDouble:atof(yytext)]; NSLog(NSSTR("Num: %@\n"), $$); }
+
+string: tSTRING { $$ = [[TQSyntaxNodeString alloc] initWithCString:yytext]; NSLog(NSSTR("> String: %@"), $$); }
+
+identifier: tIDENTIFIER {  $$ = [[TQSyntaxNodeIdentifier alloc] initWithCString:yytext]; NSLog(NSSTR("> Id: %@"), yylval.string); }
 %%
 
 int yyerror(char *str)

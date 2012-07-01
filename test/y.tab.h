@@ -22,6 +22,8 @@ typedef union {
 	TQSyntaxNodeMessage *message;
 	TQSyntaxNodeMemberAccess *memberAccess;
 	TQSyntaxNodeBinaryOperator *binOp;
+	TQSyntaxNodeIdentifier *identifier;
+	NSMutableArray *array;
 } YYSTYPE;
 #endif /* !YYSTYPE_IS_DECLARED */
 extern YYSTYPE yylval;

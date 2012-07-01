@@ -5,7 +5,7 @@
    2  lhs : member_access
    3      | variable
 
-   4  variable : tIDENTIFIER
+   4  variable : identifier
 
    5  statements : empty
    6             | statements statement
@@ -33,9 +33,9 @@
   23             | block_args ':' block_arg opt_nl
   24             | block_args block_arg_identifier ':' block_arg opt_nl
 
-  25  block_arg : tIDENTIFIER
+  25  block_arg : identifier
 
-  26  block_arg_identifier : tIDENTIFIER
+  26  block_arg_identifier : identifier
 
   27  call : callee '.'
   28       | callee call_args '.'
@@ -52,10 +52,10 @@
 
   37  class : tCLASS class_def methods opt_nl tEND opt_nl
 
-  38  class_def : class_name '<' tIDENTIFIER
+  38  class_def : class_name '<' class_name
   39            | class_name
 
-  40  class_name : tIDENTIFIER
+  40  class_name : identifier
 
   41  methods : empty
   42          | methods opt_nl method
@@ -72,7 +72,7 @@
 
   49  method_body : '{' statements '}'
 
-  50  member_access : accessable '#' tIDENTIFIER
+  50  member_access : accessable '#' identifier
 
   51  accessable : lhs
   52             | '(' expression rparen
@@ -90,8 +90,14 @@
 
   60  rparen : opt_nl ')'
 
-  61  literal : tNUMBER
-  62          | tSTRING
+  61  literal : number
+  62          | string
+
+  63  number : tNUMBER
+
+  64  string : tSTRING
+
+  65  identifier : tIDENTIFIER
 
 state 0
 	$accept : . statements $end  (0)
@@ -116,20 +122,23 @@ state 1
 	'{'  shift 8
 	.  error
 
-	variable  goto 9
-	assignment  goto 10
-	expression  goto 11
-	lhs  goto 12
-	literal  goto 13
-	class  goto 14
-	member_access  goto 15
-	accessable  goto 16
-	block  goto 17
-	statement  goto 18
-	message  goto 19
-	call  goto 20
-	callee  goto 21
-	message_receiver  goto 22
+	number  goto 9
+	string  goto 10
+	identifier  goto 11
+	variable  goto 12
+	block  goto 13
+	call  goto 14
+	class  goto 15
+	message  goto 16
+	member_access  goto 17
+	callee  goto 18
+	assignment  goto 19
+	lhs  goto 20
+	expression  goto 21
+	statement  goto 22
+	literal  goto 23
+	accessable  goto 24
+	message_receiver  goto 25
 
 
 state 2
@@ -141,29 +150,30 @@ state 2
 state 3
 	class : tCLASS . class_def methods opt_nl tEND opt_nl  (37)
 
-	tIDENTIFIER  shift 23
+	tIDENTIFIER  shift 6
 	.  error
 
-	class_def  goto 24
-	class_name  goto 25
+	identifier  goto 26
+	class_name  goto 27
+	class_def  goto 28
 
 
 state 4
-	literal : tNUMBER .  (61)
+	number : tNUMBER .  (63)
 
-	.  reduce 61
+	.  reduce 63
 
 
 state 5
-	literal : tSTRING .  (62)
+	string : tSTRING .  (64)
 
-	.  reduce 62
+	.  reduce 64
 
 
 state 6
-	variable : tIDENTIFIER .  (4)
+	identifier : tIDENTIFIER .  (65)
 
-	.  reduce 4
+	.  reduce 65
 
 
 state 7
@@ -179,18 +189,21 @@ state 7
 	'{'  shift 8
 	.  error
 
-	variable  goto 9
-	assignment  goto 10
-	expression  goto 26
-	lhs  goto 12
-	literal  goto 13
-	member_access  goto 15
-	accessable  goto 16
-	block  goto 17
-	message  goto 19
-	call  goto 20
-	callee  goto 21
-	message_receiver  goto 22
+	number  goto 9
+	string  goto 10
+	identifier  goto 11
+	variable  goto 12
+	block  goto 13
+	call  goto 14
+	message  goto 16
+	member_access  goto 17
+	callee  goto 18
+	assignment  goto 19
+	lhs  goto 20
+	expression  goto 29
+	literal  goto 23
+	accessable  goto 24
+	message_receiver  goto 25
 
 
 state 8
@@ -209,45 +222,110 @@ state 8
 	':'  reduce 58
 	'\n'  reduce 58
 
-	statements  goto 27
+	statements  goto 30
 	empty  goto 2
-	opt_nl  goto 28
+	opt_nl  goto 31
 
 
 state 9
+	literal : number .  (61)
+
+	.  reduce 61
+
+
+state 10
+	literal : string .  (62)
+
+	.  reduce 62
+
+
+state 11
+	variable : identifier .  (4)
+
+	.  reduce 4
+
+
+state 12
 	lhs : variable .  (3)
 
 	.  reduce 3
 
 
-state 10
+state 13
+	expression : block .  (10)
+	callee : block .  (16)
+
+	$end  reduce 10
+	tCLASS  reduce 10
+	tNUMBER  reduce 10
+	tSTRING  reduce 10
+	tIDENTIFIER  reduce 10
+	'('  reduce 10
+	')'  reduce 10
+	'{'  reduce 10
+	'}'  reduce 10
+	':'  reduce 16
+	'.'  reduce 16
+	'\n'  reduce 10
+
+
+state 14
+	expression : call .  (11)
+
+	.  reduce 11
+
+
+state 15
+	statement : class .  (7)
+
+	.  reduce 7
+
+
+state 16
+	expression : message .  (9)
+
+	.  reduce 9
+
+
+state 17
+	lhs : member_access .  (2)
+
+	.  reduce 2
+
+
+state 18
+	call : callee . '.'  (27)
+	call : callee . call_args '.'  (28)
+
+	':'  shift 32
+	'.'  shift 33
+	.  error
+
+	call_args  goto 34
+
+
+state 19
 	expression : assignment . opt_nl  (12)
 	opt_nl : .  (58)
 
 	.  reduce 58
 
-	opt_nl  goto 29
+	opt_nl  goto 35
 
 
-state 11
-	statement : expression .  (8)
-
-	.  reduce 8
-
-
-12: reduce/reduce conflict (reduce 13, reduce 54) on tNUMBER
-12: reduce/reduce conflict (reduce 13, reduce 54) on tSTRING
-12: reduce/reduce conflict (reduce 13, reduce 54) on tIDENTIFIER
-12: reduce/reduce conflict (reduce 13, reduce 54) on '('
-12: reduce/reduce conflict (reduce 13, reduce 54) on '{'
-state 12
+20: reduce/reduce conflict (reduce 13, reduce 54) on tNUMBER
+20: reduce/reduce conflict (reduce 13, reduce 54) on tSTRING
+20: reduce/reduce conflict (reduce 13, reduce 54) on tIDENTIFIER
+20: reduce/reduce conflict (reduce 13, reduce 54) on '('
+20: reduce/reduce conflict (reduce 13, reduce 54) on '{'
+state 20
 	assignment : lhs . '=' expression  (1)
 	expression : lhs .  (13)
 	callee : lhs .  (17)
 	accessable : lhs .  (51)
 	message_receiver : lhs .  (54)
 
-	'='  shift 30
+	'='  shift 36
 	$end  reduce 13
 	tCLASS  reduce 13
 	tNUMBER  reduce 13
@@ -263,12 +341,24 @@ state 12
 	'\n'  reduce 13
 
 
-13: reduce/reduce conflict (reduce 14, reduce 55) on tNUMBER
-13: reduce/reduce conflict (reduce 14, reduce 55) on tSTRING
-13: reduce/reduce conflict (reduce 14, reduce 55) on tIDENTIFIER
-13: reduce/reduce conflict (reduce 14, reduce 55) on '('
-13: reduce/reduce conflict (reduce 14, reduce 55) on '{'
-state 13
+state 21
+	statement : expression .  (8)
+
+	.  reduce 8
+
+
+state 22
+	statements : statements statement .  (6)
+
+	.  reduce 6
+
+
+23: reduce/reduce conflict (reduce 14, reduce 55) on tNUMBER
+23: reduce/reduce conflict (reduce 14, reduce 55) on tSTRING
+23: reduce/reduce conflict (reduce 14, reduce 55) on tIDENTIFIER
+23: reduce/reduce conflict (reduce 14, reduce 55) on '('
+23: reduce/reduce conflict (reduce 14, reduce 55) on '{'
+state 23
 	expression : literal .  (14)
 	callee : literal .  (18)
 	message_receiver : literal .  (55)
@@ -287,135 +377,79 @@ state 13
 	'\n'  reduce 14
 
 
-state 14
-	statement : class .  (7)
+state 24
+	member_access : accessable . '#' identifier  (50)
 
-	.  reduce 7
-
-
-state 15
-	lhs : member_access .  (2)
-
-	.  reduce 2
-
-
-state 16
-	member_access : accessable . '#' tIDENTIFIER  (50)
-
-	'#'  shift 31
+	'#'  shift 37
 	.  error
 
 
-state 17
-	expression : block .  (10)
-	callee : block .  (16)
-
-	$end  reduce 10
-	tCLASS  reduce 10
-	tNUMBER  reduce 10
-	tSTRING  reduce 10
-	tIDENTIFIER  reduce 10
-	'('  reduce 10
-	')'  reduce 10
-	'{'  reduce 10
-	'}'  reduce 10
-	':'  reduce 16
-	'.'  reduce 16
-	'\n'  reduce 10
-
-
-state 18
-	statements : statements statement .  (6)
-
-	.  reduce 6
-
-
-state 19
-	expression : message .  (9)
-
-	.  reduce 9
-
-
-state 20
-	expression : call .  (11)
-
-	.  reduce 11
-
-
-state 21
-	call : callee . '.'  (27)
-	call : callee . call_args '.'  (28)
-
-	':'  shift 32
-	'.'  shift 33
-	.  error
-
-	call_args  goto 34
-
-
-state 22
+state 25
 	message : message_receiver . call  (53)
 
 	tNUMBER  shift 4
 	tSTRING  shift 5
 	tIDENTIFIER  shift 6
-	'('  shift 35
+	'('  shift 38
 	'{'  shift 8
 	.  error
 
-	variable  goto 9
-	lhs  goto 36
-	literal  goto 37
-	member_access  goto 15
-	accessable  goto 16
-	block  goto 38
-	call  goto 39
-	callee  goto 21
+	number  goto 9
+	string  goto 10
+	identifier  goto 11
+	variable  goto 12
+	block  goto 39
+	call  goto 40
+	member_access  goto 17
+	callee  goto 18
+	lhs  goto 41
+	literal  goto 42
+	accessable  goto 24
 
 
-state 23
-	class_name : tIDENTIFIER .  (40)
+state 26
+	class_name : identifier .  (40)
 
 	.  reduce 40
 
 
-state 24
-	class : tCLASS class_def . methods opt_nl tEND opt_nl  (37)
-	empty : .  (57)
-
-	.  reduce 57
-
-	methods  goto 40
-	empty  goto 41
-
-
-state 25
-	class_def : class_name . '<' tIDENTIFIER  (38)
+state 27
+	class_def : class_name . '<' class_name  (38)
 	class_def : class_name .  (39)
 
-	'<'  shift 42
+	'<'  shift 43
 	tEND  reduce 39
 	'+'  reduce 39
 	'-'  reduce 39
 	'\n'  reduce 39
 
 
-26: shift/reduce conflict (shift 43, reduce 58) on ')'
-state 26
+state 28
+	class : tCLASS class_def . methods opt_nl tEND opt_nl  (37)
+	empty : .  (57)
+
+	.  reduce 57
+
+	methods  goto 44
+	empty  goto 45
+
+
+29: shift/reduce conflict (shift 46, reduce 58) on ')'
+state 29
 	expression : '(' expression . rparen  (15)
 	callee : '(' expression . ')'  (19)
 	accessable : '(' expression . rparen  (52)
 	message_receiver : '(' expression . ')'  (56)
 	opt_nl : .  (58)
 
-	')'  shift 43
+	')'  shift 46
 	'\n'  reduce 58
 
-	opt_nl  goto 44
-	rparen  goto 45
+	opt_nl  goto 47
+	rparen  goto 48
 
 
-state 27
+state 30
 	statements : statements . statement  (6)
 	block : '{' statements . '}'  (21)
 
@@ -425,82 +459,37 @@ state 27
 	tIDENTIFIER  shift 6
 	'('  shift 7
 	'{'  shift 8
-	'}'  shift 46
+	'}'  shift 49
 	.  error
 
-	variable  goto 9
-	assignment  goto 10
-	expression  goto 11
-	lhs  goto 12
-	literal  goto 13
-	class  goto 14
-	member_access  goto 15
-	accessable  goto 16
-	block  goto 17
-	statement  goto 18
-	message  goto 19
-	call  goto 20
-	callee  goto 21
-	message_receiver  goto 22
-
-
-state 28
-	block : '{' opt_nl . block_args '|' statements '}'  (20)
-	opt_nl : opt_nl . '\n'  (59)
-
-	':'  shift 47
-	'\n'  shift 48
-	.  error
-
-	block_args  goto 49
-
-
-29: shift/reduce conflict (shift 48, reduce 12) on '\n'
-state 29
-	expression : assignment opt_nl .  (12)
-	opt_nl : opt_nl . '\n'  (59)
-
-	'\n'  shift 48
-	$end  reduce 12
-	tCLASS  reduce 12
-	tNUMBER  reduce 12
-	tSTRING  reduce 12
-	tIDENTIFIER  reduce 12
-	'('  reduce 12
-	')'  reduce 12
-	'{'  reduce 12
-	'}'  reduce 12
-
-
-state 30
-	assignment : lhs '=' . expression  (1)
-
-	tNUMBER  shift 4
-	tSTRING  shift 5
-	tIDENTIFIER  shift 6
-	'('  shift 7
-	'{'  shift 8
-	.  error
-
-	variable  goto 9
-	assignment  goto 10
-	expression  goto 50
-	lhs  goto 12
-	literal  goto 13
-	member_access  goto 15
-	accessable  goto 16
-	block  goto 17
-	message  goto 19
-	call  goto 20
-	callee  goto 21
-	message_receiver  goto 22
+	number  goto 9
+	string  goto 10
+	identifier  goto 11
+	variable  goto 12
+	block  goto 13
+	call  goto 14
+	class  goto 15
+	message  goto 16
+	member_access  goto 17
+	callee  goto 18
+	assignment  goto 19
+	lhs  goto 20
+	expression  goto 21
+	statement  goto 22
+	literal  goto 23
+	accessable  goto 24
+	message_receiver  goto 25
 
 
 state 31
-	member_access : accessable '#' . tIDENTIFIER  (50)
+	block : '{' opt_nl . block_args '|' statements '}'  (20)
+	opt_nl : opt_nl . '\n'  (59)
 
-	tIDENTIFIER  shift 51
+	':'  shift 50
+	'\n'  shift 51
 	.  error
+
+	block_args  goto 52
 
 
 state 32
@@ -509,17 +498,20 @@ state 32
 	tNUMBER  shift 4
 	tSTRING  shift 5
 	tIDENTIFIER  shift 6
-	'('  shift 52
+	'('  shift 53
 	'{'  shift 8
 	.  error
 
-	variable  goto 9
-	lhs  goto 53
-	literal  goto 54
-	member_access  goto 15
-	accessable  goto 16
-	block  goto 55
-	call_arg  goto 56
+	number  goto 9
+	string  goto 10
+	identifier  goto 11
+	variable  goto 12
+	block  goto 54
+	member_access  goto 17
+	call_arg  goto 55
+	lhs  goto 56
+	literal  goto 57
+	accessable  goto 24
 
 
 state 33
@@ -533,15 +525,69 @@ state 34
 	call_args : call_args . ':' call_arg opt_nl  (30)
 	call_args : call_args . block_arg_identifier ':' call_arg opt_nl  (31)
 
-	tIDENTIFIER  shift 57
+	tIDENTIFIER  shift 6
 	':'  shift 58
 	'.'  shift 59
 	.  error
 
-	block_arg_identifier  goto 60
+	identifier  goto 60
+	block_arg_identifier  goto 61
 
 
+35: shift/reduce conflict (shift 51, reduce 12) on '\n'
 state 35
+	expression : assignment opt_nl .  (12)
+	opt_nl : opt_nl . '\n'  (59)
+
+	'\n'  shift 51
+	$end  reduce 12
+	tCLASS  reduce 12
+	tNUMBER  reduce 12
+	tSTRING  reduce 12
+	tIDENTIFIER  reduce 12
+	'('  reduce 12
+	')'  reduce 12
+	'{'  reduce 12
+	'}'  reduce 12
+
+
+state 36
+	assignment : lhs '=' . expression  (1)
+
+	tNUMBER  shift 4
+	tSTRING  shift 5
+	tIDENTIFIER  shift 6
+	'('  shift 7
+	'{'  shift 8
+	.  error
+
+	number  goto 9
+	string  goto 10
+	identifier  goto 11
+	variable  goto 12
+	block  goto 13
+	call  goto 14
+	message  goto 16
+	member_access  goto 17
+	callee  goto 18
+	assignment  goto 19
+	lhs  goto 20
+	expression  goto 62
+	literal  goto 23
+	accessable  goto 24
+	message_receiver  goto 25
+
+
+state 37
+	member_access : accessable '#' . identifier  (50)
+
+	tIDENTIFIER  shift 6
+	.  error
+
+	identifier  goto 63
+
+
+state 38
 	callee : '(' . expression ')'  (19)
 	accessable : '(' . expression rparen  (52)
 
@@ -552,21 +598,36 @@ state 35
 	'{'  shift 8
 	.  error
 
-	variable  goto 9
-	assignment  goto 10
-	expression  goto 61
-	lhs  goto 12
-	literal  goto 13
-	member_access  goto 15
-	accessable  goto 16
-	block  goto 17
-	message  goto 19
-	call  goto 20
-	callee  goto 21
-	message_receiver  goto 22
+	number  goto 9
+	string  goto 10
+	identifier  goto 11
+	variable  goto 12
+	block  goto 13
+	call  goto 14
+	message  goto 16
+	member_access  goto 17
+	callee  goto 18
+	assignment  goto 19
+	lhs  goto 20
+	expression  goto 64
+	literal  goto 23
+	accessable  goto 24
+	message_receiver  goto 25
 
 
-state 36
+state 39
+	callee : block .  (16)
+
+	.  reduce 16
+
+
+state 40
+	message : message_receiver call .  (53)
+
+	.  reduce 53
+
+
+state 41
 	callee : lhs .  (17)
 	accessable : lhs .  (51)
 
@@ -575,48 +636,39 @@ state 36
 	'#'  reduce 51
 
 
-state 37
+state 42
 	callee : literal .  (18)
 
 	.  reduce 18
 
 
-state 38
-	callee : block .  (16)
+state 43
+	class_def : class_name '<' . class_name  (38)
 
-	.  reduce 16
+	tIDENTIFIER  shift 6
+	.  error
 
-
-state 39
-	message : message_receiver call .  (53)
-
-	.  reduce 53
+	identifier  goto 26
+	class_name  goto 65
 
 
-state 40
+state 44
 	class : tCLASS class_def methods . opt_nl tEND opt_nl  (37)
 	methods : methods . opt_nl method  (42)
 	opt_nl : .  (58)
 
 	.  reduce 58
 
-	opt_nl  goto 62
+	opt_nl  goto 66
 
 
-state 41
+state 45
 	methods : empty .  (41)
 
 	.  reduce 41
 
 
-state 42
-	class_def : class_name '<' . tIDENTIFIER  (38)
-
-	tIDENTIFIER  shift 63
-	.  error
-
-
-state 43
+state 46
 	callee : '(' expression ')' .  (19)
 	message_receiver : '(' expression ')' .  (56)
 
@@ -629,16 +681,16 @@ state 43
 	'.'  reduce 19
 
 
-state 44
+state 47
 	opt_nl : opt_nl . '\n'  (59)
 	rparen : opt_nl . ')'  (60)
 
-	')'  shift 64
-	'\n'  shift 48
+	')'  shift 67
+	'\n'  shift 51
 	.  error
 
 
-state 45
+state 48
 	expression : '(' expression rparen .  (15)
 	accessable : '(' expression rparen .  (52)
 
@@ -655,53 +707,43 @@ state 45
 	'\n'  reduce 15
 
 
-state 46
+state 49
 	block : '{' statements '}' .  (21)
 
 	.  reduce 21
 
 
-state 47
+state 50
 	block_args : ':' . block_arg opt_nl  (22)
 
-	tIDENTIFIER  shift 65
+	tIDENTIFIER  shift 6
 	.  error
 
-	block_arg  goto 66
+	identifier  goto 68
+	block_arg  goto 69
 
 
-state 48
+state 51
 	opt_nl : opt_nl '\n' .  (59)
 
 	.  reduce 59
 
 
-state 49
+state 52
 	block : '{' opt_nl block_args . '|' statements '}'  (20)
 	block_args : block_args . ':' block_arg opt_nl  (23)
 	block_args : block_args . block_arg_identifier ':' block_arg opt_nl  (24)
 
-	tIDENTIFIER  shift 57
-	'|'  shift 67
-	':'  shift 68
+	tIDENTIFIER  shift 6
+	'|'  shift 70
+	':'  shift 71
 	.  error
 
-	block_arg_identifier  goto 69
+	identifier  goto 60
+	block_arg_identifier  goto 72
 
 
-state 50
-	assignment : lhs '=' expression .  (1)
-
-	.  reduce 1
-
-
-state 51
-	member_access : accessable '#' tIDENTIFIER .  (50)
-
-	.  reduce 50
-
-
-state 52
+state 53
 	call_arg : '(' . expression ')'  (36)
 	accessable : '(' . expression rparen  (52)
 
@@ -712,26 +754,44 @@ state 52
 	'{'  shift 8
 	.  error
 
-	variable  goto 9
-	assignment  goto 10
-	expression  goto 70
-	lhs  goto 12
-	literal  goto 13
-	member_access  goto 15
-	accessable  goto 16
-	block  goto 17
-	message  goto 19
-	call  goto 20
-	callee  goto 21
-	message_receiver  goto 22
+	number  goto 9
+	string  goto 10
+	identifier  goto 11
+	variable  goto 12
+	block  goto 13
+	call  goto 14
+	message  goto 16
+	member_access  goto 17
+	callee  goto 18
+	assignment  goto 19
+	lhs  goto 20
+	expression  goto 73
+	literal  goto 23
+	accessable  goto 24
+	message_receiver  goto 25
 
 
-state 53
+state 54
+	call_arg : block .  (32)
+
+	.  reduce 32
+
+
+state 55
+	call_args : ':' call_arg . opt_nl  (29)
+	opt_nl : .  (58)
+
+	.  reduce 58
+
+	opt_nl  goto 74
+
+
+state 56
 	call_arg : lhs . '=' call_arg  (33)
 	call_arg : lhs .  (34)
 	accessable : lhs .  (51)
 
-	'='  shift 71
+	'='  shift 75
 	tIDENTIFIER  reduce 34
 	':'  reduce 34
 	'.'  reduce 34
@@ -739,31 +799,10 @@ state 53
 	'\n'  reduce 34
 
 
-state 54
+state 57
 	call_arg : literal .  (35)
 
 	.  reduce 35
-
-
-state 55
-	call_arg : block .  (32)
-
-	.  reduce 32
-
-
-state 56
-	call_args : ':' call_arg . opt_nl  (29)
-	opt_nl : .  (58)
-
-	.  reduce 58
-
-	opt_nl  goto 72
-
-
-state 57
-	block_arg_identifier : tIDENTIFIER .  (26)
-
-	.  reduce 26
 
 
 state 58
@@ -772,17 +811,20 @@ state 58
 	tNUMBER  shift 4
 	tSTRING  shift 5
 	tIDENTIFIER  shift 6
-	'('  shift 52
+	'('  shift 53
 	'{'  shift 8
 	.  error
 
-	variable  goto 9
-	lhs  goto 53
-	literal  goto 54
-	member_access  goto 15
-	accessable  goto 16
-	block  goto 55
-	call_arg  goto 73
+	number  goto 9
+	string  goto 10
+	identifier  goto 11
+	variable  goto 12
+	block  goto 54
+	member_access  goto 17
+	call_arg  goto 76
+	lhs  goto 56
+	literal  goto 57
+	accessable  goto 24
 
 
 state 59
@@ -792,235 +834,262 @@ state 59
 
 
 state 60
+	block_arg_identifier : identifier .  (26)
+
+	.  reduce 26
+
+
+state 61
 	call_args : call_args block_arg_identifier . ':' call_arg opt_nl  (31)
 
-	':'  shift 74
+	':'  shift 77
 	.  error
 
 
-61: shift/reduce conflict (shift 75, reduce 58) on ')'
-state 61
+state 62
+	assignment : lhs '=' expression .  (1)
+
+	.  reduce 1
+
+
+state 63
+	member_access : accessable '#' identifier .  (50)
+
+	.  reduce 50
+
+
+64: shift/reduce conflict (shift 78, reduce 58) on ')'
+state 64
 	callee : '(' expression . ')'  (19)
 	accessable : '(' expression . rparen  (52)
 	opt_nl : .  (58)
 
-	')'  shift 75
+	')'  shift 78
 	'\n'  reduce 58
 
-	opt_nl  goto 44
-	rparen  goto 76
+	opt_nl  goto 47
+	rparen  goto 79
 
 
-state 62
-	class : tCLASS class_def methods opt_nl . tEND opt_nl  (37)
-	methods : methods opt_nl . method  (42)
-	opt_nl : opt_nl . '\n'  (59)
-
-	tEND  shift 77
-	'+'  shift 78
-	'-'  shift 79
-	'\n'  shift 48
-	.  error
-
-	method  goto 80
-	class_method  goto 81
-	instance_method  goto 82
-
-
-state 63
-	class_def : class_name '<' tIDENTIFIER .  (38)
+state 65
+	class_def : class_name '<' class_name .  (38)
 
 	.  reduce 38
 
 
-state 64
+state 66
+	class : tCLASS class_def methods opt_nl . tEND opt_nl  (37)
+	methods : methods opt_nl . method  (42)
+	opt_nl : opt_nl . '\n'  (59)
+
+	tEND  shift 80
+	'+'  shift 81
+	'-'  shift 82
+	'\n'  shift 51
+	.  error
+
+	method  goto 83
+	class_method  goto 84
+	instance_method  goto 85
+
+
+state 67
 	rparen : opt_nl ')' .  (60)
 
 	.  reduce 60
 
 
-state 65
-	block_arg : tIDENTIFIER .  (25)
+state 68
+	block_arg : identifier .  (25)
 
 	.  reduce 25
 
 
-state 66
+state 69
 	block_args : ':' block_arg . opt_nl  (22)
 	opt_nl : .  (58)
 
 	.  reduce 58
 
-	opt_nl  goto 83
+	opt_nl  goto 86
 
 
-state 67
+state 70
 	block : '{' opt_nl block_args '|' . statements '}'  (20)
 	empty : .  (57)
 
 	.  reduce 57
 
-	statements  goto 84
+	statements  goto 87
 	empty  goto 2
 
 
-state 68
+state 71
 	block_args : block_args ':' . block_arg opt_nl  (23)
 
-	tIDENTIFIER  shift 65
+	tIDENTIFIER  shift 6
 	.  error
 
-	block_arg  goto 85
+	identifier  goto 68
+	block_arg  goto 88
 
 
-state 69
+state 72
 	block_args : block_args block_arg_identifier . ':' block_arg opt_nl  (24)
 
-	':'  shift 86
+	':'  shift 89
 	.  error
 
 
-70: shift/reduce conflict (shift 87, reduce 58) on ')'
-state 70
+73: shift/reduce conflict (shift 90, reduce 58) on ')'
+state 73
 	call_arg : '(' expression . ')'  (36)
 	accessable : '(' expression . rparen  (52)
 	opt_nl : .  (58)
 
-	')'  shift 87
+	')'  shift 90
 	'\n'  reduce 58
 
-	opt_nl  goto 44
-	rparen  goto 76
+	opt_nl  goto 47
+	rparen  goto 79
 
 
-state 71
-	call_arg : lhs '=' . call_arg  (33)
-
-	tNUMBER  shift 4
-	tSTRING  shift 5
-	tIDENTIFIER  shift 6
-	'('  shift 52
-	'{'  shift 8
-	.  error
-
-	variable  goto 9
-	lhs  goto 53
-	literal  goto 54
-	member_access  goto 15
-	accessable  goto 16
-	block  goto 55
-	call_arg  goto 88
-
-
-state 72
+state 74
 	call_args : ':' call_arg opt_nl .  (29)
 	opt_nl : opt_nl . '\n'  (59)
 
-	'\n'  shift 48
+	'\n'  shift 51
 	tIDENTIFIER  reduce 29
 	':'  reduce 29
 	'.'  reduce 29
 
 
-state 73
+state 75
+	call_arg : lhs '=' . call_arg  (33)
+
+	tNUMBER  shift 4
+	tSTRING  shift 5
+	tIDENTIFIER  shift 6
+	'('  shift 53
+	'{'  shift 8
+	.  error
+
+	number  goto 9
+	string  goto 10
+	identifier  goto 11
+	variable  goto 12
+	block  goto 54
+	member_access  goto 17
+	call_arg  goto 91
+	lhs  goto 56
+	literal  goto 57
+	accessable  goto 24
+
+
+state 76
 	call_args : call_args ':' call_arg . opt_nl  (30)
 	opt_nl : .  (58)
 
 	.  reduce 58
 
-	opt_nl  goto 89
+	opt_nl  goto 92
 
 
-state 74
+state 77
 	call_args : call_args block_arg_identifier ':' . call_arg opt_nl  (31)
 
 	tNUMBER  shift 4
 	tSTRING  shift 5
 	tIDENTIFIER  shift 6
-	'('  shift 52
+	'('  shift 53
 	'{'  shift 8
 	.  error
 
-	variable  goto 9
-	lhs  goto 53
-	literal  goto 54
-	member_access  goto 15
-	accessable  goto 16
-	block  goto 55
-	call_arg  goto 90
+	number  goto 9
+	string  goto 10
+	identifier  goto 11
+	variable  goto 12
+	block  goto 54
+	member_access  goto 17
+	call_arg  goto 93
+	lhs  goto 56
+	literal  goto 57
+	accessable  goto 24
 
 
-state 75
+state 78
 	callee : '(' expression ')' .  (19)
 
 	.  reduce 19
 
 
-state 76
+state 79
 	accessable : '(' expression rparen .  (52)
 
 	.  reduce 52
 
 
-state 77
+state 80
 	class : tCLASS class_def methods opt_nl tEND . opt_nl  (37)
 	opt_nl : .  (58)
 
 	.  reduce 58
 
-	opt_nl  goto 91
+	opt_nl  goto 94
 
 
-state 78
+state 81
 	class_method : '+' . method_def  (45)
 
-	tIDENTIFIER  shift 57
+	tIDENTIFIER  shift 6
 	.  error
 
-	block_arg_identifier  goto 92
-	method_def  goto 93
+	identifier  goto 60
+	block_arg_identifier  goto 95
+	method_def  goto 96
 
 
-state 79
+state 82
 	instance_method : '-' . method_def  (46)
 
-	tIDENTIFIER  shift 57
+	tIDENTIFIER  shift 6
 	.  error
 
-	block_arg_identifier  goto 92
-	method_def  goto 94
+	identifier  goto 60
+	block_arg_identifier  goto 95
+	method_def  goto 97
 
 
-state 80
+state 83
 	methods : methods opt_nl method .  (42)
 
 	.  reduce 42
 
 
-state 81
+state 84
 	method : class_method .  (43)
 
 	.  reduce 43
 
 
-state 82
+state 85
 	method : instance_method .  (44)
 
 	.  reduce 44
 
 
-state 83
+state 86
 	block_args : ':' block_arg opt_nl .  (22)
 	opt_nl : opt_nl . '\n'  (59)
 
-	'\n'  shift 48
+	'\n'  shift 51
 	tIDENTIFIER  reduce 22
 	'{'  reduce 22
 	'|'  reduce 22
 	':'  reduce 22
 
 
-state 84
+state 87
 	statements : statements . statement  (6)
 	block : '{' opt_nl block_args '|' statements . '}'  (20)
 
@@ -1030,79 +1099,83 @@ state 84
 	tIDENTIFIER  shift 6
 	'('  shift 7
 	'{'  shift 8
-	'}'  shift 95
+	'}'  shift 98
 	.  error
 
-	variable  goto 9
-	assignment  goto 10
-	expression  goto 11
-	lhs  goto 12
-	literal  goto 13
-	class  goto 14
-	member_access  goto 15
-	accessable  goto 16
-	block  goto 17
-	statement  goto 18
-	message  goto 19
-	call  goto 20
-	callee  goto 21
-	message_receiver  goto 22
+	number  goto 9
+	string  goto 10
+	identifier  goto 11
+	variable  goto 12
+	block  goto 13
+	call  goto 14
+	class  goto 15
+	message  goto 16
+	member_access  goto 17
+	callee  goto 18
+	assignment  goto 19
+	lhs  goto 20
+	expression  goto 21
+	statement  goto 22
+	literal  goto 23
+	accessable  goto 24
+	message_receiver  goto 25
 
 
-state 85
+state 88
 	block_args : block_args ':' block_arg . opt_nl  (23)
 	opt_nl : .  (58)
 
 	.  reduce 58
 
-	opt_nl  goto 96
+	opt_nl  goto 99
 
 
-state 86
+state 89
 	block_args : block_args block_arg_identifier ':' . block_arg opt_nl  (24)
 
-	tIDENTIFIER  shift 65
+	tIDENTIFIER  shift 6
 	.  error
 
-	block_arg  goto 97
+	identifier  goto 68
+	block_arg  goto 100
 
 
-state 87
+state 90
 	call_arg : '(' expression ')' .  (36)
 
 	.  reduce 36
 
 
-state 88
+state 91
 	call_arg : lhs '=' call_arg .  (33)
 
 	.  reduce 33
 
 
-state 89
+state 92
 	call_args : call_args ':' call_arg opt_nl .  (30)
 	opt_nl : opt_nl . '\n'  (59)
 
-	'\n'  shift 48
+	'\n'  shift 51
 	tIDENTIFIER  reduce 30
 	':'  reduce 30
 	'.'  reduce 30
 
 
-state 90
+state 93
 	call_args : call_args block_arg_identifier ':' call_arg . opt_nl  (31)
 	opt_nl : .  (58)
 
 	.  reduce 58
 
-	opt_nl  goto 98
+	opt_nl  goto 101
 
 
-state 91
+state 94
 	class : tCLASS class_def methods opt_nl tEND opt_nl .  (37)
 	opt_nl : opt_nl . '\n'  (59)
 
-	'\n'  shift 48
+	'\n'  shift 51
 	$end  reduce 37
 	tCLASS  reduce 37
 	tNUMBER  reduce 37
@@ -1113,108 +1186,109 @@ state 91
 	'}'  reduce 37
 
 
-state 92
+state 95
 	method_def : block_arg_identifier . block_args method_body  (47)
 	method_def : block_arg_identifier . method_body  (48)
 
-	'{'  shift 99
-	':'  shift 47
+	'{'  shift 102
+	':'  shift 50
 	.  error
 
-	block_args  goto 100
-	method_body  goto 101
+	block_args  goto 103
+	method_body  goto 104
 
 
-state 93
+state 96
 	class_method : '+' method_def .  (45)
 
 	.  reduce 45
 
 
-state 94
+state 97
 	instance_method : '-' method_def .  (46)
 
 	.  reduce 46
 
 
-state 95
+state 98
 	block : '{' opt_nl block_args '|' statements '}' .  (20)
 
 	.  reduce 20
 
 
-state 96
+state 99
 	block_args : block_args ':' block_arg opt_nl .  (23)
 	opt_nl : opt_nl . '\n'  (59)
 
-	'\n'  shift 48
+	'\n'  shift 51
 	tIDENTIFIER  reduce 23
 	'{'  reduce 23
 	'|'  reduce 23
 	':'  reduce 23
 
 
-state 97
+state 100
 	block_args : block_args block_arg_identifier ':' block_arg . opt_nl  (24)
 	opt_nl : .  (58)
 
 	.  reduce 58
 
-	opt_nl  goto 102
+	opt_nl  goto 105
 
 
-state 98
+state 101
 	call_args : call_args block_arg_identifier ':' call_arg opt_nl .  (31)
 	opt_nl : opt_nl . '\n'  (59)
 
-	'\n'  shift 48
+	'\n'  shift 51
 	tIDENTIFIER  reduce 31
 	':'  reduce 31
 	'.'  reduce 31
 
 
-state 99
+state 102
 	method_body : '{' . statements '}'  (49)
 	empty : .  (57)
 
 	.  reduce 57
 
-	statements  goto 103
+	statements  goto 106
 	empty  goto 2
 
 
-state 100
+state 103
 	block_args : block_args . ':' block_arg opt_nl  (23)
 	block_args : block_args . block_arg_identifier ':' block_arg opt_nl  (24)
 	method_def : block_arg_identifier block_args . method_body  (47)
 
-	tIDENTIFIER  shift 57
-	'{'  shift 99
-	':'  shift 68
+	tIDENTIFIER  shift 6
+	'{'  shift 102
+	':'  shift 71
 	.  error
 
-	block_arg_identifier  goto 69
-	method_body  goto 104
+	identifier  goto 60
+	block_arg_identifier  goto 72
+	method_body  goto 107
 
 
-state 101
+state 104
 	method_def : block_arg_identifier method_body .  (48)
 
 	.  reduce 48
 
 
-state 102
+state 105
 	block_args : block_args block_arg_identifier ':' block_arg opt_nl .  (24)
 	opt_nl : opt_nl . '\n'  (59)
 
-	'\n'  shift 48
+	'\n'  shift 51
 	tIDENTIFIER  reduce 24
 	'{'  reduce 24
 	'|'  reduce 24
 	':'  reduce 24
 
 
-state 103
+state 106
 	statements : statements . statement  (6)
 	method_body : '{' statements . '}'  (49)
 
@@ -1224,32 +1298,35 @@ state 103
 	tIDENTIFIER  shift 6
 	'('  shift 7
 	'{'  shift 8
-	'}'  shift 105
+	'}'  shift 108
 	.  error
 
-	variable  goto 9
-	assignment  goto 10
-	expression  goto 11
-	lhs  goto 12
-	literal  goto 13
-	class  goto 14
-	member_access  goto 15
-	accessable  goto 16
-	block  goto 17
-	statement  goto 18
-	message  goto 19
-	call  goto 20
-	callee  goto 21
-	message_receiver  goto 22
+	number  goto 9
+	string  goto 10
+	identifier  goto 11
+	variable  goto 12
+	block  goto 13
+	call  goto 14
+	class  goto 15
+	message  goto 16
+	member_access  goto 17
+	callee  goto 18
+	assignment  goto 19
+	lhs  goto 20
+	expression  goto 21
+	statement  goto 22
+	literal  goto 23
+	accessable  goto 24
+	message_receiver  goto 25
 
 
-state 104
+state 107
 	method_def : block_arg_identifier block_args method_body .  (47)
 
 	.  reduce 47
 
 
-state 105
+state 108
 	method_body : '{' statements '}' .  (49)
 
 	.  reduce 49
@@ -1260,13 +1337,13 @@ Rules never reduced:
 	message_receiver : literal  (55)
 
 
-State 12 contains 5 reduce/reduce conflicts.
-State 13 contains 5 reduce/reduce conflicts.
-State 26 contains 1 shift/reduce conflict.
+State 20 contains 5 reduce/reduce conflicts.
+State 23 contains 5 reduce/reduce conflicts.
 State 29 contains 1 shift/reduce conflict.
-State 61 contains 1 shift/reduce conflict.
-State 70 contains 1 shift/reduce conflict.
+State 35 contains 1 shift/reduce conflict.
+State 64 contains 1 shift/reduce conflict.
+State 73 contains 1 shift/reduce conflict.
 
 
-20 terminals, 32 nonterminals
-63 grammar rules, 106 states
+20 terminals, 35 nonterminals
+66 grammar rules, 109 states
