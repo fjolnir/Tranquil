@@ -50,8 +50,6 @@
 %error-verbose
 %parse-param { TQParserState *state }
 
-%token tCLASS
-%token tEND
 %token tRETURN
 %token <dbl>  tNUMBER
 %token <cStr> tSTRING
