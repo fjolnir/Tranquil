@@ -3,7 +3,7 @@
 typedef id (^condBlock)();
 
 @interface TQNumber : TQPooledObject
-@property(readwrite, assign) double doubleValue;
+@property(readonly) double doubleValue;
 
 + (TQNumber *)numberWithDouble:(double)aValue;
 
@@ -11,7 +11,12 @@ typedef id (^condBlock)();
 - (TQNumber *)subtract:(TQNumber *)b;
 - (TQNumber *)negate;
 - (TQNumber *)multiply:(TQNumber *)b;
-- (TQNumber *)divide:(TQNumber *)b;
+- (TQNumber *)divideBy:(TQNumber *)b;
+
+- (TQNumber *)addDouble:(double)b;
+- (TQNumber *)subtractDouble:(double)b;
+- (TQNumber *)multiplyDouble:(double)b;
+- (TQNumber *)divideByDouble:(double)b;
 
 - (id)if:(condBlock)ifBlock else:(condBlock)elseBlock;
 @end

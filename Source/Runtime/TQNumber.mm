@@ -1,13 +1,27 @@
 #import "TQNumber.h"
 #import <objc/runtime.h>
 
+static TQPoolInfo *poolInfo = nil;
+static IMP superAllocImp = NULL;
+
 @implementation TQNumber
+
++ (void)load
+{
+	if(!poolInfo)
+		poolInfo = [[TQPoolInfo alloc] init];
+	if(!superAllocImp)
+		superAllocImp = method_getImplementation(class_getClassMethod(self, @selector(allocWithPoolInfo:)));
+}
 
 + (TQPoolInfo *)poolInfo
 {
-  static TQPoolInfo *poolInfo = nil;
-  if (!poolInfo) poolInfo = [[TQPoolInfo alloc] init];
-  return poolInfo;
+	return poolInfo;
+}
+
++ (id)allocWithZone:(NSZone *)zone
+{
+	return superAllocImp(self, @selector(allocWithPoolInfo:), poolInfo);
 }
 
 + (TQNumber *)numberWithDouble:(double)aValue
@@ -41,10 +55,28 @@
 {
 	return [TQNumber numberWithDouble:_doubleValue * b.doubleValue];
 }
-- (TQNumber *)divide:(TQNumber *)b
+- (TQNumber *)divideBy:(TQNumber *)b
 {
 	return [TQNumber numberWithDouble:_doubleValue / b.doubleValue];
 }
+
+- (TQNumber *)addDouble:(double)b
+{
+	return [TQNumber numberWithDouble:_doubleValue + b];
+}
+- (TQNumber *)subtractDouble:(double)b
+{
+	return [TQNumber numberWithDouble:_doubleValue - b];
+}
+- (TQNumber *)multiplyDouble:(double)b
+{
+	return [TQNumber numberWithDouble:_doubleValue * b];
+}
+- (TQNumber *)divideByDouble:(double)b
+{
+	return [TQNumber numberWithDouble:_doubleValue / b];
+}
+
 
 - (NSComparisonResult)compare:(id)object
 {

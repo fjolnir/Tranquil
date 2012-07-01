@@ -1,5 +1,6 @@
 #import "TQPooledObject.h"
 #import <malloc/malloc.h>
+#import <objc/runtime.h>
 
 #define COMPLAIN_MISSING_IMP @"Class %@ needs this code:\n\
 + (TQPoolInfo *) poolInfo\n\
@@ -8,6 +9,16 @@
   if (!poolInfo) poolInfo = [[TQPoolInfo alloc] init];\n\
   return poolInfo;\n\
 }"
+
+#define COMPLAIN_MISSING_ALLOC @"Class %@ needs this code:\n\
++ (id)allocWithZone:(NSZone *)zone\n\
+{\n\
+	static IMP superAllocImp = NULL;\n\
+	if(!superAllocImp)\n\
+		superAllocImp = method_getImplementation(class_getClassMethod(self, @selector(allocWithPoolInfo:)));\n\
+	return superAllocImp(self, @selector(allocWithPoolInfo:), poolInfo);\n\
+}"
+
 
 @implementation TQPoolInfo
 // empty
@@ -19,57 +30,62 @@
 
 + (id)allocWithZone:(NSZone *)zone
 {
-	TQPoolInfo *poolInfo = [self poolInfo];
-	if (!poolInfo->poolClass) // first allocation
+	[NSException raise:NSGenericException format:COMPLAIN_MISSING_IMP, self];
+	return nil;
+}
+
++ (id)allocWithPoolInfo:(TQPoolInfo *)poolInfo
+{
+	if(!poolInfo->poolClass) // first allocation
 	{
 		poolInfo->poolClass = self;
 		poolInfo->lastElement = NULL;
 	}
-	else 
+	else
 	{
 		if (poolInfo->poolClass != self)
 			[NSException raise:NSGenericException format:COMPLAIN_MISSING_IMP, self];
 	}
-	
-	if (!poolInfo->lastElement) 
+
+	if (!poolInfo->lastElement)
 	{
 		// pool is empty -> allocate
 		TQPooledObject *object = NSAllocateObject(self, 0, NULL);
-		object->mRetainCount = 1;
+		object->_retainCount = 1;
+		object->_poolInfoImp = method_getImplementation(class_getClassMethod(self, @selector(poolInfo)));
 		return object;
 	}
-	else 
+	else
 	{
 		// recycle element, update poolInfo
 		TQPooledObject *object = poolInfo->lastElement;
 		poolInfo->lastElement = object->mPoolPredecessor;
 
+		// Subclasses should reset necessary properties when reinitialized. so disregard the following 3 lines
 		// zero out memory. (do not overwrite isa & mPoolPredecessor, thus the offset)
-		unsigned int sizeOfFields = sizeof(Class) + sizeof(TQPooledObject *);
-		memset((char*)(id)object + sizeOfFields, 0, malloc_size(object) - sizeOfFields);
-		object->mRetainCount = 1;
+		//unsigned int sizeOfFields = sizeof(Class) + sizeof(TQPooledObject *);
+		//memset((char*)(id)object + sizeOfFields, 0, malloc_size(object) - sizeOfFields);
+		object->_retainCount = 1;
 		return object;
 	}
 }
 
-- (uint)retainCount
+- (NSUInteger)retainCount
 {
-	return mRetainCount;
+	return _retainCount;
 }
 
 - (id)retain
 {
-	++mRetainCount;
+	__sync_add_and_fetch(&_retainCount, 1);
 	return self;
 }
 
 - (oneway void)release
 {
-	--mRetainCount;
-	
-	if (!mRetainCount)
+	if (!__sync_sub_and_fetch(&_retainCount, 1))
 	{
-		TQPoolInfo *poolInfo = [isa poolInfo];
+		TQPoolInfo *poolInfo = _poolInfoImp(self->isa, @selector(poolInfo));
 		self->mPoolPredecessor = poolInfo->lastElement;
 		poolInfo->lastElement = self;
 	}
@@ -84,17 +100,17 @@
 
 + (int)purgePool
 {
-	TQPoolInfo *poolInfo = [self poolInfo];	
-	TQPooledObject *lastElement;	
-	
+	TQPoolInfo *poolInfo = [self poolInfo];
+	TQPooledObject *lastElement;
+
 	int count=0;
 	while ((lastElement = poolInfo->lastElement))
 	{
-		++count;		
+		++count;
 		poolInfo->lastElement = lastElement->mPoolPredecessor;
 		[lastElement purge];
 	}
-	
+
 	return count;
 }
 
@@ -110,7 +126,7 @@
 
 @implementation TQPooledObject
 
-+ (TQPoolInfo *)poolInfo 
++ (TQPoolInfo *)poolInfo
 {
 	return nil;
 }

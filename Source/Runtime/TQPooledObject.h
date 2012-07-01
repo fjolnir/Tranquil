@@ -44,7 +44,8 @@
 {
 	@private
 		TQPooledObject *mPoolPredecessor;
-		uint mRetainCount;
+		NSUInteger _retainCount;
+		IMP _poolInfoImp;
 }
 	
 /// The pool info structure needed to access the pool. Needs to be implemented in any inheriting class.
