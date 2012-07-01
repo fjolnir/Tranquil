@@ -19,7 +19,13 @@
                                     	return tREGEX;
                                     }
 (super)                             { UPDATE_LOC return tSUPER; }
-(self)                              { UPDATE_LOC return tSELF; }
+(self)                              { UPDATE_LOC return tSELF;  }
+(if)                                { UPDATE_LOC return tIF;    }
+(else)                              { UPDATE_LOC return tELSE;  }
+(while)                             { UPDATE_LOC return tWHILE; }
+(until)                             { UPDATE_LOC return tUNTIL; }
+(break)                             { UPDATE_LOC return tBREAK; }
+(skip)                              { UPDATE_LOC return tSKIP;  }
 \.?[0-9]+(\.[0-9]+)?(e[0-9]+)?      {
                                     	UPDATE_LOC
                                     	yylval->dbl = atof(yytext);

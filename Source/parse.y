@@ -62,6 +62,7 @@
 %token <cStr> tGREATEROREQUALOP tLESSEROREQUALOP tEQUALOP tINEQUALOP
 %token <cStr> tSUPER tSELF
 %token tNIL tMAPPINGOP
+%token tIF tELSE tWHILE tUNTIL tBREAK tSKIP
 
 %type <number> Number
 %type <string> String
@@ -81,7 +82,7 @@
 %type <dict> Dictionary
 %type <regex> RegularExpression
 
-%type <node> Literal Statement Expression Callee Lhs CallArg MessageArg MessageReceiver Rhs
+%type <node> Literal Statement Expression ExpressionInParens Callee Lhs CallArg MessageArg MessageReceiver Rhs
 %type <nsarr> Statements CallArgs MessageArgs ClassBody ClassDef MethodArgs MethodBody BlockArgs ArrayItems
 %type <nsmap> DictionaryItems
 
@@ -105,9 +106,11 @@ Program: { [state->program setRoot:[TQNodeRootBlock node]]; }
 	}
 	;
 
+// Statements
+// -----------------------------------------------------------------------------------------
 Statements:
 	  Statement                       { $$ = [NSMutableArray arrayWithObjects:$1, nil]; }
-	| Statements PeriodOrLn Statement { [$$ addObject:$3]; }
+	| Statements PeriodOrLn Statement { [$$ addObject:$3];                              }
 	;
 Statement:
 	  Call
@@ -115,8 +118,16 @@ Statement:
 	| Assignment
 	| Return
 	| Class
+	| IfStmt
 	;
 
+Return:
+	'^' Expression                    { $$ = [TQNodeReturn nodeWithValue:$2];           }
+	;
+
+
+// Block calls
+// -----------------------------------------------------------------------------------------
 Call:
 	  Callee '(' OptLn CallArgs OptLn ')' {
 		$$ = [TQNodeCall nodeWithCallee:$1];
@@ -142,6 +153,9 @@ CallArgs:
 CallArg:
 	  Expression;
 
+
+// Messages
+// -----------------------------------------------------------------------------------------
 Message:
 	  MessageReceiver Identifier {
 		$$ = [TQNodeMessage nodeWithReceiver:$1];
@@ -158,7 +172,6 @@ Message:
 		$$ = [TQNodeMessage nodeWithReceiver:$1];
 		[$$ setArguments:$2];
 	}
-
 	;
 MessageReceiver:
 	  Callee
@@ -166,7 +179,7 @@ MessageReceiver:
 	| Call
 	| Super
 	| Literal
-	| '(' Expression ')' { $$ = $2; }
+	| ExpressionInParens
 	;
 /* TODO: Figure out how to relax this so a message can be split into multiple lines
          (Without requiring a dot at the end even when in parens) */
@@ -187,9 +200,12 @@ MessageArg:
 	| Literal
 	| Block
 	| Self
-	| '(' Expression ')' { $$ = $2; }
+	| ExpressionInParens
 	;
 
+
+// Assignments
+// -----------------------------------------------------------------------------------------
 Assignment:
 	Lhs '=' Rhs  { $$ = [TQNodeOperator nodeWithType:'=' left:$1 right:$3]; }
 	;
@@ -205,10 +221,9 @@ Rhs:
 	| Assignment
 	;
 
-Return:
-	'^' Expression { $$ = [TQNodeReturn nodeWithValue:$2]; }
-	;
 
+// Expressions
+// -----------------------------------------------------------------------------------------
 Expression:
 	  Message
 	| Call
@@ -221,37 +236,55 @@ Expression:
 	| Array
 	| Dictionary
 	| RegularExpression
-	| Expression '>' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorGreater left:$1 right:$3]; }
-	| Expression '<' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorLesser left:$1 right:$3]; }
-	| Expression '*' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorMultiply left:$1 right:$3]; }
-	| Expression '/' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorDivide left:$1 right:$3]; }
-	| Expression '+' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorAdd left:$1 right:$3]; }
-	| Expression '-' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorSubtract left:$1 right:$3]; }
-	| '-' Expression %prec UNARY              { $$ = [TQNodeOperator nodeWithType:kTQOperatorUnaryMinus left:nil right:$2]; }
-	| Expression tEQUALOP Expression          { $$ = [TQNodeOperator nodeWithType:kTQOperatorEqual left:$1 right:$3]; }
-	| Expression tINEQUALOP Expression        { $$ = [TQNodeOperator nodeWithType:kTQOperatorInequal left:$1 right:$3]; }
+	| Expression '>' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorGreater left:$1 right:$3];        }
+	| Expression '<' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorLesser left:$1 right:$3];         }
+	| Expression '*' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorMultiply left:$1 right:$3];       }
+	| Expression '/' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorDivide left:$1 right:$3];         }
+	| Expression '+' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorAdd left:$1 right:$3];            }
+	| Expression '-' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorSubtract left:$1 right:$3];       }
+	| '-' Expression %prec UNARY              { $$ = [TQNodeOperator nodeWithType:kTQOperatorUnaryMinus left:nil right:$2];    }
+	| Expression tEQUALOP Expression          { $$ = [TQNodeOperator nodeWithType:kTQOperatorEqual left:$1 right:$3];          }
+	| Expression tINEQUALOP Expression        { $$ = [TQNodeOperator nodeWithType:kTQOperatorInequal left:$1 right:$3];        }
 	| Expression tGREATEROREQUALOP Expression { $$ = [TQNodeOperator nodeWithType:kTQOperatorGreaterOrEqual left:$1 right:$3]; }
-	| Expression tLESSEROREQUALOP Expression  { $$ = [TQNodeOperator nodeWithType:kTQOperatorLesserOrEqual left:$1 right:$3]; }
+	| Expression tLESSEROREQUALOP Expression  { $$ = [TQNodeOperator nodeWithType:kTQOperatorLesserOrEqual left:$1 right:$3];  }
 	| SubscriptExpression
-	| '(' Expression ')' { $$ = $2; }
+	| ExpressionInParens
 	;
+ExpressionInParens:
+	  '(' Expression ')'                      { $$ = $2;                                                                       }
+	;
+Variable:
+	  Identifier                              { $$ = [TQNodeVariable nodeWithName:[$1 value]];                                 }
+	;
+Super:
+	  tSUPER                                  { $$ = [TQNodeSuper nodeWithName:NSSTR("self")];                                 };
+	;
+Self:
+	  tSELF                                   { $$ = [TQNodeSelf  nodeWithName:NSSTR("self")];                                 };
+	;
+// Object accessors
+// -----------------------------------------------------------------------------------------
 SubscriptExpression:
 	  Expression '[' Expression ']'           { $$ = [TQNodeOperator nodeWithType:kTQOperatorGetter left:$1 right:$3]; }
 	;
 Property:
-	 Variable '#' Identifier                  { $$ = [TQNodeMemberAccess nodeWithReceiver:$1 property:[$3 value]]; }
-	| Property '#' Identifier                 { $$ = [TQNodeMemberAccess nodeWithReceiver:$1 property:[$3 value]]; }
+	 Variable '#' Identifier                  { $$ = [TQNodeMemberAccess nodeWithReceiver:$1 property:[$3 value]];     }
+	| Property '#' Identifier                 { $$ = [TQNodeMemberAccess nodeWithReceiver:$1 property:[$3 value]];     }
 	;
+
+
+// Language level object builders
+// -----------------------------------------------------------------------------------------
 Array:
-	  '#' '[' ']'                             { $$ = [TQNodeArray node]; }
-	| '#' '[' ArrayItems ']'                  { $$ = [TQNodeArray node]; [$$ setItems:$3]; }
+	  '#' '[' ']'                            { $$ = [TQNodeArray node];                         }
+	| '#' '[' ArrayItems ']'                 { $$ = [TQNodeArray node]; [$$ setItems:$3];       }
 	;
 ArrayItems:
-	  Expression                              { $$ = [NSMutableArray arrayWithObject:$1]; }
-	| ArrayItems ',' Expression               { [$$ addObject:$3]; }
+	  Expression                             { $$ = [NSMutableArray arrayWithObject:$1];        }
+	| ArrayItems ',' Expression              { [$$ addObject:$3];                               }
 	;
 Dictionary:
-	  '#''{' '}'                             { $$ = [TQNodeDictionary node]; }
+	  '#''{' '}'                             { $$ = [TQNodeDictionary node];                    }
 	| '#''{' DictionaryItems '}'             { $$ = [TQNodeDictionary node]; [$$ setItems: $3]; }
 	;
 DictionaryItems:
@@ -259,13 +292,15 @@ DictionaryItems:
 		$$ = [NSMapTable mapTableWithStrongToStrongObjects];
 		[$$ setObject:$3 forKey:$1];
 	}
-	| DictionaryItems ',' Expression tMAPPINGOP Expression { [$$ setObject:$5 forKey:$3]; }
+	| DictionaryItems ',' Expression tMAPPINGOP Expression { [$$ setObject:$5 forKey:$3];       }
 	;
 RegularExpression:
-	 tREGEX                                  { $$ = [TQNodeRegex nodeWithPattern:[NSString stringWithUTF8String:$1]]; }
+	 tREGEX            { $$ = [TQNodeRegex nodeWithPattern:[NSString stringWithUTF8String:$1]]; }
 	;
 
 
+// Classes
+// -----------------------------------------------------------------------------------------
 Class: '#' ClassDef OptLn '{' OptLn
 	      ClassBody OptLn
 	   '}' {
@@ -295,19 +330,22 @@ Class: '#' ClassDef OptLn '{' OptLn
 	;
 ClassDef:
 	  ClassName '<' ClassName { $$ = [NSMutableArray arrayWithObjects:$1, $3, nil]; }
-	| ClassName                   { $$ = [NSMutableArray arrayWithObjects:$1, nil]; }
+	| ClassName               { $$ = [NSMutableArray arrayWithObjects:$1, nil];     }
+	;
+ClassName:
+	  Constant
 	;
 ClassBody:
-	  Method             { $$ = [NSMutableArray arrayWithObjects:$1, nil]; }
-	| ClassBody OptLn Method { [$$ addObject:$3]; }
+	  Method                  { $$ = [NSMutableArray arrayWithObjects:$1, nil];     }
+	| ClassBody OptLn Method  { [$$ addObject:$3];                                  }
 	;
 Method:
 	  ClassMethod
 	| InstanceMethod
 	;
-ClassMethod:    '+' MethodDef { $$ = $2; [$$ setType:kTQClassMethod]; }
+ClassMethod:    '+' MethodDef { $$ = $2; [$$ setType:kTQClassMethod];               }
 	;
-InstanceMethod: '-' MethodDef { $$ = $2; [$$ setType:kTQInstanceMethod]; }
+InstanceMethod: '-' MethodDef { $$ = $2; [$$ setType:kTQInstanceMethod];            }
 	;
 MethodDef:
 	MethodName MethodArgs MethodBody {
@@ -352,11 +390,14 @@ MethodArgs:
 MethodBody:
 	 '{' OptLn
 	   Statements Ln
-	 '}' { $$ = $3; }
-	| '{' OptLn '}' { $$ = nil; }
+	 '}'                 { $$ = $3;                                                               }
+	| '{' OptLn '}'      { $$ = nil;                                                              }
 	| '`' Expression '`' { $$ = [NSMutableArray arrayWithObject:[TQNodeReturn nodeWithValue:$2]]; }
 	;
 
+
+// Blocks
+// -----------------------------------------------------------------------------------------
 Block:
 	'{' OptLn BlockArgs '|' OptLn
 		Statements Ln
@@ -403,14 +444,28 @@ BlockArgs:
 	;
 
 
+// Conditionals
+// -----------------------------------------------------------------------------------------
 
-ClassName: Constant;
-Variable: Identifier { $$ = [TQNodeVariable nodeWithName:[$1 value]]; };
-Super: tSUPER  { $$ = [TQNodeSuper nodeWithName:NSSTR("self")]; };
-Self: tSELF  { $$ = [TQNodeSelf nodeWithName:NSSTR("self")]; };
+IfStmt:
+	  tIF Expression OptLn '{'
+	  '}'
+	  ElseIfStmts
+	  ElseStmt { printf("IF!\n"); }
+	;
 
-/* Basics */
+ElseIfStmts: OptLn
+	| ElseIfStmts ElseIfStmt
+	;
+ElseIfStmt:
+	  tELSE tIF Expression OptLn '{' '}' { printf("ELSEIF\n"); }
 
+ElseStmt:
+	| tELSE OptLn '{' '}' { printf("ELSE!\n"); }
+	;
+
+// Basics
+// -----------------------------------------------------------------------------------------
 OptLn:
 	| OptLn '\n'
 	;
@@ -425,31 +480,31 @@ PeriodOrLn:
 	;
 
 Literal:
-	  Number { $$ = $<node>1; }
-	| String { $$ = $<node>1; }
+	  Number            { $$ = $<node>1;                                }
+	| String            { $$ = $<node>1;                                }
 	;
-Number: tNUMBER { $$ = [TQNodeNumber nodeWithDouble:$1]; }
-	;
-
-String: tSTRING { $$ = [TQNodeString nodeWithCString:$1]; }
+Number: tNUMBER         { $$ = [TQNodeNumber nodeWithDouble:$1];        }
 	;
 
-Identifier: tIDENTIFIER {  $$ = [TQNodeIdentifier nodeWithCString:$1]; }
+String: tSTRING         { $$ = [TQNodeString nodeWithCString:$1];       }
 	;
 
-Constant: tCONSTANT     {  $$ = [TQNodeConstant nodeWithCString:$1]; }
+Identifier: tIDENTIFIER {  $$ = [TQNodeIdentifier nodeWithCString:$1];  }
 	;
 
-Nil: tNIL               { $$ = [TQNodeNil node]; }
+Constant: tCONSTANT     {  $$ = [TQNodeConstant nodeWithCString:$1];    }
+	;
+
+Nil: tNIL               { $$ = [TQNodeNil node];                        }
 	;
 
 Operator:
-	  '>'               { $$ = [TQNodeIdentifier nodeWithCString:">"]; }
-	| '<'               { $$ = [TQNodeIdentifier nodeWithCString:"<"]; }
-	| '*'               { $$ = [TQNodeIdentifier nodeWithCString:"*"]; }
-	| '/'               { $$ = [TQNodeIdentifier nodeWithCString:"/"]; }
-	| '+'               { $$ = [TQNodeIdentifier nodeWithCString:"+"]; }
-	| '-'               { $$ = [TQNodeIdentifier nodeWithCString:"-"]; }
+	  '>'               { $$ = [TQNodeIdentifier nodeWithCString:">"];  }
+	| '<'               { $$ = [TQNodeIdentifier nodeWithCString:"<"];  }
+	| '*'               { $$ = [TQNodeIdentifier nodeWithCString:"*"];  }
+	| '/'               { $$ = [TQNodeIdentifier nodeWithCString:"/"];  }
+	| '+'               { $$ = [TQNodeIdentifier nodeWithCString:"+"];  }
+	| '-'               { $$ = [TQNodeIdentifier nodeWithCString:"-"];  }
 	| tEQUALOP          { $$ = [TQNodeIdentifier nodeWithCString:"=="]; }
 	| tINEQUALOP        { $$ = [TQNodeIdentifier nodeWithCString:"!="]; }
 	| tGREATEROREQUALOP { $$ = [TQNodeIdentifier nodeWithCString:">="]; }
