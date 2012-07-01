@@ -2,6 +2,7 @@
 #import "TQNodeVariable.h"
 #import "TQNodeMemberAccess.h"
 #import "../TQProgram.h"
+#import "../TQDebug.h"
 #import "TQNodeNumber.h"
 
 using namespace llvm;

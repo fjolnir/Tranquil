@@ -1,4 +1,5 @@
 #include "TQProgram.h"
+#include "TQDebug.h"
 #include "CodeGen/TQNode.h"
 #include <llvm/Transforms/IPO/PassManagerBuilder.h>
 #include <llvm/Target/TargetData.h>
