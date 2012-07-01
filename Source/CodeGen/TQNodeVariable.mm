@@ -57,24 +57,21 @@ using namespace llvm;
 
 - (llvm::Value *)_getForwardingInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock
 {
-	if(_forwarding)
-		return _forwarding;
+	IRBuilder<> *builder = aBlock.builder;
 
-	TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock];
-	if(existingVar) {
-		if(![existingVar _getForwardingInProgram:aProgram block:aBlock])
-			return NULL;
-		_forwarding = existingVar.forwarding;
-		return _forwarding;
+	if(!_forwarding) {
+		TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock];
+		if(existingVar) {
+			if(![existingVar _getForwardingInProgram:aProgram block:aBlock])
+				return NULL;
+			_forwarding = existingVar.forwarding;
+		} else {
+		_forwarding = builder->CreateLoad(builder->CreateStructGEP(_alloca, 1), [self _llvmRegisterName:@"forwardingPtr"]);
+		_forwarding = builder->CreateBitCast(_forwarding, PointerType::getUnqual([self captureStructTypeInProgram:aProgram]), [self _llvmRegisterName:@"forwarding"]);
+		}
 	}
 
-	IRBuilder<> *builder = aBlock.builder;
-	_forwarding = builder->CreateLoad(builder->CreateStructGEP(_alloca, 1), [self _llvmRegisterName:@"forwardingPtr"]);
-	_forwarding = builder->CreateBitCast(_forwarding, PointerType::getUnqual([self captureStructTypeInProgram:aProgram]),
-	[self _llvmRegisterName:@"forwarding"]);
-	_forwarding =  builder->CreateLoad(builder->CreateStructGEP(_forwarding, 6));
-
-	return _forwarding;
+	return builder->CreateLoad(builder->CreateStructGEP(_forwarding, 6));
 }
 
 - (llvm::Type *)captureStructTypeInProgram:(TQProgram *)aProgram
