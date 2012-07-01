@@ -39,10 +39,14 @@ using namespace llvm;
 
     if([self isEqual:aNode])
         return self;
-    //if((ref = [[_items allKeys] tq_referencesNode:aNode]))
-        //return ref;
-    //if((ref = [[_items allValues] tq_referencesNode:aNode]))
-        //return ref;
+	NSEnumerator *keyEnum = [_items keyEnumerator];
+	TQNode *key;
+	while(key = [keyEnum nextObject]) {
+		if((ref = [key referencesNode:aNode]))
+			return ref;
+		else if((ref = [[_items objectForKey:key] referencesNode:aNode]))
+			return ref;
+	}
 
     return nil;
 }

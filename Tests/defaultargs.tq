@@ -1,5 +1,6 @@
-blk = { a=1 |
-	print("%p %@", a, a)
+foo = 3
+blk = { a = 3, b = #{ 1=>foo, 3=>"wat" } |
+	print("%@ %@", a, b)
+    ^b
 }
-
-blk()
+^blk(123)

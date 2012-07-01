@@ -355,7 +355,7 @@ AssgnLhs       = Property
                | Variable
 AssgnRhs       = b:Expression
                {
-                   ExtendToken(); 
+                   ExtendToken();
                    ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAssign left:StackTop right:b]);
                }
 

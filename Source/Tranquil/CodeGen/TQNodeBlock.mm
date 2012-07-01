@@ -397,15 +397,14 @@ using namespace llvm;
             continue;
 
         // Load the default argument if the argument was not passed
+        Value *defaultValue;
+        if(![argDef defaultArgument])
+            defaultValue = ConstantPointerNull::get(aProgram.llInt8PtrTy);
+        else
+            defaultValue = [[argDef defaultArgument] generateCodeInProgram:aProgram block:self error:aoErr];
+
         Value *isMissingCond = _builder->CreateICmpEQ(argumentIterator, sentinel);
-        Value *argValue;
-        if(![argDef defaultArgument]) {
-            argValue = _builder->CreateSelect(isMissingCond, ConstantPointerNull::get(aProgram.llInt8PtrTy), argumentIterator);
-        }
-        else { // If there's a default argument we need to load the argument
-            Value *defaultArg = [[argDef defaultArgument] generateCodeInProgram:aProgram block:self error:aoErr];
-            argValue = _builder->CreateSelect(isMissingCond, defaultArg, argumentIterator);
-        }
+        Value *argValue = _builder->CreateSelect(isMissingCond, defaultValue, argumentIterator);
 
         TQNodeVariable *local = [TQNodeVariable nodeWithName:[argDef name]];
         [local store:argValue inProgram:aProgram block:self error:aoErr];
