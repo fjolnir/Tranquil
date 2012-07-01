@@ -7,11 +7,18 @@
 ¥ The Yen sign can also be used (See Japanese keyboard layouts to understand why)
 
 \ Keywords
+if
+else
+while
+until
+break
+skip
+nil    \ Represents 'nothing'
 yes    \ Evaluates to 1.0
-no     \ Evaluates to 0.0
-nil 
+no     \ Evaluates to nil
 self   \ Available inside method blocks
-super  \ Available inside method blocks as a message receiver that calls methods as defined by the current class's superclass
+super  \ Available inside method blocks as a message receiver
+       \that calls methods as defined by the current class's superclass
 
 \ Variable assignment
 a = b \ Variables are local in scope
@@ -42,7 +49,7 @@ aBlock(something, somethingElse) \ Calls a block with a two arguments
  
 if ..expression.. {      \ Executes the passed literal block if the expression is non-nil
 	..statements..
-} elseif ..expression.. {
+} else if ..expression.. {
 	..statements..
 } else {
 	..statements..
@@ -52,6 +59,14 @@ unless ..expression.. {  \ Executes the passed literal block if the expression i
 	..statements..
 } else {
 	..statements..
+}
+
+while ..expression.. {  \ Executes the passed literal block repeatedly while the expression is non-nil
+	..statements..      \ or a break statement is encountered
+	                    \ a skip statement jumps back to the top of the loop
+}
+until ..expression.. {  \ Executes the passed literal block repeatedly until the expression is non-nil
+	..statements..      \ skip&continue work like in while
 }
 
 \ Objects
@@ -165,37 +180,14 @@ var = instanceOfKlass - something \ Equivalent to: var = instanceOfKlass subtrac
 
 ## Examples
 
-### Flow control
-```
-#Object {
-	- ifTrue: ifBlock else: elseBlock {
-		^ifBlock()
-	}
-	- ifFalse: unlessBlock else: elseBlock {
-		^elseBlock()
-	}
-	<snip>
-}
-
-#Nil {
-	- ifTrue: ifBlock else: elseBlock {
-		^elseBlock()
-	}
-	- ifFalse: unlessBlock else: elseBlock {
-		^unlessBlock()
-	}
-}
-```
-
 ### Fibonacci
 ```
 fibonacci = { index, curr=0, succ=1 |
 	num = curr + succ
-	^(index > 2) ifTrue: {
+	if index > 2 {
 		^fibonacci(index - 1, succ, num)
-	} else: {
-		^num
 	}
+	^num
 }
 fib = fibonacci(50) \ Calculate the 50th number in the fibonacci sequence
 ```
@@ -204,31 +196,31 @@ fib = fibonacci(50) \ Calculate the 50th number in the fibonacci sequence
 
 	#Iterator {
 		- map: lambda {
-			^self reduce: { obj accum=#[] |
+			^self reduce: { obj, accum=#[] |
 				accum push lambda(obj)
 				^accum
 			}
 		}
 	
 		- _reduce: lambda accumulator: accum {
-			^self empty? ifTrue: {
+			if self isEmpty? {
 				^accum
-			} else: {
+			} else {
 				accum = lambda(self next)
 				^self _reduce:lambda accumulator:accum			}
 		}
 	
 		- reduce: lambda {
 			accum = lambda(self next)
-			^self _reduce result accum
+			^self _reduce:result accumulator:accum
 		}
 	
 		- map: mapLambda reduce: reduceLambda {
 			(self map: mapLambda) reduce: reduceLambda
 		}
 	
-		- next   `nil` \ Implemented in subclasses
-		- empty? `yes` \ Implemented in subclasses
+		- next     `nil` \ Implemented in subclasses
+		- isEmpty? `yes` \ Implemented in subclasses
 	}
 	
 	sum = #[1,2,3] reduce:`n, sum=0| sum + n`
