@@ -1,0 +1,44 @@
+\ Still pseudocode, uses features not yet implemented
+
+#Iterator {
+	- map: lambda {
+		^self reduce: { obj accum=#[] | accum push lambda(obj) }
+	}
+
+	- _reduce: lambda accumulator: accum {
+		^self empty? unless: {
+			result push lambda(self next)
+			^self _map:lambda accumulator: accum
+		} else: {
+			^accum
+		}
+	}
+
+	- reduce: lambda {
+		accum = lambda(self next)
+		^self _reduce result accum
+	}
+
+	- map: mapLambda reduce: reduceLambda {
+		(self map: mapLambda) reduce: reduceLambda
+	}
+
+	- next `nil`   \ Implemented in subclasses
+	- empty? `yes` \ Implemented in subclasses
+}
+
+#NSArrayIterator < Iterator {
+	+ withArray: array {
+		ret = self new
+		ret#array = array
+		^ret
+	}
+
+	- next {
+		^self#array[self#i++]
+	}
+
+	- empty? {
+		^self#i >= self#array count
+	}
+}
