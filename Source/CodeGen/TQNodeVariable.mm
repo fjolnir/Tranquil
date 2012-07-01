@@ -88,7 +88,7 @@ using namespace llvm;
 
 	llvm::Module *mod = aProgram.llModule;
 
-	const char *funName = [[NSString stringWithFormat:@"__tq_byref_obj_keep_helper"] UTF8String];
+	const char *funName = [[NSString stringWithFormat:@"__tq_byref_obj_keep_helper_%@", _name] UTF8String];
 	keepHelper = Function::Create(funType, GlobalValue::ExternalLinkage, funName, mod);
 	keepHelper->setCallingConv(CallingConv::C);
 
@@ -131,27 +131,16 @@ using namespace llvm;
 
 	llvm::Module *mod = aProgram.llModule;
 
-	const char *funName = [[NSString stringWithFormat:@"__tq_byref_obj_dispose_helper"] UTF8String];
+	const char *funName = [[NSString stringWithFormat:@"__tq_byref_obj_dispose_helper_%@", _name] UTF8String];
 	disposeHelper = Function::Create(funType, GlobalValue::ExternalLinkage, funName, mod);
 	disposeHelper->setCallingConv(CallingConv::C);
 
 	BasicBlock *basicBlock = BasicBlock::Create(mod->getContext(), "entry", disposeHelper, 0);
 	IRBuilder<> *builder = new IRBuilder<>(basicBlock);
 
-	//Type *byrefPtrTy = PointerType::getUnqual([self captureStructTypeInProgram:aProgram]);
-
-	// Load the passed arguments
-	//AllocaInst *dstAlloca = builder->CreateAlloca(int8PtrTy); 
-
-	//Function::arg_iterator args = function->arg_begin();
-	//builder->CreateStore(args, dstAlloca);
-
-	//Value *dstByRef = builder->CreateBitCast(builder->CreateLoad(dstAlloca), byrefPtrTy);
-	//Value *flags = ConstantInt::get(intTy, TQ_BLOCK_BYREF_CALLER | TQ_BLOCK_FIELD_IS_OBJECT);
-
-	//Value *srcPtr = builder->CreateLoad(builder->CreateStructGEP(srcByRef, 6));
-
-	//builder->CreateCall3(aProgram._Block_object_assign, destAddr, srcPtr, flags);
+	Value *byref  = builder->CreateBitCast(disposeHelper->arg_begin(), aProgram.llInt8PtrTy);
+	Value *nilPtr = ConstantPointerNull::get(aProgram.llInt8PtrTy);
+	builder->CreateCall2(aProgram.TQStoreStrongInByref, byref, nilPtr);
 
 	builder->CreateRetVoid();
 	return disposeHelper;
