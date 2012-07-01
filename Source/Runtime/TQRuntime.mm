@@ -4,6 +4,8 @@
 #import <objc/message.h>
 #import "TQNumber.h"
 
+id TQSentinel = @"3d2c9ac0bf3911e1afa70800200c9a66aaaaaaaaa";
+
 static const NSString *_TQDynamicIvarTableKey = @"TQDynamicIvarTableKey";
 
 SEL TQEqOpSel;

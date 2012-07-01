@@ -1,6 +1,5 @@
 #import <Foundation/Foundation.h>
-
-extern id TQSentinel;
+#import "TQRuntime.h"
 
 @class TQNumber;
 

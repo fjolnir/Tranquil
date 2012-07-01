@@ -2,9 +2,6 @@
 #import "TQNumber.h"
 #import <objc/runtime.h>
 
-// Just a unique address
-id TQSentinel = @"3d2c9ac0bf3911e1afa70800200c9a66aaaaaaaaa";
-
 @implementation NSMapTable (Tranquil)
 + (NSMapTable *)tq_mapTableWithObjectsAndKeys:(id)firstObject , ...
 {
