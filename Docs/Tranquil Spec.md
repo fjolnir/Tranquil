@@ -7,11 +7,11 @@
 ¥ The Yen sign can also be used (See Japanese keyboard layouts to understand why)
 
 \ Keywords
-yes
-no
-nil
-self
-super
+yes    \ Evaluates to 1.0
+no     \ Evaluates to 0.0
+nil 
+self   \ Available inside method blocks
+super  \ Available inside method blocks as a message receiver that calls methods as defined by the current class's superclass
 
 \ Variable assignment
 a = b \ Variables are local in scope
@@ -19,16 +19,16 @@ a = b \ Variables are local in scope
       \ are reserved for classes
 
 \ Arrays & Dictionaries
-anArray = #[ a, b, c ] \ Initialises an array containing 3 elements
-aDict  = #{ key = value, anotherKey = value } \ Initializes a dictionary
+anArray = #[ a, b, c ]                        \ Initialises an array containing 3 elements
+aDict  = #{ key => value, anotherKey => value } \ Initializes a dictionary
 
 \ Blocks
 
 aBlock = { ..body.. } \ A block. Defines scope
 aBlockWith = { arg0, arg1 | ..body.. } \ A block that takes two arguments
-aBlock = { &arg |  ..body.. } \ Prefixing an argument with & indicates that rather than evaluating it,
+aBlock = { &arg |  ..statements.. } \ Prefixing an argument with & indicates that rather than evaluating it,
                               \ a block with it as it's body should be passed
-aBlock = { arg=123 |  ..body.. } \ Assignment in the argument list indicates a default value
+aBlock = { arg=123 |  ..statements.. } \ Assignment in the argument list indicates a default value
                                  \ for that argument
 `expression` \ Equivalent to {^expression}
 
@@ -59,6 +59,10 @@ instance aMethod: 123. \ To explicitly terminate a message you use a period
 \ Accessing member variables
 obj#member = 123
 a = obj#member
+
+\ Regular expressions
+regexp = /[.]*/  \ Regular expressions are delimited by forward slashes
+"foobar" matches? /[foo...]/
 ```
 
 ## Blocks
