@@ -1,3 +1,5 @@
+// Tranquil runtime functions
+
 id TQRetainObject(id obj);
 id TQReleaseObject(id obj);
 id TQAutoreleaseObject(id obj);
@@ -12,3 +14,6 @@ void TQSetValueForKey(id obj, char *key, id value);
 
 bool TQObjectIsStackBlock(id obj);
 id TQPrepareObjectForReturn(id obj);
+
+// Adds operator methods to the passed class (such as ==:, >=:, []: etc)
+BOOL TQAugmentClassWithOperators(Class klass);

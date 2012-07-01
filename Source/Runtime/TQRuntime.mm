@@ -106,7 +106,7 @@ void TQSetValueForKey(id obj, char *key, id value)
 		return;
 	objc_property_t property = class_getProperty(object_getClass(obj), key);
 	if(property) {
-		// TODO: Use the type encoding to do unbox values if necessary
+		// TODO: Use the type encoding to unbox values if necessary
 		const char *attrs = property_getAttributes(property);
 		char *setterNameLoc = strstr(attrs, ",S");
 		if(!setterNameLoc) {
@@ -140,4 +140,69 @@ id TQPrepareObjectForReturn(id obj)
 	if(TQObjectIsStackBlock(obj))
 		return TQAutoreleaseObject(_objc_msgSend_hack(obj, @selector(copy)));
 	return TQRetainAutoreleaseObject(obj);
+}
+
+#pragma mark - Operators
+
+BOOL TQAugmentClassWithOperators(Class klass)
+{
+	// ==
+	IMP imp = imp_implementationWithBlock(^(id a, id b) { return [a isEqual:b] ? @YES : @NO; });
+	SEL sel = sel_registerName("==:");
+	class_addMethod(klass, sel, imp, "@@:@");
+	// !=
+	imp = imp_implementationWithBlock(^(id a, id b)     { return [a isEqual:b] ? @NO : @YES; });
+	sel = sel_registerName("==:");
+	class_addMethod(klass, sel, imp, "@@:@");
+
+	// + (Unimplemented by default)
+	imp = imp_implementationWithBlock(^(id a, id b) { return [a add:b]; });
+	sel = sel_registerName("+:");
+	class_addMethod(klass, sel, imp, "@@:@");
+	// - (Unimplemented by default)
+	imp = imp_implementationWithBlock(^(id a, id b) { return [a subtract: b]; });
+	sel = sel_registerName("-:");
+	class_addMethod(klass, sel, imp, "@@:@");
+	// unary - (Unimplemented by default)
+	imp = imp_implementationWithBlock(^(id a)       { return [a negate]; });
+	sel = sel_registerName("-");
+	class_addMethod(klass, sel, imp, "@@:");
+
+	// * (Unimplemented by default)
+	imp = imp_implementationWithBlock(^(id a, id b) { return [a multiply:b]; });
+	sel = sel_registerName("*:");
+	class_addMethod(klass, sel, imp, "@@:@");
+	// / (Unimplemented by default)
+	imp = imp_implementationWithBlock(^(id a, id b) { return [a divide:b]; });
+	sel = sel_registerName("/:");
+	class_addMethod(klass, sel, imp, "@@:@");
+
+	// <
+	imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] == NSOrderedAscending) ? @YES : @NO; });
+	sel = sel_registerName("<:");
+	class_addMethod(klass, sel, imp, "@@:@");
+	// >
+	imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] == NSOrderedDescending) ? @YES : @NO; });
+	sel = sel_registerName("<:");
+	class_addMethod(klass, sel, imp, "@@:@");
+	// <=
+	imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] != NSOrderedDescending) ? @YES : @NO; });
+	sel = sel_registerName("<:");
+	class_addMethod(klass, sel, imp, "@@:@");
+	// >=
+	imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] != NSOrderedAscending) ? @YES : @NO; });
+	sel = sel_registerName("<:");
+	class_addMethod(klass, sel, imp, "@@:@");
+
+
+	// []
+	imp = imp_implementationWithBlock(^(id a, id key)         { return [a valueForKey:key]; });
+	sel = sel_registerName("[]:");
+	class_addMethod(klass, sel, imp, "@@:@");
+	// []=
+	imp = imp_implementationWithBlock(^(id a, id key, id val) { return [a setValue:val forKey:key]; });
+	sel = sel_registerName("[]=::");
+	class_addMethod(klass, sel, imp, "@@:@@");
+
+	return YES;
 }
