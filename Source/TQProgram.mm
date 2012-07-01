@@ -1,5 +1,7 @@
 #include "TQProgram.h"
 #include "TQNode.h"
+#include <llvm/Transforms/IPO/PassManagerBuilder.h>
+#import <mach/mach_time.h>
 
 using namespace llvm;
 
@@ -157,17 +159,26 @@ using namespace llvm;
 	[_root generateCodeInProgram:self block:nil error:&err];
 	if(err) {
 		NSLog(@"Error: %@", err);
-		//return NO;
+		return NO;
 	}
 
-	// Output LLVM - IR
+	// Verify that the program is valid
 	verifyModule(*_llModule, PrintMessageAction);
+
+
+	// Compile program
+	ExecutionEngine *engine = EngineBuilder(_llModule).create();
+
+	// Optimization pass
+	//FunctionPassManager fpm = FunctionPassManager(_llModule);
+	//PassManagerBuilder builder = PassManagerBuilder();
+	//builder.OptLevel = 2;
+	//builder.populateFunctionPassManager(fpm);
+	//fpm.run(*_root.function);
+
 	PassManager PM;
 	PM.add(createPrintModulePass(&outs()));
 	PM.run(*_llModule);
-
-	// Execute program
-	ExecutionEngine *engine = EngineBuilder(_llModule).create();
 
 	//std::vector<GenericValue> noargs;
 	//GenericValue val = engine->runFunction(_root.function, noargs);
@@ -177,13 +188,22 @@ using namespace llvm;
 
 	id(*rootPtr)() = (id(*)())engine->getPointerToFunction(_root.function);
 
+
+	uint64_t startTime = mach_absolute_time();
+	// Execute code
 	id ret = rootPtr();
-	printf("--\n");
+
+	uint64_t ns = mach_absolute_time() - startTime;
+	struct mach_timebase_info timebase;
+	mach_timebase_info(&timebase);
+	double sec = sec * timebase.numer / timebase.denom / 1000000000.0;
+
+	NSLog(@"Run time: %f sec\n", sec);
 	NSLog(@"'root' retval:  %p: %@ (%@)\n", ret, ret ? ret : nil, [ret class]);
 
 	if([ret isKindOfClass:NSClassFromString(@"NSBlock")]) {
-		id (^test)(id obj) = ret;
-		NSNumber *num = test([NSNumber numberWithInt:1337]);
+		id (^test)() = ret;
+		NSNumber *num = test();
 		NSLog(@"Block retval: %@ (%@)", num, [num class]);
 	}
 
