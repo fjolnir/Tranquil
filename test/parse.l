@@ -1,5 +1,5 @@
 %{
-	#include "TQNode.h"
+	#include <Tranquil.h>
 	#include <stdlib.h>
 	#include "y.tab.h"
 %}

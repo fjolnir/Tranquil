@@ -1,6 +1,6 @@
 %{
 	#include <Foundation/Foundation.h>
-	#include "TQProgram.h"
+	#include <Tranquil.h>
 	#include <stdio.h>
 	#include <stdlib.h>
 

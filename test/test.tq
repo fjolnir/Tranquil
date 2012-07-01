@@ -17,4 +17,5 @@ class MyClass < NSObject
 end
 
 instance = MyClass new.
-instance doThis: someOtherObject#this withThat: somethingElse andThat: 1234.
+instance doThis: someOtherObject#this withThat: somethingElse
+        andThat: 1234
