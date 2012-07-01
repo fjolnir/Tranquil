@@ -2,6 +2,8 @@
 #import <objc/runtime.h>
 #import "TQRuntime.h"
 
+static id (*numberWithDoubleImp)(id, SEL, double)  ;
+
 static TQPoolInfo poolInfo = { nil, nil };
 static IMP superAllocImp = NULL;
 
@@ -19,6 +21,8 @@ extern id _objc_msgSend_hack2(id, SEL, id)     asm("_objc_msgSend");
 {
     if(!superAllocImp)
         superAllocImp = method_getImplementation(class_getClassMethod(self, @selector(allocWithPoolInfo:)));
+	if(!numberWithDoubleImp)
+		numberWithDoubleImp = (id (*)(id, SEL, double))method_getImplementation(class_getClassMethod(self, @selector(numberWithDouble:)));
 
     TQNumberTrue = [[self alloc] init];
     TQNumberTrue->_doubleValue = 1;
@@ -104,41 +108,41 @@ extern id _objc_msgSend_hack2(id, SEL, id)     asm("_objc_msgSend");
 
 - (TQNumber *)add:(TQNumber *)b
 {
-    return [TQNumber numberWithDouble:_doubleValue + b->_doubleValue];
+    return numberWithDoubleImp(self->isa, @selector(numberWithDouble), _doubleValue + b->_doubleValue);
 }
 - (TQNumber *)subtract:(TQNumber *)b
 {
-    return [TQNumber numberWithDouble:_doubleValue - b->_doubleValue];
+    return numberWithDoubleImp(self->isa, @selector(numberWithDouble:), _doubleValue - b->_doubleValue);
 }
 - (TQNumber *)negate
 {
-    return [TQNumber numberWithDouble:-_doubleValue];
+    return numberWithDoubleImp(self->isa, @selector(numberWithDouble:), -_doubleValue);
 }
 
 - (TQNumber *)multiply:(TQNumber *)b
 {
-    return [TQNumber numberWithDouble:_doubleValue * b->_doubleValue];
+    return numberWithDoubleImp(self->isa, @selector(numberWithDouble:), _doubleValue * b->_doubleValue);
 }
 - (TQNumber *)divideBy:(TQNumber *)b
 {
-    return [TQNumber numberWithDouble:_doubleValue / b->_doubleValue];
+    return numberWithDoubleImp(self->isa, @selector(numberWithDouble:), _doubleValue / b->_doubleValue);
 }
 
 - (TQNumber *)addDouble:(double)b
 {
-    return [TQNumber numberWithDouble:_doubleValue + b];
+    return numberWithDoubleImp(self->isa, @selector(numberWithDouble:), _doubleValue + b);
 }
 - (TQNumber *)subtractDouble:(double)b
 {
-    return [TQNumber numberWithDouble:_doubleValue - b];
+    return numberWithDoubleImp(self->isa, @selector(numberWithDouble:), _doubleValue - b);
 }
 - (TQNumber *)multiplyDouble:(double)b
 {
-    return [TQNumber numberWithDouble:_doubleValue * b];
+    return numberWithDoubleImp(self->isa, @selector(numberWithDouble:), _doubleValue * b);
 }
 - (TQNumber *)divideByDouble:(double)b
 {
-    return [TQNumber numberWithDouble:_doubleValue / b];
+    return numberWithDoubleImp(self->isa, @selector(numberWithDouble:), _doubleValue / b);
 }
 
 
