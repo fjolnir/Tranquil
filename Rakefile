@@ -1,26 +1,15 @@
 CXX = 'clang++'
 LD  = CXX
-LEX = 'flex'
-YACC = 'bison'
+PEG = 'greg'
 
 BUILD_DIR = 'Build'
 
-LEX_OUTPATH  = "#{BUILD_DIR}/lex.yy.mm"
-YACC_OUTPATH = "#{BUILD_DIR}/y.tab.mm"
+PARSER_OUTPATH = "#{BUILD_DIR}/parse.mm"
 
-LEXFLAGS = [
-	'-f',
-	"-o #{LEX_OUTPATH}"
-#	'-d'
-].join(' ')
 
-YACCFLAGS = [
-	'-t',
-	'-d',
-	'-v',
-	"-o #{YACC_OUTPATH}",
-	#'-g',
-	"--defines=#{BUILD_DIR}/y.tab.h"
+PEGFLAGS = [
+	"-o #{PARSER_OUTPATH}",
+	#"-v"
 ].join(' ')
 
 CXXFLAGS = [
@@ -50,21 +39,16 @@ LIBS = ['-framework Foundation'].join(' ')
 
 PATHMAP = "build/%n.o"
 
-OBJC_SOURCES = FileList['Source/*.m*'].add('Source/*/*.m*').add('Source/*/*.c').add(YACC_OUTPATH).add(LEX_OUTPATH)
+OBJC_SOURCES = FileList['Source/*.m*'].add('Source/*/*.m*').add('Source/*/*.c').add(PARSER_OUTPATH)
 O_FILES = OBJC_SOURCES.pathmap(PATHMAP)
-LEX_SOURCE = FileList['Source/*.l'].first
-YACC_SOURCE = FileList['Source/*.y'].first
+PEG_SOURCE = FileList['Source/*.leg'].first
 
 def compile(file, flags=CXXFLAGS, cc=CXX)
 	sh "#{cc} #{file[:in].join(' ')} #{flags} -c -o #{file[:out]}"
 end
 
-file YACC_OUTPATH => YACC_SOURCE do |f|
-	sh "#{YACC} #{YACCFLAGS} #{YACC_SOURCE}"
-end
-
-file LEX_OUTPATH => LEX_SOURCE do |f|
-	sh "#{LEX} #{LEXFLAGS} #{LEX_SOURCE}"
+file PARSER_OUTPATH => PEG_SOURCE do |f|
+	sh "#{PEG} #{PEGFLAGS} #{PEG_SOURCE}"
 end
 
 OBJC_SOURCES.each { |src|

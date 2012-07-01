@@ -39,7 +39,7 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
 		[out appendFormat:@"%@(", _callee];
 
 	for(TQNodeArgument *arg in _arguments) {
-		[out appendFormat:@"%@ ", arg];
+		[out appendFormat:@"%@, ", arg];
 	}
 
 	[out appendString:@")>"];

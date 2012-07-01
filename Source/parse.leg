@@ -1,0 +1,163 @@
+%{
+#import "Tranquil.h"
+
+struct _TQParserState {
+    struct {
+        int begin;
+        int length;
+    } currentToken;
+    int currentLine;
+
+    NSMutableArray *stack;
+};
+typedef struct _TQParserState TQParserState;
+
+#define YY_XTYPE TQParserState *
+#define YY_XVAR  state
+#define YYSTYPE id
+#define YYNSSTR [NSString stringWithUTF8String:yytext]
+#define YYNSNUM [NSNumber numberWithDouble:atof(yytext)]
+
+#define StackTop [state->stack lastObject]
+#define PushStack(obj) [state->stack addObject:(obj)]
+#define PopStack() StackTop; [state->stack removeLastObject]
+
+#define UpdatePos() do { \
+    ((CLParserState *)(G->data))->currentToken.begin  = thunk->begin + G->offset;  \
+    ((CLParserState *)(G->data))->currentToken.length = thunk->end - thunk->begin; \
+} while(0)
+
+//#define YY_DEBUG
+%}
+
+Program      = --
+                 Statement* EOL EOF
+# Statement
+Statement    = stmt:Call    { NSLog(@"stmt> %@", stmt); }
+             | stmt:Message { NSLog(@"stmt> %@", stmt); }
+
+
+# Expression
+Expression   = Call
+             | Message
+             | Variable
+             | Literal
+             | ParenExpr
+ParenExpr    = "(" expr:Expression ")" { $$ = expr; }
+
+# Message
+Message      = rcvr:MessageRecvr -
+               {
+                    PushStack([TQNodeMessage nodeWithReceiver:rcvr]);
+                    PushStack([NSMutableArray array]);
+               }
+               SelectorPart+
+               {
+                   NSMutableArray *arguments = PopStack();
+                   $$ = PopStack();
+                   [$$ setArguments:arguments];
+               }
+               "."?
+             | rcvr:MessageRecvr - name:Identifier - "."?
+               {
+                    $$ = [TQNodeMessage nodeWithReceiver:rcvr];
+                    NSError *err = nil;
+                    [[$$ arguments] addObject:[TQNodeArgument nodeWithPassedNode:nil identifier:name]];
+               }
+MessageRecvr = Variable
+             | Literal
+SelectorPart = name:Identifier? - ":" - param:MessageArg --
+               {
+                    [StackTop addObject:[TQNodeArgument nodeWithPassedNode:param identifier:name]];
+               }
+MessageArg   = ParenExpr
+             | Call
+             | Message
+             | Variable
+             | Literal
+
+# Call
+## callee(expr, expr)
+Call         = callee:Callee
+               {
+                    PushStack([TQNodeCall nodeWithCallee:callee]);
+                    PushStack([NSMutableArray array]);
+               }
+               "(" -- (CallArg (-- "," -- CallArg)*)? -- ")"
+               {
+                   NSMutableArray *arguments = PopStack();
+                   TQNodeMessage *call = PopStack();
+                   [call setArguments:arguments];
+                   NSLog(@"call> %@", call);
+               }
+Callee       = Variable
+CallArg      = arg:Call       { [StackTop addObject:arg]; }
+             | arg:Variable   { [StackTop addObject:arg]; }
+             | arg:Literal    { [StackTop addObject:arg]; }
+             | arg:ParenExpr  { [StackTop addObject:arg]; }
+
+
+# Basic components
+Variable     = name:Identifier
+             {
+                 $$ = [TQNodeVariable nodeWithName:name];
+             }
+
+Literal      = Number
+             | String
+
+tIF          = 'if'
+tELSE        = 'else'
+tWHILE       = 'while'
+tUNTIL       = 'until'
+tBREAK       = 'break'
+tSKIP        = 'skip'
+tNIL         = 'nil'
+tSELF        = 'self'
+tSUPER       = 'super'
+
+OpEq         = '=='
+OpNeq        = '!='
+OpAssign     = '='
+OpGEq        = '>='
+OpLEq        = '<='
+OpLesser     = '<'
+OpGreater    = '>'
+OpMul        = '*'
+OpDiv        = '/'
+OpAdd        = '+'
+OpSub        = '-'
+
+Number       = < "-"? [0-9]+ ("." [0-9]*)? ("e"[0-9]+)? >  { $$ = YYNSNUM; }
+             | < "-"? "." [0-9]+ ("e"[0-9]+)? >            { $$ = YYNSNUM; }
+Identifier   = < [a-z_][A-Za-z0-9_]* >                     { $$ = YYNSSTR; }
+Constant     = < [A-Z][A-Za-z0-9_]* >                      { $$ = YYNSSTR; }
+String       = '"' < [^\"]* > '"'                          { $$ = YYNSSTR; }
+
+-            = [ \t]*
+--           = EOL? -
+WS           = [ \t]+
+EOL          = (- ('\n' | '\r\n' | '\r'))+
+EOF          = - !.
+%%
+
+int main()
+{
+    GREG greg;
+    yyinit(&greg);
+
+    TQParserState parserState = {0};
+    parserState.currentToken.begin = 0;
+    parserState.currentToken.length = 0;
+    parserState.currentLine = 1;
+    parserState.stack = [NSMutableArray array];
+    greg.data = &parserState;
+
+    while(yyparse(&greg));
+    yydeinit(&greg);
+
+    return 0;
+}
+
+
+/*tREGEX      = "/" < ((\\/)|[^/])* > "/" < [im]* >*/
