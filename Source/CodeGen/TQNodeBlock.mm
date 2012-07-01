@@ -297,7 +297,6 @@ using namespace llvm;
 	AllocaInst *dstAlloca = builder->CreateAlloca(int8PtrTy, 0, "dstBlk.alloca");
 	AllocaInst *srcAlloca = builder->CreateAlloca(int8PtrTy, 0, "srcBlk.alloca");
 
-
 	Function::arg_iterator args = function->arg_begin();
 	builder->CreateStore(args, dstAlloca);
 	builder->CreateStore(++args, srcAlloca);
@@ -348,7 +347,7 @@ using namespace llvm;
 	builder->CreateStore(function->arg_begin(), blkAlloca);
 
 	Value *block = builder->CreateBitCast(builder->CreateLoad(blkAlloca), PointerType::getUnqual([self _blockLiteralTypeInProgram:aProgram]), "block");
-	Value *flags = ConstantInt::get(intTy, TQ_BLOCK_FIELD_IS_BYREF);
+	Value *flags = ConstantInt::get(intTy, TQ_BLOCK_FIELD_IS_BYREF);//|TQ_BLOCK_FIELD_IS_OBJECT);
 
 	int i = TQ_CAPTURE_IDX;
 	Value *varToDisposeOf;

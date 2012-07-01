@@ -21,7 +21,8 @@ using namespace llvm;
 	objc_getClass=_func_objc_getClass, TQRetainObject=_func_TQRetainObject, TQReleaseObject=_func_TQReleaseObject,
 	_Block_copy=_func__Block_copy, _Block_object_assign=_func__Block_object_assign,
 	_Block_object_dispose=_func__Block_object_dispose, imp_implementationWithBlock=_func_imp_implementationWithBlock,
-	object_getClass=_func_object_getClass, TQPrepareObjectForReturn=_func_TQPrepareObjectForReturn;
+	object_getClass=_func_object_getClass, TQPrepareObjectForReturn=_func_TQPrepareObjectForReturn,
+	TQAutoreleaseObject=_func_TQAutoreleaseObject;
 
 + (TQProgram *)programWithName:(NSString *)aName
 {
@@ -156,8 +157,9 @@ using namespace llvm;
 	//DEF_EXTERNAL_FUN(objc_storeWeak, ft_i8Ptr__i8PtrPtr_i8Ptr)
 	//DEF_EXTERNAL_FUN(objc_loadWeak, ft_i8Ptr__i8PtrPtr)
 	//DEF_EXTERNAL_FUN(objc_destroyWeak, ft_void__i8PtrPtr)
-	//DEF_EXTERNAL_FUN(TQRetainObject, ft_i8Ptr__i8Ptr)
+	DEF_EXTERNAL_FUN(TQRetainObject, ft_i8Ptr__i8Ptr)
 	//DEF_EXTERNAL_FUN(TQReleaseObject, ft_void__i8Ptr)
+	DEF_EXTERNAL_FUN(TQAutoreleaseObject, ft_i8Ptr__i8Ptr);
 	DEF_EXTERNAL_FUN(sel_registerName, ft_i8Ptr__i8Ptr)
 	//DEF_EXTERNAL_FUN(sel_getName, ft_i8Ptr__i8Ptr)
 	DEF_EXTERNAL_FUN(objc_getClass, ft_i8Ptr__i8Ptr)
@@ -210,6 +212,8 @@ using namespace llvm;
 	ExecutionEngine *engine = EngineBuilder(_llModule).create();
 	engine->addGlobalMapping(_func_TQPrepareObjectForReturn, (void*)&TQPrepareObjectForReturn);
 	engine->addGlobalMapping(_func_TQStoreStrongInByref, (void*)&TQStoreStrongInByref);
+	engine->addGlobalMapping(_func_TQRetainObject, (void*)&TQRetainObject);
+	engine->addGlobalMapping(_func_TQAutoreleaseObject, (void*)&TQAutoreleaseObject);
 
 	//std::vector<GenericValue> noargs;
 	//GenericValue val = engine->runFunction(_root.function, noargs);

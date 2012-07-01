@@ -52,7 +52,6 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
 
 	// Debug print (TODO: Remove and implement actual function bridging)
 	if([_callee isMemberOfClass:[TQNodeVariable class]] && [[_callee name] isEqualToString:@"print"]) {
-		NSLog(@"-------------NSLOG");
 		std::vector<Type*> nslog_args;
 		nslog_args.push_back(aProgram.llInt8PtrTy);
 		FunctionType *nslog_type = FunctionType::get(aProgram.llVoidTy, nslog_args, true);

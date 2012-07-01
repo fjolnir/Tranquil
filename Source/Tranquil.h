@@ -15,3 +15,4 @@
 #import "CodeGen/TQNodeReturn.h"
 #import "CodeGen/TQNodeString.h"
 #import "CodeGen/TQNodeVariable.h"
+#import "CodeGen/TQNodeConstant.h"

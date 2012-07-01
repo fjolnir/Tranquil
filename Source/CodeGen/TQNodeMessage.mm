@@ -60,7 +60,17 @@ using namespace llvm;
 {
 	llvm::IRBuilder<> *builder = aBlock.builder;
 
-	Value *selector =  builder->CreateGlobalStringPtr([[self selector] UTF8String], "selector");
+	NSString *selStr = [self selector];
+	BOOL needsAutorelease = NO;
+	if([selStr hasPrefix:@"init"])
+		needsAutorelease = YES;
+	else if([selStr hasPrefix:@"copy"])
+		needsAutorelease = YES;
+	else if([selStr isEqualToString:@"new"])
+		needsAutorelease = YES;
+
+
+	Value *selector =  builder->CreateGlobalStringPtr([selStr UTF8String], "selector");
 
 	CallInst *selReg = builder->CreateCall(aProgram.sel_registerName, selector);
 
@@ -74,7 +84,10 @@ using namespace llvm;
 		args.push_back([arg generateCodeInProgram:aProgram block:aBlock error:aoErr]);
 	}
 
-	return builder->CreateCall(aProgram.objc_msgSend, args);
+	Value *ret = builder->CreateCall(aProgram.objc_msgSend, args);
+	if(needsAutorelease)
+		ret = builder->CreateCall(aProgram.TQAutoreleaseObject, ret);
+	return ret;
 }
 
 @end

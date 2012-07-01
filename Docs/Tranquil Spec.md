@@ -14,14 +14,6 @@ nil
 self
 super
 
-{
-	a=b
-	block = {
-		a:foo.
-	}
-	return block
-}
-
 \ Variable assignment
 a = b \ Variables are local in scope
       \ Variables must begin with a lowercase letter, as uppercase names

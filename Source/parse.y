@@ -26,6 +26,7 @@
 	TQNodeBinaryOperator *binOp;
 	TQNodeIdentifier *identifier;
 	TQNodeReturn *ret;
+	TQNodeConstant *constant;
 	NSMutableArray *array;
 }
 
@@ -59,7 +60,7 @@
 
 %type <number> number
 %type <string> string
-%type <identifier> identifier constant
+%type <identifier> identifier
 %type <variable> variable
 %type <block> block
 %type <call> call
@@ -69,6 +70,7 @@
 %type <memberAccess> member_access
 %type <binOp> assignment
 %type <ret> return
+%type <constant> constant
 
 %type <node> expression expr_in_parens callee call_arg statement lhs message_receiver literal message_arg
 %type <array> block_args call_args class_def methods statements method_body message_args method_args
@@ -166,7 +168,7 @@ block_args:
 	  identifier opt_nl {
 		TQNodeArgumentDef *arg = [TQNodeArgumentDef nodeWithLocalName:[$1 value] identifier:nil];
 		$$ = [NSMutableArray arrayWithObjects:arg, nil];
-	} 
+	}
 	| block_args ',' identifier opt_nl {
 		TQNodeArgumentDef *arg = [TQNodeArgumentDef nodeWithLocalName:[$3 value] identifier:nil];
 		[$$ addObject:arg];
@@ -270,7 +272,7 @@ method_args:
 	  ':' identifier opt_nl {
 		TQNodeArgumentDef *arg = [TQNodeArgumentDef nodeWithLocalName:[$2 value] identifier:nil];
 		$$ = [NSMutableArray arrayWithObjects:arg, nil];
-	} 
+	}
 	| method_args ':' identifier opt_nl {
 		TQNodeArgumentDef *arg = [TQNodeArgumentDef nodeWithLocalName:[$3 value] identifier:nil];
 		[$$ addObject:arg];
@@ -323,8 +325,9 @@ message_receiver:
 	  member_access      { $$ = $<node>1; }
 	| call               { $$ = $<node>1; }
 	| variable           { $$ = $<node>1; }
+	| constant           { $$ = $<node>1; }
 	| literal
-	| expr_in_parens        { $$ = $<node>1; }
+	| expr_in_parens     { $$ = $<node>1; }
 	;
 message_args:
 	 message_args ':' message_arg {
@@ -366,7 +369,7 @@ string: tSTRING { $$ = [TQNodeString nodeWithCString:$1]; }
 identifier: tIDENTIFIER {  $$ = [TQNodeIdentifier nodeWithCString:$1]; }
 	;
 
-constant: tCONSTANT     {  $$ = [TQNodeIdentifier nodeWithCString:$1]; }
+constant: tCONSTANT     {  $$ = [TQNodeConstant nodeWithCString:$1]; }
 	;
 %%
 

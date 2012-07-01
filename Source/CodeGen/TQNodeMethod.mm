@@ -37,7 +37,6 @@ using namespace llvm;
 
 - (BOOL)addArgument:(TQNodeArgument *)aArgument error:(NSError **)aoError
 {
-	NSLog(@"-------- adding metharg %@ now %d", aArgument, self.arguments.count);
 	if(self.arguments.count == 2)
 		TQAssertSoft(aArgument.identifier != nil,
 		             kTQSyntaxErrorDomain, kTQUnexpectedIdentifier, NO,
@@ -102,7 +101,6 @@ using namespace llvm;
                                  class:(TQNodeClass *)aClass
                                  error:(NSError **)aoErr
 {
-	NSLog(@"MAKING METHOD: %@", self.arguments);
 	Value *block = [super generateCodeInProgram:aProgram block:aBlock error:aoErr];
 	if(*aoErr)
 		return NULL;
@@ -116,7 +114,7 @@ using namespace llvm;
 	if(_type == kTQClassMethod)
 		classPtr = builder->CreateCall(aProgram.object_getClass, classPtr);
 	Value *oldImp = builder->CreateCall4(aProgram.class_replaceMethod, classPtr, selector, imp, signature);
-	
+
 	return NULL;
 }
 

@@ -111,9 +111,11 @@ using namespace llvm;
 
 	Value *destAddr  = builder->CreateBitCast(builder->CreateStructGEP(dstByRef, 6), int8PtrTy);
 	Value *srcPtr = builder->CreateLoad(builder->CreateStructGEP(srcByRef, 6));
+	builder->CreateCall(aProgram.TQRetainObject, srcPtr);
 
 	builder->CreateCall3(aProgram._Block_object_assign, destAddr, srcPtr, flags);
 	builder->CreateRetVoid();
+
 	return keepHelper;
 }
 
@@ -141,6 +143,10 @@ using namespace llvm;
 	Value *byref  = builder->CreateBitCast(disposeHelper->arg_begin(), aProgram.llInt8PtrTy);
 	Value *nilPtr = ConstantPointerNull::get(aProgram.llInt8PtrTy);
 	builder->CreateCall2(aProgram.TQStoreStrongInByref, byref, nilPtr);
+
+	Value *flags = ConstantInt::get(aProgram.llIntTy, TQ_BLOCK_BYREF_CALLER | TQ_BLOCK_FIELD_IS_OBJECT);
+	builder->CreateCall2(aProgram._Block_object_dispose, byref, flags);
+
 
 	builder->CreateRetVoid();
 	return disposeHelper;
@@ -213,6 +219,11 @@ using namespace llvm;
 	}
 	IRBuilder<> *builder = aBlock.builder;
 	
-	return builder->CreateCall2(aProgram.TQStoreStrongInByref, builder->CreateBitCast(_alloca, aProgram.llInt8PtrTy), aValue);
+	Value *forwarding = builder->CreateLoad(builder->CreateStructGEP(_alloca, 1), [self _llvmRegisterName:@"forwarding"]);
+	forwarding = builder->CreateBitCast(forwarding, PointerType::getUnqual([self captureStructTypeInProgram:aProgram]));
+
+	return aBlock.builder->CreateStore(aValue, builder->CreateStructGEP(forwarding, 6));
+	
+//	return builder->CreateCall2(aProgram.TQStoreStrongInByref, builder->CreateBitCast(_alloca, aProgram.llInt8PtrTy), aValue);
 }
 @end
