@@ -61,7 +61,7 @@ using namespace llvm;
 			Value *value = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
 			if(*aoError)
 				return NULL;
-			return builder->CreateCall4(aProgram.objc_msgSend, settee, builder->CreateLoad(selector), value, key);
+			return builder->CreateCall4(aProgram.objc_msgSend, settee, builder->CreateLoad(selector), key, value);
 		} else {
 			// We must make sure the storage exists before evaluating the right side, so that if the assigned value is a
 			// block, it can reference itself

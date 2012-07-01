@@ -41,6 +41,9 @@ struct TQBlock_byref {
 extern id _objc_msgSend_hack(id, SEL)          asm("_objc_msgSend");
 extern id _objc_msgSend_hack2(id, SEL, id)     asm("_objc_msgSend");
 extern id _objc_msgSend_hack3(id, SEL, id, id) asm("_objc_msgSend");
+extern id _objc_msgSend_hack2i(id, SEL, int)     asm("_objc_msgSend");
+extern id _objc_msgSend_hack3i(id, SEL, id, int) asm("_objc_msgSend");
+
 
 id TQRetainObject(id obj)
 {
@@ -212,8 +215,6 @@ BOOL TQAugmentClassWithOperators(Class klass)
 	imp = imp_implementationWithBlock(^(id a, id key, id val) { return _objc_msgSend_hack3(a, @selector(setValue:forKey:), val, key); });
 	class_addMethod(klass, TQSetterOpSel, imp, "@@:@@");
 
-
-
 	return YES;
 }
 
@@ -234,4 +235,35 @@ void TQInitializeRuntime()
 	TQSetterOpSel             = sel_registerName("[]=::");
 
 	TQAugmentClassWithOperators([NSObject class]);
+
+	// Variation of []/[]= for collections
+	IMP imp;
+	imp = imp_implementationWithBlock(^(id a, id key)         { return _objc_msgSend_hack2(a, @selector(objectForKey:), key); });
+	class_addMethod([NSDictionary class], TQGetterOpSel, imp, "@@:@");
+	class_addMethod([NSMapTable class], TQGetterOpSel, imp, "@@:@");
+
+	imp = imp_implementationWithBlock(^(id a, TQNumber *idx)   {
+		return _objc_msgSend_hack2i(a, @selector(objectAtIndex:), (int)[idx doubleValue]);
+	});
+	class_addMethod([NSArray class], TQGetterOpSel, imp, "@@:@");
+	imp = imp_implementationWithBlock(^(id a, TQNumber *idx)   {
+		return _objc_msgSend_hack2i(a, @selector(pointerAtIndex:), (int)[idx doubleValue]);
+	});
+
+	class_addMethod([NSPointerArray class], TQGetterOpSel, imp, "@@:@");
+	// []=
+	imp = imp_implementationWithBlock(^(id a, id key, id val) {
+		return _objc_msgSend_hack3(a, @selector(setObject:forKey:), val, key);
+	});
+	class_addMethod([NSMutableDictionary class], TQSetterOpSel, imp, "@@:@@");
+	class_addMethod([NSMapTable class], TQSetterOpSel, imp, "@@:@@");
+
+	imp = imp_implementationWithBlock(^(id a, TQNumber *idx, id val)   {
+		return _objc_msgSend_hack3i(a, @selector(setObject:atIndex:), val, (int)[idx doubleValue]);
+	});
+	class_addMethod([NSMutableArray class], TQSetterOpSel, imp, "@@:@");
+	imp = imp_implementationWithBlock(^(id a, TQNumber *idx, id val)   {
+		return _objc_msgSend_hack3i(a, @selector(tq_setPointer:atIndex:), val, (int)[idx doubleValue]);
+	});
+	class_addMethod([NSPointerArray class], TQSetterOpSel, imp, "@@:@");
 }

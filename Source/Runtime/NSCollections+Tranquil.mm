@@ -44,4 +44,15 @@ void *TQSentinel = (void*)@"3d2c9ac0bf3911e1afa70800200c9a66aaaaaaaaa";
 
 	return ret;
 }
+
+- (void)tq_setPointer:(void*)aPtr atIndex:(NSUInteger)aIdx
+{
+	NSUInteger count = [self count];
+	if(aIdx < count)
+		[self replacePointerAtIndex:aIdx withPointer:aPtr];
+	else if(aIdx == count)
+		[self addPointer:aPtr];
+	else
+		assert(false);
+}
 @end
