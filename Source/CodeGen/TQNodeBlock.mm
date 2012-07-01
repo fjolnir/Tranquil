@@ -383,6 +383,8 @@ using namespace llvm;
 	_basicBlock = BasicBlock::Create(mod->getContext(), "entry", _function, 0);
 	_builder = new IRBuilder<>(_basicBlock);
 
+	//Value *autoreleasePool = _builder->CreateCall(aProgram.objc_autoreleasePoolPush);
+
 	// Load the arguments
 	llvm::Function::arg_iterator argumentIterator = _function->arg_begin();
 	Value *thisBlock = NULL;
@@ -425,9 +427,12 @@ using namespace llvm;
 		}
 	}
 
-	if(!_basicBlock->getTerminator())
-		ReturnInst::Create(mod->getContext(), ConstantPointerNull::get(int8PtrTy), _basicBlock);
-
+	Instruction *terminator = _basicBlock->getTerminator();
+	if(!terminator)
+		terminator = ReturnInst::Create(mod->getContext(), ConstantPointerNull::get(int8PtrTy), _basicBlock);
+	
+	//Instruction *poolPopInst = CallInst::Create(aProgram.objc_autoreleasePoolPop, autoreleasePool);
+	//_basicBlock->getInstList().insert(terminator, poolPopInst);
 	return _function;
 }
 

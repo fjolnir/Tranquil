@@ -23,7 +23,8 @@ using namespace llvm;
 	_Block_copy=_func__Block_copy, _Block_object_assign=_func__Block_object_assign,
 	_Block_object_dispose=_func__Block_object_dispose, imp_implementationWithBlock=_func_imp_implementationWithBlock,
 	object_getClass=_func_object_getClass, TQPrepareObjectForReturn=_func_TQPrepareObjectForReturn,
-	TQAutoreleaseObject=_func_TQAutoreleaseObject;
+	TQAutoreleaseObject=_func_TQAutoreleaseObject, objc_autoreleasePoolPush=_func_objc_autoreleasePoolPush,
+	objc_autoreleasePoolPop=_func_objc_autoreleasePoolPop;
 
 + (TQProgram *)programWithName:(NSString *)aName
 {
@@ -147,6 +148,10 @@ using namespace llvm;
 	// id(id)
 	FunctionType *ft_i8Ptr__i8Ptr = FunctionType::get(_llInt8PtrTy, args_i8Ptr, false);
 
+	// id()
+	std::vector<Type*> args_empty;
+	FunctionType *ft_i8Ptr__void = FunctionType::get(_llInt8PtrTy, args_empty, false);
+
 	DEF_EXTERNAL_FUN(objc_allocateClassPair, ft_i8Ptr__i8Ptr_i8Ptr_sizeT)
 	DEF_EXTERNAL_FUN(objc_registerClassPair, ft_void__i8Ptr)
 	//DEF_EXTERNAL_FUN(class_addIvar, ft_i8__i8Ptr_i8Ptr_sizeT_i8_i8Ptr)
@@ -168,7 +173,8 @@ using namespace llvm;
 	DEF_EXTERNAL_FUN(_Block_object_assign, ft_void__i8Ptr_i8Ptr_int);
 	DEF_EXTERNAL_FUN(_Block_object_dispose, ft_void__i8Ptr_int);
 	DEF_EXTERNAL_FUN(TQPrepareObjectForReturn, ft_i8Ptr__i8Ptr);
-
+	DEF_EXTERNAL_FUN(objc_autoreleasePoolPush, ft_i8Ptr__void);
+	DEF_EXTERNAL_FUN(objc_autoreleasePoolPop, ft_void__i8Ptr);
 
 #undef DEF_EXTERNAL_FUN
 
@@ -243,7 +249,7 @@ using namespace llvm;
 
 	if([ret isKindOfClass:NSClassFromString(@"NSBlock")]) {
 		id (^test)(NSString *) = ret;
-		NSNumber *num = test(@"hoya");
+		id num = test(@"hoya");
 		TQLog(@"Block retval: %@ (%@)", num, [num class]);
 	}
 	
