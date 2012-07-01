@@ -66,6 +66,8 @@ Program      = (Statement --)+ EOF
 Statement    = (
                If
              | Loop
+             | BreakStmt
+             | SkipStmt
              | Call
              | IncrDecrOp
              | Message
@@ -470,8 +472,8 @@ Literal      = Number
              | Array
              | Dictionary
 
-BreakStmt    = 'break'              { ExtendToken();                          }
-SkipStmt     = 'skip'               { ExtendToken();                          }
+BreakStmt    = 'break'              { ExtendToken(); $$ = [TQNodeBreak node]; }
+SkipStmt     = 'skip'               { ExtendToken(); $$ = [TQNodeSkip node];  }
 Nil          = ('nil' | '('--')')   { ExtendToken(); $$ = [TQNodeNil node];   }
 Self         = 'self'               { ExtendToken(); $$ = [TQNodeSelf node];  }
 Super        = 'super'              { ExtendToken(); $$ = [TQNodeSuper node]; }

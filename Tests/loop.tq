@@ -1,0 +1,13 @@
+a = 0
+until (a > 100) {
+    ++a
+    if(a == 1) {
+        skip
+    }
+    print("%@", a)
+    if(a > 3) {
+        break
+    } else {
+        print("Lesser than 4")
+    }
+}

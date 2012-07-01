@@ -1,4 +1,5 @@
 #import "TQNodeConditionalBlock.h"
+#import "TQNodeLoopBlock.h"
 #import "../TQProgram.h"
 #import "TQNodeVariable.h"
 #import "TQNodeReturn.h"
@@ -76,6 +77,11 @@ using namespace llvm;
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
 {
+    if([aBlock isKindOfClass:[TQNodeWhileBlock class]])
+        _containingLoop = (TQNodeWhileBlock *)aBlock;
+    else if([aBlock isKindOfClass:[self class]] && [(TQNodeIfBlock *)aBlock containingLoop])
+        _containingLoop = [(TQNodeIfBlock *)aBlock containingLoop];
+
     IRBuilder<> *builder = aBlock.builder;
     Module *mod = aProgram.llModule;
 

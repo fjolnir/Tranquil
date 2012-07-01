@@ -1,4 +1,6 @@
 #import "TQNodeLoopBlock.h"
+#import "TQNodeConditionalBlock.h"
+#import "../TQDebug.h"
 #import "../TQProgram.h"
 #import "TQNodeVariable.h"
 #import "TQNodeReturn.h"
@@ -6,7 +8,7 @@
 using namespace llvm;
 
 @implementation TQNodeWhileBlock
-@synthesize condition=_condition;
+@synthesize condition=_condition, loopStartBlock=_loopStartBlock, loopEndBlock=_loopEndBlock;
 
 
 + (TQNodeWhileBlock *)node { return (TQNodeWhileBlock *)[super node]; }
@@ -77,6 +79,7 @@ using namespace llvm;
     self.locals          = aBlock.locals;
 
     BasicBlock *condBB = BasicBlock::Create(mod->getContext(), "loopCond", aBlock.function);
+    _loopStartBlock = condBB;
     IRBuilder<> *condBuilder = new IRBuilder<>(condBB);
     aBlock.builder->CreateBr(condBB);
 
@@ -84,6 +87,11 @@ using namespace llvm;
     IRBuilder<> *loopBuilder = new IRBuilder<>(loopBB);
     self.basicBlock = loopBB;
     self.builder = loopBuilder;
+
+    BasicBlock *endloopBB = BasicBlock::Create(mod->getContext(), "endloop", aBlock.function);
+    _loopEndBlock = endloopBB;
+    IRBuilder<> *endloopBuilder = new IRBuilder<>(endloopBB);
+
 
     for(TQNode *stmt in self.statements) {
         [stmt generateCodeInProgram:aProgram block:self error:aoErr];
@@ -93,8 +101,6 @@ using namespace llvm;
             break;
     }
 
-    BasicBlock *endloopBB = BasicBlock::Create(mod->getContext(), "endloop", aBlock.function);
-    IRBuilder<> *endloopBuilder = new IRBuilder<>(endloopBB);
 
     // If our basic block has been changed that means there was a nested conditional/loop
     // We need to fix it by adding a br pointing to the loop condition
@@ -179,5 +185,37 @@ using namespace llvm;
                                            value:(llvm::Value *)aValue
 {
     return aBuilder->CreateICmpEQ(aValue, ConstantPointerNull::get(aProgram.llInt8PtrTy), "untilTest");
+}
+@end
+
+@implementation TQNodeBreak
++ (TQNodeBreak *)node { return (TQNodeBreak *)[super node]; }
+
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
+{
+    TQNodeWhileBlock *loop = nil;
+    if([aBlock isKindOfClass:[TQNodeWhileBlock class]])
+        loop = (TQNodeWhileBlock *)aBlock;
+    else if([aBlock isKindOfClass:[TQNodeIfBlock class]])
+        loop = [(TQNodeIfBlock *)aBlock containingLoop];
+    TQAssertSoft(loop != nil, kTQSyntaxErrorDomain, kTQUnexpectedStatement, NULL, @"break statements can only be used within loops");
+
+    return aBlock.builder->CreateBr(loop.loopEndBlock);
+}
+@end
+
+@implementation TQNodeSkip
++ (TQNodeSkip *)node { return (TQNodeSkip *)[super node]; }
+
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
+{
+    TQNodeWhileBlock *loop = nil;
+    if([aBlock isKindOfClass:[TQNodeWhileBlock class]])
+        loop = (TQNodeWhileBlock *)aBlock;
+    else if([aBlock isKindOfClass:[TQNodeIfBlock class]])
+        loop = [(TQNodeIfBlock *)aBlock containingLoop];
+    TQAssertSoft(loop != nil, kTQSyntaxErrorDomain, kTQUnexpectedStatement, NULL, @"skip statements can only be used within loops");
+
+    return aBlock.builder->CreateBr(loop.loopStartBlock);
 }
 @end
