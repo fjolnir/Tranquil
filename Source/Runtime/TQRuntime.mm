@@ -236,34 +236,28 @@ void TQInitializeRuntime()
 
 	TQAugmentClassWithOperators([NSObject class]);
 
-	// Variation of []/[]= for collections
+	// Variation of [] for collections
 	IMP imp;
-	imp = imp_implementationWithBlock(^(id a, id key)         { return _objc_msgSend_hack2(a, @selector(objectForKey:), key); });
+	imp = imp_implementationWithBlock(^(id a, id key)         { return _objc_msgSend_hack2(a, @selector(objectForKeyedSubscript:), key); });
 	class_addMethod([NSDictionary class], TQGetterOpSel, imp, "@@:@");
 	class_addMethod([NSMapTable class], TQGetterOpSel, imp, "@@:@");
 
 	imp = imp_implementationWithBlock(^(id a, TQNumber *idx)   {
-		return _objc_msgSend_hack2i(a, @selector(objectAtIndex:), (int)[idx doubleValue]);
+		return _objc_msgSend_hack2i(a, @selector(objectAtIndexedSubscript:), (int)[idx doubleValue]);
 	});
 	class_addMethod([NSArray class], TQGetterOpSel, imp, "@@:@");
-	imp = imp_implementationWithBlock(^(id a, TQNumber *idx)   {
-		return _objc_msgSend_hack2i(a, @selector(pointerAtIndex:), (int)[idx doubleValue]);
-	});
-
 	class_addMethod([NSPointerArray class], TQGetterOpSel, imp, "@@:@");
+
 	// []=
 	imp = imp_implementationWithBlock(^(id a, id key, id val) {
-		return _objc_msgSend_hack3(a, @selector(setObject:forKey:), val, key);
+		return _objc_msgSend_hack3(a, @selector(setObject:forKeyedSubscript:), val, key);
 	});
 	class_addMethod([NSMutableDictionary class], TQSetterOpSel, imp, "@@:@@");
 	class_addMethod([NSMapTable class], TQSetterOpSel, imp, "@@:@@");
 
 	imp = imp_implementationWithBlock(^(id a, TQNumber *idx, id val)   {
-		return _objc_msgSend_hack3i(a, @selector(setObject:atIndex:), val, (int)[idx doubleValue]);
+		return _objc_msgSend_hack3i(a, @selector(setObject:atIndexedSubscript:), val, (int)[idx doubleValue]);
 	});
 	class_addMethod([NSMutableArray class], TQSetterOpSel, imp, "@@:@");
-	imp = imp_implementationWithBlock(^(id a, TQNumber *idx, id val)   {
-		return _objc_msgSend_hack3i(a, @selector(tq_setPointer:atIndex:), val, (int)[idx doubleValue]);
-	});
 	class_addMethod([NSPointerArray class], TQSetterOpSel, imp, "@@:@");
 }

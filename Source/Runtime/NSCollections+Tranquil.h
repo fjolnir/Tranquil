@@ -4,9 +4,12 @@ extern void *TQSentinel;
 
 @interface NSMapTable (Tranquil)
 + (NSMapTable *)tq_mapTableWithObjectsAndKeys:(id)firstObject , ...; // Arguments terminated by TQSentinel
+- (id)objectForKeyedSubscript:(id)key;
+- (void)setObject:(id)obj forKeyedSubscript:(id)key;
 @end
 
 @interface NSPointerArray (Tranquil)
 + (NSPointerArray *)tq_pointerArrayWithObjects:(id)firstObject , ...;  // Arguments terminated by TQSentinel
-- (void)tq_setPointer:(void*)aPtr atIndex:(NSUInteger)aIdx;
+- (void)setObject:(void*)aPtr atIndexedSubscript:(NSUInteger)aIdx;
+- (id)objectAtIndexedSubscript:(NSUInteger)aIdx;
 @end

@@ -26,6 +26,16 @@ void *TQSentinel = (void*)@"3d2c9ac0bf3911e1afa70800200c9a66aaaaaaaaa";
 
 	return ret;
 }
+
+- (id)objectForKeyedSubscript:(id)key
+{
+	return [self objectForKey:key];
+}
+
+- (void)setObject:(id)obj forKeyedSubscript:(id)key
+{
+	[self setObject:obj forKey:key];
+}
 @end
 
 @implementation NSPointerArray (Tranquil)
@@ -45,7 +55,7 @@ void *TQSentinel = (void*)@"3d2c9ac0bf3911e1afa70800200c9a66aaaaaaaaa";
 	return ret;
 }
 
-- (void)tq_setPointer:(void*)aPtr atIndex:(NSUInteger)aIdx
+- (void)setObject:(void*)aPtr atIndexedSubscript:(NSUInteger)aIdx
 {
 	NSUInteger count = [self count];
 	if(aIdx < count)
@@ -54,5 +64,10 @@ void *TQSentinel = (void*)@"3d2c9ac0bf3911e1afa70800200c9a66aaaaaaaaa";
 		[self addPointer:aPtr];
 	else
 		assert(false);
+}
+
+- (id)objectAtIndexedSubscript:(NSUInteger)aIdx
+{
+	return (id)[self pointerAtIndex:aIdx];
 }
 @end
