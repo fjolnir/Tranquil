@@ -100,11 +100,11 @@ variable:
 	;
 
 statements: statement {
-		NSLog(NSSTR("----------- %@"), $1);
+		/*NSLog(NSSTR("----------- %@"), $1);*/
 		$$ = [NSMutableArray arrayWithObjects:$1, nil];
 	}
 	| statements opt_nl statement {
-		NSLog(NSSTR("----------- %@"), $3);
+		/*NSLog(NSSTR("----------- %@"), $3);*/
 		[$$ addObject:$3];
 	}
 	;
@@ -389,11 +389,10 @@ int yywrap(void)
 void parse()
 {
 	TQParserState state = { [TQProgram programWithName:@"Test"], nil };
-	yydebug = 5;
 	yyparse(&state);
 	NSLog(@"------------------------------------------");
-	NSLog(@"%@", state.program);
-	NSLog(@"------------------------------------------");
+	/*NSLog(@"%@", state.program);*/
+	/*NSLog(@"------------------------------------------");*/
 	[state.program run];
 }
 

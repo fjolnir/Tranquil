@@ -15,7 +15,7 @@ LEXFLAGS = [
 ].join(' ')
 
 YACCFLAGS = [
-	'-t',
+	#'-t',
 	'-d',
 	'-v',
 	"-o #{YACC_OUTPATH}",
