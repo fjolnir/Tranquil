@@ -42,7 +42,8 @@
     *_Block_object_assign, *_Block_object_dispose, *imp_implementationWithBlock,
     *object_getClass, *TQPrepareObjectForReturn, *TQAutoreleaseObject,
     *objc_autoreleasePoolPush, *objc_autoreleasePoolPop, *TQSetValueForKey, *TQValueForKey,
-    *TQGetOrCreateClass, *TQObjectsAreEqual, *TQObjectsAreNotEqual, *TQObjectGetSuperClass;
+    *TQGetOrCreateClass, *TQObjectsAreEqual, *TQObjectsAreNotEqual, *TQObjectGetSuperClass,
+    *TQVaargsToArray;
 
 #pragma mark - Methods
 

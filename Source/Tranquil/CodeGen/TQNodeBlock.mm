@@ -3,6 +3,7 @@
 #import "../TQDebug.h"
 #import "TQNodeVariable.h"
 #import "TQNodeArgumentDef.h"
+#import <llvm/Intrinsics.h>
 
 // Block invoke functions are numbered from 0
 #define TQ_BLOCK_FUN_PREFIX @"__tq_block_invoke_"
@@ -20,7 +21,7 @@ using namespace llvm;
 @implementation TQNodeBlock
 @synthesize arguments=_arguments, statements=_statements, locals=_locals, name=_name,
     basicBlock=_basicBlock, function=_function, builder=_builder, autoreleasePool=_autoreleasePool,
-    isCompactBlock=_isCompactBlock, parent=_parent;
+    isCompactBlock=_isCompactBlock, parent=_parent, isVariadic=_isVariadic;
 
 + (TQNodeBlock *)node { return (TQNodeBlock *)[super node]; }
 
@@ -55,16 +56,18 @@ using namespace llvm;
 - (NSString *)description
 {
     NSMutableString *out = [NSMutableString stringWithString:@"<blk@ {"];
-    if(_arguments.count > 0) {
+    if(_arguments.count > 0 || _isVariadic) {
         int i = 1;
         for(TQNodeArgumentDef *arg in _arguments) {
             [out appendFormat:@"%@", [arg name]];
             if([arg defaultArgument])
                 [out appendFormat:@" = %@", [arg defaultArgument]];
 
-            if(i++ < [_arguments count])
-            [out appendString:@", "];
+            if(i++ < [_arguments count] || _isVariadic)
+                [out appendString:@", "];
         }
+        if(_isVariadic)
+            [out appendString:@"..."];
         [out appendString:@"|"];
     }
     if(_statements.count > 0) {
@@ -188,7 +191,7 @@ using namespace llvm;
     elements.push_back(llvm::Constant::getNullValue(aProgram.llInt8PtrTy));
 
     elements.push_back(llvm::ConstantInt::get(int32Ty, [_arguments count]-1));
-    elements.push_back(llvm::ConstantInt::get(int8Ty, 0)); // isVariadic? always false for now
+    elements.push_back(llvm::ConstantInt::get(int8Ty, _isVariadic)); // isVariadic? always false for now
 
     llvm::Constant *init = llvm::ConstantStruct::getAnon(elements);
 
@@ -354,7 +357,7 @@ using namespace llvm;
 
     // Build the invoke function
     std::vector<Type *> paramTypes(_arguments.count, int8PtrTy);
-    FunctionType* funType = FunctionType::get(int8PtrTy, paramTypes, false); // TODO: Support variadics
+    FunctionType* funType = FunctionType::get(int8PtrTy, paramTypes, _isVariadic);
 
     llvm::Module *mod = aProgram.llModule;
 
@@ -412,8 +415,22 @@ using namespace llvm;
         [local store:argValue inProgram:aProgram block:self error:aoErr];
         [_locals setObject:local forKey:[argDef name]];
     }
+    if(_isVariadic) {
+        // Create a dictionary and loop through the va_list till we reach the sentinel
+        Value *vaList = _builder->CreateAlloca(aProgram.llInt8PtrTy, NULL, "valist");
+        Function *vaStart = Intrinsic::getDeclaration(mod, Intrinsic::vastart);
+        Function *vaEnd = Intrinsic::getDeclaration(mod, Intrinsic::vaend);
 
+        Value *valistCast = _builder->CreateBitCast(vaList, aProgram.llInt8PtrTy);
+        _builder->CreateCall(vaStart, valistCast);
+        Value *vaargArray = _builder->CreateCall(aProgram.TQVaargsToArray, valistCast);
+        _builder->CreateCall(vaEnd, valistCast);
+        TQNodeVariable *dotDotDot = [TQNodeVariable nodeWithName:@"..."];
+        [dotDotDot store:vaargArray inProgram:aProgram block:self error:aoErr];
+        [_locals setObject:dotDotDot forKey:[dotDotDot name]];
+    }
 
+    Value *val;
     for(TQNode *stmt in _statements) {
         [stmt generateCodeInProgram:aProgram block:self error:aoErr];
         if(*aoErr) {

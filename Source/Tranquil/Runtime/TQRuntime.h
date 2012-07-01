@@ -1,6 +1,7 @@
 // Tranquil runtime functions
 
 #import <Foundation/Foundation.h>
+#import <stdarg.h>
 
 extern id TQSentinel;
 extern id TQValid;
@@ -60,6 +61,7 @@ void TQSetValueForKey(id obj, char *key, id value);
 
 BOOL TQObjectIsStackBlock(id obj);
 id TQPrepareObjectForReturn(id obj);
+NSPointerArray *TQVaargsToArray(va_list *items);
 
 // Looks up a class if it exists, otherwise registers it
 Class TQGetOrCreateClass(const char *name, const char *superName);

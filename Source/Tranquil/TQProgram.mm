@@ -58,7 +58,8 @@ using namespace llvm;
     TQAutoreleaseObject=_func_TQAutoreleaseObject, objc_autoreleasePoolPush=_func_objc_autoreleasePoolPush,
     objc_autoreleasePoolPop=_func_objc_autoreleasePoolPop, TQSetValueForKey=_func_TQSetValueForKey,
     TQValueForKey=_func_TQValueForKey, TQGetOrCreateClass=_func_TQGetOrCreateClass,
-    TQObjectsAreEqual=_func_TQObjectsAreEqual, TQObjectsAreNotEqual=_func_TQObjectsAreNotEqual, TQObjectGetSuperClass=_func_TQObjectGetSuperClass;
+    TQObjectsAreEqual=_func_TQObjectsAreEqual, TQObjectsAreNotEqual=_func_TQObjectsAreNotEqual, TQObjectGetSuperClass=_func_TQObjectGetSuperClass,
+    TQVaargsToArray=_func_TQVaargsToArray;
 
 + (TQProgram *)programWithName:(NSString *)aName
 {
@@ -225,7 +226,7 @@ using namespace llvm;
     DEF_EXTERNAL_FUN(TQObjectsAreEqual, ft_i8Ptr__i8Ptr_i8Ptr);
     DEF_EXTERNAL_FUN(TQObjectsAreNotEqual, ft_i8Ptr__i8Ptr_i8Ptr);
     DEF_EXTERNAL_FUN(TQObjectGetSuperClass, ft_i8Ptr__i8Ptr);
-
+    DEF_EXTERNAL_FUN(TQVaargsToArray, ft_i8Ptr__i8Ptr);
 #undef DEF_EXTERNAL_FUN
 
     return self;
@@ -295,6 +296,7 @@ using namespace llvm;
     engine->addGlobalMapping(_func_TQObjectsAreEqual, (void*)&TQObjectsAreEqual);
     engine->addGlobalMapping(_func_TQObjectsAreNotEqual, (void*)&TQObjectsAreNotEqual);
     engine->addGlobalMapping(_func_TQObjectGetSuperClass, (void*)&TQObjectGetSuperClass);
+    engine->addGlobalMapping(_func_TQVaargsToArray, (void*)&TQVaargsToArray);
 
     //std::vector<GenericValue> noargs;
     //GenericValue val = engine->runFunction(_root.function, noargs);

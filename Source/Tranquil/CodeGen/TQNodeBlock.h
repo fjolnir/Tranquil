@@ -17,6 +17,7 @@
 @property(readwrite, copy, nonatomic) NSMutableArray *statements;
 @property(readwrite, retain) NSMutableDictionary *locals;
 @property(readwrite, copy) NSString *name;
+@property(readwrite, assign) BOOL isVariadic;
 @property(readwrite, assign) llvm::BasicBlock *basicBlock;
 @property(readwrite, assign) llvm::Function *function;
 @property(readwrite, assign) llvm::IRBuilder<> *builder;

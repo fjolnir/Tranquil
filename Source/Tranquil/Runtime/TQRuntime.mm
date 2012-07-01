@@ -214,6 +214,16 @@ id TQPrepareObjectForReturn(id obj)
     return obj;
 }
 
+NSPointerArray *TQVaargsToArray(va_list *items)
+{
+    register id arg;
+    NSPointerArray *arr = [NSPointerArray pointerArrayWithWeakObjects];
+    while((arg = va_arg(*items, id)) != TQSentinel) {
+        [arr addPointer:arg];
+    }
+    return arr;
+}
+
 #pragma mark - Operators
 
 BOOL TQAugmentClassWithOperators(Class klass)

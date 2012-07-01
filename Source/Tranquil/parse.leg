@@ -112,6 +112,7 @@ NoEqExpr     = Call
              | Property
              | RegExp
              | Self
+             | Variadic
              | Literal
              | Constant
              | Variable
@@ -147,6 +148,7 @@ MessageRecvr = SubscriptExp
              | Constant
              | Call
              | Super
+             | Variadic
              | Literal
              | Variable
              | ParenExpr
@@ -197,7 +199,7 @@ Block        = '{' --
                     PushStack([TQNodeBlock node]);
                     PushStack([NSMutableArray array]);
                }
-               ( (BlockArgDef - (',' -- BlockArgDef --)*)? '|' --)?
+               ( ( (BlockArgDef - (',' -- BlockArgDef --)* (',' -- BlkVarArgDef --)?) | ( BlkVarArgDef --) )? '|' --)?
                {
                     ExtendToken();
                     NSMutableArray *arguments = PopStack();
@@ -218,7 +220,8 @@ Block        = '{' --
                    UpdateToken();
                    PushStack([NSMutableArray array]);
                }
-               ( (BlockArgDef - (',' - BlockArgDef --)*)? '|' -)? expr:Expression - '`'
+               ( (BlockArgDef - (',' -- BlockArgDef --)*)?
+               (',' -- BlkVarArgDef --)? -- '|' -)? expr:Expression - '`'
                {
                    ExtendToken();
                    NSMutableArray *arguments = PopStack();
@@ -231,13 +234,14 @@ Block        = '{' --
                }
 BlockArgDef  = name:Identifier { [StackTop addObject:[TQNodeArgumentDef nodeWithName:name]]; }
                 (- "=" -- default:Expression { [[StackTop lastObject] setDefaultArgument:default]; })? 
+BlkVarArgDef = Variadic        { [StackGet(-1) setIsVariadic:YES]; }
 
 
 # Class
 Class        = '#' name:Constant --
                {
                    UpdateToken();
-                   PushStack([TQNodeClass nodeWithName:[name value]]);
+                   PushStack([TQNodeClass nodeWithName:[(TQNodeConstant *)name value]]);
                }
                ( "<" -- SuperClsName -- )? '{' -- (Method --)* '}'
                {
@@ -247,7 +251,7 @@ Class        = '#' name:Constant --
 SuperClsName = superName:Constant
                {
                    ExtendToken();
-                   [StackTop setSuperClassName:[superName value]];
+                   [StackTop setSuperClassName:[(TQNodeConstant *)superName value]];
                }
 Method       = '+' -- method:MethodImpl
                {
@@ -436,6 +440,8 @@ SubscriptExp = obj:SubscriptLhs
 SubscriptLhs = Property
              | Self
              | Variable
+             | Variadic
+             | ParenExpr
 Subscript    = "[" -- subscript:Expression -- "]" { ExtendToken(); [StackTop addObject:subscript]; }
 
 Property     = obj:PropLhs
@@ -509,6 +515,7 @@ SkipStmt     = 'skip'               { ExtendToken(); $$ = [TQNodeSkip node];  }
 Nil          = ('nil' | '('--')')   { ExtendToken(); $$ = [TQNodeNil node];   }
 Self         = 'self'               { ExtendToken(); $$ = [TQNodeSelf node];  }
 Super        = 'super'              { ExtendToken(); $$ = [TQNodeSuper node]; }
+Variadic     = '...'                { ExtendToken(); $$ = [TQNodeVariable nodeWithName:@"..."]; }
 
 Operator     = '==' { ExtendToken(); $$ = @"=="; }
              | '!=' { ExtendToken(); $$ = @"!="; }
