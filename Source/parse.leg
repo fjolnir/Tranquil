@@ -67,6 +67,7 @@ Statement    = (
                If
              | Loop
              | Call
+             | IncrDecrOp
              | Message
              | Class
              | Assignment
@@ -88,6 +89,7 @@ Expression   = Assignment
 NoEqExpr     = Call
              | Message
              | Block
+             | UnaryOp
              | Nil
              | SubscriptExp
              | Property
@@ -355,6 +357,29 @@ AssgnRhs       = b:Expression
                    ExtendToken(); 
                    ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAssign left:StackTop right:b]);
                }
+
+UnaryOp        = UnaryPrefixOp | UnaryMinusOp | UnaryPostfixOp
+IncrDecrOp     = UnaryPrefixOp | UnaryPostfixOp
+
+UnaryMinusOp   =  "-" a:AssgnLhs    { ExtendToken(); PushStack([TQNodeOperator nodeWithType:kTQOperatorUnaryMinus left:nil right:a]); }
+
+UnaryPrefixOp  = ( "++"             { ExtendToken(); PushStack([TQNodeOperator nodeWithType:kTQOperatorIncrement left:nil right:nil]);  }
+                 | "--"             { ExtendToken(); PushStack([TQNodeOperator nodeWithType:kTQOperatorDecrement left:nil right:nil]);  }
+                 )
+                 a:AssgnLhs
+                 {
+                     $$ = PopStack();
+                     [$$ setRight:a];
+                 }
+
+UnaryPostfixOp = a:AssgnLhs         { ExtendToken(); PushStack([TQNodeOperator nodeWithType:0 left:a right:nil]); }
+                 ( "++"             { ExtendToken(); [(TQNodeOperator *)StackTop setType:kTQOperatorIncrement];   }
+                 | "--"             { ExtendToken(); [(TQNodeOperator *)StackTop setType:kTQOperatorDecrement];   }
+                 )
+                 {
+                     $$ = PopStack();
+                 }
+
 
 # Accessors
 

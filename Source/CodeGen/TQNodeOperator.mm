@@ -2,6 +2,7 @@
 #import "TQNodeVariable.h"
 #import "TQNodeMemberAccess.h"
 #import "TQProgram.h"
+#import "TQNodeNumber.h"
 
 using namespace llvm;
 
@@ -42,6 +43,23 @@ using namespace llvm;
     return nil;
 }
 
+- (llvm::Value *)store:(llvm::Value *)aValue
+             inProgram:(TQProgram *)aProgram
+                 block:(TQNodeBlock *)aBlock
+                 error:(NSError **)aoError
+{
+    assert(_type == kTQOperatorGetter);
+    IRBuilder<> *builder = aBlock.builder;
+
+    // Call []=::
+    Value *selector  = aProgram.llModule->getOrInsertGlobal("TQSetterOpSel", aProgram.llInt8PtrTy);
+    Value *key = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
+    Value *settee = [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
+    if(*aoError)
+        return NULL;
+    return builder->CreateCall4(aProgram.objc_msgSend, settee, builder->CreateLoad(selector), key, aValue);
+}
+
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
 {
     IRBuilder<> *builder = aBlock.builder;
@@ -51,32 +69,40 @@ using namespace llvm;
         BOOL isGetterOp = [_left isMemberOfClass:[self class]] && [(TQNodeOperator*)_left type] == kTQOperatorGetter;
         TQAssertSoft(isVar || isProperty || isGetterOp, kTQSyntaxErrorDomain, kTQInvalidAssignee, NO, @"Only variables and object properties can be assigned to");
 
-
-        if(isGetterOp) {
-            // Call []=::
-            TQNodeOperator *setterOp = (TQNodeOperator *)_left;
-            Value *selector  = aProgram.llModule->getOrInsertGlobal("TQSetterOpSel", aProgram.llInt8PtrTy);
-            Value *key = [setterOp.right generateCodeInProgram:aProgram block:aBlock error:aoError];
-            Value *settee = [setterOp.left generateCodeInProgram:aProgram block:aBlock error:aoError];
-            Value *value = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
-            if(*aoError)
-                return NULL;
-            return builder->CreateCall4(aProgram.objc_msgSend, settee, builder->CreateLoad(selector), key, value);
-        } else {
-            // We must make sure the storage exists before evaluating the right side, so that if the assigned value is a
-            // block, it can reference itself
-            if(isVar)
-                [(TQNodeVariable *)_left createStorageInProgram:aProgram block:aBlock error:aoError];
-            Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
-            [(TQNodeVariable *)_left store:right inProgram:aProgram block:aBlock error:aoError];
-            if(*aoError)
-                return NULL;
-            return right;
-        }
+        // We must make sure the storage exists before evaluating the right side, so that if the assigned value is a
+        // block, it can reference itself
+        if(isVar)
+            [(TQNodeVariable *)_left createStorageInProgram:aProgram block:aBlock error:aoError];
+        Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
+        [(TQNodeVariable *)_left store:right inProgram:aProgram block:aBlock error:aoError];
+        if(*aoError)
+            return NULL;
+        return right;
     } else if(_type == kTQOperatorUnaryMinus) {
         Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
         Value *selector  = aProgram.llModule->getOrInsertGlobal("TQUnaryMinusOpSel", aProgram.llInt8PtrTy);
         return builder->CreateCall2(aProgram.objc_msgSend, right, builder->CreateLoad(selector));
+    } else if(_type == kTQOperatorIncrement || _type == kTQOperatorDecrement) {
+        assert(!_left || !_right);
+        NSString *selName = _type == kTQOperatorIncrement ? @"TQAddOpSel" : @"TQSubOpSel";
+        Value *selector  = aProgram.llModule->getOrInsertGlobal([selName UTF8String], aProgram.llInt8PtrTy);
+        TQNode *incrementee = _left ? _left : _right;
+
+        Value *one = [[TQNodeNumber nodeWithDouble:1.0] generateCodeInProgram:aProgram block:aBlock error:aoError];
+        Value *beforeVal = [incrementee generateCodeInProgram:aProgram block:aBlock error:aoError];
+        if(*aoError)
+            return NULL;
+        Value *incrementedVal = builder->CreateCall3(aProgram.objc_msgSend, beforeVal, builder->CreateLoad(selector), one);
+        [incrementee store:incrementedVal inProgram:aProgram block:aBlock error:aoError];
+        if(*aoError)
+            return NULL;
+
+        // Return original value and increment (var++)
+        if(_left)
+            return beforeVal;
+        // Increment and return incremented value (++var)
+        else
+            return incrementedVal;
     } else {
         Value *left  = [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
         Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];

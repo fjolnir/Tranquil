@@ -14,7 +14,9 @@ enum {
     kTQOperatorInequal,
     kTQOperatorUnaryMinus,
     kTQOperatorGetter,
-    kTQOperatorSetter
+    kTQOperatorSetter,
+    kTQOperatorIncrement,
+    kTQOperatorDecrement
 };
 typedef char TQOperatorType;
 // Binary operator (a <operator> b)
@@ -24,4 +26,9 @@ typedef char TQOperatorType;
 @property(readwrite, retain) TQNode *right;
 + (TQNodeOperator *)nodeWithType:(TQOperatorType)aType left:(TQNode *)aLeft right:(TQNode *)aRight;
 - (id)initWithType:(TQOperatorType)aType left:(TQNode *)aLeft right:(TQNode *)aRight;
+
+- (llvm::Value *)store:(llvm::Value *)aValue
+             inProgram:(TQProgram *)aProgram
+                 block:(TQNodeBlock *)aBlock
+                 error:(NSError **)aoError;
 @end
