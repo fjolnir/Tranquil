@@ -33,13 +33,15 @@ CXXFLAGS = [
 	'-g',
 	'-std=gnu++98',
 	'-ObjC++',
+	#'--analyze'
 ].join(' ')
 
 
 LDFLAGS = [
 	'-lstdc++',
 	'`llvm-config --libs`',
-	'`llvm-config --ldflags`'
+	'`llvm-config --ldflags`',
+	'-framework Foundation'
 ].join(' ')
 
 LIBS = ['-framework Foundation'].join(' ')
@@ -79,6 +81,10 @@ task :run => [:default] do
 	sh "#{BUILD_DIR}/tranquil"
 end
 
-task :dbg => [:default] do
-	sh "gdb #{BUILD_DIR}/tranquil"
+task :gdb => [:default] do
+	sh "sudo gdb #{BUILD_DIR}/tranquil"
+end
+
+task :lldb => [:default] do
+	sh "lldb #{BUILD_DIR}/tranquil"
 end
