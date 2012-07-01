@@ -46,8 +46,8 @@ aBlock(something, somethingElse) \ Calls a block with a two arguments
 		self#ivar = 123   \ Sets instance variable
 		^self             \ Returns self
 	}
-	- aMethod: a and: b { \ Instance method taking two arguments
-		^self#ivar = a + b \ Returns self#ivar after setting it to a+b
+	- aMethod: a and: b {  \ Instance method taking two arguments
+		^self#ivar = a + b \ Returns the value of self#ivar after setting it to a+b
 	}
 }
 
