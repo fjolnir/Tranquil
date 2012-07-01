@@ -1,7 +1,10 @@
-a = { :b |
-	return ({ :c |
-		return c.
-	}:b.).
+captureMePlease = "hey"
+a = { :arg |
+		block = { :arg |
+			return arg.
+		}
+		return (block:arg.).
 }
-123 doubleValue.
-return (a:123.).
+myBlock = a
+numAsStr = (a:321.) stringValue.
+return (myBlock:numAsStr.).
