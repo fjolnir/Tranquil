@@ -1,4 +1,5 @@
 #import "TQNode.h"
+#include <llvm/Support/IRBuilder.h>
 
 @class TQNodeArgument;
 
@@ -10,8 +11,9 @@
 @property(readwrite, copy) NSString *name;
 @property(readonly) llvm::BasicBlock *basicBlock;
 @property(readonly) llvm::Function *function;
-
+@property(readonly) llvm::IRBuilder<> *builder;
 
 + (TQNodeBlock *)node;
+
 - (BOOL)addArgument:(TQNodeArgument *)aArgument error:(NSError **)aoError;
 @end
