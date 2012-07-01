@@ -48,10 +48,10 @@ LIBS = ['-framework Foundation'].join(' ')
 
 PATHMAP = "build/%n.o"
 
-OBJC_SOURCES = FileList['Source*.m'].add('Source/*.mm').add(YACC_OUTPATH).add(LEX_OUTPATH)
+OBJC_SOURCES = FileList['Source/*.mm'].add('Source/*/*.mm').add(YACC_OUTPATH).add(LEX_OUTPATH)
 O_FILES = OBJC_SOURCES.pathmap(PATHMAP)
-LEX_SOURCE = FileList['*.l'].first
-YACC_SOURCE = FileList['*.y'].first
+LEX_SOURCE = FileList['Source/*.l'].first
+YACC_SOURCE = FileList['Source/*.y'].first
 
 def compile(file, flags=CXXFLAGS, cc=CXX)
 	sh "#{cc} #{file[:in].join(' ')} #{flags} -c -o #{file[:out]}"

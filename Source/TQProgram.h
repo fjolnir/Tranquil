@@ -1,7 +1,7 @@
 #ifndef _TQ_PROGRAM_H_
 #define _TQ_PROGRAM_H_
 
-#include <TQNodeBlock.h>
+#include "CodeGen/TQNodeBlock.h"
 #include <llvm/Support/IRBuilder.h>
 #include <Foundation/NSObject.h>
 

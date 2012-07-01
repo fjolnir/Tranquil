@@ -1,5 +1,5 @@
 #include "TQProgram.h"
-#include "TQNode.h"
+#include "CodeGen/TQNode.h"
 #include <llvm/Transforms/IPO/PassManagerBuilder.h>
 #import <mach/mach_time.h>
 
