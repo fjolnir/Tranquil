@@ -50,7 +50,7 @@
                                     	return tINEQUALOP;
                                     }
 
-[.\,=\.:\{\}\(\)\|<>\#\+\-\*\/\^`]  { UPDATE_LOC return *yytext; }
+[.\,=\.:\{\}\(\)\|<>\#\+\-\*\/\^`\[\]]  { UPDATE_LOC return *yytext; }
 \n                                  { RESET_COL  return *yytext; }
 %%
 

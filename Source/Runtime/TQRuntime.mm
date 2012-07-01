@@ -20,6 +20,9 @@ SEL TQUnaryMinusOpSel;
 SEL TQSetterOpSel;
 SEL TQGetterOpSel;
 
+SEL TQNumberWithDoubleSel;
+SEL TQStringWithUTF8StringSel;
+
 struct TQBlock_byref {
 	void *isa;
 	struct TQBlock_byref *forwarding;
@@ -164,61 +167,71 @@ BOOL TQAugmentClassWithOperators(Class klass)
 {
 	// ==
 	IMP imp = imp_implementationWithBlock(^(id a, id b) { return [a isEqual:b] ? @YES : @NO; });
-	TQEqOpSel = sel_registerName("==:");
 	class_addMethod(klass, TQEqOpSel, imp, "@@:@");
 	// !=
 	imp = imp_implementationWithBlock(^(id a, id b)     { return [a isEqual:b] ? @NO : @YES; });
-	TQNeqOpSel = sel_registerName("!=:");
 	class_addMethod(klass, TQNeqOpSel, imp, "@@:@");
 
 	// + (Unimplemented by default)
 	imp = imp_implementationWithBlock(^(id a, id b) { return _objc_msgSend_hack2(a, @selector(add:), b); });
-	TQAddOpSel = sel_registerName("+:");
 	class_addMethod(klass, TQAddOpSel, imp, "@@:@");
 	// - (Unimplemented by default)
 	imp = imp_implementationWithBlock(^(id a, id b) { return _objc_msgSend_hack2(a, @selector(subtract:), b); });
-	TQSubOpSel = sel_registerName("-:");
 	class_addMethod(klass, TQSubOpSel, imp, "@@:@");
 	// unary - (Unimplemented by default)
 	imp = imp_implementationWithBlock(^(id a)       { return _objc_msgSend_hack(a, @selector(negate)); });
-	TQUnaryMinusOpSel = sel_registerName("-");
 	class_addMethod(klass, TQUnaryMinusOpSel, imp, "@@:");
 
 	// * (Unimplemented by default)
 	imp = imp_implementationWithBlock(^(id a, id b) { return _objc_msgSend_hack2(a, @selector(multiply:), b); });
-	TQMultOpSel = sel_registerName("*:");
 	class_addMethod(klass, TQMultOpSel, imp, "@@:@");
 	// / (Unimplemented by default)
 	imp = imp_implementationWithBlock(^(id a, id b) { return  _objc_msgSend_hack2(a, @selector(divide:), b); });
-	TQDivOpSel = sel_registerName("/:");
 	class_addMethod(klass, TQDivOpSel, imp, "@@:@");
 
 	// <
 	imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] == NSOrderedAscending) ? @YES : @NO; });
-	TQLTOpSel = sel_registerName("<:");
 	class_addMethod(klass, TQLTOpSel, imp, "@@:@");
 	// >
 	imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] == NSOrderedDescending) ? @YES : @NO; });
-	TQGTOpSel = sel_registerName(">:");
 	class_addMethod(klass, TQGTOpSel, imp, "@@:@");
 	// <=
 	imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] != NSOrderedDescending) ? @YES : @NO; });
-	TQLTEOpSel = sel_registerName("<=:");
 	class_addMethod(klass, TQLTEOpSel, imp, "@@:@");
 	// >=
 	imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] != NSOrderedAscending) ? @YES : @NO; });
-	TQGTEOpSel = sel_registerName(">=:");
 	class_addMethod(klass, TQGTEOpSel, imp, "@@:@");
 
 
 	// []
 	imp = imp_implementationWithBlock(^(id a, id key)         { return _objc_msgSend_hack2(a, @selector(valueForKey:), key); });
-	TQGetterOpSel = sel_registerName("[]:");
 	class_addMethod(klass, TQGetterOpSel, imp, "@@:@");
 	// []=
 	imp = imp_implementationWithBlock(^(id a, id key, id val) { return _objc_msgSend_hack3(a, @selector(setValue:forKey:), val, key); });
-	TQSetterOpSel = sel_registerName("[]=::");
 	class_addMethod(klass, TQSetterOpSel, imp, "@@:@@");
 
+
+
 	return YES;
+}
+
+void TQInitializeRuntime()
+{
+	TQEqOpSel                 = sel_registerName("==:");
+	TQNeqOpSel                = sel_registerName("!=:");
+	TQAddOpSel                = sel_registerName("+:");
+	TQSubOpSel                = sel_registerName("-:");
+	TQUnaryMinusOpSel         = sel_registerName("-");
+	TQMultOpSel               = sel_registerName("*:");
+	TQDivOpSel                = sel_registerName("/:");
+	TQLTOpSel                 = sel_registerName("<:");
+	TQGTOpSel                 = sel_registerName(">:");
+	TQLTEOpSel                = sel_registerName("<=:");
+	TQGTEOpSel                = sel_registerName(">=:");
+	TQGetterOpSel             = sel_registerName("[]:");
+	TQSetterOpSel             = sel_registerName("[]=::");
+	TQNumberWithDoubleSel     = @selector(numberWithDouble:);
+	TQStringWithUTF8StringSel = @selector(stringWithUTF8String:);
+
+	TQAugmentClassWithOperators([NSObject class]);
 }

@@ -23,7 +23,7 @@
 	TQNodeMethod *method;
 	TQNodeMessage *message;
 	TQNodeMemberAccess *memberAccess;
-	TQNodeBinaryOperator *binOp;
+	TQNodeOperator *binOp;
 	TQNodeIdentifier *identifier;
 	TQNodeReturn *ret;
 	TQNodeConstant *constant;
@@ -81,6 +81,7 @@
 %left '-' '+'
 %left '*' '/'
 %left UNARY
+%left '['
 
 %start Program
 
@@ -176,7 +177,7 @@ MessageArg:
 	;
 
 Assignment:
-	Lhs '=' Expression  { $$ = [TQNodeBinaryOperator nodeWithType:'=' left:$1 right:$3]; }
+	Lhs '=' Expression  { $$ = [TQNodeOperator nodeWithType:'=' left:$1 right:$3]; }
 	;
 
 Lhs:
@@ -194,17 +195,18 @@ Expression:
 	| Variable
 	| Literal
 	| Block
-	| Expression '>' Expression               { $$ = [TQNodeBinaryOperator nodeWithType:kTQOperatorGreater left:$1 right:$3]; }
-	| Expression '<' Expression               { $$ = [TQNodeBinaryOperator nodeWithType:kTQOperatorLesser left:$1 right:$3]; }
-	| Expression '*' Expression               { $$ = [TQNodeBinaryOperator nodeWithType:kTQOperatorMultiply left:$1 right:$3]; }
-	| Expression '/' Expression               { $$ = [TQNodeBinaryOperator nodeWithType:kTQOperatorDivide left:$1 right:$3]; }
-	| Expression '+' Expression               { $$ = [TQNodeBinaryOperator nodeWithType:kTQOperatorAdd left:$1 right:$3]; }
-	| Expression '-' Expression               { $$ = [TQNodeBinaryOperator nodeWithType:kTQOperatorSubtract left:$1 right:$3]; }
-	| '-' Expression %prec UNARY
-	| Expression tEQUALOP Expression          { $$ = [TQNodeBinaryOperator nodeWithType:kTQOperatorEqual left:$1 right:$3]; }
-	| Expression tINEQUALOP Expression        { $$ = [TQNodeBinaryOperator nodeWithType:kTQOperatorInequal left:$1 right:$3]; }
-	| Expression tGREATEROREQUALOP Expression { $$ = [TQNodeBinaryOperator nodeWithType:kTQOperatorGreaterOrEqual left:$1 right:$3]; }
-	| Expression tLESSEROREQUALOP Expression  { $$ = [TQNodeBinaryOperator nodeWithType:kTQOperatorLesserOrEqual left:$1 right:$3]; }
+	| Expression '>' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorGreater left:$1 right:$3]; }
+	| Expression '<' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorLesser left:$1 right:$3]; }
+	| Expression '*' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorMultiply left:$1 right:$3]; }
+	| Expression '/' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorDivide left:$1 right:$3]; }
+	| Expression '+' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorAdd left:$1 right:$3]; }
+	| Expression '-' Expression               { $$ = [TQNodeOperator nodeWithType:kTQOperatorSubtract left:$1 right:$3]; }
+	| '-' Expression %prec UNARY              { $$ = [TQNodeOperator nodeWithType:kTQOperatorUnaryMinus left:nil right:$2]; }
+	| Expression tEQUALOP Expression          { $$ = [TQNodeOperator nodeWithType:kTQOperatorEqual left:$1 right:$3]; }
+	| Expression tINEQUALOP Expression        { $$ = [TQNodeOperator nodeWithType:kTQOperatorInequal left:$1 right:$3]; }
+	| Expression tGREATEROREQUALOP Expression { $$ = [TQNodeOperator nodeWithType:kTQOperatorGreaterOrEqual left:$1 right:$3]; }
+	| Expression tLESSEROREQUALOP Expression  { $$ = [TQNodeOperator nodeWithType:kTQOperatorLesserOrEqual left:$1 right:$3]; }
+	| Expression '[' Expression ']'           { $$ = [TQNodeOperator nodeWithType:kTQOperatorGetter left:$1 right:$3]; }
 	| '(' Expression ')' { $$ = $2; }
 	;
 

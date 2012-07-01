@@ -1,14 +1,14 @@
-#import "TQNodeBinaryOperator.h"
+#import "TQNodeOperator.h"
 #import "TQNodeVariable.h"
 #import "TQNodeMemberAccess.h"
 #import "TQProgram.h"
 
 using namespace llvm;
 
-@implementation TQNodeBinaryOperator
+@implementation TQNodeOperator
 @synthesize type=_type, left=_left, right=_right;
 
-+ (TQNodeBinaryOperator *)nodeWithType:(TQOperatorType)aType left:(TQNode *)aLeft right:(TQNode *)aRight
++ (TQNodeOperator *)nodeWithType:(TQOperatorType)aType left:(TQNode *)aLeft right:(TQNode *)aRight
 {
 	return [[[self alloc] initWithType:aType left:aLeft right:aRight] autorelease];
 }
@@ -80,6 +80,9 @@ using namespace llvm;
 			case kTQOperatorLesserOrEqual:
 				selector  = aProgram.llModule->getOrInsertGlobal("TQLTEOpSel", aProgram.llInt8PtrTy);
 				break;
+			case kTQOperatorGetter:
+				selector  = aProgram.llModule->getOrInsertGlobal("TQGetterOpSel", aProgram.llInt8PtrTy);
+				break;
 			default:
 				TQAssertSoft(NO, kTQGenericErrorDomain, kTQGenericError, NULL, @"Unknown binary operator");
 		}
@@ -90,6 +93,9 @@ using namespace llvm;
 
 - (NSString *)description
 {
-	return [NSString stringWithFormat:@"<op@ %@ %c %@>", _left, _type, _right];
+	if(_type == kTQOperatorGetter)
+		return [NSString stringWithFormat:@"<op@ %@[%@]>", _left, _right];
+	else
+		return [NSString stringWithFormat:@"<op@ %@ %c %@>", _left, _type, _right];
 }
 @end

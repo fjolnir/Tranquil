@@ -4,7 +4,7 @@
 #import "CodeGen/TQNode.h"
 #import "CodeGen/TQNodeArgument.h"
 #import "CodeGen/TQNodeArgumentDef.h"
-#import "CodeGen/TQNodeBinaryOperator.h"
+#import "CodeGen/TQNodeOperator.h"
 #import "CodeGen/TQNodeBlock.h"
 #import "CodeGen/TQNodeCall.h"
 #import "CodeGen/TQNodeClass.h"

@@ -39,7 +39,7 @@
 	*objc_registerClassPair, *class_addIvar, *class_replaceMethod, *objc_getClass,
 	*sel_registerName, *sel_getName, *_Block_copy,
 	*_Block_object_assign, *_Block_object_dispose, *imp_implementationWithBlock,
-	*object_getClass, *TQPrepareObjectForReturn, *TQAutoreleaseObject, *TQAugmentClassWithOperators;
+	*object_getClass, *TQPrepareObjectForReturn, *TQAutoreleaseObject;
 
 #pragma mark - Methods
 

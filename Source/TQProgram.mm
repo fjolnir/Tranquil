@@ -23,7 +23,7 @@ using namespace llvm;
 	_Block_copy=_func__Block_copy, _Block_object_assign=_func__Block_object_assign,
 	_Block_object_dispose=_func__Block_object_dispose, imp_implementationWithBlock=_func_imp_implementationWithBlock,
 	object_getClass=_func_object_getClass, TQPrepareObjectForReturn=_func_TQPrepareObjectForReturn,
-	TQAutoreleaseObject=_func_TQAutoreleaseObject, TQAugmentClassWithOperators=_func_TQAugmentClassWithOperators;
+	TQAutoreleaseObject=_func_TQAutoreleaseObject;
 
 + (TQProgram *)programWithName:(NSString *)aName
 {
@@ -168,7 +168,6 @@ using namespace llvm;
 	DEF_EXTERNAL_FUN(_Block_object_assign, ft_void__i8Ptr_i8Ptr_int);
 	DEF_EXTERNAL_FUN(_Block_object_dispose, ft_void__i8Ptr_int);
 	DEF_EXTERNAL_FUN(TQPrepareObjectForReturn, ft_i8Ptr__i8Ptr);
-	DEF_EXTERNAL_FUN(TQAugmentClassWithOperators, ft_void__i8Ptr);
 
 
 #undef DEF_EXTERNAL_FUN
@@ -185,6 +184,7 @@ using namespace llvm;
 
 - (BOOL)run
 {
+	TQInitializeRuntime();
 	InitializeNativeTarget();
 
 	NSError *err = nil;
@@ -217,7 +217,6 @@ using namespace llvm;
 	engine->addGlobalMapping(_func_TQStoreStrongInByref, (void*)&TQStoreStrongInByref);
 	engine->addGlobalMapping(_func_TQRetainObject, (void*)&TQRetainObject);
 	engine->addGlobalMapping(_func_TQAutoreleaseObject, (void*)&TQAutoreleaseObject);
-	engine->addGlobalMapping(_func_TQAugmentClassWithOperators, (void*)&TQAugmentClassWithOperators);
 
 	//std::vector<GenericValue> noargs;
 	//GenericValue val = engine->runFunction(_root.function, noargs);

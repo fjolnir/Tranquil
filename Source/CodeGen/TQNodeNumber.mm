@@ -3,8 +3,6 @@
 
 using namespace llvm;
 
-static Value *_NSNumberNameConst = NULL, *_NumWithDblSel = NULL;
-
 @implementation TQNodeNumber
 @synthesize value=_value;
 
@@ -36,18 +34,15 @@ static Value *_NSNumberNameConst = NULL, *_NumWithDblSel = NULL;
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
 {
+	Module *mod = aProgram.llModule;
 	llvm::IRBuilder<> *builder = aBlock.builder;
 
 	// Returns [NSNumber numberWithDouble:_value]
-	if(!_NSNumberNameConst)
-		_NSNumberNameConst = builder->CreateGlobalStringPtr("NSNumber", "className_NSNumber");
-	if(!_NumWithDblSel)
-		_NumWithDblSel = builder->CreateGlobalStringPtr("numberWithDouble:", "sel_numberWithDouble");
+	Value *selector = builder->CreateLoad(mod->getOrInsertGlobal("TQNumberWithDoubleSel", aProgram.llInt8PtrTy));
+	Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_NSNumber", aProgram.llInt8Ty);
 
-	CallInst *classLookup = builder->CreateCall(aProgram.objc_getClass, _NSNumberNameConst);
-	CallInst *selReg = builder->CreateCall(aProgram.sel_registerName, _NumWithDblSel);
 	ConstantFP *doubleValue = ConstantFP::get(aProgram.llModule->getContext(), APFloat([_value doubleValue]));
 
-	return builder->CreateCall3(aProgram.objc_msgSend, classLookup, selReg, doubleValue);
+	return builder->CreateCall3(aProgram.objc_msgSend, klass, selector, doubleValue);
 }
 @end

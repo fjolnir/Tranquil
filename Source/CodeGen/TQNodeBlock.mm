@@ -383,8 +383,8 @@ using namespace llvm;
 	_basicBlock = BasicBlock::Create(mod->getContext(), "entry", _function, 0);
 	_builder = new IRBuilder<>(_basicBlock);
 
-	Value *nsobj = _builder->CreateCall(aProgram.objc_getClass, _builder->CreateGlobalStringPtr("NSObject"));
-	_builder->CreateCall(aProgram.TQAugmentClassWithOperators, nsobj);
+	//Value *nsobj = _builder->CreateCall(aProgram.objc_getClass, _builder->CreateGlobalStringPtr("NSObject"));
+	//_builder->CreateCall(aProgram.TQAugmentClassWithOperators, nsobj);
 	
 	// Load the arguments
 	llvm::Function::arg_iterator argumentIterator = _function->arg_begin();

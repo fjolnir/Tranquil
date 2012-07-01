@@ -36,18 +36,15 @@ static Value *_StringWithUTF8StringSel, *_NSStringClassNameConst;
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
 {
-	llvm::IRBuilder<> *builder = aBlock.builder;
+	Module *mod = aProgram.llModule;
+	IRBuilder<> *builder = aBlock.builder;
 
 	// Returns [NSMutableString stringWithUTF8String:_value]
-	if(!_NSStringClassNameConst)
-		_NSStringClassNameConst = builder->CreateGlobalStringPtr("NSMutableString", "className_NSMutableString");
-	if(!_StringWithUTF8StringSel)
-		_StringWithUTF8StringSel = builder->CreateGlobalStringPtr("stringWithUTF8String:", "sel_stringWithUTF8String");
+	Value *selector = builder->CreateLoad(mod->getOrInsertGlobal("TQStringWithUTF8StringSel", aProgram.llInt8PtrTy));
+	Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_NSMutableString", aProgram.llInt8Ty);
 
-	CallInst *classLookup = builder->CreateCall(aProgram.objc_getClass, _NSStringClassNameConst);
-	CallInst *selReg = builder->CreateCall(aProgram.sel_registerName, _StringWithUTF8StringSel);
 	Value *strValue = builder->CreateGlobalStringPtr([_value UTF8String]);
 
-	return builder->CreateCall3(aProgram.objc_msgSend, classLookup, selReg, strValue);
+	return builder->CreateCall3(aProgram.objc_msgSend, klass, selector, strValue);
 }
 @end
