@@ -6,8 +6,8 @@
 #define TQAssert(cond, fmt, ...) \
     do { \
         if(!(cond)) { \
-            TQLog(@"Assertion failed:" fmt, ##__VA_ARGS__); \
-            abort(); \
+            TQLog(@"Assertion failed: " fmt, ##__VA_ARGS__); \
+            exit(1); \
         } \
     } while(0)
 

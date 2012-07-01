@@ -30,7 +30,7 @@ using namespace llvm;
     _basicBlock = NULL;
 
     // Block invocations are always passed the block itself as the first argument
-    [self addArgument:@"__blk" error:nil];
+    [self addArgument:[TQNodeArgumentDef nodeWithName:@"__blk" selectorPart:nil] error:nil];
 
     return self;
 }
@@ -50,8 +50,14 @@ using namespace llvm;
 {
     NSMutableString *out = [NSMutableString stringWithString:@"<blk@ {"];
     if(_arguments.count > 0) {
-        for(NSString *arg in _arguments) {
-            [out appendFormat:@"%@, ", arg];
+        int i = 1;
+        for(TQNodeArgumentDef *arg in _arguments) {
+            [out appendFormat:@"%@", [arg name]];
+            if([arg defaultArgument])
+                [out appendFormat:@" = %@", [arg defaultArgument]];
+
+            if(i++ < [_arguments count])
+            [out appendString:@", "];
         }
         [out appendString:@"|"];
     }
@@ -75,7 +81,7 @@ using namespace llvm;
     return sig;
 }
 
-- (BOOL)addArgument:(NSString *)aArgument error:(NSError **)aoError
+- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoError
 {
     TQAssertSoft(![_arguments containsObject:aArgument],
                  kTQSyntaxErrorDomain, kTQUnexpectedIdentifier, NO,
@@ -176,7 +182,7 @@ using namespace llvm;
     // GC Layout (unused in objc 2)
     elements.push_back(llvm::Constant::getNullValue(aProgram.llInt8PtrTy));
 
-    elements.push_back(llvm::ConstantInt::get(int32Ty, [_arguments count]));
+    elements.push_back(llvm::ConstantInt::get(int32Ty, [_arguments count]-1));
     elements.push_back(llvm::ConstantInt::get(int8Ty, 0)); // isVariadic? always false for now
 
     llvm::Constant *init = llvm::ConstantStruct::getAnon(elements);
@@ -386,22 +392,27 @@ using namespace llvm;
     for (unsigned i = 1; i < _arguments.count; ++i, ++argumentIterator)
     {
         IRBuilder<> tempBuilder(&_function->getEntryBlock(), _function->getEntryBlock().begin());
-        NSString *argument = [_arguments objectAtIndex:i];
-        if([argument isKindOfClass:[TQNodeArgumentDef class]])
-            argument = [(TQNodeArgumentDef *)argument name];
-        if(!argument)
+        TQNodeArgumentDef *argDef = [_arguments objectAtIndex:i];
+        if(!argDef)
             continue;
 
         // Load the default argument if the argument was not passed
         Value *isMissingCond = _builder->CreateICmpEQ(argumentIterator, sentinel);
-        Value *argValue = _builder->CreateSelect(isMissingCond, ConstantPointerNull::get(aProgram.llInt8PtrTy), argumentIterator);
+        Value *argValue;
+        if(![argDef defaultArgument]) {
+            argValue = _builder->CreateSelect(isMissingCond, ConstantPointerNull::get(aProgram.llInt8PtrTy), argumentIterator);
+        }
+        else { // If there's a default argument we need to load the argument
+            Value *defaultArg = [[argDef defaultArgument] generateCodeInProgram:aProgram block:self error:aoErr];
+            argValue = _builder->CreateSelect(isMissingCond, defaultArg, argumentIterator);
+        }
 
-        TQNodeVariable *local = [TQNodeVariable nodeWithName:argument];
+        TQNodeVariable *local = [TQNodeVariable nodeWithName:[argDef name]];
         [local store:argValue inProgram:aProgram block:self error:aoErr];
-        [_locals setObject:local forKey:argument];
+        [_locals setObject:local forKey:[argDef name]];
     }
 
-    
+
     Value *val;
     for(TQNode *stmt in _statements) {
         [stmt generateCodeInProgram:aProgram block:self error:aoErr];
@@ -427,7 +438,9 @@ using namespace llvm;
 
     // Generate a list of variables to capture
     if(aBlock) {
+        [_capturedVariables release];
         _capturedVariables = [[NSMutableDictionary alloc] init];
+        // Load actual captured variables
         for(NSString *name in [aBlock.locals allKeys]) {
             if([_locals objectForKey:name])
                 continue; // Arguments to this block override locals in the parent (Not that  you should write code like that)
@@ -452,6 +465,9 @@ using namespace llvm;
 
     if((ref = [_statements tq_referencesNode:aNode]))
         return ref;
+    else if((ref = [_arguments tq_referencesNode:aNode]))
+        return ref;
+
     return nil;
 }
 

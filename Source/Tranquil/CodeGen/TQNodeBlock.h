@@ -3,6 +3,8 @@
 #include "../Runtime/TQRuntime.h"
 #include <llvm/Support/IRBuilder.h>
 
+@class TQNodeArgumentDef;
+
 // A block definition ({ :arg | body })
 @interface TQNodeBlock : TQNode {
     llvm::Constant *_blockDescriptor;
@@ -23,7 +25,7 @@
 
 + (TQNodeBlock *)node;
 - (NSString *)signature;
-- (BOOL)addArgument:(NSString *)aArgument error:(NSError **)aoError;
+- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoError;
 @end
 
 @interface TQNodeRootBlock : TQNodeBlock

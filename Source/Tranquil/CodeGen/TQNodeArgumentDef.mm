@@ -4,7 +4,7 @@
 using namespace llvm;
 
 @implementation TQNodeArgumentDef
-@synthesize name=_name, selectorPart=_selectorPart;
+@synthesize name=_name, selectorPart=_selectorPart, defaultArgument=_defaultArgument;
 
 + (TQNodeArgumentDef *)nodeWithName:(NSString *)aName selectorPart:(NSString *)aIdentifier
 {
@@ -43,5 +43,15 @@ using namespace llvm;
 {
     TQAssert(NO, "Argument definitions do not generate code");
     return NULL;
+}
+
+- (TQNode *)referencesNode:(TQNode *)aNode
+{
+    TQNode *ref = nil;
+    if([aNode isEqual:self])
+        return aNode;
+    else if((ref = [_defaultArgument referencesNode:aNode]))
+        return ref;
+    return nil;
 }
 @end

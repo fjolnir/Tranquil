@@ -172,7 +172,7 @@ Block        = '{' --
                {
                     ExtendToken();
                     NSMutableArray *arguments = PopStack();
-                    for(NSString *arg in arguments) {
+                    for(TQNodeArgumentDef *arg in arguments) {
                        [StackTop addArgument:arg error:nil];
                     }
                     PushStack([NSMutableArray array]);
@@ -194,12 +194,13 @@ Block        = '{' --
                    ExtendToken();
                    NSMutableArray *arguments = PopStack();
                    $$ = [TQNodeBlock node];
-                   for(NSString *arg in arguments) {
+                   for(TQNodeArgumentDef *arg in arguments) {
                        [$$ addArgument:arg error:nil];
                    }
                    [$$ setStatements:[NSMutableArray arrayWithObject:[TQNodeReturn nodeWithValue:expr]]];
                }
-BlockArgDef  = name:Identifier { [StackTop addObject:name]; }
+BlockArgDef  = name:Identifier { [StackTop addObject:[TQNodeArgumentDef nodeWithName:name selectorPart:nil]]; }
+               (- "=" -- default:Expression { [[StackTop lastObject] setDefaultArgument:default]; })? 
 
 
 # Class
