@@ -204,7 +204,7 @@ BOOL TQAugmentClassWithOperators(Class klass)
     class_addMethod(klass, TQAddOpSel, imp, "@@:@");
     // - (Unimplemented by default)
     imp = imp_implementationWithBlock(^(id a, id b) { return _objc_msgSend_hack2(a, @selector(subtract:), b); });
-    //class_addMethod(klass, TQSubOpSel, imp, "@@:@");
+    class_addMethod(klass, TQSubOpSel, imp, "@@:@");
     // unary - (Unimplemented by default)
     imp = imp_implementationWithBlock(^(id a)       { return _objc_msgSend_hack(a, @selector(negate)); });
     class_addMethod(klass, TQUnaryMinusOpSel, imp, "@@:");

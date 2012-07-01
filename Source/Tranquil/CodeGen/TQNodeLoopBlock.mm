@@ -70,7 +70,6 @@ using namespace llvm;
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
 {
-    IRBuilder<> *builder = aBlock.builder;
     Module *mod = aProgram.llModule;
 
     // Pose as the parent block for the duration of code generation

@@ -203,7 +203,6 @@ using namespace llvm;
     IRBuilder<> *pBuilder = aParentBlock.builder;
 
     Type *i8PtrTy = aProgram.llInt8PtrTy;
-    Type *i8PtrPtrTy = aProgram.llInt8PtrPtrTy;
     Type *intTy   = aProgram.llIntTy;
 
     // Build the block struct

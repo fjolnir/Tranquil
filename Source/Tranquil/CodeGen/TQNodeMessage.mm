@@ -115,8 +115,6 @@ using namespace llvm;
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
 {
-    llvm::IRBuilder<> *builder = aBlock.builder;
-
     std::vector<Value*> args;
     for(TQNodeArgument *arg in _arguments) {
         if(!arg.passedNode)

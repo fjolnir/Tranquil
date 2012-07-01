@@ -75,7 +75,7 @@ using namespace llvm;
     if(isTailCall) {
         // Autorelease the arguments
         for(int i = 0; i < [[(TQNodeCall *)_value arguments] count]; ++i) {
-            retVal = builder->CreateCall(aProgram.TQAutoreleaseObject, args[i]);
+            builder->CreateCall(aProgram.TQAutoreleaseObject, args[i]);
         }
         retVal = [(TQNodeCall *)_value generateCodeInProgram:aProgram block:aBlock withArguments:args error:aoErr];
     } else
