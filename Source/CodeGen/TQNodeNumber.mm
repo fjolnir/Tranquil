@@ -39,7 +39,7 @@ using namespace llvm;
 
 	// Returns [NSNumber numberWithDouble:_value]
 	Value *selector = builder->CreateLoad(mod->getOrInsertGlobal("TQNumberWithDoubleSel", aProgram.llInt8PtrTy));
-	Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_NSNumber", aProgram.llInt8Ty);
+	Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_TQNumber", aProgram.llInt8Ty);
 
 	ConstantFP *doubleValue = ConstantFP::get(aProgram.llModule->getContext(), APFloat([_value doubleValue]));
 

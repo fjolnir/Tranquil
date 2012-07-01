@@ -70,14 +70,23 @@ using namespace llvm;
 	else if([selStr isEqualToString:@"new"])
 		needsAutorelease = YES;
 
-
-	Value *selector =  builder->CreateGlobalStringPtr([selStr UTF8String], "selector");
-
-	CallInst *selReg = builder->CreateCall(aProgram.sel_registerName, selector);
+	// Cache the selector into a global
+	Module *mod = aProgram.llModule;
+	Value *selectorGlobal = mod->getGlobalVariable([selStr UTF8String], false);
+	if(!selectorGlobal) {
+		Function *rootFunction = aProgram.root.function;
+		IRBuilder<> rootBuilder(&rootFunction->getEntryBlock(), rootFunction->getEntryBlock().begin());
+		Value *selector =  rootBuilder.CreateGlobalStringPtr([selStr UTF8String], "selector");
+		CallInst *selReg = rootBuilder.CreateCall(aProgram.sel_registerName, selector);
+		selectorGlobal =  new GlobalVariable(*mod, aProgram.llInt8PtrTy, false, GlobalVariable::InternalLinkage,
+		                                     ConstantPointerNull::get(aProgram.llInt8PtrTy), [selStr UTF8String]);
+		rootBuilder.CreateStore(selReg, selectorGlobal);
+	}
+	selectorGlobal = builder->CreateLoad(selectorGlobal);
 
 	std::vector<Value*> args;
 	args.push_back([_receiver generateCodeInProgram:aProgram block:aBlock error:aoErr]);
-	args.push_back(selReg);
+	args.push_back(selectorGlobal);
 
 	for(TQNodeArgument *arg in _arguments) {
 		if(!arg.passedNode)

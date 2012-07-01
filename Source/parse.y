@@ -155,6 +155,7 @@ MessageReceiver:
 	| Call
 	| Super
 	| Literal
+	| '(' Expression ')' { $$ = $2; }
 	;
 /* TODO: Figure out how to relax this so a message can be split into multiple lines
          (Without requiring a dot at the end even when in parens) */
@@ -325,7 +326,7 @@ Block:
 		}
 		[$$ setStatements:$6];
 	}
-	| '{' OptLn Statements '}' {
+	| '{' OptLn Statements Ln '}' {
 		$$ = [TQNodeBlock node];
 		[$$ setStatements:$3];
 	}

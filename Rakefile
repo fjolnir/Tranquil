@@ -48,7 +48,7 @@ LIBS = ['-framework Foundation'].join(' ')
 
 PATHMAP = "build/%n.o"
 
-OBJC_SOURCES = FileList['Source/*.mm'].add('Source/*/*.mm').add(YACC_OUTPATH).add(LEX_OUTPATH)
+OBJC_SOURCES = FileList['Source/*.m*'].add('Source/*/*.m*').add(YACC_OUTPATH).add(LEX_OUTPATH)
 O_FILES = OBJC_SOURCES.pathmap(PATHMAP)
 LEX_SOURCE = FileList['Source/*.l'].first
 YACC_SOURCE = FileList['Source/*.y'].first

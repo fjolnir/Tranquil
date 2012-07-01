@@ -34,27 +34,38 @@ using namespace llvm;
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
 {
+	IRBuilder<> *builder = aBlock.builder;
 	if(_type == '=') {
 		BOOL isVar = [_left isMemberOfClass:[TQNodeVariable class]];
 		BOOL isProperty = [_left isMemberOfClass:[TQNodeMemberAccess class]];
 		BOOL isGetterOp = [_left isMemberOfClass:[self class]] && [(TQNodeOperator*)_left type] == kTQOperatorGetter;
 		TQAssertSoft(isVar || isProperty || isGetterOp, kTQSyntaxErrorDomain, kTQInvalidAssignee, NO, @"Only variables and object properties can be assigned to");
 
-		Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
 		
 		if(isGetterOp) {
 			// Call []=::
 			TQNodeOperator *setterOp = (TQNodeOperator *)_left;
 			Value *selector  = aProgram.llModule->getOrInsertGlobal("TQSetterOpSel", aProgram.llInt8PtrTy);
-			IRBuilder<> *builder = aBlock.builder;
 			Value *key = [setterOp.right generateCodeInProgram:aProgram block:aBlock error:aoError];
 			Value *settee = [setterOp.left generateCodeInProgram:aProgram block:aBlock error:aoError];
+			Value *value = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
 			if(*aoError)
 				return NULL;
-			return builder->CreateCall4(aProgram.objc_msgSend, settee, builder->CreateLoad(selector), right, key);
-		} else
+			return builder->CreateCall4(aProgram.objc_msgSend, settee, builder->CreateLoad(selector), value, key);
+		} else {
+			// We must make sure the storage exists before evaluating the right side, so that if the assigned value is a
+			// block, it can reference itself
+			[(TQNodeVariable *)_left createStorageInProgram:aProgram block:aBlock error:aoError];
+			Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
 			[(TQNodeVariable *)_left store:right inProgram:aProgram block:aBlock error:aoError];
-		return [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
+			if(*aoError)
+				return NULL;
+			return [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
+		}
+	} else if(_type == kTQOperatorUnaryMinus) {
+		Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
+		Value *selector  = aProgram.llModule->getOrInsertGlobal("TQUnaryMinusOpSel", aProgram.llInt8PtrTy);
+		return builder->CreateCall2(aProgram.objc_msgSend, right, builder->CreateLoad(selector));
 	} else {
 		Value *left  = [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
 		Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
@@ -97,7 +108,6 @@ using namespace llvm;
 			default:
 				TQAssertSoft(NO, kTQGenericErrorDomain, kTQGenericError, NULL, @"Unknown binary operator");
 		}
-		IRBuilder<> *builder = aBlock.builder;
 		return builder->CreateCall3(aProgram.objc_msgSend, left, builder->CreateLoad(selector), right);
 	}
 }

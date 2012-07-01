@@ -196,12 +196,12 @@ using namespace llvm;
 	}
 
 	// Optimization pass
-	//FunctionPassManager fpm = FunctionPassManager(_llModule);
-	//PassManagerBuilder builder = PassManagerBuilder();
-	//builder.OptLevel = 3;
-	//builder.SizeLevel = 2;
-	//builder.populateFunctionPassManager(fpm);
-	//fpm.run(*_root.function);
+	FunctionPassManager fpm = FunctionPassManager(_llModule);
+	PassManagerBuilder builder = PassManagerBuilder();
+	builder.OptLevel = 3;
+	builder.SizeLevel = 2;
+	builder.populateFunctionPassManager(fpm);
+	fpm.run(*_root.function);
 
 	PassManager PM;
 	PM.add(createPrintModulePass(&outs()));
