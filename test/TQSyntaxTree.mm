@@ -1,5 +1,4 @@
 #include "TQSyntaxTree.h"
-#include <iostream>
 #include <llvm/LLVMContext.h>
 #include <llvm/DerivedTypes.h>
 #include <llvm/Constants.h>
@@ -16,11 +15,17 @@
 #include <llvm/ADT/SmallVector.h>
 #include <llvm/Analysis/Verifier.h>
 #include <llvm/Assembly/PrintModulePass.h>
-#include <algorithm>
+
+using namespace llvm;
 
 NSString * const kTQSyntaxErrorDomain = @"org.tranquil.syntax";
 
-@implementation TQSyntaxNode
+@implementation TQNode
++ (TQNode *)node
+{
+	return [[[self alloc] init] autorelease];
+}
+
 - (BOOL)generateCodeInModule:(llvm::Module *)aModule :(NSError **)aoErr
 {
 	NSLog(@"Code generation has not been implemented for %@.", [self class]);
@@ -28,9 +33,14 @@ NSString * const kTQSyntaxErrorDomain = @"org.tranquil.syntax";
 }
 @end
 
-@implementation TQSyntaxNodeReturn
+@implementation TQNodeReturn
 @synthesize value=_value;
-- (id)initWithValue:(TQSyntaxNode *)aValue
++ (TQNodeReturn *)nodeWithValue:(TQNode *)aValue
+{
+	return [[[self alloc] initWithValue:aValue] autorelease];
+}
+
+- (id)initWithValue:(TQNode *)aValue
 {
 	if(!(self = [super init]))
 		return nil;
@@ -46,8 +56,13 @@ NSString * const kTQSyntaxErrorDomain = @"org.tranquil.syntax";
 }
 @end
 
-@implementation TQSyntaxNodeVariable
+@implementation TQNodeVariable
 @synthesize name=_name;
+
++ (TQNodeVariable *)nodeWithName:(NSString *)aName
+{
+	return [[[self alloc] initWithName:aName] autorelease];
+}
 
 - (id)initWithName:(NSString *)aName
 {
@@ -71,8 +86,13 @@ NSString * const kTQSyntaxErrorDomain = @"org.tranquil.syntax";
 }
 @end
 
-@implementation TQSyntaxNodeString
+@implementation TQNodeString
 @synthesize value=_value;
+
++ (TQNodeString *)nodeWithCString:(const char *)aStr
+{
+	return [[[self alloc] initWithCString:aStr] autorelease];
+}
 
 - (id)initWithCString:(const char *)aStr
 {
@@ -96,7 +116,7 @@ NSString * const kTQSyntaxErrorDomain = @"org.tranquil.syntax";
 }
 @end
 
-@implementation TQSyntaxNodeIdentifier
+@implementation TQNodeIdentifier
 - (NSString *)description
 {
 	return [NSString stringWithFormat:@"<ident@ %@>", [self value]];
@@ -104,8 +124,13 @@ NSString * const kTQSyntaxErrorDomain = @"org.tranquil.syntax";
 
 @end
 
-@implementation TQSyntaxNodeNumber
+@implementation TQNodeNumber
 @synthesize value=_value;
+
++ (TQNodeNumber *)nodeWithDouble:(double)aDouble
+{
+	return [[[self alloc] initWithDouble:aDouble] autorelease];
+}
 
 - (id)initWithDouble:(double)aDouble
 {
@@ -130,10 +155,15 @@ NSString * const kTQSyntaxErrorDomain = @"org.tranquil.syntax";
 @end
 
 
-@implementation TQSyntaxNodeArgument
+@implementation TQNodeArgument
 @synthesize identifier=_identifier, passedNode=_passedNode;
 
-- (id)initWithPassedNode:(TQSyntaxNode *)aNode identifier:(NSString *)aIdentifier
++ (TQNodeArgument *)nodeWithPassedNode:(TQNode *)aNode identifier:(NSString *)aIdentifier
+{
+	return [[[self alloc] initWithPassedNode:aNode identifier:aIdentifier] autorelease];
+}
+
+- (id)initWithPassedNode:(TQNode *)aNode identifier:(NSString *)aIdentifier
 {
 	if(!(self = [super init]))
 		return nil;
@@ -158,7 +188,7 @@ NSString * const kTQSyntaxErrorDomain = @"org.tranquil.syntax";
 @end
 
 
-@implementation TQSyntaxNodeBlock
+@implementation TQNodeBlock
 @synthesize arguments=_arguments, statements=_statements;
 
 - (id)init
@@ -176,14 +206,14 @@ NSString * const kTQSyntaxErrorDomain = @"org.tranquil.syntax";
 {
 	NSMutableString *out = [NSMutableString stringWithString:@"<blk@ {"];
 	if(_arguments.count > 0) {
-		for(TQSyntaxNodeArgument *arg in _arguments) {
+		for(TQNodeArgument *arg in _arguments) {
 			[out appendFormat:@"%@ ", arg];
 		}
 		[out appendString:@"|"];
 	}
 	if(_statements.count > 0) {
 		[out appendString:@"\n"];
-		for(TQSyntaxNode *stmt in _statements) {
+		for(TQNode *stmt in _statements) {
 			[out appendFormat:@"\t%@\n", stmt];
 		}
 	}
@@ -198,7 +228,7 @@ NSString * const kTQSyntaxErrorDomain = @"org.tranquil.syntax";
 	[super dealloc];
 }
 
-- (BOOL)addArgument:(TQSyntaxNodeArgument *)aArgument error:(NSError **)aoError
+- (BOOL)addArgument:(TQNodeArgument *)aArgument error:(NSError **)aoError
 {
 	if(_arguments.count == 0)
 		TQAssertSoft(aArgument.identifier == nil,
@@ -211,10 +241,15 @@ NSString * const kTQSyntaxErrorDomain = @"org.tranquil.syntax";
 @end
 
 
-@implementation TQSyntaxNodeCall
+@implementation TQNodeCall
 @synthesize callee=_callee, arguments=_arguments;
 
-- (id)initWithCallee:(TQSyntaxNode *)aCallee
++ (TQNodeCall *)nodeWithCallee:(TQNode *)aCallee
+{
+return [[[self alloc] initWithCallee:aCallee] autorelease];
+}
+
+- (id)initWithCallee:(TQNode *)aCallee
 {
 	if(!(self = [super init]))
 		return nil;
@@ -238,7 +273,7 @@ NSString * const kTQSyntaxErrorDomain = @"org.tranquil.syntax";
 	if(_callee)
 		[out appendFormat:@"%@: ", _callee];
 
-	for(TQSyntaxNodeArgument *arg in _arguments) {
+	for(TQNodeArgument *arg in _arguments) {
 		[out appendFormat:@"%@ ", arg];
 	}
 
@@ -249,8 +284,13 @@ NSString * const kTQSyntaxErrorDomain = @"org.tranquil.syntax";
 
 @end
 
-@implementation TQSyntaxNodeClass
+@implementation TQNodeClass
 @synthesize name=_name, superClassName=_superClassName, classMethods=_classMethods, instanceMethods=_instanceMethods;
+
++ (TQNodeClass *)nodeWithName:(NSString *)aName superClass:(NSString *)aSuperClass error:(NSError **)aoError
+{
+	return [[[self alloc] initWithName:aName superClass:aSuperClass error:aoError] autorelease];
+}
 
 - (id)initWithName:(NSString *)aName superClass:(NSString *)aSuperClass error:(NSError **)aoError
 {
@@ -293,12 +333,12 @@ NSString * const kTQSyntaxErrorDomain = @"org.tranquil.syntax";
 		[out appendFormat:@" < %@", _superClassName];
 	[out appendString:@"\n"];
 
-	for(TQSyntaxNodeMethod *meth in _classMethods) {
+	for(TQNodeMethod *meth in _classMethods) {
 		[out appendFormat:@"%@\n", meth];
 	}
 	if(_classMethods.count > 0 && _instanceMethods.count > 0)
 		[out appendString:@"\n"];
-	for(TQSyntaxNodeMethod *meth in _instanceMethods) {
+	for(TQNodeMethod *meth in _instanceMethods) {
 		[out appendFormat:@"%@\n", meth];
 	}
 
@@ -308,8 +348,13 @@ NSString * const kTQSyntaxErrorDomain = @"org.tranquil.syntax";
 
 @end
 
-@implementation TQSyntaxNodeMethod
+@implementation TQNodeMethod
 @synthesize type=_type;
+
++ (TQNodeMethod *)nodeWithType:(TQMethodType)aType
+{
+	return [[[self alloc] initWithType:aType] autorelease];
+}
 
 - (id)initWithType:(TQMethodType)aType
 {
@@ -321,7 +366,7 @@ NSString * const kTQSyntaxErrorDomain = @"org.tranquil.syntax";
 	return self;
 }
 
-- (BOOL)addArgument:(TQSyntaxNodeArgument *)aArgument error:(NSError **)aoError
+- (BOOL)addArgument:(TQNodeArgument *)aArgument error:(NSError **)aoError
 {
 	if(self.arguments.count == 0)
 		TQAssertSoft(aArgument.identifier != nil,
@@ -348,13 +393,13 @@ NSString * const kTQSyntaxErrorDomain = @"org.tranquil.syntax";
 		default:
 			[out appendString:@"- "];
 	}
-	for(TQSyntaxNodeArgument *arg in self.arguments) {
+	for(TQNodeArgument *arg in self.arguments) {
 		[out appendFormat:@"%@ ", arg];
 	}
 	[out appendString:@"{"];
 	if(self.statements.count > 0) {
 		[out appendString:@"\n"];
-		for(TQSyntaxNode *stmt in self.statements) {
+		for(TQNode *stmt in self.statements) {
 			[out appendFormat:@"\t%@\n", stmt];
 		}
 	}
@@ -365,10 +410,15 @@ NSString * const kTQSyntaxErrorDomain = @"org.tranquil.syntax";
 @end
 
 
-@implementation TQSyntaxNodeMessage
+@implementation TQNodeMessage
 @synthesize receiver=_receiver, arguments=_arguments;
 
-- (id)initWithReceiver:(TQSyntaxNode *)aNode
++ (TQNodeMessage *)nodeWithReceiver:(TQNode *)aNode
+{
+	return [[[self alloc] initWithReceiver:aNode] autorelease];
+}
+
+- (id)initWithReceiver:(TQNode *)aNode
 {
 	if(!(self = [super init]))
 		return nil;
@@ -391,7 +441,7 @@ NSString * const kTQSyntaxErrorDomain = @"org.tranquil.syntax";
 	NSMutableString *out = [NSMutableString stringWithString:@"<msg@ "];
 	[out appendFormat:@"%@ ", _receiver];
 
-	for(TQSyntaxNodeArgument *arg in _arguments) {
+	for(TQNodeArgument *arg in _arguments) {
 		[out appendFormat:@"%@ ", arg];
 	}
 
@@ -400,10 +450,15 @@ NSString * const kTQSyntaxErrorDomain = @"org.tranquil.syntax";
 }
 @end
 
-@implementation TQSyntaxNodeMemberAccess
+@implementation TQNodeMemberAccess
 @synthesize receiver=_receiver, property=_property;
 
-- (id)initWithReceiver:(TQSyntaxNode *)aReceiver property:(NSString *)aProperty
++ (TQNodeMemberAccess *)nodeWithReceiver:(TQNode *)aReceiver property:(NSString *)aProperty
+{
+	return [[[self alloc] initWithReceiver:aReceiver property:aProperty] autorelease];
+}
+
+- (id)initWithReceiver:(TQNode *)aReceiver property:(NSString *)aProperty
 {
 	if(!(self = [super init]))
 		return nil;
@@ -428,10 +483,15 @@ NSString * const kTQSyntaxErrorDomain = @"org.tranquil.syntax";
 
 @end
 
-@implementation TQSyntaxNodeBinaryOperator
+@implementation TQNodeBinaryOperator
 @synthesize type=_type, left=_left, right=_right;
 
-- (id)initWithType:(TQOperatorType)aType left:(TQSyntaxNode *)aLeft right:(TQSyntaxNode *)aRight
++ (TQNodeBinaryOperator *)nodeWithType:(TQOperatorType)aType left:(TQNode *)aLeft right:(TQNode *)aRight
+{
+	return [[[self alloc] initWithType:aType left:aLeft right:aRight] autorelease];
+}
+
+- (id)initWithType:(TQOperatorType)aType left:(TQNode *)aLeft right:(TQNode *)aRight
 {
 	if(!(self = [super init]))
 		return nil;
@@ -458,5 +518,12 @@ NSString * const kTQSyntaxErrorDomain = @"org.tranquil.syntax";
 
 
 
-@implementation TQSyntaxTree
+@implementation TQProgram
+@synthesize rootNode=_rootNode;
+- (void)dealloc
+{
+	[_rootNode release];
+	[super dealloc];
+}
 @end
+

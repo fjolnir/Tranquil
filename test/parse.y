@@ -11,26 +11,26 @@
 	double dbl;
 	char *cStr;
 	// Rules
-	TQSyntaxNode *node;
-	TQSyntaxNodeNumber *number;
-	TQSyntaxNodeString *string;
-	TQSyntaxNodeVariable *variable;
-	TQSyntaxNodeArgument *arg;
-	TQSyntaxNodeBlock *block;
-	TQSyntaxNodeCall *call;
-	TQSyntaxNodeClass *klass;
-	TQSyntaxNodeMethod *method;
-	TQSyntaxNodeMessage *message;
-	TQSyntaxNodeMemberAccess *memberAccess;
-	TQSyntaxNodeBinaryOperator *binOp;
-	TQSyntaxNodeIdentifier *identifier;
+	TQNode *node;
+	TQNodeNumber *number;
+	TQNodeString *string;
+	TQNodeVariable *variable;
+	TQNodeArgument *arg;
+	TQNodeBlock *block;
+	TQNodeCall *call;
+	TQNodeClass *klass;
+	TQNodeMethod *method;
+	TQNodeMessage *message;
+	TQNodeMemberAccess *memberAccess;
+	TQNodeBinaryOperator *binOp;
+	TQNodeIdentifier *identifier;
 	NSMutableArray *array;
 }
 
 %{
 	typedef struct {
-		TQSyntaxNode *root;
-		TQSyntaxNode *currentNode;
+		TQNode *root;
+		TQNode *currentNode;
 	} TQParserState;
 
 	int yylex(YYSTYPE *lvalp, YYLTYPE *llocp);
@@ -77,11 +77,7 @@ program: empty
 	;
 
 assignment:
-	  lhs '=' expression {
-		$$ = [[TQSyntaxNodeBinaryOperator alloc] initWithType:'=' left:$1 right:$3];
-		[$1 release];
-		[$3 release];
-	}
+	  lhs '=' expression { $$ = [TQNodeBinaryOperator nodeWithType:'=' left:$1 right:$3]; }
 	;
 
 lhs:
@@ -90,28 +86,17 @@ lhs:
 	;
 
 variable:
-	  identifier {
-		$$ = [[TQSyntaxNodeVariable alloc] initWithName:[$1 value]];
-		[$1 release];
-	}
+	  identifier { $$ = [TQNodeVariable nodeWithName:[$1 value]]; }
 	;
 
-statements: statement {
-		NSLog(NSSTR("----------- %@"), $1);
-		$$ = [[NSMutableArray alloc] initWithObjects:$1, nil];
-		[$1 release];
-	}
-	| statements opt_nl statement {
-		NSLog(NSSTR("----------- %@"), $3);
-		[$$ addObject:$3];
-		[$3 release];
-	}
+statements: statement             { NSLog(NSSTR("----------- %@"), $1); $$ = [NSMutableArray arrayWithObjects:$1, nil]; }
+	| statements opt_nl statement { NSLog(NSSTR("----------- %@"), $3); [$$ addObject:$3]; }
 	;
 
 statement:
 	  class                 { $$ = $<node>1; }
-	| tRETURN call_arg '.'  { $$ = [[TQSyntaxNodeReturn alloc] initWithValue:$2]; [$2 release]; }
-	| tRETURN '.'           { $$ = [[TQSyntaxNodeReturn alloc] initWithValue:nil]; }
+	| tRETURN call_arg '.'  { $$ = [TQNodeReturn nodeWithValue:$2]; }
+	| tRETURN '.'           { $$ = [TQNodeReturn nodeWithValue:nil]; }
 	| message               { $$ = $<node>1; }
 	| call                  { $$ = $<node>1; }
 	| assignment '\n'       { $$ = $<node>1; }
@@ -142,42 +127,32 @@ block:
 	      statements
 	  opt_nl '}' {
 		NSError *err = nil;
-		$$ = [[TQSyntaxNodeBlock alloc] init];
-		for(TQSyntaxNodeArgument *arg in $3) {
+		$$ = [TQNodeBlock node];
+		for(TQNodeArgument *arg in $3) {
 			[$$ addArgument:arg error:&err];
 			if(err)
 				yyerror(&yylloc, state, [[err localizedDescription] UTF8String]);
 		}
 		[$$ setStatements:$6];
-		[$3 release];
-		[$6 release];
 	}
 	| '{' opt_nl statements opt_nl '}' {
-		$$ = [[TQSyntaxNodeBlock alloc] init];
+		$$ = [TQNodeBlock node];
 		[$$ setStatements:$3];
-		[$3 release];
 	}
-	| '{' opt_nl '}' { $$ = [[TQSyntaxNodeBlock alloc] init]; }
+	| '{' opt_nl '}' { $$ = [TQNodeBlock node]; }
 	;
 block_args:
 	  ':' block_arg opt_nl {
-		TQSyntaxNodeArgument *arg = [[TQSyntaxNodeArgument alloc] initWithPassedNode:$2 identifier:nil];
-		$$ = [[NSMutableArray alloc] initWithObjects:arg, nil];
-		[arg release];
-		[$2 release];
+		TQNodeArgument *arg = [TQNodeArgument nodeWithPassedNode:$2 identifier:nil];
+		$$ = [NSMutableArray arrayWithObjects:arg, nil];
 	} 
 	| block_args ':' block_arg opt_nl {
-		TQSyntaxNodeArgument *arg = [[TQSyntaxNodeArgument alloc] initWithPassedNode:$3 identifier:nil];
+		TQNodeArgument *arg = [TQNodeArgument nodeWithPassedNode:$3 identifier:nil];
 		[$$ addObject:arg];
-		[arg release];
-		[$3 release];
 	}
 	| block_args block_arg_identifier ':' block_arg opt_nl {
-		TQSyntaxNodeArgument *arg = [[TQSyntaxNodeArgument alloc] initWithPassedNode:$4 identifier:[$2 value]];
+		TQNodeArgument *arg = [TQNodeArgument nodeWithPassedNode:$4 identifier:[$2 value]];
 		[$$ addObject:arg];
-		[arg release];
-		[$2 release];
-		[$4 release];
 	}
 	;
 block_arg:
@@ -189,45 +164,29 @@ block_arg_identifier:
 
 /* Block call */
 call:
-	  callee '.' {
-		$$ = [[TQSyntaxNodeCall alloc] initWithCallee:$1];
-		[$1 release];
-	}
+	  callee '.' { $$ = [TQNodeCall nodeWithCallee:$1]; }
 	| callee call_args '.' {
-		$$ = [[TQSyntaxNodeCall alloc] initWithCallee:$1];
+		$$ = [TQNodeCall nodeWithCallee:$1];
 		[$$ setArguments:$2];
-		[$1 release];
-		[$2 release];
 	}
 	;
 call_args:
 	  ':' call_arg opt_nl {
-		TQSyntaxNodeArgument *arg = [[TQSyntaxNodeArgument alloc] initWithPassedNode:$2 identifier:nil];
-		$$ = [[NSMutableArray alloc] initWithObjects:arg, nil];
-		[arg release];
-		[$2 release];
+		TQNodeArgument *arg = [TQNodeArgument nodeWithPassedNode:$2 identifier:nil];
+		$$ = [NSMutableArray arrayWithObjects:arg, nil];
 	}
 	| call_args ':' call_arg opt_nl {
-		TQSyntaxNodeArgument *arg = [[TQSyntaxNodeArgument alloc] initWithPassedNode:$3 identifier:nil];
+		TQNodeArgument *arg = [TQNodeArgument nodeWithPassedNode:$3 identifier:nil];
 		[$$ addObject:arg];
-		[arg release];
-		[$3 release];
 	}
 	| call_args block_arg_identifier ':' call_arg opt_nl {
-		TQSyntaxNodeArgument *arg = [[TQSyntaxNodeArgument alloc] initWithPassedNode:$4 identifier:[$2 value]];
+		TQNodeArgument *arg = [TQNodeArgument nodeWithPassedNode:$4 identifier:[$2 value]];
 		[$$ addObject:arg];
-		[arg release];
-		[$2 release];
-		[$4 release];
 	}
 	;
 call_arg:
 	  block              { $$ = $<node>1; }
-	| lhs '=' call_arg   {
-		$$ = [[TQSyntaxNodeBinaryOperator alloc] initWithType:'=' left:$1 right:$3];
-		[$1 release];
-		[$3 release];
-	}
+	| lhs '=' call_arg   { $$ = [TQNodeBinaryOperator nodeWithType:'=' left:$1 right:$3]; }
 	| member_access      { $$ = $<node>1; }
 	| variable           { $$ = $<node>1; }
 	| literal            { $$ = $<node>1; }
@@ -239,53 +198,37 @@ class: tCLASS class_def opt_nl
 	      methods opt_nl
 	   tEND {
 		NSError *err = nil;
-		$$ = [[TQSyntaxNodeClass alloc] initWithName:[[$2 objectAtIndex:0] value]
-		                                  superClass:[$2 count] == 2 ? [[$2 objectAtIndex:1] value] : nil
-		                                       error:&err];
+		$$ = [TQNodeClass nodeWithName:[[$2 objectAtIndex:0] value]
+		                    superClass:[$2 count] == 2 ? [[$2 objectAtIndex:1] value] : nil
+		                         error:&err];
 		if(err)
 			yyerror(&yylloc, state, [[err localizedDescription] UTF8String]);
 
-		for(TQSyntaxNodeMethod *method in $4) {
+		for(TQNodeMethod *method in $4) {
 			if([method type] == kTQClassMethod)
 				[[$$ classMethods] addObject:method];
 			else
 				[[$$ instanceMethods] addObject:method];
 		}
-		[$2 release];
-		[$4 release];
 	}
 	|  tCLASS class_def opt_nl
 	   tEND {
 		NSError *err = nil;
-		$$ = [[TQSyntaxNodeClass alloc] initWithName:[[$2 objectAtIndex:0] value]
-		                                  superClass:[$2 count] == 2 ? [[$2 objectAtIndex:1] value] : nil
-		                                       error:&err];
+		$$ = [TQNodeClass nodeWithName:[[$2 objectAtIndex:0] value]
+		                    superClass:[$2 count] == 2 ? [[$2 objectAtIndex:1] value] : nil
+		                         error:&err];
 		if(err)
 			yyerror(&yylloc, state, [[err localizedDescription] UTF8String]);
-		[$2 release];
 	}
 	;
-class_def: class_name '<' class_name {
-		$$ = [[NSMutableArray alloc] initWithObjects:$1, $3, nil];
-		[$1 release];
-		[$3 release];
-	}
-	| class_name {
-		$$ = [[NSMutableArray alloc] initWithObjects:$1, nil];
-		[$1 release];
-	}
+class_def: class_name '<' class_name { $$ = [NSMutableArray arrayWithObjects:$1, $3, nil]; }
+	| class_name                     { $$ = [NSMutableArray arrayWithObjects:$1, nil]; }
 	;
 class_name: identifier
 	;
 
-methods: method {
-		$$ = [[NSMutableArray alloc] initWithObjects:$1, nil];
-		[$1 release];
-	}
-	| methods opt_nl method {
-		[$$ addObject:$3];
-		[$3 release];
-	}
+methods: method             { $$ = [NSMutableArray arrayWithObjects:$1, nil]; }
+	| methods opt_nl method { [$$ addObject:$3]; }
 	;
 method: class_method
 	| instance_method
@@ -295,27 +238,19 @@ class_method: '+' method_def    { $$ = $2; [$$ setType:kTQClassMethod]; }
 instance_method: '-' method_def { $$ = $2; [$$ setType:kTQInstanceMethod]; }
 	;
 method_def: block_arg_identifier block_args method_body {
-		$$ = [[TQSyntaxNodeMethod alloc] init];
+		$$ = [TQNodeMethod node];
 		[[$2 objectAtIndex:0] setIdentifier:[$1 value]];
 		[$$ setArguments:$2];
 		[$$ setStatements:$3];
-
-		[$1 release];
-		[$2 release];
-		[$3 release];
 	}
 	| block_arg_identifier method_body {
 		NSError *err = nil;
-		$$ = [[TQSyntaxNodeMethod alloc] init];
-		TQSyntaxNodeArgument *arg = [[TQSyntaxNodeArgument alloc] initWithPassedNode:nil identifier:[$1 value]];
+		$$ = [TQNodeMethod node];
+		TQNodeArgument *arg = [TQNodeArgument nodeWithPassedNode:nil identifier:[$1 value]];
 		[$$ addArgument:arg error:&err];
 		if(err)
 			yyerror(&yylloc, state, [[err localizedDescription] UTF8String]);
-		[arg release];
 		[$$ setStatements:$2];
-
-		[$1 release];
-		[$2 release];
 	}
 	;
 method_body: '{' opt_nl
@@ -326,33 +261,20 @@ method_body: '{' opt_nl
 
 /* Object member access */
 member_access:
-	  message_receiver '#' identifier {
-		$$ = [[TQSyntaxNodeMemberAccess alloc] initWithReceiver:$1 property:[$3 value]];
-		[$1 release];
-		[$3 release];
-	}
+	  message_receiver '#' identifier { $$ = [TQNodeMemberAccess nodeWithReceiver:$1 property:[$3 value]]; }
 	;
 
 /* Message sending */
 message:  message_receiver identifier  '.' {
-		$$ = [[TQSyntaxNodeMessage alloc] initWithReceiver:$1];
-		TQSyntaxNodeArgument *arg = [[TQSyntaxNodeArgument alloc] initWithPassedNode:nil identifier:[$2 value]];
-		NSMutableArray *args = [[NSMutableArray alloc] initWithObjects:arg, nil];
-		[arg release];
+		$$ = [TQNodeMessage nodeWithReceiver:$1];
+		TQNodeArgument *arg = [TQNodeArgument nodeWithPassedNode:nil identifier:[$2 value]];
+		NSMutableArray *args = [NSMutableArray arrayWithObjects:arg, nil];
 		[$$ setArguments:args];
-
-		[args release];
-		[$1 release];
-		[$2 release];
 	}
 	| message_receiver identifier call_args '.' {
-		$$ = [[TQSyntaxNodeMessage alloc] initWithReceiver:$1];
+		$$ = [TQNodeMessage nodeWithReceiver:$1];
 		[[$3 objectAtIndex:0] setIdentifier:[$2 value]];
 		[$$ setArguments:$3];
-
-		[$1 release];
-		[$2 release];
-		[$3 release];
 	}
 	;
 message_receiver:
@@ -385,13 +307,13 @@ literal:
 	  number { $$ = $<node>1; }
 	| string { $$ = $<node>1; }
 	;
-number: tNUMBER { $$ = [[TQSyntaxNodeNumber alloc] initWithDouble:$1]; }
+number: tNUMBER { $$ = [TQNodeNumber nodeWithDouble:$1]; }
 	;
 
-string: tSTRING { $$ = [[TQSyntaxNodeString alloc] initWithCString:$1]; }
+string: tSTRING { $$ = [TQNodeString nodeWithCString:$1]; }
 	;
 
-identifier: tIDENTIFIER {  $$ = [[TQSyntaxNodeIdentifier alloc] initWithCString:$1]; }
+identifier: tIDENTIFIER {  $$ = [TQNodeIdentifier nodeWithCString:$1]; }
 	;
 %%
 
@@ -414,12 +336,10 @@ void parse()
 	yydebug = 5;
 	yyparse(&state);
 	NSLog(@"------------------------------------------");
-	for(TQSyntaxNode *node in (NSArray*)state.root) {
+	for(TQNode *node in (NSArray*)state.root) {
 		NSLog(@"%@", node);
 	}
 	NSLog(@"------------------------------------------");
-
-	/*NSLog(@"done %@", state.root);*/
 }
 
 int main()

@@ -44,61 +44,71 @@ typedef enum {
     #define TQAssert(cond, fmt, ...)
 #endif
 
-@interface TQSyntaxNode : NSObject
+@interface TQNode : NSObject
++ (TQNode *)node;
 - (BOOL)generateCodeInModule:(llvm::Module *)aModule :(NSError **)aoErr;
 @end
 
-@interface TQSyntaxNodeReturn : TQSyntaxNode
-@property(readwrite, retain) TQSyntaxNode *value;
-- (id)initWithValue:(TQSyntaxNode *)aValue;
+@interface TQNodeReturn : TQNode
+@property(readwrite, retain) TQNode *value;
++ (TQNodeReturn *)nodeWithValue:(TQNode *)aValue;
+- (id)initWithValue:(TQNode *)aValue;
 @end
 
-@interface TQSyntaxNodeVariable : TQSyntaxNode
+@interface TQNodeVariable : TQNode
 @property(readwrite, retain) NSString *name;
++ (TQNodeVariable *)nodeWithName:(NSString *)aName;
 - (id)initWithName:(NSString *)aName;
 @end
 
-@interface TQSyntaxNodeString : TQSyntaxNode
+@interface TQNodeString : TQNode
 @property(readwrite, retain) NSString *value;
++ (TQNodeString *)nodeWithCString:(const char *)aStr;
 - (id)initWithCString:(const char *)aStr;
 @end
 
-@interface TQSyntaxNodeIdentifier : TQSyntaxNodeString
+@interface TQNodeIdentifier : TQNodeString
++ (TQNodeIdentifier *)nodeWithCString:(const char *)aStr;
 @end
 
-@interface TQSyntaxNodeNumber : TQSyntaxNode
+@interface TQNodeNumber : TQNode
 @property(readwrite, retain) NSNumber *value;
++ (TQNodeNumber *)nodeWithDouble:(double)aDouble;
 - (id)initWithDouble:(double)aDouble;
 @end
 
 // An argument to block (name: arg)
-@interface TQSyntaxNodeArgument : TQSyntaxNode
+@interface TQNodeArgument : TQNode
 @property(readwrite, retain) NSString *identifier;     // The argument identifier, that is, the portion before ':'
-@property(readwrite, retain) TQSyntaxNode *passedNode; // The node after ':'
-- (id)initWithPassedNode:(TQSyntaxNode *)aNode identifier:(NSString *)aIdentifier;
+@property(readwrite, retain) TQNode *passedNode; // The node after ':'
++ (TQNodeArgument *)nodeWithPassedNode:(TQNode *)aNode identifier:(NSString *)aIdentifier;
+- (id)initWithPassedNode:(TQNode *)aNode identifier:(NSString *)aIdentifier;
 @end
 
 // A block definition ({ :arg | body })
-@interface TQSyntaxNodeBlock : TQSyntaxNode
+@interface TQNodeBlock : TQNode
 @property(readwrite, copy) NSMutableArray *arguments;
 @property(readwrite, copy) NSMutableArray *statements;
-- (BOOL)addArgument:(TQSyntaxNodeArgument *)aArgument error:(NSError **)aoError;
++ (TQNodeBlock *)node;
+- (BOOL)addArgument:(TQNodeArgument *)aArgument error:(NSError **)aoError;
 @end
 
 // A call to a block (block: argument.)
-@interface TQSyntaxNodeCall : TQSyntaxNode
-@property(readwrite, retain) TQSyntaxNode *callee;
+@interface TQNodeCall : TQNode
+@property(readwrite, retain) TQNode *callee;
 @property(readwrite, copy) NSMutableArray *arguments;
-- (id)initWithCallee:(TQSyntaxNode *)aCallee;
++ (TQNodeCall *)nodeWithCallee:(TQNode *)aCallee;
+- (id)initWithCallee:(TQNode *)aCallee;
 @end
 
 
 // A class definition (class Name < SuperClass\n methods\n end)
-@interface TQSyntaxNodeClass : TQSyntaxNode
+@interface TQNodeClass : TQNode
 @property(readwrite, retain) NSString *name;
 @property(readwrite, retain) NSString *superClassName;
 @property(readwrite, copy) NSMutableArray *classMethods;
 @property(readwrite, copy) NSMutableArray *instanceMethods;
++ (TQNodeClass *)nodeWithName:(NSString *)aName superClass:(NSString *)aSuperClass error:(NSError **)aoError;
 - (id)initWithName:(NSString *)aName superClass:(NSString *)aSuperClass error:(NSError **)aoError;
 @end
 
@@ -108,23 +118,27 @@ typedef enum {
 } TQMethodType;
 
 // A method definition (+ aMethod: argument { body })
-@interface TQSyntaxNodeMethod : TQSyntaxNodeBlock
+@interface TQNodeMethod : TQNodeBlock
 @property(readwrite, assign) TQMethodType type;
++ (TQNodeMethod *)node;
++ (TQNodeMethod *)nodeWithType:(TQMethodType)aType;
 - (id)initWithType:(TQMethodType)aType;
 @end
 
 // A message to an object (object message: argument.)
-@interface TQSyntaxNodeMessage : TQSyntaxNode
-@property(readwrite, retain) TQSyntaxNode *receiver;
+@interface TQNodeMessage : TQNode
+@property(readwrite, retain) TQNode *receiver;
 @property(readwrite, copy) NSMutableArray *arguments;
-- (id)initWithReceiver:(TQSyntaxNode *)aNode;
++ (TQNodeMessage *)nodeWithReceiver:(TQNode *)aNode;
+- (id)initWithReceiver:(TQNode *)aNode;
 @end
 
 // Object member access (object#member)
-@interface TQSyntaxNodeMemberAccess : TQSyntaxNode
-@property(readwrite, retain) TQSyntaxNode *receiver;
+@interface TQNodeMemberAccess : TQNode
+@property(readwrite, retain) TQNode *receiver;
 @property(readwrite, copy) NSString *property;
-- (id)initWithReceiver:(TQSyntaxNode *)aReceiver property:(NSString *)aKey;
++ (TQNodeMemberAccess *)nodeWithReceiver:(TQNode *)aReceiver property:(NSString *)aKey;
+- (id)initWithReceiver:(TQNode *)aReceiver property:(NSString *)aKey;
 @end
 
 enum {
@@ -138,15 +152,18 @@ enum {
 };
 typedef char TQOperatorType;
 // Binary operator (a <operator> b)
-@interface TQSyntaxNodeBinaryOperator : TQSyntaxNode
+@interface TQNodeBinaryOperator : TQNode
 @property(readwrite, assign) TQOperatorType type;
-@property(readwrite, retain) TQSyntaxNode *left;
-@property(readwrite, retain) TQSyntaxNode *right;
-- (id)initWithType:(TQOperatorType)aType left:(TQSyntaxNode *)aLeft right:(TQSyntaxNode *)aRight;
+@property(readwrite, retain) TQNode *left;
+@property(readwrite, retain) TQNode *right;
++ (TQNodeBinaryOperator *)nodeWithType:(TQOperatorType)aType left:(TQNode *)aLeft right:(TQNode *)aRight;
+- (id)initWithType:(TQOperatorType)aType left:(TQNode *)aLeft right:(TQNode *)aRight;
 @end
 
 
-@interface TQSyntaxTree : NSObject
+@interface TQProgram : NSObject
+@property(readwrite, retain) TQNode *rootNode;
+
 @end
 
 #endif
