@@ -43,7 +43,7 @@
 using namespace llvm;
 
 @implementation TQProgram
-@synthesize root=_root, name=_name, llModule=_llModule, irBuilder=_irBuilder;
+@synthesize root=_root, name=_name, llModule=_llModule, irBuilder=_irBuilder, shouldShowDebugInfo=_shouldShowDebugInfo;
 @synthesize llVoidTy=_llVoidTy, llInt8Ty=_llInt8Ty, llInt16Ty=_llInt16Ty, llInt32Ty=_llInt32Ty, llInt64Ty=_llInt64Ty,
     llFloatTy=_llFloatTy, llDoubleTy=_llDoubleTy, llIntTy=_llIntTy, llIntPtrTy=_llIntPtrTy, llSizeTy=_llSizeTy,
     llPtrDiffTy=_llPtrDiffTy, llVoidPtrTy=_llVoidPtrTy, llInt8PtrTy=_llInt8PtrTy, llVoidPtrPtrTy=_llVoidPtrPtrTy,
@@ -252,7 +252,8 @@ using namespace llvm;
     llvm::EnableStatistics();
 
 
-    _llModule->dump();
+    if(_shouldShowDebugInfo)
+        _llModule->dump();
     // Verify that the program is valid
     verifyModule(*_llModule, PrintMessageAction);
 
@@ -325,13 +326,15 @@ using namespace llvm;
     //fpm.run(*_root.function);
     //modulePasses.run(*_llModule);
 
-    //_llModule->dump();
-    llvm::PrintStatistics();
+    if(_shouldShowDebugInfo) {
+        //_llModule->dump();
+        llvm::PrintStatistics();
+    }
 
     id(*rootPtr)() = (id(*)())engine->getPointerToFunction(_root.function);
 
-
-    fprintf(stderr, "---------------------\n");
+    if(_shouldShowDebugInfo)
+        fprintf(stderr, "---------------------\n");
     uint64_t startTime = mach_absolute_time();
     // Execute code
     id ret = rootPtr();
@@ -341,9 +344,11 @@ using namespace llvm;
     mach_timebase_info(&timebase);
     double sec = ns * timebase.numer / timebase.denom / 1000000000.0;
 
-    fprintf(stderr, "---------------------\n");
-    TQLog(@"Run time: %f sec. Ret: %p", sec, ret);
-    TQLog(@"'root' retval:  %p: %@ (%@)", ret, ret ? ret : nil, [ret class]);
+    if(_shouldShowDebugInfo) {
+        fprintf(stderr, "---------------------\n");
+        TQLog(@"Run time: %f sec. Ret: %p", sec, ret);
+        TQLog(@"'root' retval:  %p: %@ (%@)", ret, ret ? ret : nil, [ret class]);
+    }
 
     return YES;
 }

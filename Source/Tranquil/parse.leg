@@ -7,6 +7,8 @@ struct _TQParserState {
 
     NSMutableArray *stack;
     TQProgram *program;
+
+    FILE *stream;
 };
 typedef struct _TQParserState TQParserState;
 
@@ -50,6 +52,19 @@ typedef struct _TQParserState TQParserState;
 } while(0)
 
 //#define YY_DEBUG
+
+#define YY_INPUT(buf, result, maxSize, state) yyInput(buf, &result, maxSize, state)
+
+void yyInput(char *buf, int *result, int maxSize, TQParserState *state) {
+    (*result) = fread(buf, 1, maxSize, state->stream);
+    static int doneNewlineHack = 0;
+    if((*result) == 0 && doneNewlineHack == 0) {
+        doneNewlineHack = 1;
+        (*buf) = '\n';
+        (*result) = 1;
+        return;
+    }
+}
 %}
 
 Program      = -- (Statement --)+ EOF
@@ -509,8 +524,32 @@ EOL          = (- ('\n' | '\r\n' | '\r'))+
 EOF          = - !.
 %%
 
-int main()
+void printHelpAndExit(int status)
 {
+    printf("Usage: tranquil [options] [program path]\n");
+    printf("-h    Show this help message\n");
+    printf("-d    Print debugging information (Including the llvm assembly output)\n");
+    exit(status);
+}
+int main(int argc, char **argv)
+{
+    BOOL showDebugOutput = NO;
+    char *inputPath = NULL;
+
+    char *arg;
+    for(int i = 1; i < argc; ++i) {
+        arg = argv[i];
+        if(arg[0] == '-') {
+            if(strcmp(arg, "-d") == 0) showDebugOutput = YES;
+            else if(strcmp(arg, "-h") == 0) printHelpAndExit(0);
+            else {
+                fprintf(stderr, "Unknown argument %s\n", arg);
+                printHelpAndExit(1);
+            }
+        } else
+            inputPath = arg;
+    }
+
     GREG greg;
     yyinit(&greg);
 
@@ -518,6 +557,12 @@ int main()
     parserState.currentLine = 1;
     parserState.stack = [NSMutableArray array];
     parserState.program = [TQProgram programWithName:@"Test"];
+    parserState.program.shouldShowDebugInfo = showDebugOutput;
+    parserState.stream = inputPath ? fopen(inputPath, "r") : stdin;
+    if(!parserState.stream) {
+        fprintf(stderr, "Input file '%s' not found", inputPath);
+        exit(1);
+    }
     greg.data = &parserState;
 
     [parserState.stack addObject:[NSMutableArray array]];
@@ -525,8 +570,10 @@ int main()
     while(yyparse(&greg));
     yydeinit(&greg);
 
-    NSLog(@"%@", parserState.program);
+    if(showDebugOutput)
+        NSLog(@"%@", parserState.program);
     [parserState.program run];
 
     return 0;
 }
+

@@ -8,6 +8,7 @@
 @interface TQProgram : NSObject
 @property(readwrite, retain) NSString *name;
 @property(readwrite, retain) TQNodeBlock *root;
+@property(readwrite, assign) BOOL shouldShowDebugInfo;
 @property(readonly) llvm::Module *llModule;
 @property(readonly) llvm::IRBuilder<> *irBuilder;
 

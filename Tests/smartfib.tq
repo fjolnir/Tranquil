@@ -6,4 +6,4 @@ fib = { index, curr=0, succ=1 |
 		^num
 }
 
-^fib(35)
+print("%@", fib(35))
