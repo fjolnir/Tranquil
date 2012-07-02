@@ -99,6 +99,23 @@ Class TQGetOrCreateClass(const char *name, const char *superName)
     return klass;
 }
 
+// We either must use these functions to test nil for equality, or use the private _objc_setNilResponder which I don't feel good doing
+// For non equality test operators testing against nil is simply always false so we do not need to implement equivalents for them.
+id TQObjectsAreEqual(id a, id b)
+{
+    if(a)
+        return _objc_msgSend_hack2(a, TQEqOpSel, b);
+    return b == nil ? TQNumberTrue : TQNumberFalse;
+}
+
+id TQObjectsAreNotEqual(id a, id b)
+{
+    if(a)
+        return _objc_msgSend_hack2(a, TQNeqOpSel, b);
+    return b != nil ? TQNumberTrue : TQNumberFalse;
+}
+
+
 
 #pragma mark - Dynamic instance variables
 

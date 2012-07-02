@@ -87,6 +87,14 @@ using namespace llvm;
         // Increment and return incremented value (++var)
         else
             return incrementedVal;
+    } else if(_type == kTQOperatorEqual) {
+        Value *left  = [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
+        Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
+        return builder->CreateCall2(aProgram.TQObjectsAreEqual, left, right);
+    } else if(_type == kTQOperatorInequal) {
+        Value *left  = [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
+        Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
+        return builder->CreateCall2(aProgram.TQObjectsAreNotEqual, left, right);
     } else {
         Value *left  = [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
         Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
@@ -110,12 +118,6 @@ using namespace llvm;
                 break;
             case kTQOperatorSubtract:
                 selector  = aProgram.llModule->getOrInsertGlobal("TQSubOpSel", aProgram.llInt8PtrTy);
-                break;
-            case kTQOperatorEqual:
-                selector  = aProgram.llModule->getOrInsertGlobal("TQEqOpSel", aProgram.llInt8PtrTy);
-                break;
-            case kTQOperatorInequal:
-                selector  = aProgram.llModule->getOrInsertGlobal("TQNeqOpSel", aProgram.llInt8PtrTy);
                 break;
             case kTQOperatorGreaterOrEqual:
                 selector  = aProgram.llModule->getOrInsertGlobal("TQGTEOpSel", aProgram.llInt8PtrTy);

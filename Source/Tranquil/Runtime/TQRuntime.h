@@ -63,6 +63,11 @@ id TQPrepareObjectForReturn(id obj);
 // Looks up a class if it exists, otherwise registers it
 Class TQGetOrCreateClass(const char *name, const char *superName);
 
+// Tests objects for equality (including nil)
+id TQObjectsAreEqual(id a, id b);
+// Tests objects for inequality (including nil)
+id TQObjectsAreNotEqual(id a, id b);
+
 // Adds operator methods to the passed class (such as ==:, >=:, []: etc)
 BOOL TQAugmentClassWithOperators(Class klass);
 
