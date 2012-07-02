@@ -14,13 +14,9 @@
 # include <llvm/CallingConv.h>
 # include <llvm/Instructions.h>
 # include <llvm/PassManager.h>
-# include <llvm/Analysis/DebugInfo.h>
-# if !defined(LLVM_TOT)
-#  include <llvm/Analysis/DIBuilder.h>
-# endif
+# include <llvm/DebugInfo.h>
 # include <llvm/Analysis/Verifier.h>
 # include <llvm/Target/TargetData.h>
-//# include <llvm/CodeGen/MachineFunction.h>
 # include <llvm/ExecutionEngine/JIT.h>
 # include <llvm/ExecutionEngine/JITMemoryManager.h>
 # include <llvm/ExecutionEngine/JITEventListener.h>
@@ -391,7 +387,7 @@ using namespace llvm;
         Constant *strConst = ConstantDataArray::getString(_llModule->getContext(), [aStr UTF8String]);
         global = new GlobalVariable(*_llModule, strConst->getType(),
                                     true, GlobalValue::PrivateLinkage,
-                                    strConst, [globalName UTF8String], 0, false);
+                                    strConst, [globalName UTF8String]);
     }
 
     Value *zero = ConstantInt::get(Type::getInt32Ty(_llModule->getContext()), 0);

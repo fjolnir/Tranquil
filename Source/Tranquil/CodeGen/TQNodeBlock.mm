@@ -12,6 +12,11 @@
 
 using namespace llvm;
 
+@interface TQNodeBlock (Private)
+- (llvm::Function *)_generateCopyHelperInProgram:(TQProgram *)aProgram;
+- (llvm::Function *)_generateDisposeHelperInProgram:(TQProgram *)aProgram;
+@end
+
 @implementation TQNodeBlock
 @synthesize arguments=_arguments, statements=_statements, locals=_locals, name=_name,
     basicBlock=_basicBlock, function=_function, builder=_builder, autoreleasePool=_autoreleasePool;
@@ -212,10 +217,9 @@ using namespace llvm;
     // isa
     Value *isaPtr = mod->getNamedValue("_NSConcreteStackBlock");
     if(!isaPtr)
-        isaPtr = new llvm::GlobalVariable(*mod, i8PtrTy, false,
+        isaPtr = new GlobalVariable(*mod, i8PtrTy, false,
                              llvm::GlobalValue::ExternalLinkage,
-                             0, "_NSConcreteStackBlock", 0,
-                             false, 0);
+                             0, "_NSConcreteStackBlock");
     isaPtr =  pBuilder->CreateBitCast(isaPtr, i8PtrTy);
 
     // __flags

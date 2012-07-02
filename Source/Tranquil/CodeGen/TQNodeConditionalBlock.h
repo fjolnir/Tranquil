@@ -1,5 +1,5 @@
 #import "TQNodeBlock.h"
-#include <llvm/Support/IRBuilder.h>
+#include <llvm/IRBuilder.h>
 
 @class TQNodeWhileBlock;
 

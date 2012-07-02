@@ -45,65 +45,65 @@ extern id _objc_msgSend_hack2(id, SEL, id)     asm("_objc_msgSend");
 
 - (TQNumber *)add:(TQNumber *)b
 {
-    if(self->isa != object_getClass(b)) return nil;
-    return numberWithDoubleImp(self->isa, @selector(numberWithDouble), _value + b->_value);
+    if(object_getClass(self) != object_getClass(b)) return nil;
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble), _value + b->_value);
 }
 - (TQNumber *)subtract:(TQNumber *)b
 {
-    if(self->isa != object_getClass(b)) return nil;
-    return numberWithDoubleImp(self->isa, @selector(numberWithDouble:), _value - b->_value);
+    if(object_getClass(self) != object_getClass(b)) return nil;
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _value - b->_value);
 }
 - (TQNumber *)negate
 {
-    return numberWithDoubleImp(self->isa, @selector(numberWithDouble:), -_value);
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), -_value);
 }
 
 - (TQNumber *)multiply:(TQNumber *)b
 {
-    if(self->isa != object_getClass(b)) return nil;
-    return numberWithDoubleImp(self->isa, @selector(numberWithDouble:), _value * b->_value);
+    if(object_getClass(self) != object_getClass(b)) return nil;
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _value * b->_value);
 }
 - (TQNumber *)divideBy:(TQNumber *)b
 {
-    if(self->isa != object_getClass(b)) return nil;
-    return numberWithDoubleImp(self->isa, @selector(numberWithDouble:), _value / b->_value);
+    if(object_getClass(self) != object_getClass(b)) return nil;
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _value / b->_value);
 }
 
 - (TQNumber *)isGreater:(TQNumber *)b
 {
-    if(self->isa != object_getClass(b)) return nil;
+    if(object_getClass(self) != object_getClass(b)) return nil;
     return _value > b->_value ? TQNumberTrue : TQNumberFalse;
 }
 
 - (TQNumber *)isLesser:(TQNumber *)b
 {
-    if(self->isa != object_getClass(b)) return nil;
+    if(object_getClass(self) != object_getClass(b)) return nil;
     return _value < b->_value ? TQNumberTrue : TQNumberFalse;
 }
 
 - (TQNumber *)isGreaterOrEqual:(TQNumber *)b
 {
-    if(self->isa != object_getClass(b)) return nil;
+    if(object_getClass(self) != object_getClass(b)) return nil;
     return _value >= b->_value ? TQNumberTrue : TQNumberFalse;
 }
 
 - (TQNumber *)isLesserOrEqual:(TQNumber *)b
 {
-    if(self->isa != object_getClass(b)) return nil;
+    if(object_getClass(self) != object_getClass(b)) return nil;
     return _value <= b->_value ? TQNumberTrue : TQNumberFalse;
 }
 
 
 - (BOOL)isEqual:(id)aObj
 {
-    if(self->isa == object_getClass(aObj))
+    if(object_getClass(self) == object_getClass(aObj))
         return self->_value == ((TQNumber *)aObj)->_value;
     return NO;
 }
 
 - (NSComparisonResult)compare:(id)object
 {
-    if(object_getClass(object) != self->isa)
+    if(object_getClass(object) != object_getClass(self))
         return NSOrderedAscending;
     TQNumber *b = object;
     if(_value > b->_value)

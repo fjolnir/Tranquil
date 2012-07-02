@@ -2,7 +2,7 @@
 #define _TQ_PROGRAM_H_
 
 #include <Tranquil/CodeGen/TQNodeBlock.h>
-#include <llvm/Support/IRBuilder.h>
+#include <llvm/IRBuilder.h>
 #include <Foundation/NSObject.h>
 
 @interface TQProgram : NSObject
