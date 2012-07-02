@@ -31,6 +31,7 @@ LDFLAGS = [
     '`llvm-config --libs core jit nativecodegen bitwriter ipo instrumentation`',
     '`llvm-config --ldflags`',
     '-framework Foundation',
+    '-framework AppKit',
     '-all_load',
     '-lxml2'
 ].join(' ')

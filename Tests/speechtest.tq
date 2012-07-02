@@ -1,0 +1,2 @@
+(NSSpeechSynthesizer new) startSpeakingString:"Hey man"
+(NSApplication sharedApplication) run
