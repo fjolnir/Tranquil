@@ -105,12 +105,13 @@ using namespace llvm;
 
 
     Value *ret;
-    //if([_receiver isMemberOfClass:[TQNodeSuper class]])
-        //return NULL; // TODO: implement super calls
-    //else
+    if([_receiver isMemberOfClass:[TQNodeSuper class]])
+        ret = builder->CreateCall(aProgram.objc_msgSendSuper, aArgs);
+    else {
         ret = builder->CreateCall(aProgram.objc_msgSend, aArgs);
-    if(needsAutorelease)
-        ret = builder->CreateCall(aProgram.TQAutoreleaseObject, ret);
+        if(needsAutorelease)
+            ret = builder->CreateCall(aProgram.TQAutoreleaseObject, ret);
+    }
     return ret;
 }
 

@@ -62,6 +62,8 @@ id TQPrepareObjectForReturn(id obj);
 
 // Looks up a class if it exists, otherwise registers it
 Class TQGetOrCreateClass(const char *name, const char *superName);
+// Returns the superclass of the class of an object
+Class TQObjectGetSuperClass(id aObj);
 
 // Tests objects for equality (including nil)
 id TQObjectsAreEqual(id a, id b);

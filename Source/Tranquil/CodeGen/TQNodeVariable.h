@@ -16,5 +16,7 @@
 @interface TQNodeSelf : TQNodeVariable
 @end
 
-@interface TQNodeSuper : TQNodeVariable
+@interface TQNodeSuper : TQNodeVariable {
+   llvm::Type *_structType;
+}
 @end

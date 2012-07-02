@@ -1,5 +1,6 @@
 #import "TQNodeVariable.h"
 #import "../TQProgram.h"
+#import "../TQDebug.h"
 #import <llvm/Support/IRBuilder.h>
 
 using namespace llvm;
@@ -277,4 +278,52 @@ using namespace llvm;
     self.name = @"super";
     return self;
 }
+
+- (llvm::Type *)_superStructTypeInProgram:(TQProgram *)aProgram
+{
+    if(_structType)
+        return _structType;
+
+    Type *i8PtrTy = aProgram.llInt8PtrTy;
+    Type *intTy   = aProgram.llIntTy;
+
+    std::vector<Type*> fields;
+    fields.push_back(i8PtrTy); // receiver
+    fields.push_back(i8PtrTy); // (super)class
+    _structType = StructType::get(aProgram.llModule->getContext(), fields, true);
+
+    return _structType;
+}
+
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                 error:(NSError **)aoError
+{
+    IRBuilder<> *builder = aBlock.builder;
+    IRBuilder<> entryBuilder(&aBlock.function->getEntryBlock(), aBlock.function->getEntryBlock().begin());
+    AllocaInst *alloca = entryBuilder.CreateAlloca([self _superStructTypeInProgram:aProgram], 0, "super");
+
+    TQNodeSelf *selfNode = [aBlock.locals objectForKey:@"self"];
+    TQAssertSoft(selfNode, kTQSyntaxErrorDomain, kTQUnexpectedExpression, NULL, @"super is only applicable with in methods");
+    Value *selfValue = [selfNode generateCodeInProgram:aProgram block:aBlock error:aoError];
+    if(*aoError)
+        return NULL;
+
+    Value *superClass = builder->CreateCall(aProgram.TQObjectGetSuperClass, selfValue);
+
+    builder->CreateStore(selfValue,  builder->CreateStructGEP(alloca, 0, "super.receiver"));
+    builder->CreateStore(superClass, builder->CreateStructGEP(alloca, 1,  "super.class"));
+
+    return builder->CreateBitCast(alloca, aProgram.llInt8PtrTy);
+}
+
+- (TQNode *)referencesNode:(TQNode *)aNode
+{
+    if([aNode isEqual:self])
+        return self;
+    else if([aNode isKindOfClass:[TQNodeSelf class]])
+        return aNode;
+    return nil;
+}
+
 @end

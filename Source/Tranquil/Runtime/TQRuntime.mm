@@ -22,11 +22,11 @@ SEL TQUnaryMinusOpSel;
 SEL TQSetterOpSel;
 SEL TQGetterOpSel;
 
-SEL TQNumberWithDoubleSel             = @selector(numberWithDouble:);
-SEL TQStringWithUTF8StringSel         = @selector(stringWithUTF8String:);
-SEL TQPointerArrayWithObjectsSel      = @selector(tq_pointerArrayWithObjects:);
-SEL TQMapWithObjectsAndKeysSel        = @selector(tq_mapTableWithObjectsAndKeys:);
-SEL TQRegexWithPatSel                 = @selector(tq_regularExpressionWithUTF8String:options:);
+SEL TQNumberWithDoubleSel        = @selector(numberWithDouble:);
+SEL TQStringWithUTF8StringSel    = @selector(stringWithUTF8String:);
+SEL TQPointerArrayWithObjectsSel = @selector(tq_pointerArrayWithObjects:);
+SEL TQMapWithObjectsAndKeysSel   = @selector(tq_mapTableWithObjectsAndKeys:);
+SEL TQRegexWithPatSel            = @selector(tq_regularExpressionWithUTF8String:options:);
 
 Class TQNumberClass;
 
@@ -43,9 +43,9 @@ struct TQBlock_byref {
 #pragma mark - Utilities
 
 // Hack from libobjc, allows tail call optimization for objc_msgSend
-extern id _objc_msgSend_hack(id, SEL)          asm("_objc_msgSend");
-extern id _objc_msgSend_hack2(id, SEL, id)     asm("_objc_msgSend");
-extern id _objc_msgSend_hack3(id, SEL, id, id) asm("_objc_msgSend");
+extern id _objc_msgSend_hack(id, SEL)            asm("_objc_msgSend");
+extern id _objc_msgSend_hack2(id, SEL, id)       asm("_objc_msgSend");
+extern id _objc_msgSend_hack3(id, SEL, id, id)   asm("_objc_msgSend");
 extern id _objc_msgSend_hack2i(id, SEL, int)     asm("_objc_msgSend");
 extern id _objc_msgSend_hack3i(id, SEL, id, int) asm("_objc_msgSend");
 
@@ -99,6 +99,12 @@ Class TQGetOrCreateClass(const char *name, const char *superName)
     return klass;
 }
 
+Class TQObjectGetSuperClass(id aObj)
+{
+    return class_getSuperclass(object_getClass(aObj));
+}
+
+
 // We either must use these functions to test nil for equality, or use the private _objc_setNilResponder which I don't feel good doing
 // For non equality test operators testing against nil is simply always false so we do not need to implement equivalents for them.
 id TQObjectsAreEqual(id a, id b)
@@ -114,7 +120,6 @@ id TQObjectsAreNotEqual(id a, id b)
         return _objc_msgSend_hack2(a, TQNeqOpSel, b);
     return b != nil ? TQNumberTrue : TQNumberFalse;
 }
-
 
 
 #pragma mark - Dynamic instance variables

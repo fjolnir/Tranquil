@@ -41,6 +41,7 @@ typedef enum {
     kTQInvalidClassName,
     kTQInvalidAssignee,
     kTQUnexpectedStatement,
+    kTQUnexpectedExpression,
     kTQGenericError
 } TQSyntaxErrorCode;
 

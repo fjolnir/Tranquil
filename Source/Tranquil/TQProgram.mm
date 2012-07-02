@@ -6,6 +6,7 @@
 #import <mach/mach_time.h>
 #import "Runtime/TQRuntime.h"
 #import <objc/runtime.h>
+#import <objc/message.h>
 
 # include <llvm/Module.h>
 # include <llvm/DerivedTypes.h>
@@ -50,8 +51,8 @@ using namespace llvm;
     llInt8PtrPtrTy=_llInt8PtrPtrTy, llPointerWidthInBits=_llPointerWidthInBits, llPointerAlignInBytes=_llPointerAlignInBytes,
     llPointerSizeInBytes=_llPointerSizeInBytes;
 @synthesize llBlockDescriptorTy=_blockDescriptorTy, llBlockLiteralType=_blockLiteralType;
-@synthesize objc_msgSend=_func_objc_msgSend, TQStoreStrongInByref=_func_TQStoreStrongInByref, objc_storeWeak=_func_objc_storeWeak,
-    objc_loadWeak=_func_objc_loadWeak, objc_allocateClassPair=_func_objc_allocateClassPair,
+@synthesize objc_msgSend=_func_objc_msgSend, objc_msgSendSuper=_func_objc_msgSendSuper, TQStoreStrongInByref=_func_TQStoreStrongInByref,
+    objc_storeWeak=_func_objc_storeWeak, objc_loadWeak=_func_objc_loadWeak, objc_allocateClassPair=_func_objc_allocateClassPair,
     objc_registerClassPair=_func_objc_registerClassPair, objc_destroyWeak=_func_objc_destroyWeak, class_addIvar=_func_class_addIvar,
     class_replaceMethod=_func_class_replaceMethod, sel_registerName=_func_sel_registerName, sel_getName=_func_sel_getName,
     objc_getClass=_func_objc_getClass, TQRetainObject=_func_TQRetainObject, TQReleaseObject=_func_TQReleaseObject,
@@ -61,7 +62,7 @@ using namespace llvm;
     TQAutoreleaseObject=_func_TQAutoreleaseObject, objc_autoreleasePoolPush=_func_objc_autoreleasePoolPush,
     objc_autoreleasePoolPop=_func_objc_autoreleasePoolPop, TQSetValueForKey=_func_TQSetValueForKey,
     TQValueForKey=_func_TQValueForKey, TQGetOrCreateClass=_func_TQGetOrCreateClass,
-    TQObjectsAreEqual=_func_TQObjectsAreEqual, TQObjectsAreNotEqual=_func_TQObjectsAreNotEqual;
+    TQObjectsAreEqual=_func_TQObjectsAreEqual, TQObjectsAreNotEqual=_func_TQObjectsAreNotEqual, TQObjectGetSuperClass=_func_TQObjectGetSuperClass;
 
 + (TQProgram *)programWithName:(NSString *)aName
 {
@@ -205,6 +206,7 @@ using namespace llvm;
     DEF_EXTERNAL_FUN(imp_implementationWithBlock, ft_i8Ptr__i8Ptr)
     DEF_EXTERNAL_FUN(object_getClass, ft_i8Ptr__i8Ptr)
     DEF_EXTERNAL_FUN(objc_msgSend, ft_i8ptr__i8ptr_i8ptr_variadic)
+    DEF_EXTERNAL_FUN(objc_msgSendSuper, ft_i8ptr__i8ptr_i8ptr_variadic)
     DEF_EXTERNAL_FUN(TQStoreStrongInByref, ft_i8Ptr__i8Ptr_i8Ptr)
     //DEF_EXTERNAL_FUN(objc_storeWeak, ft_i8Ptr__i8PtrPtr_i8Ptr)
     //DEF_EXTERNAL_FUN(objc_loadWeak, ft_i8Ptr__i8PtrPtr)
@@ -226,6 +228,7 @@ using namespace llvm;
     DEF_EXTERNAL_FUN(TQGetOrCreateClass, ft_i8Ptr__i8Ptr_i8Ptr);
     DEF_EXTERNAL_FUN(TQObjectsAreEqual, ft_i8Ptr__i8Ptr_i8Ptr);
     DEF_EXTERNAL_FUN(TQObjectsAreNotEqual, ft_i8Ptr__i8Ptr_i8Ptr);
+    DEF_EXTERNAL_FUN(TQObjectGetSuperClass, ft_i8Ptr__i8Ptr);
 
 #undef DEF_EXTERNAL_FUN
 
@@ -296,7 +299,7 @@ using namespace llvm;
     engine->addGlobalMapping(_func_TQGetOrCreateClass, (void*)&TQGetOrCreateClass);
     engine->addGlobalMapping(_func_TQObjectsAreEqual, (void*)&TQObjectsAreEqual);
     engine->addGlobalMapping(_func_TQObjectsAreNotEqual, (void*)&TQObjectsAreNotEqual);
-    
+    engine->addGlobalMapping(_func_TQObjectGetSuperClass, (void*)&TQObjectGetSuperClass);
 
     //std::vector<GenericValue> noargs;
     //GenericValue val = engine->runFunction(_root.function, noargs);
