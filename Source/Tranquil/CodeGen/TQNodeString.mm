@@ -3,8 +3,6 @@
 
 using namespace llvm;
 
-static Value *_StringWithUTF8StringSel, *_NSStringClassNameConst;
-
 @implementation TQNodeString
 @synthesize value=_value;
 

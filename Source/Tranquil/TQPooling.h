@@ -2,26 +2,27 @@
 
 #define TQ_POOL_IVARS \
     @private \
-    TQNumber *_poolPredecessor; \
+    id _poolPredecessor; \
     NSUInteger _retainCount;
 
 #define TQ_POOL_INTERFACE \
     + (int)purgeCache;
 
-#define TQ_POOL_IMPLEMENTATION \
+#define TQ_POOL_IMPLEMENTATION(Klass) \
 static struct { \
-    TQNumber *lastElement; \
+    Klass *lastElement; \
 } _Pool = { nil }; \
 \
 + (id)allocWithZone:(NSZone *)aZone \
 { \
+    register Klass *object; \
     if(!_Pool.lastElement) { \
-        TQNumber *object = NSAllocateObject(self, 0, aZone); \
+        object = NSAllocateObject(self, 0, aZone); \
         object->_retainCount = 1; \
         return object; \
     } \
     else { \
-        TQNumber *object = _Pool.lastElement; \
+        object = _Pool.lastElement; \
         _Pool.lastElement = object->_poolPredecessor; \
  \
         object->_retainCount = 1; \
@@ -56,7 +57,7 @@ static struct { \
  \
 + (int)purgeCache \
 { \
-    TQNumber *lastElement; \
+    Klass *lastElement; \
     int count=0; \
     while ((lastElement = _Pool.lastElement)) \
     { \

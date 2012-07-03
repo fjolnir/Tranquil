@@ -33,7 +33,7 @@ LDFLAGS = [
     '-framework Foundation',
     '-framework AppKit',
     '-all_load',
-    '-lxml2'
+    '-lxml2',
 ].join(' ')
 
 LIBS = ['-framework Foundation'].join(' ')
@@ -58,7 +58,6 @@ end
 file STUB_OUTPATH => STUB_SCRIPT do |f|
     sh "ruby #{STUB_SCRIPT} > #{STUB_OUTPATH}"
 end
-
 
 OBJC_SOURCES.each { |src|
     file src.pathmap(PATHMAP) => src do |f|

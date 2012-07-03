@@ -62,7 +62,7 @@ using namespace llvm;
                  error:(NSError **)aoError
 {
     IRBuilder<> *builder = aBlock.builder;
-	NSString *keyVarName = [NSString stringWithFormat:@"TQPropertyKey_%@", _property];
+	//NSString *keyVarName = [NSString stringWithFormat:@"TQPropertyKey_%@", _property];
 
     //Value *key = aProgram.llModule->getGlobalVariable([keyVarName UTF8String], true);
 	//NSLog(@"var for %@: %p", keyVarName, key);

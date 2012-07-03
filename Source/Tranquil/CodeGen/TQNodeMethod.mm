@@ -97,6 +97,7 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
 {
     TQAssertSoft(NO, kTQGenericErrorDomain, kTQGenericError, NULL, @"Methods require their class to be passed to generate code.");
+    return NULL;
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram

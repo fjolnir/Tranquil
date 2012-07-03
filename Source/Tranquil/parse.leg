@@ -211,6 +211,7 @@ Block        = '{' --
                    ExtendToken();
                    NSMutableArray *arguments = PopStack();
                    $$ = [TQNodeBlock node];
+                   [$$ setIsCompactBlock:YES];
                    for(TQNodeArgumentDef *arg in arguments) {
                        [$$ addArgument:arg error:nil];
                    }
@@ -334,13 +335,13 @@ If           = ( "if"        { UpdateToken();  PushStack([TQNodeIfBlock node]); 
 Loop         = ( "while"  { UpdateToken(); PushStack([TQNodeWhileBlock node]); }
                | "until"  { UpdateToken(); PushStack([TQNodeUntilBlock node]); }
                )
-               -- cond:Expression -- '{' --
+               -- cond:Expression --
                {
                    ExtendToken();
                    [StackTop setCondition:cond];
                    PushStack([NSMutableArray array]);
                }
-               ( Statement --)* '}'
+               ('{' -- ( Statement --)* '}' | -- Statement)
                {
                    ExtendToken();
                    NSMutableArray *statements = PopStack();

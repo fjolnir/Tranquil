@@ -30,6 +30,7 @@
 #else
     #define TQLog(fmt, ...)
     #define TQAssert(cond, fmt, ...)
+    #define TQAssertSoft(cond, errDomain, errCode, retVal, fmt, ...)
 #endif
 
 extern NSString * const kTQSyntaxErrorDomain;

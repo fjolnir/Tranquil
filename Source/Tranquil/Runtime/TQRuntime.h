@@ -3,6 +3,7 @@
 #import <Foundation/Foundation.h>
 
 extern id TQSentinel;
+extern id TQValid;
 
 enum TQBlockFlag_t {
     // I chose a flag right in the middle of the unused space, so let's hope Apple doesn't decide to use it
@@ -92,7 +93,7 @@ extern SEL TQGetterOpSel;
 extern SEL TQNumberWithDoubleSel;
 extern SEL TQStringWithUTF8StringSel;
 extern SEL TQPointerArrayWithObjectsSel;
-extern SEL TQMapWithObjectsundKeysSel;
+extern SEL TQMapWithObjectsAndKeysSel;
 extern SEL TQRegexWithPatSel;
 
 extern Class TQNumberClass;

@@ -21,6 +21,3 @@
 
 TQ_POOL_INTERFACE
 @end
-
-extern TQNumber *TQNumberTrue, *TQNumberFalse;
-

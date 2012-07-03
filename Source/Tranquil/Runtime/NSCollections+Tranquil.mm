@@ -37,9 +37,9 @@
 @end
 
 @implementation NSPointerArray (Tranquil)
-+ (NSMapTable *)tq_pointerArrayWithObjects:(id)firstObject , ...
++ (NSPointerArray *)tq_pointerArrayWithObjects:(id)firstObject , ...
 {
-    NSMapTable *ret = [NSPointerArray pointerArrayWithStrongObjects];
+    NSPointerArray *ret = [NSPointerArray pointerArrayWithStrongObjects];
 
     va_list args;
     va_start(args, firstObject);

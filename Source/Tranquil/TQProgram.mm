@@ -278,12 +278,11 @@ using namespace llvm;
 
     PassManager modulePasses;
 
-
-    llvm::EngineBuilder factory(_llModule);
+    EngineBuilder factory(_llModule);
     factory.setEngineKind(llvm::EngineKind::JIT);
     factory.setTargetOptions(Opts);
     factory.setOptLevel(CodeGenOpt::Aggressive);
-    llvm::ExecutionEngine *engine = factory.create();
+    ExecutionEngine *engine = factory.create();
 
     //engine->DisableLazyCompilation();
     engine->addGlobalMapping(_func_TQPrepareObjectForReturn, (void*)&TQPrepareObjectForReturn);
@@ -328,8 +327,10 @@ using namespace llvm;
     fpm.add(createTailCallEliminationPass());
 
 
-    //fpm.run(*_root.function);
-    //modulePasses.run(*_llModule);
+    if(!_shouldShowDebugInfo) {
+        fpm.run(*_root.function);
+        modulePasses.run(*_llModule);
+    }
 
     if(_shouldShowDebugInfo) {
         //_llModule->dump();

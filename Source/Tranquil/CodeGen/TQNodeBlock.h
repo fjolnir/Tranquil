@@ -11,6 +11,7 @@
     llvm::Type *_literalType;
     NSMutableDictionary *_capturedVariables;
 }
+@property(readwrite, assign) BOOL isCompactBlock; // Was the block written in the form of `expr` ?
 @property(readwrite, retain) TQNodeBlock *parent;
 @property(readwrite, copy) NSMutableArray *arguments;
 @property(readwrite, copy, nonatomic) NSMutableArray *statements;

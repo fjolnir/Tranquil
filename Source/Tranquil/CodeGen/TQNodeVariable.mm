@@ -7,10 +7,11 @@ using namespace llvm;
 
 @interface TQNodeVariable (Private)
 - (TQNodeVariable *)_getExistingIdenticalInBlock:(TQNodeBlock *)aBlock;
+- (const char *)_llvmRegisterName:(NSString *)subname;
 @end
 
 @implementation TQNodeVariable
-@synthesize name=_name, alloca=_alloca;
+@synthesize name=_name, alloca=_alloca, forwarding=_forwarding;
 
 + (TQNodeVariable *)nodeWithName:(NSString *)aName
 {
@@ -285,7 +286,6 @@ using namespace llvm;
         return _structType;
 
     Type *i8PtrTy = aProgram.llInt8PtrTy;
-    Type *intTy   = aProgram.llIntTy;
 
     std::vector<Type*> fields;
     fields.push_back(i8PtrTy); // receiver

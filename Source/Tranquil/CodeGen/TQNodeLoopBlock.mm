@@ -140,7 +140,7 @@ using namespace llvm;
 {
     return nil;
 }
-- (BOOL)addArgument:(NSString *)aArgument error:(NSError **)aoError
+- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoError
 {
     return NO;
 }

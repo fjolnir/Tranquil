@@ -19,7 +19,8 @@ using namespace llvm;
 
 @implementation TQNodeBlock
 @synthesize arguments=_arguments, statements=_statements, locals=_locals, name=_name,
-    basicBlock=_basicBlock, function=_function, builder=_builder, autoreleasePool=_autoreleasePool;
+    basicBlock=_basicBlock, function=_function, builder=_builder, autoreleasePool=_autoreleasePool,
+    isCompactBlock=_isCompactBlock, parent=_parent;
 
 + (TQNodeBlock *)node { return (TQNodeBlock *)[super node]; }
 
@@ -97,7 +98,7 @@ using namespace llvm;
     return YES;
 }
 
-- (void)setStatements:(NSArray *)aStatements
+- (void)setStatements:(NSMutableArray *)aStatements
 {
     NSArray *old = _statements;
     _statements = [aStatements mutableCopy];
@@ -148,7 +149,6 @@ using namespace llvm;
     fields.push_back([self _blockDescriptorTypeInProgram:aProgram]);
 
     // Fields for captured vars
-    Type *captureType;
     for(TQNodeVariable *var in [_capturedVariables allValues]) {
         fields.push_back(i8PtrTy);
     }
@@ -211,7 +211,6 @@ using namespace llvm;
     Type *intTy   = aProgram.llIntTy;
 
     // Build the block struct
-    int BlockHeaderSize = 5;
     std::vector<Constant *> fields;
 
     // isa
@@ -415,7 +414,6 @@ using namespace llvm;
     }
 
 
-    Value *val;
     for(TQNode *stmt in _statements) {
         [stmt generateCodeInProgram:aProgram block:self error:aoErr];
         if(*aoErr) {
@@ -472,7 +470,6 @@ using namespace llvm;
 
     return nil;
 }
-
 
 @end
 

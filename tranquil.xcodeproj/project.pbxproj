@@ -6,16 +6,271 @@
 	objectVersion = 46;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C7F8BD6515A2B97E00728E65 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7F8BD6415A2B97E00728E65 /* Foundation.framework */; };
+		C7F8BDBD15A2BA0300728E65 /* bs.c in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BD7815A2BA0300728E65 /* bs.c */; };
+		C7F8BDBE15A2BA0300728E65 /* TQBridgeSupport.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BD7C15A2BA0300728E65 /* TQBridgeSupport.mm */; };
+		C7F8BDBF15A2BA0300728E65 /* TQNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BD7F15A2BA0300728E65 /* TQNode.mm */; };
+		C7F8BDC015A2BA0300728E65 /* TQNodeArgument.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BD8115A2BA0300728E65 /* TQNodeArgument.mm */; };
+		C7F8BDC115A2BA0300728E65 /* TQNodeArgumentDef.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BD8315A2BA0300728E65 /* TQNodeArgumentDef.mm */; };
+		C7F8BDC215A2BA0300728E65 /* TQNodeArray.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BD8515A2BA0300728E65 /* TQNodeArray.mm */; };
+		C7F8BDC315A2BA0300728E65 /* TQNodeBlock.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BD8715A2BA0300728E65 /* TQNodeBlock.mm */; };
+		C7F8BDC415A2BA0300728E65 /* TQNodeCall.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BD8915A2BA0300728E65 /* TQNodeCall.mm */; };
+		C7F8BDC515A2BA0300728E65 /* TQNodeClass.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BD8B15A2BA0300728E65 /* TQNodeClass.mm */; };
+		C7F8BDC615A2BA0300728E65 /* TQNodeConditionalBlock.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BD8D15A2BA0300728E65 /* TQNodeConditionalBlock.mm */; };
+		C7F8BDC715A2BA0300728E65 /* TQNodeConstant.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BD8F15A2BA0300728E65 /* TQNodeConstant.mm */; };
+		C7F8BDC815A2BA0300728E65 /* TQNodeDictionary.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BD9115A2BA0300728E65 /* TQNodeDictionary.mm */; };
+		C7F8BDC915A2BA0300728E65 /* TQNodeLoopBlock.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BD9315A2BA0300728E65 /* TQNodeLoopBlock.mm */; };
+		C7F8BDCA15A2BA0300728E65 /* TQNodeMemberAccess.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BD9515A2BA0300728E65 /* TQNodeMemberAccess.mm */; };
+		C7F8BDCB15A2BA0300728E65 /* TQNodeMessage.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BD9715A2BA0300728E65 /* TQNodeMessage.mm */; };
+		C7F8BDCC15A2BA0300728E65 /* TQNodeMethod.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BD9915A2BA0300728E65 /* TQNodeMethod.mm */; };
+		C7F8BDCD15A2BA0300728E65 /* TQNodeNil.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BD9B15A2BA0300728E65 /* TQNodeNil.mm */; };
+		C7F8BDCE15A2BA0300728E65 /* TQNodeNumber.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BD9D15A2BA0300728E65 /* TQNodeNumber.mm */; };
+		C7F8BDCF15A2BA0300728E65 /* TQNodeOperator.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BD9F15A2BA0300728E65 /* TQNodeOperator.mm */; };
+		C7F8BDD015A2BA0300728E65 /* TQNodeRegex.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BDA115A2BA0300728E65 /* TQNodeRegex.mm */; };
+		C7F8BDD115A2BA0300728E65 /* TQNodeReturn.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BDA315A2BA0300728E65 /* TQNodeReturn.mm */; };
+		C7F8BDD215A2BA0300728E65 /* TQNodeString.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BDA515A2BA0300728E65 /* TQNodeString.mm */; };
+		C7F8BDD315A2BA0300728E65 /* TQNodeVariable.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BDA715A2BA0300728E65 /* TQNodeVariable.mm */; };
+		C7F8BDD415A2BA0300728E65 /* NSCollections+Tranquil.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BDAC15A2BA0300728E65 /* NSCollections+Tranquil.mm */; };
+		C7F8BDD515A2BA0300728E65 /* NSRegularExpression+Tranquil.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BDAE15A2BA0300728E65 /* NSRegularExpression+Tranquil.mm */; };
+		C7F8BDD615A2BA0300728E65 /* TQNumber.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BDB015A2BA0300728E65 /* TQNumber.mm */; };
+		C7F8BDD715A2BA0300728E65 /* TQOperators.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BDB215A2BA0300728E65 /* TQOperators.mm */; };
+		C7F8BDD815A2BA0300728E65 /* TQRuntime.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BDB415A2BA0300728E65 /* TQRuntime.mm */; };
+		C7F8BDD915A2BA0300728E65 /* TQDebug.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BDB615A2BA0300728E65 /* TQDebug.mm */; };
+		C7F8BDDA15A2BA0300728E65 /* TQObject.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BDB815A2BA0300728E65 /* TQObject.mm */; };
+		C7F8BDDB15A2BA0300728E65 /* TQProgram.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BDBB15A2BA0300728E65 /* TQProgram.mm */; };
+		C7F8BDDE15A2BA2800728E65 /* block_stubs.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BDDC15A2BA2800728E65 /* block_stubs.mm */; };
+		C7F8BDDF15A2BA2800728E65 /* parse.mm in Sources */ = {isa = PBXBuildFile; fileRef = C7F8BDDD15A2BA2800728E65 /* parse.mm */; };
+		C7F8BDE115A2BA6300728E65 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C7F8BDE015A2BA6300728E65 /* libxml2.dylib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		C7F8BD5F15A2B97E00728E65 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		C78C63F415A087AF0064F9FC /* Tranquil */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Tranquil; path = Source/Tranquil; sourceTree = "<group>"; };
+		C7F8BD6115A2B97E00728E65 /* tranquil-profiling */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "tranquil-profiling"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C7F8BD6415A2B97E00728E65 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		C7F8BD7815A2BA0300728E65 /* bs.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bs.c; sourceTree = "<group>"; };
+		C7F8BD7915A2BA0300728E65 /* bs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bs.h; sourceTree = "<group>"; };
+		C7F8BD7A15A2BA0300728E65 /* bs_lex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bs_lex.h; sourceTree = "<group>"; };
+		C7F8BD7B15A2BA0300728E65 /* TQBridgeSupport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQBridgeSupport.h; sourceTree = "<group>"; };
+		C7F8BD7C15A2BA0300728E65 /* TQBridgeSupport.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQBridgeSupport.mm; sourceTree = "<group>"; };
+		C7F8BD7E15A2BA0300728E65 /* TQNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQNode.h; sourceTree = "<group>"; };
+		C7F8BD7F15A2BA0300728E65 /* TQNode.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQNode.mm; sourceTree = "<group>"; };
+		C7F8BD8015A2BA0300728E65 /* TQNodeArgument.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQNodeArgument.h; sourceTree = "<group>"; };
+		C7F8BD8115A2BA0300728E65 /* TQNodeArgument.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQNodeArgument.mm; sourceTree = "<group>"; };
+		C7F8BD8215A2BA0300728E65 /* TQNodeArgumentDef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQNodeArgumentDef.h; sourceTree = "<group>"; };
+		C7F8BD8315A2BA0300728E65 /* TQNodeArgumentDef.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQNodeArgumentDef.mm; sourceTree = "<group>"; };
+		C7F8BD8415A2BA0300728E65 /* TQNodeArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQNodeArray.h; sourceTree = "<group>"; };
+		C7F8BD8515A2BA0300728E65 /* TQNodeArray.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQNodeArray.mm; sourceTree = "<group>"; };
+		C7F8BD8615A2BA0300728E65 /* TQNodeBlock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQNodeBlock.h; sourceTree = "<group>"; };
+		C7F8BD8715A2BA0300728E65 /* TQNodeBlock.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQNodeBlock.mm; sourceTree = "<group>"; };
+		C7F8BD8815A2BA0300728E65 /* TQNodeCall.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQNodeCall.h; sourceTree = "<group>"; };
+		C7F8BD8915A2BA0300728E65 /* TQNodeCall.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQNodeCall.mm; sourceTree = "<group>"; };
+		C7F8BD8A15A2BA0300728E65 /* TQNodeClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQNodeClass.h; sourceTree = "<group>"; };
+		C7F8BD8B15A2BA0300728E65 /* TQNodeClass.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQNodeClass.mm; sourceTree = "<group>"; };
+		C7F8BD8C15A2BA0300728E65 /* TQNodeConditionalBlock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQNodeConditionalBlock.h; sourceTree = "<group>"; };
+		C7F8BD8D15A2BA0300728E65 /* TQNodeConditionalBlock.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQNodeConditionalBlock.mm; sourceTree = "<group>"; };
+		C7F8BD8E15A2BA0300728E65 /* TQNodeConstant.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQNodeConstant.h; sourceTree = "<group>"; };
+		C7F8BD8F15A2BA0300728E65 /* TQNodeConstant.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQNodeConstant.mm; sourceTree = "<group>"; };
+		C7F8BD9015A2BA0300728E65 /* TQNodeDictionary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQNodeDictionary.h; sourceTree = "<group>"; };
+		C7F8BD9115A2BA0300728E65 /* TQNodeDictionary.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQNodeDictionary.mm; sourceTree = "<group>"; };
+		C7F8BD9215A2BA0300728E65 /* TQNodeLoopBlock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQNodeLoopBlock.h; sourceTree = "<group>"; };
+		C7F8BD9315A2BA0300728E65 /* TQNodeLoopBlock.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQNodeLoopBlock.mm; sourceTree = "<group>"; };
+		C7F8BD9415A2BA0300728E65 /* TQNodeMemberAccess.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQNodeMemberAccess.h; sourceTree = "<group>"; };
+		C7F8BD9515A2BA0300728E65 /* TQNodeMemberAccess.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQNodeMemberAccess.mm; sourceTree = "<group>"; };
+		C7F8BD9615A2BA0300728E65 /* TQNodeMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQNodeMessage.h; sourceTree = "<group>"; };
+		C7F8BD9715A2BA0300728E65 /* TQNodeMessage.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQNodeMessage.mm; sourceTree = "<group>"; };
+		C7F8BD9815A2BA0300728E65 /* TQNodeMethod.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQNodeMethod.h; sourceTree = "<group>"; };
+		C7F8BD9915A2BA0300728E65 /* TQNodeMethod.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQNodeMethod.mm; sourceTree = "<group>"; };
+		C7F8BD9A15A2BA0300728E65 /* TQNodeNil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQNodeNil.h; sourceTree = "<group>"; };
+		C7F8BD9B15A2BA0300728E65 /* TQNodeNil.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQNodeNil.mm; sourceTree = "<group>"; };
+		C7F8BD9C15A2BA0300728E65 /* TQNodeNumber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQNodeNumber.h; sourceTree = "<group>"; };
+		C7F8BD9D15A2BA0300728E65 /* TQNodeNumber.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQNodeNumber.mm; sourceTree = "<group>"; };
+		C7F8BD9E15A2BA0300728E65 /* TQNodeOperator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQNodeOperator.h; sourceTree = "<group>"; };
+		C7F8BD9F15A2BA0300728E65 /* TQNodeOperator.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQNodeOperator.mm; sourceTree = "<group>"; };
+		C7F8BDA015A2BA0300728E65 /* TQNodeRegex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQNodeRegex.h; sourceTree = "<group>"; };
+		C7F8BDA115A2BA0300728E65 /* TQNodeRegex.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQNodeRegex.mm; sourceTree = "<group>"; };
+		C7F8BDA215A2BA0300728E65 /* TQNodeReturn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQNodeReturn.h; sourceTree = "<group>"; };
+		C7F8BDA315A2BA0300728E65 /* TQNodeReturn.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQNodeReturn.mm; sourceTree = "<group>"; };
+		C7F8BDA415A2BA0300728E65 /* TQNodeString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQNodeString.h; sourceTree = "<group>"; };
+		C7F8BDA515A2BA0300728E65 /* TQNodeString.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQNodeString.mm; sourceTree = "<group>"; };
+		C7F8BDA615A2BA0300728E65 /* TQNodeVariable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQNodeVariable.h; sourceTree = "<group>"; };
+		C7F8BDA715A2BA0300728E65 /* TQNodeVariable.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQNodeVariable.mm; sourceTree = "<group>"; };
+		C7F8BDA815A2BA0300728E65 /* gen_stubs.rb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.ruby; path = gen_stubs.rb; sourceTree = "<group>"; };
+		C7F8BDA915A2BA0300728E65 /* parse.leg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = parse.leg; sourceTree = "<group>"; };
+		C7F8BDAB15A2BA0300728E65 /* NSCollections+Tranquil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSCollections+Tranquil.h"; sourceTree = "<group>"; };
+		C7F8BDAC15A2BA0300728E65 /* NSCollections+Tranquil.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "NSCollections+Tranquil.mm"; sourceTree = "<group>"; };
+		C7F8BDAD15A2BA0300728E65 /* NSRegularExpression+Tranquil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSRegularExpression+Tranquil.h"; sourceTree = "<group>"; };
+		C7F8BDAE15A2BA0300728E65 /* NSRegularExpression+Tranquil.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "NSRegularExpression+Tranquil.mm"; sourceTree = "<group>"; };
+		C7F8BDAF15A2BA0300728E65 /* TQNumber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQNumber.h; sourceTree = "<group>"; };
+		C7F8BDB015A2BA0300728E65 /* TQNumber.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQNumber.mm; sourceTree = "<group>"; };
+		C7F8BDB115A2BA0300728E65 /* TQOperators.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQOperators.h; sourceTree = "<group>"; };
+		C7F8BDB215A2BA0300728E65 /* TQOperators.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQOperators.mm; sourceTree = "<group>"; };
+		C7F8BDB315A2BA0300728E65 /* TQRuntime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQRuntime.h; sourceTree = "<group>"; };
+		C7F8BDB415A2BA0300728E65 /* TQRuntime.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQRuntime.mm; sourceTree = "<group>"; };
+		C7F8BDB515A2BA0300728E65 /* TQDebug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQDebug.h; sourceTree = "<group>"; };
+		C7F8BDB615A2BA0300728E65 /* TQDebug.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQDebug.mm; sourceTree = "<group>"; };
+		C7F8BDB715A2BA0300728E65 /* TQObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQObject.h; sourceTree = "<group>"; };
+		C7F8BDB815A2BA0300728E65 /* TQObject.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQObject.mm; sourceTree = "<group>"; };
+		C7F8BDB915A2BA0300728E65 /* TQPooling.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQPooling.h; sourceTree = "<group>"; };
+		C7F8BDBA15A2BA0300728E65 /* TQProgram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TQProgram.h; sourceTree = "<group>"; };
+		C7F8BDBB15A2BA0300728E65 /* TQProgram.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TQProgram.mm; sourceTree = "<group>"; };
+		C7F8BDBC15A2BA0300728E65 /* Tranquil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tranquil.h; sourceTree = "<group>"; };
+		C7F8BDDC15A2BA2800728E65 /* block_stubs.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = block_stubs.mm; path = ../../Build/block_stubs.mm; sourceTree = "<group>"; };
+		C7F8BDDD15A2BA2800728E65 /* parse.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = parse.mm; path = ../../Build/parse.mm; sourceTree = "<group>"; };
+		C7F8BDE015A2BA6300728E65 /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C7F8BD5E15A2B97E00728E65 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C7F8BDE115A2BA6300728E65 /* libxml2.dylib in Frameworks */,
+				C7F8BD6515A2B97E00728E65 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		C7B6E3EE159608A9001A9250 = {
 			isa = PBXGroup;
 			children = (
+				C7F8BDE015A2BA6300728E65 /* libxml2.dylib */,
+				C7F8BD7615A2BA0300728E65 /* Source */,
 				C78C63F415A087AF0064F9FC /* Tranquil */,
+				C7F8BD6115A2B97E00728E65 /* tranquil-profiling */,
+				C7F8BD6615A2B97E00728E65 /* tranquil-profiling */,
+				C7F8BD6315A2B97E00728E65 /* Frameworks */,
 			);
+			sourceTree = "<group>";
+		};
+		C7F8BD6315A2B97E00728E65 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C7F8BD6415A2B97E00728E65 /* Foundation.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		C7F8BD6615A2B97E00728E65 /* tranquil-profiling */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = "tranquil-profiling";
+			sourceTree = "<group>";
+		};
+		C7F8BD7615A2BA0300728E65 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				C7F8BD7715A2BA0300728E65 /* BridgeSupport */,
+				C7F8BD7D15A2BA0300728E65 /* CodeGen */,
+				C7F8BDA815A2BA0300728E65 /* gen_stubs.rb */,
+				C7F8BDA915A2BA0300728E65 /* parse.leg */,
+				C7F8BDAA15A2BA0300728E65 /* Runtime */,
+				C7F8BDB515A2BA0300728E65 /* TQDebug.h */,
+				C7F8BDB615A2BA0300728E65 /* TQDebug.mm */,
+				C7F8BDB715A2BA0300728E65 /* TQObject.h */,
+				C7F8BDB815A2BA0300728E65 /* TQObject.mm */,
+				C7F8BDB915A2BA0300728E65 /* TQPooling.h */,
+				C7F8BDBA15A2BA0300728E65 /* TQProgram.h */,
+				C7F8BDBB15A2BA0300728E65 /* TQProgram.mm */,
+				C7F8BDBC15A2BA0300728E65 /* Tranquil.h */,
+				C7F8BDDC15A2BA2800728E65 /* block_stubs.mm */,
+				C7F8BDDD15A2BA2800728E65 /* parse.mm */,
+			);
+			name = Source;
+			path = Source/Tranquil;
+			sourceTree = "<group>";
+		};
+		C7F8BD7715A2BA0300728E65 /* BridgeSupport */ = {
+			isa = PBXGroup;
+			children = (
+				C7F8BD7815A2BA0300728E65 /* bs.c */,
+				C7F8BD7915A2BA0300728E65 /* bs.h */,
+				C7F8BD7A15A2BA0300728E65 /* bs_lex.h */,
+				C7F8BD7B15A2BA0300728E65 /* TQBridgeSupport.h */,
+				C7F8BD7C15A2BA0300728E65 /* TQBridgeSupport.mm */,
+			);
+			path = BridgeSupport;
+			sourceTree = "<group>";
+		};
+		C7F8BD7D15A2BA0300728E65 /* CodeGen */ = {
+			isa = PBXGroup;
+			children = (
+				C7F8BD7E15A2BA0300728E65 /* TQNode.h */,
+				C7F8BD7F15A2BA0300728E65 /* TQNode.mm */,
+				C7F8BD8015A2BA0300728E65 /* TQNodeArgument.h */,
+				C7F8BD8115A2BA0300728E65 /* TQNodeArgument.mm */,
+				C7F8BD8215A2BA0300728E65 /* TQNodeArgumentDef.h */,
+				C7F8BD8315A2BA0300728E65 /* TQNodeArgumentDef.mm */,
+				C7F8BD8415A2BA0300728E65 /* TQNodeArray.h */,
+				C7F8BD8515A2BA0300728E65 /* TQNodeArray.mm */,
+				C7F8BD8615A2BA0300728E65 /* TQNodeBlock.h */,
+				C7F8BD8715A2BA0300728E65 /* TQNodeBlock.mm */,
+				C7F8BD8815A2BA0300728E65 /* TQNodeCall.h */,
+				C7F8BD8915A2BA0300728E65 /* TQNodeCall.mm */,
+				C7F8BD8A15A2BA0300728E65 /* TQNodeClass.h */,
+				C7F8BD8B15A2BA0300728E65 /* TQNodeClass.mm */,
+				C7F8BD8C15A2BA0300728E65 /* TQNodeConditionalBlock.h */,
+				C7F8BD8D15A2BA0300728E65 /* TQNodeConditionalBlock.mm */,
+				C7F8BD8E15A2BA0300728E65 /* TQNodeConstant.h */,
+				C7F8BD8F15A2BA0300728E65 /* TQNodeConstant.mm */,
+				C7F8BD9015A2BA0300728E65 /* TQNodeDictionary.h */,
+				C7F8BD9115A2BA0300728E65 /* TQNodeDictionary.mm */,
+				C7F8BD9215A2BA0300728E65 /* TQNodeLoopBlock.h */,
+				C7F8BD9315A2BA0300728E65 /* TQNodeLoopBlock.mm */,
+				C7F8BD9415A2BA0300728E65 /* TQNodeMemberAccess.h */,
+				C7F8BD9515A2BA0300728E65 /* TQNodeMemberAccess.mm */,
+				C7F8BD9615A2BA0300728E65 /* TQNodeMessage.h */,
+				C7F8BD9715A2BA0300728E65 /* TQNodeMessage.mm */,
+				C7F8BD9815A2BA0300728E65 /* TQNodeMethod.h */,
+				C7F8BD9915A2BA0300728E65 /* TQNodeMethod.mm */,
+				C7F8BD9A15A2BA0300728E65 /* TQNodeNil.h */,
+				C7F8BD9B15A2BA0300728E65 /* TQNodeNil.mm */,
+				C7F8BD9C15A2BA0300728E65 /* TQNodeNumber.h */,
+				C7F8BD9D15A2BA0300728E65 /* TQNodeNumber.mm */,
+				C7F8BD9E15A2BA0300728E65 /* TQNodeOperator.h */,
+				C7F8BD9F15A2BA0300728E65 /* TQNodeOperator.mm */,
+				C7F8BDA015A2BA0300728E65 /* TQNodeRegex.h */,
+				C7F8BDA115A2BA0300728E65 /* TQNodeRegex.mm */,
+				C7F8BDA215A2BA0300728E65 /* TQNodeReturn.h */,
+				C7F8BDA315A2BA0300728E65 /* TQNodeReturn.mm */,
+				C7F8BDA415A2BA0300728E65 /* TQNodeString.h */,
+				C7F8BDA515A2BA0300728E65 /* TQNodeString.mm */,
+				C7F8BDA615A2BA0300728E65 /* TQNodeVariable.h */,
+				C7F8BDA715A2BA0300728E65 /* TQNodeVariable.mm */,
+			);
+			path = CodeGen;
+			sourceTree = "<group>";
+		};
+		C7F8BDAA15A2BA0300728E65 /* Runtime */ = {
+			isa = PBXGroup;
+			children = (
+				C7F8BDAB15A2BA0300728E65 /* NSCollections+Tranquil.h */,
+				C7F8BDAC15A2BA0300728E65 /* NSCollections+Tranquil.mm */,
+				C7F8BDAD15A2BA0300728E65 /* NSRegularExpression+Tranquil.h */,
+				C7F8BDAE15A2BA0300728E65 /* NSRegularExpression+Tranquil.mm */,
+				C7F8BDAF15A2BA0300728E65 /* TQNumber.h */,
+				C7F8BDB015A2BA0300728E65 /* TQNumber.mm */,
+				C7F8BDB115A2BA0300728E65 /* TQOperators.h */,
+				C7F8BDB215A2BA0300728E65 /* TQOperators.mm */,
+				C7F8BDB315A2BA0300728E65 /* TQRuntime.h */,
+				C7F8BDB415A2BA0300728E65 /* TQRuntime.mm */,
+			);
+			path = Runtime;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -37,6 +292,26 @@
 		};
 /* End PBXLegacyTarget section */
 
+/* Begin PBXNativeTarget section */
+		C7F8BD6015A2B97E00728E65 /* tranquil-profiling */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C7F8BD6F15A2B97E00728E65 /* Build configuration list for PBXNativeTarget "tranquil-profiling" */;
+			buildPhases = (
+				C7F8BD5D15A2B97E00728E65 /* Sources */,
+				C7F8BD5E15A2B97E00728E65 /* Frameworks */,
+				C7F8BD5F15A2B97E00728E65 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "tranquil-profiling";
+			productName = "tranquil-profiling";
+			productReference = C7F8BD6115A2B97E00728E65 /* tranquil-profiling */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
 /* Begin PBXProject section */
 		C7B6E3F0159608A9001A9250 /* Project object */ = {
 			isa = PBXProject;
@@ -57,9 +332,53 @@
 			projectRoot = "";
 			targets = (
 				C7B6E41C15960A91001A9250 /* tranquil */,
+				C7F8BD6015A2B97E00728E65 /* tranquil-profiling */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C7F8BD5D15A2B97E00728E65 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C7F8BDBD15A2BA0300728E65 /* bs.c in Sources */,
+				C7F8BDBE15A2BA0300728E65 /* TQBridgeSupport.mm in Sources */,
+				C7F8BDBF15A2BA0300728E65 /* TQNode.mm in Sources */,
+				C7F8BDC015A2BA0300728E65 /* TQNodeArgument.mm in Sources */,
+				C7F8BDC115A2BA0300728E65 /* TQNodeArgumentDef.mm in Sources */,
+				C7F8BDC215A2BA0300728E65 /* TQNodeArray.mm in Sources */,
+				C7F8BDC315A2BA0300728E65 /* TQNodeBlock.mm in Sources */,
+				C7F8BDC415A2BA0300728E65 /* TQNodeCall.mm in Sources */,
+				C7F8BDC515A2BA0300728E65 /* TQNodeClass.mm in Sources */,
+				C7F8BDC615A2BA0300728E65 /* TQNodeConditionalBlock.mm in Sources */,
+				C7F8BDC715A2BA0300728E65 /* TQNodeConstant.mm in Sources */,
+				C7F8BDC815A2BA0300728E65 /* TQNodeDictionary.mm in Sources */,
+				C7F8BDC915A2BA0300728E65 /* TQNodeLoopBlock.mm in Sources */,
+				C7F8BDCA15A2BA0300728E65 /* TQNodeMemberAccess.mm in Sources */,
+				C7F8BDCB15A2BA0300728E65 /* TQNodeMessage.mm in Sources */,
+				C7F8BDCC15A2BA0300728E65 /* TQNodeMethod.mm in Sources */,
+				C7F8BDCD15A2BA0300728E65 /* TQNodeNil.mm in Sources */,
+				C7F8BDCE15A2BA0300728E65 /* TQNodeNumber.mm in Sources */,
+				C7F8BDCF15A2BA0300728E65 /* TQNodeOperator.mm in Sources */,
+				C7F8BDD015A2BA0300728E65 /* TQNodeRegex.mm in Sources */,
+				C7F8BDD115A2BA0300728E65 /* TQNodeReturn.mm in Sources */,
+				C7F8BDD215A2BA0300728E65 /* TQNodeString.mm in Sources */,
+				C7F8BDD315A2BA0300728E65 /* TQNodeVariable.mm in Sources */,
+				C7F8BDD415A2BA0300728E65 /* NSCollections+Tranquil.mm in Sources */,
+				C7F8BDDE15A2BA2800728E65 /* block_stubs.mm in Sources */,
+				C7F8BDDF15A2BA2800728E65 /* parse.mm in Sources */,
+				C7F8BDD515A2BA0300728E65 /* NSRegularExpression+Tranquil.mm in Sources */,
+				C7F8BDD615A2BA0300728E65 /* TQNumber.mm in Sources */,
+				C7F8BDD715A2BA0300728E65 /* TQOperators.mm in Sources */,
+				C7F8BDD815A2BA0300728E65 /* TQRuntime.mm in Sources */,
+				C7F8BDD915A2BA0300728E65 /* TQDebug.mm in Sources */,
+				C7F8BDDA15A2BA0300728E65 /* TQObject.mm in Sources */,
+				C7F8BDDB15A2BA0300728E65 /* TQProgram.mm in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
 		C7B6E406159608A9001A9250 /* Debug */ = {
@@ -84,9 +403,9 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = /usr/local/llvm/include;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.7;
 			};
 			name = Debug;
 		};
@@ -106,8 +425,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = /usr/local/llvm/include;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
-				SDKROOT = macosx;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx10.7;
 			};
 			name = Release;
 		};
@@ -134,6 +453,131 @@
 			};
 			name = Release;
 		};
+		C7F8BD6D15A2B97E00728E65 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LIBRARY = "libc++";
+				GCC_VERSION = "";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/llvm/include,
+					Source/,
+					/usr/include/libxml2,
+				);
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+				OTHER_CFLAGS = (
+					"-I/usr/local/llvm/include",
+					"-D_DEBUG",
+					"-D_GNU_SOURCE",
+					"-D__STDC_CONSTANT_MACROS",
+					"-D__STDC_FORMAT_MACROS",
+					"-D__STDC_LIMIT_MACROS",
+					"-g",
+					"-fno-common",
+				);
+				OTHER_LDFLAGS = (
+					"-L/usr/local/llvm/lib",
+					"-ludis86",
+					"-lpthread",
+					"-lm",
+					"-lLLVMInstrumentation",
+					"-lLLVMipo",
+					"-lLLVMVectorize",
+					"-lLLVMBitWriter",
+					"-lLLVMX86CodeGen",
+					"-lLLVMX86Desc",
+					"-lLLVMX86Info",
+					"-lLLVMX86AsmPrinter",
+					"-lLLVMX86Utils",
+					"-lLLVMSelectionDAG",
+					"-lLLVMAsmPrinter",
+					"-lLLVMMCParser",
+					"-lLLVMJIT",
+					"-lLLVMRuntimeDyld",
+					"-lLLVMExecutionEngine",
+					"-lLLVMCodeGen",
+					"-lLLVMScalarOpts",
+					"-lLLVMInstCombine",
+					"-lLLVMTransformUtils",
+					"-lLLVMipa",
+					"-lLLVMAnalysis",
+					"-lLLVMTarget",
+					"-lLLVMMC",
+					"-lLLVMObject",
+					"-lLLVMCore",
+					"-lLLVMSupport",
+					"-L/usr/lib",
+					"-lstdc++",
+					"-all_load",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx10.7;
+			};
+			name = Debug;
+		};
+		C7F8BD6E15A2B97E00728E65 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LIBRARY = "libc++";
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_VERSION = "";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/llvm/include,
+					Source/,
+					/usr/include/libxml2,
+				);
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+				OTHER_CFLAGS = (
+					"-I/usr/local/llvm/include",
+					"-D_DEBUG",
+					"-D_GNU_SOURCE",
+					"-D__STDC_CONSTANT_MACROS",
+					"-D__STDC_FORMAT_MACROS",
+					"-D__STDC_LIMIT_MACROS",
+					"-g",
+					"-fno-common",
+				);
+				OTHER_LDFLAGS = (
+					"-L/usr/local/llvm/lib",
+					"-ludis86",
+					"-lpthread",
+					"-lm",
+					"-lLLVMInstrumentation",
+					"-lLLVMipo",
+					"-lLLVMVectorize",
+					"-lLLVMBitWriter",
+					"-lLLVMX86CodeGen",
+					"-lLLVMX86Desc",
+					"-lLLVMX86Info",
+					"-lLLVMX86AsmPrinter",
+					"-lLLVMX86Utils",
+					"-lLLVMSelectionDAG",
+					"-lLLVMAsmPrinter",
+					"-lLLVMMCParser",
+					"-lLLVMJIT",
+					"-lLLVMRuntimeDyld",
+					"-lLLVMExecutionEngine",
+					"-lLLVMCodeGen",
+					"-lLLVMScalarOpts",
+					"-lLLVMInstCombine",
+					"-lLLVMTransformUtils",
+					"-lLLVMipa",
+					"-lLLVMAnalysis",
+					"-lLLVMTarget",
+					"-lLLVMMC",
+					"-lLLVMObject",
+					"-lLLVMCore",
+					"-lLLVMSupport",
+					"-L/usr/lib",
+					"-lstdc++",
+					"-all_load",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx10.7;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -154,6 +598,14 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		C7F8BD6F15A2B97E00728E65 /* Build configuration list for PBXNativeTarget "tranquil-profiling" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C7F8BD6D15A2B97E00728E65 /* Debug */,
+				C7F8BD6E15A2B97E00728E65 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 /* End XCConfigurationList section */
 	};

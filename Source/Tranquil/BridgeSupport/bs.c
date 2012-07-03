@@ -39,7 +39,9 @@
 #include "bs_lex.h"
 
 #define ASSERT_ALLOC(ptr) (assert(ptr != NULL))
+#if defined(__cplusplus)
 extern "C"{
+#endif
 static inline char *
 get_framework_name(const char *path)
 {
@@ -1491,6 +1493,8 @@ bs_element_free(bs_element_type_t type, void *value)
   }
   free(value);
 }
+#if defined(__cplusplus)
 }
+#endif
 #endif // !MACRUBY_STATIC
 

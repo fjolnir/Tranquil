@@ -7,7 +7,7 @@
 using namespace llvm;
 
 @implementation TQNodeIfBlock
-@synthesize condition=_condition, elseBlockStatements=_elseBlockStatements;
+@synthesize condition=_condition, elseBlockStatements=_elseBlockStatements, containingLoop=_containingLoop;
 
 
 + (TQNodeIfBlock *)node { return (TQNodeIfBlock *)[super node]; }
@@ -163,7 +163,7 @@ using namespace llvm;
 {
     return nil;
 }
-- (BOOL)addArgument:(NSString *)aArgument error:(NSError **)aoError
+- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoError
 {
     return NO;
 }

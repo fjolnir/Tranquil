@@ -6,6 +6,8 @@
 
 id TQSentinel = @"3d2c9ac0bf3911e1afa70800200c9a66aaaaaaaaa";
 
+id TQValid = @"valid object";
+
 static const NSString *_TQDynamicIvarTableKey = @"TQDynamicIvarTableKey";
 
 SEL TQEqOpSel;
@@ -22,11 +24,11 @@ SEL TQUnaryMinusOpSel;
 SEL TQSetterOpSel;
 SEL TQGetterOpSel;
 
-SEL TQNumberWithDoubleSel        = @selector(numberWithDouble:);
-SEL TQStringWithUTF8StringSel    = @selector(stringWithUTF8String:);
-SEL TQPointerArrayWithObjectsSel = @selector(tq_pointerArrayWithObjects:);
-SEL TQMapWithObjectsAndKeysSel   = @selector(tq_mapTableWithObjectsAndKeys:);
-SEL TQRegexWithPatSel            = @selector(tq_regularExpressionWithUTF8String:options:);
+SEL TQNumberWithDoubleSel;//        = @selector(numberWithDouble:);
+SEL TQStringWithUTF8StringSel;
+SEL TQPointerArrayWithObjectsSel;
+SEL TQMapWithObjectsAndKeysSel;
+SEL TQRegexWithPatSel;
 
 Class TQNumberClass;
 
@@ -111,14 +113,14 @@ id TQObjectsAreEqual(id a, id b)
 {
     if(a)
         return _objc_msgSend_hack2(a, TQEqOpSel, b);
-    return b == nil ? TQNumberTrue : TQNumberFalse;
+    return b == nil ? TQValid : nil;
 }
 
 id TQObjectsAreNotEqual(id a, id b)
 {
     if(a)
         return _objc_msgSend_hack2(a, TQNeqOpSel, b);
-    return b != nil ? TQNumberTrue : TQNumberFalse;
+    return b != nil ? TQValid : nil;
 }
 
 
@@ -136,7 +138,6 @@ static inline NSMapTable *_TQGetDynamicIvarTable(id obj)
 
 static inline size_t _accessorNameLen(const char *accessorNameLoc)
 {
-    size_t accessorNameLen = 0;
     const char *accessorNameEnd = strstr(accessorNameLoc, ",");
     if(!accessorNameEnd)
         return strlen(accessorNameLoc);
@@ -218,10 +219,10 @@ id TQPrepareObjectForReturn(id obj)
 BOOL TQAugmentClassWithOperators(Class klass)
 {
     // ==
-    IMP imp = imp_implementationWithBlock(^(id a, id b) { return [a isEqual:b] ? TQNumberTrue : TQNumberFalse; });
+    IMP imp = imp_implementationWithBlock(^(id a, id b) { return [a isEqual:b] ? TQValid : nil; });
     class_addMethod(klass, TQEqOpSel, imp, "@@:@");
     // !=
-    imp = imp_implementationWithBlock(^(id a, id b)     { return [a isEqual:b] ? TQNumberFalse : TQNumberTrue; });
+    imp = imp_implementationWithBlock(^(id a, id b)     { return [a isEqual:b] ? nil : TQValid; });
     class_addMethod(klass, TQNeqOpSel, imp, "@@:@");
 
     // + (Unimplemented by default)
@@ -242,16 +243,16 @@ BOOL TQAugmentClassWithOperators(Class klass)
     class_addMethod(klass, TQDivOpSel, imp, "@@:@");
 
     // <
-    imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] == NSOrderedAscending) ? TQNumberTrue : TQNumberFalse; });
+    imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] == NSOrderedAscending) ? TQValid : nil; });
     class_addMethod(klass, TQLTOpSel, imp, "@@:@");
     // >
-    imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] == NSOrderedDescending) ? TQNumberTrue : TQNumberFalse; });
+    imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] == NSOrderedDescending) ? TQValid : nil; });
     class_addMethod(klass, TQGTOpSel, imp, "@@:@");
     // <=
-    imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] != NSOrderedDescending) ? TQNumberTrue : TQNumberFalse; });
+    imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] != NSOrderedDescending) ? TQValid : nil; });
     class_addMethod(klass, TQLTEOpSel, imp, "@@:@");
     // >=
-    imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] != NSOrderedAscending) ? TQNumberTrue : TQNumberFalse; });
+    imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] != NSOrderedAscending) ? TQValid : nil; });
     class_addMethod(klass, TQGTEOpSel, imp, "@@:@");
 
 
@@ -267,19 +268,25 @@ BOOL TQAugmentClassWithOperators(Class klass)
 
 void TQInitializeRuntime()
 {
-    TQEqOpSel         = sel_registerName("==:");
-    TQNeqOpSel        = sel_registerName("!=:");
-    TQAddOpSel        = sel_registerName("+:");
-    TQSubOpSel        = sel_registerName("-:");
-    TQUnaryMinusOpSel = sel_registerName("-");
-    TQMultOpSel       = sel_registerName("*:");
-    TQDivOpSel        = sel_registerName("/:");
-    TQLTOpSel         = sel_registerName("<:");
-    TQGTOpSel         = sel_registerName(">:");
-    TQLTEOpSel        = sel_registerName("<=:");
-    TQGTEOpSel        = sel_registerName(">=:");
-    TQGetterOpSel     = sel_registerName("[]:");
-    TQSetterOpSel     = sel_registerName("[]=::");
+    TQEqOpSel                    = sel_registerName("==:");
+    TQNeqOpSel                   = sel_registerName("!=:");
+    TQAddOpSel                   = sel_registerName("+:");
+    TQSubOpSel                   = sel_registerName("-:");
+    TQUnaryMinusOpSel            = sel_registerName("-");
+    TQMultOpSel                  = sel_registerName("*:");
+    TQDivOpSel                   = sel_registerName("/:");
+    TQLTOpSel                    = sel_registerName("<:");
+    TQGTOpSel                    = sel_registerName(">:");
+    TQLTEOpSel                   = sel_registerName("<=:");
+    TQGTEOpSel                   = sel_registerName(">=:");
+    TQGetterOpSel                = sel_registerName("[]:");
+    TQSetterOpSel                = sel_registerName("[]=::");
+    
+    TQNumberWithDoubleSel        = @selector(numberWithDouble:);
+    TQStringWithUTF8StringSel    = @selector(stringWithUTF8String:);
+    TQPointerArrayWithObjectsSel = @selector(tq_pointerArrayWithObjects:);
+    TQMapWithObjectsAndKeysSel   = @selector(tq_mapTableWithObjectsAndKeys:);
+    TQRegexWithPatSel            = @selector(tq_regularExpressionWithUTF8String:options:);
 
     TQNumberClass     = [TQNumber class];
 
@@ -313,25 +320,25 @@ void TQInitializeRuntime()
     // Add optimized operators to TQNumber
      // ==
     imp = imp_implementationWithBlock(^(TQNumber *a, TQNumber *b) {
-        return object_getClass(a) == object_getClass(b) && a->_value == b->_value ? TQNumberTrue : TQNumberFalse;
+        return object_getClass(a) == object_getClass(b) && a->_value == b->_value ? TQValid : nil;
     });
     class_replaceMethod(TQNumberClass, TQEqOpSel, imp, "@@:@");
     // !=
     imp = imp_implementationWithBlock(^(TQNumber *a, TQNumber *b) {
         if(object_getClass(a) != object_getClass(b))
-            return TQNumberFalse;
-        return  a->_value != b->_value? TQNumberFalse : TQNumberTrue;
+            return (id)nil;
+        return (a->_value != b->_value) ? nil : TQValid;
     });
     class_replaceMethod(TQNumberClass, TQNeqOpSel, imp, "@@:@");
 
-    class_replaceMethod(TQNumberClass, TQAddOpSel, class_getMethodImplementation(TQNumberClass, @selector(add:)),              "@@:@");
-    class_replaceMethod(TQNumberClass, TQSubOpSel, class_getMethodImplementation(TQNumberClass, @selector(subtract:)),         "@@:@");
+    class_replaceMethod(TQNumberClass, TQAddOpSel,  class_getMethodImplementation(TQNumberClass, @selector(add:)),             "@@:@");
+    class_replaceMethod(TQNumberClass, TQSubOpSel,  class_getMethodImplementation(TQNumberClass, @selector(subtract:)),        "@@:@");
     class_replaceMethod(TQNumberClass, TQUnaryMinusOpSel, class_getMethodImplementation(TQNumberClass, @selector(negate)),     "@@:" );
     class_replaceMethod(TQNumberClass, TQMultOpSel, class_getMethodImplementation(TQNumberClass, @selector(multiply:)),        "@@:@");
-    class_replaceMethod(TQNumberClass, TQDivOpSel, class_getMethodImplementation(TQNumberClass, @selector(divideBy:)),         "@@:@");
+    class_replaceMethod(TQNumberClass, TQDivOpSel,  class_getMethodImplementation(TQNumberClass, @selector(divideBy:)),        "@@:@");
 
-    class_replaceMethod(TQNumberClass, TQLTOpSel, class_getMethodImplementation(TQNumberClass, @selector(isLesser:)),          "@@:@");
-    class_replaceMethod(TQNumberClass, TQGTOpSel, class_getMethodImplementation(TQNumberClass, @selector(isGreater:)),         "@@:@");
+    class_replaceMethod(TQNumberClass, TQLTOpSel,  class_getMethodImplementation(TQNumberClass, @selector(isLesser:)),         "@@:@");
+    class_replaceMethod(TQNumberClass, TQGTOpSel,  class_getMethodImplementation(TQNumberClass, @selector(isGreater:)),        "@@:@");
     class_replaceMethod(TQNumberClass, TQLTEOpSel, class_getMethodImplementation(TQNumberClass, @selector(isLesserOrEqual:)),  "@@:@");
     class_replaceMethod(TQNumberClass, TQGTEOpSel, class_getMethodImplementation(TQNumberClass, @selector(isGreaterOrEqual:)), "@@:@");
 
