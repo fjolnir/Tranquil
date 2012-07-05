@@ -1,0 +1,9 @@
+log = { ... |
+    str = NSMutableString new
+    ... each: { arg |
+        str appendFormat:"%@ ", arg
+    }
+    print("%@", str)
+}
+log("foo", 123)
+

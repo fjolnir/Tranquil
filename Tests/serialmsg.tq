@@ -1,0 +1,12 @@
+#NSString {
+    - trim {
+        ^self stringByTrimmingCharactersInSet: NSCharacterSet whitespaceCharacterSet
+    }
+    - capitalize {
+        ^self capitalizedString
+    }
+}
+
+str     = "  a string   "
+prepped = str capitalize trim
+print("'%@' => '%@'", str, prepped)
