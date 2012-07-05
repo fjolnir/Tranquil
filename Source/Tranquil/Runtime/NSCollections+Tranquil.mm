@@ -66,10 +66,13 @@
 
 - (id)objectAtIndexedSubscript:(NSUInteger)aIdx
 {
-    return (id)[self pointerAtIndex:aIdx];
+    if(aIdx < [self count])
+        return (id)[self pointerAtIndex:aIdx];
+    else
+        return nil;
 }
 
-- (TQNumber *)tqCount
+- (TQNumber *)size
 {
     return [TQNumber numberWithDouble:(double)[self count]];
 }
@@ -79,7 +82,7 @@
 - (id)push:(id)aObj
 {
     [self addPointer:aObj];
-    return nil;
+    return self;
 }
 
 - (id)last
@@ -132,4 +135,13 @@
     return [[self map:mapBlock] reduce:reduceBlock];
 }
 
+- (NSString *)description
+{
+    NSMutableString *out = [NSMutableString stringWithFormat:@"<%@: %p", [self class], self];
+    for(id obj in self) {
+        [out appendFormat:@" %@,\n", obj];
+    }
+    [out appendString:@">"];
+    return out;
+}
 @end

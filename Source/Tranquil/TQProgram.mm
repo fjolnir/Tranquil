@@ -255,10 +255,11 @@ using namespace llvm;
     llvm::EnableStatistics();
 
 
-    if(_shouldShowDebugInfo)
+    if(_shouldShowDebugInfo) {
         _llModule->dump();
-    // Verify that the program is valid
-    verifyModule(*_llModule, PrintMessageAction);
+        // Verify that the program is valid
+        verifyModule(*_llModule, PrintMessageAction);
+    }
 
     // Compile program
     llvm::TargetOptions Opts;

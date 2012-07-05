@@ -13,7 +13,7 @@
 + (NSPointerArray *)tq_pointerArrayWithObjects:(id)firstObject , ...;  // Arguments terminated by TQSentinel
 - (void)setObject:(void*)aPtr atIndexedSubscript:(NSUInteger)aIdx;
 - (id)objectAtIndexedSubscript:(NSUInteger)aIdx;
-- (TQNumber *)tqCount;
+- (TQNumber *)size;
 
 - (id)push:(id)aObj;
 - (id)last;
