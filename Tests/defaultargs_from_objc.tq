@@ -1,13 +1,25 @@
-#TQNumber {
-    - to: b {
-        list = #[]
-        a = self
-        until a >= b
-            list push: a++
-        ^list
+#Range {
+    + from: beginning to: end {
+        ret = self new
+        ret#start = beginning
+        ret#end   = end
+        ^ret
+    }
+    - reduce: lambda {
+        i   = self#start
+        end = self#end
+
+        accum = lambda(i++)
+        until i >= end
+            accum = lambda(i++, accum)
+        ^accum
     }
 }
-
+#TQNumber {
+    - to: b {
+        ^Range from:self to:b
+    }
+}
 sum = (0 to: 1000000) reduce: `obj, accum=0 | obj+accum`
 
 print("Sum: %@", sum)

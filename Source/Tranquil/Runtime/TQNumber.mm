@@ -12,7 +12,7 @@ extern id _objc_msgSend_hack(id, SEL)          asm("_objc_msgSend");
 extern id _objc_msgSend_hack2(id, SEL, id)     asm("_objc_msgSend");
 
 @implementation TQNumber
-@synthesize doubleValue=_value;
+@synthesize value=_value;
 
 + (void)load
 {
@@ -33,7 +33,7 @@ extern id _objc_msgSend_hack2(id, SEL, id)     asm("_objc_msgSend");
 + (TQNumber *)numberWithDouble:(double)aValue
 {
     // This one gets called quite frequently, so we cache the imps required to allocate
-    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), NSDefaultMallocZone()), @selector(initWithDouble:), aValue);
+    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithDouble:), aValue);
     //return objc_autoreleaseReturnValue(ret);
     return autoreleaseImp(ret, @selector(autorelease));
 }
@@ -120,6 +120,6 @@ extern id _objc_msgSend_hack2(id, SEL, id)     asm("_objc_msgSend");
     return [NSString stringWithFormat:@"%f", _value];
 }
 
-TQ_POOL_IMPLEMENTATION(TQNumber)
 
+TQ_BATCH_IMPL(TQNumber)
 @end

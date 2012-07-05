@@ -2,14 +2,16 @@
 
 #import <Foundation/Foundation.h>
 #import <Tranquil/TQObject.h>
-#import <Tranquil/TQPooling.h>
+#import <Tranquil/TQBatching.h>
+
+@class TQRange;
 
 @interface TQNumber : TQObject {
     @public
     double _value;
-    TQ_POOL_IVARS
+    TQ_BATCH_IVARS
 }
-@property(readonly) double doubleValue;
+@property(readonly) double value;
 
 + (TQNumber *)numberWithDouble:(double)aValue;
 
@@ -19,5 +21,4 @@
 - (TQNumber *)multiply:(TQNumber *)b;
 - (TQNumber *)divideBy:(TQNumber *)b;
 
-TQ_POOL_INTERFACE
 @end
