@@ -21,4 +21,6 @@
 - (TQNumber *)multiply:(TQNumber *)b;
 - (TQNumber *)divideBy:(TQNumber *)b;
 
+- (id)times:(id (^)())block;
+
 @end

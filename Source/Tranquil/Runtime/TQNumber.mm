@@ -118,6 +118,15 @@ extern id _objc_msgSend_hack2(id, SEL, id)     asm("_objc_msgSend");
     return [NSString stringWithFormat:@"%f", _value];
 }
 
+id TQDispatchBlock0(struct TQBlockLiteral *block) __asm("_TQDispatchBlock0");
+- (id)times:(id (^)())block
+{
+    for(int i = 0; i < (int)_value; ++i) {
+        TQDispatchBlock0((struct TQBlockLiteral *)block);
+    }
+    return nil;
+}
+
 
 TQ_BATCH_IMPL(TQNumber)
 @end
