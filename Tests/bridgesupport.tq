@@ -1,0 +1,2 @@
+bs = TQBridgeSupport new
+bs loadFramework: "/System/Library/Frameworks/Foundation.framework"
