@@ -104,6 +104,7 @@ Expression   = Equation
              | NoEqExpr
 
 NoEqExpr     = Call
+             | Valid
              | Message
              | Block
              | UnaryOp
@@ -334,7 +335,7 @@ MethodArg    = identifier:Identifier':' -- name:Identifier
 If           = ( "if"        { UpdateToken();  PushStack([TQNodeIfBlock node]);     }
                | "unless"    { UpdateToken();  PushStack([TQNodeUnlessBlock node]); }
                )
-               -- cond:Expression --
+               - cond:Expression --
                {
                    ExtendToken();
                    [StackTop setCondition:cond];
@@ -532,6 +533,7 @@ Nil          = ('nil' | '('--')')   { ExtendToken(); $$ = [TQNodeNil node];   }
 Self         = 'self'               { ExtendToken(); $$ = [TQNodeSelf node];  }
 Super        = 'super'              { ExtendToken(); $$ = [TQNodeSuper node]; }
 Variadic     = '...'                { ExtendToken(); $$ = [TQNodeVariable nodeWithName:@"..."]; }
+Valid        = 'valid'              { ExtendToken(); $$ = [TQNodeValid node]; }
 
 Operator     = '==' { ExtendToken(); $$ = @"=="; }
              | '!=' { ExtendToken(); $$ = @"!="; }

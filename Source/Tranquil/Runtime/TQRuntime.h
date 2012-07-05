@@ -2,9 +2,10 @@
 
 #import <Foundation/Foundation.h>
 #import <stdarg.h>
+#import <Tranquil/Runtime/TQValidObject.h>
 
 extern id TQSentinel;
-extern id TQValid;
+extern TQValidObject *TQValid;
 
 enum TQBlockFlag_t {
     // I chose a flag right in the middle of the unused space, so let's hope Apple doesn't decide to use it

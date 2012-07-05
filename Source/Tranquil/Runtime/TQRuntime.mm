@@ -6,7 +6,7 @@
 
 id TQSentinel = @"3d2c9ac0bf3911e1afa70800200c9a66aaaaaaaaa";
 
-id TQValid = @"valid object";
+TQValidObject *TQValid;
 
 static const NSString *_TQDynamicIvarTableKey = @"TQDynamicIvarTableKey";
 
@@ -278,6 +278,8 @@ BOOL TQAugmentClassWithOperators(Class klass)
 
 void TQInitializeRuntime()
 {
+    TQValid = [TQValidObject sharedInstance];
+
     TQEqOpSel                    = sel_registerName("==:");
     TQNeqOpSel                   = sel_registerName("!=:");
     TQAddOpSel                   = sel_registerName("+:");
@@ -337,7 +339,7 @@ void TQInitializeRuntime()
     imp = imp_implementationWithBlock(^(TQNumber *a, TQNumber *b) {
         if(object_getClass(a) != object_getClass(b))
             return (id)nil;
-        return (a->_value != b->_value) ? nil : TQValid;
+        return (a->_value != b->_value) ? nil : (id)TQValid;
     });
     class_replaceMethod(TQNumberClass, TQNeqOpSel, imp, "@@:@");
 

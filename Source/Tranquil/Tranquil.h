@@ -3,6 +3,7 @@
 #import <Tranquil/Runtime/TQRuntime.h>
 #import <Tranquil/Runtime/TQOperators.h>
 #import <Tranquil/Runtime/TQNumber.h>
+#import <Tranquil/Runtime/TQValidObject.h>
 #import <Tranquil/CodeGen/TQNode.h>
 #import <Tranquil/CodeGen/TQNodeArgument.h>
 #import <Tranquil/CodeGen/TQNodeArgumentDef.h>
@@ -24,3 +25,4 @@
 #import <Tranquil/CodeGen/TQNodeRegex.h>
 #import <Tranquil/CodeGen/TQNodeConditionalBlock.h>
 #import <Tranquil/CodeGen/TQNodeLoopBlock.h>
+#import <Tranquil/CodeGen/TQNodeValid.h>
