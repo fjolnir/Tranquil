@@ -67,7 +67,7 @@ void yyInput(char *buf, int *result, int maxSize, TQParserState *state) {
 }
 %}
 
-Program      = -- (Statement --)+ EOF
+Program      = -- ((Statement (- '.')?|Comment) --)+ EOF
                {
                    NSMutableArray *statements = PopStack();
                    TQNodeBlock *root = [TQNodeRootBlock node];
@@ -99,8 +99,8 @@ Return       = "^" retVal:Expression { UpdateToken(); $$ = [TQNodeReturn nodeWit
 
 
 # Expression
-Expression   = Assignment
-             | Equation
+Expression   = Equation
+             | Assignment
              | NoEqExpr
 
 NoEqExpr     = Call
@@ -121,8 +121,26 @@ NoEqExpr     = Call
 ParenExpr    = '(' -- expr:Expression -- ')' { ExtendToken(); $$ = expr; }
 
 
-# Message
-Message      = rcvr:MessageRecvr -
+# Messages
+UnaryMsg     = rcvr:UnaryMsgRcvr - name:Identifier - !":"
+               {
+                    PushStack([TQNodeMessage nodeWithReceiver:rcvr]);
+                    [(NSMutableArray*)[StackTop arguments] addObject:[TQNodeArgument nodeWithPassedNode:nil
+                                                                                           selectorPart:name]];
+               }
+               (- extraName:Identifier - !":"
+                  {
+                      ReplaceStackTop([TQNodeMessage nodeWithReceiver:StackTop]);
+                      [(NSMutableArray*)[StackTop arguments] addObject:[TQNodeArgument nodeWithPassedNode:nil
+                                                                                             selectorPart:extraName]];
+
+                  }
+               )*
+               {
+                   $$ = PopStack();
+               }
+
+KeywordMsg   = rcvr:BinMsgRcvr -
                {
                     ExtendToken();
                     PushStack([TQNodeMessage nodeWithReceiver:rcvr]);
@@ -135,15 +153,9 @@ Message      = rcvr:MessageRecvr -
                     $$ = PopStack();
                     [$$ setArguments:arguments];
                }
-               '.'?
-             | rcvr:MessageRecvr - name:Identifier - '.'?
-               {
-                    $$ = [TQNodeMessage nodeWithReceiver:rcvr];
-                    NSError *err = nil;
-                    [(NSMutableArray*)[$$ arguments] addObject:[TQNodeArgument nodeWithPassedNode:nil
-                                                                                     selectorPart:name]];
-               }
-MessageRecvr = SubscriptExp
+Message      = KeywordMsg|UnaryMsg
+
+UnaryMsgRcvr = SubscriptExp
              | Property
              | Constant
              | Call
@@ -152,12 +164,16 @@ MessageRecvr = SubscriptExp
              | Literal
              | Variable
              | ParenExpr
+BinMsgRcvr   = UnaryMsg
+             | UnaryMsgRcvr
+
 SelectorPart = name:Identifier? - ':' -- param:MessageArg
                {
                     ExtendToken();
                     [StackTop addObject:[TQNodeArgument nodeWithPassedNode:param selectorPart:name]];
                }
 MessageArg   = Call
+             | UnaryMsg
              | Block
              | UnaryOp
              | Nil
@@ -537,7 +553,7 @@ Constant     = < [A-Z][A-Za-z0-9_]* >                      { ExtendToken(); $$ =
 String       = '"' < [^\"]* > '"'                          { ExtendToken(); $$ = [TQNodeString   nodeWithString:YYNSSTR]; }
 RegExp       = < "/" ("\\/"|[^/])* "/"[im]* >              { ExtendToken(); $$ = [TQNodeRegex nodeWithPattern:YYNSSTR];   }
 
-Comment      = "\\" !"\\" (!EOL .)* EOL { NSLog(@"Comment"); }
+Comment      = - '\\' (!EOL .)* EOL
 -            = [ \t]*
 --           = (Comment | EOL)? -
 EOL          = (- ('\n' | '\r\n' | '\r'))+
