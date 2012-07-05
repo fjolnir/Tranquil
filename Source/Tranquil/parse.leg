@@ -150,11 +150,23 @@ MessageRecvr = SubscriptExp
              | Literal
              | Variable
              | ParenExpr
-SelectorPart = name:Identifier? - ':' -- param:Expression
+SelectorPart = name:Identifier? - ':' -- param:MessageArg
                {
                     ExtendToken();
                     [StackTop addObject:[TQNodeArgument nodeWithPassedNode:param selectorPart:name]];
                }
+MessageArg   = Call
+             | Block
+             | UnaryOp
+             | Nil
+             | SubscriptExp
+             | Property
+             | RegExp
+             | Self
+             | Literal
+             | Constant
+             | Variable
+             | ParenExpr
 
 # Call
 ## callee(expr, expr)
