@@ -14,8 +14,6 @@ until
 break
 skip
 nil    \ Represents 'nothing'
-yes    \ Evaluates to 1.0
-no     \ Evaluates to nil
 self   \ Available inside method blocks
 super  \ Available inside method blocks as a message receiver
        \ that calls methods as defined by the current class's superclass
@@ -72,13 +70,13 @@ until ..expression.. {  \ Executes the passed literal block repeatedly until the
 \ Objects
 
 #Klass < Object {
-	+ new {               \ Class method
-		super new.        \ Calls superclass method
-		self#ivar = 123   \ Sets instance variable
-		^self             \ Returns self
+	+ new {                   \ Class method ('self' refers to the class itself)
+		instance = super new  \ Calls superclass's implementation (which in this case, creates the instance)
+		instance#ivar = 123   \ Sets instance variable
+		^instance             \ Returns the instance
 	}
-	- aMethod: a and: b {  \ Instance method taking two arguments
-		^self#ivar = a + b \ Returns the value of self#ivar after setting it to a+b
+	- aMethod: a and: b {     \ Instance method taking two arguments ('self' refers to an instance of Klass)
+		^self#ivar = a + b    \ Returns the value of self#ivar after setting it to a+b
 	}
 }
 
@@ -103,10 +101,10 @@ A block is ..a block of code. It is either used as a function or a method. (A me
 By default a block returns `nil`. To return a value the `^` symbol is prefixed to the expression to return.
 
 ### Variadic blocks
-If in a block one wishes to access arguments beyond those defined by the block constructor, he can use the special '...' variable to do so, it is an array of pairs which you can iterate.
+If in a block one wishes to accept an arbitrary number of argument, he can use the special '...' argument to do so, it is an array of arguments which you can iterate over. (... must be the last argument specified)
 
 ```
-variadicBlock = {
+variadicBlock = { ... |
 	... each: { arg |
 		print(arg)
 	}
@@ -122,13 +120,6 @@ variadicBlock("foo", "bar", "baz")
 ## Objects
 
 There is only one type, the object.
-
-### Built in objects
-
-* nil
-* yes
-* no
-
 
 ### Classes
 Classes are named objects that can be instantiated.
@@ -202,17 +193,11 @@ fib = fibonacci(50) \ Calculate the 50th number in the fibonacci sequence
 			}
 		}
 	
-		- _reduce: lambda accumulator: accum {
-			if self isEmpty? {
-				^accum
-			} else {
-				accum = lambda(self next)
-				^self _reduce:lambda accumulator:accum			}
-		}
-	
 		- reduce: lambda {
 			accum = lambda(self next)
-			^self _reduce:result accumulator:accum
+			until self isEmpty?
+				accum = lambda(self next, accum)
+			^accum
 		}
 	
 		- map: mapLambda reduce: reduceLambda {
@@ -220,7 +205,7 @@ fib = fibonacci(50) \ Calculate the 50th number in the fibonacci sequence
 		}
 	
 		- next     `nil` \ Implemented in subclasses
-		- isEmpty? `yes` \ Implemented in subclasses
+		- isEmpty? `1` \ Implemented in subclasses
 	}
 	
 	sum = #[1,2,3] reduce:`n, sum=0| sum + n`
