@@ -1,7 +1,7 @@
-max = { a, b|
+max = { a, b |
     if (a > b) ^a else ^b
 }
-min = { a, b|
+min = { a, b |
     if (a < b) ^a else ^b
 }
 
@@ -30,7 +30,6 @@ min = { a, b|
             ^accum appendArray: elem
         }
     }
-
 
     - max {
         ^self fold: max
@@ -99,3 +98,4 @@ print("%@", a)
 
 foo = #[1,2,3,4,5,6,7,8,9] partition:`obj | obj < 5`
 print("%@", foo)
+print("%@", max(1,2))
