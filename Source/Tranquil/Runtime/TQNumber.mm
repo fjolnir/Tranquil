@@ -29,12 +29,10 @@ extern id _objc_msgSend_hack2(id, SEL, id)     asm("_objc_msgSend");
     autoreleaseImp = (typeof(autoreleaseImp))class_getMethodImplementation(self, @selector(autorelease));
 }
 
- //id objc_autoreleaseReturnValue(id obj);
 + (TQNumber *)numberWithDouble:(double)aValue
 {
     // This one gets called quite frequently, so we cache the imps required to allocate
     TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithDouble:), aValue);
-    //return objc_autoreleaseReturnValue(ret);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 
@@ -47,7 +45,7 @@ extern id _objc_msgSend_hack2(id, SEL, id)     asm("_objc_msgSend");
 - (TQNumber *)add:(TQNumber *)b
 {
     if(isa != object_getClass(b)) return nil;
-    return numberWithDoubleImp(isa, @selector(numberWithDouble), _value + b->_value);
+    return numberWithDoubleImp(isa, @selector(numberWithDouble:), _value + b->_value);
 }
 - (TQNumber *)subtract:(TQNumber *)b
 {
