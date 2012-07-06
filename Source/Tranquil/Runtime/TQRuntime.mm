@@ -72,20 +72,6 @@ id TQRetainAutoreleaseObject(id obj)
     return TQAutoreleaseObject(TQRetainObject(obj));
 }
 
-id TQStoreStrongInByref(void *dstPtr, id obj)
-{
-    struct TQBlock_byref *dst = (struct TQBlock_byref *)dstPtr;
-    id prev = dst->forwarding->capture;
-    if(prev == obj)
-        return prev;
-    TQRetainObject(obj);
-    dst->forwarding->capture = obj;
-    TQReleaseObject(prev);
-
-    return obj;
-}
-
-
 #pragma mark -
 Class TQGetOrCreateClass(const char *name, const char *superName)
 {
@@ -210,8 +196,8 @@ BOOL TQObjectIsStackBlock(id obj)
 id TQPrepareObjectForReturn(id obj)
 {
     if(TQObjectIsStackBlock(obj))
-        return TQAutoreleaseObject(_objc_msgSend_hack(obj, @selector(copy)));
-    return obj;
+        return _objc_msgSend_hack(obj, @selector(copy));
+    return TQRetainObject(obj);
 }
 
 NSPointerArray *TQVaargsToArray(va_list *items)

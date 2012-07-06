@@ -51,50 +51,12 @@ using namespace llvm;
         //TQNodeBlock *blk = (TQNodeBlock*)stmt;
 
     //}
-
-    // Evaluate retain the value or if it's a call, it's arguments before popping the block's autorelease pool
     Value *retVal;
-    std::vector<Value*> args;
-    Value *msgReceiver = NULL;
-    BOOL isTailCall = [_value isKindOfClass:[TQNodeCall class]] || [_value isKindOfClass:[TQNodeMessage class]];
-    if(isTailCall) {
-        Value *arg;
-        for(TQNodeArgument *argNode in [(TQNodeCall *)_value arguments]) {
-            arg = [argNode generateCodeInProgram:aProgram block:aBlock error:aoErr];
-            if(arg) {
-                builder->CreateCall(aProgram.TQRetainObject, arg);
-                args.push_back(arg);
-            }
-        }
-        if([_value isKindOfClass:[TQNodeMessage class]])
-            msgReceiver = builder->CreateCall(aProgram.TQRetainObject, [[(TQNodeMessage *)_value receiver] generateCodeInProgram:aProgram block:aBlock error:aoErr]);
-
-    } else {
-        retVal = builder->CreateCall(aProgram.TQRetainObject, [_value generateCodeInProgram:aProgram
-                                                                                      block:aBlock
-                                                                                      error:aoErr]);
-    }
-    // Pop
+    retVal = builder->CreateCall(aProgram.TQPrepareObjectForReturn, [_value generateCodeInProgram:aProgram
+                                                                                            block:aBlock
+                                                                                            error:aoErr]);
     builder->CreateCall(aProgram.objc_autoreleasePoolPop, aBlock.autoreleasePool);
-
-    // Return
-    if(isTailCall) {
-        // Autorelease the arguments
-        for(int i = 0; i < args.size(); ++i) {
-            builder->CreateCall(aProgram.TQAutoreleaseObject, args[i]);
-        }
-        if(msgReceiver)
-            builder->CreateCall(aProgram.TQAutoreleaseObject, msgReceiver);
-        retVal = [(TQNodeCall *)_value generateCodeInProgram:aProgram block:aBlock withArguments:args error:aoErr];
-    } else
-        retVal = builder->CreateCall(aProgram.TQAutoreleaseObject, retVal);
-    //Value *retVal = [_value generateCodeInProgram:aProgram block:aBlock error:aoError];
-    // If the returned instruction is not a call, then it's our responsibility to prepare for return (For example to copy a block
-    // to the heap if necessary)
-    if(![_value isKindOfClass:[TQNodeMessage class]] && ![_value isKindOfClass:[TQNodeCall class]])
-        retVal = builder->CreateCall(aProgram.TQPrepareObjectForReturn, retVal);
-    //else if(isTailCall && ![aBlock isKindOfClass:[TQNodeRootBlock class]])
-        //((CallInst*)retVal)->setTailCall(true);
+    retVal = builder->CreateCall(aProgram.TQAutoreleaseObject, retVal);
     return builder->CreateRet(retVal);
 }
 @end

@@ -47,7 +47,7 @@ using namespace llvm;
     llInt8PtrPtrTy=_llInt8PtrPtrTy, llPointerWidthInBits=_llPointerWidthInBits, llPointerAlignInBytes=_llPointerAlignInBytes,
     llPointerSizeInBytes=_llPointerSizeInBytes;
 @synthesize llBlockDescriptorTy=_blockDescriptorTy, llBlockLiteralType=_blockLiteralType;
-@synthesize objc_msgSend=_func_objc_msgSend, objc_msgSendSuper=_func_objc_msgSendSuper, TQStoreStrongInByref=_func_TQStoreStrongInByref,
+@synthesize objc_msgSend=_func_objc_msgSend, objc_msgSendSuper=_func_objc_msgSendSuper,
     objc_storeWeak=_func_objc_storeWeak, objc_loadWeak=_func_objc_loadWeak, objc_allocateClassPair=_func_objc_allocateClassPair,
     objc_registerClassPair=_func_objc_registerClassPair, objc_destroyWeak=_func_objc_destroyWeak, class_addIvar=_func_class_addIvar,
     class_replaceMethod=_func_class_replaceMethod, sel_registerName=_func_sel_registerName, sel_getName=_func_sel_getName,
@@ -204,12 +204,11 @@ using namespace llvm;
     DEF_EXTERNAL_FUN(object_getClass, ft_i8Ptr__i8Ptr)
     DEF_EXTERNAL_FUN(objc_msgSend, ft_i8ptr__i8ptr_i8ptr_variadic)
     DEF_EXTERNAL_FUN(objc_msgSendSuper, ft_i8ptr__i8ptr_i8ptr_variadic)
-    DEF_EXTERNAL_FUN(TQStoreStrongInByref, ft_i8Ptr__i8Ptr_i8Ptr)
     //DEF_EXTERNAL_FUN(objc_storeWeak, ft_i8Ptr__i8PtrPtr_i8Ptr)
     //DEF_EXTERNAL_FUN(objc_loadWeak, ft_i8Ptr__i8PtrPtr)
     //DEF_EXTERNAL_FUN(objc_destroyWeak, ft_void__i8PtrPtr)
     DEF_EXTERNAL_FUN(TQRetainObject, ft_i8Ptr__i8Ptr)
-    //DEF_EXTERNAL_FUN(TQReleaseObject, ft_void__i8Ptr)
+    DEF_EXTERNAL_FUN(TQReleaseObject, ft_void__i8Ptr)
     DEF_EXTERNAL_FUN(TQAutoreleaseObject, ft_i8Ptr__i8Ptr);
     DEF_EXTERNAL_FUN(sel_registerName, ft_i8Ptr__i8Ptr)
     //DEF_EXTERNAL_FUN(sel_getName, ft_i8Ptr__i8Ptr)
@@ -288,7 +287,6 @@ using namespace llvm;
 
     //engine->DisableLazyCompilation();
     engine->addGlobalMapping(_func_TQPrepareObjectForReturn, (void*)&TQPrepareObjectForReturn);
-    engine->addGlobalMapping(_func_TQStoreStrongInByref, (void*)&TQStoreStrongInByref);
     engine->addGlobalMapping(_func_TQRetainObject, (void*)&TQRetainObject);
     engine->addGlobalMapping(_func_TQAutoreleaseObject, (void*)&TQAutoreleaseObject);
     engine->addGlobalMapping(_func_TQSetValueForKey, (void*)&TQSetValueForKey);
@@ -298,6 +296,7 @@ using namespace llvm;
     engine->addGlobalMapping(_func_TQObjectsAreNotEqual, (void*)&TQObjectsAreNotEqual);
     engine->addGlobalMapping(_func_TQObjectGetSuperClass, (void*)&TQObjectGetSuperClass);
     engine->addGlobalMapping(_func_TQVaargsToArray, (void*)&TQVaargsToArray);
+    engine->addGlobalMapping(_func_TQReleaseObject, (void*)&TQReleaseObject);
 
     //std::vector<GenericValue> noargs;
     //GenericValue val = engine->runFunction(_root.function, noargs);
@@ -367,23 +366,7 @@ using namespace llvm;
     return [NSString stringWithFormat:@"<prog@\n%@\n}>", _root];
 }
 
-- (void)insertLogUsingBuilder:(llvm::IRBuilder<> *)aBuilder withStr:(NSString *)txt
-{
-    std::vector<Type*> nslog_args;
-    nslog_args.push_back(_llInt8PtrTy);
-    FunctionType *printf_type = FunctionType::get(_llIntTy, nslog_args, true);
-    Function *func_printf = _llModule->getFunction("printf");
-    if(!func_printf) {
-        func_printf = Function::Create(printf_type, GlobalValue::ExternalLinkage, "printf", _llModule);
-        func_printf->setCallingConv(CallingConv::C);
-    }
-    std::vector<Value*> args;
-    args.push_back(aBuilder->CreateGlobalStringPtr("> %s\n"));
-    args.push_back(aBuilder->CreateGlobalStringPtr([txt UTF8String]));
-    aBuilder->CreateCall(func_printf, args);
-}
-
-- (llvm::Value *)getGlobalStringPtr:(NSString *)aStr inBlock:(TQNodeBlock *)aBlock
+- (llvm::Value *)getGlobalStringPtr:(NSString *)aStr withBuilder:(llvm::IRBuilder<> *)aBuilder
 {
     NSString *globalName = [NSString stringWithFormat:@"TQConstStr_%@", aStr];
     GlobalVariable *global = _llModule->getGlobalVariable([globalName UTF8String], true);
@@ -396,8 +379,28 @@ using namespace llvm;
 
     Value *zero = ConstantInt::get(Type::getInt32Ty(_llModule->getContext()), 0);
     Value *indices[] = { zero, zero };
-    return aBlock.builder->CreateInBoundsGEP(global, indices);
+    return aBuilder->CreateInBoundsGEP(global, indices);
 }
+
+- (llvm::Value *)getGlobalStringPtr:(NSString *)aStr inBlock:(TQNodeBlock *)aBlock
+{
+    return [self getGlobalStringPtr:aStr withBuilder:aBlock.builder];
+}
+
+- (void)insertLogUsingBuilder:(llvm::IRBuilder<> *)aBuilder withStr:(NSString *)txt
+{
+    std::vector<Type*> nslog_args;
+    nslog_args.push_back(_llInt8PtrTy);
+    FunctionType *printf_type = FunctionType::get(_llIntTy, nslog_args, true);
+    Function *func_printf = _llModule->getFunction("printf");
+    if(!func_printf) {
+        func_printf = Function::Create(printf_type, GlobalValue::ExternalLinkage, "printf", _llModule);
+        func_printf->setCallingConv(CallingConv::C);
+    }
+    std::vector<Value*> args;
+    args.push_back([self getGlobalStringPtr:@"> %s\n" withBuilder:aBuilder]);
+    args.push_back([self getGlobalStringPtr:txt withBuilder:aBuilder]);
+    aBuilder->CreateCall(func_printf, args);
+}
+
 @end
-
-

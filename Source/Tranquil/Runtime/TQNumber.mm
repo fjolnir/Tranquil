@@ -71,25 +71,25 @@ extern id _objc_msgSend_hack2(id, SEL, id)     asm("_objc_msgSend");
 - (TQNumber *)isGreater:(TQNumber *)b
 {
     if(isa != object_getClass(b)) return nil;
-    return _value > b->_value ? TQValid : nil;
+    return _value > b->_value ? (TQNumber*)TQValid : nil;
 }
 
 - (TQNumber *)isLesser:(TQNumber *)b
 {
     if(isa != object_getClass(b)) return nil;
-    return _value < b->_value ? TQValid : nil;
+    return _value < b->_value ? (TQNumber*)TQValid : nil;
 }
 
 - (TQNumber *)isGreaterOrEqual:(TQNumber *)b
 {
     if(isa != object_getClass(b)) return nil;
-    return _value >= b->_value ? TQValid : nil;
+    return _value >= b->_value ? (TQNumber*)TQValid : nil;
 }
 
 - (TQNumber *)isLesserOrEqual:(TQNumber *)b
 {
     if(isa != object_getClass(b)) return nil;
-    return _value <= b->_value ? TQValid : nil;
+    return _value <= b->_value ? (TQNumber*)TQValid : nil;
 }
 
 

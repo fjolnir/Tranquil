@@ -35,7 +35,7 @@
 @property(readonly) llvm::Type *llBlockDescriptorTy, *llBlockLiteralType;
 
 #pragma mark - Cached functions
-@property(readonly) llvm::Function *objc_msgSend, *objc_msgSendSuper, *TQStoreStrongInByref, *objc_storeWeak,
+@property(readonly) llvm::Function *objc_msgSend, *objc_msgSendSuper, *objc_storeWeak,
     *objc_loadWeak, *objc_destroyWeak, *TQRetainObject, *TQReleaseObject, *objc_allocateClassPair,
     *objc_registerClassPair, *class_addIvar, *class_replaceMethod, *objc_getClass,
     *sel_registerName, *sel_getName, *_Block_copy,
@@ -52,6 +52,7 @@
 - (BOOL)run;
 
 - (void)insertLogUsingBuilder:(llvm::IRBuilder<> *)aBuilder withStr:(NSString *)txt;
+- (llvm::Value *)getGlobalStringPtr:(NSString *)aStr withBuilder:(llvm::IRBuilder<> *)aBuilder;
 - (llvm::Value *)getGlobalStringPtr:(NSString *)aStr inBlock:(TQNodeBlock *)aBlock;
 @end
 #endif

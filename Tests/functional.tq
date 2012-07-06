@@ -19,15 +19,17 @@ min = { a, b |
     }
 
     - appendArray: anotherArray {
+
+        result = self copy
         anotherArray each: { elem |
-            self push: elem
+            result push: elem
         }
-        ^self
+        ^result
     }
 
     - concat {
         ^self fold: { elem, accum=#[] |
-            ^accum appendArray: elem
+            ^elem fold: `subElem, newAccum=accum | newAccum push: subElem`
         }
     }
 
