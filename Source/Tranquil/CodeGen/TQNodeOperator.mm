@@ -128,6 +128,15 @@ using namespace llvm;
             case kTQOperatorGetter:
                 selector  = aProgram.llModule->getOrInsertGlobal("TQGetterOpSel", aProgram.llInt8PtrTy);
                 break;
+            case kTQOperatorLShift:
+                selector  = aProgram.llModule->getOrInsertGlobal("TQLShiftOpSel", aProgram.llInt8PtrTy);
+                break;
+            case kTQOperatorRShift:
+                selector  = aProgram.llModule->getOrInsertGlobal("TQRShiftOpSel", aProgram.llInt8PtrTy);
+                break;
+            case kTQOperatorConcat:
+                selector  = aProgram.llModule->getOrInsertGlobal("TQConcatOpSel", aProgram.llInt8PtrTy);
+                break;
             default:
                 TQAssertSoft(NO, kTQGenericErrorDomain, kTQGenericError, NULL, @"Unknown binary operator");
         }
@@ -166,6 +175,13 @@ using namespace llvm;
             break;
             case kTQOperatorInequal: opStr = @"!=";
             break;
+            case kTQOperatorLShift: opStr = @"<<";
+            break;
+            case kTQOperatorRShift: opStr = @">>";
+            break;
+            case kTQOperatorConcat: opStr = @"..";
+            break;
+
             default: opStr = @"<unknown>";
         }
         return [NSString stringWithFormat:@"<op@ %@ %@ %@>", _left, opStr, _right];

@@ -83,6 +83,7 @@ Statement    = (
              | Loop
              | BreakStmt
              | SkipStmt
+             | ShiftStmt
              | Call
              | Message
              | IncrDecrOp
@@ -390,9 +391,16 @@ Sum          = a:Product             { UpdateToken(); PushStack(a);             
                )*                    { $$ = PopStack();                                                                                         }
 
 Product      = a:NoEqExpr            { UpdateToken(); PushStack(a);                                                                             }
-               ( - "*" - b:Product   { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorMultiply left:StackTop right:b]); }
-               | - "/" - b:Product   { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorDivide   left:StackTop right:b]); }
+               ( - "*"  - b:Product  { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorMultiply left:StackTop right:b]); }
+               | - "/"  - b:Product  { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorDivide   left:StackTop right:b]); }
+               | - ShiftRhs
+               | - ".." - b:Product  { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorConcat   left:StackTop right:b]); }
                )*                    { $$ = PopStack();                                                                                         }
+ShiftRhs     = "<<" - b:Product      { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorLShift   left:StackTop right:b]); }
+             | ">>" - b:Product      { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorRShift   left:StackTop right:b]); }
+## Shifts can also be used as statements (For example to push onto a stack or append to a string)
+ShiftStmt    = a:NoEqExpr { PushStack(a); }
+               - ShiftRhs { $$ = PopStack(); }
 
 Equation     = a:Sum                 { UpdateToken(); PushStack(a);                                                                                   }
                ( - "<" -  b:Equation { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorLesser         left:StackTop right:b]); }
@@ -476,6 +484,7 @@ Property     = obj:PropLhs
                }
 PropLhs      = Self
              | Variable
+             | Constant
 
 PropSubscr   = "#" - prop:Identifier { ExtendToken(); [StackTop addObject:prop]; }
 
@@ -546,6 +555,10 @@ Operator     = '==' { ExtendToken(); $$ = @"=="; }
              | '/'  { ExtendToken(); $$ = @"/";  }
              | '+'  { ExtendToken(); $$ = @"+";  }
              | '-'  { ExtendToken(); $$ = @"-";  }
+             | '<<' { ExtendToken(); $$ = @"<<"; }
+             | '>>' { ExtendToken(); $$ = @"<<"; }
+             | '..' { ExtendToken(); $$ = @".."; }
+
 SelIdent     = Identifier | Operator
 
 Number       = (< '-'? [0-9]+ ('.' [0-9]*)? ('e'[0-9]+)? >

@@ -16,7 +16,10 @@ enum {
     kTQOperatorGetter,
     kTQOperatorSetter,
     kTQOperatorIncrement,
-    kTQOperatorDecrement
+    kTQOperatorDecrement,
+    kTQOperatorLShift,
+    kTQOperatorRShift,
+    kTQOperatorConcat
 };
 typedef char TQOperatorType;
 // Binary operator (a <operator> b)

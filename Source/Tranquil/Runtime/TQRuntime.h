@@ -87,6 +87,9 @@ extern SEL TQDivOpSel;
 extern SEL TQAddOpSel;
 extern SEL TQSubOpSel;
 extern SEL TQUnaryMinusOpSel;
+extern SEL TQLShiftOpSel;
+extern SEL TQRShiftOpSel;
+extern SEL TQConcatOpSel;
 extern SEL TQSetterOpSel;
 extern SEL TQGetterOpSel;
 

@@ -21,6 +21,9 @@ SEL TQDivOpSel;
 SEL TQAddOpSel;
 SEL TQSubOpSel;
 SEL TQUnaryMinusOpSel;
+SEL TQLShiftOpSel;
+SEL TQRShiftOpSel;
+SEL TQConcatOpSel;
 SEL TQSetterOpSel;
 SEL TQGetterOpSel;
 
@@ -277,6 +280,9 @@ void TQInitializeRuntime()
     TQGTOpSel                    = sel_registerName(">:");
     TQLTEOpSel                   = sel_registerName("<=:");
     TQGTEOpSel                   = sel_registerName(">=:");
+    TQLShiftOpSel                = sel_registerName("<<:");
+    TQRShiftOpSel                = sel_registerName(">>:");
+    TQConcatOpSel                = sel_registerName("..:");
     TQGetterOpSel                = sel_registerName("[]:");
     TQSetterOpSel                = sel_registerName("[]=::");
     
@@ -315,8 +321,25 @@ void TQInitializeRuntime()
     class_addMethod([NSMutableArray class], TQSetterOpSel, imp, "@@:@");
     class_addMethod([NSPointerArray class], TQSetterOpSel, imp, "@@:@");
 
+
+    // Operators for NS(Mutable)String
+    imp = class_getMethodImplementation([NSString class], @selector(stringByAppendingString:));
+    class_addMethod([NSString class], TQConcatOpSel, imp, "@@:@");
+    imp = class_getMethodImplementation([NSMutableString class], @selector(appendString:));
+    imp = imp_implementationWithBlock(^(id a, id b)   {
+         _objc_msgSend_hack2(a, @selector(appendString:), b);
+         return a;
+    });
+    class_addMethod([NSMutableString class], TQLShiftOpSel, imp, "@@:@");
+    imp = imp_implementationWithBlock(^(id a, id b)   {
+        _objc_msgSend_hack3i(a, @selector(insertString:atIndex:), b, 0);
+        return a;
+    });
+    class_addMethod([NSMutableString class], TQRShiftOpSel, imp, "@@:@");
+
+
     // Add optimized operators to TQNumber
-     // ==
+    // ==
     imp = imp_implementationWithBlock(^(TQNumber *a, TQNumber *b) {
         return object_getClass(a) == object_getClass(b) && a->_value == b->_value ? TQValid : nil;
     });
