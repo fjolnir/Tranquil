@@ -416,10 +416,16 @@ Assignment     = a:AssgnLhs -   { UpdateToken(); PushStack(a);    }
 AssgnLhs       = Property
                | SubscriptExp
                | Variable
-AssgnRhs       = ( -"=" -- b:Expression)
+AssgnRhs       = -- ( "=" -- b:Expression  { PushStack([TQNodeOperator nodeWithType:kTQOperatorAssign left:StackTop right:b]);   }
+                 | "+=" -- b:Expression { PushStack([TQNodeOperator nodeWithType:kTQOperatorAdd left:StackTop right:b]);      }
+                 | "-=" -- b:Expression { PushStack([TQNodeOperator nodeWithType:kTQOperatorSubtract left:StackTop right:b]); }
+                 | "*=" -- b:Expression { PushStack([TQNodeOperator nodeWithType:kTQOperatorMultiply left:StackTop right:b]); }
+                 | "/=" -- b:Expression { PushStack([TQNodeOperator nodeWithType:kTQOperatorDivide left:StackTop right:b]);   }
+               )
                {
                    ExtendToken();
-                   ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAssign left:StackTop right:b]);
+                   TQNodeOperator *assignVal = PopStack();
+                   ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAssign left:StackTop right:assignVal]);
                }
 
 UnaryOp        = UnaryPrefixOp | UnaryMinusOp | UnaryPostfixOp
