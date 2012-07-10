@@ -140,7 +140,7 @@ When a block is called as a result of a message to an object (object method: 123
 
 ### Operator methods
 
-Operator methods are methods for which the colon after the method name is optional (a <operator> b as opposed to a <operator>: b). The available ones are:
+Operator methods are methods for which the colon after the method name is optional (a + b as opposed to a +: b) and operator precedence is applied. The available ones are:
 
 ```
 Meaning          |  Operator  | Resulting message    Notes
