@@ -33,7 +33,7 @@ aDict  = #{ key => value, anotherKey => value } \ Initializes a dictionary
 
 aBlock = { ..body.. } \ A block. Defines scope
 aBlockWith = { arg0, arg1 | ^arg0 } \ A block that takes two arguments
-                                    \ and returns it's first argument as-is
+                                    \ and returns its first argument as-is
 aBlock = { arg=123 |  ..statements.. } \ Assignment in the argument list indicates a default value
                                        \ for that argument
 `expression` \ Equivalent to { ^expression }
