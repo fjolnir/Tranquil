@@ -6,7 +6,7 @@ Tranquil is a programming language built on top of LLVM & the Objective-C Runtim
 
 The following will create a binary called `tranquil` in the `Build` folder.
 
-	> brew install llvm --HEAD
+	> brew install llvm --HEAD --jit --enable-optimized
 	> git clone git://github.com/fjolnir/Tranquil.git
 	> cd Tranquil
 	> rake
