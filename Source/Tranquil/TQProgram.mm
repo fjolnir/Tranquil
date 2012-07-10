@@ -368,7 +368,7 @@ using namespace llvm;
 
 - (llvm::Value *)getGlobalStringPtr:(NSString *)aStr withBuilder:(llvm::IRBuilder<> *)aBuilder
 {
-    NSString *globalName = [NSString stringWithFormat:@"TQConstStr_%@", aStr];
+    NSString *globalName = [NSString stringWithFormat:@"TQConstCStr_%@", aStr];
     GlobalVariable *global = _llModule->getGlobalVariable([globalName UTF8String], true);
     if(!global) {
         Constant *strConst = ConstantDataArray::getString(_llModule->getContext(), [aStr UTF8String]);

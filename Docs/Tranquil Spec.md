@@ -93,6 +93,10 @@ a = obj#member
 \ Regular expressions
 regexp = /[.]*/  \ Regular expressions are delimited by forward slashes
 "foobar" matches? /[foo...]/
+
+\ String interpolation
+a = "variable"
+b = "A string with an embedded #{a}." \ Evaluates to "A string with an embedded variable."
 ```
 
 ## Blocks

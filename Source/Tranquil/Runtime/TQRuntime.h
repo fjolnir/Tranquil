@@ -96,6 +96,7 @@ extern SEL TQExpOpSel;
 
 extern SEL TQNumberWithDoubleSel;
 extern SEL TQStringWithUTF8StringSel;
+extern SEL TQStringWithFormatSel;
 extern SEL TQPointerArrayWithObjectsSel;
 extern SEL TQMapWithObjectsAndKeysSel;
 extern SEL TQRegexWithPatSel;

@@ -580,7 +580,28 @@ Number       = (< '-'? [0-9]+ ('.' [0-9]+)? ('e'[0-9]+)? >
              | < '-'? '.' [0-9]+ ('e'[0-9]+)? > )          { ExtendToken(); $$ = [TQNodeNumber nodeWithDouble:YYNUM];     }
 Identifier   = < [a-z_][A-Za-z0-9_]* >                     { ExtendToken(); $$ = YYNSSTR;                                 }
 Constant     = < [A-Z][A-Za-z0-9_]* >                      { ExtendToken(); $$ = [TQNodeConstant nodeWithString:YYNSSTR]; }
-String       = '"' < [^\"]* > '"'                          { ExtendToken(); $$ = [TQNodeString   nodeWithString:YYNSSTR]; }
+# String with support for embedding expressions
+String       = '"'
+               {
+                   ExtendToken();
+                   PushStack([TQNodeString nodeWithString:[NSMutableString string]]);
+               }
+               (StrEmbeddExpr|StrInside)* '"'
+               {
+                   $$ = PopStack();
+               }
+
+StrInside    = <("#" !"{" |[^\"#])+ >
+               {
+                   [[(TQNodeString *)StackTop value] appendString:YYNSSTR];
+               }
+StrEmbeddExpr= ("#{"-"}"
+               | "#{" - expr:Expression - "}"
+                 {
+                     [[(TQNodeString *)StackTop value] appendString:@"%@"];
+                     [[StackTop embeddedValues] addObject:expr];
+                 }
+               )
 RegExp       = < "/" ("\\/"|[^/])* "/"[im]* >              { ExtendToken(); $$ = [TQNodeRegex nodeWithPattern:YYNSSTR];   }
 
 Comment      = - '\\' (!EOL .)* EOL

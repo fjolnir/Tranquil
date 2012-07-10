@@ -11,4 +11,9 @@ static TQValidObject *sharedInstance;
     });
     return sharedInstance;
 }
+
+- (NSString *)description
+{
+    return @"Valid";
+}
 @end

@@ -28,8 +28,9 @@ SEL TQSetterOpSel;
 SEL TQGetterOpSel;
 SEL TQExpOpSel;
 
-SEL TQNumberWithDoubleSel;//        = @selector(numberWithDouble:);
+SEL TQNumberWithDoubleSel;
 SEL TQStringWithUTF8StringSel;
+SEL TQStringWithFormatSel;
 SEL TQPointerArrayWithObjectsSel;
 SEL TQMapWithObjectsAndKeysSel;
 SEL TQRegexWithPatSel;
@@ -297,6 +298,7 @@ void TQInitializeRuntime()
     
     TQNumberWithDoubleSel        = @selector(numberWithDouble:);
     TQStringWithUTF8StringSel    = @selector(stringWithUTF8String:);
+    TQStringWithFormatSel        = @selector(stringWithFormat:);
     TQPointerArrayWithObjectsSel = @selector(tq_pointerArrayWithObjects:);
     TQMapWithObjectsAndKeysSel   = @selector(tq_mapTableWithObjectsAndKeys:);
     TQRegexWithPatSel            = @selector(tq_regularExpressionWithUTF8String:options:);
@@ -338,7 +340,6 @@ void TQInitializeRuntime()
         return a;
     });
     class_addMethod([NSPointerArray class], TQRShiftOpSel, imp, "@@:@");
-    
 
     // Operators for NS(Mutable)String
     imp = class_getMethodImplementation([NSString class], @selector(stringByAppendingString:));

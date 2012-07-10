@@ -1,6 +1,7 @@
 #import <Tranquil/CodeGen/TQNode.h>
 
 @interface TQNodeString : TQNode
-@property(readwrite, retain) NSString *value;
-+ (TQNodeString *)nodeWithString:(NSString *)aStr;
+@property(readwrite, retain) NSMutableString *value;
+@property(readwrite, retain) NSMutableArray *embeddedValues;
++ (TQNodeString *)nodeWithString:(NSMutableString *)aStr;
 @end
