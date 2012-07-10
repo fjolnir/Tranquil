@@ -169,10 +169,14 @@ UnaryMsgRcvr = SubscriptExp
 BinMsgRcvr   = UnaryMsg
              | UnaryMsgRcvr
 
-SelectorPart = name:Identifier? - ':' -- param:MessageArg
+SelectorPart = { PushStack([TQNodeArgument node]); }
+               (name:SelIdent  { [StackTop setSelectorPart:name]; })?
+                - ':' -- param:MessageArg
                {
                     ExtendToken();
-                    [StackTop addObject:[TQNodeArgument nodeWithPassedNode:param selectorPart:name]];
+                    TQNodeArgument *arg = PopStack();
+                    [arg setPassedNode:param];
+                    [StackTop addObject:arg];
                }
 MessageArg   = Call
              | UnaryMsg
@@ -391,7 +395,8 @@ Sum          = a:Product             { UpdateToken(); PushStack(a);             
                )*                    { $$ = PopStack();                                                                                         }
 
 Product      = a:NoEqExpr            { UpdateToken(); PushStack(a);                                                                             }
-               ( - "*"  - b:Product  { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorMultiply left:StackTop right:b]); }
+               ( - "^"  - b:Product  { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorExponent left:StackTop right:b]); }
+               | - "*"  - b:Product  { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorMultiply left:StackTop right:b]); }
                | - "/"  - b:Product  { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorDivide   left:StackTop right:b]); }
                | - ShiftRhs
                | - ".." - b:Product  { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorConcat   left:StackTop right:b]); }
@@ -416,11 +421,11 @@ Assignment     = a:AssgnLhs -   { UpdateToken(); PushStack(a);    }
 AssgnLhs       = Property
                | SubscriptExp
                | Variable
-AssgnRhs       = -- ( "=" -- b:Expression  { PushStack([TQNodeOperator nodeWithType:kTQOperatorAssign left:StackTop right:b]);   }
-                 | "+=" -- b:Expression { PushStack([TQNodeOperator nodeWithType:kTQOperatorAdd left:StackTop right:b]);      }
-                 | "-=" -- b:Expression { PushStack([TQNodeOperator nodeWithType:kTQOperatorSubtract left:StackTop right:b]); }
-                 | "*=" -- b:Expression { PushStack([TQNodeOperator nodeWithType:kTQOperatorMultiply left:StackTop right:b]); }
-                 | "/=" -- b:Expression { PushStack([TQNodeOperator nodeWithType:kTQOperatorDivide left:StackTop right:b]);   }
+AssgnRhs       = -- ( "=" -- b:Expression { PushStack(b);                                                                       }
+                 | "+=" -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorAdd left:StackTop right:b]);      }
+                 | "-=" -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorSubtract left:StackTop right:b]); }
+                 | "*=" -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorMultiply left:StackTop right:b]); }
+                 | "/=" -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorDivide left:StackTop right:b]);   }
                )
                {
                    ExtendToken();
@@ -550,24 +555,28 @@ Super        = 'super'              { ExtendToken(); $$ = [TQNodeSuper node]; }
 Variadic     = '...'                { ExtendToken(); $$ = [TQNodeVariable nodeWithName:@"..."]; }
 Valid        = 'valid'              { ExtendToken(); $$ = [TQNodeValid node]; }
 
-Operator     = '==' { ExtendToken(); $$ = @"=="; }
-             | '!=' { ExtendToken(); $$ = @"!="; }
-             | '='  { ExtendToken(); $$ = @"=";  }
-             | '>=' { ExtendToken(); $$ = @">="; }
-             | '<=' { ExtendToken(); $$ = @"<="; }
-             | '<'  { ExtendToken(); $$ = @"<";  }
-             | '>'  { ExtendToken(); $$ = @">";  }
-             | '*'  { ExtendToken(); $$ = @"*";  }
-             | '/'  { ExtendToken(); $$ = @"/";  }
-             | '+'  { ExtendToken(); $$ = @"+";  }
-             | '-'  { ExtendToken(); $$ = @"-";  }
-             | '<<' { ExtendToken(); $$ = @"<<"; }
-             | '>>' { ExtendToken(); $$ = @"<<"; }
-             | '..' { ExtendToken(); $$ = @".."; }
+Operator     = '=='  { ExtendToken(); $$ = @"==";  }
+             | '!='  { ExtendToken(); $$ = @"!=";  }
+             | '='   { ExtendToken(); $$ = @"=";   }
+             | '>='  { ExtendToken(); $$ = @">=";  }
+             | '<='  { ExtendToken(); $$ = @"<=";  }
+             | '*'   { ExtendToken(); $$ = @"*";   }
+             | '/'   { ExtendToken(); $$ = @"/";   }
+             | '+'   { ExtendToken(); $$ = @"+";   }
+             | '-'   { ExtendToken(); $$ = @"-";   }
+             | '<<'  { ExtendToken(); $$ = @"<<";  }
+             | '>>'  { ExtendToken(); $$ = @"<<";  }
+             | '<'   { ExtendToken(); $$ = @"<";   }
+             | '>'   { ExtendToken(); $$ = @">";   }
+             | '..'  { ExtendToken(); $$ = @"..";  }
+             | '^'   { ExtendToken(); $$ = @"^";   }
+             | '[]=' { ExtendToken(); $$ = @"[]="; }
+             | '[]'  { ExtendToken(); $$ = @"[]";  }
+
 
 SelIdent     = Identifier | Operator
 
-Number       = (< '-'? [0-9]+ ('.' [0-9]*)? ('e'[0-9]+)? >
+Number       = (< '-'? [0-9]+ ('.' [0-9]+)? ('e'[0-9]+)? >
              | < '-'? '.' [0-9]+ ('e'[0-9]+)? > )          { ExtendToken(); $$ = [TQNodeNumber nodeWithDouble:YYNUM];     }
 Identifier   = < [a-z_][A-Za-z0-9_]* >                     { ExtendToken(); $$ = YYNSSTR;                                 }
 Constant     = < [A-Z][A-Za-z0-9_]* >                      { ExtendToken(); $$ = [TQNodeConstant nodeWithString:YYNSSTR]; }

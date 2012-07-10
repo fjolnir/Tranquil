@@ -137,6 +137,10 @@ using namespace llvm;
             case kTQOperatorConcat:
                 selector  = aProgram.llModule->getOrInsertGlobal("TQConcatOpSel", aProgram.llInt8PtrTy);
                 break;
+            case kTQOperatorExponent:
+                selector  = aProgram.llModule->getOrInsertGlobal("TQExpOpSel", aProgram.llInt8PtrTy);
+                break;
+
             default:
                 TQAssertSoft(NO, kTQGenericErrorDomain, kTQGenericError, NULL, @"Unknown binary operator");
         }
@@ -180,6 +184,8 @@ using namespace llvm;
             case kTQOperatorRShift: opStr = @">>";
             break;
             case kTQOperatorConcat: opStr = @"..";
+            break;
+            case kTQOperatorExponent: opStr = @"^";
             break;
 
             default: opStr = @"<unknown>";

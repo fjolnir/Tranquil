@@ -65,11 +65,15 @@ OBJC_SOURCES.each { |src|
     end
 }
 
+file :build_dir do
+    sh "mkdir -p #{File.dirname(__FILE__)}/Build"
+end
+
 file :tranquil => O_FILES do |t|
     sh "#{LD} #{LDFLAGS} #{LIBS} #{O_FILES} -o #{BUILD_DIR}/#{t.name}"
 end
 
-task :default => [:tranquil]
+task :default => [:build_dir, :tranquil]
 
 task :run => [:default] do
     sh "#{BUILD_DIR}/tranquil"

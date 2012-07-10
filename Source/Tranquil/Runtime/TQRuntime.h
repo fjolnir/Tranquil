@@ -92,6 +92,7 @@ extern SEL TQRShiftOpSel;
 extern SEL TQConcatOpSel;
 extern SEL TQSetterOpSel;
 extern SEL TQGetterOpSel;
+extern SEL TQExpOpSel;
 
 extern SEL TQNumberWithDoubleSel;
 extern SEL TQStringWithUTF8StringSel;

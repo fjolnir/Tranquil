@@ -4,8 +4,6 @@
 #import <Tranquil/TQObject.h>
 #import <Tranquil/TQBatching.h>
 
-@class TQRange;
-
 @interface TQNumber : TQObject {
     @public
     double _value;
@@ -18,8 +16,11 @@
 - (TQNumber *)add:(TQNumber *)b;
 - (TQNumber *)subtract:(TQNumber *)b;
 - (TQNumber *)negate;
+- (TQNumber *)ceil;
+- (TQNumber *)floor;
 - (TQNumber *)multiply:(TQNumber *)b;
 - (TQNumber *)divideBy:(TQNumber *)b;
+- (TQNumber *)pow:(TQNumber *)b;
 
 - (id)times:(id (^)())block;
 

@@ -1,9 +1,5 @@
-max = { a, b |
-    if (a > b) ^a else ^b
-}
-min = { a, b |
-    if (a < b) ^a else ^b
-}
+max = { a, b | if (a > b) ^a else ^b }
+min = { a, b | if (a < b) ^a else ^b }
 
 #NSPointerArray {
     - fold: lambda {

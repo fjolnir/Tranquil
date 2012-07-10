@@ -18,6 +18,7 @@ self   \ Available inside method blocks
 super  \ Available inside method blocks as a message receiver
        \ that calls methods as defined by the current class's superclass
 ...    \ Array of passed variadic arguments
+valid  \ Represents non-nilness, for use in cases where the actual object is not important
 
 \ Variable assignment
 a = b \ Variables are local in scope
@@ -31,11 +32,11 @@ aDict  = #{ key => value, anotherKey => value } \ Initializes a dictionary
 \ Blocks
 
 aBlock = { ..body.. } \ A block. Defines scope
-aBlockWith = { arg0, arg1 | ..body.. } \ A block that takes two arguments
-                              \ a block with it as it's body should be passed
+aBlockWith = { arg0, arg1 | ^arg0 } \ A block that takes two arguments
+                                    \ and returns it's first argument as-is
 aBlock = { arg=123 |  ..statements.. } \ Assignment in the argument list indicates a default value
-                                 \ for that argument
-`expression` \ Equivalent to {^expression}
+                                       \ for that argument
+`expression` \ Equivalent to { ^expression }
 
 
 \ Block calls
@@ -100,8 +101,10 @@ A block is ..a block of code. It is either used as a function or a method. (A me
 
 By default a block returns `nil`. To return a value the `^` symbol is prefixed to the expression to return.
 
+All arguments are optional and if no default value is specified, `nil` is used.
+
 ### Variadic blocks
-If in a block one wishes to accept an arbitrary number of argument, he can use the special '...' argument to do so, it is an array of arguments which you can iterate over. (... must be the last argument specified)
+If in a block one wishes to accept an arbitrary number of argument, he can use the special '...' argument to do so, its value is an array of arguments which you can iterate over. (... must be the last argument specified)
 
 ```
 variadicBlock = { ... |
@@ -137,7 +140,7 @@ When a block is called as a result of a message to an object (object method: 123
 
 ### Operator methods
 
-Operator methods are methods that follow this calling syntax: a <operator> b. The available ones are:
+Operator methods are methods for which the colon after the method name is optional (a <operator> b as opposed to a <operator>: b). The available ones are:
 
 ```
 Meaning          |  Operator  | Resulting message    Notes
@@ -153,21 +156,45 @@ Less than        |  <         | <:                 |
 Greater than     |  >         | >:                 |
 Lesser or equal  |  <=        | <=:                |
 Greater or equal |  >=        | >=:                |
+Left shift       |  <<        | <<:                |
+Right shift      |  >>        | >>:                |
+Concatenation    |  ..        | ..:                |
+Exponent         |  ^         | ^:                 |
 Index            |  []        | []:                | Postfix operator (a[b])
 Index assign     |  []=       | []=::              | Postfix operator (a[b] = c)
-
-\ Example
-#Klass {
-	- +: b {
-		^self plus: b
-	},
-	- -: b {
-		^self subtract: b
-	}
-}
-
-var = instanceOfKlass - something \ Equivalent to: var = instanceOfKlass subtract:something
 ```
+#### Example
+
+	#Klass {
+		- +: b {
+			^self plus: b
+		},
+		- -: b {
+			^self subtract: b
+		}
+	}
+	
+	var = instanceOfKlass - something \ Equivalent to: var = instanceOfKlass subtract:something
+	
+	#NSString {
+		- ..: b `self stringByAppendingString: b`
+	}
+	#TQNumber {
+		- ..: b {
+			multiplier = 10^(log(10, b) ceil) \ This is pseudo code, the log() block is not implemented
+			^self*multiplier + b
+		}
+	}
+	print("%@ %@", "foo".."bar", 1..2) \ outputs 'foobar 12'
+	
+
+### Operator assignments
+
+The +,-,* and / operators can also be used in assignment form, that is:
+
+	a += b \ Shorthand for a = a+b
+	a *= b \ Shorthand for a = a*b
+	\ etc..
 
 ## Examples
 
@@ -204,8 +231,8 @@ fib = fibonacci(50) \ Calculate the 50th number in the fibonacci sequence
 			(self map: mapLambda) reduce: reduceLambda
 		}
 	
-		- next     `nil` \ Implemented in subclasses
-		- isEmpty? `1` \ Implemented in subclasses
+		- next     `nil`   \ Implemented in subclasses
+		- isEmpty? `valid` \ Implemented in subclasses
 	}
 	
 	sum = #[1,2,3] reduce:`n, sum=0| sum + n`

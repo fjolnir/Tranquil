@@ -26,6 +26,7 @@ SEL TQRShiftOpSel;
 SEL TQConcatOpSel;
 SEL TQSetterOpSel;
 SEL TQGetterOpSel;
+SEL TQExpOpSel;
 
 SEL TQNumberWithDoubleSel;//        = @selector(numberWithDouble:);
 SEL TQStringWithUTF8StringSel;
@@ -162,6 +163,9 @@ void TQSetValueForKey(id obj, char *key, id value)
 {
     if(!obj)
         return;
+    if(TQObjectIsStackBlock(value))
+        value = [[value copy] autorelease];
+
     objc_property_t property = class_getProperty(object_getClass(obj), key);
     if(property) {
         // TODO: Use the type encoding to unbox values if necessary
@@ -176,8 +180,12 @@ void TQSetValueForKey(id obj, char *key, id value)
             objc_msgSend(obj, sel_registerName(setterName), value);
         } else {
             // Custom setter
+            char *setterNameEnd = strstr(setterNameLoc, ",");
             char setterName[_accessorNameLen(setterNameLoc)];
-            strcpy(setterName, setterNameLoc);
+            if(setterNameEnd)
+                strncpy(setterName, setterNameLoc, setterNameEnd - setterNameLoc);
+            else
+                strcpy(setterName, setterNameLoc);
             objc_msgSend(obj, sel_registerName(setterName), value);
         }
     } else {
@@ -285,6 +293,7 @@ void TQInitializeRuntime()
     TQConcatOpSel                = sel_registerName("..:");
     TQGetterOpSel                = sel_registerName("[]:");
     TQSetterOpSel                = sel_registerName("[]=::");
+    TQExpOpSel                   = sel_registerName("^:");
     
     TQNumberWithDoubleSel        = @selector(numberWithDouble:);
     TQStringWithUTF8StringSel    = @selector(stringWithUTF8String:);
@@ -296,7 +305,7 @@ void TQInitializeRuntime()
 
     TQAugmentClassWithOperators([NSObject class]);
 
-    // Variation of [] for collections
+    // Operators for collections
     IMP imp;
     imp = imp_implementationWithBlock(^(id a, id key)         { return _objc_msgSend_hack2(a, @selector(objectForKeyedSubscript:), key); });
     class_addMethod([NSDictionary class], TQGetterOpSel, imp, "@@:@");
@@ -321,6 +330,15 @@ void TQInitializeRuntime()
     class_addMethod([NSMutableArray class], TQSetterOpSel, imp, "@@:@");
     class_addMethod([NSPointerArray class], TQSetterOpSel, imp, "@@:@");
 
+    // <<&>>
+    imp = class_getMethodImplementation([NSPointerArray class], @selector(push:));
+    class_addMethod([NSPointerArray class], TQLShiftOpSel, imp, "@@:@");
+    imp = imp_implementationWithBlock(^(id a, id b)   {
+        _objc_msgSend_hack3i(a, @selector(insertPointer:atIndex:), b, 0);
+        return a;
+    });
+    class_addMethod([NSPointerArray class], TQRShiftOpSel, imp, "@@:@");
+    
 
     // Operators for NS(Mutable)String
     imp = class_getMethodImplementation([NSString class], @selector(stringByAppendingString:));
@@ -362,5 +380,5 @@ void TQInitializeRuntime()
     class_replaceMethod(TQNumberClass, TQGTOpSel,  class_getMethodImplementation(TQNumberClass, @selector(isGreater:)),        "@@:@");
     class_replaceMethod(TQNumberClass, TQLTEOpSel, class_getMethodImplementation(TQNumberClass, @selector(isLesserOrEqual:)),  "@@:@");
     class_replaceMethod(TQNumberClass, TQGTEOpSel, class_getMethodImplementation(TQNumberClass, @selector(isGreaterOrEqual:)), "@@:@");
-
+    class_replaceMethod(TQNumberClass, TQExpOpSel, class_getMethodImplementation(TQNumberClass, @selector(pow:)), "@@:@");
 }

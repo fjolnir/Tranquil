@@ -1,7 +1,7 @@
 #NSPointerArray {
 	- each: lambda {
 		i = 0
-		count = self tqCount
+		count = self size
 		until (i >= count) {
 			lambda(self[i])
 			++i

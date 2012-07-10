@@ -52,9 +52,18 @@ extern id _objc_msgSend_hack2(id, SEL, id)     asm("_objc_msgSend");
     if(isa != object_getClass(b)) return nil;
     return numberWithDoubleImp(isa, @selector(numberWithDouble:), _value - b->_value);
 }
+
 - (TQNumber *)negate
 {
     return numberWithDoubleImp(isa, @selector(numberWithDouble:), -_value);
+}
+- (TQNumber *)ceil
+{
+    return numberWithDoubleImp(isa, @selector(numberWithDouble:), ceil(_value));
+}
+- (TQNumber *)floor
+{
+    return numberWithDoubleImp(isa, @selector(numberWithDouble:), floor(_value));
 }
 
 - (TQNumber *)multiply:(TQNumber *)b
@@ -67,6 +76,13 @@ extern id _objc_msgSend_hack2(id, SEL, id)     asm("_objc_msgSend");
     if(isa != object_getClass(b)) return nil;
     return numberWithDoubleImp(isa, @selector(numberWithDouble:), _value / b->_value);
 }
+
+- (TQNumber *)pow:(TQNumber *)b
+{
+    if(isa != object_getClass(b)) return nil;
+    return numberWithDoubleImp(isa, @selector(numberWithDouble:), pow(_value, b->_value));
+}
+
 
 - (TQNumber *)isGreater:(TQNumber *)b
 {
