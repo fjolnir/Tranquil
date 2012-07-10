@@ -14,4 +14,4 @@ The following will create a binary called `tranquil` in the `Build` folder.
 
 ## Learning the language
 
-To learn Tranquil you should read the [specification](https://github.com/fjolnir/Tranquil/blob/master/Docs/Tranquil%20Spec.md)
+To learn Tranquil you should read the [specification](https://github.com/fjolnir/Tranquil/blob/master/Docs/Tranquil%20Spec.md).
