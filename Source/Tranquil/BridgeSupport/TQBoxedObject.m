@@ -16,13 +16,11 @@ static int _TQRetTypeAssocKey, _TQArgTypesAssocKey;
 struct TQBoxedBlockLiteral;
 struct TQBoxedBlockDescriptor {
     unsigned long int reserved; // NULL
-    unsigned long int size;  // sizeof(struct TQBoxedBlockLiteral)
-    int32_t numArgs;
-    BOOL isVariadic;
+    unsigned long int size;     // sizeof(struct TQBoxedBlockLiteral)
 };
 struct TQBoxedBlockLiteral {
     void *isa; // _NSConcreteStackBlock
-    int flags; // TQ_BLOCK_IS_TRANQUIL_BLOCK
+    int flags;
     int reserved;
     void *invoke;
     struct TQBoxedBlockDescriptor *descriptor;
@@ -38,8 +36,6 @@ static id __wrapperBlock_invoke(struct TQBoxedBlockLiteral *__blk, ...);
 static struct TQBoxedBlockDescriptor boxedBlockDescriptor = {
     0,
     sizeof(struct TQBoxedBlockLiteral),
-    0,
-    YES
 };
 
 @interface TQBoxedObject ()
