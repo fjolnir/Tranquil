@@ -476,16 +476,16 @@ id __wrapperBlock_invoke(struct TQBoxedBlockLiteral *__blk, ...)
         ffiArgValues[0] = __blk->funPtr;
 
     for(int i = isBlock, ofs = 0; i < __blk->cif->nargs; ++i) {
-        nextType = NSGetSizeAndAlignment(currType, NULL, NULL);
         arg = va_arg(argList, id);
         [TQBoxedObject unbox:arg to:ffiArgs+ofs usingType:currType];
         ffiArgValues[i] = ffiArgs+ofs;
 
         ofs += __blk->cif->arg_types[i]->size;
-        currType = nextType;
+        currType = NSGetSizeAndAlignment(currType, NULL, NULL);
     }
     va_end(argList);
     ffi_call(__blk->cif, FFI_FN(funPtr), ffiRet, ffiArgValues);
+
     // retain/autorelease to move the pointer onto the heap
     return [[[TQBoxedObject box:ffiRet withType:retType] retain] autorelease];
 }
