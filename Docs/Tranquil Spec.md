@@ -11,14 +11,14 @@ if
 else
 while
 until
-break
-skip
+break  \ Prematurely terminates a loop
+skip   \ Skips to the end of the current iteration of a loop
 nil    \ Represents 'nothing'
 self   \ Available inside method blocks
 super  \ Available inside method blocks as a message receiver
        \ that calls methods as defined by the current class's superclass
 ...    \ Array of passed variadic arguments
-valid  \ Represents non-nilness, for use in cases where the actual object is not important
+valid  \ Represents non-nilness, for use in cases where the actual object value is not of concern
 
 \ Variable assignment
 a = b \ Variables are local in scope
@@ -47,7 +47,7 @@ aBlock(something, somethingElse) \ Calls a block with a two arguments
 \ Flow control
  
 if ..expression.. {      \ Executes the passed literal block if the expression is non-nil
-	..statements..
+	..statements..       \ (The braces can be omitted if the block contains only one statement)
 } else if ..expression.. {
 	..statements..
 } else {
@@ -92,11 +92,11 @@ a = obj#member
 
 \ Regular expressions
 regexp = /[.]*/  \ Regular expressions are delimited by forward slashes
-"foobar" matches? /[foo...]/
+/[foo...]/ matches: "foobar"
 
 \ String interpolation
-a = "variable"
-b = "A string with an embedded #{a}." \ Evaluates to "A string with an embedded variable."
+a = "expression"
+b = "A string with an embedded #{a}." \ Evaluates to "A string with an embedded expression."
 ```
 
 ## Blocks
@@ -123,6 +123,10 @@ variadicBlock("foo", "bar", "baz")
 \ bar
 \ baz
 ```
+
+## Flow Control
+
+Flow control blocks are different from standard blocks in that they are statements only, and can therefore not be used as expressions. They also execute within the parent block (Unlike standard blocks which have their own execution context) which means that if one returns from  inside a flow control block, the parent block is returned from.
 
 ## Objects
 
