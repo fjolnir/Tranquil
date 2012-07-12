@@ -413,6 +413,7 @@ static struct TQBoxedBlockDescriptor boxedBlockDescriptor = {
         }
 
         if(ffi_prep_cif(cif, FFI_DEFAULT_ABI, numArgs, retType.ffiType, args) != FFI_OK) {
+            // TODO: be more graceful
             NSLog(@"unable to wrap block");
             exit(1);
         }
