@@ -88,6 +88,7 @@
         }
         _ffiType->elements[numFields] = NULL;
     } else
+        // TODO: handle unions by returning a type matching the largest field?
         assert(NO);
     return self;
 }
