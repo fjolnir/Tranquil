@@ -33,7 +33,7 @@ LDFLAGS = [
     '-framework Foundation',
     '-framework AppKit',
     '-all_load',
-    '-lxml2',
+    '-lxml2 -lffi',
 ].join(' ')
 
 LIBS = ['-framework Foundation'].join(' ')
