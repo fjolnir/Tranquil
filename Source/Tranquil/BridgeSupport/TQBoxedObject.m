@@ -1,7 +1,6 @@
 #import "TQBoxedObject.h"
 #import "bs.h"
 #import "TQFFIType.h"
-#import "../Runtime/TQRuntime.h"
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
@@ -455,7 +454,7 @@ id __wrapperBlock_invoke(struct TQBoxedBlockLiteral *__blk, ...)
     void *funPtr = __blk->funPtr;
     BOOL isBlock = *(type++) == _C_ID;
     if(isBlock)
-        funPtr = ((struct TQBlockLiteral *)funPtr)->invoke;
+        funPtr = ((struct TQBoxedBlockLiteral *)funPtr)->invoke;
 
     void *ffiRet = alloca(__blk->cif->rtype->size);
     const char *retType = type;
