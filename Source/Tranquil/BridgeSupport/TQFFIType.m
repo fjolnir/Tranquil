@@ -43,10 +43,14 @@
 
 + (TQFFIType *)typeWithEncoding:(const char *)aEncoding
 {
-    return [[[self alloc] initWithEncoding:aEncoding] autorelease];
+    return [self typeWithEncoding:aEncoding nextType:NULL];
+}
++ (TQFFIType *)typeWithEncoding:(const char *)aEncoding nextType:(const char **)aoNextType
+{
+    return [[[self alloc] initWithEncoding:aEncoding nextType:aoNextType] autorelease];
 }
 
-- (id)initWithEncoding:(const char *)aEncoding
+- (id)initWithEncoding:(const char *)aEncoding nextType:(const char **)aoNextType
 {
     if(!(self = [super init]))
         return nil;
@@ -54,10 +58,12 @@
     _encoding = aEncoding;
     _size = 0;
 
-    if([TQBoxedObject typeIsScalar:_encoding]) {
+    const char *next = NSGetSizeAndAlignment(_encoding, &_size, NULL);
+    if(aoNextType)
+        *aoNextType = next;
+
+    if([TQBoxedObject typeIsScalar:_encoding])
         _ffiType = [TQFFIType scalarTypeToFFIType:_encoding];
-        NSGetSizeAndAlignment(_encoding, &_size, NULL);
-    }
     else if(*_encoding == _C_STRUCT_B) {
         ffi_type type;
         _ffiType = (ffi_type*)malloc(sizeof(ffi_type));
@@ -74,13 +80,11 @@
         _ffiType->size = type.alignment = 0;
         _ffiType->elements = (ffi_type **)malloc(sizeof(ffi_type*) * numFields + 1);
 
-        NSUInteger currSize;
         for(int i = 0; i < numFields; i++) {
             TQFFIType *fieldType = [TQFFIType typeWithEncoding:fieldEncoding];
             [_referencedTypes addObject:fieldType];
             _ffiType->elements[i] = fieldType.ffiType;
-            fieldEncoding = NSGetSizeAndAlignment(fieldEncoding, &currSize, NULL);
-            _size += currSize;
+            fieldEncoding = NSGetSizeAndAlignment(fieldEncoding, NULL, NULL);
         }
         _ffiType->elements[numFields] = NULL;
     } else

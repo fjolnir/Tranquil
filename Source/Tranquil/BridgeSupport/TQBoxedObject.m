@@ -377,11 +377,11 @@ static struct TQBoxedBlockDescriptor boxedBlockDescriptor = {
     if(!needsWrapping) {
         initImp = BlockImp(^(TQBoxedObject *self, id *aPtr) { return *aPtr; });
     } else {
+        const char *argTypes;
         // Figure out the return type
-        TQFFIType *retType = [TQFFIType typeWithEncoding:aType+1];
+        TQFFIType *retType = [TQFFIType typeWithEncoding:aType+1 nextType:&argTypes];
 
         // And now the argument types
-        const char *argTypes = NSGetSizeAndAlignment(aType+1, NULL, NULL);
         NSUInteger numArgs = isBlock;
         if(*argTypes != _MR_C_LAMBDA_E) {
             const char *currArg = argTypes;
@@ -403,14 +403,13 @@ static struct TQBoxedBlockDescriptor boxedBlockDescriptor = {
             argSize += sizeof(void*);
         }
 
-        const char *nextType = NULL;
-        NSUInteger currArgSize;
+        TQFFIType *currTypeObj;
         for(int i = isBlock; i < numArgs; ++i) {
-            nextType = NSGetSizeAndAlignment(argTypes, &currArgSize, NULL);
-            argSize += currArgSize;
-            [argTypeObjects addObject:[TQFFIType typeWithEncoding:argTypes]];
-            args[argIdx++] = [[argTypeObjects lastObject] ffiType];
-            argTypes = nextType;
+            currTypeObj = [TQFFIType typeWithEncoding:argTypes nextType:&argTypes];
+            argSize += [currTypeObj size];
+            args[argIdx++] = [currTypeObj ffiType];
+
+            [argTypeObjects addObject:currTypeObj];
         }
 
         if(ffi_prep_cif(cif, FFI_DEFAULT_ABI, numArgs, retType.ffiType, args) != FFI_OK) {

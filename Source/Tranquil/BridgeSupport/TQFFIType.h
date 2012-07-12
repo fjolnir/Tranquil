@@ -9,5 +9,7 @@
 @property(readonly) NSUInteger size;
 + (ffi_type *)scalarTypeToFFIType:(const char *)aType;
 + (TQFFIType *)typeWithEncoding:(const char *)aEncoding;
++ (TQFFIType *)typeWithEncoding:(const char *)aEncoding nextType:(const char **)aoNextType;
+- (id)initWithEncoding:(const char *)aEncoding nextType:(const char **)aoNextType;
 @end
 
