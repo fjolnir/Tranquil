@@ -386,8 +386,8 @@ static struct TQBoxedBlockDescriptor boxedBlockDescriptor = {
         }
 
         // These two "leak". TODO: figure out how to deallocate these if the class is disposed of (Maybe allocate in the extraBytes?)
-        ffi_cif *cif = malloc(sizeof(ffi_cif));
-        ffi_type **args = malloc(sizeof(ffi_type*)*numArgs);
+        ffi_cif *cif = (ffi_cif*)malloc(sizeof(ffi_cif));
+        ffi_type **args = (ffi_type**)malloc(sizeof(ffi_type*)*numArgs);
         NSMutableArray *argTypeObjects = [NSMutableArray arrayWithCapacity:numArgs];
         NSUInteger argSize;
         argSize = 0;
@@ -465,15 +465,15 @@ id __wrapperBlock_invoke(struct TQBoxedBlockLiteral *__blk, ...)
     const char *currType, *nextType;
     currType = NSGetSizeAndAlignment(retType, NULL, NULL);
     void *ffiArgs       = alloca(__blk->argSize);
-    void **ffiArgValues = alloca(sizeof(void*) * __blk->cif->nargs);
-    void *arg;
+    void **ffiArgValues = (void**)alloca(sizeof(void*) * __blk->cif->nargs);
     if(isBlock)
         ffiArgValues[0] = __blk->funPtr;
 
+    id arg;
     for(int i = isBlock, ofs = 0; i < __blk->cif->nargs; ++i) {
         arg = va_arg(argList, id);
-        [TQBoxedObject unbox:arg to:ffiArgs+ofs usingType:currType];
-        ffiArgValues[i] = ffiArgs+ofs;
+        [TQBoxedObject unbox:arg to:(char*)ffiArgs+ofs usingType:currType];
+        ffiArgValues[i] = (char*)ffiArgs+ofs;
 
         ofs += __blk->cif->arg_types[i]->size;
         currType = NSGetSizeAndAlignment(currType, NULL, NULL);
