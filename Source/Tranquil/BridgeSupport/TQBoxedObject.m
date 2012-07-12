@@ -77,62 +77,64 @@ static struct TQBoxedBlockDescriptor boxedBlockDescriptor = {
 
 + (void)unbox:(id)aValue to:(void *)aDest usingType:(const char *)aType
 {
-    if([self typeIsScalar:aType]) {
-        switch(*aType) {
-            case _C_ID:
-            case _C_CLASS:
-                *(id*)aDest                  = aValue;
-            break;
-            case _C_SEL:
-                *(SEL*)aDest                 = NSSelectorFromString(aValue);
-            break;
-            case _C_CHARPTR:
-                *(const char **)aDest        = [(NSString *)aValue UTF8String];
-            break;
-            case _C_DBL:
-                *(double *)aDest             = [(NSNumber *)aValue doubleValue];
-            break;
-            case _C_FLT:
-                *(float *)aDest              = [(NSNumber *)aValue floatValue];
-            break;
-            case _C_INT:
-                *(int *)aDest                = [(NSNumber *)aValue intValue];
-            break;
-            case _C_SHT:
-                *(short *)aDest              = [(NSNumber *)aValue shortValue];
-            break;
-            case _C_BOOL:
-                *(BOOL *)aDest               = [(NSNumber *)aValue boolValue];
-            break;
-            case _C_LNG:
-                *(long *)aDest               = [(NSNumber *)aValue longValue];
-            break;
-            case _C_LNG_LNG:
-                *(long long *)aDest          = [(NSNumber *)aValue longLongValue];
-            break;
-            case _C_UINT:
-                *(unsigned int *)aDest       = [(NSNumber *)aValue unsignedIntValue];
-            break;
-            case _C_USHT:
-                *(unsigned short *)aDest     = [(NSNumber *)aValue unsignedShortValue];
-            break;
-            case _C_ULNG:
-                *(unsigned long *)aDest      = [(NSNumber *)aValue unsignedLongValue];
-            break;
-            case _C_ULNG_LNG:
-                *(unsigned long long *)aDest = [(NSNumber *)aValue unsignedLongLongValue];
-            break;
-            default:
-                NSLog(@"Unsupported scalar type %c!", *aType);
-                return;
-        }
-    } else {
-        assert([aValue isKindOfClass:self]);
-        NSUInteger size;
-        NSGetSizeAndAlignment(aType, &size, NULL);
-        TQBoxedObject *value = aValue;
-        assert(value->_size == size);
-        memmove(aDest, value->_ptr, size);
+    switch(*aType) {
+        case _C_ID:
+        case _C_CLASS:
+            *(id*)aDest                  = aValue;
+        break;
+        case _C_SEL:
+            *(SEL*)aDest                 = NSSelectorFromString(aValue);
+        break;
+        case _C_CHARPTR:
+            *(const char **)aDest        = [(NSString *)aValue UTF8String];
+        break;
+        case _C_DBL:
+            *(double *)aDest             = [(NSNumber *)aValue doubleValue];
+        break;
+        case _C_FLT:
+            *(float *)aDest              = [(NSNumber *)aValue floatValue];
+        break;
+        case _C_INT:
+            *(int *)aDest                = [(NSNumber *)aValue intValue];
+        break;
+        case _C_SHT:
+            *(short *)aDest              = [(NSNumber *)aValue shortValue];
+        break;
+        case _C_BOOL:
+            *(BOOL *)aDest               = [(NSNumber *)aValue boolValue];
+        break;
+        case _C_LNG:
+            *(long *)aDest               = [(NSNumber *)aValue longValue];
+        break;
+        case _C_LNG_LNG:
+            *(long long *)aDest          = [(NSNumber *)aValue longLongValue];
+        break;
+        case _C_UINT:
+            *(unsigned int *)aDest       = [(NSNumber *)aValue unsignedIntValue];
+        break;
+        case _C_USHT:
+            *(unsigned short *)aDest     = [(NSNumber *)aValue unsignedShortValue];
+        break;
+        case _C_ULNG:
+            *(unsigned long *)aDest      = [(NSNumber *)aValue unsignedLongValue];
+        break;
+        case _C_ULNG_LNG:
+            *(unsigned long long *)aDest = [(NSNumber *)aValue unsignedLongLongValue];
+        break;
+        case _C_STRUCT_B:
+        case _C_UNION_B:
+        case _MR_C_LAMBDA_B: {
+            assert([aValue isKindOfClass:self]);
+            NSUInteger size;
+            NSGetSizeAndAlignment(aType, &size, NULL);
+
+            TQBoxedObject *value = aValue;
+            assert(value->_size == size);
+            memmove(aDest, value->_ptr, size);
+        } break;
+        default:
+            NSLog(@"Tried to unbox unsupported type %c!", *aType);
+            return;
     }
 }
 
