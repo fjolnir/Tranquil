@@ -206,6 +206,8 @@ static struct TQBoxedBlockDescriptor boxedBlockDescriptor = {
         len = [self _findEndOfPair:aType start:_C_STRUCT_B end:_C_STRUCT_E] - aType + 1;
     else if(*aType == _C_UNION_B)
         len = [self _findEndOfPair:aType start:_C_UNION_B end:_C_UNION_E] - aType + 1;
+    else if(*aType == _C_ARY_B)
+        len = [self _findEndOfPair:aType start:_C_ARY_B end:_C_ARY_E] - aType + 1;
     else if(*aType == _MR_C_LAMBDA_B)
         len = [self _findEndOfPair:aType start:_MR_C_LAMBDA_B end:_MR_C_LAMBDA_E] - aType + 1;
     else if(*aType == _C_PTR) {
@@ -315,7 +317,7 @@ static struct TQBoxedBlockDescriptor boxedBlockDescriptor = {
 
         if(name) {
             class_addMethod(kls, NSSelectorFromString(name), BlockImp(fieldGetter), "@:");
-            class_addMethod(kls, NSSelectorFromString([NSString stringWithFormat:@"set%@:", [name capitalizedString]]), BlockImp(fieldSetter), "@:");
+            class_addMethod(kls, NSSelectorFromString([NSString stringWithFormat:@"set%@:", [name capitalizedString]]), BlockImp(fieldSetter), "@:@");
         }
         [fieldGetters addObject:fieldGetter];
         [fieldSetters addObject:fieldSetter];
@@ -466,22 +468,22 @@ id __wrapperBlock_invoke(struct TQBoxedBlockLiteral *__blk, ...)
 
     const char *currType, *nextType;
     currType = NSGetSizeAndAlignment(retType, NULL, NULL);
-    void *ffiArgs       = alloca(__blk->argSize);
-    void **ffiArgValues = (void**)alloca(sizeof(void*) * __blk->cif->nargs);
+    void *ffiArgs     = alloca(__blk->argSize);
+    void **ffiArgPtrs = (void**)alloca(sizeof(void*) * __blk->cif->nargs);
     if(isBlock)
-        ffiArgValues[0] = __blk->funPtr;
+        ffiArgPtrs[0] = __blk->funPtr;
 
     id arg;
     for(int i = isBlock, ofs = 0; i < __blk->cif->nargs; ++i) {
         arg = va_arg(argList, id);
         [TQBoxedObject unbox:arg to:(char*)ffiArgs+ofs usingType:currType];
-        ffiArgValues[i] = (char*)ffiArgs+ofs;
+        ffiArgPtrs[i] = (char*)ffiArgs+ofs;
 
         ofs += __blk->cif->arg_types[i]->size;
         currType = NSGetSizeAndAlignment(currType, NULL, NULL);
     }
     va_end(argList);
-    ffi_call(__blk->cif, FFI_FN(funPtr), ffiRet, ffiArgValues);
+    ffi_call(__blk->cif, FFI_FN(funPtr), ffiRet, ffiArgPtrs);
 
     // retain/autorelease to move the pointer onto the heap
     return [[[TQBoxedObject box:ffiRet withType:retType] retain] autorelease];
