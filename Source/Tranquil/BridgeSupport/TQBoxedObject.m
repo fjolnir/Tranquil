@@ -486,5 +486,6 @@ id __wrapperBlock_invoke(struct TQBoxedBlockLiteral *__blk, ...)
     }
     va_end(argList);
     ffi_call(__blk->cif, FFI_FN(funPtr), ffiRet, ffiArgValues);
-    return [TQBoxedObject box:ffiRet withType:retType];
+    // retain/autorelease to move the pointer onto the heap
+    return [[[TQBoxedObject box:ffiRet withType:retType] retain] autorelease];
 }
