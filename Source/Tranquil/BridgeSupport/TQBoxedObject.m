@@ -9,6 +9,9 @@
 #define TQBoxedObject_PREFIX "TQBoxedObject_"
 #define BlockImp imp_implementationWithBlock
 
+// To identify whether a block is a wrapper or not
+#define TQ_BLOCK_IS_WRAPPER_BLOCK (1 << 20)
+
 static int _TQRetTypeAssocKey, _TQArgTypesAssocKey, _TQFFIResourcesAssocKey;
 static void _freeRelinquishFunction(const void *item, NSUInteger (*size)(const void *item));
 
@@ -96,51 +99,32 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
 {
     switch(*aType) {
         case _C_ID:
-        case _C_CLASS:
-            *(id*)aDest                  = aValue;
-        break;
-        case _C_SEL:
-            *(SEL*)aDest                 = NSSelectorFromString(aValue);
-        break;
-        case _C_CHARPTR:
-            *(const char **)aDest        = [(NSString *)aValue UTF8String];
-        break;
-        case _C_DBL:
-            *(double *)aDest             = [(NSNumber *)aValue doubleValue];
-        break;
-        case _C_FLT:
-            *(float *)aDest              = [(NSNumber *)aValue floatValue];
-        break;
-        case _C_INT:
-            *(int *)aDest                = [(NSNumber *)aValue intValue];
-        break;
-        case _C_SHT:
-            *(short *)aDest              = [(NSNumber *)aValue shortValue];
-        break;
-        case _C_BOOL:
-            *(BOOL *)aDest               = [(NSNumber *)aValue boolValue];
-        break;
-        case _C_LNG:
-            *(long *)aDest               = [(NSNumber *)aValue longValue];
-        break;
-        case _C_LNG_LNG:
-            *(long long *)aDest          = [(NSNumber *)aValue longLongValue];
-        break;
-        case _C_UINT:
-            *(unsigned int *)aDest       = [(NSNumber *)aValue unsignedIntValue];
-        break;
-        case _C_USHT:
-            *(unsigned short *)aDest     = [(NSNumber *)aValue unsignedShortValue];
-        break;
-        case _C_ULNG:
-            *(unsigned long *)aDest      = [(NSNumber *)aValue unsignedLongValue];
-        break;
-        case _C_ULNG_LNG:
-            *(unsigned long long *)aDest = [(NSNumber *)aValue unsignedLongLongValue];
-        break;
-        case _C_STRUCT_B:
-        case _C_UNION_B:
+        case _C_CLASS:    *(id*)aDest                  = aValue;                          break;
+        case _C_SEL:      *(SEL*)aDest                 = NSSelectorFromString(aValue);    break;
+        case _C_CHARPTR:  *(const char **)aDest        = [aValue UTF8String];             break;
+        case _C_DBL:      *(double *)aDest             = [aValue doubleValue];            break;
+        case _C_FLT:      *(float *)aDest              = [aValue floatValue];             break;
+        case _C_INT:      *(int *)aDest                = [aValue intValue];               break;
+        case _C_SHT:      *(short *)aDest              = [aValue shortValue];             break;
+        case _C_BOOL:     *(BOOL *)aDest               = [aValue boolValue];              break;
+        case _C_LNG:      *(long *)aDest               = [aValue longValue];              break;
+        case _C_LNG_LNG:  *(long long *)aDest          = [aValue longLongValue];          break;
+        case _C_UINT:     *(unsigned int *)aDest       = [aValue unsignedIntValue];       break;
+        case _C_USHT:     *(unsigned short *)aDest     = [aValue unsignedShortValue];     break;
+        case _C_ULNG:     *(unsigned long *)aDest      = [aValue unsignedLongValue];      break;
+        case _C_ULNG_LNG: *(unsigned long long *)aDest = [aValue unsignedLongLongValue];  break;
+
         case _MR_C_LAMBDA_B: {
+            TQBoxedBlockLiteral *wrapperBlock = (TQBoxedBlockLiteral *)aValue;
+            if(!(wrapperBlock->flags & TQ_BLOCK_IS_WRAPPER_BLOCK)) {
+                NSLog(@"%@ is not a wrapper block", aValue);
+                return;
+            }
+            memmove(aDest, wrapperBlock->funPtr, sizeof(void*));
+        } break;
+
+        case _C_STRUCT_B:
+        case _C_UNION_B: {
             assert([aValue isKindOfClass:self]);
             NSUInteger size;
             NSGetSizeAndAlignment(aType, &size, NULL);
@@ -149,9 +133,9 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
             assert(value->_size == size);
             memmove(aDest, value->_ptr, size);
         } break;
+
         default:
             NSLog(@"Tried to unbox unsupported type %c!", *aType);
-            return;
     }
 }
 
@@ -416,7 +400,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
             // Create and return the wrapper block
             struct TQBoxedBlockLiteral blk = {
                 &_NSConcreteStackBlock,
-                0, 0,
+                TQ_BLOCK_IS_WRAPPER_BLOCK, 0,
                 (void*)&__wrapperBlock_invoke,
                 &boxedBlockDescriptor,
                 isBlock ? (id)*aPtr : (id)aPtr,

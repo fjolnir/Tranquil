@@ -1,7 +1,7 @@
 #import <Tranquil/TQObject.h>
 #import <Tranquil/TQProgram.h>
 #import <Tranquil/Runtime/TQRuntime.h>
-#import <Tranquil/Runtime/TQOperators.h>
+#import <Tranquil/Runtime/NSNumber+TQOperators.h>
 #import <Tranquil/Runtime/TQNumber.h>
 #import <Tranquil/Runtime/TQValidObject.h>
 #import <Tranquil/CodeGen/TQNode.h>

@@ -6,7 +6,7 @@ using namespace llvm;
 
 @implementation TQNodeConstant
 
-+ (TQNodeConstant *)nodeWithString:(NSString *)aStr{ return (TQNodeConstant *)[super nodeWithString:aStr]; }
++ (TQNodeConstant *)nodeWithString:(NSMutableString *)aStr{ return (TQNodeConstant *)[super nodeWithString:aStr]; }
 
 - (NSString *)description
 {
@@ -15,8 +15,6 @@ using namespace llvm;
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
 {
-    llvm::IRBuilder<> *builder = aBlock.builder;
-    Value *className = builder->CreateGlobalStringPtr([self.value UTF8String]);
-    return builder->CreateCall(aProgram.objc_getClass, className);
+    return aBlock.builder->CreateCall(aProgram.objc_getClass, [aProgram getGlobalStringPtr:self.value inBlock:aBlock]);
 }
 @end

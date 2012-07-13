@@ -49,8 +49,8 @@ using namespace llvm;
 @synthesize llBlockDescriptorTy=_blockDescriptorTy, llBlockLiteralType=_blockLiteralType;
 @synthesize objc_msgSend=_func_objc_msgSend, objc_msgSendSuper=_func_objc_msgSendSuper,
     objc_storeWeak=_func_objc_storeWeak, objc_loadWeak=_func_objc_loadWeak, objc_allocateClassPair=_func_objc_allocateClassPair,
-    objc_registerClassPair=_func_objc_registerClassPair, objc_destroyWeak=_func_objc_destroyWeak, class_addIvar=_func_class_addIvar,
-    class_replaceMethod=_func_class_replaceMethod, sel_registerName=_func_sel_registerName, sel_getName=_func_sel_getName,
+    objc_registerClassPair=_func_objc_registerClassPair, objc_destroyWeak=_func_objc_destroyWeak,
+    class_replaceMethod=_func_class_replaceMethod, sel_registerName=_func_sel_registerName,
     objc_getClass=_func_objc_getClass, TQRetainObject=_func_TQRetainObject, TQReleaseObject=_func_TQReleaseObject,
     _Block_copy=_func__Block_copy, _Block_object_assign=_func__Block_object_assign,
     _Block_object_dispose=_func__Block_object_dispose, imp_implementationWithBlock=_func_imp_implementationWithBlock,
@@ -198,7 +198,6 @@ using namespace llvm;
 
     DEF_EXTERNAL_FUN(objc_allocateClassPair, ft_i8Ptr__i8Ptr_i8Ptr_sizeT)
     DEF_EXTERNAL_FUN(objc_registerClassPair, ft_void__i8Ptr)
-    //DEF_EXTERNAL_FUN(class_addIvar, ft_i8__i8Ptr_i8Ptr_sizeT_i8_i8Ptr)
     DEF_EXTERNAL_FUN(class_replaceMethod, ft_i8__i8Ptr_i8Ptr_i8Ptr_i8Ptr)
     DEF_EXTERNAL_FUN(imp_implementationWithBlock, ft_i8Ptr__i8Ptr)
     DEF_EXTERNAL_FUN(object_getClass, ft_i8Ptr__i8Ptr)
@@ -211,7 +210,6 @@ using namespace llvm;
     DEF_EXTERNAL_FUN(TQReleaseObject, ft_void__i8Ptr)
     DEF_EXTERNAL_FUN(TQAutoreleaseObject, ft_i8Ptr__i8Ptr);
     DEF_EXTERNAL_FUN(sel_registerName, ft_i8Ptr__i8Ptr)
-    //DEF_EXTERNAL_FUN(sel_getName, ft_i8Ptr__i8Ptr)
     DEF_EXTERNAL_FUN(objc_getClass, ft_i8Ptr__i8Ptr)
     DEF_EXTERNAL_FUN(_Block_copy, ft_i8Ptr__i8Ptr);
     DEF_EXTERNAL_FUN(_Block_object_assign, ft_void__i8Ptr_i8Ptr_int);

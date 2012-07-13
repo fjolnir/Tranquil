@@ -359,15 +359,21 @@ void TQInitializeRuntime()
 
     // Add optimized operators to TQNumber
     // ==
-    imp = imp_implementationWithBlock(^(TQNumber *a, TQNumber *b) {
-        return object_getClass(a) == object_getClass(b) && a->_value == b->_value ? TQValid : nil;
+    imp = imp_implementationWithBlock(^(TQNumber *a, id b) {
+        if(!b)
+            return (id)nil;
+        else if(object_getClass(a) != object_getClass(b))
+            return a->_value == [b doubleValue] ? (id)nil : (id)TQValid;
+        return a->_value == ((TQNumber*)b)->_value ? (id)TQValid : nil;
     });
     class_replaceMethod(TQNumberClass, TQEqOpSel, imp, "@@:@");
     // !=
-    imp = imp_implementationWithBlock(^(TQNumber *a, TQNumber *b) {
-        if(object_getClass(a) != object_getClass(b))
+    imp = imp_implementationWithBlock(^(TQNumber *a, id b) {
+        if(!b)
             return (id)nil;
-        return (a->_value != b->_value) ? nil : (id)TQValid;
+        else if(object_getClass(a) != object_getClass(b))
+            return a->_value != [b doubleValue] ? (id)nil : (id)TQValid;
+        return (a->_value != ((TQNumber*)b)->_value) ? nil : (id)TQValid;
     });
     class_replaceMethod(TQNumberClass, TQNeqOpSel, imp, "@@:@");
 
