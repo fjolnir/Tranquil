@@ -9,7 +9,8 @@
 #define TQBoxedObject_PREFIX "TQBoxedObject_"
 #define BlockImp imp_implementationWithBlock
 
-static int _TQRetTypeAssocKey, _TQArgTypesAssocKey;
+static int _TQRetTypeAssocKey, _TQArgTypesAssocKey, _TQFFIResourcesAssocKey;
+static void _freeRelinquishFunction(const void *item, NSUInteger (*size)(const void *item));
 
 // Used to wrap blocks that take or return non-objects
 struct TQBoxedBlockLiteral;
@@ -153,6 +154,9 @@ static struct TQBoxedBlockDescriptor boxedBlockDescriptor = {
 }
 - (void)_moveValueToHeap
 {
+    if(_isOnHeap)
+        return;
+
     void *stackAddr = _ptr;
     _ptr = malloc(_size);
     memmove(_ptr, stackAddr, _size);
@@ -163,6 +167,13 @@ static struct TQBoxedBlockDescriptor boxedBlockDescriptor = {
 {
     id ret = [super retain];
     [self _moveValueToHeap];
+    return ret;
+}
+
+- (id)copyWithZone:(NSZone *)aZone
+{
+    TQBoxedObject *ret = [[[self class] allocWithZone:aZone] initWithPtr:_ptr];
+    [ret _moveValueToHeap];
     return ret;
 }
 
@@ -330,9 +341,6 @@ static struct TQBoxedBlockDescriptor boxedBlockDescriptor = {
         fieldType = nextType;
     }
 
-    // Persistent immutable copies shared amongst instances
-    fieldGetters = [fieldGetters copy];
-    fieldSetters = [fieldSetters copy];
     IMP subscriptGetterImp = BlockImp(^(id self, NSInteger idx) {
         id (^getter)(id) = [fieldGetters objectAtIndex:idx];
         return getter(self);
@@ -389,7 +397,6 @@ static struct TQBoxedBlockDescriptor boxedBlockDescriptor = {
                 ++numArgs;
         }
 
-        // These two "leak". TODO: figure out how to deallocate these if the class is disposed of (Maybe allocate in the extraBytes?)
         ffi_cif *cif = (ffi_cif*)malloc(sizeof(ffi_cif));
         ffi_type **args = (ffi_type**)malloc(sizeof(ffi_type*)*numArgs);
         NSMutableArray *argTypeObjects = [NSMutableArray arrayWithCapacity:numArgs];
@@ -418,10 +425,6 @@ static struct TQBoxedBlockDescriptor boxedBlockDescriptor = {
         }
 
         initImp = BlockImp(^(TQBoxedObject *self, id *aPtr) {
-            // Hold on to these guys:
-            objc_setAssociatedObject(self, &_TQRetTypeAssocKey, retType, OBJC_ASSOCIATION_RETAIN);
-            objc_setAssociatedObject(self, &_TQArgTypesAssocKey, argTypeObjects, OBJC_ASSOCIATION_RETAIN);
-
             // Create and return the wrapper block
             struct TQBoxedBlockLiteral blk = {
                 &_NSConcreteStackBlock,
@@ -435,6 +438,17 @@ static struct TQBoxedBlockDescriptor boxedBlockDescriptor = {
             };
             return [[(id)&blk copy] autorelease];
         });
+
+        // Hold on to these guys for the life of the class:
+        objc_setAssociatedObject(kls, &_TQRetTypeAssocKey, retType, OBJC_ASSOCIATION_RETAIN);
+        objc_setAssociatedObject(kls, &_TQArgTypesAssocKey, argTypeObjects, OBJC_ASSOCIATION_RETAIN);
+        NSPointerFunctions *pointerFuns = [NSPointerFunctions pointerFunctionsWithOptions:NSPointerFunctionsOpaqueMemory|NSPointerFunctionsOpaquePersonality];
+        pointerFuns.relinquishFunction = &_freeRelinquishFunction;
+
+        NSPointerArray *ffiResArr = [NSPointerArray  pointerArrayWithPointerFunctions:pointerFuns];
+        [ffiResArr addPointer:cif];
+        [ffiResArr addPointer:args];
+        objc_setAssociatedObject(kls, &_TQFFIResourcesAssocKey, argTypeObjects, OBJC_ASSOCIATION_RETAIN);
     }
     class_addMethod(kls, @selector(initWithPtr:), initImp, "@:^v");
 
@@ -457,8 +471,6 @@ id __wrapperBlock_invoke(struct TQBoxedBlockLiteral *__blk, ...)
     const char *type = __blk->type;
     void *funPtr = __blk->funPtr;
     BOOL isBlock = *(type++) == _C_ID;
-    if(isBlock)
-        funPtr = ((struct TQBoxedBlockLiteral *)funPtr)->invoke;
 
     void *ffiRet = alloca(__blk->cif->rtype->size);
     const char *retType = type;
@@ -470,8 +482,10 @@ id __wrapperBlock_invoke(struct TQBoxedBlockLiteral *__blk, ...)
     currType = NSGetSizeAndAlignment(retType, NULL, NULL);
     void *ffiArgs     = alloca(__blk->argSize);
     void **ffiArgPtrs = (void**)alloca(sizeof(void*) * __blk->cif->nargs);
-    if(isBlock)
-        ffiArgPtrs[0] = __blk->funPtr;
+    if(isBlock) {
+        ffiArgPtrs[0] = funPtr;
+        funPtr = ((struct TQBoxedBlockLiteral *)funPtr)->invoke;
+    }
 
     id arg;
     for(int i = isBlock, ofs = 0; i < __blk->cif->nargs; ++i) {
@@ -487,4 +501,9 @@ id __wrapperBlock_invoke(struct TQBoxedBlockLiteral *__blk, ...)
 
     // retain/autorelease to move the pointer onto the heap
     return [[[TQBoxedObject box:ffiRet withType:retType] retain] autorelease];
+}
+
+void _freeRelinquishFunction(const void *item, NSUInteger (*size)(const void *item))
+{
+    free((void*)item);
 }
