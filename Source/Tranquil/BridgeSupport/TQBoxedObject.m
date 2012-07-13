@@ -280,7 +280,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     }
 
     Class kls = objc_allocateClassPair(superClass, aClassName, 0);
-    class_addMethod(kls->isa, @selector(box:), initImp, "@:*");
+    class_addMethod(kls->isa, @selector(box:), initImp, "@:^v");
 
     return kls;
 }
@@ -334,20 +334,20 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
         return getter(self);
     });
     const char *subscrGetterType = [[NSString stringWithFormat:@"@:%s", @encode(NSInteger)] UTF8String];
-    class_replaceMethod(kls, @selector(objectAtIndexedSubscript:), subscriptGetterImp, subscrGetterType);
+    class_addMethod(kls, @selector(objectAtIndexedSubscript:), subscriptGetterImp, subscrGetterType);
     IMP subscriptSetterImp = BlockImp(^(id self, id value, NSInteger idx) {
         id (^setter)(id, id) = [fieldSetters objectAtIndex:idx];
         return setter(self, value);
     });
     const char *subscrSetterType = [[NSString stringWithFormat:@"@:@%s", @encode(NSInteger)] UTF8String];
-    class_replaceMethod(kls, @selector(setObject:atIndexedSubscript:), subscriptSetterImp, subscrSetterType);
+    class_addMethod(kls, @selector(setObject:atIndexedSubscript:), subscriptSetterImp, subscrSetterType);
 
     IMP initImp = BlockImp(^(TQBoxedObject *self, void *aPtr) {
         self->_ptr  = aPtr;
         self->_size = size;
         return self;
     });
-    class_addMethod(kls, @selector(initWithPtr:), initImp, "@:*");
+    class_addMethod(kls, @selector(initWithPtr:), initImp, "@:^v");
 
     return kls;
 }
