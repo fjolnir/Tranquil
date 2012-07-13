@@ -38,6 +38,22 @@ static struct TQBoxedBlockDescriptor boxedBlockDescriptor = {
     sizeof(struct TQBoxedBlockLiteral),
 };
 
+// Boxing imps
+static id _box_C_ID_imp(TQBoxedObject *self, SEL _cmd, id *aPtr);
+static id _box_C_SEL_imp(TQBoxedObject *self, SEL _cmd, SEL *aPtr);
+static id _box_C_CHARPTR_imp(TQBoxedObject *self, SEL _cmd, const char *aPtr);
+static id _box_C_DBL_imp(TQBoxedObject *self, SEL _cmd, double *aPtr);
+static id _box_C_FLT_imp(TQBoxedObject *self, SEL _cmd, float *aPtr);
+static id _box_C_INT_imp(TQBoxedObject *self, SEL _cmd, int *aPtr);
+static id _box_C_SHT_imp(TQBoxedObject *self, SEL _cmd, short *aPtr);
+static id _box_C_BOOL_imp(TQBoxedObject *self, SEL _cmd, _Bool *aPtr);
+static id _box_C_LNG_imp(TQBoxedObject *self, SEL _cmd, long *aPtr);
+static id _box_C_LNG_LNG_imp(TQBoxedObject *self, SEL _cmd, long long *aPtr);
+static id _box_C_UINT_imp(TQBoxedObject *self, SEL _cmd, unsigned int *aPtr);
+static id _box_C_USHT_imp(TQBoxedObject *self, SEL _cmd, unsigned short *aPtr);
+static id _box_C_ULNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long *aPtr);
+static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long *aPtr);
+
 @interface TQBoxedObject ()
 + (NSString *)_classNameForType:(const char *)aType;
 + (Class)_prepareAggregate:(const char *)aClassName withType:(const char *)aType;
@@ -243,48 +259,20 @@ static struct TQBoxedBlockDescriptor boxedBlockDescriptor = {
     Class superClass = self;
     switch(*aType) {
         case _C_ID:
-        case _C_CLASS:
-            initImp = BlockImp(^(TQBoxedObject *self, id *aPtr)                 { return *aPtr; });
-        break;
-        case _C_SEL:
-            initImp = BlockImp(^(TQBoxedObject *self, SEL *aPtr)                { return NSStringFromSelector(*aPtr); });
-        break;
-        case _C_CHARPTR:
-            initImp = BlockImp(^(TQBoxedObject *self, const char *aPtr)         { return @(*aPtr); });
-        break;
-        case _C_DBL:
-            initImp = BlockImp(^(TQBoxedObject *self, double *aPtr)             { return @(*aPtr); });
-        break;
-        case _C_FLT:
-            initImp = BlockImp(^(TQBoxedObject *self, float *aPtr)              { return @(*aPtr); });
-        break;
-        case _C_INT:
-            initImp = BlockImp(^(TQBoxedObject *self, int *aPtr)                { return @(*aPtr); });
-        break;
-        case _C_SHT:
-            initImp = BlockImp(^(TQBoxedObject *self, short *aPtr)              { return @(*aPtr); });
-        break;
-        case _C_BOOL:
-            initImp = BlockImp(^(TQBoxedObject *self, _Bool *aPtr)              { return @(*aPtr); });
-        break;
-        case _C_LNG:
-            initImp = BlockImp(^(TQBoxedObject *self, long *aPtr)               { return @(*aPtr); });
-        break;
-        case _C_LNG_LNG:
-            initImp = BlockImp(^(TQBoxedObject *self, long long *aPtr)          { return @(*aPtr); });
-        break;
-        case _C_UINT:
-            initImp = BlockImp(^(TQBoxedObject *self, unsigned int *aPtr)       { return @(*aPtr); });
-        break;
-        case _C_USHT:
-            initImp = BlockImp(^(TQBoxedObject *self, unsigned short *aPtr)     { return @(*aPtr); });
-        break;
-        case _C_ULNG:
-            initImp = BlockImp(^(TQBoxedObject *self, unsigned long *aPtr)      { return @(*aPtr); });
-        break;
-        case _C_ULNG_LNG:
-            initImp = BlockImp(^(TQBoxedObject *self, unsigned long long *aPtr) { return @(*aPtr); });
-        break;
+        case _C_CLASS:    initImp = (IMP)_box_C_ID_imp;       break;
+        case _C_SEL:      initImp = (IMP)_box_C_SEL_imp;      break;
+        case _C_CHARPTR:  initImp = (IMP)_box_C_CHARPTR_imp;  break;
+        case _C_DBL:      initImp = (IMP)_box_C_DBL_imp;      break;
+        case _C_FLT:      initImp = (IMP)_box_C_FLT_imp;      break;
+        case _C_INT:      initImp = (IMP)_box_C_INT_imp;      break;
+        case _C_SHT:      initImp = (IMP)_box_C_SHT_imp;      break;
+        case _C_BOOL:     initImp = (IMP)_box_C_BOOL_imp;     break;
+        case _C_LNG:      initImp = (IMP)_box_C_LNG_imp;      break;
+        case _C_LNG_LNG:  initImp = (IMP)_box_C_LNG_LNG_imp;  break;
+        case _C_UINT:     initImp = (IMP)_box_C_UINT_imp;     break;
+        case _C_USHT:     initImp = (IMP)_box_C_USHT_imp;     break;
+        case _C_ULNG:     initImp = (IMP)_box_C_ULNG_imp;     break;
+        case _C_ULNG_LNG: initImp = (IMP)_box_C_ULNG_LNG_imp; break;
 
         default:
             NSLog(@"Unsupported scalar type %c!", *aType);
@@ -382,7 +370,7 @@ static struct TQBoxedBlockDescriptor boxedBlockDescriptor = {
 
     IMP initImp;
     if(!needsWrapping) {
-        initImp = BlockImp(^(TQBoxedObject *self, id *aPtr) { return *aPtr; });
+        initImp = (IMP)_box_C_ID_imp;
     } else {
         const char *argTypes;
         // Figure out the return type
@@ -507,3 +495,20 @@ void _freeRelinquishFunction(const void *item, NSUInteger (*size)(const void *it
 {
     free((void*)item);
 }
+
+
+#pragma mark - Scalar boxing IMPs
+id _box_C_ID_imp(TQBoxedObject *self, SEL _cmd, id *aPtr)                       { return *aPtr; }
+id _box_C_SEL_imp(TQBoxedObject *self, SEL _cmd, SEL *aPtr)                     { return NSStringFromSelector(*aPtr); }
+id _box_C_CHARPTR_imp(TQBoxedObject *self, SEL _cmd, const char *aPtr)          { return @(*aPtr); }
+id _box_C_DBL_imp(TQBoxedObject *self, SEL _cmd, double *aPtr)                  { return @(*aPtr); }
+id _box_C_FLT_imp(TQBoxedObject *self, SEL _cmd, float *aPtr)                   { return @(*aPtr); }
+id _box_C_INT_imp(TQBoxedObject *self, SEL _cmd, int *aPtr)                     { return @(*aPtr); }
+id _box_C_SHT_imp(TQBoxedObject *self, SEL _cmd, short *aPtr)                   { return @(*aPtr); }
+id _box_C_BOOL_imp(TQBoxedObject *self, SEL _cmd, _Bool *aPtr)                  { return @(*aPtr); }
+id _box_C_LNG_imp(TQBoxedObject *self, SEL _cmd, long *aPtr)                    { return @(*aPtr); }
+id _box_C_LNG_LNG_imp(TQBoxedObject *self, SEL _cmd, long long *aPtr)           { return @(*aPtr); }
+id _box_C_UINT_imp(TQBoxedObject *self, SEL _cmd, unsigned int *aPtr)           { return @(*aPtr); }
+id _box_C_USHT_imp(TQBoxedObject *self, SEL _cmd, unsigned short *aPtr)         { return @(*aPtr); }
+id _box_C_ULNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long *aPtr)          { return @(*aPtr); }
+id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long *aPtr) { return @(*aPtr); }
