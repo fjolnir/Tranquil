@@ -293,9 +293,9 @@ void TQInitializeRuntime()
     TQRShiftOpSel                = sel_registerName(">>:");
     TQConcatOpSel                = sel_registerName("..:");
     TQGetterOpSel                = sel_registerName("[]:");
-    TQSetterOpSel                = sel_registerName("[]=::");
+    TQSetterOpSel                = sel_registerName("[]:=:");
     TQExpOpSel                   = sel_registerName("^:");
-    
+
     TQNumberWithDoubleSel        = @selector(numberWithDouble:);
     TQStringWithUTF8StringSel    = @selector(stringWithUTF8String:);
     TQStringWithFormatSel        = @selector(stringWithFormat:);

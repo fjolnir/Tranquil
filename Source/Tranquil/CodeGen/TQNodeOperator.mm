@@ -202,7 +202,7 @@ using namespace llvm;
     assert(_type == kTQOperatorGetter);
     IRBuilder<> *builder = aBlock.builder;
 
-    // Call []=::
+    // Call []:=:
     Value *selector  = aProgram.llModule->getOrInsertGlobal("TQSetterOpSel", aProgram.llInt8PtrTy);
     Value *key = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
     Value *settee = [_left generateCodeInProgram:aProgram block:aBlock error:aoError];

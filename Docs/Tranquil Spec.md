@@ -3,7 +3,7 @@
 ## Basic Syntax
 
 ```
-\ A backslash outside a string is a comment 
+\ A backslash outside a string is a comment
 ¥ The Yen sign can also be used (See Japanese keyboard layouts to understand why)
 
 \ Keywords
@@ -25,9 +25,10 @@ a = b \ Variables are local in scope
       \ Variables must begin with a lowercase letter, as uppercase names
       \ are reserved for classes
 
-\ Arrays & Dictionaries
-anArray = #[ a, b, c ]                          \ Initialises an array containing 3 elements
-aDict  = #{ key => value, anotherKey => value } \ Initializes a dictionary
+\ Collection literals (Arrays & Dictionaries)
+anArray = #[ a, b, c ]                           \ Initialises an array containing 3 elements
+aDict   = #{ key => value, anotherKey => value } \ Initializes a dictionary
+arrayWithSubArrays = #[1, [2], [3, 4]]           \ Embedded collection literals do not require the prepended '#'
 
 \ Blocks
 
@@ -110,19 +111,17 @@ All arguments are optional and if no default value is specified, `nil` is used.
 ### Variadic blocks
 If in a block one wishes to accept an arbitrary number of argument, he can use the special '...' argument to do so, its value is an array of arguments which you can iterate over. (... must be the last argument specified)
 
-```
-variadicBlock = { ... |
-	... each: { arg |
-		print(arg)
+	variadicBlock = { ... |
+		... each: { arg |
+			print(arg)
+		}
 	}
-}
-
-variadicBlock("foo", "bar", "baz")
-\ Outputs:
-\ foo
-\ bar
-\ baz
-```
+	
+	variadicBlock("foo", "bar", "baz")
+	\ Outputs:
+	\ foo
+	\ bar
+	\ baz
 
 ## Flow Control
 
@@ -137,14 +136,15 @@ Classes are named objects that can be instantiated.
 
 ### Inheritance
 
-```
-\ Defines a useless subclass of SuperKlass
-#Klass < SuperKlass {
-}
-```
+	\ Defines a useless subclass of SuperKlass
+	#Klass < SuperKlass {
+	}
 
 ### Self
 When a block is called as a result of a message to an object (object method: 123.) the `self` variable is implicitly set to that object. (Assigning to `self` is discouraged)
+
+### Super
+When a block is called as a result of a message to an object, the `super` keyword can be used as a message receiver to call the current object's superclass's implementation of a method (Even if the object's class has overridden it).
 
 ### Operator methods
 
@@ -169,7 +169,7 @@ Right shift      |  >>        | >>:                |
 Concatenation    |  ..        | ..:                |
 Exponent         |  ^         | ^:                 |
 Index            |  []        | []:                | Postfix operator (a[b])
-Index assign     |  []=       | []=::              | Postfix operator (a[b] = c)
+Index assign     |  []=       | []:=:              | Postfix operator (a[b] = c)
 ```
 #### Example
 
@@ -207,16 +207,16 @@ The +,-,* and / operators can also be used in assignment form, that is:
 ## Examples
 
 ### Fibonacci
-```
-fibonacci = { index, curr=0, succ=1 |
-	num = curr + succ
-	if index > 2 {
-		^fibonacci(index - 1, succ, num)
-	}
-	^num
-}
-fib = fibonacci(50) \ Calculate the 50th number in the fibonacci sequence
-```
+
+    fibonacci = { index, curr=0, succ=1 |
+        num = curr + succ
+        if index > 2 {
+            ^fibonacci(index - 1, succ, num)
+        }
+        ^num
+    }
+    fib = fibonacci(50) \ Calculate the 50th number in the fibonacci sequence
+
 
 ### Map/Reduce
 
@@ -245,4 +245,3 @@ fib = fibonacci(50) \ Calculate the 50th number in the fibonacci sequence
 	
 	sum = #[1,2,3] reduce:`n, sum=0| sum + n`
 	\ Sum now equals 0+1+2+3 = 6
-	

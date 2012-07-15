@@ -142,7 +142,7 @@ UnaryMsg     = rcvr:UnaryMsgRcvr - name:Identifier - !":"
                    $$ = PopStack();
                }
 
-KeywordMsg   = rcvr:BinMsgRcvr -
+KeywordMsg   = rcvr:KwdMsgRcvr -
                {
                     ExtendToken();
                     PushStack([TQNodeMessage nodeWithReceiver:rcvr]);
@@ -166,7 +166,7 @@ UnaryMsgRcvr = SubscriptExp
              | Literal
              | Variable
              | ParenExpr
-BinMsgRcvr   = UnaryMsg
+KwdMsgRcvr   = UnaryMsg
              | UnaryMsgRcvr
 
 SelectorPart = { PushStack([TQNodeArgument node]); }
@@ -180,6 +180,7 @@ SelectorPart = { PushStack([TQNodeArgument node]); }
                }
 MessageArg   = Call
              | UnaryMsg
+             | Equation
              | Block
              | UnaryOp
              | Nil
@@ -329,7 +330,7 @@ MethodArgs   = selIdentifier:SelIdent
                    ExtendToken();
                    $$ = PopStack();
                }
-MethodArg    = identifier:Identifier':' -- name:Identifier
+MethodArg    = identifier:SelIdent':' -- name:Identifier
                {
                    ExtendToken();
                    [StackTop addObject:[TQNodeMethodArgumentDef nodeWithName:name selectorPart:identifier]];
@@ -501,7 +502,8 @@ PropSubscr   = "#" - prop:Identifier { ExtendToken(); [StackTop addObject:prop];
 
 
 # Built-in constructors
-Array        = "#["
+Array        = "#" ArrayProto
+ArrayProto   = "["
                {
                    UpdateToken();
                    PushStack([NSMutableArray array]);
@@ -513,12 +515,18 @@ Array        = "#["
                    NSMutableArray *items = PopStack();
                    [$$ setItems:items];
                }
-ArrItem      = item:Expression
-             {
-                 [StackTop addObject:item];
-             }
+ArrItem      = (subarray:ArrayProto
+               {
+                   [StackTop addObject:subarray];
+               }
+               | item:Expression
+               {
+                   [StackTop addObject:item];
+               }
+               )
 
-Dictionary   = "#{" --
+Dictionary     = "#" DictProto
+DictProto      = "{" --
                {
                    UpdateToken();
                    PushStack([NSMapTable mapTableWithStrongToStrongObjects]);
@@ -530,11 +538,12 @@ Dictionary   = "#{" --
                    [$$ setItems:items];
 
                }
-DictItem     = key:Expression -- "=>" -- value:Expression
+DictItem     = key:DictValue -- "=>" -- value:DictValue
                {
                    ExtendToken();
                    [StackTop setObject:value forKey:key];
                }
+DictValue    = DictProto | Expression
 
 # Basic components
 Variable     = name:Identifier
@@ -555,26 +564,26 @@ Super        = 'super'              { ExtendToken(); $$ = [TQNodeSuper node]; }
 Variadic     = '...'                { ExtendToken(); $$ = [TQNodeVariable nodeWithName:@"..."]; }
 Valid        = 'valid'              { ExtendToken(); $$ = [TQNodeValid node]; }
 
-Operator     = '=='  { ExtendToken(); $$ = @"==";  }
-             | '!='  { ExtendToken(); $$ = @"!=";  }
-             | '='   { ExtendToken(); $$ = @"=";   }
-             | '>='  { ExtendToken(); $$ = @">=";  }
-             | '<='  { ExtendToken(); $$ = @"<=";  }
-             | '*'   { ExtendToken(); $$ = @"*";   }
-             | '/'   { ExtendToken(); $$ = @"/";   }
-             | '+'   { ExtendToken(); $$ = @"+";   }
-             | '-'   { ExtendToken(); $$ = @"-";   }
-             | '<<'  { ExtendToken(); $$ = @"<<";  }
-             | '>>'  { ExtendToken(); $$ = @"<<";  }
-             | '<'   { ExtendToken(); $$ = @"<";   }
-             | '>'   { ExtendToken(); $$ = @">";   }
-             | '..'  { ExtendToken(); $$ = @"..";  }
-             | '^'   { ExtendToken(); $$ = @"^";   }
-             | '[]=' { ExtendToken(); $$ = @"[]="; }
-             | '[]'  { ExtendToken(); $$ = @"[]";  }
+Operator     = '=='  { ExtendToken(); $$ = @"=="; }
+             | '!='  { ExtendToken(); $$ = @"!="; }
+             | '='   { ExtendToken(); $$ = @"=";  }
+             | '>='  { ExtendToken(); $$ = @">="; }
+             | '<='  { ExtendToken(); $$ = @"<="; }
+             | '*'   { ExtendToken(); $$ = @"*";  }
+             | '/'   { ExtendToken(); $$ = @"/";  }
+             | '+'   { ExtendToken(); $$ = @"+";  }
+             | '-'   { ExtendToken(); $$ = @"-";  }
+             | '<<'  { ExtendToken(); $$ = @"<<"; }
+             | '>>'  { ExtendToken(); $$ = @"<<"; }
+             | '<'   { ExtendToken(); $$ = @"<";  }
+             | '>'   { ExtendToken(); $$ = @">";  }
+             | '..'  { ExtendToken(); $$ = @".."; }
+             | '^'   { ExtendToken(); $$ = @"^";  }
+             | '='   { ExtendToken(); $$ = @"=";  }
+             | '[]'  { ExtendToken(); $$ = @"[]"; }
 
 
-SelIdent     = Identifier | Operator
+SelIdent     = Operator | Identifier
 
 Number       = (< '-'? [0-9]+ ('.' [0-9]+)? ('e'[0-9]+)? >
              | < '-'? '.' [0-9]+ ('e'[0-9]+)? > )          { ExtendToken(); $$ = [TQNodeNumber nodeWithDouble:YYNUM];     }
