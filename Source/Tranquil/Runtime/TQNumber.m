@@ -323,4 +323,8 @@ id TQDispatchBlock0(struct TQBlockLiteral *block) __asm("_TQDispatchBlock0");
 
 #pragma mark - Batch allocation code
 TQ_BATCH_IMPL(TQNumber)
+- (void)dealloc
+{
+    TQ_BATCH_DEALLOC
+}
 @end

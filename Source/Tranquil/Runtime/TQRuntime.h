@@ -4,6 +4,10 @@
 #import <stdarg.h>
 #import <Tranquil/Runtime/TQValidObject.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern id TQSentinel;
 extern TQValidObject *TQValid;
 
@@ -54,8 +58,8 @@ id TQAutoreleaseObject(id obj);
 id TQRetainAutoreleaseObject(id obj);
 
 // These implement support for dynamic instance variables (But use existing properties if available)
-id TQValueForKey(id obj, char *key);
 void TQSetValueForKey(id obj, char *key, id value);
+id TQValueForKey(id obj, const char *key);
 
 BOOL TQObjectIsStackBlock(id obj);
 id TQPrepareObjectForReturn(id obj);
@@ -65,6 +69,15 @@ NSPointerArray *TQVaargsToArray(va_list *items);
 Class TQGetOrCreateClass(const char *name, const char *superName);
 // Returns the superclass of the class of an object
 Class TQObjectGetSuperClass(id aObj);
+// Determines whether a method with a certain signature needs to be boxed
+BOOL TQMethodTypeRequiresBoxing(const char *encoding);
+// Unboxes an object into a buffer
+void TQUnboxObject(id object, const char *type, void *buffer);
+// Boxes a value into an object
+id TQBoxValue(void *value, const char *type);
+// Returns whether or not a struct of a given size must be returned by inserting a pointer argument in the argument list
+// as opposed to returning it by value in a register
+BOOL TQStructSizeRequiresStret(int size);
 
 // Tests objects for equality (including nil)
 id TQObjectsAreEqual(id a, id b);
@@ -100,5 +113,10 @@ extern SEL TQStringWithFormatSel;
 extern SEL TQPointerArrayWithObjectsSel;
 extern SEL TQMapWithObjectsAndKeysSel;
 extern SEL TQRegexWithPatSel;
+extern SEL TQMoveToHeapSel;
 
 extern Class TQNumberClass;
+
+#ifdef __cplusplus
+}
+#endif

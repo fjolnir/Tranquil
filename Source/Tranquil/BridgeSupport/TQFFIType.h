@@ -1,12 +1,13 @@
 #import <ffi/ffi.h>
 #import <Foundation/Foundation.h>
+#import <Tranquil/TQBatching.h>
 
 @interface TQFFIType : NSObject {
     NSMutableArray *_referencedTypes;
+    TQ_BATCH_IVARS
 }
 @property(readonly) const char *encoding;
 @property(readonly) ffi_type *ffiType;
-@property(readonly) NSUInteger size;
 + (ffi_type *)scalarTypeToFFIType:(const char *)aType;
 + (TQFFIType *)typeWithEncoding:(const char *)aEncoding;
 + (TQFFIType *)typeWithEncoding:(const char *)aEncoding nextType:(const char **)aoNextType;

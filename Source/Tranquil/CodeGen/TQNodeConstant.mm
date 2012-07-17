@@ -15,6 +15,10 @@ using namespace llvm;
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
 {
-    return aBlock.builder->CreateCall(aProgram.objc_getClass, [aProgram getGlobalStringPtr:self.value inBlock:aBlock]);
+    TQNode *bridgedNode = [aProgram.bridge entityNamed:self.value];
+    if(bridgedNode)
+        return [bridgedNode generateCodeInProgram:aProgram block:aBlock error:aoErr];
+    else
+        return aBlock.builder->CreateCall(aProgram.objc_getClass, [aProgram getGlobalStringPtr:self.value inBlock:aBlock]);
 }
 @end

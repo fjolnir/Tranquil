@@ -19,7 +19,9 @@ extern \"C\" {
     static void *underflowJmpTbl[] = { "
     (i..maxArgs).each { |j| source << "&&underflow#{j-i}"; source << ", " unless j == maxArgs }; source << " };\n"
     source << "
-    if(block->flags & TQ_BLOCK_IS_TRANQUIL_BLOCK) {
+    if(!block)
+        TQAssert(NO, @\"Tried to call nil.\");
+    else if(block->flags & TQ_BLOCK_IS_TRANQUIL_BLOCK) {
         if(block->descriptor->numArgs > #{maxArgs})
             TQAssert(NO, @\"Tranquil was compiled with support for #{maxArgs} block arguments. You tried to call a block that takes %d.\", block->descriptor->numArgs);
         else if(block->descriptor->isVariadic) {

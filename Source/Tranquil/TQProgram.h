@@ -2,12 +2,14 @@
 #define _TQ_PROGRAM_H_
 
 #include <Tranquil/CodeGen/TQNodeBlock.h>
+#include <Tranquil/BridgeSupport/TQBridgeSupport.h>
 #include <llvm/IRBuilder.h>
 #include <Foundation/NSObject.h>
 
 @interface TQProgram : NSObject
 @property(readwrite, retain) NSString *name;
 @property(readwrite, retain) TQNodeBlock *root;
+@property(readonly) TQBridgeSupport *bridge;
 @property(readwrite, assign) BOOL shouldShowDebugInfo;
 @property(readonly) llvm::Module *llModule;
 @property(readonly) llvm::IRBuilder<> *irBuilder;
@@ -43,7 +45,7 @@
     *object_getClass, *TQPrepareObjectForReturn, *TQAutoreleaseObject,
     *objc_autoreleasePoolPush, *objc_autoreleasePoolPop, *TQSetValueForKey, *TQValueForKey,
     *TQGetOrCreateClass, *TQObjectsAreEqual, *TQObjectsAreNotEqual, *TQObjectGetSuperClass,
-    *TQVaargsToArray;
+    *TQVaargsToArray, *TQBoxedMsgSend, *TQUnboxObject, *TQBoxValue;
 
 #pragma mark - Methods
 

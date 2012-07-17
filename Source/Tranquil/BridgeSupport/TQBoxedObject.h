@@ -1,6 +1,6 @@
 // Supports boxing scalar, struct, union, block & function pointer types
 // TODO: Support arrays
-#import <Foundation/Foundation.h>
+#import <Tranquil/TQObject.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
 
@@ -9,7 +9,7 @@
 
 #define TQBox(val) [TQBoxedObject box:&(val) withType:@encode(__typeof(val))]
 
-@interface TQBoxedObject : NSObject {
+@interface TQBoxedObject : TQObject {
     @protected
     void *_ptr; // Points to the boxed value
     NSUInteger _size;
@@ -26,4 +26,10 @@
 - (id)objectAtIndexedSubscript:(NSInteger)aIdx;
 - (void)setObject:(id)aValue atIndexedSubscript:(NSInteger)aIdx;
 
+- (void)moveValueToHeap;
 @end
+
+// Sends a message boxing the return value and unboxing arguments as necessary
+// WAY slower than objc_msgSend so only use this if you have a reason to believe the method may have
+// non-object parameters/return value
+id TQBoxedMsgSend(id self, SEL selector, ...);

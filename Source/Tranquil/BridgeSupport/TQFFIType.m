@@ -19,6 +19,8 @@
             return &ffi_type_sint;
         case _C_SHT:
             return &ffi_type_sshort;
+        case _C_CHR:
+            return &ffi_type_sint8;
         case _C_BOOL:
             return &ffi_type_uchar;
         case _C_LNG:
@@ -36,7 +38,8 @@
         case _C_VOID:
             return &ffi_type_void;
         default:
-            NSLog(@"Unsupported scalar type %c!", *aType);
+            [NSException raise:NSGenericException
+                        format:@"Unsupported scalar type %c!", *aType];
             return NULL;
     }
 }
@@ -54,17 +57,17 @@
 {
     if(!(self = [super init]))
         return nil;
-    _referencedTypes = [[NSMutableArray alloc] init];
     _encoding = aEncoding;
-    _size = 0;
 
-    const char *next = NSGetSizeAndAlignment(_encoding, &_size, NULL);
-    if(aoNextType)
+    if(aoNextType) {
+        const char *next = NSGetSizeAndAlignment(_encoding, NULL, NULL);
         *aoNextType = next;
+    }
 
     if([TQBoxedObject typeIsScalar:_encoding])
         _ffiType = [TQFFIType scalarTypeToFFIType:_encoding];
     else if(*_encoding == _C_STRUCT_B) {
+        _referencedTypes = [[NSMutableArray alloc] init];
         ffi_type type;
         _ffiType = (ffi_type*)malloc(sizeof(ffi_type));
         _ffiType->type = FFI_TYPE_STRUCT;
@@ -100,6 +103,10 @@
         free(_ffiType);
     }
     [_referencedTypes release];
-    [super dealloc];
+
+    TQ_BATCH_DEALLOC
 }
+
+#pragma mark - Batch allocation code
+TQ_BATCH_IMPL(TQFFIType)
 @end

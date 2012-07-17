@@ -209,6 +209,7 @@ Call         = callee:Callee
                     [$$ setArguments:arguments];
                }
 Callee       = Block
+             | Constant
              | SubscriptExp
              | Property
              | Variable
@@ -477,6 +478,7 @@ SubscriptExp = obj:SubscriptLhs
 SubscriptLhs = Property
              | Self
              | Variable
+             | Constant
              | Variadic
              | ParenExpr
 Subscript    = "[" -- subscript:Expression -- "]" { ExtendToken(); [StackTop addObject:subscript]; }

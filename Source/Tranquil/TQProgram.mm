@@ -5,6 +5,7 @@
 #include <llvm/Target/TargetData.h>
 #import <mach/mach_time.h>
 #import "Runtime/TQRuntime.h"
+#import "BridgeSupport/TQBoxedObject.h"
 #import <objc/runtime.h>
 #import <objc/message.h>
 
@@ -40,7 +41,8 @@
 using namespace llvm;
 
 @implementation TQProgram
-@synthesize root=_root, name=_name, llModule=_llModule, irBuilder=_irBuilder, shouldShowDebugInfo=_shouldShowDebugInfo;
+@synthesize root=_root, name=_name, llModule=_llModule, irBuilder=_irBuilder, shouldShowDebugInfo=_shouldShowDebugInfo,
+            bridge=_bridge;
 @synthesize llVoidTy=_llVoidTy, llInt8Ty=_llInt8Ty, llInt16Ty=_llInt16Ty, llInt32Ty=_llInt32Ty, llInt64Ty=_llInt64Ty,
     llFloatTy=_llFloatTy, llDoubleTy=_llDoubleTy, llIntTy=_llIntTy, llIntPtrTy=_llIntPtrTy, llSizeTy=_llSizeTy,
     llPtrDiffTy=_llPtrDiffTy, llVoidPtrTy=_llVoidPtrTy, llInt8PtrTy=_llInt8PtrTy, llVoidPtrPtrTy=_llVoidPtrPtrTy,
@@ -59,7 +61,8 @@ using namespace llvm;
     objc_autoreleasePoolPop=_func_objc_autoreleasePoolPop, TQSetValueForKey=_func_TQSetValueForKey,
     TQValueForKey=_func_TQValueForKey, TQGetOrCreateClass=_func_TQGetOrCreateClass,
     TQObjectsAreEqual=_func_TQObjectsAreEqual, TQObjectsAreNotEqual=_func_TQObjectsAreNotEqual, TQObjectGetSuperClass=_func_TQObjectGetSuperClass,
-    TQVaargsToArray=_func_TQVaargsToArray;
+    TQVaargsToArray=_func_TQVaargsToArray, TQBoxedMsgSend=_func_TQBoxedMsgSend, TQUnboxObject=_func_TQUnboxObject,
+    TQBoxValue=_func_TQBoxValue;
 
 + (TQProgram *)programWithName:(NSString *)aName
 {
@@ -72,6 +75,7 @@ using namespace llvm;
         return nil;
 
     _name = [aName retain];
+    _bridge = [[TQBridgeSupport alloc] init];
     _llModule = new Module([_name UTF8String], getGlobalContext());
     llvm::LLVMContext &ctx = _llModule->getContext();
     _irBuilder = new IRBuilder<>(ctx);
@@ -168,15 +172,22 @@ using namespace llvm;
     args_i8Ptr_i8Ptr.push_back(_llInt8PtrTy);
     FunctionType *ft_i8Ptr__i8Ptr_i8Ptr = FunctionType::get(_llInt8PtrTy, args_i8Ptr_i8Ptr, false);
 
+    // id(id, id, id)
+    std::vector<Type*> args_i8Ptr_i8Ptr_i8ptr;
+    args_i8Ptr_i8Ptr_i8ptr.push_back(_llInt8PtrTy);
+    args_i8Ptr_i8Ptr_i8ptr.push_back(_llInt8PtrTy);
+    args_i8Ptr_i8Ptr_i8ptr.push_back(_llInt8PtrTy);
+    FunctionType *ft_i8Ptr__i8Ptr_i8Ptr_i8ptr = FunctionType::get(_llInt8PtrTy, args_i8Ptr_i8Ptr_i8ptr, false);
+
     // void(id*, id)
     FunctionType *ft_void__i8PtrPtr_i8Ptr = FunctionType::get(_llVoidTy, args_i8PtrPtr_i8Ptr, false);
 
-    // id(id, id, id)
+    // void(id, id, id)
     std::vector<Type*> args_i8Ptr_i8Ptr_i8Ptr;
     args_i8Ptr_i8Ptr_i8Ptr.push_back(_llInt8PtrTy);
     args_i8Ptr_i8Ptr_i8Ptr.push_back(_llInt8PtrTy);
     args_i8Ptr_i8Ptr_i8Ptr.push_back(_llInt8PtrTy);
-    FunctionType *ft_void__i8PtrPtr_i8Ptr_i8Ptr = FunctionType::get(_llVoidTy, args_i8Ptr_i8Ptr_i8Ptr, false);
+    FunctionType *ft_void__i8Ptr_i8Ptr_i8Ptr = FunctionType::get(_llVoidTy, args_i8Ptr_i8Ptr_i8Ptr, false);
 
     // void(id, id)
     FunctionType *ft_void__i8Ptr_i8Ptr = FunctionType::get(_llVoidTy, args_i8Ptr_i8Ptr, false);
@@ -217,13 +228,17 @@ using namespace llvm;
     DEF_EXTERNAL_FUN(TQPrepareObjectForReturn, ft_i8Ptr__i8Ptr);
     DEF_EXTERNAL_FUN(objc_autoreleasePoolPush, ft_i8Ptr__void);
     DEF_EXTERNAL_FUN(objc_autoreleasePoolPop, ft_void__i8Ptr);
-    DEF_EXTERNAL_FUN(TQSetValueForKey, ft_void__i8PtrPtr_i8Ptr_i8Ptr);
+    DEF_EXTERNAL_FUN(TQSetValueForKey, ft_void__i8Ptr_i8Ptr_i8Ptr);
     DEF_EXTERNAL_FUN(TQValueForKey, ft_i8Ptr__i8Ptr_i8Ptr);
     DEF_EXTERNAL_FUN(TQGetOrCreateClass, ft_i8Ptr__i8Ptr_i8Ptr);
     DEF_EXTERNAL_FUN(TQObjectsAreEqual, ft_i8Ptr__i8Ptr_i8Ptr);
     DEF_EXTERNAL_FUN(TQObjectsAreNotEqual, ft_i8Ptr__i8Ptr_i8Ptr);
     DEF_EXTERNAL_FUN(TQObjectGetSuperClass, ft_i8Ptr__i8Ptr);
     DEF_EXTERNAL_FUN(TQVaargsToArray, ft_i8Ptr__i8Ptr);
+    DEF_EXTERNAL_FUN(TQBoxedMsgSend, ft_i8ptr__i8ptr_i8ptr_variadic)
+    DEF_EXTERNAL_FUN(TQUnboxObject, ft_void__i8Ptr_i8Ptr_i8Ptr)
+    DEF_EXTERNAL_FUN(TQBoxValue, ft_i8Ptr__i8Ptr_i8Ptr)
+
 #undef DEF_EXTERNAL_FUN
 
     return self;
@@ -234,6 +249,7 @@ using namespace llvm;
     delete _irBuilder;
     delete _llModule;
     [_root release];
+    [_bridge release];
     [super dealloc];
 }
 
@@ -242,8 +258,11 @@ using namespace llvm;
     TQInitializeRuntime();
     InitializeNativeTarget();
 
+    //[_bridge loadFramework:@"/System/Library/Frameworks/Foundation.framework"];
+    [_bridge loadFramework:@"/System/Library/Frameworks/AppKit.framework"];
+    [_bridge loadFramework:@"/System/Library/Frameworks/GLUT.framework"];
+
     NSError *err = nil;
-    _root.name = @"root";
     [_root generateCodeInProgram:self block:nil error:&err];
     if(err) {
         NSLog(@"Error: %@", err);
@@ -295,6 +314,9 @@ using namespace llvm;
     engine->addGlobalMapping(_func_TQObjectGetSuperClass, (void*)&TQObjectGetSuperClass);
     engine->addGlobalMapping(_func_TQVaargsToArray, (void*)&TQVaargsToArray);
     engine->addGlobalMapping(_func_TQReleaseObject, (void*)&TQReleaseObject);
+    engine->addGlobalMapping(_func_TQBoxedMsgSend, (void*)&TQBoxedMsgSend);
+    engine->addGlobalMapping(_func_TQUnboxObject, (void*)&TQUnboxObject);
+    engine->addGlobalMapping(_func_TQBoxValue, (void*)&TQBoxValue);
 
     //std::vector<GenericValue> noargs;
     //GenericValue val = engine->runFunction(_root.function, noargs);

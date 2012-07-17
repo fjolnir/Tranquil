@@ -7,6 +7,7 @@
 
 // A block definition ({ :arg | body })
 @interface TQNodeBlock : TQNode {
+    llvm::Function *_function;
     llvm::Constant *_blockDescriptor;
     llvm::Type *_literalType;
     NSMutableDictionary *_capturedVariables;
@@ -16,7 +17,6 @@
 @property(readwrite, copy) NSMutableArray *arguments;
 @property(readwrite, copy, nonatomic) NSMutableArray *statements;
 @property(readwrite, retain) NSMutableDictionary *locals;
-@property(readwrite, copy) NSString *name;
 @property(readwrite, assign) BOOL isVariadic;
 @property(readwrite, assign) llvm::BasicBlock *basicBlock;
 @property(readwrite, assign) llvm::Function *function;
@@ -27,6 +27,7 @@
 
 + (TQNodeBlock *)node;
 - (NSString *)signature;
+- (NSUInteger)argumentCount;
 - (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoError;
 @end
 

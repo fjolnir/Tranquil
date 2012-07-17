@@ -1,2 +1,5 @@
-bs = TQBridgeSupport new
-bs loadFramework: "/System/Library/Frameworks/Foundation.framework"
+\bs = TQBridgeSupport new
+\bs loadFramework: "/System/Library/Frameworks/Foundation.framework"
+a = NSMakeRect(1,2,3,4)
+
+print("%@ %@ %@", a, a[0][1], a[1][0])

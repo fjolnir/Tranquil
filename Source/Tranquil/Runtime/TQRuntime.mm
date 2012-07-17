@@ -1,4 +1,6 @@
 #import "TQRuntime.h"
+#import "../BridgeSupport/TQBoxedObject.h"
+#import "NSString+TQAdditions.h"
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
@@ -34,6 +36,7 @@ SEL TQStringWithFormatSel;
 SEL TQPointerArrayWithObjectsSel;
 SEL TQMapWithObjectsAndKeysSel;
 SEL TQRegexWithPatSel;
+SEL TQMoveToHeapSel;
 
 Class TQNumberClass;
 
@@ -97,6 +100,44 @@ Class TQObjectGetSuperClass(id aObj)
     return class_getSuperclass(object_getClass(aObj));
 }
 
+BOOL TQMethodTypeRequiresBoxing(const char *aEncoding)
+{
+    if(*aEncoding != '@' && *aEncoding != 'v')
+        return YES;
+    ++aEncoding;
+    while(*(++aEncoding) != ':') {} // Just iterate till the selector
+    // First run of this loop skips over the selector
+    while(*(++aEncoding) != '\0') {
+        if(*aEncoding != '@' && !(*aEncoding >= '0' && *aEncoding <= '9'))
+            return YES;
+    }
+    return NO;
+}
+
+void TQUnboxObject(id object, const char *type, void *buffer)
+{
+    if(*type == _C_ID)
+        *(id*)buffer = object;
+    else
+        [TQBoxedObject unbox:object to:buffer usingType:type];
+}
+
+id TQBoxValue(void *value, const char *type)
+{
+    TQBoxedObject * ret = [TQBoxedObject box:value withType:type];
+    return ret;
+}
+
+BOOL TQStructSizeRequiresStret(int size)
+{
+    #if defined(__LP64__)
+        return size > sizeof(long)*2;
+    #elif defined(__arm__)
+        return YES; // All structs are stret returned on arm
+    #else
+        return size > sizeof(long);
+    #endif
+}
 
 // We either must use these functions to test nil for equality, or use the private _objc_setNilResponder which I don't feel good doing
 // For non equality test operators testing against nil is simply always false so we do not need to implement equivalents for them.
@@ -136,28 +177,43 @@ static inline size_t _accessorNameLen(const char *accessorNameLoc)
         return accessorNameEnd - accessorNameLoc;
 }
 
-id TQValueForKey(id obj, char *key)
+id TQValueForKey(id obj, const char *key)
 {
     if(!obj)
         return nil;
-    objc_property_t property = class_getProperty(object_getClass(obj), key);
-    if(property) {
-        // TODO: Use the type encoding to box values if necessary
-        const char *attrs = property_getAttributes(property);
-        char *getterNameLoc = strstr(attrs, ",S");
-        if(!getterNameLoc) {
-            // Standard getter
-            return objc_msgSend(obj, sel_registerName(key));
-        } else {
-            // Custom getter
-            char getterName[_accessorNameLen(getterNameLoc)];
-            strcpy(getterName, getterNameLoc);
-            return objc_msgSend(obj, sel_registerName(getterName));
+
+    Class kls = object_getClass(obj);
+    // Check if there already exists a boxed getter
+    SEL tqGetterSel = NSSelectorFromString([NSString stringWithFormat:@"__tq_getter_%s", key]);
+    if(class_respondsToSelector(kls, tqGetterSel))
+        return objc_msgSend(obj, tqGetterSel);
+
+    // Otherwise we create one
+    const int maxTypeLen = 128;
+    char valType[maxTypeLen];
+    SEL getterSel = sel_registerName(key);
+    IMP imp;
+    if(class_respondsToSelector(kls, getterSel)) {
+        Method method = class_getInstanceMethod(kls, getterSel);
+        method_getReturnType(method, valType, maxTypeLen);
+
+        imp = class_getMethodImplementation(kls, getterSel);
+        if(*valType != _C_ID) {
+            // We make the selector arg masquerade as an object so that we don't attempt to unbox it
+            NSString *accessorType = [NSString stringWithFormat:@"<^%s@@>", valType];
+            id (^boxedGetter)(id,SEL) = (id)[TQBoxedObject box:(void*)imp withType:[accessorType UTF8String]];
+            imp = imp_implementationWithBlock(^(id self) {
+                return boxedGetter(self, getterSel);
+            });
         }
     } else {
         NSMapTable *ivarTable = _TQGetDynamicIvarTable(obj);
-        return (id)NSMapGet(ivarTable, key);
+        imp = imp_implementationWithBlock(^(id self) {
+            return (id)NSMapGet(ivarTable, key);
+        });
     }
+    class_addMethod([obj class], tqGetterSel, imp, "@:");
+    return objc_msgSend(obj, tqGetterSel);
 }
 
 void TQSetValueForKey(id obj, char *key, id value)
@@ -167,35 +223,50 @@ void TQSetValueForKey(id obj, char *key, id value)
     if(TQObjectIsStackBlock(value))
         value = [[value copy] autorelease];
 
-    objc_property_t property = class_getProperty(object_getClass(obj), key);
-    if(property) {
-        // TODO: Use the type encoding to unbox values if necessary
-        const char *attrs = property_getAttributes(property);
-        char *setterNameLoc = strstr(attrs, ",S");
-        if(!setterNameLoc) {
-            // Standard setter
-            size_t setterNameLen = 3 + strlen(key);
-            char setterName[setterNameLen];
-            strcpy(setterName, "set");
-            strcpy(setterName + 3, key);
-            objc_msgSend(obj, sel_registerName(setterName), value);
+    Class kls = object_getClass(obj);
+    // Check if there already exists a boxed getter
+    SEL tqSetterSel = NSSelectorFromString([NSString stringWithFormat:@"__tq_setter_%s:", key]);
+    if(class_respondsToSelector(kls, tqSetterSel)) {
+        objc_msgSend(obj, tqSetterSel, value);
+        return;
+    }
+
+    // Otherwise we create one
+    const int maxTypeLen = 128;
+    char valType[maxTypeLen];
+    NSString *selStr = [NSString stringWithFormat:@"set%@:", [[NSString stringWithUTF8String:key] stringByCapitalizingFirstLetter]];
+    SEL setterSel = NSSelectorFromString(selStr);
+    IMP imp;
+    if(class_respondsToSelector(kls, setterSel)) {
+        Method method = class_getInstanceMethod(kls, setterSel);
+        method_getArgumentType(method, 2, valType, maxTypeLen);
+
+        IMP realImp = class_getMethodImplementation(kls, setterSel);
+        if(*valType == _C_ID) {
+            imp = imp_implementationWithBlock(^(id self, id value) {
+                realImp(self, setterSel, value);
+                return nil;
+            });
         } else {
-            // Custom setter
-            char *setterNameEnd = strstr(setterNameLoc, ",");
-            char setterName[_accessorNameLen(setterNameLoc)];
-            if(setterNameEnd)
-                strncpy(setterName, setterNameLoc, setterNameEnd - setterNameLoc);
-            else
-                strcpy(setterName, setterNameLoc);
-            objc_msgSend(obj, sel_registerName(setterName), value);
+            NSString *accessorType = [NSString stringWithFormat:@"<^v@@%s>", valType];
+            id (^boxedSetter)(id,SEL,id) = (id)[TQBoxedObject box:(void*)realImp withType:[accessorType UTF8String]];
+            imp = imp_implementationWithBlock(^(id self, id value) {
+                boxedSetter(self, setterSel, value);
+                return nil;
+            });
         }
     } else {
-        NSMapTable *ivarTable = _TQGetDynamicIvarTable(obj);
-        if(value)
-            NSMapInsert(ivarTable, key, value);
-        else
-            NSMapRemove(ivarTable, key);
+        imp = imp_implementationWithBlock(^(id self, id value) {
+            NSMapTable *ivarTable = _TQGetDynamicIvarTable(self);
+            if(value)
+                NSMapInsert(ivarTable, key, value);
+            else
+                NSMapRemove(ivarTable, key);
+            return nil;
+        });
     }
+    class_addMethod([obj class], tqSetterSel, imp, "@:@");
+    objc_msgSend(obj, tqSetterSel, value);
 }
 
 #pragma mark -
@@ -276,6 +347,9 @@ BOOL TQAugmentClassWithOperators(Class klass)
 
 void TQInitializeRuntime()
 {
+    if(TQValid == [TQValidObject sharedInstance])
+        return;
+
     TQValid = [TQValidObject sharedInstance];
 
     TQEqOpSel                    = sel_registerName("==:");
@@ -302,9 +376,11 @@ void TQInitializeRuntime()
     TQPointerArrayWithObjectsSel = @selector(tq_pointerArrayWithObjects:);
     TQMapWithObjectsAndKeysSel   = @selector(tq_mapTableWithObjectsAndKeys:);
     TQRegexWithPatSel            = @selector(tq_regularExpressionWithUTF8String:options:);
+    TQMoveToHeapSel              = @selector(moveValueToHeap);
 
     TQNumberClass     = [TQNumber class];
 
+    // Add operators that cannot be added through standard categories (because the compiler won't allow methods containing symbols)
     TQAugmentClassWithOperators([NSObject class]);
 
     // Operators for collections
@@ -356,7 +432,6 @@ void TQInitializeRuntime()
     });
     class_addMethod([NSMutableString class], TQRShiftOpSel, imp, "@@:@");
 
-
     // Add optimized operators to TQNumber
     // ==
     imp = imp_implementationWithBlock(^(TQNumber *a, id b) {
@@ -387,5 +462,5 @@ void TQInitializeRuntime()
     class_replaceMethod(TQNumberClass, TQGTOpSel,  class_getMethodImplementation(TQNumberClass, @selector(isGreater:)),        "@@:@");
     class_replaceMethod(TQNumberClass, TQLTEOpSel, class_getMethodImplementation(TQNumberClass, @selector(isLesserOrEqual:)),  "@@:@");
     class_replaceMethod(TQNumberClass, TQGTEOpSel, class_getMethodImplementation(TQNumberClass, @selector(isGreaterOrEqual:)), "@@:@");
-    class_replaceMethod(TQNumberClass, TQExpOpSel, class_getMethodImplementation(TQNumberClass, @selector(pow:)), "@@:@");
+    class_replaceMethod(TQNumberClass, TQExpOpSel, class_getMethodImplementation(TQNumberClass, @selector(pow:)),              "@@:@");
 }

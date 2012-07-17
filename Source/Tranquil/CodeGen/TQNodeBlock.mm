@@ -19,7 +19,7 @@ using namespace llvm;
 @end
 
 @implementation TQNodeBlock
-@synthesize arguments=_arguments, statements=_statements, locals=_locals, name=_name,
+@synthesize arguments=_arguments, statements=_statements, locals=_locals,
     basicBlock=_basicBlock, function=_function, builder=_builder, autoreleasePool=_autoreleasePool,
     isCompactBlock=_isCompactBlock, parent=_parent, isVariadic=_isVariadic;
 
@@ -30,10 +30,10 @@ using namespace llvm;
     if(!(self = [super init]))
         return nil;
 
-    _arguments = [[NSMutableArray alloc] init];
+    _arguments  = [[NSMutableArray alloc] init];
     _statements = [[NSMutableArray alloc] init];
-    _locals = [[NSMutableDictionary alloc] init];
-    _function = NULL;
+    _locals     = [[NSMutableDictionary alloc] init];
+    _function   = NULL;
     _basicBlock = NULL;
 
     // Block invocations are always passed the block itself as the first argument
@@ -163,6 +163,11 @@ using namespace llvm;
 
 #pragma mark - Code generation
 
+- (NSUInteger)argumentCount
+{
+    return [_arguments count] - 1;
+}
+
 // Descriptor is a constant struct describing all instances of this block
 - (llvm::Constant *)_generateBlockDescriptorInProgram:(TQProgram *)aProgram
 {
@@ -190,7 +195,7 @@ using namespace llvm;
     // GC Layout (unused in objc 2)
     elements.push_back(llvm::Constant::getNullValue(aProgram.llInt8PtrTy));
 
-    elements.push_back(llvm::ConstantInt::get(int32Ty, [_arguments count]-1));
+    elements.push_back(llvm::ConstantInt::get(int32Ty, [self argumentCount]));
     elements.push_back(llvm::ConstantInt::get(int8Ty, _isVariadic)); // isVariadic? always false for now
 
     llvm::Constant *init = llvm::ConstantStruct::getAnon(elements);
@@ -465,7 +470,7 @@ using namespace llvm;
 // Generates a block on the stack
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
 {
-    TQAssert(!_basicBlock && !_function, @"Tried to regenerate code for block %@", _name);
+    TQAssert(!_basicBlock && !_function, @"Tried to regenerate code for block");
 
     // Generate a list of variables to capture
     if(aBlock) {

@@ -127,13 +127,6 @@ static inline Klass *TQBatchAlloc##Klass(Class self) \
 + (id)allocWithZone:(NSZone *)zone { return TQBatchAlloc##Klass(self); } \
 + (id)alloc                        { return TQBatchAlloc##Klass(self); } \
 \
-- (void)dealloc \
-{ \
-    /* Free the entire batch if all the objects in it are unreferenced */\
-    if(__sync_add_and_fetch(&_batch->_freed, 1) == OBJECTS_PER_BUNCH) \
-        TQFreeObjectBatch(&_BatchPool, _batch); \
-    else if(NO) [super dealloc]; /* Silence compiler warning about not calling super dealloc */\
-} \
 - (id)retain \
 { \
     __sync_add_and_fetch(&_retainCountMinusOne, 1); \
@@ -144,3 +137,10 @@ static inline Klass *TQBatchAlloc##Klass(Class self) \
     if(__sync_sub_and_fetch(&_retainCountMinusOne, 1) < 0) \
         [self dealloc]; \
 }
+
+#define TQ_BATCH_DEALLOC \
+    /* Free the entire batch if all the objects in it are unreferenced */\
+    if(__sync_add_and_fetch(&_batch->_freed, 1) == OBJECTS_PER_BUNCH) \
+        TQFreeObjectBatch(&_BatchPool, _batch); \
+    else if(NO) [super dealloc]; /* Silence compiler warning about not calling super dealloc */
+
