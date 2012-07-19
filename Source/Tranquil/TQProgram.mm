@@ -260,6 +260,7 @@ using namespace llvm;
 
     //[_bridge loadFramework:@"/System/Library/Frameworks/Foundation.framework"];
     [_bridge loadFramework:@"/System/Library/Frameworks/AppKit.framework"];
+    [_bridge loadBridgesupportFile:[@"~/Library/BridgeSupport/math.bridgesupport" stringByExpandingTildeInPath]];
     //[_bridge loadFramework:@"/System/Library/Frameworks/GLUT.framework"];
 
     NSError *err = nil;
