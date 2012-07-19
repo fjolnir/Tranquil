@@ -1,0 +1,363 @@
+<?xml version='1.0'?>
+<signatures version='1.0'>
+<depends_on path='/System/Library/Frameworks/CoreFoundation.framework'/>
+<depends_on path='/System/Library/Frameworks/IOKit.framework'/>
+<depends_on path='/System/Library/Frameworks/Security.framework'/>
+<cftype name='DAApprovalSessionRef' gettypeid_func='DAApprovalSessionGetTypeID' type='^{__DASession=}'/>
+<cftype name='DADiskRef' gettypeid_func='DADiskGetTypeID' type='^{__DADisk=}'/>
+<cftype name='DADissenterRef' type='^{__DADissenter=}'/>
+<cftype name='DASessionRef' gettypeid_func='DASessionGetTypeID' type='^{__DASession=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionBusNameKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionBusPathKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionDeviceGUIDKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionDeviceInternalKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionDeviceModelKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionDevicePathKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionDeviceProtocolKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionDeviceRevisionKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionDeviceUnitKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionDeviceVendorKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFDictionaryRef' name='kDADiskDescriptionMatchMediaUnformatted' type='^{__CFDictionary=}'/>
+<constant declared_type='CFDictionaryRef' name='kDADiskDescriptionMatchMediaWhole' type='^{__CFDictionary=}'/>
+<constant declared_type='CFDictionaryRef' name='kDADiskDescriptionMatchVolumeMountable' type='^{__CFDictionary=}'/>
+<constant declared_type='CFDictionaryRef' name='kDADiskDescriptionMatchVolumeUnrecognized' type='^{__CFDictionary=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionMediaBSDMajorKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionMediaBSDMinorKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionMediaBSDNameKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionMediaBSDUnitKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionMediaBlockSizeKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionMediaContentKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionMediaEjectableKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionMediaIconKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionMediaKindKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionMediaLeafKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionMediaNameKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionMediaPathKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionMediaRemovableKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionMediaSizeKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionMediaTypeKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionMediaUUIDKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionMediaWholeKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionMediaWritableKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionVolumeKindKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionVolumeMountableKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionVolumeNameKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionVolumeNetworkKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionVolumePathKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFStringRef' name='kDADiskDescriptionVolumeUUIDKey' const='true' type='^{__CFString=}'/>
+<constant declared_type='CFArrayRef' name='kDADiskDescriptionWatchVolumeName' type='^{__CFArray=}'/>
+<constant declared_type='CFArrayRef' name='kDADiskDescriptionWatchVolumePath' type='^{__CFArray=}'/>
+<enum value='14286848' name='err_local_diskarbitration'/>
+<enum value='0' name='kDADiskClaimOptionDefault'/>
+<enum value='0' name='kDADiskEjectOptionDefault'/>
+<enum value='0' name='kDADiskMountOptionDefault'/>
+<enum value='1' name='kDADiskMountOptionWhole'/>
+<enum value='0' name='kDADiskOptionDefault'/>
+<enum value='1' name='kDADiskOptionEjectUponLogout'/>
+<enum value='16' name='kDADiskOptionMountAutomatic'/>
+<enum value='32' name='kDADiskOptionMountAutomaticNoDefer'/>
+<enum value='256' name='kDADiskOptionPrivate'/>
+<enum value='0' name='kDADiskRenameOptionDefault'/>
+<enum value='0' name='kDADiskUnmountOptionDefault'/>
+<enum value='524288' name='kDADiskUnmountOptionForce'/>
+<enum value='1' name='kDADiskUnmountOptionWhole'/>
+<enum value='-119930877' name='kDAReturnBadArgument'/>
+<enum value='-119930878' name='kDAReturnBusy'/>
+<enum value='-119930879' name='kDAReturnError'/>
+<enum value='-119930876' name='kDAReturnExclusiveAccess'/>
+<enum value='-119930875' name='kDAReturnNoResources'/>
+<enum value='-119930874' name='kDAReturnNotFound'/>
+<enum value='-119930873' name='kDAReturnNotMounted'/>
+<enum value='-119930872' name='kDAReturnNotPermitted'/>
+<enum value='-119930871' name='kDAReturnNotPrivileged'/>
+<enum value='-119930870' name='kDAReturnNotReady'/>
+<enum value='-119930869' name='kDAReturnNotWritable'/>
+<enum value='0' name='kDAReturnSuccess'/>
+<enum value='-119930868' name='kDAReturnUnsupported'/>
+<function name='DAApprovalSessionCreate'>
+<arg declared_type='CFAllocatorRef' name='allocator' type='^{__CFAllocator=}'/>
+<retval declared_type='DAApprovalSessionRef' already_retained='true' type='^{__DASession=}'/>
+</function>
+<function name='DAApprovalSessionGetTypeID'>
+<retval declared_type='CFTypeID' type64='Q' type='L'/>
+</function>
+<function name='DAApprovalSessionScheduleWithRunLoop'>
+<arg declared_type='DAApprovalSessionRef' name='session' type='^{__DASession=}'/>
+<arg declared_type='CFRunLoopRef' name='runLoop' type='^{__CFRunLoop=}'/>
+<arg declared_type='CFStringRef' name='runLoopMode' type='^{__CFString=}'/>
+<retval declared_type='void' type='v'/>
+</function>
+<function name='DAApprovalSessionUnscheduleFromRunLoop'>
+<arg declared_type='DAApprovalSessionRef' name='session' type='^{__DASession=}'/>
+<arg declared_type='CFRunLoopRef' name='runLoop' type='^{__CFRunLoop=}'/>
+<arg declared_type='CFStringRef' name='runLoopMode' type='^{__CFString=}'/>
+<retval declared_type='void' type='v'/>
+</function>
+<function name='DADiskClaim'>
+<arg declared_type='DADiskRef' name='disk' type='^{__DADisk=}'/>
+<arg declared_type='DADiskClaimOptions' type64='I' name='options' type='L'/>
+<arg declared_type='DADiskClaimReleaseCallback' name='release' function_pointer='true' type='^?'>
+<arg declared_type='DADiskRef' type='^{__DADisk=}'/>
+<arg declared_type='void*' type='^v'/>
+<retval declared_type='DADissenterRef' type='^{__DADissenter=}'/>
+</arg>
+<arg declared_type='void*' name='releaseContext' type='^v'/>
+<arg declared_type='DADiskClaimCallback' name='callback' function_pointer='true' type='^?'>
+<arg declared_type='DADiskRef' type='^{__DADisk=}'/>
+<arg declared_type='DADissenterRef' type='^{__DADissenter=}'/>
+<arg declared_type='void*' type='^v'/>
+<retval declared_type='void' type='v'/>
+</arg>
+<arg declared_type='void*' name='callbackContext' type='^v'/>
+<retval declared_type='void' type='v'/>
+</function>
+<function name='DADiskCopyDescription'>
+<arg declared_type='DADiskRef' name='disk' type='^{__DADisk=}'/>
+<retval declared_type='CFDictionaryRef' already_retained='true' type='^{__CFDictionary=}'/>
+</function>
+<function name='DADiskCopyIOMedia'>
+<arg declared_type='DADiskRef' name='disk' type='^{__DADisk=}'/>
+<retval declared_type='io_service_t' type='I'/>
+</function>
+<function name='DADiskCopyWholeDisk'>
+<arg declared_type='DADiskRef' name='disk' type='^{__DADisk=}'/>
+<retval declared_type='DADiskRef' already_retained='true' type='^{__DADisk=}'/>
+</function>
+<function name='DADiskCreateFromBSDName'>
+<arg declared_type='CFAllocatorRef' name='allocator' type='^{__CFAllocator=}'/>
+<arg declared_type='DASessionRef' name='session' type='^{__DASession=}'/>
+<arg declared_type='char*' name='name' const='true' type='*'/>
+<retval declared_type='DADiskRef' already_retained='true' type='^{__DADisk=}'/>
+</function>
+<function name='DADiskCreateFromIOMedia'>
+<arg declared_type='CFAllocatorRef' name='allocator' type='^{__CFAllocator=}'/>
+<arg declared_type='DASessionRef' name='session' type='^{__DASession=}'/>
+<arg declared_type='io_service_t' name='media' type='I'/>
+<retval declared_type='DADiskRef' already_retained='true' type='^{__DADisk=}'/>
+</function>
+<function name='DADiskCreateFromVolumePath'>
+<arg declared_type='CFAllocatorRef' name='allocator' type='^{__CFAllocator=}'/>
+<arg declared_type='DASessionRef' name='session' type='^{__DASession=}'/>
+<arg declared_type='CFURLRef' name='path' type='^{__CFURL=}'/>
+<retval declared_type='DADiskRef' already_retained='true' type='^{__DADisk=}'/>
+</function>
+<function name='DADiskEject'>
+<arg declared_type='DADiskRef' name='disk' type='^{__DADisk=}'/>
+<arg declared_type='DADiskEjectOptions' type64='I' name='options' type='L'/>
+<arg declared_type='DADiskEjectCallback' name='callback' function_pointer='true' type='^?'>
+<arg declared_type='DADiskRef' type='^{__DADisk=}'/>
+<arg declared_type='DADissenterRef' type='^{__DADissenter=}'/>
+<arg declared_type='void*' type='^v'/>
+<retval declared_type='void' type='v'/>
+</arg>
+<arg declared_type='void*' name='context' type='^v'/>
+<retval declared_type='void' type='v'/>
+</function>
+<function name='DADiskGetBSDName'>
+<arg declared_type='DADiskRef' name='disk' type='^{__DADisk=}'/>
+<retval declared_type='char*' const='true' type='*'/>
+</function>
+<function name='DADiskGetOptions'>
+<arg declared_type='DADiskRef' name='disk' type='^{__DADisk=}'/>
+<retval declared_type='DADiskOptions' type64='I' type='L'/>
+</function>
+<function name='DADiskGetTypeID'>
+<retval declared_type='CFTypeID' type64='Q' type='L'/>
+</function>
+<function name='DADiskIsClaimed'>
+<arg declared_type='DADiskRef' name='disk' type='^{__DADisk=}'/>
+<retval declared_type='Boolean' type='B'/>
+</function>
+<function name='DADiskMount'>
+<arg declared_type='DADiskRef' name='disk' type='^{__DADisk=}'/>
+<arg declared_type='CFURLRef' name='path' type='^{__CFURL=}'/>
+<arg declared_type='DADiskMountOptions' type64='I' name='options' type='L'/>
+<arg declared_type='DADiskMountCallback' name='callback' function_pointer='true' type='^?'>
+<arg declared_type='DADiskRef' type='^{__DADisk=}'/>
+<arg declared_type='DADissenterRef' type='^{__DADissenter=}'/>
+<arg declared_type='void*' type='^v'/>
+<retval declared_type='void' type='v'/>
+</arg>
+<arg declared_type='void*' name='context' type='^v'/>
+<retval declared_type='void' type='v'/>
+</function>
+<function name='DADiskMountWithArguments'>
+<arg declared_type='DADiskRef' name='disk' type='^{__DADisk=}'/>
+<arg declared_type='CFURLRef' name='path' type='^{__CFURL=}'/>
+<arg declared_type='DADiskMountOptions' type64='I' name='options' type='L'/>
+<arg declared_type='DADiskMountCallback' name='callback' function_pointer='true' type='^?'>
+<arg declared_type='DADiskRef' type='^{__DADisk=}'/>
+<arg declared_type='DADissenterRef' type='^{__DADissenter=}'/>
+<arg declared_type='void*' type='^v'/>
+<retval declared_type='void' type='v'/>
+</arg>
+<arg declared_type='void*' name='context' type='^v'/>
+<arg declared_type='CFStringRef*' name='arguments' type='^^{__CFString}'/>
+<retval declared_type='void' type='v'/>
+</function>
+<function name='DADiskRename'>
+<arg declared_type='DADiskRef' name='disk' type='^{__DADisk=}'/>
+<arg declared_type='CFStringRef' name='name' type='^{__CFString=}'/>
+<arg declared_type='DADiskRenameOptions' type64='I' name='options' type='L'/>
+<arg declared_type='DADiskRenameCallback' name='callback' function_pointer='true' type='^?'>
+<arg declared_type='DADiskRef' type='^{__DADisk=}'/>
+<arg declared_type='DADissenterRef' type='^{__DADissenter=}'/>
+<arg declared_type='void*' type='^v'/>
+<retval declared_type='void' type='v'/>
+</arg>
+<arg declared_type='void*' name='context' type='^v'/>
+<retval declared_type='void' type='v'/>
+</function>
+<function name='DADiskSetOptions'>
+<arg declared_type='DADiskRef' name='disk' type='^{__DADisk=}'/>
+<arg declared_type='DADiskOptions' type64='I' name='options' type='L'/>
+<arg declared_type='Boolean' name='value' type='B'/>
+<retval declared_type='DAReturn' type='i'/>
+</function>
+<function name='DADiskUnclaim'>
+<arg declared_type='DADiskRef' name='disk' type='^{__DADisk=}'/>
+<retval declared_type='void' type='v'/>
+</function>
+<function name='DADiskUnmount'>
+<arg declared_type='DADiskRef' name='disk' type='^{__DADisk=}'/>
+<arg declared_type='DADiskUnmountOptions' type64='I' name='options' type='L'/>
+<arg declared_type='DADiskUnmountCallback' name='callback' function_pointer='true' type='^?'>
+<arg declared_type='DADiskRef' type='^{__DADisk=}'/>
+<arg declared_type='DADissenterRef' type='^{__DADissenter=}'/>
+<arg declared_type='void*' type='^v'/>
+<retval declared_type='void' type='v'/>
+</arg>
+<arg declared_type='void*' name='context' type='^v'/>
+<retval declared_type='void' type='v'/>
+</function>
+<function name='DADissenterCreate'>
+<arg declared_type='CFAllocatorRef' name='allocator' type='^{__CFAllocator=}'/>
+<arg declared_type='DAReturn' name='status' type='i'/>
+<arg declared_type='CFStringRef' name='string' type='^{__CFString=}'/>
+<retval declared_type='DADissenterRef' already_retained='true' type='^{__DADissenter=}'/>
+</function>
+<function name='DADissenterGetStatus'>
+<arg declared_type='DADissenterRef' name='dissenter' type='^{__DADissenter=}'/>
+<retval declared_type='DAReturn' type='i'/>
+</function>
+<function name='DADissenterGetStatusString'>
+<arg declared_type='DADissenterRef' name='dissenter' type='^{__DADissenter=}'/>
+<retval declared_type='CFStringRef' type='^{__CFString=}'/>
+</function>
+<function name='DARegisterDiskAppearedCallback'>
+<arg declared_type='DASessionRef' name='session' type='^{__DASession=}'/>
+<arg declared_type='CFDictionaryRef' name='match' type='^{__CFDictionary=}'/>
+<arg declared_type='DADiskAppearedCallback' name='callback' function_pointer='true' type='^?'>
+<arg declared_type='DADiskRef' type='^{__DADisk=}'/>
+<arg declared_type='void*' type='^v'/>
+<retval declared_type='void' type='v'/>
+</arg>
+<arg declared_type='void*' name='context' type='^v'/>
+<retval declared_type='void' type='v'/>
+</function>
+<function name='DARegisterDiskDescriptionChangedCallback'>
+<arg declared_type='DASessionRef' name='session' type='^{__DASession=}'/>
+<arg declared_type='CFDictionaryRef' name='match' type='^{__CFDictionary=}'/>
+<arg declared_type='CFArrayRef' name='watch' type='^{__CFArray=}'/>
+<arg declared_type='DADiskDescriptionChangedCallback' name='callback' function_pointer='true' type='^?'>
+<arg declared_type='DADiskRef' type='^{__DADisk=}'/>
+<arg declared_type='CFArrayRef' type='^{__CFArray=}'/>
+<arg declared_type='void*' type='^v'/>
+<retval declared_type='void' type='v'/>
+</arg>
+<arg declared_type='void*' name='context' type='^v'/>
+<retval declared_type='void' type='v'/>
+</function>
+<function name='DARegisterDiskDisappearedCallback'>
+<arg declared_type='DASessionRef' name='session' type='^{__DASession=}'/>
+<arg declared_type='CFDictionaryRef' name='match' type='^{__CFDictionary=}'/>
+<arg declared_type='DADiskDisappearedCallback' name='callback' function_pointer='true' type='^?'>
+<arg declared_type='DADiskRef' type='^{__DADisk=}'/>
+<arg declared_type='void*' type='^v'/>
+<retval declared_type='void' type='v'/>
+</arg>
+<arg declared_type='void*' name='context' type='^v'/>
+<retval declared_type='void' type='v'/>
+</function>
+<function name='DARegisterDiskEjectApprovalCallback'>
+<arg declared_type='DAApprovalSessionRef' name='session' type='^{__DASession=}'/>
+<arg declared_type='CFDictionaryRef' name='match' type='^{__CFDictionary=}'/>
+<arg declared_type='DADiskEjectApprovalCallback' name='callback' function_pointer='true' type='^?'>
+<arg declared_type='DADiskRef' type='^{__DADisk=}'/>
+<arg declared_type='void*' type='^v'/>
+<retval declared_type='DADissenterRef' type='^{__DADissenter=}'/>
+</arg>
+<arg declared_type='void*' name='context' type='^v'/>
+<retval declared_type='void' type='v'/>
+</function>
+<function name='DARegisterDiskMountApprovalCallback'>
+<arg declared_type='DAApprovalSessionRef' name='session' type='^{__DASession=}'/>
+<arg declared_type='CFDictionaryRef' name='match' type='^{__CFDictionary=}'/>
+<arg declared_type='DADiskMountApprovalCallback' name='callback' function_pointer='true' type='^?'>
+<arg declared_type='DADiskRef' type='^{__DADisk=}'/>
+<arg declared_type='void*' type='^v'/>
+<retval declared_type='DADissenterRef' type='^{__DADissenter=}'/>
+</arg>
+<arg declared_type='void*' name='context' type='^v'/>
+<retval declared_type='void' type='v'/>
+</function>
+<function name='DARegisterDiskPeekCallback'>
+<arg declared_type='DASessionRef' name='session' type='^{__DASession=}'/>
+<arg declared_type='CFDictionaryRef' name='match' type='^{__CFDictionary=}'/>
+<arg declared_type='CFIndex' type64='q' name='order' type='l'/>
+<arg declared_type='DADiskPeekCallback' name='callback' function_pointer='true' type='^?'>
+<arg declared_type='DADiskRef' type='^{__DADisk=}'/>
+<arg declared_type='void*' type='^v'/>
+<retval declared_type='void' type='v'/>
+</arg>
+<arg declared_type='void*' name='context' type='^v'/>
+<retval declared_type='void' type='v'/>
+</function>
+<function name='DARegisterDiskUnmountApprovalCallback'>
+<arg declared_type='DAApprovalSessionRef' name='session' type='^{__DASession=}'/>
+<arg declared_type='CFDictionaryRef' name='match' type='^{__CFDictionary=}'/>
+<arg declared_type='DADiskUnmountApprovalCallback' name='callback' function_pointer='true' type='^?'>
+<arg declared_type='DADiskRef' type='^{__DADisk=}'/>
+<arg declared_type='void*' type='^v'/>
+<retval declared_type='DADissenterRef' type='^{__DADissenter=}'/>
+</arg>
+<arg declared_type='void*' name='context' type='^v'/>
+<retval declared_type='void' type='v'/>
+</function>
+<function name='DASessionCreate'>
+<arg declared_type='CFAllocatorRef' name='allocator' type='^{__CFAllocator=}'/>
+<retval declared_type='DASessionRef' already_retained='true' type='^{__DASession=}'/>
+</function>
+<function name='DASessionGetTypeID'>
+<retval declared_type='CFTypeID' type64='Q' type='L'/>
+</function>
+<function name='DASessionScheduleWithRunLoop'>
+<arg declared_type='DASessionRef' name='session' type='^{__DASession=}'/>
+<arg declared_type='CFRunLoopRef' name='runLoop' type='^{__CFRunLoop=}'/>
+<arg declared_type='CFStringRef' name='runLoopMode' type='^{__CFString=}'/>
+<retval declared_type='void' type='v'/>
+</function>
+<function name='DASessionSetDispatchQueue'>
+<arg declared_type='DASessionRef' name='session' type='^{__DASession=}'/>
+<arg declared_type='dispatch_queue_t' name='queue' type='@'/>
+<retval declared_type='void' type='v'/>
+</function>
+<function name='DASessionUnscheduleFromRunLoop'>
+<arg declared_type='DASessionRef' name='session' type='^{__DASession=}'/>
+<arg declared_type='CFRunLoopRef' name='runLoop' type='^{__CFRunLoop=}'/>
+<arg declared_type='CFStringRef' name='runLoopMode' type='^{__CFString=}'/>
+<retval declared_type='void' type='v'/>
+</function>
+<function name='DAUnregisterApprovalCallback'>
+<arg declared_type='DAApprovalSessionRef' name='session' type='^{__DASession=}'/>
+<arg declared_type='void*' name='callback' type='^v'/>
+<arg declared_type='void*' name='context' type='^v'/>
+<retval declared_type='void' type='v'/>
+</function>
+<function name='DAUnregisterCallback'>
+<arg declared_type='DASessionRef' name='session' type='^{__DASession=}'/>
+<arg declared_type='void*' name='callback' type='^v'/>
+<arg declared_type='void*' name='context' type='^v'/>
+<retval declared_type='void' type='v'/>
+</function>
+</signatures>

@@ -1,0 +1,1738 @@
+<?xml version='1.0'?>
+<signatures version='1.0'>
+<depends_on path='/System/Library/Frameworks/Security.framework'/>
+<depends_on path='/System/Library/Frameworks/Foundation.framework'/>
+<depends_on path='/System/Library/Frameworks/CoreFoundation.framework'/>
+<constant name='NSAddedPersistentStoresKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSAffectedObjectsErrorKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSAffectedStoresErrorKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSBinaryExternalRecordType' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSBinaryStoreType' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSCoreDataVersionNumber' type='d' declared_type='double'/>
+<constant name='NSDeletedObjectsKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSDetailedErrorsKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSEntityNameInPathKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSErrorMergePolicy' type='@' declared_type='id'/>
+<constant name='NSExternalRecordExtensionOption' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSExternalRecordsDirectoryOption' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSExternalRecordsFileFormatOption' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSIgnorePersistentStoreVersioningOption' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSInMemoryStoreType' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSInferMappingModelAutomaticallyOption' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSInsertedObjectsKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSInvalidatedAllObjectsKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSInvalidatedObjectsKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSManagedObjectContextDidSaveNotification' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSManagedObjectContextObjectsDidChangeNotification' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSManagedObjectContextWillSaveNotification' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSMergeByPropertyObjectTrumpMergePolicy' type='@' declared_type='id'/>
+<constant name='NSMergeByPropertyStoreTrumpMergePolicy' type='@' declared_type='id'/>
+<constant name='NSMigratePersistentStoresAutomaticallyOption' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSMigrationDestinationObjectKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSMigrationEntityMappingKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSMigrationEntityPolicyKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSMigrationManagerKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSMigrationPropertyMappingKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSMigrationSourceObjectKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSModelPathKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSObjectURIKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSOverwriteMergePolicy' type='@' declared_type='id'/>
+<constant name='NSPersistentStoreCoordinatorStoresDidChangeNotification' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSPersistentStoreCoordinatorWillRemoveStoreNotification' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSPersistentStoreDidImportUbiquitousContentChangesNotification' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSPersistentStoreOSCompatibility' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSPersistentStoreSaveConflictsErrorKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSPersistentStoreTimeoutOption' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSPersistentStoreUbiquitousContentNameKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSPersistentStoreUbiquitousContentURLKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSReadOnlyPersistentStoreOption' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSRefreshedObjectsKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSRemovedPersistentStoresKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSRollbackMergePolicy' type='@' declared_type='id'/>
+<constant name='NSSQLiteAnalyzeOption' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSSQLiteErrorDomain' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSSQLiteManualVacuumOption' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSSQLitePragmasOption' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSSQLiteStoreType' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSStoreModelVersionHashesKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSStoreModelVersionIdentifiersKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSStorePathKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSStoreTypeKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSStoreUUIDInPathKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSStoreUUIDKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSUUIDChangedPersistentStoresKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSUpdatedObjectsKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSValidateXMLStoreOption' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSValidationKeyErrorKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSValidationObjectErrorKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSValidationPredicateErrorKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSValidationValueErrorKey' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSXMLExternalRecordType' type='@' const='true' declared_type='NSString*'/>
+<constant name='NSXMLStoreType' type='@' const='true' declared_type='NSString*'/>
+<enum name='NSAddEntityMappingType' value='2'/>
+<enum name='NSBinaryDataAttributeType' value='1000'/>
+<enum name='NSBooleanAttributeType' value='800'/>
+<enum name='NSCascadeDeleteRule' value='2'/>
+<enum name='NSConfinementConcurrencyType' value='0'/>
+<enum name='NSCopyEntityMappingType' value='4'/>
+<enum name='NSCoreDataError' value='134060'/>
+<enum name='NSCoreDataVersionNumber10_4' value='46.0'/>
+<enum name='NSCoreDataVersionNumber10_4_3' value='77.0'/>
+<enum name='NSCoreDataVersionNumber10_5' value='185.0'/>
+<enum name='NSCoreDataVersionNumber10_5_3' value='186.0'/>
+<enum name='NSCoreDataVersionNumber10_6' value='246.0'/>
+<enum name='NSCoreDataVersionNumber10_6_2' value='250.0'/>
+<enum name='NSCoreDataVersionNumber10_6_3' value='251.0'/>
+<enum name='NSCoreDataVersionNumber10_7' value='358.4'/>
+<enum name='NSCoreDataVersionNumber10_7_2' value='358.12'/>
+<enum name='NSCoreDataVersionNumber10_7_3' value='358.13'/>
+<enum name='NSCoreDataVersionNumber_iPhoneOS_3_0' value='241.0'/>
+<enum name='NSCoreDataVersionNumber_iPhoneOS_3_1' value='248.0'/>
+<enum name='NSCoreDataVersionNumber_iPhoneOS_3_2' value='310.2'/>
+<enum name='NSCoreDataVersionNumber_iPhoneOS_4_0' value='320.5'/>
+<enum name='NSCoreDataVersionNumber_iPhoneOS_4_1' value='320.11'/>
+<enum name='NSCoreDataVersionNumber_iPhoneOS_4_2' value='320.15'/>
+<enum name='NSCoreDataVersionNumber_iPhoneOS_4_3' value='320.17'/>
+<enum name='NSCoreDataVersionNumber_iPhoneOS_5_0' value='386.1'/>
+<enum name='NSCoreDataVersionNumber_iPhoneOS_5_1' value='386.5'/>
+<enum name='NSCountResultType' value='4'/>
+<enum name='NSCustomEntityMappingType' value='1'/>
+<enum name='NSDateAttributeType' value='900'/>
+<enum name='NSDecimalAttributeType' value='400'/>
+<enum name='NSDenyDeleteRule' value='3'/>
+<enum name='NSDictionaryResultType' value='2'/>
+<enum name='NSDoubleAttributeType' value='500'/>
+<enum name='NSEntityMigrationPolicyError' value='134170'/>
+<enum name='NSErrorMergePolicyType' value='0'/>
+<enum name='NSExternalRecordImportError' value='134200'/>
+<enum name='NSFetchRequestExpressionType' value='50'/>
+<enum name='NSFetchRequestType' value='1'/>
+<enum name='NSFloatAttributeType' value='600'/>
+<enum name='NSInferredMappingModelError' value='134190'/>
+<enum name='NSInteger16AttributeType' value='100'/>
+<enum name='NSInteger32AttributeType' value='200'/>
+<enum name='NSInteger64AttributeType' value='300'/>
+<enum name='NSMainQueueConcurrencyType' value='2'/>
+<enum name='NSManagedObjectContextLockingError' value='132000'/>
+<enum name='NSManagedObjectExternalRelationshipError' value='133010'/>
+<enum name='NSManagedObjectIDResultType' value='1'/>
+<enum name='NSManagedObjectMergeError' value='133020'/>
+<enum name='NSManagedObjectReferentialIntegrityError' value='133000'/>
+<enum name='NSManagedObjectResultType' value='0'/>
+<enum name='NSManagedObjectValidationError' value='1550'/>
+<enum name='NSMergeByPropertyObjectTrumpMergePolicyType' value='2'/>
+<enum name='NSMergeByPropertyStoreTrumpMergePolicyType' value='1'/>
+<enum name='NSMigrationCancelledError' value='134120'/>
+<enum name='NSMigrationError' value='134110'/>
+<enum name='NSMigrationManagerDestinationStoreError' value='134160'/>
+<enum name='NSMigrationManagerSourceStoreError' value='134150'/>
+<enum name='NSMigrationMissingMappingModelError' value='134140'/>
+<enum name='NSMigrationMissingSourceModelError' value='134130'/>
+<enum name='NSNoActionDeleteRule' value='0'/>
+<enum name='NSNullifyDeleteRule' value='1'/>
+<enum name='NSObjectIDAttributeType' value='2000'/>
+<enum name='NSOverwriteMergePolicyType' value='3'/>
+<enum name='NSPersistentStoreCoordinatorLockingError' value='132010'/>
+<enum name='NSPersistentStoreIncompatibleSchemaError' value='134020'/>
+<enum name='NSPersistentStoreIncompatibleVersionHashError' value='134100'/>
+<enum name='NSPersistentStoreIncompleteSaveError' value='134040'/>
+<enum name='NSPersistentStoreInvalidTypeError' value='134000'/>
+<enum name='NSPersistentStoreOpenError' value='134080'/>
+<enum name='NSPersistentStoreOperationError' value='134070'/>
+<enum name='NSPersistentStoreSaveConflictsError' value='134050'/>
+<enum name='NSPersistentStoreSaveError' value='134030'/>
+<enum name='NSPersistentStoreTimeoutError' value='134090'/>
+<enum name='NSPersistentStoreTypeMismatchError' value='134010'/>
+<enum name='NSPersistentStoreUnsupportedRequestTypeError' value='134091'/>
+<enum name='NSPrivateQueueConcurrencyType' value='1'/>
+<enum name='NSRemoveEntityMappingType' value='3'/>
+<enum name='NSRollbackMergePolicyType' value='4'/>
+<enum name='NSSQLiteError' value='134180'/>
+<enum name='NSSaveRequestType' value='2'/>
+<enum name='NSSnapshotEventMergePolicy' value='64'/>
+<enum name='NSSnapshotEventRefresh' value='32'/>
+<enum name='NSSnapshotEventRollback' value='16'/>
+<enum name='NSSnapshotEventUndoDeletion' value='4'/>
+<enum name='NSSnapshotEventUndoInsertion' value='2'/>
+<enum name='NSSnapshotEventUndoUpdate' value='8'/>
+<enum name='NSStringAttributeType' value='700'/>
+<enum name='NSTransformEntityMappingType' value='5'/>
+<enum name='NSTransformableAttributeType' value='1800'/>
+<enum name='NSUndefinedAttributeType' value='0'/>
+<enum name='NSUndefinedEntityMappingType' value='0'/>
+<enum name='NSValidationDateTooLateError' value='1630'/>
+<enum name='NSValidationDateTooSoonError' value='1640'/>
+<enum name='NSValidationInvalidDateError' value='1650'/>
+<enum name='NSValidationMissingMandatoryPropertyError' value='1570'/>
+<enum name='NSValidationMultipleErrorsError' value='1560'/>
+<enum name='NSValidationNumberTooLargeError' value='1610'/>
+<enum name='NSValidationNumberTooSmallError' value='1620'/>
+<enum name='NSValidationRelationshipDeniedDeleteError' value='1600'/>
+<enum name='NSValidationRelationshipExceedsMaximumCountError' value='1590'/>
+<enum name='NSValidationRelationshipLacksMinimumCountError' value='1580'/>
+<enum name='NSValidationStringPatternMatchingError' value='1680'/>
+<enum name='NSValidationStringTooLongError' value='1660'/>
+<enum name='NSValidationStringTooShortError' value='1670'/>
+<class name='NSAtomicStore'>
+<method selector='addCacheNodes:'>
+<arg name='cacheNodes' type='@' index='0' declared_type='NSSet*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='cacheNodeForObjectID:'>
+<arg name='objectID' type='@' index='0' declared_type='NSManagedObjectID*'/>
+<retval type='@' declared_type='NSAtomicStoreCacheNode*'/>
+</method>
+<method selector='cacheNodes'>
+<retval type='@' declared_type='NSSet*'/>
+</method>
+<method selector='initWithPersistentStoreCoordinator:configurationName:URL:options:'>
+<arg name='coordinator' type='@' index='0' declared_type='NSPersistentStoreCoordinator*'/>
+<arg name='configurationName' type='@' index='1' declared_type='NSString*'/>
+<arg name='url' type='@' index='2' declared_type='NSURL*'/>
+<arg name='options' type='@' index='3' declared_type='NSDictionary*'/>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='load:'>
+<arg name='error' type='^@' index='0' declared_type='NSError**'/>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='newCacheNodeForManagedObject:'>
+<arg name='managedObject' type='@' index='0' declared_type='NSManagedObject*'/>
+<retval type='@' declared_type='NSAtomicStoreCacheNode*'/>
+</method>
+<method selector='newReferenceObjectForManagedObject:'>
+<arg name='managedObject' type='@' index='0' declared_type='NSManagedObject*'/>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='objectIDForEntity:referenceObject:'>
+<arg name='entity' type='@' index='0' declared_type='NSEntityDescription*'/>
+<arg name='data' type='@' index='1' declared_type='id'/>
+<retval type='@' declared_type='NSManagedObjectID*'/>
+</method>
+<method selector='referenceObjectForObjectID:'>
+<arg name='objectID' type='@' index='0' declared_type='NSManagedObjectID*'/>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='save:'>
+<arg name='error' type='^@' index='0' declared_type='NSError**'/>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='updateCacheNode:fromManagedObject:'>
+<arg name='node' type='@' index='0' declared_type='NSAtomicStoreCacheNode*'/>
+<arg name='managedObject' type='@' index='1' declared_type='NSManagedObject*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='willRemoveCacheNodes:'>
+<arg name='cacheNodes' type='@' index='0' declared_type='NSSet*'/>
+<retval type='v' declared_type='void'/>
+</method>
+</class>
+<class name='NSAtomicStoreCacheNode'>
+<method selector='initWithObjectID:'>
+<arg name='moid' type='@' index='0' declared_type='NSManagedObjectID*'/>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='objectID'>
+<retval type='@' declared_type='NSManagedObjectID*'/>
+</method>
+<method selector='propertyCache'>
+<retval type='@' declared_type='NSMutableDictionary*'/>
+</method>
+<method selector='setPropertyCache:'>
+<arg name='propertyCache' type='@' index='0' declared_type='NSMutableDictionary*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setValue:forKey:'>
+<arg name='value' type='@' index='0' declared_type='id'/>
+<arg name='key' type='@' index='1' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='valueForKey:'>
+<arg name='key' type='@' index='0' declared_type='NSString*'/>
+<retval type='@' declared_type='id'/>
+</method>
+</class>
+<class name='NSAttributeDescription'>
+<method selector='allowsExternalBinaryDataStorage'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='attributeType'>
+<retval type='I' declared_type='NSAttributeType' type64='Q'/>
+</method>
+<method selector='attributeValueClassName'>
+<retval type='@' declared_type='NSString*'/>
+</method>
+<method selector='defaultValue'>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='setAllowsExternalBinaryDataStorage:'>
+<arg name='flag' type='B' index='0' declared_type='BOOL'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setAttributeType:'>
+<arg name='type' type='I' index='0' declared_type='NSAttributeType' type64='Q'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setAttributeValueClassName:'>
+<arg name='className' type='@' index='0' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setDefaultValue:'>
+<arg name='value' type='@' index='0' declared_type='id'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setValueTransformerName:'>
+<arg name='string' type='@' index='0' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='valueTransformerName'>
+<retval type='@' declared_type='NSString*'/>
+</method>
+<method selector='versionHash'>
+<retval type='@' declared_type='NSData*'/>
+</method>
+</class>
+<class name='NSEntityDescription'>
+<method selector='attributesByName'>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+<method selector='compoundIndexes'>
+<retval type='@' declared_type='NSArray*'/>
+</method>
+<method selector='entityForName:inManagedObjectContext:' class_method='true'>
+<arg name='entityName' type='@' index='0' declared_type='NSString*'/>
+<arg name='context' type='@' index='1' declared_type='NSManagedObjectContext*'/>
+<retval type='@' declared_type='NSEntityDescription*'/>
+</method>
+<method selector='insertNewObjectForEntityForName:inManagedObjectContext:' class_method='true'>
+<arg name='entityName' type='@' index='0' declared_type='NSString*'/>
+<arg name='context' type='@' index='1' declared_type='NSManagedObjectContext*'/>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='isAbstract'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='isKindOfEntity:'>
+<arg name='entity' type='@' index='0' declared_type='NSEntityDescription*'/>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='managedObjectClassName'>
+<retval type='@' declared_type='NSString*'/>
+</method>
+<method selector='managedObjectModel'>
+<retval type='@' declared_type='NSManagedObjectModel*'/>
+</method>
+<method selector='name'>
+<retval type='@' declared_type='NSString*'/>
+</method>
+<method selector='properties'>
+<retval type='@' declared_type='NSArray*'/>
+</method>
+<method selector='propertiesByName'>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+<method selector='relationshipsByName'>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+<method selector='relationshipsWithDestinationEntity:'>
+<arg name='entity' type='@' index='0' declared_type='NSEntityDescription*'/>
+<retval type='@' declared_type='NSArray*'/>
+</method>
+<method selector='renamingIdentifier'>
+<retval type='@' declared_type='NSString*'/>
+</method>
+<method selector='setAbstract:'>
+<arg name='flag' type='B' index='0' declared_type='BOOL'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setCompoundIndexes:'>
+<arg name='value' type='@' index='0' declared_type='NSArray*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setManagedObjectClassName:'>
+<arg name='name' type='@' index='0' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setName:'>
+<arg name='name' type='@' index='0' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setProperties:'>
+<arg name='properties' type='@' index='0' declared_type='NSArray*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setRenamingIdentifier:'>
+<arg name='value' type='@' index='0' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setSubentities:'>
+<arg name='array' type='@' index='0' declared_type='NSArray*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setUserInfo:'>
+<arg name='dictionary' type='@' index='0' declared_type='NSDictionary*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setVersionHashModifier:'>
+<arg name='modifierString' type='@' index='0' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='subentities'>
+<retval type='@' declared_type='NSArray*'/>
+</method>
+<method selector='subentitiesByName'>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+<method selector='superentity'>
+<retval type='@' declared_type='NSEntityDescription*'/>
+</method>
+<method selector='userInfo'>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+<method selector='versionHash'>
+<retval type='@' declared_type='NSData*'/>
+</method>
+<method selector='versionHashModifier'>
+<retval type='@' declared_type='NSString*'/>
+</method>
+</class>
+<class name='NSEntityMapping'>
+<method selector='attributeMappings'>
+<retval type='@' declared_type='NSArray*'/>
+</method>
+<method selector='destinationEntityName'>
+<retval type='@' declared_type='NSString*'/>
+</method>
+<method selector='destinationEntityVersionHash'>
+<retval type='@' declared_type='NSData*'/>
+</method>
+<method selector='entityMigrationPolicyClassName'>
+<retval type='@' declared_type='NSString*'/>
+</method>
+<method selector='mappingType'>
+<retval type='I' declared_type='NSEntityMappingType' type64='Q'/>
+</method>
+<method selector='name'>
+<retval type='@' declared_type='NSString*'/>
+</method>
+<method selector='relationshipMappings'>
+<retval type='@' declared_type='NSArray*'/>
+</method>
+<method selector='setAttributeMappings:'>
+<arg name='mappings' type='@' index='0' declared_type='NSArray*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setDestinationEntityName:'>
+<arg name='name' type='@' index='0' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setDestinationEntityVersionHash:'>
+<arg name='vhash' type='@' index='0' declared_type='NSData*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setEntityMigrationPolicyClassName:'>
+<arg name='name' type='@' index='0' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setMappingType:'>
+<arg name='type' type='I' index='0' declared_type='NSEntityMappingType' type64='Q'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setName:'>
+<arg name='name' type='@' index='0' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setRelationshipMappings:'>
+<arg name='mappings' type='@' index='0' declared_type='NSArray*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setSourceEntityName:'>
+<arg name='name' type='@' index='0' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setSourceEntityVersionHash:'>
+<arg name='vhash' type='@' index='0' declared_type='NSData*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setSourceExpression:'>
+<arg name='source' type='@' index='0' declared_type='NSExpression*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setUserInfo:'>
+<arg name='dict' type='@' index='0' declared_type='NSDictionary*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='sourceEntityName'>
+<retval type='@' declared_type='NSString*'/>
+</method>
+<method selector='sourceEntityVersionHash'>
+<retval type='@' declared_type='NSData*'/>
+</method>
+<method selector='sourceExpression'>
+<retval type='@' declared_type='NSExpression*'/>
+</method>
+<method selector='userInfo'>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+</class>
+<class name='NSEntityMigrationPolicy'>
+<method selector='beginEntityMapping:manager:error:'>
+<arg name='mapping' type='@' index='0' declared_type='NSEntityMapping*'/>
+<arg name='manager' type='@' index='1' declared_type='NSMigrationManager*'/>
+<arg name='error' type='^@' index='2' declared_type='NSError**'/>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='createDestinationInstancesForSourceInstance:entityMapping:manager:error:'>
+<arg name='sInstance' type='@' index='0' declared_type='NSManagedObject*'/>
+<arg name='mapping' type='@' index='1' declared_type='NSEntityMapping*'/>
+<arg name='manager' type='@' index='2' declared_type='NSMigrationManager*'/>
+<arg name='error' type='^@' index='3' declared_type='NSError**'/>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='createRelationshipsForDestinationInstance:entityMapping:manager:error:'>
+<arg name='dInstance' type='@' index='0' declared_type='NSManagedObject*'/>
+<arg name='mapping' type='@' index='1' declared_type='NSEntityMapping*'/>
+<arg name='manager' type='@' index='2' declared_type='NSMigrationManager*'/>
+<arg name='error' type='^@' index='3' declared_type='NSError**'/>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='endEntityMapping:manager:error:'>
+<arg name='mapping' type='@' index='0' declared_type='NSEntityMapping*'/>
+<arg name='manager' type='@' index='1' declared_type='NSMigrationManager*'/>
+<arg name='error' type='^@' index='2' declared_type='NSError**'/>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='endInstanceCreationForEntityMapping:manager:error:'>
+<arg name='mapping' type='@' index='0' declared_type='NSEntityMapping*'/>
+<arg name='manager' type='@' index='1' declared_type='NSMigrationManager*'/>
+<arg name='error' type='^@' index='2' declared_type='NSError**'/>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='endRelationshipCreationForEntityMapping:manager:error:'>
+<arg name='mapping' type='@' index='0' declared_type='NSEntityMapping*'/>
+<arg name='manager' type='@' index='1' declared_type='NSMigrationManager*'/>
+<arg name='error' type='^@' index='2' declared_type='NSError**'/>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='performCustomValidationForEntityMapping:manager:error:'>
+<arg name='mapping' type='@' index='0' declared_type='NSEntityMapping*'/>
+<arg name='manager' type='@' index='1' declared_type='NSMigrationManager*'/>
+<arg name='error' type='^@' index='2' declared_type='NSError**'/>
+<retval type='B' declared_type='BOOL'/>
+</method>
+</class>
+<class name='NSExpressionDescription'>
+<method selector='expression'>
+<retval type='@' declared_type='NSExpression*'/>
+</method>
+<method selector='expressionResultType'>
+<retval type='I' declared_type='NSAttributeType' type64='Q'/>
+</method>
+<method selector='setExpression:'>
+<arg name='expression' type='@' index='0' declared_type='NSExpression*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setExpressionResultType:'>
+<arg name='type' type='I' index='0' declared_type='NSAttributeType' type64='Q'/>
+<retval type='v' declared_type='void'/>
+</method>
+</class>
+<class name='NSFetchRequest'>
+<method selector='affectedStores'>
+<retval type='@' declared_type='NSArray*'/>
+</method>
+<method selector='entity'>
+<retval type='@' declared_type='NSEntityDescription*'/>
+</method>
+<method selector='entityName'>
+<retval type='@' declared_type='NSString*'/>
+</method>
+<method selector='fetchBatchSize'>
+<retval type='I' declared_type='NSUInteger' type64='Q'/>
+</method>
+<method selector='fetchLimit'>
+<retval type='I' declared_type='NSUInteger' type64='Q'/>
+</method>
+<method selector='fetchOffset'>
+<retval type='I' declared_type='NSUInteger' type64='Q'/>
+</method>
+<method selector='fetchRequestWithEntityName:' class_method='true'>
+<arg name='entityName' type='@' index='0' declared_type='NSString*'/>
+<retval type='@' declared_type='NSFetchRequest*'/>
+</method>
+<method selector='havingPredicate'>
+<retval type='@' declared_type='NSPredicate*'/>
+</method>
+<method selector='includesPendingChanges'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='includesPropertyValues'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='includesSubentities'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='init'>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='initWithEntityName:'>
+<arg name='entityName' type='@' index='0' declared_type='NSString*'/>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='predicate'>
+<retval type='@' declared_type='NSPredicate*'/>
+</method>
+<method selector='propertiesToFetch'>
+<retval type='@' declared_type='NSArray*'/>
+</method>
+<method selector='propertiesToGroupBy'>
+<retval type='@' declared_type='NSArray*'/>
+</method>
+<method selector='relationshipKeyPathsForPrefetching'>
+<retval type='@' declared_type='NSArray*'/>
+</method>
+<method selector='resultType'>
+<retval type='I' declared_type='NSFetchRequestResultType' type64='Q'/>
+</method>
+<method selector='returnsDistinctResults'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='returnsObjectsAsFaults'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='setAffectedStores:'>
+<arg name='stores' type='@' index='0' declared_type='NSArray*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setEntity:'>
+<arg name='entity' type='@' index='0' declared_type='NSEntityDescription*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setFetchBatchSize:'>
+<arg name='bsize' type='I' index='0' declared_type='NSUInteger' type64='Q'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setFetchLimit:'>
+<arg name='limit' type='I' index='0' declared_type='NSUInteger' type64='Q'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setFetchOffset:'>
+<arg name='offset' type='I' index='0' declared_type='NSUInteger' type64='Q'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setHavingPredicate:'>
+<arg name='predicate' type='@' index='0' declared_type='NSPredicate*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setIncludesPendingChanges:'>
+<arg name='flag' type='B' index='0' declared_type='BOOL'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setIncludesPropertyValues:'>
+<arg name='yesNo' type='B' index='0' declared_type='BOOL'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setIncludesSubentities:'>
+<arg name='yesNo' type='B' index='0' declared_type='BOOL'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setPredicate:'>
+<arg name='predicate' type='@' index='0' declared_type='NSPredicate*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setPropertiesToFetch:'>
+<arg name='values' type='@' index='0' declared_type='NSArray*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setPropertiesToGroupBy:'>
+<arg name='array' type='@' index='0' declared_type='NSArray*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setRelationshipKeyPathsForPrefetching:'>
+<arg name='keys' type='@' index='0' declared_type='NSArray*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setResultType:'>
+<arg name='type' type='I' index='0' declared_type='NSFetchRequestResultType' type64='Q'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setReturnsDistinctResults:'>
+<arg name='flag' type='B' index='0' declared_type='BOOL'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setReturnsObjectsAsFaults:'>
+<arg name='yesNo' type='B' index='0' declared_type='BOOL'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setShouldRefreshRefetchedObjects:'>
+<arg name='flag' type='B' index='0' declared_type='BOOL'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setSortDescriptors:'>
+<arg name='sortDescriptors' type='@' index='0' declared_type='NSArray*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='shouldRefreshRefetchedObjects'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='sortDescriptors'>
+<retval type='@' declared_type='NSArray*'/>
+</method>
+</class>
+<class name='NSFetchRequestExpression'>
+<method selector='contextExpression'>
+<retval type='@' declared_type='NSExpression*'/>
+</method>
+<method selector='expressionForFetch:context:countOnly:' class_method='true'>
+<arg name='fetch' type='@' index='0' declared_type='NSExpression*'/>
+<arg name='context' type='@' index='1' declared_type='NSExpression*'/>
+<arg name='countFlag' type='B' index='2' declared_type='BOOL'/>
+<retval type='@' declared_type='NSExpression*'/>
+</method>
+<method selector='isCountOnlyRequest'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='requestExpression'>
+<retval type='@' declared_type='NSExpression*'/>
+</method>
+</class>
+<class name='NSFetchedPropertyDescription'>
+<method selector='fetchRequest'>
+<retval type='@' declared_type='NSFetchRequest*'/>
+</method>
+<method selector='setFetchRequest:'>
+<arg name='fetchRequest' type='@' index='0' declared_type='NSFetchRequest*'/>
+<retval type='v' declared_type='void'/>
+</method>
+</class>
+<class name='NSIncrementalStore'>
+<method selector='executeRequest:withContext:error:'>
+<arg name='request' type='@' index='0' declared_type='NSPersistentStoreRequest*'/>
+<arg name='context' type='@' index='1' declared_type='NSManagedObjectContext*'/>
+<arg name='error' type='^@' index='2' declared_type='NSError**'/>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='identifierForNewStoreAtURL:' class_method='true'>
+<arg name='storeURL' type='@' index='0' declared_type='NSURL*'/>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='loadMetadata:'>
+<arg name='error' type='^@' index='0' declared_type='NSError**'/>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='managedObjectContextDidRegisterObjectsWithIDs:'>
+<arg name='objectIDs' type='@' index='0' declared_type='NSArray*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='managedObjectContextDidUnregisterObjectsWithIDs:'>
+<arg name='objectIDs' type='@' index='0' declared_type='NSArray*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='newObjectIDForEntity:referenceObject:'>
+<arg name='entity' type='@' index='0' declared_type='NSEntityDescription*'/>
+<arg name='data' type='@' index='1' declared_type='id'/>
+<retval type='@' declared_type='NSManagedObjectID*'/>
+</method>
+<method selector='newValueForRelationship:forObjectWithID:withContext:error:'>
+<arg name='relationship' type='@' index='0' declared_type='NSRelationshipDescription*'/>
+<arg name='objectID' type='@' index='1' declared_type='NSManagedObjectID*'/>
+<arg name='context' type='@' index='2' declared_type='NSManagedObjectContext*'/>
+<arg name='error' type='^@' index='3' declared_type='NSError**'/>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='newValuesForObjectWithID:withContext:error:'>
+<arg name='objectID' type='@' index='0' declared_type='NSManagedObjectID*'/>
+<arg name='context' type='@' index='1' declared_type='NSManagedObjectContext*'/>
+<arg name='error' type='^@' index='2' declared_type='NSError**'/>
+<retval type='@' declared_type='NSIncrementalStoreNode*'/>
+</method>
+<method selector='obtainPermanentIDsForObjects:error:'>
+<arg name='array' type='@' index='0' declared_type='NSArray*'/>
+<arg name='error' type='^@' index='1' declared_type='NSError**'/>
+<retval type='@' declared_type='NSArray*'/>
+</method>
+<method selector='referenceObjectForObjectID:'>
+<arg name='objectID' type='@' index='0' declared_type='NSManagedObjectID*'/>
+<retval type='@' declared_type='id'/>
+</method>
+</class>
+<class name='NSIncrementalStoreNode'>
+<method selector='initWithObjectID:withValues:version:'>
+<arg name='objectID' type='@' index='0' declared_type='NSManagedObjectID*'/>
+<arg name='values' type='@' index='1' declared_type='NSDictionary*'/>
+<arg name='version' type='Q' index='2' declared_type='uint64_t'/>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='objectID'>
+<retval type='@' declared_type='NSManagedObjectID*'/>
+</method>
+<method selector='updateWithValues:version:'>
+<arg name='values' type='@' index='0' declared_type='NSDictionary*'/>
+<arg name='version' type='Q' index='1' declared_type='uint64_t'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='valueForPropertyDescription:'>
+<arg name='prop' type='@' index='0' declared_type='NSPropertyDescription*'/>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='version'>
+<retval type='Q' declared_type='uint64_t'/>
+</method>
+</class>
+<class name='NSManagedObject'>
+<method selector='awakeFromFetch'>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='awakeFromInsert'>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='awakeFromSnapshotEvents:'>
+<arg name='flags' type='I' index='0' declared_type='NSSnapshotEventType' type64='Q'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='changedValues'>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+<method selector='changedValuesForCurrentEvent'>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+<method selector='committedValuesForKeys:'>
+<arg name='keys' type='@' index='0' declared_type='NSArray*'/>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+<method selector='contextShouldIgnoreUnmodeledPropertyChanges' class_method='true'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='didAccessValueForKey:'>
+<arg name='key' type='@' index='0' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='didChangeValueForKey:'>
+<arg name='key' type='@' index='0' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='didChangeValueForKey:withSetMutation:usingObjects:'>
+<arg name='inKey' type='@' index='0' declared_type='NSString*'/>
+<arg name='inMutationKind' type='I' index='1' declared_type='NSKeyValueSetMutationKind' type64='Q'/>
+<arg name='inObjects' type='@' index='2' declared_type='NSSet*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='didSave'>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='didTurnIntoFault'>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='entity'>
+<retval type='@' declared_type='NSEntityDescription*'/>
+</method>
+<method selector='faultingState'>
+<retval type='I' declared_type='NSUInteger' type64='Q'/>
+</method>
+<method selector='hasChanges'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='hasFaultForRelationshipNamed:'>
+<arg name='key' type='@' index='0' declared_type='NSString*'/>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='initWithEntity:insertIntoManagedObjectContext:'>
+<arg name='entity' type='@' index='0' declared_type='NSEntityDescription*'/>
+<arg name='context' type='@' index='1' declared_type='NSManagedObjectContext*'/>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='isDeleted'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='isFault'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='isInserted'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='isUpdated'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='managedObjectContext'>
+<retval type='@' declared_type='NSManagedObjectContext*'/>
+</method>
+<method selector='objectID'>
+<retval type='@' declared_type='NSManagedObjectID*'/>
+</method>
+<method selector='observationInfo'>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='prepareForDeletion'>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='primitiveValueForKey:'>
+<arg name='key' type='@' index='0' declared_type='NSString*'/>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='setObservationInfo:'>
+<arg name='inObservationInfo' type='@' index='0' declared_type='id'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setPrimitiveValue:forKey:'>
+<arg name='value' type='@' index='0' declared_type='id'/>
+<arg name='key' type='@' index='1' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setValue:forKey:'>
+<arg name='value' type='@' index='0' declared_type='id'/>
+<arg name='key' type='@' index='1' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='validateForDelete:'>
+<arg name='error' type='^@' index='0' declared_type='NSError**'/>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='validateForInsert:'>
+<arg name='error' type='^@' index='0' declared_type='NSError**'/>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='validateForUpdate:'>
+<arg name='error' type='^@' index='0' declared_type='NSError**'/>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='validateValue:forKey:error:'>
+<arg name='value' type='^@' index='0' declared_type='id*'/>
+<arg name='key' type='@' index='1' declared_type='NSString*'/>
+<arg name='error' type='^@' index='2' declared_type='NSError**'/>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='valueForKey:'>
+<arg name='key' type='@' index='0' declared_type='NSString*'/>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='willAccessValueForKey:'>
+<arg name='key' type='@' index='0' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='willChangeValueForKey:'>
+<arg name='key' type='@' index='0' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='willChangeValueForKey:withSetMutation:usingObjects:'>
+<arg name='inKey' type='@' index='0' declared_type='NSString*'/>
+<arg name='inMutationKind' type='I' index='1' declared_type='NSKeyValueSetMutationKind' type64='Q'/>
+<arg name='inObjects' type='@' index='2' declared_type='NSSet*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='willSave'>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='willTurnIntoFault'>
+<retval type='v' declared_type='void'/>
+</method>
+</class>
+<class name='NSManagedObjectContext'>
+<method selector='assignObject:toPersistentStore:'>
+<arg name='object' type='@' index='0' declared_type='id'/>
+<arg name='store' type='@' index='1' declared_type='NSPersistentStore*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='concurrencyType'>
+<retval type='I' declared_type='NSManagedObjectContextConcurrencyType' type64='Q'/>
+</method>
+<method selector='countForFetchRequest:error:'>
+<arg name='request' type='@' index='0' declared_type='NSFetchRequest*'/>
+<arg name='error' type='^@' index='1' declared_type='NSError**'/>
+<retval type='I' declared_type='NSUInteger' type64='Q'/>
+</method>
+<method selector='deleteObject:'>
+<arg name='object' type='@' index='0' declared_type='NSManagedObject*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='deletedObjects'>
+<retval type='@' declared_type='NSSet*'/>
+</method>
+<method selector='detectConflictsForObject:'>
+<arg name='object' type='@' index='0' declared_type='NSManagedObject*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='executeFetchRequest:error:'>
+<arg name='request' type='@' index='0' declared_type='NSFetchRequest*'/>
+<arg name='error' type='^@' index='1' declared_type='NSError**'/>
+<retval type='@' declared_type='NSArray*'/>
+</method>
+<method selector='existingObjectWithID:error:'>
+<arg name='objectID' type='@' index='0' declared_type='NSManagedObjectID*'/>
+<arg name='error' type='^@' index='1' declared_type='NSError**'/>
+<retval type='@' declared_type='NSManagedObject*'/>
+</method>
+<method selector='hasChanges'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='initWithConcurrencyType:'>
+<arg name='ct' type='I' index='0' declared_type='NSManagedObjectContextConcurrencyType' type64='Q'/>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='insertObject:'>
+<arg name='object' type='@' index='0' declared_type='NSManagedObject*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='insertedObjects'>
+<retval type='@' declared_type='NSSet*'/>
+</method>
+<method selector='lock'>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='mergeChangesFromContextDidSaveNotification:'>
+<arg name='notification' type='@' index='0' declared_type='NSNotification*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='mergePolicy'>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='objectRegisteredForID:'>
+<arg name='objectID' type='@' index='0' declared_type='NSManagedObjectID*'/>
+<retval type='@' declared_type='NSManagedObject*'/>
+</method>
+<method selector='objectWithID:'>
+<arg name='objectID' type='@' index='0' declared_type='NSManagedObjectID*'/>
+<retval type='@' declared_type='NSManagedObject*'/>
+</method>
+<method selector='observeValueForKeyPath:ofObject:change:context:'>
+<arg name='keyPath' type='@' index='0' declared_type='NSString*'/>
+<arg name='object' type='@' index='1' declared_type='id'/>
+<arg name='change' type='@' index='2' declared_type='NSDictionary*'/>
+<arg name='context' type='^v' index='3' declared_type='void*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='obtainPermanentIDsForObjects:error:'>
+<arg name='objects' type='@' index='0' declared_type='NSArray*'/>
+<arg name='error' type='^@' index='1' declared_type='NSError**'/>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='parentContext'>
+<retval type='@' declared_type='NSManagedObjectContext*'/>
+</method>
+<method selector='performBlock:'>
+<arg name='block' type='@?' index='0' declared_type='void (^)()' function_pointer='true'>
+<retval type='v' declared_type='void'/>
+</arg>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='performBlockAndWait:'>
+<arg name='block' type='@?' index='0' declared_type='void (^)()' function_pointer='true'>
+<retval type='v' declared_type='void'/>
+</arg>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='persistentStoreCoordinator'>
+<retval type='@' declared_type='NSPersistentStoreCoordinator*'/>
+</method>
+<method selector='processPendingChanges'>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='propagatesDeletesAtEndOfEvent'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='redo'>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='refreshObject:mergeChanges:'>
+<arg name='object' type='@' index='0' declared_type='NSManagedObject*'/>
+<arg name='flag' type='B' index='1' declared_type='BOOL'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='registeredObjects'>
+<retval type='@' declared_type='NSSet*'/>
+</method>
+<method selector='reset'>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='retainsRegisteredObjects'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='rollback'>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='save:'>
+<arg name='error' type='^@' index='0' declared_type='NSError**'/>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='setMergePolicy:'>
+<arg name='mergePolicy' type='@' index='0' declared_type='id'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setParentContext:'>
+<arg name='parent' type='@' index='0' declared_type='NSManagedObjectContext*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setPersistentStoreCoordinator:'>
+<arg name='coordinator' type='@' index='0' declared_type='NSPersistentStoreCoordinator*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setPropagatesDeletesAtEndOfEvent:'>
+<arg name='flag' type='B' index='0' declared_type='BOOL'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setRetainsRegisteredObjects:'>
+<arg name='flag' type='B' index='0' declared_type='BOOL'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setStalenessInterval:'>
+<arg name='expiration' type='d' index='0' declared_type='NSTimeInterval'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setUndoManager:'>
+<arg name='undoManager' type='@' index='0' declared_type='NSUndoManager*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='stalenessInterval'>
+<retval type='d' declared_type='NSTimeInterval'/>
+</method>
+<method selector='tryLock'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='undo'>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='undoManager'>
+<retval type='@' declared_type='NSUndoManager*'/>
+</method>
+<method selector='unlock'>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='updatedObjects'>
+<retval type='@' declared_type='NSSet*'/>
+</method>
+<method selector='userInfo'>
+<retval type='@' declared_type='NSMutableDictionary*'/>
+</method>
+</class>
+<class name='NSManagedObjectID'>
+<method selector='URIRepresentation'>
+<retval type='@' declared_type='NSURL*'/>
+</method>
+<method selector='entity'>
+<retval type='@' declared_type='NSEntityDescription*'/>
+</method>
+<method selector='isTemporaryID'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='persistentStore'>
+<retval type='@' declared_type='NSPersistentStore*'/>
+</method>
+</class>
+<class name='NSManagedObjectModel'>
+<method selector='configurations'>
+<retval type='@' declared_type='NSArray*'/>
+</method>
+<method selector='entities'>
+<retval type='@' declared_type='NSArray*'/>
+</method>
+<method selector='entitiesByName'>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+<method selector='entitiesForConfiguration:'>
+<arg name='configuration' type='@' index='0' declared_type='NSString*'/>
+<retval type='@' declared_type='NSArray*'/>
+</method>
+<method selector='entityVersionHashesByName'>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+<method selector='fetchRequestFromTemplateWithName:substitutionVariables:'>
+<arg name='name' type='@' index='0' declared_type='NSString*'/>
+<arg name='variables' type='@' index='1' declared_type='NSDictionary*'/>
+<retval type='@' declared_type='NSFetchRequest*'/>
+</method>
+<method selector='fetchRequestTemplateForName:'>
+<arg name='name' type='@' index='0' declared_type='NSString*'/>
+<retval type='@' declared_type='NSFetchRequest*'/>
+</method>
+<method selector='fetchRequestTemplatesByName'>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+<method selector='init'>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='initWithContentsOfURL:'>
+<arg name='url' type='@' index='0' declared_type='NSURL*'/>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='isConfiguration:compatibleWithStoreMetadata:'>
+<arg name='configuration' type='@' index='0' declared_type='NSString*'/>
+<arg name='metadata' type='@' index='1' declared_type='NSDictionary*'/>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='localizationDictionary'>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+<method selector='mergedModelFromBundles:' class_method='true'>
+<arg name='bundles' type='@' index='0' declared_type='NSArray*'/>
+<retval type='@' declared_type='NSManagedObjectModel*'/>
+</method>
+<method selector='mergedModelFromBundles:forStoreMetadata:' class_method='true'>
+<arg name='bundles' type='@' index='0' declared_type='NSArray*'/>
+<arg name='metadata' type='@' index='1' declared_type='NSDictionary*'/>
+<retval type='@' declared_type='NSManagedObjectModel*'/>
+</method>
+<method selector='modelByMergingModels:' class_method='true'>
+<arg name='models' type='@' index='0' declared_type='NSArray*'/>
+<retval type='@' declared_type='NSManagedObjectModel*'/>
+</method>
+<method selector='modelByMergingModels:forStoreMetadata:' class_method='true'>
+<arg name='models' type='@' index='0' declared_type='NSArray*'/>
+<arg name='metadata' type='@' index='1' declared_type='NSDictionary*'/>
+<retval type='@' declared_type='NSManagedObjectModel*'/>
+</method>
+<method selector='setEntities:'>
+<arg name='entities' type='@' index='0' declared_type='NSArray*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setEntities:forConfiguration:'>
+<arg name='entities' type='@' index='0' declared_type='NSArray*'/>
+<arg name='configuration' type='@' index='1' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setFetchRequestTemplate:forName:'>
+<arg name='fetchRequestTemplate' type='@' index='0' declared_type='NSFetchRequest*'/>
+<arg name='name' type='@' index='1' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setLocalizationDictionary:'>
+<arg name='localizationDictionary' type='@' index='0' declared_type='NSDictionary*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setVersionIdentifiers:'>
+<arg name='identifiers' type='@' index='0' declared_type='NSSet*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='versionIdentifiers'>
+<retval type='@' declared_type='NSSet*'/>
+</method>
+</class>
+<class name='NSMappingModel'>
+<method selector='entityMappings'>
+<retval type='@' declared_type='NSArray*'/>
+</method>
+<method selector='entityMappingsByName'>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+<method selector='inferredMappingModelForSourceModel:destinationModel:error:' class_method='true'>
+<arg name='sourceModel' type='@' index='0' declared_type='NSManagedObjectModel*'/>
+<arg name='destinationModel' type='@' index='1' declared_type='NSManagedObjectModel*'/>
+<arg name='error' type='^@' index='2' declared_type='NSError**'/>
+<retval type='@' declared_type='NSMappingModel*'/>
+</method>
+<method selector='initWithContentsOfURL:'>
+<arg name='url' type='@' index='0' declared_type='NSURL*'/>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='mappingModelFromBundles:forSourceModel:destinationModel:' class_method='true'>
+<arg name='bundles' type='@' index='0' declared_type='NSArray*'/>
+<arg name='sourceModel' type='@' index='1' declared_type='NSManagedObjectModel*'/>
+<arg name='destinationModel' type='@' index='2' declared_type='NSManagedObjectModel*'/>
+<retval type='@' declared_type='NSMappingModel*'/>
+</method>
+<method selector='setEntityMappings:'>
+<arg name='mappings' type='@' index='0' declared_type='NSArray*'/>
+<retval type='v' declared_type='void'/>
+</method>
+</class>
+<class name='NSMergeConflict'>
+<method selector='cachedSnapshot'>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+<method selector='initWithSource:newVersion:oldVersion:cachedSnapshot:persistedSnapshot:'>
+<arg name='srcObject' type='@' index='0' declared_type='NSManagedObject*'/>
+<arg name='newvers' type='I' index='1' declared_type='NSUInteger' type64='Q'/>
+<arg name='oldvers' type='I' index='2' declared_type='NSUInteger' type64='Q'/>
+<arg name='cachesnap' type='@' index='3' declared_type='NSDictionary*'/>
+<arg name='persnap' type='@' index='4' declared_type='NSDictionary*'/>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='newVersionNumber'>
+<retval type='I' declared_type='NSUInteger' type64='Q'/>
+</method>
+<method selector='objectSnapshot'>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+<method selector='oldVersionNumber'>
+<retval type='I' declared_type='NSUInteger' type64='Q'/>
+</method>
+<method selector='persistedSnapshot'>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+<method selector='sourceObject'>
+<retval type='@' declared_type='NSManagedObject*'/>
+</method>
+</class>
+<class name='NSMergePolicy'>
+<method selector='initWithMergeType:'>
+<arg name='ty' type='I' index='0' declared_type='NSMergePolicyType' type64='Q'/>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='mergeType'>
+<retval type='I' declared_type='NSMergePolicyType' type64='Q'/>
+</method>
+<method selector='resolveConflicts:error:'>
+<arg name='list' type='@' index='0' declared_type='NSArray*'/>
+<arg name='error' type='^@' index='1' declared_type='NSError**'/>
+<retval type='B' declared_type='BOOL'/>
+</method>
+</class>
+<class name='NSMigrationManager'>
+<method selector='associateSourceInstance:withDestinationInstance:forEntityMapping:'>
+<arg name='sourceInstance' type='@' index='0' declared_type='NSManagedObject*'/>
+<arg name='destinationInstance' type='@' index='1' declared_type='NSManagedObject*'/>
+<arg name='entityMapping' type='@' index='2' declared_type='NSEntityMapping*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='cancelMigrationWithError:'>
+<arg name='error' type='@' index='0' declared_type='NSError*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='currentEntityMapping'>
+<retval type='@' declared_type='NSEntityMapping*'/>
+</method>
+<method selector='destinationContext'>
+<retval type='@' declared_type='NSManagedObjectContext*'/>
+</method>
+<method selector='destinationEntityForEntityMapping:'>
+<arg name='mEntity' type='@' index='0' declared_type='NSEntityMapping*'/>
+<retval type='@' declared_type='NSEntityDescription*'/>
+</method>
+<method selector='destinationInstancesForEntityMappingNamed:sourceInstances:'>
+<arg name='mappingName' type='@' index='0' declared_type='NSString*'/>
+<arg name='sourceInstances' type='@' index='1' declared_type='NSArray*'/>
+<retval type='@' declared_type='NSArray*'/>
+</method>
+<method selector='destinationModel'>
+<retval type='@' declared_type='NSManagedObjectModel*'/>
+</method>
+<method selector='initWithSourceModel:destinationModel:'>
+<arg name='sourceModel' type='@' index='0' declared_type='NSManagedObjectModel*'/>
+<arg name='destinationModel' type='@' index='1' declared_type='NSManagedObjectModel*'/>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='mappingModel'>
+<retval type='@' declared_type='NSMappingModel*'/>
+</method>
+<method selector='migrateStoreFromURL:type:options:withMappingModel:toDestinationURL:destinationType:destinationOptions:error:'>
+<arg name='sourceURL' type='@' index='0' declared_type='NSURL*'/>
+<arg name='sStoreType' type='@' index='1' declared_type='NSString*'/>
+<arg name='sOptions' type='@' index='2' declared_type='NSDictionary*'/>
+<arg name='mappings' type='@' index='3' declared_type='NSMappingModel*'/>
+<arg name='dURL' type='@' index='4' declared_type='NSURL*'/>
+<arg name='dStoreType' type='@' index='5' declared_type='NSString*'/>
+<arg name='dOptions' type='@' index='6' declared_type='NSDictionary*'/>
+<arg name='error' type='^@' index='7' declared_type='NSError**'/>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='migrationProgress'>
+<retval type='f' declared_type='float'/>
+</method>
+<method selector='reset'>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setUserInfo:'>
+<arg name='dict' type='@' index='0' declared_type='NSDictionary*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setUsesStoreSpecificMigrationManager:'>
+<arg name='flag' type='B' index='0' declared_type='BOOL'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='sourceContext'>
+<retval type='@' declared_type='NSManagedObjectContext*'/>
+</method>
+<method selector='sourceEntityForEntityMapping:'>
+<arg name='mEntity' type='@' index='0' declared_type='NSEntityMapping*'/>
+<retval type='@' declared_type='NSEntityDescription*'/>
+</method>
+<method selector='sourceInstancesForEntityMappingNamed:destinationInstances:'>
+<arg name='mappingName' type='@' index='0' declared_type='NSString*'/>
+<arg name='destinationInstances' type='@' index='1' declared_type='NSArray*'/>
+<retval type='@' declared_type='NSArray*'/>
+</method>
+<method selector='sourceModel'>
+<retval type='@' declared_type='NSManagedObjectModel*'/>
+</method>
+<method selector='userInfo'>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+<method selector='usesStoreSpecificMigrationManager'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+</class>
+<class name='NSPersistentStore'>
+<method selector='URL'>
+<retval type='@' declared_type='NSURL*'/>
+</method>
+<method selector='configurationName'>
+<retval type='@' declared_type='NSString*'/>
+</method>
+<method selector='didAddToPersistentStoreCoordinator:'>
+<arg name='coordinator' type='@' index='0' declared_type='NSPersistentStoreCoordinator*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='identifier'>
+<retval type='@' declared_type='NSString*'/>
+</method>
+<method selector='initWithPersistentStoreCoordinator:configurationName:URL:options:'>
+<arg name='root' type='@' index='0' declared_type='NSPersistentStoreCoordinator*'/>
+<arg name='name' type='@' index='1' declared_type='NSString*'/>
+<arg name='url' type='@' index='2' declared_type='NSURL*'/>
+<arg name='options' type='@' index='3' declared_type='NSDictionary*'/>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='isReadOnly'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='loadMetadata:'>
+<arg name='error' type='^@' index='0' declared_type='NSError**'/>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='metadata'>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+<method selector='metadataForPersistentStoreWithURL:error:' class_method='true'>
+<arg name='url' type='@' index='0' declared_type='NSURL*'/>
+<arg name='error' type='^@' index='1' declared_type='NSError**'/>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+<method selector='migrationManagerClass' class_method='true'>
+<retval type='#' declared_type='Class'/>
+</method>
+<method selector='options'>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+<method selector='persistentStoreCoordinator'>
+<retval type='@' declared_type='NSPersistentStoreCoordinator*'/>
+</method>
+<method selector='setIdentifier:'>
+<arg name='identifier' type='@' index='0' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setMetadata:'>
+<arg name='storeMetadata' type='@' index='0' declared_type='NSDictionary*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setMetadata:forPersistentStoreWithURL:error:' class_method='true'>
+<arg name='metadata' type='@' index='0' declared_type='NSDictionary*'/>
+<arg name='url' type='@' index='1' declared_type='NSURL*'/>
+<arg name='error' type='^@' index='2' declared_type='NSError**'/>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='setReadOnly:'>
+<arg name='flag' type='B' index='0' declared_type='BOOL'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setURL:'>
+<arg name='url' type='@' index='0' declared_type='NSURL*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='type'>
+<retval type='@' declared_type='NSString*'/>
+</method>
+<method selector='willRemoveFromPersistentStoreCoordinator:'>
+<arg name='coordinator' type='@' index='0' declared_type='NSPersistentStoreCoordinator*'/>
+<retval type='v' declared_type='void'/>
+</method>
+</class>
+<class name='NSPersistentStoreCoordinator'>
+<method selector='URLForPersistentStore:'>
+<arg name='store' type='@' index='0' declared_type='NSPersistentStore*'/>
+<retval type='@' declared_type='NSURL*'/>
+</method>
+<method selector='addPersistentStoreWithType:configuration:URL:options:error:'>
+<arg name='storeType' type='@' index='0' declared_type='NSString*'/>
+<arg name='configuration' type='@' index='1' declared_type='NSString*'/>
+<arg name='storeURL' type='@' index='2' declared_type='NSURL*'/>
+<arg name='options' type='@' index='3' declared_type='NSDictionary*'/>
+<arg name='error' type='^@' index='4' declared_type='NSError**'/>
+<retval type='@' declared_type='NSPersistentStore*'/>
+</method>
+<method selector='elementsDerivedFromExternalRecordURL:' class_method='true'>
+<arg name='fileURL' type='@' index='0' declared_type='NSURL*'/>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+<method selector='executeRequest:withContext:error:'>
+<arg name='request' type='@' index='0' declared_type='NSPersistentStoreRequest*'/>
+<arg name='context' type='@' index='1' declared_type='NSManagedObjectContext*'/>
+<arg name='error' type='^@' index='2' declared_type='NSError**'/>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='importStoreWithIdentifier:fromExternalRecordsDirectory:toURL:options:withType:error:'>
+<arg name='storeIdentifier' type='@' index='0' declared_type='NSString*'/>
+<arg name='externalRecordsURL' type='@' index='1' declared_type='NSURL*'/>
+<arg name='destinationURL' type='@' index='2' declared_type='NSURL*'/>
+<arg name='options' type='@' index='3' declared_type='NSDictionary*'/>
+<arg name='storeType' type='@' index='4' declared_type='NSString*'/>
+<arg name='error' type='^@' index='5' declared_type='NSError**'/>
+<retval type='@' declared_type='NSPersistentStore*'/>
+</method>
+<method selector='initWithManagedObjectModel:'>
+<arg name='model' type='@' index='0' declared_type='NSManagedObjectModel*'/>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='lock'>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='managedObjectIDForURIRepresentation:'>
+<arg name='url' type='@' index='0' declared_type='NSURL*'/>
+<retval type='@' declared_type='NSManagedObjectID*'/>
+</method>
+<method selector='managedObjectModel'>
+<retval type='@' declared_type='NSManagedObjectModel*'/>
+</method>
+<method selector='metadataForPersistentStore:'>
+<arg name='store' type='@' index='0' declared_type='NSPersistentStore*'/>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+<method selector='metadataForPersistentStoreOfType:URL:error:' class_method='true'>
+<arg name='storeType' type='@' index='0' declared_type='NSString*'/>
+<arg name='url' type='@' index='1' declared_type='NSURL*'/>
+<arg name='error' type='^@' index='2' declared_type='NSError**'/>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+<method selector='metadataForPersistentStoreWithURL:error:' class_method='true'>
+<arg name='url' type='@' index='0' declared_type='NSURL*'/>
+<arg name='error' type='^@' index='1' declared_type='NSError**'/>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+<method selector='migratePersistentStore:toURL:options:withType:error:'>
+<arg name='store' type='@' index='0' declared_type='NSPersistentStore*'/>
+<arg name='URL' type='@' index='1' declared_type='NSURL*'/>
+<arg name='options' type='@' index='2' declared_type='NSDictionary*'/>
+<arg name='storeType' type='@' index='3' declared_type='NSString*'/>
+<arg name='error' type='^@' index='4' declared_type='NSError**'/>
+<retval type='@' declared_type='NSPersistentStore*'/>
+</method>
+<method selector='persistentStoreForURL:'>
+<arg name='URL' type='@' index='0' declared_type='NSURL*'/>
+<retval type='@' declared_type='NSPersistentStore*'/>
+</method>
+<method selector='persistentStores'>
+<retval type='@' declared_type='NSArray*'/>
+</method>
+<method selector='registerStoreClass:forStoreType:' class_method='true'>
+<arg name='storeClass' type='#' index='0' declared_type='Class'/>
+<arg name='storeType' type='@' index='1' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='registeredStoreTypes' class_method='true'>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+<method selector='removePersistentStore:error:'>
+<arg name='store' type='@' index='0' declared_type='NSPersistentStore*'/>
+<arg name='error' type='^@' index='1' declared_type='NSError**'/>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='setMetadata:forPersistentStore:'>
+<arg name='metadata' type='@' index='0' declared_type='NSDictionary*'/>
+<arg name='store' type='@' index='1' declared_type='NSPersistentStore*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setMetadata:forPersistentStoreOfType:URL:error:' class_method='true'>
+<arg name='metadata' type='@' index='0' declared_type='NSDictionary*'/>
+<arg name='storeType' type='@' index='1' declared_type='NSString*'/>
+<arg name='url' type='@' index='2' declared_type='NSURL*'/>
+<arg name='error' type='^@' index='3' declared_type='NSError**'/>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='setURL:forPersistentStore:'>
+<arg name='url' type='@' index='0' declared_type='NSURL*'/>
+<arg name='store' type='@' index='1' declared_type='NSPersistentStore*'/>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='tryLock'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='unlock'>
+<retval type='v' declared_type='void'/>
+</method>
+</class>
+<class name='NSPersistentStoreRequest'>
+<method selector='affectedStores'>
+<retval type='@' declared_type='NSArray*'/>
+</method>
+<method selector='requestType'>
+<retval type='I' declared_type='NSPersistentStoreRequestType' type64='Q'/>
+</method>
+<method selector='setAffectedStores:'>
+<arg name='stores' type='@' index='0' declared_type='NSArray*'/>
+<retval type='v' declared_type='void'/>
+</method>
+</class>
+<class name='NSPropertyDescription'>
+<method selector='entity'>
+<retval type='@' declared_type='NSEntityDescription*'/>
+</method>
+<method selector='isIndexed'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='isIndexedBySpotlight'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='isOptional'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='isStoredInExternalRecord'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='isTransient'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='name'>
+<retval type='@' declared_type='NSString*'/>
+</method>
+<method selector='renamingIdentifier'>
+<retval type='@' declared_type='NSString*'/>
+</method>
+<method selector='setIndexed:'>
+<arg name='flag' type='B' index='0' declared_type='BOOL'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setIndexedBySpotlight:'>
+<arg name='flag' type='B' index='0' declared_type='BOOL'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setName:'>
+<arg name='name' type='@' index='0' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setOptional:'>
+<arg name='flag' type='B' index='0' declared_type='BOOL'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setRenamingIdentifier:'>
+<arg name='value' type='@' index='0' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setStoredInExternalRecord:'>
+<arg name='flag' type='B' index='0' declared_type='BOOL'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setTransient:'>
+<arg name='flag' type='B' index='0' declared_type='BOOL'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setUserInfo:'>
+<arg name='dictionary' type='@' index='0' declared_type='NSDictionary*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setValidationPredicates:withValidationWarnings:'>
+<arg name='validationPredicates' type='@' index='0' declared_type='NSArray*'/>
+<arg name='validationWarnings' type='@' index='1' declared_type='NSArray*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setVersionHashModifier:'>
+<arg name='modifierString' type='@' index='0' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='userInfo'>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+<method selector='validationPredicates'>
+<retval type='@' declared_type='NSArray*'/>
+</method>
+<method selector='validationWarnings'>
+<retval type='@' declared_type='NSArray*'/>
+</method>
+<method selector='versionHash'>
+<retval type='@' declared_type='NSData*'/>
+</method>
+<method selector='versionHashModifier'>
+<retval type='@' declared_type='NSString*'/>
+</method>
+</class>
+<class name='NSPropertyMapping'>
+<method selector='name'>
+<retval type='@' declared_type='NSString*'/>
+</method>
+<method selector='setName:'>
+<arg name='name' type='@' index='0' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setUserInfo:'>
+<arg name='userInfo' type='@' index='0' declared_type='NSDictionary*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setValueExpression:'>
+<arg name='expression' type='@' index='0' declared_type='NSExpression*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='userInfo'>
+<retval type='@' declared_type='NSDictionary*'/>
+</method>
+<method selector='valueExpression'>
+<retval type='@' declared_type='NSExpression*'/>
+</method>
+</class>
+<class name='NSRelationshipDescription'>
+<method selector='deleteRule'>
+<retval type='I' declared_type='NSDeleteRule' type64='Q'/>
+</method>
+<method selector='destinationEntity'>
+<retval type='@' declared_type='NSEntityDescription*'/>
+</method>
+<method selector='inverseRelationship'>
+<retval type='@' declared_type='NSRelationshipDescription*'/>
+</method>
+<method selector='isOrdered'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='isToMany'>
+<retval type='B' declared_type='BOOL'/>
+</method>
+<method selector='maxCount'>
+<retval type='I' declared_type='NSUInteger' type64='Q'/>
+</method>
+<method selector='minCount'>
+<retval type='I' declared_type='NSUInteger' type64='Q'/>
+</method>
+<method selector='setDeleteRule:'>
+<arg name='rule' type='I' index='0' declared_type='NSDeleteRule' type64='Q'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setDestinationEntity:'>
+<arg name='entity' type='@' index='0' declared_type='NSEntityDescription*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setInverseRelationship:'>
+<arg name='relationship' type='@' index='0' declared_type='NSRelationshipDescription*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setMaxCount:'>
+<arg name='maxCount' type='I' index='0' declared_type='NSUInteger' type64='Q'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setMinCount:'>
+<arg name='minCount' type='I' index='0' declared_type='NSUInteger' type64='Q'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='setOrdered:'>
+<arg name='flag' type='B' index='0' declared_type='BOOL'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='versionHash'>
+<retval type='@' declared_type='NSData*'/>
+</method>
+</class>
+<class name='NSSaveChangesRequest'>
+<method selector='deletedObjects'>
+<retval type='@' declared_type='NSSet*'/>
+</method>
+<method selector='initWithInsertedObjects:updatedObjects:deletedObjects:lockedObjects:'>
+<arg name='insertedObjects' type='@' index='0' declared_type='NSSet*'/>
+<arg name='updatedObjects' type='@' index='1' declared_type='NSSet*'/>
+<arg name='deletedObjects' type='@' index='2' declared_type='NSSet*'/>
+<arg name='lockedObjects' type='@' index='3' declared_type='NSSet*'/>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='insertedObjects'>
+<retval type='@' declared_type='NSSet*'/>
+</method>
+<method selector='lockedObjects'>
+<retval type='@' declared_type='NSSet*'/>
+</method>
+<method selector='updatedObjects'>
+<retval type='@' declared_type='NSSet*'/>
+</method>
+</class>
+</signatures>

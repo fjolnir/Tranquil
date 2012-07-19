@@ -1,0 +1,2088 @@
+<?xml version='1.0'?>
+<signatures version='1.0'>
+<depends_on path='/System/Library/Frameworks/OpenGL.framework'/>
+<depends_on path='/System/Library/Frameworks/IOKit.framework'/>
+<depends_on path='/System/Library/Frameworks/Foundation.framework'/>
+<depends_on path='/System/Library/Frameworks/ApplicationServices.framework'/>
+<depends_on path='/System/Library/Frameworks/CoreVideo.framework'/>
+<depends_on path='/System/Library/Frameworks/IOSurface.framework'/>
+<depends_on path='/System/Library/Frameworks/Accelerate.framework'/>
+<depends_on path='/System/Library/Frameworks/QuartzCore.framework/Versions/A/Frameworks/CoreImage.framework'/>
+<depends_on path='/System/Library/Frameworks/QuartzCore.framework/Versions/A/Frameworks/ScalableUserInterface.framework'/>
+<depends_on path='/System/Library/Frameworks/CoreText.framework'/>
+<depends_on path='/System/Library/Frameworks/CoreFoundation.framework'/>
+<depends_on path='/System/Library/Frameworks/ImageIO.framework'/>
+<struct type64='{CATransform3D=&quot;m11&quot;d&quot;m12&quot;d&quot;m13&quot;d&quot;m14&quot;d&quot;m21&quot;d&quot;m22&quot;d&quot;m23&quot;d&quot;m24&quot;d&quot;m31&quot;d&quot;m32&quot;d&quot;m33&quot;d&quot;m34&quot;d&quot;m41&quot;d&quot;m42&quot;d&quot;m43&quot;d&quot;m44&quot;d}' name='CATransform3D' type='{CATransform3D=&quot;m11&quot;f&quot;m12&quot;f&quot;m13&quot;f&quot;m14&quot;f&quot;m21&quot;f&quot;m22&quot;f&quot;m23&quot;f&quot;m24&quot;f&quot;m31&quot;f&quot;m32&quot;f&quot;m33&quot;f&quot;m34&quot;f&quot;m41&quot;f&quot;m42&quot;f&quot;m43&quot;f&quot;m44&quot;f}'>
+<field type64='d' declared_type='CGFloat' name='m11' type='f'/>
+<field type64='d' declared_type='CGFloat' name='m12' type='f'/>
+<field type64='d' declared_type='CGFloat' name='m13' type='f'/>
+<field type64='d' declared_type='CGFloat' name='m14' type='f'/>
+<field type64='d' declared_type='CGFloat' name='m21' type='f'/>
+<field type64='d' declared_type='CGFloat' name='m22' type='f'/>
+<field type64='d' declared_type='CGFloat' name='m23' type='f'/>
+<field type64='d' declared_type='CGFloat' name='m24' type='f'/>
+<field type64='d' declared_type='CGFloat' name='m31' type='f'/>
+<field type64='d' declared_type='CGFloat' name='m32' type='f'/>
+<field type64='d' declared_type='CGFloat' name='m33' type='f'/>
+<field type64='d' declared_type='CGFloat' name='m34' type='f'/>
+<field type64='d' declared_type='CGFloat' name='m41' type='f'/>
+<field type64='d' declared_type='CGFloat' name='m42' type='f'/>
+<field type64='d' declared_type='CGFloat' name='m43' type='f'/>
+<field type64='d' declared_type='CGFloat' name='m44' type='f'/>
+</struct>
+<constant const='true' type64='{CATransform3D=dddddddddddddddd}' declared_type='CATransform3D' name='CATransform3DIdentity' type='{CATransform3D=ffffffffffffffff}'/>
+<constant const='true' declared_type='NSString*' name='kCAAlignmentCenter' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAAlignmentJustified' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAAlignmentLeft' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAAlignmentNatural' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAAlignmentRight' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAAnimationCubic' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAAnimationCubicPaced' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAAnimationDiscrete' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAAnimationLinear' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAAnimationPaced' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAAnimationRotateAuto' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAAnimationRotateAutoReverse' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAEmitterLayerAdditive' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAEmitterLayerBackToFront' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAEmitterLayerCircle' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAEmitterLayerCuboid' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAEmitterLayerLine' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAEmitterLayerOldestFirst' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAEmitterLayerOldestLast' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAEmitterLayerOutline' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAEmitterLayerPoint' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAEmitterLayerPoints' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAEmitterLayerRectangle' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAEmitterLayerSphere' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAEmitterLayerSurface' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAEmitterLayerUnordered' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAEmitterLayerVolume' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAFillModeBackwards' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAFillModeBoth' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAFillModeForwards' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAFillModeFrozen' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAFillModeRemoved' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAFillRuleEvenOdd' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAFillRuleNonZero' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAFilterLinear' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAFilterNearest' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAFilterTrilinear' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAGradientLayerAxial' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAGravityBottom' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAGravityBottomLeft' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAGravityBottomRight' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAGravityCenter' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAGravityLeft' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAGravityResize' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAGravityResizeAspect' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAGravityResizeAspectFill' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAGravityRight' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAGravityTop' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAGravityTopLeft' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAGravityTopRight' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCALineCapButt' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCALineCapRound' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCALineCapSquare' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCALineJoinBevel' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCALineJoinMiter' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCALineJoinRound' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAMediaTimingFunctionDefault' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAMediaTimingFunctionEaseIn' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAMediaTimingFunctionEaseInEaseOut' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAMediaTimingFunctionEaseOut' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAMediaTimingFunctionLinear' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAOnOrderIn' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAOnOrderOut' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAScrollBoth' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAScrollHorizontally' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAScrollNone' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAScrollVertically' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCATransactionAnimationDuration' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCATransactionAnimationTimingFunction' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCATransactionCompletionBlock' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCATransactionDisableActions' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCATransition' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCATransitionFade' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCATransitionFromBottom' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCATransitionFromLeft' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCATransitionFromRight' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCATransitionFromTop' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCATransitionMoveIn' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCATransitionPush' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCATransitionReveal' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCATruncationEnd' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCATruncationMiddle' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCATruncationNone' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCATruncationStart' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAValueFunctionRotateX' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAValueFunctionRotateY' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAValueFunctionRotateZ' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAValueFunctionScale' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAValueFunctionScaleX' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAValueFunctionScaleY' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAValueFunctionScaleZ' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAValueFunctionTranslate' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAValueFunctionTranslateX' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAValueFunctionTranslateY' type='@'/>
+<constant const='true' declared_type='NSString*' name='kCAValueFunctionTranslateZ' type='@'/>
+<enum value='1' name='CA_WARN_DEPRECATED'/>
+<enum value='7' name='kCAConstraintHeight'/>
+<enum value='2' name='kCAConstraintMaxX'/>
+<enum value='6' name='kCAConstraintMaxY'/>
+<enum value='1' name='kCAConstraintMidX'/>
+<enum value='5' name='kCAConstraintMidY'/>
+<enum value='0' name='kCAConstraintMinX'/>
+<enum value='4' name='kCAConstraintMinY'/>
+<enum value='3' name='kCAConstraintWidth'/>
+<enum value='4' name='kCALayerBottomEdge'/>
+<enum value='16' name='kCALayerHeightSizable'/>
+<enum value='1' name='kCALayerLeftEdge'/>
+<enum value='4' name='kCALayerMaxXMargin'/>
+<enum value='32' name='kCALayerMaxYMargin'/>
+<enum value='1' name='kCALayerMinXMargin'/>
+<enum value='8' name='kCALayerMinYMargin'/>
+<enum value='0' name='kCALayerNotSizable'/>
+<enum value='2' name='kCALayerRightEdge'/>
+<enum value='8' name='kCALayerTopEdge'/>
+<enum value='2' name='kCALayerWidthSizable'/>
+<function name='CACurrentMediaTime'>
+<retval declared_type='CFTimeInterval' type='d'/>
+</function>
+<function name='CATransform3DConcat'>
+<arg type64='{CATransform3D=dddddddddddddddd}' declared_type='CATransform3D' name='a' type='{CATransform3D=ffffffffffffffff}'/>
+<arg type64='{CATransform3D=dddddddddddddddd}' declared_type='CATransform3D' name='b' type='{CATransform3D=ffffffffffffffff}'/>
+<retval type64='{CATransform3D=dddddddddddddddd}' declared_type='CATransform3D' type='{CATransform3D=ffffffffffffffff}'/>
+</function>
+<function name='CATransform3DEqualToTransform'>
+<arg type64='{CATransform3D=dddddddddddddddd}' declared_type='CATransform3D' name='a' type='{CATransform3D=ffffffffffffffff}'/>
+<arg type64='{CATransform3D=dddddddddddddddd}' declared_type='CATransform3D' name='b' type='{CATransform3D=ffffffffffffffff}'/>
+<retval declared_type='_Bool' type='B'/>
+</function>
+<function name='CATransform3DGetAffineTransform'>
+<arg type64='{CATransform3D=dddddddddddddddd}' declared_type='CATransform3D' name='t' type='{CATransform3D=ffffffffffffffff}'/>
+<retval type64='{CGAffineTransform=dddddd}' declared_type='CGAffineTransform' type='{CGAffineTransform=ffffff}'/>
+</function>
+<function name='CATransform3DInvert'>
+<arg type64='{CATransform3D=dddddddddddddddd}' declared_type='CATransform3D' name='t' type='{CATransform3D=ffffffffffffffff}'/>
+<retval type64='{CATransform3D=dddddddddddddddd}' declared_type='CATransform3D' type='{CATransform3D=ffffffffffffffff}'/>
+</function>
+<function name='CATransform3DIsAffine'>
+<arg type64='{CATransform3D=dddddddddddddddd}' declared_type='CATransform3D' name='t' type='{CATransform3D=ffffffffffffffff}'/>
+<retval declared_type='_Bool' type='B'/>
+</function>
+<function name='CATransform3DIsIdentity'>
+<arg type64='{CATransform3D=dddddddddddddddd}' declared_type='CATransform3D' name='t' type='{CATransform3D=ffffffffffffffff}'/>
+<retval declared_type='_Bool' type='B'/>
+</function>
+<function name='CATransform3DMakeAffineTransform'>
+<arg type64='{CGAffineTransform=dddddd}' declared_type='CGAffineTransform' name='m' type='{CGAffineTransform=ffffff}'/>
+<retval type64='{CATransform3D=dddddddddddddddd}' declared_type='CATransform3D' type='{CATransform3D=ffffffffffffffff}'/>
+</function>
+<function name='CATransform3DMakeRotation'>
+<arg type64='d' declared_type='CGFloat' name='angle' type='f'/>
+<arg type64='d' declared_type='CGFloat' name='x' type='f'/>
+<arg type64='d' declared_type='CGFloat' name='y' type='f'/>
+<arg type64='d' declared_type='CGFloat' name='z' type='f'/>
+<retval type64='{CATransform3D=dddddddddddddddd}' declared_type='CATransform3D' type='{CATransform3D=ffffffffffffffff}'/>
+</function>
+<function name='CATransform3DMakeScale'>
+<arg type64='d' declared_type='CGFloat' name='sx' type='f'/>
+<arg type64='d' declared_type='CGFloat' name='sy' type='f'/>
+<arg type64='d' declared_type='CGFloat' name='sz' type='f'/>
+<retval type64='{CATransform3D=dddddddddddddddd}' declared_type='CATransform3D' type='{CATransform3D=ffffffffffffffff}'/>
+</function>
+<function name='CATransform3DMakeTranslation'>
+<arg type64='d' declared_type='CGFloat' name='tx' type='f'/>
+<arg type64='d' declared_type='CGFloat' name='ty' type='f'/>
+<arg type64='d' declared_type='CGFloat' name='tz' type='f'/>
+<retval type64='{CATransform3D=dddddddddddddddd}' declared_type='CATransform3D' type='{CATransform3D=ffffffffffffffff}'/>
+</function>
+<function name='CATransform3DRotate'>
+<arg type64='{CATransform3D=dddddddddddddddd}' declared_type='CATransform3D' name='t' type='{CATransform3D=ffffffffffffffff}'/>
+<arg type64='d' declared_type='CGFloat' name='angle' type='f'/>
+<arg type64='d' declared_type='CGFloat' name='x' type='f'/>
+<arg type64='d' declared_type='CGFloat' name='y' type='f'/>
+<arg type64='d' declared_type='CGFloat' name='z' type='f'/>
+<retval type64='{CATransform3D=dddddddddddddddd}' declared_type='CATransform3D' type='{CATransform3D=ffffffffffffffff}'/>
+</function>
+<function name='CATransform3DScale'>
+<arg type64='{CATransform3D=dddddddddddddddd}' declared_type='CATransform3D' name='t' type='{CATransform3D=ffffffffffffffff}'/>
+<arg type64='d' declared_type='CGFloat' name='sx' type='f'/>
+<arg type64='d' declared_type='CGFloat' name='sy' type='f'/>
+<arg type64='d' declared_type='CGFloat' name='sz' type='f'/>
+<retval type64='{CATransform3D=dddddddddddddddd}' declared_type='CATransform3D' type='{CATransform3D=ffffffffffffffff}'/>
+</function>
+<function name='CATransform3DTranslate'>
+<arg type64='{CATransform3D=dddddddddddddddd}' declared_type='CATransform3D' name='t' type='{CATransform3D=ffffffffffffffff}'/>
+<arg type64='d' declared_type='CGFloat' name='tx' type='f'/>
+<arg type64='d' declared_type='CGFloat' name='ty' type='f'/>
+<arg type64='d' declared_type='CGFloat' name='tz' type='f'/>
+<retval type64='{CATransform3D=dddddddddddddddd}' declared_type='CATransform3D' type='{CATransform3D=ffffffffffffffff}'/>
+</function>
+<class name='CAAnimation'>
+<method selector='animation' class_method='true'>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='defaultValueForKey:' class_method='true'>
+<arg index='0' declared_type='NSString*' name='key' type='@'/>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='delegate'>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='isRemovedOnCompletion'>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='setDelegate:'>
+<arg index='0' declared_type='id' name='delegate' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setRemovedOnCompletion:'>
+<arg index='0' declared_type='BOOL' name='removedOnCompletion' type='B'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setTimingFunction:'>
+<arg index='0' declared_type='CAMediaTimingFunction*' name='timingFunction' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='shouldArchiveValueForKey:'>
+<arg index='0' declared_type='NSString*' name='key' type='@'/>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='timingFunction'>
+<retval declared_type='CAMediaTimingFunction*' type='@'/>
+</method>
+</class>
+<class name='CAAnimationGroup'>
+<method selector='animations'>
+<retval declared_type='NSArray*' type='@'/>
+</method>
+<method selector='setAnimations:'>
+<arg index='0' declared_type='NSArray*' name='animations' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+</class>
+<class name='CABasicAnimation'>
+<method selector='byValue'>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='fromValue'>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='setByValue:'>
+<arg index='0' declared_type='id' name='byValue' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setFromValue:'>
+<arg index='0' declared_type='id' name='fromValue' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setToValue:'>
+<arg index='0' declared_type='id' name='toValue' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='toValue'>
+<retval declared_type='id' type='@'/>
+</method>
+</class>
+<class name='CAConstraint'>
+<method selector='attribute'>
+<retval declared_type='CAConstraintAttribute' type='i'/>
+</method>
+<method selector='constraintWithAttribute:relativeTo:attribute:' class_method='true'>
+<arg index='0' declared_type='CAConstraintAttribute' name='attr' type='i'/>
+<arg index='1' declared_type='NSString*' name='srcId' type='@'/>
+<arg index='2' declared_type='CAConstraintAttribute' name='srcAttr' type='i'/>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='constraintWithAttribute:relativeTo:attribute:offset:' class_method='true'>
+<arg index='0' declared_type='CAConstraintAttribute' name='attr' type='i'/>
+<arg index='1' declared_type='NSString*' name='srcId' type='@'/>
+<arg index='2' declared_type='CAConstraintAttribute' name='srcAttr' type='i'/>
+<arg type64='d' index='3' declared_type='CGFloat' name='c' type='f'/>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='constraintWithAttribute:relativeTo:attribute:scale:offset:' class_method='true'>
+<arg index='0' declared_type='CAConstraintAttribute' name='attr' type='i'/>
+<arg index='1' declared_type='NSString*' name='srcId' type='@'/>
+<arg index='2' declared_type='CAConstraintAttribute' name='srcAttr' type='i'/>
+<arg type64='d' index='3' declared_type='CGFloat' name='m' type='f'/>
+<arg type64='d' index='4' declared_type='CGFloat' name='c' type='f'/>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='initWithAttribute:relativeTo:attribute:scale:offset:'>
+<arg index='0' declared_type='CAConstraintAttribute' name='attr' type='i'/>
+<arg index='1' declared_type='NSString*' name='srcId' type='@'/>
+<arg index='2' declared_type='CAConstraintAttribute' name='srcAttr' type='i'/>
+<arg type64='d' index='3' declared_type='CGFloat' name='m' type='f'/>
+<arg type64='d' index='4' declared_type='CGFloat' name='c' type='f'/>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='offset'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+<method selector='scale'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+<method selector='sourceAttribute'>
+<retval declared_type='CAConstraintAttribute' type='i'/>
+</method>
+<method selector='sourceName'>
+<retval declared_type='NSString*' type='@'/>
+</method>
+</class>
+<class name='CAConstraintLayoutManager'>
+<method selector='layoutManager' class_method='true'>
+<retval declared_type='id' type='@'/>
+</method>
+</class>
+<class name='CAEmitterCell'>
+<method selector='alphaRange'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='alphaSpeed'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='birthRate'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='blueRange'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='blueSpeed'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='color'>
+<retval declared_type='CGColorRef' type='^{CGColor=}'/>
+</method>
+<method selector='contents'>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='contentsRect'>
+<retval type64='{CGRect={CGPoint=dd}{CGSize=dd}}' declared_type='CGRect' type='{CGRect={CGPoint=ff}{CGSize=ff}}'/>
+</method>
+<method selector='defaultValueForKey:' class_method='true'>
+<arg index='0' declared_type='NSString*' name='key' type='@'/>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='emissionLatitude'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+<method selector='emissionLongitude'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+<method selector='emissionRange'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+<method selector='emitterCell' class_method='true'>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='emitterCells'>
+<retval declared_type='NSArray*' type='@'/>
+</method>
+<method selector='greenRange'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='greenSpeed'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='isEnabled'>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='lifetime'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='lifetimeRange'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='magnificationFilter'>
+<retval declared_type='NSString*' type='@'/>
+</method>
+<method selector='minificationFilter'>
+<retval declared_type='NSString*' type='@'/>
+</method>
+<method selector='minificationFilterBias'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='name'>
+<retval declared_type='NSString*' type='@'/>
+</method>
+<method selector='redRange'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='redSpeed'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='scale'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+<method selector='scaleRange'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+<method selector='scaleSpeed'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+<method selector='setAlphaRange:'>
+<arg index='0' declared_type='float' name='alphaRange' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setAlphaSpeed:'>
+<arg index='0' declared_type='float' name='alphaSpeed' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setBirthRate:'>
+<arg index='0' declared_type='float' name='birthRate' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setBlueRange:'>
+<arg index='0' declared_type='float' name='blueRange' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setBlueSpeed:'>
+<arg index='0' declared_type='float' name='blueSpeed' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setColor:'>
+<arg index='0' declared_type='CGColorRef' name='color' type='^{CGColor=}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setContents:'>
+<arg index='0' declared_type='id' name='contents' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setContentsRect:'>
+<arg type64='{CGRect={CGPoint=dd}{CGSize=dd}}' index='0' declared_type='CGRect' name='contentsRect' type='{CGRect={CGPoint=ff}{CGSize=ff}}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setEmissionLatitude:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='emissionLatitude' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setEmissionLongitude:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='emissionLongitude' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setEmissionRange:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='emissionRange' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setEmitterCells:'>
+<arg index='0' declared_type='NSArray*' name='emitterCells' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setEnabled:'>
+<arg index='0' declared_type='BOOL' name='enabled' type='B'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setGreenRange:'>
+<arg index='0' declared_type='float' name='greenRange' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setGreenSpeed:'>
+<arg index='0' declared_type='float' name='greenSpeed' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setLifetime:'>
+<arg index='0' declared_type='float' name='lifetime' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setLifetimeRange:'>
+<arg index='0' declared_type='float' name='lifetimeRange' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setMagnificationFilter:'>
+<arg index='0' declared_type='NSString*' name='magnificationFilter' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setMinificationFilter:'>
+<arg index='0' declared_type='NSString*' name='minificationFilter' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setMinificationFilterBias:'>
+<arg index='0' declared_type='float' name='minificationFilterBias' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setName:'>
+<arg index='0' declared_type='NSString*' name='name' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setRedRange:'>
+<arg index='0' declared_type='float' name='redRange' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setRedSpeed:'>
+<arg index='0' declared_type='float' name='redSpeed' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setScale:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='scale' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setScaleRange:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='scaleRange' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setScaleSpeed:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='scaleSpeed' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setSpin:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='spin' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setSpinRange:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='spinRange' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setStyle:'>
+<arg index='0' declared_type='NSDictionary*' name='style' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setVelocity:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='velocity' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setVelocityRange:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='velocityRange' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setXAcceleration:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='xAcceleration' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setYAcceleration:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='yAcceleration' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setZAcceleration:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='zAcceleration' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='shouldArchiveValueForKey:'>
+<arg index='0' declared_type='NSString*' name='key' type='@'/>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='spin'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+<method selector='spinRange'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+<method selector='style'>
+<retval declared_type='NSDictionary*' type='@'/>
+</method>
+<method selector='velocity'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+<method selector='velocityRange'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+<method selector='xAcceleration'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+<method selector='yAcceleration'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+<method selector='zAcceleration'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+</class>
+<class name='CAEmitterLayer'>
+<method selector='birthRate'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='emitterCells'>
+<retval declared_type='NSArray*' type='@'/>
+</method>
+<method selector='emitterDepth'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+<method selector='emitterMode'>
+<retval declared_type='NSString*' type='@'/>
+</method>
+<method selector='emitterPosition'>
+<retval type64='{CGPoint=dd}' declared_type='CGPoint' type='{CGPoint=ff}'/>
+</method>
+<method selector='emitterShape'>
+<retval declared_type='NSString*' type='@'/>
+</method>
+<method selector='emitterSize'>
+<retval type64='{CGSize=dd}' declared_type='CGSize' type='{CGSize=ff}'/>
+</method>
+<method selector='emitterZPosition'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+<method selector='lifetime'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='preservesDepth'>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='renderMode'>
+<retval declared_type='NSString*' type='@'/>
+</method>
+<method selector='scale'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='seed'>
+<retval declared_type='unsigned int' type='I'/>
+</method>
+<method selector='setBirthRate:'>
+<arg index='0' declared_type='float' name='birthRate' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setEmitterCells:'>
+<arg index='0' declared_type='NSArray*' name='emitterCells' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setEmitterDepth:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='emitterDepth' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setEmitterMode:'>
+<arg index='0' declared_type='NSString*' name='emitterMode' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setEmitterPosition:'>
+<arg type64='{CGPoint=dd}' index='0' declared_type='CGPoint' name='emitterPosition' type='{CGPoint=ff}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setEmitterShape:'>
+<arg index='0' declared_type='NSString*' name='emitterShape' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setEmitterSize:'>
+<arg type64='{CGSize=dd}' index='0' declared_type='CGSize' name='emitterSize' type='{CGSize=ff}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setEmitterZPosition:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='emitterZPosition' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setLifetime:'>
+<arg index='0' declared_type='float' name='lifetime' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setPreservesDepth:'>
+<arg index='0' declared_type='BOOL' name='preservesDepth' type='B'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setRenderMode:'>
+<arg index='0' declared_type='NSString*' name='renderMode' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setScale:'>
+<arg index='0' declared_type='float' name='scale' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setSeed:'>
+<arg index='0' declared_type='unsigned int' name='seed' type='I'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setSpin:'>
+<arg index='0' declared_type='float' name='spin' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setVelocity:'>
+<arg index='0' declared_type='float' name='velocity' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='spin'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='velocity'>
+<retval declared_type='float' type='f'/>
+</method>
+</class>
+<class name='CAGradientLayer'>
+<method selector='colors'>
+<retval declared_type='NSArray*' type='@'/>
+</method>
+<method selector='endPoint'>
+<retval type64='{CGPoint=dd}' declared_type='CGPoint' type='{CGPoint=ff}'/>
+</method>
+<method selector='locations'>
+<retval declared_type='NSArray*' type='@'/>
+</method>
+<method selector='setColors:'>
+<arg index='0' declared_type='NSArray*' name='colors' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setEndPoint:'>
+<arg type64='{CGPoint=dd}' index='0' declared_type='CGPoint' name='endPoint' type='{CGPoint=ff}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setLocations:'>
+<arg index='0' declared_type='NSArray*' name='locations' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setStartPoint:'>
+<arg type64='{CGPoint=dd}' index='0' declared_type='CGPoint' name='startPoint' type='{CGPoint=ff}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setType:'>
+<arg index='0' declared_type='NSString*' name='type' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='startPoint'>
+<retval type64='{CGPoint=dd}' declared_type='CGPoint' type='{CGPoint=ff}'/>
+</method>
+<method selector='type'>
+<retval declared_type='NSString*' type='@'/>
+</method>
+</class>
+<class name='CAKeyframeAnimation'>
+<method selector='biasValues'>
+<retval declared_type='NSArray*' type='@'/>
+</method>
+<method selector='calculationMode'>
+<retval declared_type='NSString*' type='@'/>
+</method>
+<method selector='continuityValues'>
+<retval declared_type='NSArray*' type='@'/>
+</method>
+<method selector='keyTimes'>
+<retval declared_type='NSArray*' type='@'/>
+</method>
+<method selector='path'>
+<retval declared_type='CGPathRef' type='^{CGPath=}'/>
+</method>
+<method selector='rotationMode'>
+<retval declared_type='NSString*' type='@'/>
+</method>
+<method selector='setBiasValues:'>
+<arg index='0' declared_type='NSArray*' name='biasValues' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setCalculationMode:'>
+<arg index='0' declared_type='NSString*' name='calculationMode' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setContinuityValues:'>
+<arg index='0' declared_type='NSArray*' name='continuityValues' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setKeyTimes:'>
+<arg index='0' declared_type='NSArray*' name='keyTimes' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setPath:'>
+<arg index='0' declared_type='CGPathRef' name='path' type='^{CGPath=}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setRotationMode:'>
+<arg index='0' declared_type='NSString*' name='rotationMode' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setTensionValues:'>
+<arg index='0' declared_type='NSArray*' name='tensionValues' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setTimingFunctions:'>
+<arg index='0' declared_type='NSArray*' name='timingFunctions' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setValues:'>
+<arg index='0' declared_type='NSArray*' name='values' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='tensionValues'>
+<retval declared_type='NSArray*' type='@'/>
+</method>
+<method selector='timingFunctions'>
+<retval declared_type='NSArray*' type='@'/>
+</method>
+<method selector='values'>
+<retval declared_type='NSArray*' type='@'/>
+</method>
+</class>
+<class name='CALayer'>
+<method selector='actionForKey:'>
+<arg index='0' declared_type='NSString*' name='event' type='@'/>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='actions'>
+<retval declared_type='NSDictionary*' type='@'/>
+</method>
+<method selector='addAnimation:forKey:'>
+<arg index='0' declared_type='CAAnimation*' name='anim' type='@'/>
+<arg index='1' declared_type='NSString*' name='key' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='addConstraint:'>
+<arg index='0' declared_type='CAConstraint*' name='c' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='addSublayer:'>
+<arg index='0' declared_type='CALayer*' name='layer' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='affineTransform'>
+<retval type64='{CGAffineTransform=dddddd}' declared_type='CGAffineTransform' type='{CGAffineTransform=ffffff}'/>
+</method>
+<method selector='anchorPoint'>
+<retval type64='{CGPoint=dd}' declared_type='CGPoint' type='{CGPoint=ff}'/>
+</method>
+<method selector='anchorPointZ'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+<method selector='animationForKey:'>
+<arg index='0' declared_type='NSString*' name='key' type='@'/>
+<retval declared_type='CAAnimation*' type='@'/>
+</method>
+<method selector='animationKeys'>
+<retval declared_type='NSArray*' type='@'/>
+</method>
+<method selector='autoresizingMask'>
+<retval declared_type='unsigned int' type='I'/>
+</method>
+<method selector='backgroundColor'>
+<retval declared_type='CGColorRef' type='^{CGColor=}'/>
+</method>
+<method selector='backgroundFilters'>
+<retval declared_type='NSArray*' type='@'/>
+</method>
+<method selector='borderColor'>
+<retval declared_type='CGColorRef' type='^{CGColor=}'/>
+</method>
+<method selector='borderWidth'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+<method selector='bounds'>
+<retval type64='{CGRect={CGPoint=dd}{CGSize=dd}}' declared_type='CGRect' type='{CGRect={CGPoint=ff}{CGSize=ff}}'/>
+</method>
+<method selector='compositingFilter'>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='constraints'>
+<retval declared_type='NSArray*' type='@'/>
+</method>
+<method selector='containsPoint:'>
+<arg type64='{CGPoint=dd}' index='0' declared_type='CGPoint' name='p' type='{CGPoint=ff}'/>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='contents'>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='contentsAreFlipped'>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='contentsCenter'>
+<retval type64='{CGRect={CGPoint=dd}{CGSize=dd}}' declared_type='CGRect' type='{CGRect={CGPoint=ff}{CGSize=ff}}'/>
+</method>
+<method selector='contentsGravity'>
+<retval declared_type='NSString*' type='@'/>
+</method>
+<method selector='contentsRect'>
+<retval type64='{CGRect={CGPoint=dd}{CGSize=dd}}' declared_type='CGRect' type='{CGRect={CGPoint=ff}{CGSize=ff}}'/>
+</method>
+<method selector='contentsScale'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+<method selector='convertPoint:fromLayer:'>
+<arg type64='{CGPoint=dd}' index='0' declared_type='CGPoint' name='p' type='{CGPoint=ff}'/>
+<arg index='1' declared_type='CALayer*' name='l' type='@'/>
+<retval type64='{CGPoint=dd}' declared_type='CGPoint' type='{CGPoint=ff}'/>
+</method>
+<method selector='convertPoint:toLayer:'>
+<arg type64='{CGPoint=dd}' index='0' declared_type='CGPoint' name='p' type='{CGPoint=ff}'/>
+<arg index='1' declared_type='CALayer*' name='l' type='@'/>
+<retval type64='{CGPoint=dd}' declared_type='CGPoint' type='{CGPoint=ff}'/>
+</method>
+<method selector='convertRect:fromLayer:'>
+<arg type64='{CGRect={CGPoint=dd}{CGSize=dd}}' index='0' declared_type='CGRect' name='r' type='{CGRect={CGPoint=ff}{CGSize=ff}}'/>
+<arg index='1' declared_type='CALayer*' name='l' type='@'/>
+<retval type64='{CGRect={CGPoint=dd}{CGSize=dd}}' declared_type='CGRect' type='{CGRect={CGPoint=ff}{CGSize=ff}}'/>
+</method>
+<method selector='convertRect:toLayer:'>
+<arg type64='{CGRect={CGPoint=dd}{CGSize=dd}}' index='0' declared_type='CGRect' name='r' type='{CGRect={CGPoint=ff}{CGSize=ff}}'/>
+<arg index='1' declared_type='CALayer*' name='l' type='@'/>
+<retval type64='{CGRect={CGPoint=dd}{CGSize=dd}}' declared_type='CGRect' type='{CGRect={CGPoint=ff}{CGSize=ff}}'/>
+</method>
+<method selector='convertTime:fromLayer:'>
+<arg index='0' declared_type='CFTimeInterval' name='t' type='d'/>
+<arg index='1' declared_type='CALayer*' name='l' type='@'/>
+<retval declared_type='CFTimeInterval' type='d'/>
+</method>
+<method selector='convertTime:toLayer:'>
+<arg index='0' declared_type='CFTimeInterval' name='t' type='d'/>
+<arg index='1' declared_type='CALayer*' name='l' type='@'/>
+<retval declared_type='CFTimeInterval' type='d'/>
+</method>
+<method selector='cornerRadius'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+<method selector='defaultActionForKey:' class_method='true'>
+<arg index='0' declared_type='NSString*' name='event' type='@'/>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='defaultValueForKey:' class_method='true'>
+<arg index='0' declared_type='NSString*' name='key' type='@'/>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='delegate'>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='display'>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='displayIfNeeded'>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='drawInContext:'>
+<arg index='0' declared_type='CGContextRef' name='ctx' type='^{CGContext=}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='drawsAsynchronously'>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='edgeAntialiasingMask'>
+<retval declared_type='unsigned int' type='I'/>
+</method>
+<method selector='filters'>
+<retval declared_type='NSArray*' type='@'/>
+</method>
+<method selector='frame'>
+<retval type64='{CGRect={CGPoint=dd}{CGSize=dd}}' declared_type='CGRect' type='{CGRect={CGPoint=ff}{CGSize=ff}}'/>
+</method>
+<method selector='hitTest:'>
+<arg type64='{CGPoint=dd}' index='0' declared_type='CGPoint' name='p' type='{CGPoint=ff}'/>
+<retval declared_type='CALayer*' type='@'/>
+</method>
+<method selector='init'>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='initWithLayer:'>
+<arg index='0' declared_type='id' name='layer' type='@'/>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='insertSublayer:above:'>
+<arg index='0' declared_type='CALayer*' name='layer' type='@'/>
+<arg index='1' declared_type='CALayer*' name='sibling' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='insertSublayer:atIndex:'>
+<arg index='0' declared_type='CALayer*' name='layer' type='@'/>
+<arg index='1' declared_type='unsigned int' name='idx' type='I'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='insertSublayer:below:'>
+<arg index='0' declared_type='CALayer*' name='layer' type='@'/>
+<arg index='1' declared_type='CALayer*' name='sibling' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='isDoubleSided'>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='isGeometryFlipped'>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='isHidden'>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='isOpaque'>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='layer' class_method='true'>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='layerWithRemoteClientId:' class_method='true'>
+<arg index='0' declared_type='uint32_t' name='client_id' type='I'/>
+<retval declared_type='CALayer*' type='@'/>
+</method>
+<method selector='layoutIfNeeded'>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='layoutManager'>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='layoutSublayers'>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='magnificationFilter'>
+<retval declared_type='NSString*' type='@'/>
+</method>
+<method selector='mask'>
+<retval declared_type='CALayer*' type='@'/>
+</method>
+<method selector='masksToBounds'>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='minificationFilter'>
+<retval declared_type='NSString*' type='@'/>
+</method>
+<method selector='minificationFilterBias'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='modelLayer'>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='name'>
+<retval declared_type='NSString*' type='@'/>
+</method>
+<method selector='needsDisplay'>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='needsDisplayForKey:' class_method='true'>
+<arg index='0' declared_type='NSString*' name='key' type='@'/>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='needsDisplayOnBoundsChange'>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='needsLayout'>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='opacity'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='position'>
+<retval type64='{CGPoint=dd}' declared_type='CGPoint' type='{CGPoint=ff}'/>
+</method>
+<method selector='preferredFrameSize'>
+<retval type64='{CGSize=dd}' declared_type='CGSize' type='{CGSize=ff}'/>
+</method>
+<method selector='presentationLayer'>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='rasterizationScale'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+<method selector='removeAllAnimations'>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='removeAnimationForKey:'>
+<arg index='0' declared_type='NSString*' name='key' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='removeFromSuperlayer'>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='renderInContext:'>
+<arg index='0' declared_type='CGContextRef' name='ctx' type='^{CGContext=}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='replaceSublayer:with:'>
+<arg index='0' declared_type='CALayer*' name='layer' type='@'/>
+<arg index='1' declared_type='CALayer*' name='layer2' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='resizeSublayersWithOldSize:'>
+<arg type64='{CGSize=dd}' index='0' declared_type='CGSize' name='size' type='{CGSize=ff}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='resizeWithOldSuperlayerSize:'>
+<arg type64='{CGSize=dd}' index='0' declared_type='CGSize' name='size' type='{CGSize=ff}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='scrollPoint:'>
+<arg type64='{CGPoint=dd}' index='0' declared_type='CGPoint' name='p' type='{CGPoint=ff}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='scrollRectToVisible:'>
+<arg type64='{CGRect={CGPoint=dd}{CGSize=dd}}' index='0' declared_type='CGRect' name='r' type='{CGRect={CGPoint=ff}{CGSize=ff}}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setActions:'>
+<arg index='0' declared_type='NSDictionary*' name='actions' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setAffineTransform:'>
+<arg type64='{CGAffineTransform=dddddd}' index='0' declared_type='CGAffineTransform' name='m' type='{CGAffineTransform=ffffff}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setAnchorPoint:'>
+<arg type64='{CGPoint=dd}' index='0' declared_type='CGPoint' name='anchorPoint' type='{CGPoint=ff}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setAnchorPointZ:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='anchorPointZ' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setAutoresizingMask:'>
+<arg index='0' declared_type='unsigned int' name='autoresizingMask' type='I'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setBackgroundColor:'>
+<arg index='0' declared_type='CGColorRef' name='backgroundColor' type='^{CGColor=}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setBackgroundFilters:'>
+<arg index='0' declared_type='NSArray*' name='backgroundFilters' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setBorderColor:'>
+<arg index='0' declared_type='CGColorRef' name='borderColor' type='^{CGColor=}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setBorderWidth:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='borderWidth' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setBounds:'>
+<arg type64='{CGRect={CGPoint=dd}{CGSize=dd}}' index='0' declared_type='CGRect' name='bounds' type='{CGRect={CGPoint=ff}{CGSize=ff}}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setCompositingFilter:'>
+<arg index='0' declared_type='id' name='compositingFilter' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setConstraints:'>
+<arg index='0' declared_type='NSArray*' name='constraints' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setContents:'>
+<arg index='0' declared_type='id' name='contents' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setContentsCenter:'>
+<arg type64='{CGRect={CGPoint=dd}{CGSize=dd}}' index='0' declared_type='CGRect' name='contentsCenter' type='{CGRect={CGPoint=ff}{CGSize=ff}}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setContentsGravity:'>
+<arg index='0' declared_type='NSString*' name='contentsGravity' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setContentsRect:'>
+<arg type64='{CGRect={CGPoint=dd}{CGSize=dd}}' index='0' declared_type='CGRect' name='contentsRect' type='{CGRect={CGPoint=ff}{CGSize=ff}}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setContentsScale:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='contentsScale' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setCornerRadius:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='cornerRadius' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setDelegate:'>
+<arg index='0' declared_type='id' name='delegate' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setDoubleSided:'>
+<arg index='0' declared_type='BOOL' name='doubleSided' type='B'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setDrawsAsynchronously:'>
+<arg index='0' declared_type='BOOL' name='drawsAsynchronously' type='B'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setEdgeAntialiasingMask:'>
+<arg index='0' declared_type='unsigned int' name='edgeAntialiasingMask' type='I'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setFilters:'>
+<arg index='0' declared_type='NSArray*' name='filters' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setFrame:'>
+<arg type64='{CGRect={CGPoint=dd}{CGSize=dd}}' index='0' declared_type='CGRect' name='frame' type='{CGRect={CGPoint=ff}{CGSize=ff}}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setGeometryFlipped:'>
+<arg index='0' declared_type='BOOL' name='geometryFlipped' type='B'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setHidden:'>
+<arg index='0' declared_type='BOOL' name='hidden' type='B'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setLayoutManager:'>
+<arg index='0' declared_type='id' name='layoutManager' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setMagnificationFilter:'>
+<arg index='0' declared_type='NSString*' name='magnificationFilter' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setMask:'>
+<arg index='0' declared_type='CALayer*' name='mask' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setMasksToBounds:'>
+<arg index='0' declared_type='BOOL' name='masksToBounds' type='B'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setMinificationFilter:'>
+<arg index='0' declared_type='NSString*' name='minificationFilter' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setMinificationFilterBias:'>
+<arg index='0' declared_type='float' name='minificationFilterBias' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setName:'>
+<arg index='0' declared_type='NSString*' name='name' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setNeedsDisplay'>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setNeedsDisplayInRect:'>
+<arg type64='{CGRect={CGPoint=dd}{CGSize=dd}}' index='0' declared_type='CGRect' name='r' type='{CGRect={CGPoint=ff}{CGSize=ff}}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setNeedsDisplayOnBoundsChange:'>
+<arg index='0' declared_type='BOOL' name='needsDisplayOnBoundsChange' type='B'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setNeedsLayout'>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setOpacity:'>
+<arg index='0' declared_type='float' name='opacity' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setOpaque:'>
+<arg index='0' declared_type='BOOL' name='opaque' type='B'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setPosition:'>
+<arg type64='{CGPoint=dd}' index='0' declared_type='CGPoint' name='position' type='{CGPoint=ff}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setRasterizationScale:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='rasterizationScale' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setShadowColor:'>
+<arg index='0' declared_type='CGColorRef' name='shadowColor' type='^{CGColor=}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setShadowOffset:'>
+<arg type64='{CGSize=dd}' index='0' declared_type='CGSize' name='shadowOffset' type='{CGSize=ff}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setShadowOpacity:'>
+<arg index='0' declared_type='float' name='shadowOpacity' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setShadowPath:'>
+<arg index='0' declared_type='CGPathRef' name='shadowPath' type='^{CGPath=}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setShadowRadius:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='shadowRadius' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setShouldRasterize:'>
+<arg index='0' declared_type='BOOL' name='shouldRasterize' type='B'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setStyle:'>
+<arg index='0' declared_type='NSDictionary*' name='style' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setSublayerTransform:'>
+<arg type64='{CATransform3D=dddddddddddddddd}' index='0' declared_type='CATransform3D' name='sublayerTransform' type='{CATransform3D=ffffffffffffffff}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setSublayers:'>
+<arg index='0' declared_type='NSArray*' name='sublayers' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setTransform:'>
+<arg type64='{CATransform3D=dddddddddddddddd}' index='0' declared_type='CATransform3D' name='transform' type='{CATransform3D=ffffffffffffffff}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setZPosition:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='zPosition' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='shadowColor'>
+<retval declared_type='CGColorRef' type='^{CGColor=}'/>
+</method>
+<method selector='shadowOffset'>
+<retval type64='{CGSize=dd}' declared_type='CGSize' type='{CGSize=ff}'/>
+</method>
+<method selector='shadowOpacity'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='shadowPath'>
+<retval declared_type='CGPathRef' type='^{CGPath=}'/>
+</method>
+<method selector='shadowRadius'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+<method selector='shouldArchiveValueForKey:'>
+<arg index='0' declared_type='NSString*' name='key' type='@'/>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='shouldRasterize'>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='style'>
+<retval declared_type='NSDictionary*' type='@'/>
+</method>
+<method selector='sublayerTransform'>
+<retval type64='{CATransform3D=dddddddddddddddd}' declared_type='CATransform3D' type='{CATransform3D=ffffffffffffffff}'/>
+</method>
+<method selector='sublayers'>
+<retval declared_type='NSArray*' type='@'/>
+</method>
+<method selector='superlayer'>
+<retval declared_type='CALayer*' type='@'/>
+</method>
+<method selector='transform'>
+<retval type64='{CATransform3D=dddddddddddddddd}' declared_type='CATransform3D' type='{CATransform3D=ffffffffffffffff}'/>
+</method>
+<method selector='visibleRect'>
+<retval type64='{CGRect={CGPoint=dd}{CGSize=dd}}' declared_type='CGRect' type='{CGRect={CGPoint=ff}{CGSize=ff}}'/>
+</method>
+<method selector='zPosition'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+</class>
+<class name='CAMediaTimingFunction'>
+<method selector='functionWithControlPoints::::' class_method='true'>
+<arg index='0' declared_type='float' name='c1x' type='f'/>
+<arg index='1' declared_type='float' name='c1y' type='f'/>
+<arg index='2' declared_type='float' name='c2x' type='f'/>
+<arg index='3' declared_type='float' name='c2y' type='f'/>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='functionWithName:' class_method='true'>
+<arg index='0' declared_type='NSString*' name='name' type='@'/>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='getControlPointAtIndex:values:'>
+<arg type64='Q' index='0' declared_type='size_t' name='idx' type='L'/>
+<arg index='1' declared_type='float*' name='ptr' type='^f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='initWithControlPoints::::'>
+<arg index='0' declared_type='float' name='c1x' type='f'/>
+<arg index='1' declared_type='float' name='c1y' type='f'/>
+<arg index='2' declared_type='float' name='c2x' type='f'/>
+<arg index='3' declared_type='float' name='c2y' type='f'/>
+<retval declared_type='id' type='@'/>
+</method>
+</class>
+<class name='CAOpenGLLayer'>
+<method selector='canDrawInCGLContext:pixelFormat:forLayerTime:displayTime:'>
+<arg index='0' declared_type='CGLContextObj' name='ctx' type='^{_CGLContextObject=}'/>
+<arg index='1' declared_type='CGLPixelFormatObj' name='pf' type='^{_CGLPixelFormatObject=}'/>
+<arg index='2' declared_type='CFTimeInterval' name='t' type='d'/>
+<arg const='true' index='3' declared_type='CVTimeStamp*' name='ts' type='^{_CVTimeStamp=IiqQdq{CVSMPTETime=ssIIIssss}QQ}'/>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='copyCGLContextForPixelFormat:'>
+<arg index='0' declared_type='CGLPixelFormatObj' name='pf' type='^{_CGLPixelFormatObject=}'/>
+<retval declared_type='CGLContextObj' type='^{_CGLContextObject=}'/>
+</method>
+<method selector='copyCGLPixelFormatForDisplayMask:'>
+<arg index='0' declared_type='uint32_t' name='mask' type='I'/>
+<retval declared_type='CGLPixelFormatObj' type='^{_CGLPixelFormatObject=}'/>
+</method>
+<method selector='drawInCGLContext:pixelFormat:forLayerTime:displayTime:'>
+<arg index='0' declared_type='CGLContextObj' name='ctx' type='^{_CGLContextObject=}'/>
+<arg index='1' declared_type='CGLPixelFormatObj' name='pf' type='^{_CGLPixelFormatObject=}'/>
+<arg index='2' declared_type='CFTimeInterval' name='t' type='d'/>
+<arg const='true' index='3' declared_type='CVTimeStamp*' name='ts' type='^{_CVTimeStamp=IiqQdq{CVSMPTETime=ssIIIssss}QQ}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='isAsynchronous'>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='releaseCGLContext:'>
+<arg index='0' declared_type='CGLContextObj' name='ctx' type='^{_CGLContextObject=}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='releaseCGLPixelFormat:'>
+<arg index='0' declared_type='CGLPixelFormatObj' name='pf' type='^{_CGLPixelFormatObject=}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setAsynchronous:'>
+<arg index='0' declared_type='BOOL' name='asynchronous' type='B'/>
+<retval declared_type='void' type='v'/>
+</method>
+</class>
+<class name='CAPropertyAnimation'>
+<method selector='animationWithKeyPath:' class_method='true'>
+<arg index='0' declared_type='NSString*' name='path' type='@'/>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='isAdditive'>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='isCumulative'>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='keyPath'>
+<retval declared_type='NSString*' type='@'/>
+</method>
+<method selector='setAdditive:'>
+<arg index='0' declared_type='BOOL' name='additive' type='B'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setCumulative:'>
+<arg index='0' declared_type='BOOL' name='cumulative' type='B'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setKeyPath:'>
+<arg index='0' declared_type='NSString*' name='keyPath' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setValueFunction:'>
+<arg index='0' declared_type='CAValueFunction*' name='valueFunction' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='valueFunction'>
+<retval declared_type='CAValueFunction*' type='@'/>
+</method>
+</class>
+<class name='CARemoteLayerClient'>
+<method selector='clientId'>
+<retval declared_type='uint32_t' type='I'/>
+</method>
+<method selector='initWithServerPort:'>
+<arg index='0' declared_type='mach_port_t' name='port' type='I'/>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='invalidate'>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='layer'>
+<retval declared_type='CALayer*' type='@'/>
+</method>
+<method selector='setLayer:'>
+<arg index='0' declared_type='CALayer*' name='layer' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+</class>
+<class name='CARemoteLayerServer'>
+<method selector='serverPort'>
+<retval declared_type='mach_port_t' type='I'/>
+</method>
+<method selector='sharedServer' class_method='true'>
+<retval declared_type='CARemoteLayerServer*' type='@'/>
+</method>
+</class>
+<class name='CARenderer'>
+<method selector='addUpdateRect:'>
+<arg type64='{CGRect={CGPoint=dd}{CGSize=dd}}' index='0' declared_type='CGRect' name='r' type='{CGRect={CGPoint=ff}{CGSize=ff}}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='beginFrameAtTime:timeStamp:'>
+<arg index='0' declared_type='CFTimeInterval' name='t' type='d'/>
+<arg index='1' declared_type='CVTimeStamp*' name='ts' type='^{_CVTimeStamp=IiqQdq{CVSMPTETime=ssIIIssss}QQ}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='bounds'>
+<retval type64='{CGRect={CGPoint=dd}{CGSize=dd}}' declared_type='CGRect' type='{CGRect={CGPoint=ff}{CGSize=ff}}'/>
+</method>
+<method selector='endFrame'>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='layer'>
+<retval declared_type='CALayer*' type='@'/>
+</method>
+<method selector='nextFrameTime'>
+<retval declared_type='CFTimeInterval' type='d'/>
+</method>
+<method selector='render'>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='rendererWithCGLContext:options:' class_method='true'>
+<arg index='0' declared_type='void*' name='ctx' type='^v'/>
+<arg index='1' declared_type='NSDictionary*' name='dict' type='@'/>
+<retval declared_type='CARenderer*' type='@'/>
+</method>
+<method selector='setBounds:'>
+<arg type64='{CGRect={CGPoint=dd}{CGSize=dd}}' index='0' declared_type='CGRect' name='bounds' type='{CGRect={CGPoint=ff}{CGSize=ff}}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setLayer:'>
+<arg index='0' declared_type='CALayer*' name='layer' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='updateBounds'>
+<retval type64='{CGRect={CGPoint=dd}{CGSize=dd}}' declared_type='CGRect' type='{CGRect={CGPoint=ff}{CGSize=ff}}'/>
+</method>
+</class>
+<class name='CAReplicatorLayer'>
+<method selector='instanceAlphaOffset'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='instanceBlueOffset'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='instanceColor'>
+<retval declared_type='CGColorRef' type='^{CGColor=}'/>
+</method>
+<method selector='instanceCount'>
+<retval type64='q' declared_type='NSInteger' type='i'/>
+</method>
+<method selector='instanceDelay'>
+<retval declared_type='CFTimeInterval' type='d'/>
+</method>
+<method selector='instanceGreenOffset'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='instanceRedOffset'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='instanceTransform'>
+<retval type64='{CATransform3D=dddddddddddddddd}' declared_type='CATransform3D' type='{CATransform3D=ffffffffffffffff}'/>
+</method>
+<method selector='preservesDepth'>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='setInstanceAlphaOffset:'>
+<arg index='0' declared_type='float' name='instanceAlphaOffset' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setInstanceBlueOffset:'>
+<arg index='0' declared_type='float' name='instanceBlueOffset' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setInstanceColor:'>
+<arg index='0' declared_type='CGColorRef' name='instanceColor' type='^{CGColor=}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setInstanceCount:'>
+<arg type64='q' index='0' declared_type='NSInteger' name='instanceCount' type='i'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setInstanceDelay:'>
+<arg index='0' declared_type='CFTimeInterval' name='instanceDelay' type='d'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setInstanceGreenOffset:'>
+<arg index='0' declared_type='float' name='instanceGreenOffset' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setInstanceRedOffset:'>
+<arg index='0' declared_type='float' name='instanceRedOffset' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setInstanceTransform:'>
+<arg type64='{CATransform3D=dddddddddddddddd}' index='0' declared_type='CATransform3D' name='instanceTransform' type='{CATransform3D=ffffffffffffffff}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setPreservesDepth:'>
+<arg index='0' declared_type='BOOL' name='preservesDepth' type='B'/>
+<retval declared_type='void' type='v'/>
+</method>
+</class>
+<class name='CAScrollLayer'>
+<method selector='scrollMode'>
+<retval declared_type='NSString*' type='@'/>
+</method>
+<method selector='scrollToPoint:'>
+<arg type64='{CGPoint=dd}' index='0' declared_type='CGPoint' name='p' type='{CGPoint=ff}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='scrollToRect:'>
+<arg type64='{CGRect={CGPoint=dd}{CGSize=dd}}' index='0' declared_type='CGRect' name='r' type='{CGRect={CGPoint=ff}{CGSize=ff}}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setScrollMode:'>
+<arg index='0' declared_type='NSString*' name='scrollMode' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+</class>
+<class name='CAShapeLayer'>
+<method selector='fillColor'>
+<retval declared_type='CGColorRef' type='^{CGColor=}'/>
+</method>
+<method selector='fillRule'>
+<retval declared_type='NSString*' type='@'/>
+</method>
+<method selector='lineCap'>
+<retval declared_type='NSString*' type='@'/>
+</method>
+<method selector='lineDashPattern'>
+<retval declared_type='NSArray*' type='@'/>
+</method>
+<method selector='lineDashPhase'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+<method selector='lineJoin'>
+<retval declared_type='NSString*' type='@'/>
+</method>
+<method selector='lineWidth'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+<method selector='miterLimit'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+<method selector='path'>
+<retval declared_type='CGPathRef' type='^{CGPath=}'/>
+</method>
+<method selector='setFillColor:'>
+<arg index='0' declared_type='CGColorRef' name='fillColor' type='^{CGColor=}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setFillRule:'>
+<arg index='0' declared_type='NSString*' name='fillRule' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setLineCap:'>
+<arg index='0' declared_type='NSString*' name='lineCap' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setLineDashPattern:'>
+<arg index='0' declared_type='NSArray*' name='lineDashPattern' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setLineDashPhase:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='lineDashPhase' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setLineJoin:'>
+<arg index='0' declared_type='NSString*' name='lineJoin' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setLineWidth:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='lineWidth' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setMiterLimit:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='miterLimit' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setPath:'>
+<arg index='0' declared_type='CGPathRef' name='path' type='^{CGPath=}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setStrokeColor:'>
+<arg index='0' declared_type='CGColorRef' name='strokeColor' type='^{CGColor=}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setStrokeEnd:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='strokeEnd' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setStrokeStart:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='strokeStart' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='strokeColor'>
+<retval declared_type='CGColorRef' type='^{CGColor=}'/>
+</method>
+<method selector='strokeEnd'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+<method selector='strokeStart'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+</class>
+<class name='CATextLayer'>
+<method selector='alignmentMode'>
+<retval declared_type='NSString*' type='@'/>
+</method>
+<method selector='font'>
+<retval declared_type='CFTypeRef' type='@'/>
+</method>
+<method selector='fontSize'>
+<retval type64='d' declared_type='CGFloat' type='f'/>
+</method>
+<method selector='foregroundColor'>
+<retval declared_type='CGColorRef' type='^{CGColor=}'/>
+</method>
+<method selector='isWrapped'>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='setAlignmentMode:'>
+<arg index='0' declared_type='NSString*' name='alignmentMode' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setFont:'>
+<arg index='0' declared_type='CFTypeRef' name='font' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setFontSize:'>
+<arg type64='d' index='0' declared_type='CGFloat' name='fontSize' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setForegroundColor:'>
+<arg index='0' declared_type='CGColorRef' name='foregroundColor' type='^{CGColor=}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setString:'>
+<arg index='0' declared_type='id' name='string' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setTruncationMode:'>
+<arg index='0' declared_type='NSString*' name='truncationMode' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setWrapped:'>
+<arg index='0' declared_type='BOOL' name='wrapped' type='B'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='string'>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='truncationMode'>
+<retval declared_type='NSString*' type='@'/>
+</method>
+</class>
+<class name='CATiledLayer'>
+<method selector='fadeDuration' class_method='true'>
+<retval declared_type='CFTimeInterval' type='d'/>
+</method>
+<method selector='levelsOfDetail'>
+<retval type64='Q' declared_type='size_t' type='L'/>
+</method>
+<method selector='levelsOfDetailBias'>
+<retval type64='Q' declared_type='size_t' type='L'/>
+</method>
+<method selector='setLevelsOfDetail:'>
+<arg type64='Q' index='0' declared_type='size_t' name='levelsOfDetail' type='L'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setLevelsOfDetailBias:'>
+<arg type64='Q' index='0' declared_type='size_t' name='levelsOfDetailBias' type='L'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setTileSize:'>
+<arg type64='{CGSize=dd}' index='0' declared_type='CGSize' name='tileSize' type='{CGSize=ff}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='tileSize'>
+<retval type64='{CGSize=dd}' declared_type='CGSize' type='{CGSize=ff}'/>
+</method>
+</class>
+<class name='CATransaction'>
+<method selector='animationDuration' class_method='true'>
+<retval declared_type='CFTimeInterval' type='d'/>
+</method>
+<method selector='animationTimingFunction' class_method='true'>
+<retval declared_type='CAMediaTimingFunction*' type='@'/>
+</method>
+<method selector='begin' class_method='true'>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='commit' class_method='true'>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='completionBlock' class_method='true'>
+<retval function_pointer='true' declared_type='void (^)(void)' type='@?'>
+<retval declared_type='void' type='v'/>
+</retval>
+</method>
+<method selector='disableActions' class_method='true'>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='flush' class_method='true'>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='lock' class_method='true'>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setAnimationDuration:' class_method='true'>
+<arg index='0' declared_type='CFTimeInterval' name='dur' type='d'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setAnimationTimingFunction:' class_method='true'>
+<arg index='0' declared_type='CAMediaTimingFunction*' name='function' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setCompletionBlock:' class_method='true'>
+<arg function_pointer='true' index='0' declared_type='void (^)(void)' name='block' type='@?'>
+<retval declared_type='void' type='v'/>
+</arg>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setDisableActions:' class_method='true'>
+<arg index='0' declared_type='BOOL' name='flag' type='B'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setValue:forKey:' class_method='true'>
+<arg index='0' declared_type='id' name='anObject' type='@'/>
+<arg index='1' declared_type='NSString*' name='key' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='unlock' class_method='true'>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='valueForKey:' class_method='true'>
+<arg index='0' declared_type='NSString*' name='key' type='@'/>
+<retval declared_type='id' type='@'/>
+</method>
+</class>
+<class name='CATransition'>
+<method selector='endProgress'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='filter'>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='setEndProgress:'>
+<arg index='0' declared_type='float' name='endProgress' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setFilter:'>
+<arg index='0' declared_type='id' name='filter' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setStartProgress:'>
+<arg index='0' declared_type='float' name='startProgress' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setSubtype:'>
+<arg index='0' declared_type='NSString*' name='subtype' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setType:'>
+<arg index='0' declared_type='NSString*' name='type' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='startProgress'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='subtype'>
+<retval declared_type='NSString*' type='@'/>
+</method>
+<method selector='type'>
+<retval declared_type='NSString*' type='@'/>
+</method>
+</class>
+<class name='CAValueFunction'>
+<method selector='functionWithName:' class_method='true'>
+<arg index='0' declared_type='NSString*' name='name' type='@'/>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='name'>
+<retval declared_type='NSString*' type='@'/>
+</method>
+</class>
+<class name='CIFilter'>
+<method selector='isEnabled'>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='name'>
+<retval declared_type='NSString*' type='@'/>
+</method>
+<method selector='setEnabled:'>
+<arg index='0' declared_type='BOOL' name='enabled' type='B'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setName:'>
+<arg index='0' declared_type='NSString*' name='name' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+</class>
+<class name='NSObject'>
+<method selector='actionForLayer:forKey:'>
+<arg index='0' declared_type='CALayer*' name='layer' type='@'/>
+<arg index='1' declared_type='NSString*' name='event' type='@'/>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='animationDidStart:'>
+<arg index='0' declared_type='CAAnimation*' name='anim' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='animationDidStop:finished:'>
+<arg index='0' declared_type='CAAnimation*' name='anim' type='@'/>
+<arg index='1' declared_type='BOOL' name='flag' type='B'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='autoreverses'>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='beginTime'>
+<retval declared_type='CFTimeInterval' type='d'/>
+</method>
+<method selector='displayLayer:'>
+<arg index='0' declared_type='CALayer*' name='layer' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='drawLayer:inContext:'>
+<arg index='0' declared_type='CALayer*' name='layer' type='@'/>
+<arg index='1' declared_type='CGContextRef' name='ctx' type='^{CGContext=}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='duration'>
+<retval declared_type='CFTimeInterval' type='d'/>
+</method>
+<method selector='fillMode'>
+<retval declared_type='NSString*' type='@'/>
+</method>
+<method selector='invalidateLayoutOfLayer:'>
+<arg index='0' declared_type='CALayer*' name='layer' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='layoutSublayersOfLayer:'>
+<arg index='0' declared_type='CALayer*' name='layer' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='preferredSizeOfLayer:'>
+<arg index='0' declared_type='CALayer*' name='layer' type='@'/>
+<retval type64='{CGSize=dd}' declared_type='CGSize' type='{CGSize=ff}'/>
+</method>
+<method selector='repeatCount'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='repeatDuration'>
+<retval declared_type='CFTimeInterval' type='d'/>
+</method>
+<method selector='runActionForKey:object:arguments:'>
+<arg index='0' declared_type='NSString*' name='event' type='@'/>
+<arg index='1' declared_type='id' name='anObject' type='@'/>
+<arg index='2' declared_type='NSDictionary*' name='dict' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setAutoreverses:'>
+<arg index='0' declared_type='BOOL' name='autoreverses' type='B'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setBeginTime:'>
+<arg index='0' declared_type='CFTimeInterval' name='beginTime' type='d'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setDuration:'>
+<arg index='0' declared_type='CFTimeInterval' name='duration' type='d'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setFillMode:'>
+<arg index='0' declared_type='NSString*' name='fillMode' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setRepeatCount:'>
+<arg index='0' declared_type='float' name='repeatCount' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setRepeatDuration:'>
+<arg index='0' declared_type='CFTimeInterval' name='repeatDuration' type='d'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setSpeed:'>
+<arg index='0' declared_type='float' name='speed' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setTimeOffset:'>
+<arg index='0' declared_type='CFTimeInterval' name='timeOffset' type='d'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='speed'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='timeOffset'>
+<retval declared_type='CFTimeInterval' type='d'/>
+</method>
+</class>
+<class name='NSValue'>
+<method selector='CATransform3DValue'>
+<retval type64='{CATransform3D=dddddddddddddddd}' declared_type='CATransform3D' type='{CATransform3D=ffffffffffffffff}'/>
+</method>
+<method selector='valueWithCATransform3D:' class_method='true'>
+<arg type64='{CATransform3D=dddddddddddddddd}' index='0' declared_type='CATransform3D' name='t' type='{CATransform3D=ffffffffffffffff}'/>
+<retval declared_type='NSValue*' type='@'/>
+</method>
+</class>
+<informal_protocol name='CAAction'>
+<method selector='runActionForKey:object:arguments:' type64='v40@0:8@16@24@32' type='v20@0:4@8@12@16'>
+<arg index='0' declared_type='NSString*' name='event' type='@'/>
+<arg index='1' declared_type='id' name='anObject' type='@'/>
+<arg index='2' declared_type='NSDictionary*' name='dict' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+</informal_protocol>
+<informal_protocol name='CAAnimationDelegate'>
+<method selector='animationDidStart:' type64='v24@0:8@16' type='v12@0:4@8'>
+<arg index='0' declared_type='CAAnimation*' name='anim' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='animationDidStop:finished:' type64='v28@0:8@16B24' type='v16@0:4@8B12'>
+<arg index='0' declared_type='CAAnimation*' name='anim' type='@'/>
+<arg index='1' declared_type='BOOL' name='flag' type='B'/>
+<retval declared_type='void' type='v'/>
+</method>
+</informal_protocol>
+<informal_protocol name='CALayerDelegate'>
+<method selector='actionForLayer:forKey:' type64='@32@0:8@16@24' type='@16@0:4@8@12'>
+<arg index='0' declared_type='CALayer*' name='layer' type='@'/>
+<arg index='1' declared_type='NSString*' name='event' type='@'/>
+<retval declared_type='id' type='@'/>
+</method>
+<method selector='displayLayer:' type64='v24@0:8@16' type='v12@0:4@8'>
+<arg index='0' declared_type='CALayer*' name='layer' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='drawLayer:inContext:' type64='v32@0:8@16^{CGContext=}24' type='v16@0:4@8^{CGContext=}12'>
+<arg index='0' declared_type='CALayer*' name='layer' type='@'/>
+<arg index='1' declared_type='CGContextRef' name='ctx' type='^{CGContext=}'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='layoutSublayersOfLayer:' type64='v24@0:8@16' type='v12@0:4@8'>
+<arg index='0' declared_type='CALayer*' name='layer' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+</informal_protocol>
+<informal_protocol name='CALayoutManager'>
+<method selector='invalidateLayoutOfLayer:' type64='v24@0:8@16' type='v12@0:4@8'>
+<arg index='0' declared_type='CALayer*' name='layer' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='layoutSublayersOfLayer:' type64='v24@0:8@16' type='v12@0:4@8'>
+<arg index='0' declared_type='CALayer*' name='layer' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='preferredSizeOfLayer:' type64='{CGSize=dd}24@0:8@16' type='{CGSize=ff}12@0:4@8'>
+<arg index='0' declared_type='CALayer*' name='layer' type='@'/>
+<retval type64='{CGSize=dd}' declared_type='CGSize' type='{CGSize=ff}'/>
+</method>
+</informal_protocol>
+<informal_protocol name='CAMediaTiming'>
+<method selector='autoreverses' type64='B16@0:8' type='B8@0:4'>
+<retval declared_type='BOOL' type='B'/>
+</method>
+<method selector='beginTime' type64='d16@0:8' type='d8@0:4'>
+<retval declared_type='CFTimeInterval' type='d'/>
+</method>
+<method selector='duration' type64='d16@0:8' type='d8@0:4'>
+<retval declared_type='CFTimeInterval' type='d'/>
+</method>
+<method selector='fillMode' type64='@16@0:8' type='@8@0:4'>
+<retval declared_type='NSString*' type='@'/>
+</method>
+<method selector='repeatCount' type64='f16@0:8' type='f8@0:4'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='repeatDuration' type64='d16@0:8' type='d8@0:4'>
+<retval declared_type='CFTimeInterval' type='d'/>
+</method>
+<method selector='setAutoreverses:' type64='v20@0:8B16' type='v12@0:4B8'>
+<arg index='0' declared_type='BOOL' name='autoreverses' type='B'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setBeginTime:' type64='v24@0:8d16' type='v16@0:4d8'>
+<arg index='0' declared_type='CFTimeInterval' name='beginTime' type='d'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setDuration:' type64='v24@0:8d16' type='v16@0:4d8'>
+<arg index='0' declared_type='CFTimeInterval' name='duration' type='d'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setFillMode:' type64='v24@0:8@16' type='v12@0:4@8'>
+<arg index='0' declared_type='NSString*' name='fillMode' type='@'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setRepeatCount:' type64='v20@0:8f16' type='v12@0:4f8'>
+<arg index='0' declared_type='float' name='repeatCount' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setRepeatDuration:' type64='v24@0:8d16' type='v16@0:4d8'>
+<arg index='0' declared_type='CFTimeInterval' name='repeatDuration' type='d'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setSpeed:' type64='v20@0:8f16' type='v12@0:4f8'>
+<arg index='0' declared_type='float' name='speed' type='f'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='setTimeOffset:' type64='v24@0:8d16' type='v16@0:4d8'>
+<arg index='0' declared_type='CFTimeInterval' name='timeOffset' type='d'/>
+<retval declared_type='void' type='v'/>
+</method>
+<method selector='speed' type64='f16@0:8' type='f8@0:4'>
+<retval declared_type='float' type='f'/>
+</method>
+<method selector='timeOffset' type64='d16@0:8' type='d8@0:4'>
+<retval declared_type='CFTimeInterval' type='d'/>
+</method>
+</informal_protocol>
+</signatures>

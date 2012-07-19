@@ -1,0 +1,2195 @@
+<?xml version='1.0'?>
+<signatures version='1.0'>
+<struct type='{vImage_AffineTransform=&quot;a&quot;f&quot;b&quot;f&quot;c&quot;f&quot;d&quot;f&quot;tx&quot;f&quot;ty&quot;f}' name='vImage_AffineTransform'>
+<field type='f' declared_type='float' name='a'/>
+<field type='f' declared_type='float' name='b'/>
+<field type='f' declared_type='float' name='c'/>
+<field type='f' declared_type='float' name='d'/>
+<field type='f' declared_type='float' name='tx'/>
+<field type='f' declared_type='float' name='ty'/>
+</struct>
+<struct type='{vImage_AffineTransform_Double=&quot;a&quot;d&quot;b&quot;d&quot;c&quot;d&quot;d&quot;d&quot;tx&quot;d&quot;ty&quot;d}' name='vImage_AffineTransform_Double'>
+<field type='d' declared_type='double' name='a'/>
+<field type='d' declared_type='double' name='b'/>
+<field type='d' declared_type='double' name='c'/>
+<field type='d' declared_type='double' name='d'/>
+<field type='d' declared_type='double' name='tx'/>
+<field type='d' declared_type='double' name='ty'/>
+</struct>
+<struct type64='{vImage_Buffer=&quot;data&quot;^v&quot;height&quot;Q&quot;width&quot;Q&quot;rowBytes&quot;Q}' type='{vImage_Buffer=&quot;data&quot;^v&quot;height&quot;I&quot;width&quot;I&quot;rowBytes&quot;I}' name='vImage_Buffer'>
+<field type='^v' declared_type='void*' name='data'/>
+<field type64='Q' type='L' declared_type='vImagePixelCount' name='height'/>
+<field type64='Q' type='L' declared_type='vImagePixelCount' name='width'/>
+<field type64='Q' type='L' declared_type='size_t' name='rowBytes'/>
+</struct>
+<struct type64='{vImage_AffineTransform_Double=&quot;a&quot;d&quot;b&quot;d&quot;c&quot;d&quot;d&quot;d&quot;tx&quot;d&quot;ty&quot;d}' type='{vImage_AffineTransform=&quot;a&quot;f&quot;b&quot;f&quot;c&quot;f&quot;d&quot;f&quot;tx&quot;f&quot;ty&quot;f}' name='vImage_CGAffineTransform'>
+<field type64='d' declared_type64='double' type='f' declared_type='float' name='a'/>
+<field type64='d' declared_type64='double' type='f' declared_type='float' name='b'/>
+<field type64='d' declared_type64='double' type='f' declared_type='float' name='c'/>
+<field type64='d' declared_type64='double' type='f' declared_type='float' name='d'/>
+<field type64='d' declared_type64='double' type='f' declared_type='float' name='tx'/>
+<field type64='d' declared_type64='double' type='f' declared_type='float' name='ty'/>
+</struct>
+<enum value='1' name='VIMAGE_AFFINETRANSFORM_DOUBLE_IS_AVAILABLE'/>
+<enum value='1' name='VIMAGE_CGAFFINETRANSFORM_IS_AVAILABLE'/>
+<enum value='0' name='kRotate0DegreesClockwise'/>
+<enum value='0' name='kRotate0DegreesCounterClockwise'/>
+<enum value='2' name='kRotate180DegreesClockwise'/>
+<enum value='2' name='kRotate180DegreesCounterClockwise'/>
+<enum value='1' name='kRotate270DegreesClockwise'/>
+<enum value='3' name='kRotate270DegreesCounterClockwise'/>
+<enum value='3' name='kRotate90DegreesClockwise'/>
+<enum value='1' name='kRotate90DegreesCounterClockwise'/>
+<enum value='4' name='kvImageBackgroundColorFill'/>
+<enum value='-21774' name='kvImageBufferSizeMismatch'/>
+<enum value='2' name='kvImageCopyInPlace'/>
+<enum value='16' name='kvImageDoNotTile'/>
+<enum value='8' name='kvImageEdgeExtend'/>
+<enum value='5' name='kvImageGamma_11_over_5_half_precision'/>
+<enum value='8' name='kvImageGamma_11_over_9_half_precision'/>
+<enum value='4' name='kvImageGamma_5_over_11_half_precision'/>
+<enum value='2' name='kvImageGamma_5_over_9_half_precision'/>
+<enum value='9' name='kvImageGamma_9_over_11_half_precision'/>
+<enum value='3' name='kvImageGamma_9_over_5_half_precision'/>
+<enum value='10' name='kvImageGamma_BT709_forward_half_precision'/>
+<enum value='11' name='kvImageGamma_BT709_reverse_half_precision'/>
+<enum value='0' name='kvImageGamma_UseGammaValue'/>
+<enum value='1' name='kvImageGamma_UseGammaValue_half_precision'/>
+<enum value='6' name='kvImageGamma_sRGB_forward_half_precision'/>
+<enum value='7' name='kvImageGamma_sRGB_reverse_half_precision'/>
+<enum value='128' name='kvImageGetTempBufferSize'/>
+<enum value='32' name='kvImageHighQualityResampling'/>
+<enum value='-21768' name='kvImageInvalidEdgeStyle'/>
+<enum value='-21767' name='kvImageInvalidKernelSize'/>
+<enum value='-21769' name='kvImageInvalidOffset_X'/>
+<enum value='-21770' name='kvImageInvalidOffset_Y'/>
+<enum value='-21773' name='kvImageInvalidParameter'/>
+<enum value='1' name='kvImageLeaveAlphaUnchanged'/>
+<enum value='-21771' name='kvImageMemoryAllocationError'/>
+<enum value='0' name='kvImageNoError'/>
+<enum value='0' name='kvImageNoFlags'/>
+<enum value='-21772' name='kvImageNullPointerArgument'/>
+<enum value='-21766' name='kvImageRoiLargerThanInputBuffer'/>
+<enum value='64' name='kvImageTruncateKernel'/>
+<enum value='-21775' name='kvImageUnknownFlagsBit'/>
+<enum value='3' name='kvImage_PNG_FILTER_VALUE_AVG'/>
+<enum value='0' name='kvImage_PNG_FILTER_VALUE_NONE'/>
+<enum value='4' name='kvImage_PNG_FILTER_VALUE_PAETH'/>
+<enum value='1' name='kvImage_PNG_FILTER_VALUE_SUB'/>
+<enum value='2' name='kvImage_PNG_FILTER_VALUE_UP'/>
+<function name='vImageAffineWarpCG_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='^{vImage_AffineTransform_Double=dddddd}' type='^{vImage_AffineTransform=ffffff}' declared_type='vImage_CGAffineTransform*' name='transform' const='true'/>
+<arg type='*' declared_type='uint8_t*' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageAffineWarpCG_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='^{vImage_AffineTransform_Double=dddddd}' type='^{vImage_AffineTransform=ffffff}' declared_type='vImage_CGAffineTransform*' name='transform' const='true'/>
+<arg type='^f' declared_type='float*' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageAffineWarpCG_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='^{vImage_AffineTransform_Double=dddddd}' type='^{vImage_AffineTransform=ffffff}' declared_type='vImage_CGAffineTransform*' name='transform' const='true'/>
+<arg type='C' declared_type='Pixel_8' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageAffineWarpCG_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='^{vImage_AffineTransform_Double=dddddd}' type='^{vImage_AffineTransform=ffffff}' declared_type='vImage_CGAffineTransform*' name='transform' const='true'/>
+<arg type='f' declared_type='Pixel_F' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageAffineWarpD_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type='^{vImage_AffineTransform_Double=dddddd}' declared_type='vImage_AffineTransform_Double*' name='transform' const='true'/>
+<arg type='*' declared_type='uint8_t*' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageAffineWarpD_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type='^{vImage_AffineTransform_Double=dddddd}' declared_type='vImage_AffineTransform_Double*' name='transform' const='true'/>
+<arg type='^f' declared_type='float*' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageAffineWarpD_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type='^{vImage_AffineTransform_Double=dddddd}' declared_type='vImage_AffineTransform_Double*' name='transform' const='true'/>
+<arg type='C' declared_type='Pixel_8' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageAffineWarpD_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type='^{vImage_AffineTransform_Double=dddddd}' declared_type='vImage_AffineTransform_Double*' name='transform' const='true'/>
+<arg type='f' declared_type='Pixel_F' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageAffineWarp_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type='^{vImage_AffineTransform=ffffff}' declared_type='vImage_AffineTransform*' name='transform' const='true'/>
+<arg type='*' declared_type='uint8_t*' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageAffineWarp_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type='^{vImage_AffineTransform=ffffff}' declared_type='vImage_AffineTransform*' name='transform' const='true'/>
+<arg type='^f' declared_type='float*' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageAffineWarp_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type='^{vImage_AffineTransform=ffffff}' declared_type='vImage_AffineTransform*' name='transform' const='true'/>
+<arg type='C' declared_type='Pixel_8' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageAffineWarp_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type='^{vImage_AffineTransform=ffffff}' declared_type='vImage_AffineTransform*' name='transform' const='true'/>
+<arg type='f' declared_type='Pixel_F' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageAlphaBlend_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcTop' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcBottom' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageAlphaBlend_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcTop' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcBottom' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageAlphaBlend_NonpremultipliedToPremultiplied_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcTop' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcBottom' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageAlphaBlend_NonpremultipliedToPremultiplied_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcTop' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcBottom' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageAlphaBlend_NonpremultipliedToPremultiplied_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcTop' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcTopAlpha' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcBottom' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageAlphaBlend_NonpremultipliedToPremultiplied_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcTop' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcTopAlpha' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcBottom' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageAlphaBlend_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcTop' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcTopAlpha' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcBottom' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcBottomAlpha' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='alpha' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageAlphaBlend_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcTop' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcTopAlpha' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcBottom' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcBottomAlpha' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='alpha' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageBoxConvolve_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='I' declared_type='uint32_t' name='kernel_height'/>
+<arg type='I' declared_type='uint32_t' name='kernel_width'/>
+<arg type='*' declared_type='uint8_t*' name='backgroundColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageBoxConvolve_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='I' declared_type='uint32_t' name='kernel_height'/>
+<arg type='I' declared_type='uint32_t' name='kernel_width'/>
+<arg type='C' declared_type='Pixel_8' name='backgroundColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageBufferFill_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='*' declared_type='uint8_t*' name='color' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageBufferFill_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^f' declared_type='float*' name='color' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageClipToAlpha_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageClipToAlpha_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageClipToAlpha_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='alpha' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageClipToAlpha_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='alpha' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageClipToAlpha_RGBA8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageClipToAlpha_RGBAFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageClip_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='f' declared_type='Pixel_F' name='maxFloat'/>
+<arg type='f' declared_type='Pixel_F' name='minFloat'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageContrastStretch_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageContrastStretch_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type='I' declared_type='unsigned int' name='histogram_entries'/>
+<arg type='f' declared_type='Pixel_F' name='minVal'/>
+<arg type='f' declared_type='Pixel_F' name='maxVal'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageContrastStretch_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageContrastStretch_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type='I' declared_type='unsigned int' name='histogram_entries'/>
+<arg type='f' declared_type='Pixel_F' name='minVal'/>
+<arg type='f' declared_type='Pixel_F' name='maxVal'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_16SToF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='f' declared_type='float' name='offset'/>
+<arg type='f' declared_type='float' name='scale'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_16UToF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='f' declared_type='float' name='offset'/>
+<arg type='f' declared_type='float' name='scale'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_16UToPlanar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_ARGB1555toARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_ARGB1555toPlanar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='destA' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='destR' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='destG' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='destB' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_ARGB8888toARGB1555'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_ARGB8888toPlanar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcARGB' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='destA' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='destR' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='destG' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='destB' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_ARGB8888toRGB565'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_ARGB8888toRGB888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' const='true'/>
+<arg type='I' declared_type='vImage_Flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_ARGBFFFFtoPlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcARGB' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='destA' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='destR' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='destG' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='destB' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_BGRA8888toRGB888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' const='true'/>
+<arg type='I' declared_type='vImage_Flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_ChunkyToPlanar8'>
+<arg type='^^v' declared_type='void**' name='srcChannels' const='true'/>
+<arg type='^^{vImage_Buffer}' declared_type='vImage_Buffer**' name='destPlanarBuffers' const='true'/>
+<arg type='I' declared_type='unsigned int' name='channelCount'/>
+<arg type64='Q' type='L' declared_type='size_t' name='srcStrideBytes'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcWidth'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcHeight'/>
+<arg type64='Q' type='L' declared_type='size_t' name='srcRowBytes'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_ChunkyToPlanarF'>
+<arg type='^^v' declared_type='void**' name='srcChannels' const='true'/>
+<arg type='^^{vImage_Buffer}' declared_type='vImage_Buffer**' name='destPlanarBuffers' const='true'/>
+<arg type='I' declared_type='unsigned int' name='channelCount'/>
+<arg type64='Q' type='L' declared_type='size_t' name='srcStrideBytes'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcWidth'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcHeight'/>
+<arg type64='Q' type='L' declared_type='size_t' name='srcRowBytes'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_FTo16S'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='f' declared_type='float' name='offset'/>
+<arg type='f' declared_type='float' name='scale'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_FTo16U'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='f' declared_type='float' name='offset'/>
+<arg type='f' declared_type='float' name='scale'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_Planar16FtoPlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_Planar8To16U'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_Planar8ToARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='alpha' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='red' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='green' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='blue' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^f' declared_type='float*' name='maxFloat' const='true'/>
+<arg type='^f' declared_type='float*' name='minFloat' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_Planar8ToBGRX8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='blue' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='green' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='red' const='true'/>
+<arg type='C' declared_type='Pixel_8' name='alpha'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_Planar8ToBGRXFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='blue' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='green' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='red' const='true'/>
+<arg type='f' declared_type='Pixel_F' name='alpha'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^f' declared_type='float*' name='maxFloat' const='true'/>
+<arg type='^f' declared_type='float*' name='minFloat' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_Planar8ToXRGB8888'>
+<arg type='C' declared_type='Pixel_8' name='alpha'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='red' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='green' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='blue' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_Planar8ToXRGBFFFF'>
+<arg type='f' declared_type='Pixel_F' name='alpha'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='red' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='green' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='blue' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^f' declared_type='float*' name='maxFloat' const='true'/>
+<arg type='^f' declared_type='float*' name='minFloat' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_Planar8toARGB1555'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcA' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcR' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcG' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcB' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_Planar8toARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcA' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcR' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcG' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcB' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_Planar8toPlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='f' declared_type='Pixel_F' name='maxFloat'/>
+<arg type='f' declared_type='Pixel_F' name='minFloat'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_Planar8toRGB565'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcR' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcG' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcB' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_Planar8toRGB888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='planarRed' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='planarGreen' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='planarBlue' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='rgbDest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_PlanarFToARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='alpha' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='red' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='green' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='blue' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^f' declared_type='float*' name='maxFloat' const='true'/>
+<arg type='^f' declared_type='float*' name='minFloat' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_PlanarFToBGRX8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='blue' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='green' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='red' const='true'/>
+<arg type='C' declared_type='Pixel_8' name='alpha'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^f' declared_type='float*' name='maxFloat' const='true'/>
+<arg type='^f' declared_type='float*' name='minFloat' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_PlanarFToBGRXFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='blue' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='green' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='red' const='true'/>
+<arg type='f' declared_type='Pixel_F' name='alpha'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_PlanarFToXRGB8888'>
+<arg type='C' declared_type='Pixel_8' name='alpha'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='red' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='green' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='blue' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^f' declared_type='float*' name='maxFloat' const='true'/>
+<arg type='^f' declared_type='float*' name='minFloat' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_PlanarFToXRGBFFFF'>
+<arg type='f' declared_type='Pixel_F' name='alpha'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='red' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='green' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='blue' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_PlanarFtoARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcA' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcR' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcG' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcB' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_PlanarFtoPlanar16F'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_PlanarFtoPlanar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='f' declared_type='Pixel_F' name='maxFloat'/>
+<arg type='f' declared_type='Pixel_F' name='minFloat'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_PlanarFtoRGBFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='planarRed' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='planarGreen' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='planarBlue' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='rgbDest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_PlanarToChunky8'>
+<arg type='^^{vImage_Buffer}' declared_type='vImage_Buffer**' name='srcPlanarBuffers' const='true'/>
+<arg type='^^v' declared_type='void**' name='destChannels'/>
+<arg type='I' declared_type='unsigned int' name='channelCount'/>
+<arg type64='Q' type='L' declared_type='size_t' name='destStrideBytes'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='destWidth'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='destHeight'/>
+<arg type64='Q' type='L' declared_type='size_t' name='destRowBytes'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_PlanarToChunkyF'>
+<arg type='^^{vImage_Buffer}' declared_type='vImage_Buffer**' name='srcPlanarBuffers' const='true'/>
+<arg type='^^v' declared_type='void**' name='destChannels'/>
+<arg type='I' declared_type='unsigned int' name='channelCount'/>
+<arg type64='Q' type='L' declared_type='size_t' name='destStrideBytes'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='destWidth'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='destHeight'/>
+<arg type64='Q' type='L' declared_type='size_t' name='destRowBytes'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_RGB565toARGB8888'>
+<arg type='C' declared_type='Pixel_8' name='alpha'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_RGB565toPlanar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='destR' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='destG' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='destB' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_RGB888toARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' const='true'/>
+<arg type='C' declared_type='Pixel_8'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' const='true'/>
+<arg type='B' declared_type='_Bool'/>
+<arg type='I' declared_type='vImage_Flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_RGB888toBGRA8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' const='true'/>
+<arg type='C' declared_type='Pixel_8'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' const='true'/>
+<arg type='B' declared_type='_Bool'/>
+<arg type='I' declared_type='vImage_Flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_RGB888toPlanar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='rgbSrc' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='redDest' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='greenDest' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='blueDest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_RGB888toRGBA8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' const='true'/>
+<arg type='C' declared_type='Pixel_8'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' const='true'/>
+<arg type='B' declared_type='_Bool'/>
+<arg type='I' declared_type='vImage_Flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_RGBA8888toRGB888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' const='true'/>
+<arg type='I' declared_type='vImage_Flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvert_RGBFFFtoPlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='rgbSrc' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='redDest' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='greenDest' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='blueDest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvolveMultiKernel_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='^^s' declared_type='int16_t**' name='kernels' const='true'/>
+<arg type='I' declared_type='uint32_t' name='kernel_height'/>
+<arg type='I' declared_type='uint32_t' name='kernel_width'/>
+<arg type='^i' declared_type='int32_t*' name='divisors' const='true'/>
+<arg type='^i' declared_type='int32_t*' name='biases' const='true'/>
+<arg type='*' declared_type='uint8_t*' name='backgroundColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvolveMultiKernel_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='^^f' declared_type='float**' name='kernels' const='true'/>
+<arg type='I' declared_type='uint32_t' name='kernel_height'/>
+<arg type='I' declared_type='uint32_t' name='kernel_width'/>
+<arg type='^f' declared_type='float*' name='biases' const='true'/>
+<arg type='^f' declared_type='float*' name='backgroundColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvolveWithBias_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='^s' declared_type='int16_t*' name='kernel' const='true'/>
+<arg type='I' declared_type='uint32_t' name='kernel_height'/>
+<arg type='I' declared_type='uint32_t' name='kernel_width'/>
+<arg type='i' declared_type='int32_t' name='divisor'/>
+<arg type='i' declared_type='int32_t' name='bias'/>
+<arg type='*' declared_type='uint8_t*' name='backgroundColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvolveWithBias_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='^f' declared_type='float*' name='kernel' const='true'/>
+<arg type='I' declared_type='uint32_t' name='kernel_height'/>
+<arg type='I' declared_type='uint32_t' name='kernel_width'/>
+<arg type='f' declared_type='float' name='bias'/>
+<arg type='^f' declared_type='float*' name='backgroundColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvolveWithBias_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='^s' declared_type='int16_t*' name='kernel' const='true'/>
+<arg type='I' declared_type='uint32_t' name='kernel_height'/>
+<arg type='I' declared_type='uint32_t' name='kernel_width'/>
+<arg type='i' declared_type='int32_t' name='divisor'/>
+<arg type='i' declared_type='int32_t' name='bias'/>
+<arg type='C' declared_type='Pixel_8' name='backgroundColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvolveWithBias_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='^f' declared_type='float*' name='kernel' const='true'/>
+<arg type='I' declared_type='uint32_t' name='kernel_height'/>
+<arg type='I' declared_type='uint32_t' name='kernel_width'/>
+<arg type='f' declared_type='float' name='bias'/>
+<arg type='f' declared_type='Pixel_F' name='backgroundColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvolve_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='^s' declared_type='int16_t*' name='kernel' const='true'/>
+<arg type='I' declared_type='uint32_t' name='kernel_height'/>
+<arg type='I' declared_type='uint32_t' name='kernel_width'/>
+<arg type='i' declared_type='int32_t' name='divisor'/>
+<arg type='*' declared_type='uint8_t*' name='backgroundColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvolve_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='^f' declared_type='float*' name='kernel' const='true'/>
+<arg type='I' declared_type='uint32_t' name='kernel_height'/>
+<arg type='I' declared_type='uint32_t' name='kernel_width'/>
+<arg type='^f' declared_type='float*' name='backgroundColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvolve_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='^s' declared_type='int16_t*' name='kernel' const='true'/>
+<arg type='I' declared_type='uint32_t' name='kernel_height'/>
+<arg type='I' declared_type='uint32_t' name='kernel_width'/>
+<arg type='i' declared_type='int32_t' name='divisor'/>
+<arg type='C' declared_type='Pixel_8' name='backgroundColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageConvolve_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='^f' declared_type='float*' name='kernel' const='true'/>
+<arg type='I' declared_type='uint32_t' name='kernel_height'/>
+<arg type='I' declared_type='uint32_t' name='kernel_width'/>
+<arg type='f' declared_type='Pixel_F' name='backgroundColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageCreateGammaFunction'>
+<arg type='f' declared_type='float' name='gamma'/>
+<arg type='i' declared_type='int' name='gamma_type'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type='^v' declared_type='GammaFunction'/>
+</function>
+<function name='vImageDestroyGammaFunction'>
+<arg type='^v' declared_type='GammaFunction' name='f'/>
+<retval type='v' declared_type='void'/>
+</function>
+<function name='vImageDestroyResamplingFilter'>
+<arg type='^v' declared_type='ResamplingFilter' name='filter'/>
+<retval type='v' declared_type='void'/>
+</function>
+<function name='vImageDilate_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='*' declared_type='unsigned char*' name='kernel' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_height'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_width'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageDilate_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='^f' declared_type='float*' name='kernel' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_height'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_width'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageDilate_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='*' declared_type='unsigned char*' name='kernel' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_height'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_width'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageDilate_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='^f' declared_type='float*' name='kernel' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_height'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_width'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageEndsInContrastStretch_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^I' declared_type='unsigned int*' name='percent_low' const='true'/>
+<arg type='^I' declared_type='unsigned int*' name='percent_high' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageEndsInContrastStretch_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type='^I' declared_type='unsigned int*' name='percent_low' const='true'/>
+<arg type='^I' declared_type='unsigned int*' name='percent_high' const='true'/>
+<arg type='I' declared_type='unsigned int' name='histogram_entries'/>
+<arg type='f' declared_type='Pixel_F' name='minVal'/>
+<arg type='f' declared_type='Pixel_F' name='maxVal'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageEndsInContrastStretch_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='unsigned int' name='percent_low'/>
+<arg type='I' declared_type='unsigned int' name='percent_high'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageEndsInContrastStretch_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type='I' declared_type='unsigned int' name='percent_low'/>
+<arg type='I' declared_type='unsigned int' name='percent_high'/>
+<arg type='I' declared_type='unsigned int' name='histogram_entries'/>
+<arg type='f' declared_type='Pixel_F' name='minVal'/>
+<arg type='f' declared_type='Pixel_F' name='maxVal'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageEqualization_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageEqualization_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type='I' declared_type='unsigned int' name='histogram_entries'/>
+<arg type='f' declared_type='Pixel_F' name='minVal'/>
+<arg type='f' declared_type='Pixel_F' name='maxVal'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageEqualization_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageEqualization_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type='I' declared_type='unsigned int' name='histogram_entries'/>
+<arg type='f' declared_type='Pixel_F' name='minVal'/>
+<arg type='f' declared_type='Pixel_F' name='maxVal'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageErode_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='*' declared_type='unsigned char*' name='kernel' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_height'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_width'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageErode_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='^f' declared_type='float*' name='kernel' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_height'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_width'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageErode_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='*' declared_type='unsigned char*' name='kernel' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_height'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_width'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageErode_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='^f' declared_type='float*' name='kernel' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_height'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_width'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageFlatten_ARGB8888ToRGB888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' const='true'/>
+<arg type='*' declared_type='uint8_t*'/>
+<arg type='B' declared_type='_Bool'/>
+<arg type='I' declared_type='vImage_Flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageFlatten_ARGBFFFFToRGBFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' const='true'/>
+<arg type='^f' declared_type='float*'/>
+<arg type='B' declared_type='_Bool'/>
+<arg type='I' declared_type='vImage_Flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageFlatten_BGRA8888ToRGB888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' const='true'/>
+<arg type='*' declared_type='uint8_t*'/>
+<arg type='B' declared_type='_Bool'/>
+<arg type='I' declared_type='vImage_Flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageFlatten_BGRAFFFFToRGBFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' const='true'/>
+<arg type='^f' declared_type='float*'/>
+<arg type='B' declared_type='_Bool'/>
+<arg type='I' declared_type='vImage_Flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageFlatten_RGBA8888ToRGB888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' const='true'/>
+<arg type='*' declared_type='uint8_t*'/>
+<arg type='B' declared_type='_Bool'/>
+<arg type='I' declared_type='vImage_Flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageFlatten_RGBAFFFFToRGBFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' const='true'/>
+<arg type='^f' declared_type='float*'/>
+<arg type='B' declared_type='_Bool'/>
+<arg type='I' declared_type='vImage_Flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageGamma_Planar8toPlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='GammaFunction' name='gamma' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageGamma_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='GammaFunction' name='gamma' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageGamma_PlanarFtoPlanar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='GammaFunction' name='gamma' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageGetMinimumGeometryTempBufferSize'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<arg type64='Q' type='L' declared_type='size_t' name='bytesPerPixel'/>
+<retval type64='Q' type='L' declared_type='size_t'/>
+</function>
+<function name='vImageGetMinimumTempBufferSizeForConvolution'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='uint32_t' name='kernel_height'/>
+<arg type='I' declared_type='uint32_t' name='kernel_width'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<arg type64='Q' type='L' declared_type='size_t' name='bytesPerPixel'/>
+<retval type64='Q' type='L' declared_type='size_t'/>
+</function>
+<function name='vImageGetMinimumTempBufferSizeForHistogram'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='unsigned int' name='histogram_entries'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<arg type64='Q' type='L' declared_type='size_t' name='bytesPerPixel'/>
+<retval type64='Q' type='L' declared_type='size_t'/>
+</function>
+<function name='vImageGetMinimumTempBufferSizeForMinMax'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_height'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_width'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<arg type64='Q' type='L' declared_type='size_t' name='bytesPerPixel'/>
+<retval type64='Q' type='L' declared_type='size_t'/>
+</function>
+<function name='vImageGetResamplingFilterSize'>
+<arg type='f' declared_type='float' name='scale'/>
+<arg type='^?' function_pointer='true' declared_type='void (*)(float *, float *, unsigned long, void *)' name='kernelFunc'>
+<arg type='^f' declared_type='float*' const='true'/>
+<arg type='^f' declared_type='float*'/>
+<arg type64='Q' type='L' declared_type='unsigned long'/>
+<arg type='^v' declared_type='void*'/>
+<retval type='v' declared_type='void'/>
+</arg>
+<arg type='f' declared_type='float' name='kernelWidth'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='Q' type='L' declared_type='size_t'/>
+</function>
+<function name='vImageHistogramCalculation_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^^Q' type='^^I' declared_type='vImagePixelCount**' name='histogram'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageHistogramCalculation_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^^Q' type='^^I' declared_type='vImagePixelCount**' name='histogram'/>
+<arg type='I' declared_type='unsigned int' name='histogram_entries'/>
+<arg type='f' declared_type='Pixel_F' name='minVal'/>
+<arg type='f' declared_type='Pixel_F' name='maxVal'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageHistogramCalculation_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^Q' type='^I' declared_type='vImagePixelCount*' name='histogram'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageHistogramCalculation_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^Q' type='^I' declared_type='vImagePixelCount*' name='histogram'/>
+<arg type='I' declared_type='unsigned int' name='histogram_entries'/>
+<arg type='f' declared_type='Pixel_F' name='minVal'/>
+<arg type='f' declared_type='Pixel_F' name='maxVal'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageHistogramSpecification_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type64='^^Q' type='^^I' declared_type='vImagePixelCount**' name='desired_histogram' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageHistogramSpecification_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='^^Q' type='^^I' declared_type='vImagePixelCount**' name='desired_histogram' const='true'/>
+<arg type='I' declared_type='unsigned int' name='histogram_entries'/>
+<arg type='f' declared_type='Pixel_F' name='minVal'/>
+<arg type='f' declared_type='Pixel_F' name='maxVal'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageHistogramSpecification_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type64='^Q' type='^I' declared_type='vImagePixelCount*' name='desired_histogram' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageHistogramSpecification_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='^Q' type='^I' declared_type='vImagePixelCount*' name='desired_histogram' const='true'/>
+<arg type='I' declared_type='unsigned int' name='histogram_entries'/>
+<arg type='f' declared_type='Pixel_F' name='minVal'/>
+<arg type='f' declared_type='Pixel_F' name='maxVal'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageHorizontalReflect_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageHorizontalReflect_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageHorizontalReflect_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageHorizontalReflect_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageHorizontalShearD_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='d' declared_type='double' name='xTranslate'/>
+<arg type='d' declared_type='double' name='shearSlope'/>
+<arg type='^v' declared_type='ResamplingFilter' name='filter'/>
+<arg type='*' declared_type='uint8_t*' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageHorizontalShearD_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='d' declared_type='double' name='xTranslate'/>
+<arg type='d' declared_type='double' name='shearSlope'/>
+<arg type='^v' declared_type='ResamplingFilter' name='filter'/>
+<arg type='^f' declared_type='float*' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageHorizontalShearD_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='d' declared_type='double' name='xTranslate'/>
+<arg type='d' declared_type='double' name='shearSlope'/>
+<arg type='^v' declared_type='ResamplingFilter' name='filter'/>
+<arg type='C' declared_type='Pixel_8' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageHorizontalShearD_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='d' declared_type='double' name='xTranslate'/>
+<arg type='d' declared_type='double' name='shearSlope'/>
+<arg type='^v' declared_type='ResamplingFilter' name='filter'/>
+<arg type='f' declared_type='Pixel_F' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageHorizontalShear_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='f' declared_type='float' name='xTranslate'/>
+<arg type='f' declared_type='float' name='shearSlope'/>
+<arg type='^v' declared_type='ResamplingFilter' name='filter'/>
+<arg type='*' declared_type='uint8_t*' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageHorizontalShear_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='f' declared_type='float' name='xTranslate'/>
+<arg type='f' declared_type='float' name='shearSlope'/>
+<arg type='^v' declared_type='ResamplingFilter' name='filter'/>
+<arg type='^f' declared_type='float*' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageHorizontalShear_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='f' declared_type='float' name='xTranslate'/>
+<arg type='f' declared_type='float' name='shearSlope'/>
+<arg type='^v' declared_type='ResamplingFilter' name='filter'/>
+<arg type='C' declared_type='Pixel_8' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageHorizontalShear_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='f' declared_type='float' name='xTranslate'/>
+<arg type='f' declared_type='float' name='shearSlope'/>
+<arg type='^v' declared_type='ResamplingFilter' name='filter'/>
+<arg type='f' declared_type='Pixel_F' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageInterpolatedLookupTable_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^f' declared_type='Pixel_F*' name='table' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='tableEntries'/>
+<arg type='f' declared_type='float' name='maxFloat'/>
+<arg type='f' declared_type='float' name='minFloat'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageLookupTable_Planar8toPlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^f' declared_type='Pixel_F*' name='table' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageLookupTable_PlanarFtoPlanar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='*' declared_type='Pixel_8*' name='table' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageMatrixMultiply_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^s' declared_type='int16_t*' name='matrix' const='true'/>
+<arg type='i' declared_type='int32_t' name='divisor'/>
+<arg type='^s' declared_type='int16_t*' name='pre_bias' const='true'/>
+<arg type='^i' declared_type='int32_t*' name='post_bias' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageMatrixMultiply_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^f' declared_type='float*' name='matrix' const='true'/>
+<arg type='^f' declared_type='float*' name='pre_bias' const='true'/>
+<arg type='^f' declared_type='float*' name='post_bias' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageMatrixMultiply_Planar8'>
+<arg type='^^{vImage_Buffer}' declared_type='vImage_Buffer**' name='srcs' const='true'/>
+<arg type='^^{vImage_Buffer}' declared_type='vImage_Buffer**' name='dests' const='true'/>
+<arg type='I' declared_type='uint32_t' name='src_planes'/>
+<arg type='I' declared_type='uint32_t' name='dest_planes'/>
+<arg type='^s' declared_type='int16_t*' name='matrix' const='true'/>
+<arg type='i' declared_type='int32_t' name='divisor'/>
+<arg type='^s' declared_type='int16_t*' name='pre_bias' const='true'/>
+<arg type='^i' declared_type='int32_t*' name='post_bias' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageMatrixMultiply_PlanarF'>
+<arg type='^^{vImage_Buffer}' declared_type='vImage_Buffer**' name='srcs' const='true'/>
+<arg type='^^{vImage_Buffer}' declared_type='vImage_Buffer**' name='dests' const='true'/>
+<arg type='I' declared_type='uint32_t' name='src_planes'/>
+<arg type='I' declared_type='uint32_t' name='dest_planes'/>
+<arg type='^f' declared_type='float*' name='matrix' const='true'/>
+<arg type='^f' declared_type='float*' name='pre_bias' const='true'/>
+<arg type='^f' declared_type='float*' name='post_bias' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageMax_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_height'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_width'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageMax_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_height'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_width'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageMax_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_height'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_width'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageMax_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_height'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_width'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageMin_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_height'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_width'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageMin_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_height'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_width'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageMin_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_height'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_width'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageMin_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_height'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='kernel_width'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageNewResamplingFilter'>
+<arg type='f' declared_type='float' name='scale'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type='^v' declared_type='ResamplingFilter'/>
+</function>
+<function name='vImageNewResamplingFilterForFunctionUsingBuffer'>
+<arg type='^v' declared_type='ResamplingFilter' name='filter'/>
+<arg type='f' declared_type='float' name='scale'/>
+<arg type='^?' function_pointer='true' declared_type='void (*)(float *, float *, unsigned long, void *)' name='kernelFunc'>
+<arg type='^f' declared_type='float*' const='true'/>
+<arg type='^f' declared_type='float*'/>
+<arg type64='Q' type='L' declared_type='unsigned long'/>
+<arg type='^v' declared_type='void*'/>
+<retval type='v' declared_type='void'/>
+</arg>
+<arg type='f' declared_type='float' name='kernelWidth'/>
+<arg type='^v' declared_type='void*' name='userData'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageOverwriteChannelsWithPixel_ARGB8888'>
+<arg type='*' declared_type='uint8_t*' name='the_pixel' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='C' declared_type='uint8_t' name='copyMask'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageOverwriteChannelsWithPixel_ARGBFFFF'>
+<arg type='^f' declared_type='float*' name='the_pixel' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='C' declared_type='uint8_t' name='copyMask'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageOverwriteChannelsWithScalar_ARGB8888'>
+<arg type='C' declared_type='Pixel_8' name='scalar'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='C' declared_type='uint8_t' name='copyMask'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageOverwriteChannelsWithScalar_ARGBFFFF'>
+<arg type='f' declared_type='Pixel_F' name='scalar'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='C' declared_type='uint8_t' name='copyMask'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageOverwriteChannelsWithScalar_Planar8'>
+<arg type='C' declared_type='Pixel_8' name='scalar'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageOverwriteChannelsWithScalar_PlanarF'>
+<arg type='f' declared_type='Pixel_F' name='scalar'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageOverwriteChannels_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='newSrc' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='origSrc' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='C' declared_type='uint8_t' name='copyMask'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageOverwriteChannels_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='newSrc' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='origSrc' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='C' declared_type='uint8_t' name='copyMask'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImagePNGDecompressionFilter'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='buffer' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='startScanline'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='scanlineCount'/>
+<arg type='I' declared_type='uint32_t' name='bitsPerPixel'/>
+<arg type='I' declared_type='uint32_t' name='filterMethodNumber'/>
+<arg type='I' declared_type='uint32_t' name='filterType'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImagePermuteChannels_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='*' declared_type='uint8_t*' name='permuteMap' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImagePermuteChannels_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='*' declared_type='uint8_t*' name='permuteMap' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImagePiecewisePolynomial_Planar8toPlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^^f' declared_type='float**' name='coefficients' const='true'/>
+<arg type='^f' declared_type='float*' name='boundaries' const='true'/>
+<arg type='I' declared_type='uint32_t' name='order'/>
+<arg type='I' declared_type='uint32_t' name='log2segments'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImagePiecewisePolynomial_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^^f' declared_type='float**' name='coefficients' const='true'/>
+<arg type='^f' declared_type='float*' name='boundaries' const='true'/>
+<arg type='I' declared_type='uint32_t' name='order'/>
+<arg type='I' declared_type='uint32_t' name='log2segments'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImagePiecewisePolynomial_PlanarFtoPlanar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^^f' declared_type='float**' name='coefficients' const='true'/>
+<arg type='^f' declared_type='float*' name='boundaries' const='true'/>
+<arg type='I' declared_type='uint32_t' name='order'/>
+<arg type='I' declared_type='uint32_t' name='log2segments'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImagePiecewiseRational_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^^f' declared_type='float**' name='topCoefficients' const='true'/>
+<arg type='^^f' declared_type='float**' name='bottomCoefficients' const='true'/>
+<arg type='^f' declared_type='float*' name='boundaries' const='true'/>
+<arg type='I' declared_type='uint32_t' name='topOrder'/>
+<arg type='I' declared_type='uint32_t' name='bottomOrder'/>
+<arg type='I' declared_type='uint32_t' name='log2segments'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImagePremultipliedAlphaBlend_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcTop' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcBottom' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImagePremultipliedAlphaBlend_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcTop' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcBottom' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImagePremultipliedAlphaBlend_BGRA8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcTop' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcBottom' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImagePremultipliedAlphaBlend_BGRAFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcTop' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcBottom' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImagePremultipliedAlphaBlend_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcTop' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcTopAlpha' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcBottom' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImagePremultipliedAlphaBlend_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcTop' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcTopAlpha' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcBottom' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImagePremultipliedConstAlphaBlend_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcTop' const='true'/>
+<arg type='C' declared_type='Pixel_8' name='constAlpha'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcBottom' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImagePremultipliedConstAlphaBlend_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcTop' const='true'/>
+<arg type='f' declared_type='Pixel_F' name='constAlpha'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcBottom' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImagePremultipliedConstAlphaBlend_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcTop' const='true'/>
+<arg type='C' declared_type='Pixel_8' name='constAlpha'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcTopAlpha' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcBottom' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImagePremultipliedConstAlphaBlend_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcTop' const='true'/>
+<arg type='f' declared_type='Pixel_F' name='constAlpha'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcTopAlpha' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='srcBottom' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImagePremultiplyData_ARGB16U'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImagePremultiplyData_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImagePremultiplyData_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImagePremultiplyData_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='alpha' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImagePremultiplyData_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='alpha' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImagePremultiplyData_RGBA16U'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImagePremultiplyData_RGBA8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImagePremultiplyData_RGBAFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageRichardsonLucyDeConvolve_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='^s' declared_type='int16_t*' name='kernel' const='true'/>
+<arg type='^s' declared_type='int16_t*' name='kernel2' const='true'/>
+<arg type='I' declared_type='uint32_t' name='kernel_height'/>
+<arg type='I' declared_type='uint32_t' name='kernel_width'/>
+<arg type='I' declared_type='uint32_t' name='kernel_height2'/>
+<arg type='I' declared_type='uint32_t' name='kernel_width2'/>
+<arg type='i' declared_type='int32_t' name='divisor'/>
+<arg type='i' declared_type='int32_t' name='divisor2'/>
+<arg type='*' declared_type='uint8_t*' name='backgroundColor'/>
+<arg type='I' declared_type='uint32_t' name='iterationCount'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageRichardsonLucyDeConvolve_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='^f' declared_type='float*' name='kernel' const='true'/>
+<arg type='^f' declared_type='float*' name='kernel2' const='true'/>
+<arg type='I' declared_type='uint32_t' name='kernel_height'/>
+<arg type='I' declared_type='uint32_t' name='kernel_width'/>
+<arg type='I' declared_type='uint32_t' name='kernel_height2'/>
+<arg type='I' declared_type='uint32_t' name='kernel_width2'/>
+<arg type='^f' declared_type='float*' name='backgroundColor'/>
+<arg type='I' declared_type='uint32_t' name='iterationCount'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageRichardsonLucyDeConvolve_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='^s' declared_type='int16_t*' name='kernel' const='true'/>
+<arg type='^s' declared_type='int16_t*' name='kernel2' const='true'/>
+<arg type='I' declared_type='uint32_t' name='kernel_height'/>
+<arg type='I' declared_type='uint32_t' name='kernel_width'/>
+<arg type='I' declared_type='uint32_t' name='kernel_height2'/>
+<arg type='I' declared_type='uint32_t' name='kernel_width2'/>
+<arg type='i' declared_type='int32_t' name='divisor'/>
+<arg type='i' declared_type='int32_t' name='divisor2'/>
+<arg type='C' declared_type='Pixel_8' name='backgroundColor'/>
+<arg type='I' declared_type='uint32_t' name='iterationCount'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageRichardsonLucyDeConvolve_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='^f' declared_type='float*' name='kernel' const='true'/>
+<arg type='^f' declared_type='float*' name='kernel2' const='true'/>
+<arg type='I' declared_type='uint32_t' name='kernel_height'/>
+<arg type='I' declared_type='uint32_t' name='kernel_width'/>
+<arg type='I' declared_type='uint32_t' name='kernel_height2'/>
+<arg type='I' declared_type='uint32_t' name='kernel_width2'/>
+<arg type='f' declared_type='Pixel_F' name='backgroundColor'/>
+<arg type='I' declared_type='uint32_t' name='iterationCount'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageRotate90_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='C' declared_type='uint8_t' name='rotationConstant'/>
+<arg type='*' declared_type='uint8_t*' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageRotate90_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='C' declared_type='uint8_t' name='rotationConstant'/>
+<arg type='^f' declared_type='float*' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageRotate90_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='C' declared_type='uint8_t' name='rotationConstant'/>
+<arg type='C' declared_type='Pixel_8' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageRotate90_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='C' declared_type='uint8_t' name='rotationConstant'/>
+<arg type='f' declared_type='Pixel_F' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageRotate_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type='f' declared_type='float' name='angleInRadians'/>
+<arg type='*' declared_type='uint8_t*' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageRotate_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type='f' declared_type='float' name='angleInRadians'/>
+<arg type='^f' declared_type='float*' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageRotate_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type='f' declared_type='float' name='angleInRadians'/>
+<arg type='C' declared_type='Pixel_8' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageRotate_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type='f' declared_type='float' name='angleInRadians'/>
+<arg type='f' declared_type='Pixel_F' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageScale_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageScale_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageScale_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageScale_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageSelectChannels_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='newSrc' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='origSrc' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='C' declared_type='uint8_t' name='copyMask'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageSelectChannels_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='newSrc' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='origSrc' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='C' declared_type='uint8_t' name='copyMask'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageTableLookUp_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='*' declared_type='Pixel_8*' name='alphaTable' const='true'/>
+<arg type='*' declared_type='Pixel_8*' name='redTable' const='true'/>
+<arg type='*' declared_type='Pixel_8*' name='greenTable' const='true'/>
+<arg type='*' declared_type='Pixel_8*' name='blueTable' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageTableLookUp_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='*' declared_type='Pixel_8*' name='table' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageTentConvolve_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='I' declared_type='uint32_t' name='kernel_height'/>
+<arg type='I' declared_type='uint32_t' name='kernel_width'/>
+<arg type='*' declared_type='uint8_t*' name='backgroundColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageTentConvolve_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='^v' declared_type='void*' name='tempBuffer'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='I' declared_type='uint32_t' name='kernel_height'/>
+<arg type='I' declared_type='uint32_t' name='kernel_width'/>
+<arg type='C' declared_type='Pixel_8' name='backgroundColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageUnpremultiplyData_ARGB16U'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageUnpremultiplyData_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageUnpremultiplyData_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageUnpremultiplyData_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='alpha' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageUnpremultiplyData_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='alpha' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageUnpremultiplyData_RGBA16U'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageUnpremultiplyData_RGBA8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageUnpremultiplyData_RGBAFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageVerticalReflect_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageVerticalReflect_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageVerticalReflect_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageVerticalReflect_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageVerticalShearD_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='d' declared_type='double' name='yTranslate'/>
+<arg type='d' declared_type='double' name='shearSlope'/>
+<arg type='^v' declared_type='ResamplingFilter' name='filter'/>
+<arg type='*' declared_type='uint8_t*' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageVerticalShearD_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='d' declared_type='double' name='yTranslate'/>
+<arg type='d' declared_type='double' name='shearSlope'/>
+<arg type='^v' declared_type='ResamplingFilter' name='filter'/>
+<arg type='^f' declared_type='float*' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageVerticalShearD_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='d' declared_type='double' name='yTranslate'/>
+<arg type='d' declared_type='double' name='shearSlope'/>
+<arg type='^v' declared_type='ResamplingFilter' name='filter'/>
+<arg type='C' declared_type='Pixel_8' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageVerticalShearD_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='d' declared_type='double' name='yTranslate'/>
+<arg type='d' declared_type='double' name='shearSlope'/>
+<arg type='^v' declared_type='ResamplingFilter' name='filter'/>
+<arg type='f' declared_type='Pixel_F' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageVerticalShear_ARGB8888'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='f' declared_type='float' name='yTranslate'/>
+<arg type='f' declared_type='float' name='shearSlope'/>
+<arg type='^v' declared_type='ResamplingFilter' name='filter'/>
+<arg type='*' declared_type='uint8_t*' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageVerticalShear_ARGBFFFF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='f' declared_type='float' name='yTranslate'/>
+<arg type='f' declared_type='float' name='shearSlope'/>
+<arg type='^v' declared_type='ResamplingFilter' name='filter'/>
+<arg type='^f' declared_type='float*' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageVerticalShear_Planar8'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='f' declared_type='float' name='yTranslate'/>
+<arg type='f' declared_type='float' name='shearSlope'/>
+<arg type='^v' declared_type='ResamplingFilter' name='filter'/>
+<arg type='C' declared_type='Pixel_8' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+<function name='vImageVerticalShear_PlanarF'>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='src' const='true'/>
+<arg type64='^{vImage_Buffer=^vQQQ}' type='^{vImage_Buffer=^vIII}' declared_type='vImage_Buffer*' name='dest' const='true'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_X'/>
+<arg type64='Q' type='L' declared_type='vImagePixelCount' name='srcOffsetToROI_Y'/>
+<arg type='f' declared_type='float' name='yTranslate'/>
+<arg type='f' declared_type='float' name='shearSlope'/>
+<arg type='^v' declared_type='ResamplingFilter' name='filter'/>
+<arg type='f' declared_type='Pixel_F' name='backColor'/>
+<arg type='I' declared_type='vImage_Flags' name='flags'/>
+<retval type64='q' type='l' declared_type='vImage_Error'/>
+</function>
+</signatures>
