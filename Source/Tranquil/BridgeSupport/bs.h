@@ -43,7 +43,7 @@ extern "C" {
  */
 
 #define _MR_C_LAMBDA_B        '<'
-#define _MR_C_LAMBDA_FUNCPTR      '^'
+#define _MR_C_LAMBDA_FUNCPTR  '^'
 #define _MR_C_LAMBDA_BLOCK    '@'
 #define _MR_C_LAMBDA_E        '>'
 

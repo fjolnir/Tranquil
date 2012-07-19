@@ -74,23 +74,31 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
             bs_element_class_t *kls = (bs_element_class_t*)value;
             TQBridgedClassInfo *classInfo = [[TQBridgedClassInfo alloc] init];
             classInfo.name = [NSString stringWithUTF8String:kls->name];
-            //NSLog(@"Class: %s %d instance  %d class methods {\n", kls->name, kls->instance_methods_count, kls->class_methods_count);
             bs_element_method_t *method;
             bs_element_arg_t *arg;
             NSMutableArray *argTypes;
             NSMutableDictionary *instanceMethods = [NSMutableDictionary dictionaryWithCapacity:kls->instance_methods_count];
             for(int i = 0; i < kls->instance_methods_count; ++i) {
                 method = &kls->instance_methods[i];
+                BOOL ignore = method->ignore || !method->retval || !method->retval->type;
+                if(ignore)
+                    break;
                 //NSLog(@" - (%s) %s (%d args)", method->retval ? method->retval->type : "v", method->name, method->args_count);
                 argTypes = [NSMutableArray array];
                 for(int j = 0; j < method->args_count; ++j) {
                     arg = &method->args[j];
+                    if(!arg->type) {
+                        ignore = YES;
+                        break;
+                    }
                     //NSLog(@"    * arg %d: %s  outPointer? %d %s", arg->index, arg->type, arg->type_modifier == BS_TYPE_MODIFIER_OUT, arg->sel_of_type);
                     [argTypes addObject:[NSString stringWithUTF8String:arg->type]];
-                    
                 }
+                if(ignore)
+                    break;
                 [instanceMethods setObject:[TQBridgedMethodInfo methodWithSelector:method->name
                                                                          className:classInfo.name
+                                                                        returnType:[NSString stringWithUTF8String:method->retval->type]
                                                                           argTypes:argTypes]
                                     forKey:NSStringFromSelector(method->name)];
             }
@@ -249,13 +257,17 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
 @end
 
 @implementation TQBridgedMethodInfo
-@synthesize className=_className, selector=_selector, argTypes=_argTypes;
-+ (TQBridgedMethodInfo *)methodWithSelector:(SEL)aSelector className:(NSString *)aKlassName argTypes:(NSArray *)aArgTypes
+@synthesize className=_className, selector=_selector, argTypes=_argTypes, returnType=_returnType;
++ (TQBridgedMethodInfo *)methodWithSelector:(SEL)aSelector
+                                  className:(NSString *)aKlassName
+                                 returnType:(NSString *)aReturnType
+                                   argTypes:(NSArray *)aArgTypes;
 {
     TQBridgedMethodInfo *ret = [[super alloc] init];
     ret->_className = [aKlassName retain];
     ret->_selector  = aSelector;
-    ret->_argTypes  = aArgTypes;
+    ret->_argTypes   = [aArgTypes retain];
+    ret->_returnType = [aReturnType retain];
 
     return [ret autorelease];
 }
@@ -264,6 +276,7 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
 {
     [_className release];
     [_argTypes release];
+    [_returnType release];
     [super dealloc];
 }
 @end
@@ -304,6 +317,10 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
     rootBuilder.CreateStore(boxed, _global);
     return aBlock.builder->CreateLoad(_global);
 }
+@end
+
+@interface TQNodeBlock (Privates)
+- (llvm::Value *)_generateBlockLiteralInProgram:(TQProgram *)aProgram parentBlock:(TQNodeBlock *)aParentBlock;
 @end
 
 @implementation TQBridgedFunction

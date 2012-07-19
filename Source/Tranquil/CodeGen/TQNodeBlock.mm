@@ -18,7 +18,6 @@ using namespace llvm;
 @interface TQNodeBlock (Private)
 - (llvm::Function *)_generateCopyHelperInProgram:(TQProgram *)aProgram;
 - (llvm::Function *)_generateDisposeHelperInProgram:(TQProgram *)aProgram;
-- (NSArray *)_determineArgTypesUsingBridgeSupport:(TQBridgeSupport *)aBridge;
 @end
 
 @implementation TQNodeBlock
@@ -50,6 +49,8 @@ using namespace llvm;
     [_locals release];
     [_arguments release];
     [_statements release];
+    [_argTypes release];
+    [_retType release];
     delete _basicBlock;
     delete _function;
     delete _builder;
@@ -85,7 +86,7 @@ using namespace llvm;
 
 - (NSString *)signatureInProgram:(TQProgram *)aProgram
 {
-    return [[self _determineArgTypesUsingBridgeSupport:aProgram.bridge] componentsJoinedByString:@""];
+    return [_argTypes componentsJoinedByString:@""];
     // Return type
     NSMutableString *sig = [NSMutableString stringWithString:@"@"];
     // Argument types
@@ -371,15 +372,6 @@ using namespace llvm;
     return function;
 }
 
-- (NSArray *)_determineArgTypesUsingBridgeSupport:(TQBridgeSupport *)aBridge
-{
-    NSMutableArray *types = [NSMutableArray arrayWithCapacity:_arguments.count];
-    for(TQNodeArgumentDef *arg in _arguments) {
-        [types addObject:@"@"];
-    }
-    return types;
-}
-
 // Invokes the body of this block
 - (llvm::Function *)_generateInvokeInProgram:(TQProgram *)aProgram error:(NSError **)aoErr
 {
@@ -389,14 +381,27 @@ using namespace llvm;
     llvm::PointerType *int8PtrTy = aProgram.llInt8PtrTy;
 
     // Build the invoke function
+    std::vector<Type *> paramTypes;
+
+    Type *retType = [TQBridgeSupport llvmTypeFromEncoding:[_retType UTF8String] inProgram:aProgram];
+    AllocaInst *resultAlloca;
+
+    NSUInteger retTypeSize;
+    NSGetSizeAndAlignment([_retType UTF8String], &retTypeSize, NULL);
+    // Return doesn't fit in a register so we must pass an alloca before the function arguments
+    // TODO: Make this cross platform
+    BOOL returningOnStack = TQStructSizeRequiresStret(retTypeSize);
+    if(returningOnStack) {
+        paramTypes.push_back(PointerType::getUnqual(retType));
+        retType = aProgram.llVoidTy;
+    }
+
     NSString *argTypeEncoding;
     NSUInteger argTypeSize;
-    std::vector<Type *> paramTypes;
-    NSArray *argEncodings = [self _determineArgTypesUsingBridgeSupport:aProgram.bridge];
     NSMutableArray *byValArgIndices = [NSMutableArray array];
     const char *currEncoding;
-    for(int i = 0; i < [argEncodings count]; ++i) {
-        currEncoding = [[argEncodings objectAtIndex:i] UTF8String];
+    for(int i = 0; i < [_argTypes count]; ++i) {
+        currEncoding = [[_argTypes objectAtIndex:i] UTF8String];
         NSGetSizeAndAlignment(currEncoding, &argTypeSize, NULL);
         Type *llType = [TQBridgeSupport llvmTypeFromEncoding:currEncoding inProgram:aProgram];
         if(TQStructSizeRequiresStret(argTypeSize)) {
@@ -405,15 +410,18 @@ using namespace llvm;
         }
         paramTypes.push_back(llType);
     }
-    FunctionType* funType = FunctionType::get(int8PtrTy, paramTypes, _isVariadic);
+    FunctionType* funType = FunctionType::get(retType, paramTypes, _isVariadic);
 
     llvm::Module *mod = aProgram.llModule;
 
     const char *functionName = [[NSString stringWithFormat:@"__tq_block_invoke"] UTF8String];
 
     _function = Function::Create(funType, GlobalValue::ExternalLinkage, functionName, mod);
-    //if(returningOnStack)
-        //function->addAttribute(1, Attribute::StructRet);
+    // If it's a void, object or a stret return we don't allocate a buffer for the return value
+    if(![_retType hasPrefix:@"v"] && ![_retType hasPrefix:@"@"] && !returningOnStack)
+        resultAlloca = _builder->CreateAlloca(retType);
+    if(returningOnStack)
+        _function->addAttribute(1, Attribute::StructRet);
     for(NSNumber *idx in byValArgIndices) {
         _function->addAttribute([idx intValue], Attribute::ByVal);
     }
@@ -454,7 +462,7 @@ using namespace llvm;
         if(![argDef name])
             continue;
 
-        argTypeEncoding = [argEncodings objectAtIndex:i];
+        argTypeEncoding = [_argTypes objectAtIndex:i];
         NSGetSizeAndAlignment([argTypeEncoding UTF8String], &argTypeSize, NULL);
 
         // If the value is an object type we treat it the normal way
@@ -525,6 +533,15 @@ using namespace llvm;
 {
     TQAssert(!_basicBlock && !_function, @"Tried to regenerate code for block");
 
+    if(!_retType)
+        _retType = @"@";
+    if(!_argTypes) {
+        _argTypes = [[NSMutableArray alloc] initWithCapacity:_arguments.count];
+        for(TQNodeArgumentDef *arg in _arguments) {
+            [_argTypes addObject:@"@"];
+        }
+    }
+
     // Generate a list of variables to capture
     if(aBlock) {
         [_capturedVariables release];
@@ -574,8 +591,16 @@ using namespace llvm;
 
     // No arguments for the root block ([super init] adds the block itself as an arg)
     [self.arguments removeAllObjects];
+    _retType = @"@";
+    _argTypes = [NSArray array];
 
     return self;
+}
+
+- (void)dealloc
+{
+    [_argTypes release];
+    [super dealloc];
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr

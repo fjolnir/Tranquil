@@ -32,10 +32,13 @@
 @end
 
 @interface TQBridgedMethodInfo : NSObject
-@property(readwrite, retain) NSString *className;
+@property(readwrite, retain) NSString *className, *returnType;
 @property(readwrite, assign) SEL selector;
 @property(readwrite, retain) NSArray *argTypes;
-+ (TQBridgedMethodInfo *)methodWithSelector:(SEL)aSelector className:(NSString *)aKlassName argTypes:(NSArray *)aArgTypes;
++ (TQBridgedMethodInfo *)methodWithSelector:(SEL)aSelector
+                                  className:(NSString *)aKlassName
+                                 returnType:(NSString *)aReturnType
+                                   argTypes:(NSArray *)aArgTypes;
 @end
 
 @interface TQBridgedConstant : TQNode {
@@ -46,7 +49,7 @@
 @end
 
 @interface TQBridgedFunction : TQNodeBlock
-@property(readonly) NSString *returnType, *name;
+@property(readonly) NSString *name, *returnType;
 @property(readonly) NSArray *argumentTypes;
 
 + (TQBridgedFunction *)functionWithName:(NSString *)aName returnType:(NSString *)aReturn argumentTypes:(NSArray *)aArgumentTypes;

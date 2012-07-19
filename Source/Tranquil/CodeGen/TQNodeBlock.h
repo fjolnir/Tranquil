@@ -7,10 +7,13 @@
 
 // A block definition ({ :arg | body })
 @interface TQNodeBlock : TQNode {
+    @protected
     llvm::Function *_function;
     llvm::Constant *_blockDescriptor;
     llvm::Type *_literalType;
     NSMutableDictionary *_capturedVariables;
+    NSString *_retType;
+    NSMutableArray *_argTypes;
 }
 @property(readwrite, assign) BOOL isCompactBlock; // Was the block written in the form of `expr` ?
 @property(readwrite, retain) TQNodeBlock *parent;

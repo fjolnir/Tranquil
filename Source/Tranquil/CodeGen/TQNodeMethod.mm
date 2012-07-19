@@ -49,11 +49,6 @@ using namespace llvm;
     return YES;
 }
 
-- (void)dealloc
-{
-    [super dealloc];
-}
-
 - (NSString *)description
 {
     NSMutableString *out = [NSMutableString stringWithString:@"<meth@ "];
@@ -105,6 +100,11 @@ using namespace llvm;
     return _argTypes;
 }
 
+- (NSString *)_determineReturnTypeUsingBridgeSupport:(TQBridgeSupport *)aBridge
+{
+    return _retType;
+}
+
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                  class:(TQNodeClass *)aClass
@@ -114,7 +114,11 @@ using namespace llvm;
     TQBridgedClassInfo *classInfo = [aProgram.bridge classNamed:aClass.superClassName];
     TQBridgedMethodInfo *methodInfo = [classInfo.instanceMethods objectForKey:[self _selectorString]];
 
-    _argTypes = [NSMutableArray arrayWithCapacity:self.arguments.count];
+    if([methodInfo.returnType isEqualToString:@"v"]) // No such thing as a void return in tranquil
+        _retType = @"@";
+    else
+        _retType = [methodInfo.returnType retain];
+    _argTypes = [[NSMutableArray arrayWithCapacity:self.arguments.count] retain];
     NSMutableString *methodSignature = [NSMutableString stringWithString:@"@@:"];
     if(methodInfo) {
         [_argTypes addObject:@"@"]; // __blk
