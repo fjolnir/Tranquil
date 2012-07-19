@@ -16,6 +16,7 @@
 
 }
 - (id)loadFramework:(NSString *)aFrameworkPath;
+- (id)loadBridgesupportFile:(NSString *)aPath;
 
 + (llvm::Type *)llvmTypeFromEncoding:(const char *)aEncoding inProgram:(TQProgram *)aProgram;
 
@@ -49,8 +50,7 @@
 @end
 
 @interface TQBridgedFunction : TQNodeBlock
-@property(readonly) NSString *name, *returnType;
-@property(readonly) NSArray *argumentTypes;
+@property(readonly) NSString *name;
 
 + (TQBridgedFunction *)functionWithName:(NSString *)aName returnType:(NSString *)aReturn argumentTypes:(NSArray *)aArgumentTypes;
 @end

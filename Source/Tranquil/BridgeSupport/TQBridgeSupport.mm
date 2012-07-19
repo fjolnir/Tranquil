@@ -159,6 +159,20 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
     return TQValid;
 }
 
+- (id)loadBridgesupportFile:(NSString *)aPath
+{
+    char *error = nil;
+    bool parsed = bs_parser_parse(_parser, [aPath fileSystemRepresentation], NULL, BS_PARSE_OPTIONS_DEFAULT,
+                                  &_parserCallback, (void*)self, &error);
+    if(!parsed) {
+        if(error)
+            NSLog(@"BridgeSupport error: %s", error);
+        return NO;
+    }
+
+    return TQValid;
+}
+
 - (TQNode *)entityNamed:(NSString *)aName
 {
     id ret = [self functionNamed:aName];
@@ -257,7 +271,7 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
 @end
 
 @implementation TQBridgedMethodInfo
-@synthesize className=_className, selector=_selector, argTypes=_argTypes, returnType=_returnType;
+@synthesize className=_className, selector=_selector, argTypes=_argTypes, returnType=_retType;
 + (TQBridgedMethodInfo *)methodWithSelector:(SEL)aSelector
                                   className:(NSString *)aKlassName
                                  returnType:(NSString *)aReturnType
@@ -267,7 +281,7 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
     ret->_className = [aKlassName retain];
     ret->_selector  = aSelector;
     ret->_argTypes   = [aArgTypes retain];
-    ret->_returnType = [aReturnType retain];
+    ret->_retType = [aReturnType retain];
 
     return [ret autorelease];
 }
@@ -276,7 +290,7 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
 {
     [_className release];
     [_argTypes release];
-    [_returnType release];
+    [_retType release];
     [super dealloc];
 }
 @end
@@ -324,14 +338,14 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
 @end
 
 @implementation TQBridgedFunction
-@synthesize name=_name, returnType=_returnType, argumentTypes=_argumentTypes;
+@synthesize name=_name;
 
 + (TQBridgedFunction *)functionWithName:(NSString *)aName returnType:(NSString *)aReturn argumentTypes:(NSArray *)aArgumentTypes
 {
     TQBridgedFunction *fun = (TQBridgedFunction *)[self node];
     fun->_name             = [aName retain];
-    fun->_returnType       = [aReturn retain];
-    fun->_argumentTypes    = [aArgumentTypes retain];
+    fun->_retType          = [aReturn retain];
+    fun->_argTypes         = [aArgumentTypes mutableCopy];
 
     return fun;
 }
@@ -339,14 +353,14 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
 - (void)dealloc
 {
     [_name release];
-    [_returnType release];
-    [_argumentTypes release];
+    [_retType release];
+    [_argTypes release];
     [super dealloc];
 }
 
 - (NSUInteger)argumentCount
 {
-    return [_argumentTypes count];
+    return [_argTypes count];
 }
 //- (llvm::Function *)_generateCopyHelperInProgram:(TQProgram *)aProgram
 //{
@@ -368,7 +382,7 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
     llvm::PointerType *int8PtrTy = aProgram.llInt8PtrTy;
 
     // Build the invoke function
-    std::vector<Type *> paramObjTypes(_argumentTypes.count+1, int8PtrTy);
+    std::vector<Type *> paramObjTypes(_argTypes.count+1, int8PtrTy);
     FunctionType* wrapperFunType = FunctionType::get(int8PtrTy, paramObjTypes, false);
 
     Module *mod = aProgram.llModule;
@@ -407,13 +421,13 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
     currBlock   = entryBlock;
     currBuilder = entryBuilder;
 
-    Type *retType = [TQBridgeSupport llvmTypeFromEncoding:[_returnType UTF8String] inProgram:aProgram];    
+    Type *retType = [TQBridgeSupport llvmTypeFromEncoding:[_retType UTF8String] inProgram:aProgram];    
     AllocaInst *resultAlloca;
     // If it's a void return we don't allocate a return buffer
-    if(![_returnType hasPrefix:@"v"])
+    if(![_retType hasPrefix:@"v"])
         resultAlloca = entryBuilder->CreateAlloca(retType);
 
-    NSGetSizeAndAlignment([_returnType UTF8String], &typeSize, NULL);
+    NSGetSizeAndAlignment([_retType UTF8String], &typeSize, NULL);
     // Return doesn't fit in a register so we must pass an alloca before the function arguments
     // TODO: Make this cross platform
     BOOL returningOnStack = TQStructSizeRequiresStret(typeSize);
@@ -424,9 +438,9 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
     }
 
     NSMutableArray *byValArgIndices = [NSMutableArray array];
-    for(int i = 0; i < [_argumentTypes count]; ++i)
+    for(int i = 0; i < [_argTypes count]; ++i)
     {
-        argTypeEncoding = [_argumentTypes objectAtIndex:i];
+        argTypeEncoding = [_argTypes objectAtIndex:i];
         NSGetSizeAndAlignment([argTypeEncoding UTF8String], &typeSize, NULL);
         argType = [TQBridgeSupport llvmTypeFromEncoding:[argTypeEncoding UTF8String] inProgram:aProgram];
         // Larger structs should be passed as pointers to their location on the stack
@@ -443,7 +457,7 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
         Value *notPassedCond = currBuilder->CreateICmpEQ(argumentIterator, sentinel);
 
         // Create the block for the next argument check (or set it to the call block)
-        if(i == [_argumentTypes count]-1) {
+        if(i == [_argTypes count]-1) {
             nextBlock = callBlock;
             nextBuilder = callBuilder;
         } else {
@@ -486,18 +500,19 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
     }
 
     Value *callResult = callBuilder->CreateCall(function, args);
-    if([_returnType hasPrefix:@"v"])
+    if([_retType hasPrefix:@"v"])
         callBuilder->CreateRet(ConstantPointerNull::get(aProgram.llInt8PtrTy));
-    if([_returnType hasPrefix:@"@"])
+    if([_retType hasPrefix:@"@"])
         callBuilder->CreateRet(callResult);
     else {
         if(!returningOnStack)
             callBuilder->CreateStore(callResult, resultAlloca);
         Value *boxed = callBuilder->CreateCall2(aProgram.TQBoxValue,
                                                 callBuilder->CreateBitCast(resultAlloca, int8PtrTy),
-                                                [aProgram getGlobalStringPtr:_returnType withBuilder:callBuilder]);
-        Value *moveToHeapSel = callBuilder->CreateLoad(mod->getOrInsertGlobal("TQMoveToHeapSel", aProgram.llInt8PtrTy));
-        callBuilder->CreateCall2(aProgram.objc_msgSend, boxed, moveToHeapSel);
+                                                [aProgram getGlobalStringPtr:_retType withBuilder:callBuilder]);
+        // Retain/autorelease to force a TQBoxedObject move to the heap in case the returned value is stored in stack memory
+        boxed = callBuilder->CreateCall(aProgram.TQRetainObject, boxed);
+        boxed = callBuilder->CreateCall(aProgram.TQAutoreleaseObject, boxed);
         callBuilder->CreateRet(boxed);
     }
 

@@ -36,6 +36,9 @@ using namespace llvm;
 - (TQNode *)referencesNode:(TQNode *)aNode
 {
     // All string refs must be unique since they are mutable
+    TQNode *ref = [_embeddedValues tq_referencesNode:aNode];
+    if(ref)
+        return ref;
     return nil;
 }
 

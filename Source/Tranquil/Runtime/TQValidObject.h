@@ -4,4 +4,7 @@
 
 @interface TQValidObject : TQObject
 + (TQValidObject *)sharedInstance;
+- (int)intValue;
+- (BOOL)boolValue;
+- (char)charValue;
 @end

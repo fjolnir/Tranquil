@@ -12,6 +12,21 @@ static TQValidObject *sharedInstance;
     return sharedInstance;
 }
 
+- (int)intValue
+{
+    return 1;
+}
+
+- (BOOL)boolValue
+{
+    return YES;
+}
+
+- (char)charValue
+{
+    return 1;
+}
+
 - (NSString *)description
 {
     return @"Valid";
