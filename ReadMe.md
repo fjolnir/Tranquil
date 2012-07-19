@@ -14,7 +14,8 @@ The following will create a binary called `tranquil` in the `Build` folder and i
 	> git clone git://github.com/fjolnir/Tranquil.git
 	> cd Tranquil
 	> rake
-	> cp Bridgesupport/Mac/* ~/BridgeSupport
+	> mkdir -p ~/Library/BridgeSupport
+	> cp Bridgesupport/Mac/* ~/Library/BridgeSupport
 	> build/tranquil -h
 
 ## Learning the language
