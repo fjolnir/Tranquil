@@ -18,15 +18,22 @@ appMenuItem setSubmenu: appMenu
 win = NSWindow alloc initWithContentRect: #[NSZeroPoint, [300, 200]]
                                styleMask: NSTitledWindowMask
                                  backing: NSBackingStoreBuffered
-                                   defer: 0
+                                   defer: no
 win#title = "Tranquil!"
 win makeKeyAndOrderFront: nil
 
-view = NSTextField alloc initWithFrame: (win contentView bounds)
-view#stringValue = "Hey!"
-win contentView addSubview: view
+\ Create a little view
+#TestView < NSView {
+    - drawRect: dirtyRect {
+        NSColor redColor set
+        (NSBezierPath bezierPathWithRect: dirtyRect) fill
+    }
+}
+
+view = TestView alloc initWithFrame: (win contentView bounds)
+win#contentView = view
 
 \ Start the app
 nsapp setActivationPolicy: NSApplicationActivationPolicyRegular
-nsapp activateIgnoringOtherApps:1
+nsapp activateIgnoringOtherApps: yes
 nsapp run
