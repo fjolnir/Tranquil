@@ -124,8 +124,7 @@ void TQUnboxObject(id object, const char *type, void *buffer)
 
 id TQBoxValue(void *value, const char *type)
 {
-    TQBoxedObject * ret = [TQBoxedObject box:value withType:type];
-    return ret;
+    return [TQBoxedObject box:value withType:type];
 }
 
 BOOL TQStructSizeRequiresStret(int size)

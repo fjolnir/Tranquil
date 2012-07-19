@@ -2,103 +2,99 @@
 
 ## Basic Syntax
 
-```
-\ A backslash outside a string is a comment
-¥ The Yen sign can also be used (See Japanese keyboard layouts to understand why)
-
-\ Keywords
-if
-else
-while
-until
-break  \ Prematurely terminates a loop
-skip   \ Skips to the end of the current iteration of a loop
-nil    \ Represents 'nothing'
-self   \ Available inside method blocks
-super  \ Available inside method blocks as a message receiver
-       \ that calls methods as defined by the current class's superclass
-...    \ Array of passed variadic arguments
-valid  \ Represents non-nilness, for use in cases where the actual object value is not of concern
-
-\ Variable assignment
-a = b \ Variables are local in scope
-      \ Variables must begin with a lowercase letter, as uppercase names
-      \ are reserved for classes
-
-\ Collection literals (Arrays & Dictionaries)
-anArray = #[ a, b, c ]                           \ Initialises an array containing 3 elements
-aDict   = #{ key => value, anotherKey => value } \ Initializes a dictionary
-arrayWithSubArrays = #[1, [2], [3, 4]]           \ Embedded collection literals do not require the prepended '#'
-
-\ Blocks
-
-aBlock = { ..body.. } \ A block. Defines scope
-aBlockWith = { arg0, arg1 | ^arg0 } \ A block that takes two arguments
-                                    \ and returns its first argument as-is
-aBlock = { arg=123 |  ..statements.. } \ Assignment in the argument list indicates a default value
-                                       \ for that argument
-`expression` \ Equivalent to { ^expression }
-
-
-\ Block calls
-
-aBlock()                         \ Calls a block with no arguments
-aBlock(something, somethingElse) \ Calls a block with a two arguments
-
-\ Flow control
- 
-if ..expression.. {      \ Executes the passed literal block if the expression is non-nil
-	..statements..       \ (The braces can be omitted if the block contains only one statement)
-} else if ..expression.. {
-	..statements..
-} else {
-	..statements..
-}
-
-unless ..expression.. {  \ Executes the passed literal block if the expression is nil
-	..statements..
-} else {
-	..statements..
-}
-
-while ..expression.. {  \ Executes the passed literal block repeatedly while the expression is non-nil
-	..statements..      \ or a break statement is encountered
-	                    \ a skip statement jumps back to the top of the loop
-}
-until ..expression.. {  \ Executes the passed literal block repeatedly until the expression is non-nil
-	..statements..      \ skip&continue work like in while
-}
-
-\ Objects
-
-#Klass < Object {
-	+ new {                   \ Class method ('self' refers to the class itself)
-		instance = super new  \ Calls superclass's implementation (which in this case, creates the instance)
-		instance#ivar = 123   \ Sets instance variable
-		^instance             \ Returns the instance
+	\ A backslash outside a string starts a comment
+	-- Two (or more) consecutive dashes should be used for more significant comments
+	
+	-- Keywords
+	if
+	else
+	while
+	until
+	break  \ Prematurely terminates a loop
+	skip   \ Skips to the end of the current iteration of a loop
+	nil    \ Represents 'nothing'
+	self   \ Available inside method blocks
+	super  \ Available inside method blocks as a message receiver
+	       \ that calls methods as defined by the current class's superclass
+	...    \ Array of passed variadic arguments
+	valid  \ Represents non-nilness, for use in cases where the actual object value is not of concern
+	
+	-- Variable assignment
+	a = b \ Variables are local in scope
+	      \ Variables must begin with a lowercase letter, as uppercase names
+	      \ are reserved for classes
+	
+	-- Collection literals (Arrays & Dictionaries)
+	anArray = #[ a, b, c ]                           \ Initialises an array containing 3 elements
+	aDict   = #{ key => value, anotherKey => value } \ Initializes a dictionary
+	arrayWithSubArrays = #[1, [2], [3, 4]]           \ Embedded collection literals do not require the prepended '#'
+	
+	-- Blocks
+	aBlock = { ..body.. } \ A block. Defines scope
+	aBlockWith = { arg0, arg1 | ^arg0 } \ A block that takes two arguments
+	                                    \ and returns its first argument as-is
+	aBlock = { arg=123 |  ..statements.. } \ Assignment in the argument list indicates a default value
+	                                       \ for that argument
+	`expression` \ Equivalent to { ^expression }
+	
+	
+	-- Block calls
+	aBlock()                         \ Calls a block with no arguments
+	aBlock(something, somethingElse) \ Calls a block with a two arguments
+	
+	-- Flow control
+	if ..expression.. {      \ Executes the passed literal block if the expression is non-nil
+		..statements..       \ (The braces can be omitted if the block contains only one statement)
+	} else if ..expression.. {
+		..statements..
+	} else {
+		..statements..
 	}
-	- aMethod: a and: b {     \ Instance method taking two arguments ('self' refers to an instance of Klass)
-		^self#ivar = a + b    \ Returns the value of self#ivar after setting it to a+b
+	
+	unless ..expression.. {  \ Executes the passed literal block if the expression is nil
+		..statements..
+	} else {
+		..statements..
 	}
-}
+	
+	while ..expression.. {  \ Executes the passed literal block repeatedly while the expression is non-nil
+		..statements..      \ or a break statement is encountered
+		                    \ a skip statement jumps back to the top of the loop
+	}
+	until ..expression.. {  \ Executes the passed literal block repeatedly until the expression is non-nil
+		..statements..      \ skip&continue work like in while
+	}
+	
+	-- Objects
+	
+	#Klass < Object {
+		+ new {                   \ Class method ('self' refers to the class itself)
+			instance = super new  \ Calls superclass's implementation (which in this case, creates the instance)
+			instance#ivar = 123   \ Sets instance variable
+			^instance             \ Returns the instance
+		}
+		- aMethod: a and: b {     \ Instance method taking two arguments ('self' refers to an instance of Klass)
+			^self#ivar = a + b    \ Returns the value of self#ivar after setting it to a+b
+		}
+	}
+	
+	-- Passing messages to objects
+	instance = Klass new
+	instance aMethod: 123 and: 456
+	instance aMethod: 123. \ To explicitly terminate a message you use a period
+	
+	-- Accessing member variables
+	obj#member = 123
+	a = obj#member
+	
+	-- Regular expressions
+	regexp = /[.]*/  \ Regular expressions are delimited by forward slashes
+	/[foo...]/ matches: "foobar"
+	
+	-- String interpolation
+	a = "expression"
+	b = "A string with an embedded #{a}." \ Evaluates to "A string with an embedded expression."
 
-\ Passing messages to objects
-instance = Klass new
-instance aMethod: 123 and: 456
-instance aMethod: 123. \ To explicitly terminate a message you use a period
-
-\ Accessing member variables
-obj#member = 123
-a = obj#member
-
-\ Regular expressions
-regexp = /[.]*/  \ Regular expressions are delimited by forward slashes
-/[foo...]/ matches: "foobar"
-
-\ String interpolation
-a = "expression"
-b = "A string with an embedded #{a}." \ Evaluates to "A string with an embedded expression."
-```
 
 ## Blocks
 
@@ -123,9 +119,11 @@ If in a block one wishes to accept an arbitrary number of argument, he can use t
 	\ bar
 	\ baz
 
+
 ## Flow Control
 
 Flow control blocks are different from standard blocks in that they are statements only, and can therefore not be used as expressions. They also execute within the parent block (Unlike standard blocks which have their own execution context) which means that if one returns from  inside a flow control block, the parent block is returned from.
+
 
 ## Objects
 
@@ -171,6 +169,7 @@ Exponent         |  ^         | ^:                 |
 Index            |  []        | []:                | Postfix operator (a[b])
 Index assign     |  []=       | []:=:              | Postfix operator (a[b] = c)
 ```
+
 #### Example
 
 	#Klass {
@@ -203,6 +202,7 @@ The +,-,* and / operators can also be used in assignment form, that is:
 	a += b \ Shorthand for a = a+b
 	a *= b \ Shorthand for a = a*b
 	\ etc..
+
 
 ## Examples
 

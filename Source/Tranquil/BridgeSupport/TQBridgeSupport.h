@@ -3,12 +3,12 @@
 #import <Tranquil/BridgeSupport/TQBoxedObject.h>
 #import <Tranquil/BridgeSupport/bs.h>
 
-@class TQProgram, TQBridgedFunction, TQBridgedConstant;
+@class TQProgram, TQBridgedFunction, TQBridgedConstant, TQBridgedClassInfo;
 
 @interface TQBridgeSupport : TQObject {
     @public
     bs_parser_t *_parser;
-    NSMutableDictionary *_functions;
+    NSMutableDictionary *_functions, *_classes;
     // String constants & enums (Entities whose values are only defined in headers and not stored in the binary)
     NSMutableDictionary *_literalConstants;
     // Other constants
@@ -23,6 +23,19 @@
 - (TQNode *)entityNamed:(NSString *)aName;
 - (TQBridgedFunction *)functionNamed:(NSString *)aName;
 - (TQBridgedConstant *)constantNamed:(NSString *)aName;
+- (TQBridgedClassInfo *)classNamed:(NSString *)aName;
+@end
+
+@interface TQBridgedClassInfo : NSObject
+@property(readwrite, retain) NSString *name;
+@property(readwrite, retain) NSDictionary *instanceMethods, *classMethods;
+@end
+
+@interface TQBridgedMethodInfo : NSObject
+@property(readwrite, retain) NSString *className;
+@property(readwrite, assign) SEL selector;
+@property(readwrite, retain) NSArray *argTypes;
++ (TQBridgedMethodInfo *)methodWithSelector:(SEL)aSelector className:(NSString *)aKlassName argTypes:(NSArray *)aArgTypes;
 @end
 
 @interface TQBridgedConstant : TQNode {

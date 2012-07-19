@@ -131,9 +131,6 @@ _bs_find_path(const char *framework_path, char *path, const size_t path_len,
     CHECK_IF_EXISTS();
   }
 
-  snprintf(path, path_len, "%s/Resources/BridgeSupport/%s.%s",
-           framework_path, framework_name, ext);
-  CHECK_IF_EXISTS();
 
   home = getenv("HOME");
   if (home != NULL) {
@@ -148,6 +145,10 @@ _bs_find_path(const char *framework_path, char *path, const size_t path_len,
 
   snprintf(path, path_len, "/System/Library/BridgeSupport/%s.%s",
     framework_name, ext);
+  CHECK_IF_EXISTS();
+
+    snprintf(path, path_len, "%s/Resources/BridgeSupport/%s.%s",
+           framework_path, framework_name, ext);
   CHECK_IF_EXISTS();
 
 #undef CHECK_IF_EXISTS
@@ -257,7 +258,7 @@ get_boolean_attribute(xmlTextReaderPtr reader, const char *name,
   return ret;
 }
 
-#define MAX_ENCODE_LEN 4096
+#define MAX_ENCODE_LEN 32768
 
 #ifndef MIN
 # define MIN(a, b) (((a) < (b)) ? (a) : (b))
@@ -974,8 +975,9 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
         }
           }
           else {
-            BAIL("argument defined outside of a " \
-                 "function/method/function_pointer");
+              // Ignore (arguments can come after function pointer struct fields)
+//            BAIL("argument defined outside of a " \
+  //               "function/method/function_pointer");
           }
           break;
         }
@@ -1060,7 +1062,8 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
         }
           }
           else {
-            BAIL("return value defined outside a function/method");
+              // Ignore (return values can come after function pointer struct fields)              
+//            BAIL("return value defined outside a function/method");
           }
           break;
         }
@@ -1230,6 +1233,8 @@ bs_parser_parse(bs_parser_t *parser, const char *path,
 
         case BS_XML_METHOD:
         {
+            if(!method)
+                break;
           bs_element_method_t *methods;
           unsigned *methods_count;
 

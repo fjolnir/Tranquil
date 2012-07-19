@@ -26,7 +26,7 @@
 @property(readwrite, assign) llvm::Value *autoreleasePool;
 
 + (TQNodeBlock *)node;
-- (NSString *)signature;
+- (NSString *)signatureInProgram:(TQProgram *)aProgram;
 - (NSUInteger)argumentCount;
 - (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoError;
 @end

@@ -631,8 +631,8 @@ id TQBoxedMsgSend(id self, SEL selector, ...)
         argType = argEncoding;
         unsigned int ofs = 0;
         for(unsigned int i = 0; i < nargs; ++i) {
-            // Only box non-objects that come after the selector
-            if(i >= 2 && *(argType = [TQBoxedObject _skipQualifiers:argType]) != _C_ID) {
+            // Only unbox non-objects that come after the selector
+            if(*(argType = [TQBoxedObject _skipQualifiers:argType]) != _C_ID && i >= 2) {
                 [TQBoxedObject unbox:(id)argPtrs[i] to:(char*)argValues+ofs usingType:argType];
                 argTypes[i] = [[TQFFIType typeWithEncoding:argType] ffiType];
             } else {
@@ -650,7 +650,6 @@ id TQBoxedMsgSend(id self, SEL selector, ...)
             retPtr = alloca(sizeof(void*));
         } else
             retType = &ffi_type_void;
-
 
         argValues = alloca(sizeof(void*)*nargs);
         unsigned int ofs;

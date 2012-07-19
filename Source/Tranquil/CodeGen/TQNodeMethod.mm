@@ -100,18 +100,41 @@ using namespace llvm;
     return NULL;
 }
 
+- (NSArray *)_determineArgTypesUsingBridgeSupport:(TQBridgeSupport *)aBridge
+{
+    return _argTypes;
+}
+
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                  class:(TQNodeClass *)aClass
                                  error:(NSError **)aoErr
 {
+    // If a matching bridged method is found, use the types from there
+    TQBridgedClassInfo *classInfo = [aProgram.bridge classNamed:aClass.superClassName];
+    TQBridgedMethodInfo *methodInfo = [classInfo.instanceMethods objectForKey:[self _selectorString]];
+
+    _argTypes = [NSMutableArray arrayWithCapacity:self.arguments.count];
+    NSMutableString *methodSignature = [NSMutableString stringWithString:@"@@:"];
+    if(methodInfo) {
+        [_argTypes addObject:@"@"]; // __blk
+        [_argTypes addObject:@"@"]; // self
+        assert(methodInfo.argTypes.count+2 == self.arguments.count);
+        [_argTypes addObjectsFromArray:methodInfo.argTypes];
+        [methodSignature appendString:[methodInfo.argTypes componentsJoinedByString:@""]];
+    } else {
+        for(int i = 1; i < self.arguments.count; ++i) {
+            [_argTypes addObject:@"@"];
+        }
+    }
+
     Value *block = [super generateCodeInProgram:aProgram block:aBlock error:aoErr];
     if(*aoErr)
         return NULL;
     IRBuilder<> *builder = aBlock.builder;
 
     Value *imp = builder->CreateCall(aProgram.imp_implementationWithBlock, block);
-    Value *signature = [aProgram getGlobalStringPtr:[self signature] inBlock:aBlock];
+    Value *signature = [aProgram getGlobalStringPtr:methodSignature inBlock:aBlock];
     Value *selector = builder->CreateCall(aProgram.sel_registerName, [aProgram getGlobalStringPtr:[self _selectorString] inBlock:aBlock]);
 
     Value *classPtr = aClass.classPtr;

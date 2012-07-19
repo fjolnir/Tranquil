@@ -52,11 +52,10 @@ using namespace llvm;
 
 + (TQNodeMethodArgumentDef *)nodeWithName:(NSString *)aName selectorPart:(NSString *)aSelectorPart
 {
-    TQNodeMethodArgumentDef *ret = [[self alloc] init];
-    ret.name = aName;
+    TQNodeMethodArgumentDef *ret = (TQNodeMethodArgumentDef*)[super nodeWithName:aName];;
     ret.selectorPart = aSelectorPart;
 
-    return [ret autorelease];
+    return ret;
 }
 
 - (void)dealloc

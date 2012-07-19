@@ -1,9 +1,11 @@
 #import "TQNodeBlock.h"
 #import "../TQProgram.h"
 #import "../TQDebug.h"
+#import "../BridgeSupport/TQBridgeSupport.h"
 #import "TQNodeVariable.h"
 #import "TQNodeArgumentDef.h"
 #import <llvm/Intrinsics.h>
+#include <iostream>
 
 // Block invoke functions are numbered from 0
 #define TQ_BLOCK_FUN_PREFIX @"__tq_block_invoke_"
@@ -16,6 +18,7 @@ using namespace llvm;
 @interface TQNodeBlock (Private)
 - (llvm::Function *)_generateCopyHelperInProgram:(TQProgram *)aProgram;
 - (llvm::Function *)_generateDisposeHelperInProgram:(TQProgram *)aProgram;
+- (NSArray *)_determineArgTypesUsingBridgeSupport:(TQBridgeSupport *)aBridge;
 @end
 
 @implementation TQNodeBlock
@@ -80,8 +83,9 @@ using namespace llvm;
     return out;
 }
 
-- (NSString *)signature
+- (NSString *)signatureInProgram:(TQProgram *)aProgram
 {
+    return [[self _determineArgTypesUsingBridgeSupport:aProgram.bridge] componentsJoinedByString:@""];
     // Return type
     NSMutableString *sig = [NSMutableString stringWithString:@"@"];
     // Argument types
@@ -190,7 +194,8 @@ using namespace llvm;
     elements.push_back([self _generateDisposeHelperInProgram:aProgram]);
 
     // Signature
-    elements.push_back(ConstantExpr::getBitCast((GlobalVariable*)[aProgram getGlobalStringPtr:[self signature] inBlock:self], aProgram.llInt8PtrTy));
+    elements.push_back(ConstantExpr::getBitCast((GlobalVariable*)[aProgram getGlobalStringPtr:[self signatureInProgram:aProgram] inBlock:self],
+                       aProgram.llInt8PtrTy));
 
     // GC Layout (unused in objc 2)
     elements.push_back(llvm::Constant::getNullValue(aProgram.llInt8PtrTy));
@@ -366,6 +371,15 @@ using namespace llvm;
     return function;
 }
 
+- (NSArray *)_determineArgTypesUsingBridgeSupport:(TQBridgeSupport *)aBridge
+{
+    NSMutableArray *types = [NSMutableArray arrayWithCapacity:_arguments.count];
+    for(TQNodeArgumentDef *arg in _arguments) {
+        [types addObject:@"@"];
+    }
+    return types;
+}
+
 // Invokes the body of this block
 - (llvm::Function *)_generateInvokeInProgram:(TQProgram *)aProgram error:(NSError **)aoErr
 {
@@ -375,7 +389,22 @@ using namespace llvm;
     llvm::PointerType *int8PtrTy = aProgram.llInt8PtrTy;
 
     // Build the invoke function
-    std::vector<Type *> paramTypes(_arguments.count, int8PtrTy);
+    NSString *argTypeEncoding;
+    NSUInteger argTypeSize;
+    std::vector<Type *> paramTypes;
+    NSArray *argEncodings = [self _determineArgTypesUsingBridgeSupport:aProgram.bridge];
+    NSMutableArray *byValArgIndices = [NSMutableArray array];
+    const char *currEncoding;
+    for(int i = 0; i < [argEncodings count]; ++i) {
+        currEncoding = [[argEncodings objectAtIndex:i] UTF8String];
+        NSGetSizeAndAlignment(currEncoding, &argTypeSize, NULL);
+        Type *llType = [TQBridgeSupport llvmTypeFromEncoding:currEncoding inProgram:aProgram];
+        if(TQStructSizeRequiresStret(argTypeSize)) {
+            llType = PointerType::getUnqual(llType);
+            [byValArgIndices addObject:[NSNumber numberWithInt:i+1]]; // Add one to jump over retval
+        }
+        paramTypes.push_back(llType);
+    }
     FunctionType* funType = FunctionType::get(int8PtrTy, paramTypes, _isVariadic);
 
     llvm::Module *mod = aProgram.llModule;
@@ -383,6 +412,11 @@ using namespace llvm;
     const char *functionName = [[NSString stringWithFormat:@"__tq_block_invoke"] UTF8String];
 
     _function = Function::Create(funType, GlobalValue::ExternalLinkage, functionName, mod);
+    //if(returningOnStack)
+        //function->addAttribute(1, Attribute::StructRet);
+    for(NSNumber *idx in byValArgIndices) {
+        _function->addAttribute([idx intValue], Attribute::ByVal);
+    }
 
     _basicBlock = BasicBlock::Create(mod->getContext(), "entry", _function, 0);
     _builder = new IRBuilder<>(_basicBlock);
@@ -413,23 +447,42 @@ using namespace llvm;
 
     // Load the rest of arguments
     Value *sentinel = _builder->CreateLoad(mod->getOrInsertGlobal("TQSentinel", aProgram.llInt8PtrTy));
+    Value *argValue;
     for (unsigned i = 1; i < _arguments.count; ++i, ++argumentIterator)
     {
-        IRBuilder<> tempBuilder(&_function->getEntryBlock(), _function->getEntryBlock().begin());
         TQNodeArgumentDef *argDef = [_arguments objectAtIndex:i];
         if(![argDef name])
             continue;
 
-        // Load the default argument if the argument was not passed
-        Value *defaultValue;
-        if(![argDef defaultArgument])
-            defaultValue = ConstantPointerNull::get(aProgram.llInt8PtrTy);
-        else
-            defaultValue = [[argDef defaultArgument] generateCodeInProgram:aProgram block:self error:aoErr];
+        argTypeEncoding = [argEncodings objectAtIndex:i];
+        NSGetSizeAndAlignment([argTypeEncoding UTF8String], &argTypeSize, NULL);
 
-        Value *isMissingCond = _builder->CreateICmpEQ(argumentIterator, sentinel);
-        Value *argValue = _builder->CreateSelect(isMissingCond, defaultValue, argumentIterator);
+        // If the value is an object type we treat it the normal way
+        if([argTypeEncoding isEqualToString:@"@"]) {
+            Value *defaultValue, *isMissingCond;
+            // Load the default argument if the argument was not passed
+            if(![argDef defaultArgument])
+                defaultValue = ConstantPointerNull::get(aProgram.llInt8PtrTy);
+            else
+                defaultValue = [[argDef defaultArgument] generateCodeInProgram:aProgram block:self error:aoErr];
 
+            isMissingCond = _builder->CreateICmpEQ(argumentIterator, sentinel);
+            argValue = _builder->CreateSelect(isMissingCond, defaultValue, argumentIterator);
+        }
+        // Otherwise we need to box the value & we are not able to use default arguments
+        else {
+            IRBuilder<> entryBuilder(&_function->getEntryBlock(), _function->getEntryBlock().begin());
+            if(TQStructSizeRequiresStret(argTypeSize))
+                argValue = argumentIterator;
+            else {
+                argValue = entryBuilder.CreateAlloca(paramTypes[i], 0,
+                                                     [[@"boxingBuffer_" stringByAppendingString:[[_arguments objectAtIndex:i] name]] UTF8String]);
+                _builder->CreateStore(argumentIterator, argValue);
+            }
+            argValue = _builder->CreateCall2(aProgram.TQBoxValue,
+                                             _builder->CreateBitCast(argValue, int8PtrTy),
+                                             [aProgram getGlobalStringPtr:argTypeEncoding withBuilder:_builder]);
+        }
         TQNodeVariable *local = [TQNodeVariable nodeWithName:[argDef name]];
         [local store:argValue inProgram:aProgram block:self error:aoErr];
         [_locals setObject:local forKey:[argDef name]];

@@ -1,5 +1,6 @@
 #import "TQBridgeSupport.h"
 #import "../Tranquil.h"
+#import "../TQDebug.h"
 #import "../Runtime/NSString+TQAdditions.h"
 #import "bs.h"
 #import <objc/runtime.h>
@@ -71,7 +72,31 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
         } break;
         case BS_ELEMENT_CLASS: {
             bs_element_class_t *kls = (bs_element_class_t*)value;
-            //printf("Class: %s\n", kls->name);
+            TQBridgedClassInfo *classInfo = [[TQBridgedClassInfo alloc] init];
+            classInfo.name = [NSString stringWithUTF8String:kls->name];
+            //NSLog(@"Class: %s %d instance  %d class methods {\n", kls->name, kls->instance_methods_count, kls->class_methods_count);
+            bs_element_method_t *method;
+            bs_element_arg_t *arg;
+            NSMutableArray *argTypes;
+            NSMutableDictionary *instanceMethods = [NSMutableDictionary dictionaryWithCapacity:kls->instance_methods_count];
+            for(int i = 0; i < kls->instance_methods_count; ++i) {
+                method = &kls->instance_methods[i];
+                //NSLog(@" - (%s) %s (%d args)", method->retval ? method->retval->type : "v", method->name, method->args_count);
+                argTypes = [NSMutableArray array];
+                for(int j = 0; j < method->args_count; ++j) {
+                    arg = &method->args[j];
+                    //NSLog(@"    * arg %d: %s  outPointer? %d %s", arg->index, arg->type, arg->type_modifier == BS_TYPE_MODIFIER_OUT, arg->sel_of_type);
+                    [argTypes addObject:[NSString stringWithUTF8String:arg->type]];
+                    
+                }
+                [instanceMethods setObject:[TQBridgedMethodInfo methodWithSelector:method->name
+                                                                         className:classInfo.name
+                                                                          argTypes:argTypes]
+                                    forKey:NSStringFromSelector(method->name)];
+            }
+            //NSLog(@"}");
+            classInfo.instanceMethods = instanceMethods;
+            [bs->_classes setObject:classInfo forKey:classInfo.name];
         } break;
         case BS_ELEMENT_INFORMAL_PROTOCOL_METHOD:
             // Protocols are not a thing in Tranquil and probably won't be
@@ -82,7 +107,6 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
 }
 
 @implementation TQBridgeSupport
-
 - (id)init
 {
     if(!(self = [super init]))
@@ -91,6 +115,7 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
     _functions        = [[NSMutableDictionary alloc] init];
     _literalConstants = [[NSMutableDictionary alloc] init];
     _constants        = [[NSMutableDictionary alloc] init];
+    _classes          = [[NSMutableDictionary alloc] init];
     _parser           = bs_parser_new();
 
     return self;
@@ -99,6 +124,7 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
 - (void)dealloc
 {
     [_functions release];
+    [_classes release];
     [_constants release];
     [_literalConstants release];
     bs_parser_free(_parser);
@@ -114,7 +140,7 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
     if(!found)
         return nil;
     char *error = nil;
-    bool parsed = bs_parser_parse(_parser, bsPath, frameworkPath, BS_PARSE_OPTIONS_LOAD_DYLIBS, 
+    bool parsed = bs_parser_parse(_parser, bsPath, frameworkPath, BS_PARSE_OPTIONS_LOAD_DYLIBS,
                                   &_parserCallback, (void*)self, &error);
     if(!parsed) {
         if(error)
@@ -145,6 +171,12 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
         return literal;
     return [_constants objectForKey:aName];
 }
+
+- (TQBridgedClassInfo *)classNamed:(NSString *)aName
+{
+    return [_classes objectForKey:aName];
+}
+
 
 + (llvm::Type *)llvmTypeFromEncoding:(const char *)aEncoding inProgram:(TQProgram *)aProgram
 {
@@ -203,6 +235,37 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
     }
 }
 
+@end
+
+@implementation TQBridgedClassInfo
+@synthesize name=_name, instanceMethods=_instanceMethods, classMethods=_classMethods;
+- (void)dealloc
+{
+    [_name release];
+    [_instanceMethods release];
+    [_classMethods release];
+    [super dealloc];
+}
+@end
+
+@implementation TQBridgedMethodInfo
+@synthesize className=_className, selector=_selector, argTypes=_argTypes;
++ (TQBridgedMethodInfo *)methodWithSelector:(SEL)aSelector className:(NSString *)aKlassName argTypes:(NSArray *)aArgTypes
+{
+    TQBridgedMethodInfo *ret = [[super alloc] init];
+    ret->_className = [aKlassName retain];
+    ret->_selector  = aSelector;
+    ret->_argTypes  = aArgTypes;
+
+    return [ret autorelease];
+}
+
+- (void)dealloc
+{
+    [_className release];
+    [_argTypes release];
+    [super dealloc];
+}
 @end
 
 @implementation TQBridgedConstant
@@ -343,12 +406,18 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
         retType = aProgram.llVoidTy;
     }
 
+    NSMutableArray *byValArgIndices = [NSMutableArray array];
     for(int i = 0; i < [_argumentTypes count]; ++i)
     {
         argTypeEncoding = [_argumentTypes objectAtIndex:i];
-        //NSGetSizeAndAlignment([argTypeEncoding UTF8String], &typeSize, NULL);
+        NSGetSizeAndAlignment([argTypeEncoding UTF8String], &typeSize, NULL);
         argType = [TQBridgeSupport llvmTypeFromEncoding:[argTypeEncoding UTF8String] inProgram:aProgram];
-        argTypes.push_back(argType);
+        // Larger structs should be passed as pointers to their location on the stack
+        if(TQStructSizeRequiresStret(typeSize)) {
+            argTypes.push_back(PointerType::getUnqual(argType));
+            [byValArgIndices addObject:[NSNumber numberWithInt:i+1]]; // Add one to jump over retval
+        } else
+            argTypes.push_back(argType);
 
         IRBuilder<> startBuilder(&_function->getEntryBlock(), _function->getEntryBlock().begin());
         Value *unboxedArgAlloca = startBuilder.CreateAlloca(argType, NULL, [[NSString stringWithFormat:@"arg%d", i] UTF8String]);
@@ -371,7 +440,10 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
                                  argumentIterator,
                                  [aProgram getGlobalStringPtr:argTypeEncoding withBuilder:nextBuilder],
                                  nextBuilder->CreateBitCast(unboxedArgAlloca, aProgram.llInt8PtrTy));
-        args.push_back(nextBuilder->CreateLoad(unboxedArgAlloca));
+        if(TQStructSizeRequiresStret(typeSize))
+            args.push_back(unboxedArgAlloca);
+        else
+            args.push_back(nextBuilder->CreateLoad(unboxedArgAlloca));
 
         ++argumentIterator;
         currBlock   = nextBlock;
@@ -389,11 +461,18 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
     if(!function) {
         function = Function::Create(funType, GlobalValue::ExternalLinkage, [_name UTF8String], aProgram.llModule);
         function->setCallingConv(CallingConv::C);
+        if(returningOnStack)
+            function->addAttribute(1, Attribute::StructRet);
+        for(NSNumber *idx in byValArgIndices) {
+            function->addAttribute([idx intValue], Attribute::ByVal);
+        }
     }
 
     Value *callResult = callBuilder->CreateCall(function, args);
     if([_returnType hasPrefix:@"v"])
         callBuilder->CreateRet(ConstantPointerNull::get(aProgram.llInt8PtrTy));
+    if([_returnType hasPrefix:@"@"])
+        callBuilder->CreateRet(callResult);
     else {
         if(!returningOnStack)
             callBuilder->CreateStore(callResult, resultAlloca);
@@ -407,6 +486,17 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
 
     return _function;
 }
+
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
+{
+    if(![self _generateInvokeInProgram:aProgram error:aoErr])
+        return NULL;
+
+    Value *literal = (Value*)[self _generateBlockLiteralInProgram:aProgram parentBlock:aBlock];
+
+    return literal;
+}
+
 
 - (NSString *)description
 {
