@@ -3,9 +3,8 @@
 ## Basic Syntax
 
 	\ A backslash outside a string starts a comment
-	-- Two (or more) consecutive dashes should be used for more significant comments
 	
-	-- Keywords
+	\ Keywords
 	if
 	else
 	while
@@ -19,17 +18,17 @@
 	...    \ Array of passed variadic arguments
 	valid  \ Represents non-nilness, for use in cases where the actual object value is not of concern
 	
-	-- Variable assignment
+	\ Variable assignment
 	a = b \ Variables are local in scope
 	      \ Variables must begin with a lowercase letter, as uppercase names
 	      \ are reserved for classes
 	
-	-- Collection literals (Arrays & Dictionaries)
+	\ Collection literals (Arrays & Dictionaries)
 	anArray = #[ a, b, c ]                           \ Initialises an array containing 3 elements
 	aDict   = #{ key => value, anotherKey => value } \ Initializes a dictionary
 	arrayWithSubArrays = #[1, [2], [3, 4]]           \ Embedded collection literals do not require the prepended '#'
 	
-	-- Blocks
+	\ Blocks
 	aBlock = { ..body.. } \ A block. Defines scope
 	aBlockWith = { arg0, arg1 | ^arg0 } \ A block that takes two arguments
 	                                    \ and returns its first argument as-is
@@ -38,11 +37,11 @@
 	`expression` \ Equivalent to { ^expression }
 	
 	
-	-- Block calls
+	\ Block calls
 	aBlock()                         \ Calls a block with no arguments
 	aBlock(something, somethingElse) \ Calls a block with a two arguments
 	
-	-- Flow control
+	\ Flow control
 	if ..expression.. {      \ Executes the passed literal block if the expression is non-nil
 		..statements..       \ (The braces can be omitted if the block contains only one statement)
 	} else if ..expression.. {
@@ -65,7 +64,7 @@
 		..statements..      \ skip&continue work like in while
 	}
 	
-	-- Objects
+	\ Objects
 	
 	#Klass < Object {
 		+ new {                   \ Class method ('self' refers to the class itself)
@@ -78,20 +77,20 @@
 		}
 	}
 	
-	-- Passing messages to objects
+	\ Passing messages to objects
 	instance = Klass new
 	instance aMethod: 123 and: 456
 	instance aMethod: 123. \ To explicitly terminate a message you use a period
 	
-	-- Accessing member variables
+	\ Accessing member variables
 	obj#member = 123
 	a = obj#member
 	
-	-- Regular expressions
+	\ Regular expressions
 	regexp = /[.]*/  \ Regular expressions are delimited by forward slashes
 	/[foo...]/ matches: "foobar"
 	
-	-- String interpolation
+	\ String interpolation
 	a = "expression"
 	b = "A string with an embedded #{a}." \ Evaluates to "A string with an embedded expression."
 

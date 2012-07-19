@@ -281,13 +281,13 @@ Method       = '+' -- method:MethodImpl
                {
                    ExtendToken();
                    [(TQNodeMethod *)method setType:kTQClassMethod];
-                   [[StackTop classMethods] addObject:method];
+                   [[(TQNodeClass *)StackTop classMethods] addObject:method];
                }
              | '-' -- method:MethodImpl
                {
                    ExtendToken();
                    [(TQNodeMethod *)method setType:kTQInstanceMethod];
-                   [[StackTop instanceMethods] addObject:method];
+                   [[(TQNodeClass *)StackTop instanceMethods] addObject:method];
                }
 MethodImpl   = arguments:MethodArgs  --
                {
@@ -617,7 +617,8 @@ StrEmbeddExpr= ("#{"-"}"
                )
 RegExp       = < "/" ("\\/"|[^/])* "/"[im]* >              { ExtendToken(); $$ = [TQNodeRegex nodeWithPattern:YYNSSTR];   }
 
-Comment      = - ('\\'|'¥') (!EOL .)* EOL
+Comment      = - (('\\') (!EOL .)* EOL)+
+
 -            = [ \t]*
 --           = (Comment | EOL)? -
 EOL          = (- ('\n' | '\r\n' | '\r'))+
