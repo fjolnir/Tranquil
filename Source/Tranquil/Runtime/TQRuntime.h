@@ -79,6 +79,9 @@ id TQBoxValue(void *value, const char *type);
 // as opposed to returning it by value in a register
 BOOL TQStructSizeRequiresStret(int size);
 
+// Returns the number of arguments a tranquil block takes (If the object is not a block originating from tranquil, it returns -1)
+NSInteger TQBlockGetNumberOfArguments(id block);
+
 // Tests objects for equality (including nil)
 id TQObjectsAreEqual(id a, id b);
 // Tests objects for inequality (including nil)
