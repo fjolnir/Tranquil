@@ -72,8 +72,8 @@
 			instance#ivar = 123   \ Sets instance variable
 			^instance             \ Returns the instance
 		}
-		- aMethod: a and: b {     \ Instance method taking two arguments ('self' refers to an instance of Klass)
-			^self#ivar = a + b    \ Returns the value of self#ivar after setting it to a+b
+		- aMethodTaking: a and: b {     \ Instance method taking two arguments ('self' refers to an instance of Klass)
+			^self#ivar = a + b          \ Returns the value of self#ivar after setting it to a+b
 		}
 	}
 	
