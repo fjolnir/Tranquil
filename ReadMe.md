@@ -26,8 +26,8 @@ Also, here're a couple of examples:
 
 ### Array iteration
 	alternatives = #["Objective-C", "Ruby", "Nu", "Perl", "Python"]
-	alternatives each: { alternative | print("Tranquil is nicer than #{alternative}") }
-	print("Or so I hope at least.")
+	alternatives each: { alternative | "Tranquil is nicer than #{alternative}" print }
+	"Or so I hope at least." print
 
 ### Reduction
 
