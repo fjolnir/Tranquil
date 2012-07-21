@@ -1,7 +1,7 @@
 #import "NSObject+TQAdditions.h"
 
 @implementation NSObject (Tranquil)
-- (NSString *)toString
+- (NSMutableString *)toString
 {
     return [[[self description] mutableCopy] autorelease];
 }

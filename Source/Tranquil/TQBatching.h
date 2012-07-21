@@ -10,7 +10,7 @@
 
 typedef struct
 {
-    long       _instance_size;
+    long    _instance_size;
     int32_t _freed;
     int32_t _allocated;
     int32_t _reserved;

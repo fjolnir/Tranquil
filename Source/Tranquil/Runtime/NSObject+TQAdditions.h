@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
 @interface NSObject (Tranquil)
-- (NSString *)toString;
+- (NSMutableString *)toString;
 - (id)print;
 @end
