@@ -84,8 +84,8 @@ Statement    = (
              | BreakStmt
              | SkipStmt
              | ShiftStmt
-             | Call
              | Message
+             | Call
              | IncrDecrOp
              | Class
              | Assignment
@@ -157,10 +157,10 @@ KeywordMsg   = rcvr:KwdMsgRcvr -
                }
 Message      = KeywordMsg|UnaryMsg
 
-UnaryMsgRcvr = SubscriptExp
+UnaryMsgRcvr = Call
+             | SubscriptExp
              | Property
              | Constant
-             | Call
              | Super
              | Variadic
              | Literal
