@@ -53,13 +53,18 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
         case BS_ELEMENT_FUNCTION: {
             bs_element_function_t *fun = (bs_element_function_t*)value;
 
+            // TODO: Support bridging variadic functions
+            if(fun->variadic)
+                break;
+
             NSMutableArray *args = [NSMutableArray arrayWithCapacity:fun->args_count];
             for(int i = 0; i < fun->args_count; ++i) {
                 [args addObject:[NSString stringWithUTF8String:fun->args[i].type]];
             }
             TQBridgedFunction *funObj = [TQBridgedFunction functionWithName:[NSString stringWithUTF8String:fun->name]
                                                                  returnType:[NSString stringWithUTF8String:fun->retval ? fun->retval->type : "v"]
-                                                              argumentTypes:args];
+                                                              argumentTypes:args
+                                                                   variadic:fun->variadic];
             [bs->_functions setObject:funObj
                                forKey:[funObj.name stringByCapitalizingFirstLetter]];
 
@@ -340,12 +345,18 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
 @implementation TQBridgedFunction
 @synthesize name=_name;
 
-+ (TQBridgedFunction *)functionWithName:(NSString *)aName returnType:(NSString *)aReturn argumentTypes:(NSArray *)aArgumentTypes
++ (TQBridgedFunction *)functionWithName:(NSString *)aName
+                             returnType:(NSString *)aReturn
+                          argumentTypes:(NSArray *)aArgumentTypes
+                               variadic:(BOOL)aIsVariadic
 {
     TQBridgedFunction *fun = (TQBridgedFunction *)[self node];
     fun->_name             = [aName retain];
     fun->_retType          = [aReturn retain];
     fun->_argTypes         = [aArgumentTypes mutableCopy];
+    fun.isVariadic         = aIsVariadic;
+    if(aIsVariadic)
+        fun.isTranquilBlock = NO; // 
 
     return fun;
 }
@@ -422,7 +433,7 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
     currBuilder = entryBuilder;
 
     Type *retType = [TQBridgeSupport llvmTypeFromEncoding:[_retType UTF8String] inProgram:aProgram];    
-    AllocaInst *resultAlloca;
+    AllocaInst *resultAlloca = NULL;
     // If it's a void return we don't allocate a return buffer
     if(![_retType hasPrefix:@"v"])
         resultAlloca = entryBuilder->CreateAlloca(retType);
@@ -502,7 +513,7 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
     Value *callResult = callBuilder->CreateCall(function, args);
     if([_retType hasPrefix:@"v"])
         callBuilder->CreateRet(ConstantPointerNull::get(aProgram.llInt8PtrTy));
-    if([_retType hasPrefix:@"@"])
+    else if([_retType hasPrefix:@"@"])
         callBuilder->CreateRet(callResult);
     else {
         if(!returningOnStack)

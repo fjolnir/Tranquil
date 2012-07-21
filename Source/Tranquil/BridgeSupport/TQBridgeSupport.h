@@ -52,5 +52,8 @@
 @interface TQBridgedFunction : TQNodeBlock
 @property(readonly) NSString *name;
 
-+ (TQBridgedFunction *)functionWithName:(NSString *)aName returnType:(NSString *)aReturn argumentTypes:(NSArray *)aArgumentTypes;
++ (TQBridgedFunction *)functionWithName:(NSString *)aName
+                             returnType:(NSString *)aReturn
+                          argumentTypes:(NSArray *)aArgumentTypes
+                               variadic:(BOOL)aIsVariadic;
 @end
