@@ -429,12 +429,12 @@ void TQInitializeRuntime()
     class_addMethod([NSString class], TQConcatOpSel, imp, "@@:@");
     imp = class_getMethodImplementation([NSMutableString class], @selector(appendString:));
     imp = imp_implementationWithBlock(^(id a, id b)   {
-         _objc_msgSend_hack2(a, @selector(appendString:), b);
+         _objc_msgSend_hack2(a, @selector(appendString:), [b toString]);
          return a;
     });
     class_addMethod([NSMutableString class], TQLShiftOpSel, imp, "@@:@");
     imp = imp_implementationWithBlock(^(id a, id b)   {
-        _objc_msgSend_hack3i(a, @selector(insertString:atIndex:), b, 0);
+        _objc_msgSend_hack3i(a, @selector(insertString:atIndex:), [b toString], 0);
         return a;
     });
     class_addMethod([NSMutableString class], TQRShiftOpSel, imp, "@@:@");
