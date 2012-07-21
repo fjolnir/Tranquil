@@ -127,7 +127,7 @@ using namespace llvm;
         [_argTypes addObjectsFromArray:methodInfo.argTypes];
         [methodSignature appendString:[methodInfo.argTypes componentsJoinedByString:@""]];
     } else {
-        for(int i = 1; i < self.arguments.count; ++i) {
+        for(int i = 1; i < self.arguments.count+1; ++i) {
             [_argTypes addObject:@"@"];
         }
     }
