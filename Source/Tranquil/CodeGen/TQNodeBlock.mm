@@ -23,7 +23,7 @@ using namespace llvm;
 @implementation TQNodeBlock
 @synthesize arguments=_arguments, statements=_statements, locals=_locals,
     basicBlock=_basicBlock, function=_function, builder=_builder, autoreleasePool=_autoreleasePool,
-    isCompactBlock=_isCompactBlock, parent=_parent, isVariadic=_isVariadic;
+    isCompactBlock=_isCompactBlock, parent=_parent, isVariadic=_isVariadic, isTranquilBlock=_isTranquilBlock;
 
 + (TQNodeBlock *)node { return (TQNodeBlock *)[super node]; }
 
@@ -32,11 +32,12 @@ using namespace llvm;
     if(!(self = [super init]))
         return nil;
 
-    _arguments  = [[NSMutableArray alloc] init];
-    _statements = [[NSMutableArray alloc] init];
-    _locals     = [[NSMutableDictionary alloc] init];
-    _function   = NULL;
-    _basicBlock = NULL;
+    _arguments       = [[NSMutableArray alloc] init];
+    _statements      = [[NSMutableArray alloc] init];
+    _locals          = [[NSMutableDictionary alloc] init];
+    _function        = NULL;
+    _basicBlock      = NULL;
+    _isTranquilBlock = YES;
 
     // Block invocations are always passed the block itself as the first argument
     [self addArgument:[TQNodeArgumentDef nodeWithName:@"__blk"] error:nil];
@@ -236,7 +237,10 @@ using namespace llvm;
     isaPtr =  pBuilder->CreateBitCast(isaPtr, i8PtrTy);
 
     // __flags
-    int flags = TQ_BLOCK_HAS_COPY_DISPOSE | TQ_BLOCK_HAS_SIGNATURE | TQ_BLOCK_IS_TRANQUIL_BLOCK;
+    int flags = TQ_BLOCK_HAS_COPY_DISPOSE | TQ_BLOCK_HAS_SIGNATURE;
+    if(_isTranquilBlock)
+        flags |= TQ_BLOCK_IS_TRANQUIL_BLOCK;
+
     Value *invoke = pBuilder->CreateBitCast(_function, i8PtrTy, "invokePtr");
     Constant *descriptor = [self _generateBlockDescriptorInProgram:aProgram];
 
