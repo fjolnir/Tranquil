@@ -4,4 +4,6 @@ a = { arg |
 }
 myBlock = a
 numAsStr = "Three Two One"
-print("%@ %@ %@", myBlock, numAsStr, a(numAsStr))
+myBlock     print
+numAsStr    print
+a(numAsStr) print

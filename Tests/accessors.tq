@@ -1,8 +1,8 @@
 a = 1
 a#foo = "bar"
-print("a#foo=%@", a#foo)
+"a#foo: #{a#foo}" print
 
 view = NSView alloc initWithFrame: #[[1,2], [3,4]]
-print("view: %@", view)
+"view: #{view}" print
 view#frame = NSMakeRect(4,3,2,1)
-print("frame: %@", view#frame[0][1])
+"frame: #{view#frame[0][1]}" print

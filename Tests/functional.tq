@@ -89,11 +89,11 @@ min = { a, b | if (a < b) ^a else ^b }
 }
 
 a = #[1,2,3] zip: #[4,5,6]
-print("%@", a)
+a print
 
 a = #[#[1,2,3], #[4,5,6]] concat
-print("%@", a)
+a print
 
 foo = #[1,2,3,4,5,6,7,8,9] partition:`obj | obj < 5`
-print("%@", foo)
-print("%@", max(1,2))
+foo print
+max(1,2) print

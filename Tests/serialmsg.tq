@@ -9,4 +9,4 @@
 
 str     = "  a string   "
 prepped = str capitalize trim
-print("'%@' => '%@'", str, prepped)
+"#{str} => #{prepped}" print

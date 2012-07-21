@@ -86,25 +86,6 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
 {
     IRBuilder<> *builder = aBlock.builder;
 
-    // Debug print (TODO: Remove and implement actual function bridging)
-    if([_callee isMemberOfClass:[TQNodeVariable class]] && [[(TQNodeVariable *)_callee name] isEqualToString:@"print"]) {
-        std::vector<Type*> nslog_args;
-        nslog_args.push_back(aProgram.llInt8PtrTy);
-        FunctionType *nslog_type = FunctionType::get(aProgram.llVoidTy, nslog_args, true);
-
-        Function *func_nslog = aProgram.llModule->getFunction("NSLog");
-        if(!func_nslog) {
-            func_nslog = Function::Create(nslog_type, GlobalValue::ExternalLinkage, "NSLog", aProgram.llModule);
-            func_nslog->setCallingConv(CallingConv::C);
-        }
-        std::vector<Value*> args;
-        for(TQNodeArgument *arg in _arguments) {
-            args.push_back([arg generateCodeInProgram:aProgram block:aBlock error:aoErr]);
-        }
-        return builder->CreateCall(func_nslog, args);
-    }
-
-
     std::vector<Value*> args;
     for(TQNodeArgument *arg in _arguments) {
         args.push_back([arg generateCodeInProgram:aProgram block:aBlock error:aoErr]);

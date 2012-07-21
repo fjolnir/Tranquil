@@ -1,9 +1,9 @@
 fib = { index, curr=0, succ=1 |
-	num = curr + succ
-	if index > 2
-		^fib(index - 1, succ, num)
-	else
-		^num
+    num = curr + succ
+    if index > 2
+    	^fib(index - 1, succ, num)
+    else
+    	^num
 }
 
-print("%@", fib(35))
+fib(35) print

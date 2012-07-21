@@ -1,5 +1,5 @@
 \ Tail calls are not yet implemented, so this segfaults
 a = { arg|
-	^a(1)
+    ^a(1)
 }
 ^a(123)

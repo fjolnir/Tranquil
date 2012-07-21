@@ -1,8 +1,8 @@
 #Klass < NSObject {
-	- +: b {
-		print("Adding (Not really)")
-		^1
-	}
+    - +: b {
+    	"Adding (Not really)" print
+    	^1
+    }
 }
 
 obj = Klass new

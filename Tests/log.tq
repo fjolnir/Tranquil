@@ -1,9 +1,5 @@
 log = { ... |
-    str = NSMutableString new
-    ... each: { arg |
-        str appendFormat:"%@ ", arg
-    }
-    print("%@", str)
+    output = ... reduce: `arg, out="" | out << arg toString << " "`
+    output print
 }
 log("foo", 123)
-

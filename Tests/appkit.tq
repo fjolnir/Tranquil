@@ -25,7 +25,7 @@ win makeKeyAndOrderFront: nil
 \ Create a little view
 #TestView < NSView {
     - drawRect: dirtyRect {
-        NSColor redColor set
+        NSColor cyanColor set
         (NSBezierPath bezierPathWithRect: dirtyRect) fill
     }
 }
