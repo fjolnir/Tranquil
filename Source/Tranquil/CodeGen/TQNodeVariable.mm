@@ -102,7 +102,6 @@ using namespace llvm;
     if(_alloca)
         return _alloca;
 
-    IRBuilder<> *builder = aBlock.builder;
     TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock];
     if(existingVar) {
         if(![existingVar generateCodeInProgram:aProgram block:aBlock error:aoError])
@@ -119,12 +118,13 @@ using namespace llvm;
     AllocaInst *alloca = entryBuilder.CreateAlloca(byRefType, 0, [self _llvmRegisterName:@"alloca"]);
 
     // Initialize the variable to nil
-    entryBuilder.CreateStore(builder->CreateBitCast(alloca, i8PtrTy),        builder->CreateStructGEP(alloca, 1, [self
-    _llvmRegisterName:@"forwardingAssign"]));
-    entryBuilder.CreateStore(ConstantInt::get(intTy, 0), builder->CreateStructGEP(alloca, 2, [self _llvmRegisterName:@"flags"]));
+    entryBuilder.CreateStore(entryBuilder.CreateBitCast(alloca, i8PtrTy),
+                             entryBuilder.CreateStructGEP(alloca, 1, [self _llvmRegisterName:@"forwardingAssign"]));
+    entryBuilder.CreateStore(ConstantInt::get(intTy, 0), entryBuilder.CreateStructGEP(alloca, 2, [self _llvmRegisterName:@"flags"]));
     Constant *size = ConstantExpr::getTruncOrBitCast(ConstantExpr::getSizeOf(byRefType), intTy);
-    entryBuilder.CreateStore(size,                                           builder->CreateStructGEP(alloca, 3, [self _llvmRegisterName:@"size"]));
-    entryBuilder.CreateStore(ConstantPointerNull::get(aProgram.llInt8PtrTy), builder->CreateStructGEP(alloca, 4, [self _llvmRegisterName:@"marked_variable"]));
+    entryBuilder.CreateStore(size, entryBuilder.CreateStructGEP(alloca, 3, [self _llvmRegisterName:@"size"]));
+    entryBuilder.CreateStore(ConstantPointerNull::get(aProgram.llInt8PtrTy),
+                             entryBuilder.CreateStructGEP(alloca, 4, [self _llvmRegisterName:@"marked_variable"]));
 
     _alloca = alloca;
 
