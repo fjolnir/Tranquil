@@ -32,3 +32,8 @@ typedef char TQOperatorType;
 + (TQNodeOperator *)nodeWithType:(TQOperatorType)aType left:(TQNode *)aLeft right:(TQNode *)aRight;
 - (id)initWithType:(TQOperatorType)aType left:(TQNode *)aLeft right:(TQNode *)aRight;
 @end
+
+@interface TQNodeMultiAssignOperator : TQNode
+@property(readwrite, retain) NSMutableArray *left;
+@property(readwrite, retain) NSMutableArray *right;
+@end

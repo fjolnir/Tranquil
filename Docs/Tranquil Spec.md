@@ -22,6 +22,8 @@
 	a = b \ Variables are local in scope
 	      \ Variables must begin with a lowercase letter, as uppercase names
 	      \ are reserved for classes
+	a, b = 1, 2 \ Comma separated operands can be used for multiple assignment
+	a, b = b, a \ The right hand sides are evaluated before the assignment, so swapping values works
 	
 	\ Collection literals (Arrays & Dictionaries)
 	anArray = #[ a, b, c ]                           \ Initialises an array containing 3 elements

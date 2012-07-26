@@ -211,3 +211,51 @@ using namespace llvm;
     return builder->CreateCall4(aProgram.objc_msgSend, settee, builder->CreateLoad(selector), key, aValue);
 }
 @end
+
+@implementation TQNodeMultiAssignOperator
+
+- (id)init
+{
+    if(!(self = [super init]))
+        return nil;
+
+    _left  = [NSMutableArray array];
+    _right = [NSMutableArray array];
+
+    return self;
+}
+
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
+{
+    // We must first evaluate the values in order for cases like a,b = b,a to work
+    std::vector<Value*> values;
+    for(int i = 0; i < MIN([self.right count], [self.left count]); ++i) {
+        values.push_back([[self.right objectAtIndex:i] generateCodeInProgram:aProgram block:aBlock error:aoError]);
+    }
+
+    // Then store the values
+    unsigned maxIdx = [self.right count] - 1;
+    for(int i = 0; i < [self.left count]; ++i) {
+        [[self.left objectAtIndex:i] store:values[MIN(i, maxIdx)]
+                                 inProgram:aProgram
+                                     block:aBlock
+                                     error:aoError];
+    }
+
+    return NULL;
+}
+
+- (NSString *)description
+{
+    NSMutableString *str = [NSMutableString stringWithString:@"<multiassgn@"];
+    for(TQNode *assignee in self.left) {
+        [str appendFormat:@"%@, ", assignee];
+    }
+    [str appendString:@"= "];
+    for(TQNode *value in self.right) {
+        [str appendFormat:@"%@, ", value];
+    }
+    [str appendString:@">"];
+    return str;
+}
+@end

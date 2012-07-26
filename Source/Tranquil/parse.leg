@@ -88,10 +88,17 @@ Statement    = (
              | Call
              | IncrDecrOp
              | Class
+             | MultiAssgnmt
              | Assignment
              | Return
              | InvalidStmt
-             ) { [StackTop addObject:$$]; }
+             )
+             {
+                 if(![$$ isKindOfClass:[NSArray class]])
+                     [StackTop addObject:$$];
+                 else
+                     [StackTop addObjectsFromArray:$$];
+             }
 
 InvalidStmt  = Expression            { SyntaxError(@"Unexpected Expression"); }
              | ("=" -- b:Expression) { SyntaxError(@"Unexpected Assignment"); }
@@ -441,22 +448,37 @@ Equation     = a:Sum                 { UpdateToken(); PushStack(a);             
                | - "!=" - b:Equation { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorInequal        left:StackTop right:b]); }
                )*                    { $$ = PopStack();                                                                                               }
 
-Assignment     = a:AssgnLhs -   { UpdateToken(); PushStack(a);    }
-                 (AssgnRhs -)+  { $$ = PopStack();                }
+
+Assignment     = a:AssgnLhs
+                 {
+                     PushStack(a);
+                 }
+                 - (AssgnRhs -)+  { $$ = PopStack(); }
+
 AssgnLhs       = Property
                | SubscriptExp
                | Variable
+
 AssgnRhs       = -- ( "=" -- b:Expression { PushStack(b);                                                                       }
                  | "+=" -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorAdd left:StackTop right:b]);      }
                  | "-=" -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorSubtract left:StackTop right:b]); }
                  | "*=" -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorMultiply left:StackTop right:b]); }
                  | "/=" -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorDivide left:StackTop right:b]);   }
-               )
-               {
-                   ExtendToken();
-                   TQNodeOperator *assignVal = PopStack();
-                   ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAssign left:StackTop right:assignVal]);
-               }
+                 )
+                 {
+                     ExtendToken();
+                     TQNodeOperator *assignVal = PopStack();
+                     ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAssign left:StackTop right:assignVal]);
+                 }
+
+MultiAssgnmt   = { PushStack([TQNodeMultiAssignOperator node]); }
+                 MultiAsgnLhs (- "," -- MultiAsgnLhs)+ - "=" -- MultiAsgnRhs (- "," -- MultiAsgnRhs)*
+                 {
+                     $$ = PopStack();
+                 }
+MultiAsgnLhs   = AssgnLhs   { [[(TQNodeMultiAssignOperator *)StackTop left] addObject:$$]; }
+MultiAsgnRhs   = Expression { [[(TQNodeMultiAssignOperator *)StackTop right] addObject:$$]; }
+
 
 UnaryOp        = UnaryPrefixOp | UnaryMinusOp | UnaryPostfixOp
 IncrDecrOp     = UnaryPrefixOp | UnaryPostfixOp
