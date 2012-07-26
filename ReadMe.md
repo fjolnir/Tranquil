@@ -22,7 +22,7 @@ The following will create a binary called `tranquil` in the `Build` folder and i
 
 To learn more about Tranquil you should read the [specification](https://github.com/fjolnir/Tranquil/blob/master/Docs/Tranquil%20Spec.md) and check out the [tests](https://github.com/fjolnir/Tranquil/blob/master/Tests).
 
-Also, here're a couple of examples:
+But here're a couple of examples:
 
 ### Array iteration
 	alternatives = #["Objective-C", "Ruby", "Nu", "Perl", "Python"]
@@ -32,6 +32,10 @@ Also, here're a couple of examples:
 ### Reduction
 
 	sum = (0 to: 1000000) reduce: `obj, accum=0 | obj+accum`
+
+### Multiple assignment
+
+	a, b = b, a  \ Swap b&a
 	
 ### Talking to Cocoa
 
