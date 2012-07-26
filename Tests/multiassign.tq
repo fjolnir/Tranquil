@@ -1,0 +1,16 @@
+a, b = 1, 2
+
+a print
+b print
+
+a, b = b, a
+a print
+b print
+
+a, b = 1337
+a print
+b print
+
+a, b = 1,2,3,4
+a print
+b print
