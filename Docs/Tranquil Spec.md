@@ -85,6 +85,7 @@
 	\ Accessing member variables
 	obj#member = 123
 	a = obj#member
+	#member = 123 \ If no is provided, it's assumed to be 'self'
 	
 	\ Regular expressions
 	regexp = /[.]*/  \ Regular expressions are delimited by forward slashes

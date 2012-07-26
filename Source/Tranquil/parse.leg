@@ -483,15 +483,19 @@ SubscriptLhs = Property
              | ParenExpr
 Subscript    = "[" -- subscript:Expression -- "]" { ExtendToken(); [StackTop addObject:subscript]; }
 
-Property     = obj:PropLhs
-               {
+Property     = {
                    UpdateToken();
+                   PushStack([TQNodeSelf node]);
+               }
+               (obj:PropLhs { ReplaceStackTop(obj); })?
+               {
                    PushStack([NSMutableArray array]);
                }
                - (PropSubscr -)+
                {
                    NSMutableArray *subscripts = PopStack();
-                   $$ = [TQNodeMemberAccess nodeWithReceiver:obj property:[subscripts objectAtIndex:0]];
+                   TQNode *receiver = PopStack();
+                   $$ = [TQNodeMemberAccess nodeWithReceiver:receiver property:[subscripts objectAtIndex:0]];
                    for(int i = 1; i < [subscripts count]; ++i) {
                       $$ = [TQNodeMemberAccess nodeWithReceiver:$$ property:[subscripts objectAtIndex:i]];
                    }
