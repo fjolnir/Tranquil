@@ -30,7 +30,7 @@ using namespace llvm;
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<var@ %@>", _name];
+    return [NSString stringWithFormat:@"<var@ %@>", _name ? _name : @"unnamed"];
 }
 
 - (NSUInteger)hash
@@ -92,7 +92,7 @@ using namespace llvm;
 
 - (const char *)_llvmRegisterName:(NSString *)subname
 {
-    return [[NSString stringWithFormat:@"%@.%@", _name, subname] UTF8String];
+    return _name ? [[NSString stringWithFormat:@"%@.%@", _name, subname] UTF8String] : "";
 }
 
 - (llvm::Value *)createStorageInProgram:(TQProgram *)aProgram
@@ -162,6 +162,9 @@ using namespace llvm;
 
 - (TQNodeVariable *)_getExistingIdenticalInBlock:(TQNodeBlock *)aBlock
 {
+    if(!_name)
+        return nil;
+
     TQNodeVariable *existingVar = nil;
     if((existingVar = [aBlock.locals objectForKey:_name]) && existingVar != self)
         return existingVar;

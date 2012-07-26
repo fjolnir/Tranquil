@@ -64,6 +64,9 @@
 		..statements..      \ skip&continue work like in while
 	}
 	
+	\ Ternary operator
+	..condition.. ? ..expression.. : ..expression..
+	
 	\ Objects
 	
 	#Klass < Object {

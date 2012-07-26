@@ -1,0 +1,3 @@
+a = yes ? 1 : 2
+b = no ? 1 : 2
+"a: #{a} b: #{b}" print

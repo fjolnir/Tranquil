@@ -100,11 +100,17 @@ Return       = "^" retVal:Expression { UpdateToken(); $$ = [TQNodeReturn nodeWit
 
 
 # Expression
-Expression   = Equation
+Expression   = Ternary
+             | Equation
              | Assignment
-             | NoEqExpr
+             | _OtherExpr
 
-NoEqExpr     = Call
+NoTernExpr   = Equation
+             | _OtherExpr
+
+NoEqExpr     = _OtherExpr
+
+_OtherExpr   = Call
              | Valid
              | Message
              | Block
@@ -170,7 +176,7 @@ KwdMsgRcvr   = UnaryMsg
              | UnaryMsgRcvr
 
 SelectorPart = { PushStack([TQNodeArgument node]); }
-               (name:SelIdent  { [StackTop setSelectorPart:name]; })?
+               (name:SelIdent  { [StackTop setSelectorPart:name]; }) #?
                 - ':' -- param:MessageArg
                {
                     ExtendToken();
@@ -368,6 +374,21 @@ If           = ( "if"        { UpdateToken();  PushStack([TQNodeIfBlock node]); 
                    NSMutableArray *statements = PopStack();
                    $$ = PopStack();
                    [$$ setStatements:statements];
+               }
+
+Ternary      = cond:NoTernExpr --- "?" --- ifExpr:Expression
+               {
+                   PushStack([TQNodeTernaryOperator node]);
+                   [StackTop setCondition:cond];
+                   [StackTop setIfExpr:ifExpr];
+               }
+               (--- ":" --- elseExpr:Expression
+                {
+                    [StackTop setElseExpr:elseExpr];
+                }
+               )?
+               {
+                   $$ = PopStack();
                }
 
 # Loops
@@ -623,8 +644,10 @@ RegExp       = < "/" ("\\/"|[^/])* "/"[im]* >              { ExtendToken(); $$ =
 
 Comment      = - (('\\') (!EOL .)* EOL)+
 
--            = [ \t]*
+Space        = [ \t]
+-            = Space*
 --           = (Comment | EOL)? -
+---          = (Space | EOL | Comment)+
 EOL          = (- ('\n' | '\r\n' | '\r'))+
 EOF          = - !.
 %%

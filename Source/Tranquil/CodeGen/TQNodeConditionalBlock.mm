@@ -3,6 +3,8 @@
 #import "../TQProgram.h"
 #import "TQNodeVariable.h"
 #import "TQNodeReturn.h"
+#import "../TQDebug.h"
+#import "TQNodeOperator.h"
 
 using namespace llvm;
 
@@ -159,46 +161,16 @@ using namespace llvm;
 
 
 #pragma mark - Unused methods from TQNodeBlock
-- (NSString *)signature
-{
-    return nil;
-}
-- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoError
-{
-    return NO;
-}
-- (llvm::Constant *)_generateBlockDescriptorInProgram:(TQProgram *)aProgram
-{
-    return NULL;
-}
-- (llvm::Value *)_generateBlockLiteralInProgram:(TQProgram *)aProgram parentBlock:(TQNodeBlock *)aParentBlock
-{
-    return NULL;
-}
-- (llvm::Function *)_generateCopyHelperInProgram:(TQProgram *)aProgram
-{
-    return NULL;
-}
-- (llvm::Function *)_generateDisposeHelperInProgram:(TQProgram *)aProgram
-{
-    return NULL;
-}
-- (llvm::Function *)_generateInvokeInProgram:(TQProgram *)aProgram error:(NSError **)aoErr
-{
-    return NULL;
-}
-- (llvm::Type *)_blockDescriptorTypeInProgram:(TQProgram *)aProgram
-{
-    return NULL;
-}
-- (llvm::Type *)_genericBlockLiteralTypeInProgram:(TQProgram *)aProgram
-{
-    return NULL;
-}
-- (llvm::Type *)_blockLiteralTypeInProgram:(TQProgram *)aProgram
-{
-    return NULL;
-}
+- (NSString *)signature { return nil; }
+- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoError { return NO; }
+- (llvm::Constant *)_generateBlockDescriptorInProgram:(TQProgram *)aProgram { return NULL; }
+- (llvm::Value *)_generateBlockLiteralInProgram:(TQProgram *)aProgram parentBlock:(TQNodeBlock *)aParentBlock { return NULL; }
+- (llvm::Function *)_generateCopyHelperInProgram:(TQProgram *)aProgram { return NULL; }
+- (llvm::Function *)_generateDisposeHelperInProgram:(TQProgram *)aProgram { return NULL; }
+- (llvm::Function *)_generateInvokeInProgram:(TQProgram *)aProgram error:(NSError **)aoErr { return NULL; }
+- (llvm::Type *)_blockDescriptorTypeInProgram:(TQProgram *)aProgram { return NULL; }
+- (llvm::Type *)_genericBlockLiteralTypeInProgram:(TQProgram *)aProgram { return NULL; }
+- (llvm::Type *)_blockLiteralTypeInProgram:(TQProgram *)aProgram { return NULL; }
 @end
 
 @implementation TQNodeUnlessBlock
@@ -207,5 +179,33 @@ using namespace llvm;
                                            value:(llvm::Value *)aValue
 {
     return aBlock.builder->CreateICmpEQ(aValue, ConstantPointerNull::get(aProgram.llInt8PtrTy), "ifTest");
+}
+@end
+
+@implementation TQNodeTernaryOperator
+@synthesize ifExpr=_ifExpr, elseExpr=_elseExpr;
+
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
+{
+    TQAssert(_ifExpr, @"Ternary operator missing truth result");
+    TQNodeVariable *tempVar = [TQNodeVariable new];
+    [tempVar createStorageInProgram:aProgram block:aBlock error:aoErr];
+
+    TQNodeOperator *ifAsgn  = [TQNodeOperator nodeWithType:kTQOperatorAssign left:tempVar right:_ifExpr];
+    self.statements = [NSArray arrayWithObject:ifAsgn];
+
+    if(_elseExpr) {
+        TQNodeOperator *elseAsgn  = [TQNodeOperator nodeWithType:kTQOperatorAssign left:tempVar right:_elseExpr];
+        self.elseBlockStatements = [NSArray arrayWithObject:elseAsgn];
+    }
+    [super generateCodeInProgram:aProgram block:aBlock error:aoErr];
+
+    [tempVar release];
+    return [tempVar generateCodeInProgram:aProgram block:aBlock error:aoErr];
+}
+
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<ternary@ (%@) ? %@ : %@>", self.condition, _ifExpr, _elseExpr];
 }
 @end

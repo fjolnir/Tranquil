@@ -17,3 +17,7 @@
 
 @interface TQNodeUnlessBlock : TQNodeIfBlock
 @end
+
+@interface TQNodeTernaryOperator : TQNodeIfBlock
+@property(readwrite, retain) TQNode *ifExpr, *elseExpr;
+@end
