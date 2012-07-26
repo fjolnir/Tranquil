@@ -11,12 +11,12 @@
 	until
 	break  \ Prematurely terminates a loop
 	skip   \ Skips to the end of the current iteration of a loop
-	nil    \ Represents 'nothing' ('no' is available as a synonym for Objective-C APIs)
+	nil    \ Represents 'nothing' ('no' is a synonym)
 	self   \ Available inside method blocks
 	super  \ Available inside method blocks as a message receiver
 	       \ that calls methods as defined by the current class's superclass
 	...    \ Array of passed variadic arguments
-	valid  \ Represents non-nilness, for use in cases where the actual object value is not of concern ('yes' is available as a synonym for use with Objective-C APIs)
+	valid  \ Represents non-nilness, for use in cases where the actual object value is not of concern ('yes' is a synonym)
 	
 	\ Variable assignment
 	a = b \ Variables are local in scope
