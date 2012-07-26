@@ -1,0 +1,18 @@
+#HelloView < UIView {
+    - drawRect: dirtyRect {
+        if #hasMoved {
+            bgColor = UIColor colorWithRed: (0 randUpTo: 1)
+                                     green: (0 randUpTo: 1)
+                                      blue: (0 randUpTo: 1)
+            text = "ZOMG!"
+        } else {
+            bgColor = UIColor blackColor
+            text = #touchCount > 0 ? "Touched #{#touchCount} times!" : "Hello world!"
+        }
+        bgColor set
+        (UIBezierPath bezierPathWithRect: dirtyRect) fill
+
+        UIColor whiteColor set
+        text drawAtPoint: #[10, 20] withFont: (UIFont systemFontOfSize: 24)
+    }
+}
