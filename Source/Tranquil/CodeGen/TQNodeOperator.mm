@@ -258,4 +258,14 @@ using namespace llvm;
     [str appendString:@">"];
     return str;
 }
+
+- (TQNode *)referencesNode:(TQNode *)aNode
+{
+    TQNode *ref = nil;
+    if((ref = [self.left tq_referencesNode:aNode]))
+        return ref;
+    else if((ref = [self.right tq_referencesNode:aNode]))
+        return ref;
+    return nil;
+}
 @end
