@@ -109,8 +109,8 @@ Return       = "^" retVal:Expression { UpdateToken(); $$ = [TQNodeReturn nodeWit
 # Expression
 Expression   = TernaryExpr
              | KeywordMsg
-             | Equation
              | Assignment
+             | Equation
              | _OtherExpr
 
 NoTernExpr   = Equation
