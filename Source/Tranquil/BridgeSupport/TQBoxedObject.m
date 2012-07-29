@@ -88,7 +88,8 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     IMP imp;
     // []
     imp = imp_implementationWithBlock(^(id a, id key) {
-        if(*(Class*)key == TQNumberClass || *(Class*)key == NSNumberClass)
+        Class keyKls = object_getClass(key);
+        if(keyKls == TQNumberClass || keyKls == NSNumberClass)
             return [a objectAtIndexedSubscript:[(TQNumber *)key intValue]];
         else
             return [a objectForKeyedSubscript:key];
@@ -97,7 +98,8 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
 
     // []=
     imp = imp_implementationWithBlock(^(id a, id key, id val) {
-        if(*(Class*)key == TQNumberClass || *(Class*)key == NSNumberClass)
+        Class keyKls = object_getClass(key);
+        if(keyKls == TQNumberClass || keyKls == NSNumberClass)
             return [a setObject:val atIndexedSubscript:[(TQNumber *)key intValue]];
         else
             return [a setObject:val forKeyedSubscript:key];
@@ -582,7 +584,7 @@ id TQBoxedMsgSend(id self, SEL selector, ...)
     if(!self)
         return nil;
 
-    Method method = class_getInstanceMethod(*(Class*)self, selector);
+    Method method = class_getInstanceMethod(object_getClass(self), selector);
     if(!method) {
         [NSException raise:NSGenericException
                     format:@"Unknown selector %@ sent to object %@", NSStringFromSelector(selector), self];

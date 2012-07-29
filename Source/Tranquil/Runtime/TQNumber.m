@@ -11,6 +11,59 @@ static id (*autoreleaseImp)(id,SEL);
 extern id _objc_msgSend_hack(id, SEL)          asm("_objc_msgSend");
 extern id _objc_msgSend_hack2(id, SEL, id)     asm("_objc_msgSend");
 
+// Tagged pointer niceness (Only for 64bit atm)
+void _objc_insert_tagged_isa(unsigned char slotNumber, Class isa) asm("__objc_insert_tagged_isa");
+static const unsigned char kTagSlot = 7; // Take the last slot (0b111)
+static const unsigned char kTagBits = 4;
+
+static __inline__ id _createTaggedPointer(float value)
+{
+    uintptr_t ptr;
+    memcpy(&ptr, &value, sizeof(float));
+    ptr <<= kTagBits;
+    ptr |= (kTagSlot << 1) | 1;
+    return (id)ptr;
+}
+
+static __inline__ BOOL _isTaggedPointer(id ptr)
+{
+#ifdef __LP64__
+    return (uintptr_t)ptr & 1;
+#else
+    return NO; // TODO: Port to & test on 32bit
+#endif
+}
+
+static __inline__ BOOL _fitsInTaggedPointer(double aValue)
+{
+#ifdef __LP64__
+    return aValue <= FLT_MAX && aValue >= -FLT_MAX;
+#else
+    return NO;
+#endif
+}
+
+static __inline__ double _TQNumberValue(TQNumber *ptr)
+{
+    if(_isTaggedPointer(ptr)) {
+        ptr = (id)((uintptr_t)ptr >> kTagBits);
+        float fltVal;
+        memcpy(&fltVal, &ptr, sizeof(float));
+        return fltVal;
+    }
+    return ptr->_value;
+}
+
+
+@interface TQTaggedNumber : TQNumber
+@end
+@implementation TQTaggedNumber
+- (id)retain { return self;}
+- (oneway void)release {}
+- (id)autorelease { return self; }
+- (void)dealloc { if(NO) [super dealloc]; }
+@end
+
 @implementation TQNumber
 @synthesize value=_value;
 
@@ -22,6 +75,9 @@ extern id _objc_msgSend_hack2(id, SEL, id)     asm("_objc_msgSend");
         assert((typeof(allocImp))method_getImplementation(class_getClassMethod(self, @selector(allocWithZone:))) == allocImp);
         assert((typeof(initImp))class_getMethodImplementation(self, @selector(initWithDouble:)) == initImp);
         assert((typeof(autoreleaseImp))class_getMethodImplementation(self, @selector(autorelease)) == autoreleaseImp);
+    } else {
+        // Register our tagged pointer slot
+        _objc_insert_tagged_isa(kTagSlot, [TQTaggedNumber class]);
     }
     numberWithDoubleImp = (id (*)(id, SEL, double))method_getImplementation(class_getClassMethod(self, @selector(numberWithDouble:)));
     allocImp = (typeof(allocImp))method_getImplementation(class_getClassMethod(self, @selector(allocWithZone:)));
@@ -66,47 +122,71 @@ extern id _objc_msgSend_hack2(id, SEL, id)     asm("_objc_msgSend");
 }
 + (TQNumber *)numberWithDouble:(double)aValue
 {
+    if(_fitsInTaggedPointer(aValue))
+        return _createTaggedPointer(aValue);
+
     TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithDouble:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 + (TQNumber *)numberWithInteger:(NSInteger)aValue
 {
+    if(_fitsInTaggedPointer(aValue))
+        return _createTaggedPointer(aValue);
+
     TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithInteger:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 
 + (NSNumber *)numberWithUnsignedChar:(unsigned char)aValue
 {
+    if(_fitsInTaggedPointer(aValue))
+        return _createTaggedPointer(aValue);
+
     TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithUnsignedChar:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 
 + (NSNumber *)numberWithUnsignedShort:(unsigned short)aValue
 {
+    if(_fitsInTaggedPointer(aValue))
+        return _createTaggedPointer(aValue);
+
     TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithUnsignedShort:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 
 + (NSNumber *)numberWithUnsignedInt:(unsigned int)aValue
 {
+    if(_fitsInTaggedPointer(aValue))
+        return _createTaggedPointer(aValue);
+
     TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithUnsignedInt:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 
 + (NSNumber *)numberWithUnsignedLong:(unsigned long)aValue
 {
+    if(_fitsInTaggedPointer(aValue))
+        return _createTaggedPointer(aValue);
+
     TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithUnsignedLong:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 
 + (NSNumber *)numberWithUnsignedLongLong:(unsigned long long)aValue
 {
+    if(_fitsInTaggedPointer(aValue))
+        return _createTaggedPointer(aValue);
+
     TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithUnsignedLongLong:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 
 + (NSNumber *)numberWithUnsignedInteger:(NSUInteger)aValue
 {
+    if(_fitsInTaggedPointer(aValue))
+        return _createTaggedPointer(aValue);
+
     TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithUnsignedInteger:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
@@ -190,115 +270,117 @@ extern id _objc_msgSend_hack2(id, SEL, id)     asm("_objc_msgSend");
 }
 
 
-- (char)charValue { return _value; }
-- (short)shortValue { return _value; }
-- (int)intValue { return _value; }
-- (long)longValue { return _value; }
-- (long long)longLongValue { return _value; }
-- (float)floatValue { return _value; }
-- (double)doubleValue { return _value; }
-- (BOOL)boolValue { return _value; }
-- (NSInteger)integerValue { return _value; }
+- (char)charValue { return _TQNumberValue(self); }
+- (short)shortValue { return _TQNumberValue(self); }
+- (int)intValue { return _TQNumberValue(self); }
+- (long)longValue { return _TQNumberValue(self); }
+- (long long)longLongValue { return _TQNumberValue(self); }
+- (float)floatValue { return _TQNumberValue(self); }
+- (double)doubleValue { return _TQNumberValue(self); }
+- (BOOL)boolValue { return _TQNumberValue(self); }
+- (NSInteger)integerValue { return _TQNumberValue(self); }
 
-- (unsigned char)unsignedCharValue { return _value; }
-- (unsigned short)unsignedShortValue { return _value; }
-- (unsigned int)unsignedIntValue { return _value; }
-- (unsigned long)unsignedLongValue { return _value; }
-- (unsigned long long)unsignedLongLongValue { return _value; }
-- (NSUInteger)unsignedIntegerValue { return _value; }
+- (unsigned char)unsignedCharValue { return _TQNumberValue(self); }
+- (unsigned short)unsignedShortValue { return _TQNumberValue(self); }
+- (unsigned int)unsignedIntValue { return _TQNumberValue(self); }
+- (unsigned long)unsignedLongValue { return _TQNumberValue(self); }
+- (unsigned long long)unsignedLongLongValue { return _TQNumberValue(self); }
+- (NSUInteger)unsignedIntegerValue { return _TQNumberValue(self); }
 
 #pragma mark - Operators
 
 - (TQNumber *)add:(id)b
 {
-    if(isa != object_getClass(b))
-        return numberWithDoubleImp(isa, @selector(numberWithDouble:), _value + [b doubleValue]);
-    return numberWithDoubleImp(isa, @selector(numberWithDouble:), _value + ((TQNumber*)b)->_value);
+    if(object_getClass(self) != object_getClass(b))
+        return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _TQNumberValue(self) + [b doubleValue]);
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _TQNumberValue(self) + _TQNumberValue(b) );
 }
 - (TQNumber *)subtract:(id)b
 {
-    if(isa != object_getClass(b))
-        return numberWithDoubleImp(isa, @selector(numberWithDouble:), _value - [b doubleValue]);
-    return numberWithDoubleImp(isa, @selector(numberWithDouble:), _value - ((TQNumber*)b)->_value);
+    if(object_getClass(self) != object_getClass(b))
+        return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _TQNumberValue(self) - [b doubleValue]);
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _TQNumberValue(self) - _TQNumberValue(b) );
 }
 
 - (TQNumber *)negate
 {
-    return numberWithDoubleImp(isa, @selector(numberWithDouble:), -_value);
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), -_TQNumberValue(self));
 }
 - (TQNumber *)ceil
 {
-    return numberWithDoubleImp(isa, @selector(numberWithDouble:), ceil(_value));
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), ceil(_TQNumberValue(self)));
 }
 - (TQNumber *)floor
 {
-    return numberWithDoubleImp(isa, @selector(numberWithDouble:), floor(_value));
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), floor(_TQNumberValue(self)));
 }
 
 - (TQNumber *)multiply:(id)b
 {
-    if(isa != object_getClass(b))
-        return numberWithDoubleImp(isa, @selector(numberWithDouble:), _value * [b doubleValue]);
-    return numberWithDoubleImp(isa, @selector(numberWithDouble:), _value * ((TQNumber*)b)->_value);
+    if(object_getClass(self) != object_getClass(b))
+        return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _TQNumberValue(self) * [b doubleValue]);
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _TQNumberValue(self) * _TQNumberValue(b) );
 }
 - (TQNumber *)divideBy:(id)b
 {
-    if(isa != object_getClass(b))
-        return numberWithDoubleImp(isa, @selector(numberWithDouble:), _value / [b doubleValue]);
-    return numberWithDoubleImp(isa, @selector(numberWithDouble:), _value / ((TQNumber*)b)->_value);
+    if(object_getClass(self) != object_getClass(b))
+        return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _TQNumberValue(self) / [b doubleValue]);
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _TQNumberValue(self) / _TQNumberValue(b) );
 }
 
 - (TQNumber *)pow:(id)b
 {
-    if(isa != object_getClass(b))
-        return numberWithDoubleImp(isa, @selector(numberWithDouble:), pow(_value, [b doubleValue]));
-    return numberWithDoubleImp(isa, @selector(numberWithDouble:), pow(_value, ((TQNumber*)b)->_value));
+    if(object_getClass(self) != object_getClass(b))
+        return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), pow(_value, [b doubleValue]));
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), pow(_value, _TQNumberValue(b) ));
 }
 
 - (TQNumber *)isGreater:(id)b
 {
-    if(isa != object_getClass(b))
-        return _value > [b doubleValue] ? (TQNumber*)TQValid : nil;
-    return _value > ((TQNumber*)b)->_value ? (TQNumber*)TQValid : nil;
+    if(object_getClass(self) != object_getClass(b))
+        return _TQNumberValue(self) > [b doubleValue] ? (TQNumber*)TQValid : nil;
+    return _TQNumberValue(self) > _TQNumberValue(b)  ? (TQNumber*)TQValid : nil;
 }
 
 - (TQNumber *)isLesser:(id)b
 {
-    if(isa != object_getClass(b))
-        return _value < [b doubleValue] ? (TQNumber*)TQValid : nil;
-    return _value < ((TQNumber*)b)->_value ? (TQNumber*)TQValid : nil;
+    if(object_getClass(self) != object_getClass(b))
+        return _TQNumberValue(self) < [b doubleValue] ? (TQNumber*)TQValid : nil;
+    return _TQNumberValue(self) < _TQNumberValue(b)  ? (TQNumber*)TQValid : nil;
 }
 
 - (TQNumber *)isGreaterOrEqual:(id)b
 {
-    if(isa != object_getClass(b))
-        return _value >= [b doubleValue] ? (TQNumber*)TQValid : nil;
-    return _value >= ((TQNumber*)b)->_value ? (TQNumber*)TQValid : nil;
+    if(object_getClass(self) != object_getClass(b))
+        return _TQNumberValue(self) >= [b doubleValue] ? (TQNumber*)TQValid : nil;
+    return _TQNumberValue(self) >= _TQNumberValue(b)  ? (TQNumber*)TQValid : nil;
 }
 
 - (TQNumber *)isLesserOrEqual:(id)b
 {
-    if(isa != object_getClass(b))
-        return _value <= [b doubleValue] ? (TQNumber*)TQValid : nil;
-    return _value <= ((TQNumber*)b)->_value ? (TQNumber*)TQValid : nil;
+    if(object_getClass(self) != object_getClass(b))
+        return _TQNumberValue(self) <= [b doubleValue] ? (TQNumber*)TQValid : nil;
+    return _TQNumberValue(self) <= _TQNumberValue(b)  ? (TQNumber*)TQValid : nil;
 }
 
 
 - (BOOL)isEqual:(id)aObj
 {
-    if(isa == object_getClass(aObj))
-        return self->_value == ((TQNumber *)aObj)->_value;
+    if(object_getClass(self) == object_getClass(aObj))
+        return _TQNumberValue(self) == _TQNumberValue(aObj);
     return NO;
 }
 
 - (NSComparisonResult)compare:(id)object
 {
-    if(object_getClass(object) != isa)
+    if(object_getClass(object) != object_getClass(self))
         return NSOrderedAscending;
     TQNumber *b = object;
-    if(_value > ((TQNumber*)b)->_value)
+    double value      = _TQNumberValue(self);
+    double otherValue = _TQNumberValue(b);
+    if(value > otherValue)
         return NSOrderedDescending;
-    else if(_value < ((TQNumber*)b)->_value)
+    else if(value < otherValue)
         return NSOrderedAscending;
     else
         return NSOrderedSame;
@@ -308,7 +390,7 @@ extern id _objc_msgSend_hack2(id, SEL, id)     asm("_objc_msgSend");
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"%f", _value];
+    return [NSString stringWithFormat:@"%f", _TQNumberValue(self)];
 }
 
 id TQDispatchBlock0(struct TQBlockLiteral *)      __asm("_TQDispatchBlock0");
@@ -317,11 +399,11 @@ id TQDispatchBlock1(struct TQBlockLiteral *, id ) __asm("_TQDispatchBlock1");
 - (id)times:(id (^)())block
 {
     if(TQBlockGetNumberOfArguments(block) == 1) {
-        for(int i = 0; i < (int)_value; ++i) {
+        for(int i = 0; i < (int)_TQNumberValue(self); ++i) {
             TQDispatchBlock1((struct TQBlockLiteral *)block, [TQNumber numberWithInt:i]);
         }
     } else {
-        for(int i = 0; i < (int)_value; ++i) {
+        for(int i = 0; i < (int)_TQNumberValue(self); ++i) {
             TQDispatchBlock0((struct TQBlockLiteral *)block);
         }
     }
