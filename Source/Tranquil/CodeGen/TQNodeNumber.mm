@@ -44,7 +44,7 @@ using namespace llvm;
 
     // Returns [NSNumber numberWithDouble:_value]
     NSString *globalName = [NSString stringWithFormat:@"TQConstNum_%f", [_value doubleValue]];
-    Value *num =  mod->getGlobalVariable([globalName UTF8String], false);
+    Value *num =  mod->getGlobalVariable([globalName UTF8String], true);
     if(!num) {
         Function *rootFunction = aProgram.root.function;
         IRBuilder<> rootBuilder(&rootFunction->getEntryBlock(), rootFunction->getEntryBlock().begin());
