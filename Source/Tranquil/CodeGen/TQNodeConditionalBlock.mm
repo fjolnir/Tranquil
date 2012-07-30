@@ -204,6 +204,14 @@ using namespace llvm;
     return [tempVar generateCodeInProgram:aProgram block:aBlock error:aoErr];
 }
 
+- (TQNode *)referencesNode:(TQNode *)aNode
+{
+    TQNode *ref;
+    if((ref = [_ifExpr referencesNode:aNode]))
+        return ref;
+    return [_elseExpr referencesNode:aNode];
+}
+
 - (NSString *)description
 {
     return [NSString stringWithFormat:@"<ternary@ (%@) ? %@ : %@>", self.condition, _ifExpr, _elseExpr];

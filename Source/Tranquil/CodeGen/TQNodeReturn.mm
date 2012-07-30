@@ -42,21 +42,11 @@ using namespace llvm;
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
 {
-    IRBuilder<> *builder = aBlock.builder;
-
-    // Release any blocks created inside the block we're returning from (Unless we're returning it)
-    //for(TQNode *stmt in aBlock.statements) {
-        //if(![stmt isKindOfClass:[TQNodeBlock class]])
-            //continue;
-        //TQNodeBlock *blk = (TQNodeBlock*)stmt;
-
-    //}
     Value *retVal;
-    retVal = builder->CreateCall(aProgram.TQPrepareObjectForReturn, [_value generateCodeInProgram:aProgram
-                                                                                            block:aBlock
-                                                                                            error:aoErr]);
-    builder->CreateCall(aProgram.objc_autoreleasePoolPop, aBlock.autoreleasePool);
-    retVal = builder->CreateCall(aProgram.TQAutoreleaseObject, retVal);
-    return builder->CreateRet(retVal);
+    retVal = [_value generateCodeInProgram:aProgram block:aBlock error:aoErr];
+    retVal = aBlock.builder->CreateCall(aProgram.TQPrepareObjectForReturn, retVal);
+    aBlock.builder->CreateCall(aProgram.objc_autoreleasePoolPop, aBlock.autoreleasePool);
+    retVal = aBlock.builder->CreateCall(aProgram.TQAutoreleaseObject, retVal);
+    return aBlock.builder->CreateRet(retVal);
 }
 @end

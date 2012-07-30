@@ -56,8 +56,8 @@ using namespace llvm;
         Value *result = rootBuilder.CreateCall3(aProgram.objc_msgSend, klass, selector, doubleValue);
         result = rootBuilder.CreateCall(aProgram.TQRetainObject, result);
 
-        num =  new GlobalVariable(*mod, aProgram.llInt8PtrTy, false, GlobalVariable::InternalLinkage,
-                                   ConstantPointerNull::get(aProgram.llInt8PtrTy), [globalName UTF8String]);
+        num = new GlobalVariable(*mod, aProgram.llInt8PtrTy, false, GlobalVariable::InternalLinkage,
+                                 ConstantPointerNull::get(aProgram.llInt8PtrTy), [globalName UTF8String]);
 
         rootBuilder.CreateStore(result, num);
     }
