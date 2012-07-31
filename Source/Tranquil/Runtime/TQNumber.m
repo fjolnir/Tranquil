@@ -8,8 +8,8 @@ static id (*initImp)(id,SEL,double);
 static id (*autoreleaseImp)(id,SEL);
 
 // Hack from libobjc, allows tail call optimization for objc_msgSend
-extern id _objc_msgSend_hack(id, SEL)          asm("_objc_msgSend");
-extern id _objc_msgSend_hack2(id, SEL, id)     asm("_objc_msgSend");
+extern id _objc_msgSend_hack(id, SEL)      asm("_objc_msgSend");
+extern id _objc_msgSend_hack2(id, SEL, id) asm("_objc_msgSend");
 
 // Tagged pointer niceness (Only for 64bit atm)
 void _objc_insert_tagged_isa(unsigned char slotNumber, Class isa) asm("__objc_insert_tagged_isa");

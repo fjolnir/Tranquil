@@ -126,7 +126,6 @@ _OtherExpr   = Call
              | Nil
              | SubscriptExp
              | Property
-             | RegExp
              | Self
              | Variadic
              | Literal
@@ -606,6 +605,7 @@ Literal      = Number
              | String
              | Array
              | Dictionary
+             | RegExp
 
 BreakStmt    = 'break'                     { ExtendToken(); $$ = [TQNodeBreak node]; }
 SkipStmt     = 'skip'                      { ExtendToken(); $$ = [TQNodeSkip node];  }
