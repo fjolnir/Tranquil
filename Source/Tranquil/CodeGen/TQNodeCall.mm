@@ -63,8 +63,6 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock
                          withArguments:(std::vector<llvm::Value*>)aArgs error:(NSError **)aoErr
 {
-    IRBuilder<> *builder = aBlock.builder;
-
     Value *callee = [_callee generateCodeInProgram:aProgram block:aBlock error:aoErr];
     aArgs.insert(aArgs.begin(), callee);
 
@@ -78,7 +76,7 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
         dispatcher->setCallingConv(CallingConv::C);
     }
 
-    return builder->CreateCall(dispatcher, aArgs);
+    return aBlock.builder->CreateCall(dispatcher, aArgs);
 }
 
 

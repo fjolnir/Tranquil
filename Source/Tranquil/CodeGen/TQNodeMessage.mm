@@ -73,8 +73,6 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock
                          withArguments:(std::vector<llvm::Value*>)aArgs error:(NSError **)aoErr
 {
-    llvm::IRBuilder<> *builder = aBlock.builder;
-
     NSString *selStr = [self selector];
     BOOL needsAutorelease = NO;
     if([selStr hasPrefix:@"init"])
@@ -97,7 +95,7 @@ using namespace llvm;
                                              ConstantPointerNull::get(aProgram.llInt8PtrTy), [selStr UTF8String]);
         rootBuilder.CreateStore(selReg, selectorGlobal);
     }
-    selectorGlobal = builder->CreateLoad(selectorGlobal);
+    selectorGlobal = aBlock.builder->CreateLoad(selectorGlobal);
 
 
     aArgs.insert(aArgs.begin(), selectorGlobal);
@@ -106,12 +104,12 @@ using namespace llvm;
 
     Value *ret;
     if([_receiver isMemberOfClass:[TQNodeSuper class]])
-        ret = builder->CreateCall(aProgram.objc_msgSendSuper, aArgs);
+        ret = aBlock.builder->CreateCall(aProgram.objc_msgSendSuper, aArgs);
     else {
         // TODO: only use boxed msg send when there's an identical selector known take non-object arguments (from BridgeSupport)
-        ret = builder->CreateCall(aProgram.TQBoxedMsgSend, aArgs); //objc_msgSend, aArgs); 
+        ret = aBlock.builder->CreateCall(aProgram.TQBoxedMsgSend, aArgs); //objc_msgSend, aArgs); 
         if(needsAutorelease)
-            ret = builder->CreateCall(aProgram.TQAutoreleaseObject, ret);
+            ret = aBlock.builder->CreateCall(aProgram.TQAutoreleaseObject, ret);
     }
     return ret;
 }

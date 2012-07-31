@@ -46,7 +46,6 @@ using namespace llvm;
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
 {
-    IRBuilder<> *builder = aBlock.builder;
     if(_type == kTQOperatorAssign) {
         BOOL isVar = [_left isMemberOfClass:[TQNodeVariable class]];
         BOOL isProperty = [_left isMemberOfClass:[TQNodeMemberAccess class]];
@@ -65,7 +64,7 @@ using namespace llvm;
     } else if(_type == kTQOperatorUnaryMinus) {
         Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
         Value *selector  = aProgram.llModule->getOrInsertGlobal("TQUnaryMinusOpSel", aProgram.llInt8PtrTy);
-        return builder->CreateCall2(aProgram.objc_msgSend, right, builder->CreateLoad(selector));
+        return aBlock.builder->CreateCall2(aProgram.objc_msgSend, right, aBlock.builder->CreateLoad(selector));
     } else if(_type == kTQOperatorIncrement || _type == kTQOperatorDecrement) {
         assert(!_left || !_right);
         NSString *selName = _type == kTQOperatorIncrement ? @"TQAddOpSel" : @"TQSubOpSel";
@@ -76,7 +75,7 @@ using namespace llvm;
         Value *beforeVal = [incrementee generateCodeInProgram:aProgram block:aBlock error:aoError];
         if(*aoError)
             return NULL;
-        Value *incrementedVal = builder->CreateCall3(aProgram.objc_msgSend, beforeVal, builder->CreateLoad(selector), one);
+        Value *incrementedVal = aBlock.builder->CreateCall3(aProgram.objc_msgSend, beforeVal, aBlock.builder->CreateLoad(selector), one);
         [incrementee store:incrementedVal inProgram:aProgram block:aBlock error:aoError];
         if(*aoError)
             return NULL;
@@ -90,11 +89,11 @@ using namespace llvm;
     } else if(_type == kTQOperatorEqual) {
         Value *left  = [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
         Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
-        return builder->CreateCall2(aProgram.TQObjectsAreEqual, left, right);
+        return aBlock.builder->CreateCall2(aProgram.TQObjectsAreEqual, left, right);
     } else if(_type == kTQOperatorInequal) {
         Value *left  = [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
         Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
-        return builder->CreateCall2(aProgram.TQObjectsAreNotEqual, left, right);
+        return aBlock.builder->CreateCall2(aProgram.TQObjectsAreNotEqual, left, right);
     } else {
         Value *left  = [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
         Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
@@ -147,7 +146,7 @@ using namespace llvm;
             default:
                 TQAssertSoft(NO, kTQGenericErrorDomain, kTQGenericError, NULL, @"Unknown binary operator");
         }
-        return builder->CreateCall3(aProgram.objc_msgSend, left, builder->CreateLoad(selector), right);
+        return aBlock.builder->CreateCall3(aProgram.objc_msgSend, left, aBlock.builder->CreateLoad(selector), right);
     }
 }
 
@@ -203,7 +202,6 @@ using namespace llvm;
                  error:(NSError **)aoError
 {
     assert(_type == kTQOperatorGetter);
-    IRBuilder<> *builder = aBlock.builder;
 
     // Call []:=:
     Value *selector  = aProgram.llModule->getOrInsertGlobal("TQSetterOpSel", aProgram.llInt8PtrTy);
@@ -211,6 +209,8 @@ using namespace llvm;
     Value *settee = [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
     if(*aoError)
         return NULL;
+
+    IRBuilder<> *builder = aBlock.builder;
     return builder->CreateCall4(aProgram.objc_msgSend, settee, builder->CreateLoad(selector), key, aValue);
 }
 @end

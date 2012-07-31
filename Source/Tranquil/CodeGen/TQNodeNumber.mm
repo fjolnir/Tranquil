@@ -40,7 +40,6 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
 {
     Module *mod = aProgram.llModule;
-    llvm::IRBuilder<> *builder = aBlock.builder;
 
     // Returns [NSNumber numberWithDouble:_value]
     NSString *globalName = [NSString stringWithFormat:@"TQConstNum_%f", [_value doubleValue]];
@@ -61,6 +60,6 @@ using namespace llvm;
 
         rootBuilder.CreateStore(result, num);
     }
-    return builder->CreateLoad(num);
+    return aBlock.builder->CreateLoad(num);
    }
 @end
