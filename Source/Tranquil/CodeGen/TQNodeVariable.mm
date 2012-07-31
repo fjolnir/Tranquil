@@ -47,7 +47,7 @@ using namespace llvm;
 }
 - (TQNode *)referencesNode:(TQNode *)aNode
 {
-    return [aNode isEqual:self] ? self : nil;
+    return (_name && [aNode isEqual:self]) ? self : nil;
 }
 
 
