@@ -7,21 +7,21 @@ static id (*allocImp)(id,SEL,NSZone*);
 static id (*initImp)(id,SEL,double);
 static id (*autoreleaseImp)(id,SEL);
 
-// Hack from libobjc, allows tail call optimization for objc_msgSend
+// Hack from libobjc, aLows tail caL optimization for objc_msgSend
 extern id _objc_msgSend_hack(id, SEL)      asm("_objc_msgSend");
 extern id _objc_msgSend_hack2(id, SEL, id) asm("_objc_msgSend");
 
 // Tagged pointer niceness (Only for 64bit atm)
 void _objc_insert_tagged_isa(unsigned char slotNumber, Class isa) asm("__objc_insert_tagged_isa");
-static const unsigned char kTagSlot = 7; // Take the last slot (0b111)
-static const unsigned char kTagBits = 4;
 
-static __inline__ id _createTaggedPointer(float value)
+static const unsigned char kTagSlot  = 7; // Take the last slot (0b111)
+static const uintptr_t     kTag      = (kTagSlot << 1) | 1;
+
+static __inline__ id _createTaggedPointer(double value)
 {
     uintptr_t ptr;
-    memcpy(&ptr, &value, sizeof(float));
-    ptr <<= kTagBits;
-    ptr |= (kTagSlot << 1) | 1;
+    memcpy(&ptr, &value, sizeof(double));
+    ptr |= kTag;
     return (id)ptr;
 }
 
@@ -37,7 +37,7 @@ static __inline__ BOOL _isTaggedPointer(id ptr)
 static __inline__ BOOL _fitsInTaggedPointer(double aValue)
 {
 #ifdef __LP64__
-    return aValue <= FLT_MAX && aValue >= -FLT_MAX;
+    return YES;
 #else
     return NO;
 #endif
@@ -46,10 +46,11 @@ static __inline__ BOOL _fitsInTaggedPointer(double aValue)
 static __inline__ double _TQNumberValue(TQNumber *ptr)
 {
     if(_isTaggedPointer(ptr)) {
-        ptr = (id)((uintptr_t)ptr >> kTagBits);
-        float fltVal;
-        memcpy(&fltVal, &ptr, sizeof(float));
-        return fltVal;
+        // Zero the isa tag
+        ptr = (id)(((uintptr_t)ptr) & ~kTag);
+        double val;
+        memcpy(&val, &ptr, sizeof(double));
+        return val;
     }
     return ptr->_value;
 }
