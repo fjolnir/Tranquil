@@ -429,6 +429,7 @@ Product      = a:NoEqExpr            { UpdateToken(); PushStack(a);             
                ( - "^"  - b:Product  { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorExponent left:StackTop right:b]); }
                | - "*"  - b:Product  { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorMultiply left:StackTop right:b]); }
                | - "/"  - b:Product  { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorDivide   left:StackTop right:b]); }
+               | - "%"  - b:Product  { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorModulo   left:StackTop right:b]); }
                | - ShiftRhs
                | - ".." - b:Product  { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorConcat   left:StackTop right:b]); }
                )*                    { $$ = PopStack();                                                                                         }
@@ -622,6 +623,7 @@ Operator     = '=='  { ExtendToken(); $$ = @"=="; }
              | '<='  { ExtendToken(); $$ = @"<="; }
              | '*'   { ExtendToken(); $$ = @"*";  }
              | '/'   { ExtendToken(); $$ = @"/";  }
+             | '%'   { ExtendToken(); $$ = @"%";  }
              | '+'   { ExtendToken(); $$ = @"+";  }
              | '-'   { ExtendToken(); $$ = @"-";  }
              | '<<'  { ExtendToken(); $$ = @"<<"; }

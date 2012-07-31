@@ -327,7 +327,12 @@ static __inline__ double _TQNumberValue(TQNumber *ptr)
         return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _TQNumberValue(self) / [b doubleValue]);
     return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _TQNumberValue(self) / _TQNumberValue(b) );
 }
-
+- (TQNumber *)modulo:(id)b
+{
+    if(object_getClass(self) != object_getClass(b))
+        return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), fmod(_TQNumberValue(self), [b doubleValue]));
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), fmod(_TQNumberValue(self), _TQNumberValue(b)));
+}
 - (TQNumber *)pow:(id)b
 {
     if(object_getClass(self) != object_getClass(b))

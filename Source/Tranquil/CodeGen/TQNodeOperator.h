@@ -5,6 +5,7 @@ enum {
     kTQOperatorAdd,
     kTQOperatorSubtract,
     kTQOperatorDivide,
+    kTQOperatorModulo,
     kTQOperatorLesser,
     kTQOperatorAssign,
     kTQOperatorGreater,

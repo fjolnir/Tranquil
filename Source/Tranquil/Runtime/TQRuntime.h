@@ -100,6 +100,7 @@ extern SEL TQGTEOpSel;
 extern SEL TQLTEOpSel;
 extern SEL TQMultOpSel;
 extern SEL TQDivOpSel;
+extern SEL TQModOpSel;
 extern SEL TQAddOpSel;
 extern SEL TQSubOpSel;
 extern SEL TQUnaryMinusOpSel;

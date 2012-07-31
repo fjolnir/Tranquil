@@ -70,6 +70,7 @@
 - (TQNumber *)floor;
 - (TQNumber *)multiply:(id)b;
 - (TQNumber *)divideBy:(id)b;
+- (TQNumber *)modulo:(id)b;
 - (TQNumber *)pow:(id)b;
 
 - (id)times:(id (^)())block;

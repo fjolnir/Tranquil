@@ -163,6 +163,7 @@ Subtraction      |  -         | -:                 |
 Negation         |  -         | -                  | Prefix operator
 Multiplication   |  *         | *:                 | 
 Division         |  /         | /:                 | 
+Modulo           |  %         | %:                 |
 Less than        |  <         | <:                 |
 Greater than     |  >         | >:                 |
 Lesser or equal  |  <=        | <=:                |

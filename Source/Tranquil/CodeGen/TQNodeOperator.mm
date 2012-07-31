@@ -113,6 +113,9 @@ using namespace llvm;
             case kTQOperatorDivide:
                 selector  = aProgram.llModule->getOrInsertGlobal("TQDivOpSel", aProgram.llInt8PtrTy);
                 break;
+            case kTQOperatorModulo:
+                selector  = aProgram.llModule->getOrInsertGlobal("TQModOpSel", aProgram.llInt8PtrTy);
+                break;
             case kTQOperatorAdd:
                 selector  = aProgram.llModule->getOrInsertGlobal("TQAddOpSel", aProgram.llInt8PtrTy);
                 break;

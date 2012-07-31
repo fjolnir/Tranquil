@@ -21,6 +21,7 @@ SEL TQGTEOpSel;
 SEL TQLTEOpSel;
 SEL TQMultOpSel;
 SEL TQDivOpSel;
+SEL TQModOpSel;
 SEL TQAddOpSel;
 SEL TQSubOpSel;
 SEL TQUnaryMinusOpSel;
@@ -367,6 +368,7 @@ void TQInitializeRuntime()
     TQUnaryMinusOpSel            = sel_registerName("-");
     TQMultOpSel                  = sel_registerName("*:");
     TQDivOpSel                   = sel_registerName("/:");
+    TQModOpSel                   = sel_registerName("%:");
     TQLTOpSel                    = sel_registerName("<:");
     TQGTOpSel                    = sel_registerName(">:");
     TQLTEOpSel                   = sel_registerName("<=:");
@@ -480,6 +482,7 @@ void TQInitializeRuntime()
     class_replaceMethod(TQNumberClass, TQUnaryMinusOpSel, class_getMethodImplementation(TQNumberClass, @selector(negate)),     "@@:" );
     class_replaceMethod(TQNumberClass, TQMultOpSel, class_getMethodImplementation(TQNumberClass, @selector(multiply:)),        "@@:@");
     class_replaceMethod(TQNumberClass, TQDivOpSel,  class_getMethodImplementation(TQNumberClass, @selector(divideBy:)),        "@@:@");
+    class_replaceMethod(TQNumberClass, TQModOpSel,  class_getMethodImplementation(TQNumberClass, @selector(modulo:)),          "@@:@");
 
     class_replaceMethod(TQNumberClass, TQLTOpSel,  class_getMethodImplementation(TQNumberClass, @selector(isLesser:)),         "@@:@");
     class_replaceMethod(TQNumberClass, TQGTOpSel,  class_getMethodImplementation(TQNumberClass, @selector(isGreater:)),        "@@:@");
