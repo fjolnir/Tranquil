@@ -680,22 +680,22 @@ id TQBoxedMsgSend(id self, SEL selector, ...)
 
 
 #pragma mark - Scalar boxing IMPs
-id _box_C_ID_imp(TQBoxedObject *self, SEL _cmd, id *aPtr)                       { return *aPtr; }
-id _box_C_SEL_imp(TQBoxedObject *self, SEL _cmd, SEL *aPtr)                     { return NSStringFromSelector(*aPtr); }
-id _box_C_VOID_imp(TQBoxedObject *self, SEL _cmd, id *aPtr)                     { return nil; }
-id _box_C_CHARPTR_imp(TQBoxedObject *self, SEL _cmd, const char *aPtr)          { return @(*aPtr); }
-id _box_C_DBL_imp(TQBoxedObject *self, SEL _cmd, double *aPtr)                  { return @(*aPtr); }
-id _box_C_FLT_imp(TQBoxedObject *self, SEL _cmd, float *aPtr)                   { return @(*aPtr); }
-id _box_C_INT_imp(TQBoxedObject *self, SEL _cmd, int *aPtr)                     { return @(*aPtr); }
-id _box_C_SHT_imp(TQBoxedObject *self, SEL _cmd, short *aPtr)                   { return @(*aPtr); }
-id _box_C_CHR_imp(TQBoxedObject *self, SEL _cmd, char *aPtr)                    { return @(*aPtr); }
-id _box_C_BOOL_imp(TQBoxedObject *self, SEL _cmd, _Bool *aPtr)                  { return *aPtr ? TQValid : nil; }
-id _box_C_LNG_imp(TQBoxedObject *self, SEL _cmd, long *aPtr)                    { return @(*aPtr); }
-id _box_C_LNG_LNG_imp(TQBoxedObject *self, SEL _cmd, long long *aPtr)           { return @(*aPtr); }
-id _box_C_UINT_imp(TQBoxedObject *self, SEL _cmd, unsigned int *aPtr)           { return @(*aPtr); }
-id _box_C_USHT_imp(TQBoxedObject *self, SEL _cmd, unsigned short *aPtr)         { return @(*aPtr); }
-id _box_C_ULNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long *aPtr)          { return @(*aPtr); }
-id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long *aPtr) { return @(*aPtr); }
+id _box_C_ID_imp(TQBoxedObject *self, SEL _cmd, id *aPtr)                       { return *aPtr;                                       }
+id _box_C_SEL_imp(TQBoxedObject *self, SEL _cmd, SEL *aPtr)                     { return NSStringFromSelector(*aPtr);                 }
+id _box_C_VOID_imp(TQBoxedObject *self, SEL _cmd, id *aPtr)                     { return nil;                                         }
+id _box_C_CHARPTR_imp(TQBoxedObject *self, SEL _cmd, const char *aPtr)          { return @(*aPtr);                                    }
+id _box_C_DBL_imp(TQBoxedObject *self, SEL _cmd, double *aPtr)                  { return [TQNumber numberWithDouble:*aPtr];           }
+id _box_C_FLT_imp(TQBoxedObject *self, SEL _cmd, float *aPtr)                   { return [TQNumber numberWithFloat:*aPtr];            }
+id _box_C_INT_imp(TQBoxedObject *self, SEL _cmd, int *aPtr)                     { return [TQNumber numberWithInt:*aPtr];              }
+id _box_C_SHT_imp(TQBoxedObject *self, SEL _cmd, short *aPtr)                   { return [TQNumber numberWithShort:*aPtr];            }
+id _box_C_CHR_imp(TQBoxedObject *self, SEL _cmd, char *aPtr)                    { return [TQNumber numberWithChar:*aPtr];             }
+id _box_C_BOOL_imp(TQBoxedObject *self, SEL _cmd, _Bool *aPtr)                  { return *aPtr ? TQValid : nil;                       }
+id _box_C_LNG_imp(TQBoxedObject *self, SEL _cmd, long *aPtr)                    { return [TQNumber numberWithLong:*aPtr];             }
+id _box_C_LNG_LNG_imp(TQBoxedObject *self, SEL _cmd, long long *aPtr)           { return [TQNumber numberWithLongLong:*aPtr];         }
+id _box_C_UINT_imp(TQBoxedObject *self, SEL _cmd, unsigned int *aPtr)           { return [TQNumber numberWithUnsignedInt:*aPtr];      }
+id _box_C_USHT_imp(TQBoxedObject *self, SEL _cmd, unsigned short *aPtr)         { return [TQNumber numberWithUnsignedShort:*aPtr];    }
+id _box_C_ULNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long *aPtr)          { return [TQNumber numberWithUnsignedLong:*aPtr];     }
+id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long *aPtr) { return [TQNumber numberWithUnsignedLongLong:*aPtr]; }
 
 #pragma mark -
 
