@@ -2,6 +2,12 @@
 #import <objc/runtime.h>
 #import "TQRuntime.h"
 
+#ifdef __LP64__
+    #define _tqfloat double
+#else
+    #define _tqfloat float
+#endif
+
 static id (*numberWithDoubleImp)(id, SEL, double)  ;
 static id (*allocImp)(id,SEL,NSZone*);
 static id (*initImp)(id,SEL,double);
@@ -11,27 +17,23 @@ static id (*autoreleaseImp)(id,SEL);
 extern id _objc_msgSend_hack(id, SEL)      asm("_objc_msgSend");
 extern id _objc_msgSend_hack2(id, SEL, id) asm("_objc_msgSend");
 
-// Tagged pointer niceness (Only for 64bit atm)
+// Tagged pointer niceness (Uses floats by truncating the mantissa by 1 byte)
 void _objc_insert_tagged_isa(unsigned char slotNumber, Class isa) asm("__objc_insert_tagged_isa");
 
 static const unsigned char kTagSlot  = 7; // Take the last slot (0b111)
 static const uintptr_t     kTag      = (kTagSlot << 1) | 1;
 
-static __inline__ id _createTaggedPointer(double value)
+static __inline__ id _createTaggedPointer(_tqfloat value)
 {
     uintptr_t ptr;
-    memcpy(&ptr, &value, sizeof(double));
+    memcpy(&ptr, &value, sizeof(_tqfloat));
     ptr |= kTag;
     return (id)ptr;
 }
 
 static __inline__ BOOL _isTaggedPointer(id ptr)
 {
-#ifdef __LP64__
     return (uintptr_t)ptr & 1;
-#else
-    return NO; // TODO: Port to & test on 32bit
-#endif
 }
 
 static __inline__ BOOL _fitsInTaggedPointer(double aValue)
@@ -39,17 +41,17 @@ static __inline__ BOOL _fitsInTaggedPointer(double aValue)
 #ifdef __LP64__
     return YES;
 #else
-    return NO;
+    return (aValue > -FLT_MAX) && (aValue < FLT_MAX);
 #endif
 }
 
-static __inline__ double _TQNumberValue(TQNumber *ptr)
+static __inline__ _tqfloat _TQNumberValue(TQNumber *ptr)
 {
     if(_isTaggedPointer(ptr)) {
         // Zero the isa tag
         ptr = (id)(((uintptr_t)ptr) & ~kTag);
         double val;
-        memcpy(&val, &ptr, sizeof(double));
+        memcpy(&val, &ptr, sizeof(_tqfloat));
         return val;
     }
     return ptr->_value;
