@@ -36,6 +36,11 @@ But here're a couple of examples:
 ### Multiple assignment
 
 	a, b = b, a  \ Swap b&a
+
+### Calculate fibonacci numbers (In a not-so-performant manner)
+
+	fib = `n | n > 1 ? fib(n-1) + fib(n-2) : n`
+	fib(10) print
 	
 ### Talking to Cocoa
 
