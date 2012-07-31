@@ -53,6 +53,11 @@
     return ret;
 }
 
+- (id)objectAtIndex:(NSUInteger)aIdx
+{
+    return (id)[self pointerAtIndex:aIdx];
+}
+
 - (void)setObject:(void*)aPtr atIndexedSubscript:(NSUInteger)aIdx
 {
     NSUInteger count = [self count];
