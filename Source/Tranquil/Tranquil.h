@@ -4,6 +4,7 @@
 #import <Tranquil/Runtime/NSNumber+TQOperators.h>
 #import <Tranquil/Runtime/TQNumber.h>
 #import <Tranquil/Runtime/TQValidObject.h>
+#import <Tranquil/Runtime/TQRange.h>
 #import <Tranquil/BridgeSupport/TQBoxedObject.h>
 #import <Tranquil/CodeGen/TQNode.h>
 #import <Tranquil/CodeGen/TQNodeArgument.h>

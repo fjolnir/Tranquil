@@ -59,7 +59,7 @@ using namespace llvm;
     }
 
     Value *selector = builder->CreateLoad(mod->getOrInsertGlobal("TQRegexWithPatSel", aProgram.llInt8PtrTy));
-    Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_NSRegularExpression", aProgram.llInt8Ty);
+    Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_TQRegularExpression", aProgram.llInt8Ty);
     Value *patVal   = [aProgram getGlobalStringPtr:pattern inBlock:aBlock];
     Value *optsVal  = ConstantInt::get(aProgram.llIntTy, opts);
 
