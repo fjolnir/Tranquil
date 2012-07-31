@@ -10,6 +10,10 @@ using namespace llvm;
     return (TQNodeNil *)[super node];
 }
 
+- (id)referencesNode:(TQNode *)aNode
+{
+    return nil;
+}
 
 - (NSString *)description
 {
