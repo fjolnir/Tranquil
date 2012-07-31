@@ -5,6 +5,7 @@
 #import <objc/runtime.h>
 #import <objc/message.h>
 #import "TQNumber.h"
+#import "NSObject+TQAdditions.h"
 
 id TQSentinel = @"3d2c9ac0bf3911e1afa70800200c9a66aaaaaaaaa";
 
@@ -390,8 +391,23 @@ void TQInitializeRuntime()
     // Add operators that cannot be added through standard categories (because the compiler won't allow methods containing symbols)
     TQAugmentClassWithOperators([NSObject class]);
 
-    // Operators for collections
     IMP imp;
+    // Operators for NSString
+    imp = imp_implementationWithBlock(^(id a, TQNumber *idx)   {
+        return [a substringWithRange:(NSRange){[idx intValue], 1}];
+    });
+    class_addMethod([NSString class], TQGetterOpSel, imp, "@@:@");
+    
+    imp = imp_implementationWithBlock(^(id a, TQNumber *idx, NSString *replacement)   {
+        int loc = [idx intValue];
+        [a deleteCharactersInRange:(NSRange){loc, 1}];
+        [a insertString:replacement atIndex:loc];
+        return a;
+    });
+    class_addMethod([NSMutableString class], TQSetterOpSel, imp, "@@:@");
+
+
+    // Operators for collections
     imp = imp_implementationWithBlock(^(id a, id key)         { return _objc_msgSend_hack2(a, @selector(objectForKeyedSubscript:), key); });
     class_addMethod([NSDictionary class], TQGetterOpSel, imp, "@@:@");
     class_addMethod([NSMapTable class], TQGetterOpSel, imp, "@@:@");
