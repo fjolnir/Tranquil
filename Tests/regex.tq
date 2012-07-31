@@ -2,7 +2,7 @@ if /(foo|bar)/ matches:"foobar" {
     "Matches!" print
 }
 
-/(foo|bar)/ match:"foobar" usingBlock: { str, range |
+"foobar" match: /(foo|bar)/  usingBlock: { str, range |
     "#{str} -- #{range}" print
     range each: { i |
         str[i] print

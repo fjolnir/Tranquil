@@ -31,3 +31,15 @@
     return nil;
 }
 @end
+
+@implementation NSString (TQRegularExpression)
+- (id)matches:(TQRegularExpression *)aRegex
+{
+    return [aRegex matches:self];
+}
+
+- (id)match:(TQRegularExpression *)aRegex usingBlock:(id (^)(NSString *text, TQRange *range))aBlock
+{
+    return [aRegex match:self usingBlock:aBlock];
+}
+@end
