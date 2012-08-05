@@ -29,7 +29,11 @@
 - (void)moveValueToHeap;
 @end
 
+// The tranquil message dispatcher. Automatically performs any (un)boxing required for a message
+// to be dispatched.
+extern "C" id tq_msgSend(id self, SEL selector, ...);
+
 // Sends a message boxing the return value and unboxing arguments as necessary
-// WAY slower than objc_msgSend so only use this if you have a reason to believe the method may have
-// non-object parameters/return value
-id TQBoxedMsgSend(id self, SEL selector, ...);
+// WAY slower than objc_msgSend and should never be used directly.
+// tq_msgSend is a more intelligent message dispatcher that calls tq_boxedMsgSend only if necessary
+extern "C" id tq_boxedMsgSend(id self, SEL selector, ...);

@@ -61,8 +61,8 @@ using namespace llvm;
     objc_autoreleasePoolPop=_func_objc_autoreleasePoolPop, TQSetValueForKey=_func_TQSetValueForKey,
     TQValueForKey=_func_TQValueForKey, TQGetOrCreateClass=_func_TQGetOrCreateClass,
     TQObjectsAreEqual=_func_TQObjectsAreEqual, TQObjectsAreNotEqual=_func_TQObjectsAreNotEqual, TQObjectGetSuperClass=_func_TQObjectGetSuperClass,
-    TQVaargsToArray=_func_TQVaargsToArray, TQBoxedMsgSend=_func_TQBoxedMsgSend, TQUnboxObject=_func_TQUnboxObject,
-    TQBoxValue=_func_TQBoxValue;
+    TQVaargsToArray=_func_TQVaargsToArray, TQUnboxObject=_func_TQUnboxObject,
+    TQBoxValue=_func_TQBoxValue, tq_msgSend=_func_tq_msgSend;
 
 + (TQProgram *)programWithName:(NSString *)aName
 {
@@ -235,9 +235,9 @@ using namespace llvm;
     DEF_EXTERNAL_FUN(TQObjectsAreNotEqual, ft_i8Ptr__i8Ptr_i8Ptr);
     DEF_EXTERNAL_FUN(TQObjectGetSuperClass, ft_i8Ptr__i8Ptr);
     DEF_EXTERNAL_FUN(TQVaargsToArray, ft_i8Ptr__i8Ptr);
-    DEF_EXTERNAL_FUN(TQBoxedMsgSend, ft_i8ptr__i8ptr_i8ptr_variadic)
     DEF_EXTERNAL_FUN(TQUnboxObject, ft_void__i8Ptr_i8Ptr_i8Ptr)
     DEF_EXTERNAL_FUN(TQBoxValue, ft_i8Ptr__i8Ptr_i8Ptr)
+    DEF_EXTERNAL_FUN(tq_msgSend, ft_i8ptr__i8ptr_i8ptr_variadic)
 
 #undef DEF_EXTERNAL_FUN
 
@@ -315,7 +315,6 @@ using namespace llvm;
     engine->addGlobalMapping(_func_TQObjectGetSuperClass, (void*)&TQObjectGetSuperClass);
     engine->addGlobalMapping(_func_TQVaargsToArray, (void*)&TQVaargsToArray);
     engine->addGlobalMapping(_func_TQReleaseObject, (void*)&TQReleaseObject);
-    engine->addGlobalMapping(_func_TQBoxedMsgSend, (void*)&TQBoxedMsgSend);
     engine->addGlobalMapping(_func_TQUnboxObject, (void*)&TQUnboxObject);
     engine->addGlobalMapping(_func_TQBoxValue, (void*)&TQBoxValue);
 

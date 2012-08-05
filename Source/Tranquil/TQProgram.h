@@ -45,7 +45,7 @@
     *object_getClass, *TQPrepareObjectForReturn, *TQAutoreleaseObject,
     *objc_autoreleasePoolPush, *objc_autoreleasePoolPop, *TQSetValueForKey, *TQValueForKey,
     *TQGetOrCreateClass, *TQObjectsAreEqual, *TQObjectsAreNotEqual, *TQObjectGetSuperClass,
-    *TQVaargsToArray, *TQBoxedMsgSend, *TQUnboxObject, *TQBoxValue;
+    *TQVaargsToArray, *TQUnboxObject, *TQBoxValue, *tq_msgSend;
 
 #pragma mark - Methods
 

@@ -579,15 +579,27 @@ id __wrapperBlock_invoke(struct TQBoxedBlockLiteral *__blk, ...)
 
 #pragma mark - Boxed msgSend
 
-id TQBoxedMsgSend(id self, SEL selector, ...)
+extern "C" NSMapTable *_TQSelectorCache;
+extern "C" void _TQCacheSelector(id obj, SEL sel);
+
+extern "C" id tq_boxedMsgSend(id self, SEL selector, ...)
 {
     if(!self)
         return nil;
 
-    Method method = class_getInstanceMethod(object_getClass(self), selector);
-    if(!method) {
+    Class kls = object_getClass(self);
+    void *cacheKey =  (void*)((uintptr_t)kls ^ (uintptr_t)selector);
+    Method method = (Method)NSMapGet(_TQSelectorCache, cacheKey);
+    if(method == 0x0) {
+        _TQCacheSelector(self, selector);
+        method = (Method)NSMapGet(_TQSelectorCache, cacheKey);
+    }
+    if(method == 0x0) {
         [NSException raise:NSGenericException
                     format:@"Unknown selector %@ sent to object %@", NSStringFromSelector(selector), self];
+        return nil;
+    } else if((uintptr_t)method == 0x1) {
+        NSLog(@"Error: Tried to use tq_boxedMsgSend to call a method that does not require boxing");
         return nil;
     }
 
@@ -679,6 +691,7 @@ id TQBoxedMsgSend(id self, SEL selector, ...)
 }
 
 
+
 #pragma mark - Scalar boxing IMPs
 id _box_C_ID_imp(TQBoxedObject *self, SEL _cmd, id *aPtr)                       { return *aPtr;                                       }
 id _box_C_SEL_imp(TQBoxedObject *self, SEL _cmd, SEL *aPtr)                     { return NSStringFromSelector(*aPtr);                 }
@@ -703,3 +716,4 @@ void _freeRelinquishFunction(const void *item, NSUInteger (*size)(const void *it
 {
     free((void*)item);
 }
+

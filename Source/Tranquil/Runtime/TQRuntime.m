@@ -7,9 +7,16 @@
 #import "TQNumber.h"
 #import "NSObject+TQAdditions.h"
 
-id TQSentinel = @"3d2c9ac0bf3911e1afa70800200c9a66aaaaaaaaa";
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-TQValidObject *TQValid;
+id TQSentinel = @"3d2c9ac0bf3911e1afa70800200c9a66aaaaaaaaa";
+TQValidObject *TQValid = nil;
+
+// A Table keyed with `Class xor Selector` with values either being 0x1 (No boxing required for selector)
+// or a pointer the Method object of the method to be boxed. This is only used by tq_msgSend and tq_boxedMsgSend
+NSMapTable *_TQSelectorCache = nil;
 
 static const NSString *_TQDynamicIvarTableKey = @"TQDynamicIvarTableKey";
 
@@ -115,6 +122,26 @@ BOOL TQMethodTypeRequiresBoxing(const char *aEncoding)
     }
     return NO;
 }
+
+void _TQCacheSelector(id obj, SEL sel)
+{
+    Class kls = object_getClass(obj);
+    void *cacheKey = (void*)( (uintptr_t)kls ^ (uintptr_t)sel);
+
+    Method method = class_getInstanceMethod(kls, sel);
+    // Methods that do not have a registered implementation are assumed to take&return only objects
+    uintptr_t unboxedVal = 0x1L;
+    if(!method) {
+        NSMapInsert(_TQSelectorCache, cacheKey, (void*)0x1);
+        return;
+    }
+
+    const char *enc = method_getTypeEncoding(method);
+    if(TQMethodTypeRequiresBoxing(enc))
+        NSMapInsert(_TQSelectorCache, cacheKey, (void*)method);
+    else
+        NSMapInsert(_TQSelectorCache, cacheKey, (void*)0x1);
+ }
 
 void TQUnboxObject(id object, const char *type, void *buffer)
 {
@@ -356,8 +383,13 @@ BOOL TQAugmentClassWithOperators(Class klass)
 
 void TQInitializeRuntime()
 {
-    if(TQValid == [TQValidObject sharedInstance])
+    if(_TQSelectorCache)
         return;
+
+    NSMapTableKeyCallBacks   keyCallbacks = { NULL,  NULL, NULL, NULL, NULL, NULL };
+    NSMapTableValueCallBacks valCallbacks = { NULL,  NULL, NULL };
+
+    _TQSelectorCache = NSCreateMapTable(keyCallbacks, valCallbacks, 100);
 
     TQValid = [TQValidObject sharedInstance];
 
@@ -490,3 +522,7 @@ void TQInitializeRuntime()
     class_replaceMethod(TQNumberClass, TQGTEOpSel, class_getMethodImplementation(TQNumberClass, @selector(isGreaterOrEqual:)), "@@:@");
     class_replaceMethod(TQNumberClass, TQExpOpSel, class_getMethodImplementation(TQNumberClass, @selector(pow:)),              "@@:@");
 }
+
+#ifdef __cplusplus
+}
+#endif

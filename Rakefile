@@ -40,11 +40,14 @@ LIBS = ['-framework Foundation'].join(' ')
 
 PATHMAP = "build/%n.o"
 
-STUB_OUTPATH = 'Build/block_stubs.mm'
-STUB_SCRIPT = 'Source/Tranquil/gen_stubs.rb'
-OBJC_SOURCES = FileList['Source/Tranquil/**/*.m*'].add('Source/Tranquil/**/*.c').add(PARSER_OUTPATH).add(STUB_OUTPATH)
-O_FILES = OBJC_SOURCES.pathmap(PATHMAP)
-PEG_SOURCE = FileList['Source/Tranquil/*.leg'].first
+STUB_OUTPATH   = 'Build/block_stubs.mm'
+STUB_SCRIPT    = 'Source/Tranquil/gen_stubs.rb'
+MSGSEND_SOURCE = 'Source/Tranquil/Runtime/msgsend.s'
+MSGSEND_OUT    = "Build/msgsend.o"
+OBJC_SOURCES   = FileList['Source/Tranquil/**/*.m*'].add('Source/Tranquil/**/*.c').add(PARSER_OUTPATH).add(STUB_OUTPATH)
+O_FILES        = OBJC_SOURCES.pathmap(PATHMAP)
+O_FILES << MSGSEND_OUT
+PEG_SOURCE     = FileList['Source/Tranquil/*.leg'].first
 
 
 def compile(file, flags=CXXFLAGS, cc=CXX)
@@ -58,6 +61,11 @@ end
 file STUB_OUTPATH => STUB_SCRIPT do |f|
     sh "ruby #{STUB_SCRIPT} > #{STUB_OUTPATH}"
 end
+
+file MSGSEND_OUT => MSGSEND_SOURCE do |f|
+    sh "#{CXX} #{MSGSEND_SOURCE} -c -o #{MSGSEND_OUT}"
+end
+
 
 OBJC_SOURCES.each { |src|
     file src.pathmap(PATHMAP) => src do |f|
