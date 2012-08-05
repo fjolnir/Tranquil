@@ -51,7 +51,7 @@ using namespace llvm;
 
     NSRegularExpressionOptions opts = 0;
     if(optRange.length > 0) {
-        NSString *optStr  = [_pattern substringWithRange:[match rangeAtIndex:2]];
+        NSString *optStr  = [_pattern substringWithRange:[match rangeAtIndex:3]];
         if([optStr rangeOfString:@"i"].location != NSNotFound)
             opts |= NSRegularExpressionCaseInsensitive;
         if([optStr rangeOfString:@"m"].location != NSNotFound)

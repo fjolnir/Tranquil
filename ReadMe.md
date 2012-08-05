@@ -26,7 +26,7 @@ But here're a couple of examples:
 
 ### Array iteration
 	alternatives = #["Objective-C", "Ruby", "Nu", "Perl", "Python"]
-	alternatives each: { alternative | "Tranquil is nicer than #{alternative}" print }
+	alternatives each: `alternative | "Tranquil is nicer than #{alternative}" print`
 	"Or so I hope at least." print
 
 ### Reduction
@@ -41,7 +41,12 @@ But here're a couple of examples:
 
 	fib = `n | n > 1 ? fib(n-1) + fib(n-2) : n`
 	fib(10) print
-	
+
+### Evaluate a regular expression
+
+	if /foo[a-z]+/i matches: "Foobar"
+		"Foobar starts with foo." print
+
 ### Talking to Cocoa
 
 	nsapp = NSApplication sharedApplication
