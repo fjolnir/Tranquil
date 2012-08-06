@@ -8,7 +8,8 @@
     #define _tqfloat float
 #endif
 
-static id (*numberWithDoubleImp)(id, SEL, double)  ;
+static id (*numberWithDoubleImp)(id, SEL, double);
+static id (*numberWithLongImp)(id, SEL, long);
 static id (*allocImp)(id,SEL,NSZone*);
 static id (*initImp)(id,SEL,double);
 static id (*autoreleaseImp)(id,SEL);
@@ -83,6 +84,8 @@ static __inline__ _tqfloat _TQNumberValue(TQNumber *ptr)
         _objc_insert_tagged_isa(kTagSlot, [TQTaggedNumber class]);
     }
     numberWithDoubleImp = (id (*)(id, SEL, double))method_getImplementation(class_getClassMethod(self, @selector(numberWithDouble:)));
+    numberWithLongImp   = (id (*)(id, SEL, long))method_getImplementation(class_getClassMethod(self, @selector(numberWithLong:)));
+
     allocImp = (typeof(allocImp))method_getImplementation(class_getClassMethod(self, @selector(allocWithZone:)));
     initImp = (typeof(initImp))class_getMethodImplementation(self, @selector(initWithDouble:));
     autoreleaseImp = (typeof(autoreleaseImp))class_getMethodImplementation(self, @selector(autorelease));
@@ -339,9 +342,46 @@ static __inline__ _tqfloat _TQNumberValue(TQNumber *ptr)
 - (TQNumber *)pow:(id)b
 {
     if(object_getClass(self) != object_getClass(b))
-        return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), pow(_value, [b doubleValue]));
-    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), pow(_value, _TQNumberValue(b) ));
+        return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), pow(_TQNumberValue(self), [b doubleValue]));
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), pow(_TQNumberValue(self), _TQNumberValue(b) ));
 }
+
+- (TQNumber *)and:(id)b
+{
+    if(object_getClass(self) != object_getClass(b))
+        return numberWithLongImp(object_getClass(self), @selector(numberWithLong:), (long)_TQNumberValue(self) & [b longValue]);
+    return numberWithLongImp(object_getClass(self), @selector(numberWithLong:), (long)_TQNumberValue(self) & (long)_TQNumberValue(b));
+}
+
+- (TQNumber *)or:(id)b
+{
+    if(object_getClass(self) != object_getClass(b))
+        return numberWithLongImp(object_getClass(self), @selector(numberWithLong:), (long)_TQNumberValue(self) | [b longValue]);
+    return numberWithLongImp(object_getClass(self), @selector(numberWithLong:), (long)_TQNumberValue(self) | (long)_TQNumberValue(b));
+}
+
+- (TQNumber *)xor:(id)b
+{
+    if(object_getClass(self) != object_getClass(b))
+        return numberWithLongImp(object_getClass(self), @selector(numberWithLong:), (long)_TQNumberValue(self) ^ [b longValue]);
+    return numberWithLongImp(object_getClass(self), @selector(numberWithLong:), (long)_TQNumberValue(self) ^ (long)_TQNumberValue(b));
+}
+
+- (TQNumber *)lshift:(id)b
+{
+    if(object_getClass(self) != object_getClass(b))
+        return numberWithLongImp(object_getClass(self), @selector(numberWithLong:), (long)_TQNumberValue(self) << [b longValue]);
+    return numberWithLongImp(object_getClass(self), @selector(numberWithLong:), (long)_TQNumberValue(self) << (long)_TQNumberValue(b));
+}
+
+- (TQNumber *)rshift:(id)b
+{
+    if(object_getClass(self) != object_getClass(b))
+        return numberWithLongImp(object_getClass(self), @selector(numberWithLong:), (long)_TQNumberValue(self) >> [b longValue]);
+    return numberWithLongImp(object_getClass(self), @selector(numberWithLong:), (long)_TQNumberValue(self) >> (long)_TQNumberValue(b));
+}
+
+
 
 - (TQNumber *)isGreater:(id)b
 {
