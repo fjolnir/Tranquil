@@ -247,7 +247,7 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
             std::vector<Type*> fields;
             while(*field != _C_STRUCT_E) {
                 fields.push_back([self llvmTypeFromEncoding:field inProgram:aProgram]);
-                field = NSGetSizeAndAlignment(field, NULL, NULL);
+                field = TQGetSizeAndAlignment(field, NULL, NULL);
             }
             return StructType::get(aProgram.llModule->getContext(), fields);
         }
@@ -411,8 +411,6 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
     BasicBlock *errBlock    = BasicBlock::Create(mod->getContext(), "invalidArgError", _function);
     IRBuilder<> *errBuilder = new IRBuilder<>(errBlock);
 
-
-
     // Load the block pointer argument (must do this before captures, which must be done before arguments in case a default value references a capture)
     llvm::Function::arg_iterator argumentIterator = _function->arg_begin();
     // Ignore the block pointer
@@ -420,8 +418,6 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
 
 
     // Load the arguments
-    Value *sentinel = entryBuilder->CreateLoad(mod->getOrInsertGlobal("TQSentinel", aProgram.llInt8PtrTy));
-
     NSString *argTypeEncoding;
     Type *argType;
     std::vector<Type *> argTypes;
@@ -438,7 +434,7 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
     if(![_retType hasPrefix:@"v"])
         resultAlloca = entryBuilder->CreateAlloca(retType);
 
-    NSGetSizeAndAlignment([_retType UTF8String], &typeSize, NULL);
+    TQGetSizeAndAlignment([_retType UTF8String], &typeSize, NULL);
     // Return doesn't fit in a register so we must pass an alloca before the function arguments
     // TODO: Make this cross platform
     BOOL returningOnStack = TQStructSizeRequiresStret(typeSize);
@@ -449,47 +445,52 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
     }
 
     NSMutableArray *byValArgIndices = [NSMutableArray array];
-    for(int i = 0; i < [_argTypes count]; ++i)
-    {
-        argTypeEncoding = [_argTypes objectAtIndex:i];
-        NSGetSizeAndAlignment([argTypeEncoding UTF8String], &typeSize, NULL);
-        argType = [TQBridgeSupport llvmTypeFromEncoding:[argTypeEncoding UTF8String] inProgram:aProgram];
-        // Larger structs should be passed as pointers to their location on the stack
-        if(TQStructSizeRequiresStret(typeSize)) {
-            argTypes.push_back(PointerType::getUnqual(argType));
-            [byValArgIndices addObject:[NSNumber numberWithInt:i+1]]; // Add one to jump over retval
-        } else
-            argTypes.push_back(argType);
+    if([_argTypes count] > 0) {
+        Value *sentinel = entryBuilder->CreateLoad(mod->getOrInsertGlobal("TQSentinel", aProgram.llInt8PtrTy));
+        for(int i = 0; i < [_argTypes count]; ++i)
+        {
+            argTypeEncoding = [_argTypes objectAtIndex:i];
+            TQGetSizeAndAlignment([argTypeEncoding UTF8String], &typeSize, NULL);
+            argType = [TQBridgeSupport llvmTypeFromEncoding:[argTypeEncoding UTF8String] inProgram:aProgram];
+            // Larger structs should be passed as pointers to their location on the stack
+            if(TQStructSizeRequiresStret(typeSize)) {
+                argTypes.push_back(PointerType::getUnqual(argType));
+                [byValArgIndices addObject:[NSNumber numberWithInt:i+1]]; // Add one to jump over retval
+            } else
+                argTypes.push_back(argType);
 
-        IRBuilder<> startBuilder(&_function->getEntryBlock(), _function->getEntryBlock().begin());
-        Value *unboxedArgAlloca = startBuilder.CreateAlloca(argType, NULL, [[NSString stringWithFormat:@"arg%d", i] UTF8String]);
+            IRBuilder<> startBuilder(&_function->getEntryBlock(), _function->getEntryBlock().begin());
+            Value *unboxedArgAlloca = startBuilder.CreateAlloca(argType, NULL, [[NSString stringWithFormat:@"arg%d", i] UTF8String]);
 
-        // If the value is a sentinel we've not been passed enough arguments => jump to error
-        Value *notPassedCond = currBuilder->CreateICmpEQ(argumentIterator, sentinel);
+            // If the value is a sentinel we've not been passed enough arguments => jump to error
+            Value *notPassedCond = currBuilder->CreateICmpEQ(argumentIterator, sentinel);
 
-        // Create the block for the next argument check (or set it to the call block)
-        if(i == [_argTypes count]-1) {
-            nextBlock = callBlock;
-            nextBuilder = callBuilder;
-        } else {
-            nextBlock = BasicBlock::Create(mod->getContext(), [[NSString stringWithFormat:@"check%d", i] UTF8String], _function, callBlock);
-            nextBuilder = new IRBuilder<>(nextBlock);
+            // Create the block for the next argument check (or set it to the call block)
+            if(i == [_argTypes count]-1) {
+                nextBlock = callBlock;
+                nextBuilder = callBuilder;
+            } else {
+                nextBlock = BasicBlock::Create(mod->getContext(), [[NSString stringWithFormat:@"check%d", i] UTF8String], _function, callBlock);
+                nextBuilder = new IRBuilder<>(nextBlock);
+            }
+
+            currBuilder->CreateCondBr(notPassedCond, errBlock, nextBlock);
+
+            nextBuilder->CreateCall3(aProgram.TQUnboxObject,
+                                     argumentIterator,
+                                     [aProgram getGlobalStringPtr:argTypeEncoding withBuilder:nextBuilder],
+                                     nextBuilder->CreateBitCast(unboxedArgAlloca, aProgram.llInt8PtrTy));
+            if(TQStructSizeRequiresStret(typeSize))
+                args.push_back(unboxedArgAlloca);
+            else
+                args.push_back(nextBuilder->CreateLoad(unboxedArgAlloca));
+
+            ++argumentIterator;
+            currBlock   = nextBlock;
+            currBuilder = nextBuilder;
         }
-
-        currBuilder->CreateCondBr(notPassedCond, errBlock, nextBlock);
-
-        nextBuilder->CreateCall3(aProgram.TQUnboxObject,
-                                 argumentIterator,
-                                 [aProgram getGlobalStringPtr:argTypeEncoding withBuilder:nextBuilder],
-                                 nextBuilder->CreateBitCast(unboxedArgAlloca, aProgram.llInt8PtrTy));
-        if(TQStructSizeRequiresStret(typeSize))
-            args.push_back(unboxedArgAlloca);
-        else
-            args.push_back(nextBuilder->CreateLoad(unboxedArgAlloca));
-
-        ++argumentIterator;
-        currBlock   = nextBlock;
-        currBuilder = nextBuilder;
+    } else {
+        currBuilder->CreateBr(callBlock);
     }
 
     // Populate the error block
