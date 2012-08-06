@@ -6,6 +6,7 @@
 #import <objc/message.h>
 #import "TQNumber.h"
 #import "NSObject+TQAdditions.h"
+#import "../BridgeSupport/bs.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -167,6 +168,28 @@ BOOL TQStructSizeRequiresStret(int size)
     #else
         return size > sizeof(long);
     #endif
+}
+
+const char *TQGetSizeAndAlignment(const char *typePtr, NSUInteger *sizep, NSUInteger *alignp)
+{
+    if(*typePtr == _MR_C_LAMBDA_B) {
+        if(sizep)
+            *sizep = sizeof(void*);
+        if(alignp)
+            *alignp = __alignof(id (*)()); // TODO: Make this handle cross compilation
+        unsigned depth = 0;
+        do {
+            if(*typePtr == _MR_C_LAMBDA_B)
+                ++depth;
+            else if(*typePtr == _MR_C_LAMBDA_E)
+                --depth;
+            if(depth == 0)
+                break;
+            ++typePtr;
+        } while(*typePtr != '\0');
+        return typePtr;
+    }
+    return NSGetSizeAndAlignment(typePtr, sizep, alignp);
 }
 
 NSInteger TQBlockGetNumberOfArguments(id block)

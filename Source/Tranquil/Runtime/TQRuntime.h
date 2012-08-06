@@ -78,6 +78,8 @@ id TQBoxValue(void *value, const char *type);
 // Returns whether or not a struct of a given size must be returned by inserting a pointer argument in the argument list
 // as opposed to returning it by value in a register
 BOOL TQStructSizeRequiresStret(int size);
+// NSGetSizeAndAlignment augmented to handle MacRuby lambda notation <@>
+const char *TQGetSizeAndAlignment(const char *typePtr, NSUInteger *sizep, NSUInteger *alignp);
 
 // Returns the number of arguments a tranquil block takes (If the object is not a block originating from tranquil, it returns -1)
 NSInteger TQBlockGetNumberOfArguments(id block);
