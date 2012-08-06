@@ -217,41 +217,7 @@ static inline size_t _accessorNameLen(const char *accessorNameLoc)
 
 id TQValueForKey(id obj, const char *key)
 {
-    if(!obj)
-        return nil;
-
-    Class kls = object_getClass(obj);
-    // Check if there already exists a boxed getter
-    SEL tqGetterSel = NSSelectorFromString([NSString stringWithFormat:@"__tq_getter_%s", key]);
-    if(class_respondsToSelector(kls, tqGetterSel))
-        return objc_msgSend(obj, tqGetterSel);
-
-    // Otherwise we create one
-    const int maxTypeLen = 128;
-    char valType[maxTypeLen];
-    SEL getterSel = sel_registerName(key);
-    IMP imp;
-    if(class_respondsToSelector(kls, getterSel)) {
-        Method method = class_getInstanceMethod(kls, getterSel);
-        method_getReturnType(method, valType, maxTypeLen);
-
-        imp = class_getMethodImplementation(kls, getterSel);
-        if(*valType != _C_ID) {
-            // We make the selector arg masquerade as an object so that we don't attempt to unbox it
-            NSString *accessorType = [NSString stringWithFormat:@"<^%s@@>", valType];
-            id (^boxedGetter)(id,SEL) = (id)[TQBoxedObject box:(void*)imp withType:[accessorType UTF8String]];
-            imp = imp_implementationWithBlock(^(id self) {
-                return boxedGetter(self, getterSel);
-            });
-        }
-    } else {
-        NSMapTable *ivarTable = _TQGetDynamicIvarTable(obj);
-        imp = imp_implementationWithBlock(^(id self) {
-            return (id)NSMapGet(ivarTable, key);
-        });
-    }
-    class_addMethod([obj class], tqGetterSel, imp, "@:");
-    return objc_msgSend(obj, tqGetterSel);
+    return tq_msgSend(obj, sel_registerName(key));
 }
 
 void TQSetValueForKey(id obj, char *key, id value)
@@ -261,50 +227,9 @@ void TQSetValueForKey(id obj, char *key, id value)
     if(TQObjectIsStackBlock(value))
         value = [[value copy] autorelease];
 
-    Class kls = object_getClass(obj);
-    // Check if there already exists a boxed getter
-    SEL tqSetterSel = NSSelectorFromString([NSString stringWithFormat:@"__tq_setter_%s:", key]);
-    if(class_respondsToSelector(kls, tqSetterSel)) {
-        objc_msgSend(obj, tqSetterSel, value);
-        return;
-    }
-
-    // Otherwise we create one
-    const int maxTypeLen = 128;
-    char valType[maxTypeLen];
     NSString *selStr = [NSString stringWithFormat:@"set%@:", [[NSString stringWithUTF8String:key] stringByCapitalizingFirstLetter]];
     SEL setterSel = NSSelectorFromString(selStr);
-    IMP imp;
-    if(class_respondsToSelector(kls, setterSel)) {
-        Method method = class_getInstanceMethod(kls, setterSel);
-        method_getArgumentType(method, 2, valType, maxTypeLen);
-
-        IMP realImp = class_getMethodImplementation(kls, setterSel);
-        if(*valType == _C_ID) {
-            imp = imp_implementationWithBlock(^(id self, id value) {
-                realImp(self, setterSel, value);
-                return nil;
-            });
-        } else {
-            NSString *accessorType = [NSString stringWithFormat:@"<^v@@%s>", valType];
-            id (^boxedSetter)(id,SEL,id) = (id)[TQBoxedObject box:(void*)realImp withType:[accessorType UTF8String]];
-            imp = imp_implementationWithBlock(^(id self, id value) {
-                boxedSetter(self, setterSel, value);
-                return nil;
-            });
-        }
-    } else {
-        imp = imp_implementationWithBlock(^(id self, id value) {
-            NSMapTable *ivarTable = _TQGetDynamicIvarTable(self);
-            if(value)
-                NSMapInsert(ivarTable, key, value);
-            else
-                NSMapRemove(ivarTable, key);
-            return nil;
-        });
-    }
-    class_addMethod([obj class], tqSetterSel, imp, "@:@");
-    objc_msgSend(obj, tqSetterSel, value);
+    tq_msgSend(obj, setterSel, value);
 }
 
 #pragma mark -
