@@ -125,22 +125,24 @@ BOOL TQMethodTypeRequiresBoxing(const char *aEncoding)
 
 void _TQCacheSelector(id obj, SEL sel)
 {
-    Class kls = object_getClass(obj);
-    void *cacheKey = (void*)( (uintptr_t)kls ^ (uintptr_t)sel);
+    @synchronized((NSDictionary *)_TQSelectorCache) {
+        Class kls = object_getClass(obj);
+        void *cacheKey = (void*)((uintptr_t)kls ^ (uintptr_t)sel);
 
-    Method method = class_getInstanceMethod(kls, sel);
-    // Methods that do not have a registered implementation are assumed to take&return only objects
-    uintptr_t unboxedVal = 0x1L;
-    if(!method) {
-        CFDictionarySetValue(_TQSelectorCache, cacheKey, (void*)0x1);
-        return;
+        Method method = class_getInstanceMethod(kls, sel);
+        // Methods that do not have a registered implementation are assumed to take&return only objects
+        uintptr_t unboxedVal = 0x1L;
+        if(!method) {
+            CFDictionarySetValue(_TQSelectorCache, cacheKey, (void*)0x1);
+            return;
+        }
+
+        const char *enc = method_getTypeEncoding(method);
+        if(TQMethodTypeRequiresBoxing(enc))
+            CFDictionarySetValue(_TQSelectorCache, cacheKey, (void*)method);
+        else
+            CFDictionarySetValue(_TQSelectorCache, cacheKey, (void*)0x1);
     }
-
-    const char *enc = method_getTypeEncoding(method);
-    if(TQMethodTypeRequiresBoxing(enc))
-        CFDictionarySetValue(_TQSelectorCache, cacheKey, (void*)method);
-    else
-        CFDictionarySetValue(_TQSelectorCache, cacheKey, (void*)0x1);
  }
 
 void TQUnboxObject(id object, const char *type, void *buffer)
