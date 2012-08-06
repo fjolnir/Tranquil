@@ -36,7 +36,7 @@ LDFLAGS = [
     '-lxml2 -lffi',
 ].join(' ')
 
-LIBS = ['-framework Foundation'].join(' ')
+LIBS = ['-framework Foundation', '-framework GLUT'].join(' ')
 
 PATHMAP = "build/%n.o"
 
