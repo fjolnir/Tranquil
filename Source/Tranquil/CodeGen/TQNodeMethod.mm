@@ -123,7 +123,6 @@ using namespace llvm;
     if(methodInfo) {
         [_argTypes addObject:@"@"]; // __blk
         [_argTypes addObject:@"@"]; // self
-        assert(methodInfo.argTypes.count+2 == self.arguments.count);
         [_argTypes addObjectsFromArray:methodInfo.argTypes];
         [methodSignature appendString:[methodInfo.argTypes componentsJoinedByString:@""]];
     } else {
