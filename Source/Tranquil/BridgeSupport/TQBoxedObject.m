@@ -83,13 +83,14 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     TQInitializeRuntime();
 
     Class TQNumberClass = [TQNumber class];
+    Class TQTaggedNumberClass = NSClassFromString(@"TQTaggedNumber");
     Class NSNumberClass = [NSNumber class];
 
     IMP imp;
     // []
     imp = imp_implementationWithBlock(^(id a, id key) {
         Class keyKls = object_getClass(key);
-        if(keyKls == TQNumberClass || keyKls == NSNumberClass)
+        if(keyKls == TQTaggedNumberClass || keyKls == TQNumberClass  || keyKls == NSNumberClass)
             return [a objectAtIndexedSubscript:[(TQNumber *)key intValue]];
         else
             return [a objectForKeyedSubscript:key];
