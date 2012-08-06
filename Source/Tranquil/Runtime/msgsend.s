@@ -65,9 +65,10 @@ _tq_msgSend:
 
     call _object_getClass
     xor  %rax, %a2 // klass xor selector -> second param slot
+    // Load the global CFDict _TQSelectorCache to first param slot
     mov  __TQSelectorCache@GOTPCREL(%rip), %a1
     mov  (%a1), %a1
-    call _NSMapGet
+    call _CFDictionaryGetValue
 
     cmp $1, %rax  // Value 0x1 means it's a safe method and we can simply objc_msgSend
     je  unboxedCall
@@ -79,6 +80,7 @@ _tq_msgSend:
     SaveRegisters
     call __TQCacheSelector
     RestoreRegisters
+    // Try again
     jmp _tq_msgSend
 
 boxedCall:

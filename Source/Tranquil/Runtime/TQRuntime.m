@@ -14,9 +14,9 @@ extern "C" {
 id TQSentinel = @"3d2c9ac0bf3911e1afa70800200c9a66aaaaaaaaa";
 TQValidObject *TQValid = nil;
 
-// A Table keyed with `Class xor Selector` with values either being 0x1 (No boxing required for selector)
+// A dictionary keyed with `Class xor Selector` with values either being 0x1 (No boxing required for selector)
 // or a pointer the Method object of the method to be boxed. This is only used by tq_msgSend and tq_boxedMsgSend
-NSMapTable *_TQSelectorCache = nil;
+CFMutableDictionaryRef _TQSelectorCache = NULL;
 
 static const NSString *_TQDynamicIvarTableKey = @"TQDynamicIvarTableKey";
 
@@ -132,15 +132,15 @@ void _TQCacheSelector(id obj, SEL sel)
     // Methods that do not have a registered implementation are assumed to take&return only objects
     uintptr_t unboxedVal = 0x1L;
     if(!method) {
-        NSMapInsert(_TQSelectorCache, cacheKey, (void*)0x1);
+        CFDictionarySetValue(_TQSelectorCache, cacheKey, (void*)0x1);
         return;
     }
 
     const char *enc = method_getTypeEncoding(method);
     if(TQMethodTypeRequiresBoxing(enc))
-        NSMapInsert(_TQSelectorCache, cacheKey, (void*)method);
+        CFDictionarySetValue(_TQSelectorCache, cacheKey, (void*)method);
     else
-        NSMapInsert(_TQSelectorCache, cacheKey, (void*)0x1);
+        CFDictionarySetValue(_TQSelectorCache, cacheKey, (void*)0x1);
  }
 
 void TQUnboxObject(id object, const char *type, void *buffer)
@@ -386,10 +386,7 @@ void TQInitializeRuntime()
     if(_TQSelectorCache)
         return;
 
-    NSMapTableKeyCallBacks   keyCallbacks = { NULL,  NULL, NULL, NULL, NULL, NULL };
-    NSMapTableValueCallBacks valCallbacks = { NULL,  NULL, NULL };
-
-    _TQSelectorCache = NSCreateMapTable(keyCallbacks, valCallbacks, 100);
+    _TQSelectorCache = CFDictionaryCreateMutable(NULL, 100, NULL, NULL);
 
     TQValid = [TQValidObject sharedInstance];
 
