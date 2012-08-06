@@ -58,6 +58,7 @@
     if(!(self = [super init]))
         return nil;
     _encoding = aEncoding;
+    _referencedTypes = nil;
 
     if(aoNextType) {
         const char *next = NSGetSizeAndAlignment(_encoding, NULL, NULL);
