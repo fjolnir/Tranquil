@@ -8,6 +8,7 @@
 }
 @property(readonly) const char *encoding;
 @property(readonly) ffi_type *ffiType;
+
 + (ffi_type *)scalarTypeToFFIType:(const char *)aType;
 + (TQFFIType *)typeWithEncoding:(const char *)aEncoding;
 + (TQFFIType *)typeWithEncoding:(const char *)aEncoding nextType:(const char **)aoNextType;

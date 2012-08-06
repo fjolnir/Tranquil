@@ -1,7 +1,6 @@
 captureMePlease = "hey I was defined in the root block!"
-a = { arg |
-    ^(`arg stringByAppendingString:captureMePlease`())
-}
+a = { arg | ^`"#{arg} — #{captureMePlease}"`() } \ Excuse this madness, it's not representative of code that should actually be written
+
 myBlock = a
 numAsStr = "Three Two One"
 myBlock     print
