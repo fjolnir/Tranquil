@@ -240,7 +240,16 @@ static inline size_t _accessorNameLen(const char *accessorNameLoc)
 
 id TQValueForKey(id obj, const char *key)
 {
-    return tq_msgSend(obj, sel_registerName(key));
+    if(!obj)
+        return nil;
+
+    Class kls = object_getClass(obj);
+    SEL selector = sel_registerName(key);
+    if(class_respondsToSelector(kls, selector))
+        return tq_msgSend(obj, selector);
+
+    NSMapTable *ivarTable = _TQGetDynamicIvarTable(obj);
+    return (id)NSMapGet(ivarTable, key);
 }
 
 void TQSetValueForKey(id obj, char *key, id value)
@@ -250,9 +259,17 @@ void TQSetValueForKey(id obj, char *key, id value)
     if(TQObjectIsStackBlock(value))
         value = [[value copy] autorelease];
 
+    Class kls = object_getClass(obj);
     NSString *selStr = [NSString stringWithFormat:@"set%@:", [[NSString stringWithUTF8String:key] stringByCapitalizingFirstLetter]];
     SEL setterSel = NSSelectorFromString(selStr);
-    tq_msgSend(obj, setterSel, value);
+    if(class_respondsToSelector(kls, setterSel))
+        tq_msgSend(obj, setterSel, value);
+
+    NSMapTable *ivarTable = _TQGetDynamicIvarTable(obj);
+    if(value)
+        NSMapInsert(ivarTable, key, value);
+    else
+        NSMapRemove(ivarTable, key);
 }
 
 #pragma mark -
