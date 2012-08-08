@@ -1,4 +1,4 @@
-GlutInit(TQPointer to:0 withType:"i", nil)
+GlutInit(0, nil)
 
 GlutInitDisplayMode(GLUT_RGBA bitOr: GLUT_DOUBLE)
 GlutInitWindowSize(400, 300)

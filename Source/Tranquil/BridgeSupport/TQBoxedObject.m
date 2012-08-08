@@ -225,8 +225,9 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
             if(!aValue)
                 *(void **)aDest = NULL;
             else if(![aValue isKindOfClass:[TQPointer class]]) {
-                [NSException raise:@"Invalid value"
-                            format:@"You tried to unbox %@ to a pointer, but it can not.", aValue];
+                TQPointer *ptr = [[TQPointer alloc] initWithType:aType+1 count:1];
+                [ptr setObject:aValue atIndexedSubscript:0];
+                *(void **)aDest = ptr->_addr;
             } else
                 *(void **)aDest = ((TQPointer *)aValue)->_addr;
             break;

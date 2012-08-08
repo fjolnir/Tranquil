@@ -31,6 +31,7 @@ NSString * const TQTypeString    = @"*";
 + (TQPointer *)withType:(NSString *)aType count:(NSNumber *)aCount;
 + (TQPointer *)withType:(NSString *)aType;
 
+- (id)initWithType:(const char *)aType count:(NSUInteger)aCount;
 - (id)initWithType:(const char *)aType address:(void *)aAddr count:(NSUInteger)aCount;
 
 - (id)objectAtIndexedSubscript:(NSUInteger)aIdx;
