@@ -109,7 +109,7 @@ using namespace llvm;
         // TODO: only use boxed msg send when there's an identical selector known take non-object arguments (from BridgeSupport)
         ret = aBlock.builder->CreateCall(aProgram.tq_msgSend, aArgs); //objc_msgSend, aArgs); 
         if(needsAutorelease)
-            ret = aBlock.builder->CreateCall(aProgram.TQAutoreleaseObject, ret);
+            ret = aBlock.builder->CreateCall(aProgram.objc_autoreleaseReturnValue, ret);
     }
     return ret;
 }

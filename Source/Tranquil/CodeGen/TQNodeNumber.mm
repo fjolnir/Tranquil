@@ -53,7 +53,7 @@ using namespace llvm;
         ConstantFP *doubleValue = ConstantFP::get(aProgram.llModule->getContext(), APFloat([_value doubleValue]));
 
         Value *result = rootBuilder.CreateCall3(aProgram.objc_msgSend, klass, selector, doubleValue);
-        result = rootBuilder.CreateCall(aProgram.TQRetainObject, result);
+        result = rootBuilder.CreateCall(aProgram.objc_retain, result);
 
         num = new GlobalVariable(*mod, aProgram.llInt8PtrTy, false, GlobalVariable::InternalLinkage,
                                  ConstantPointerNull::get(aProgram.llInt8PtrTy), [globalName UTF8String]);

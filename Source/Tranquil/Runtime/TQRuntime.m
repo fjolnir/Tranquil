@@ -69,27 +69,6 @@ extern id _objc_msgSend_hack3(id, SEL, id, id)   asm("_objc_msgSend");
 extern id _objc_msgSend_hack2i(id, SEL, int)     asm("_objc_msgSend");
 extern id _objc_msgSend_hack3i(id, SEL, id, int) asm("_objc_msgSend");
 
-
-id TQRetainObject(id obj)
-{
-    return _objc_msgSend_hack(obj, @selector(retain));
-}
-
-void TQReleaseObject(id obj)
-{
-    _objc_msgSend_hack(obj, @selector(release));
-}
-
-id TQAutoreleaseObject(id obj)
-{
-    return _objc_msgSend_hack(obj, @selector(autorelease));
-}
-
-id TQRetainAutoreleaseObject(id obj)
-{
-    return TQAutoreleaseObject(TQRetainObject(obj));
-}
-
 #pragma mark -
 Class TQGetOrCreateClass(const char *name, const char *superName)
 {
@@ -284,7 +263,7 @@ id TQPrepareObjectForReturn(id obj)
 {
     if(TQObjectIsStackBlock(obj))
         return _objc_msgSend_hack(obj, @selector(copy));
-    return TQRetainObject(obj);
+    return objc_retain(obj);
 }
 
 NSPointerArray *TQVaargsToArray(va_list *items)
@@ -412,7 +391,7 @@ void TQInitializeRuntime()
     class_addMethod([NSMapTable class], TQGetterOpSel, imp, "@@:@");
 
     imp = imp_implementationWithBlock(^(id a, TQNumber *idx)   {
-        return _objc_msgSend_hack2i(a, @selector(objectAtIndexedSubscript:), (int)[idx value]);
+        return _objc_msgSend_hack2i(a, @selector(objectAtIndexedSubscript:), [idx unsignedIntegerValue]);
     });
     class_addMethod([NSArray class], TQGetterOpSel, imp, "@@:@");
     class_addMethod([NSPointerArray class], TQGetterOpSel, imp, "@@:@");
@@ -425,7 +404,7 @@ void TQInitializeRuntime()
     class_addMethod([NSMapTable class], TQSetterOpSel, imp, "@@:@@");
 
     imp = imp_implementationWithBlock(^(id a, TQNumber *idx, id val)   {
-        return _objc_msgSend_hack3i(a, @selector(setObject:atIndexedSubscript:), val, (int)[idx value]);
+        return _objc_msgSend_hack3i(a, @selector(setObject:atIndexedSubscript:), val, [idx unsignedIntegerValue]);
     });
     class_addMethod([NSMutableArray class], TQSetterOpSel, imp, "@@:@");
     class_addMethod([NSPointerArray class], TQSetterOpSel, imp, "@@:@");

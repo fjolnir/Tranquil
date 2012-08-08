@@ -51,12 +51,6 @@ struct TQBlockLiteral {
     // imported variables
 };
 
-
-id TQRetainObject(id obj);
-void TQReleaseObject(id obj);
-id TQAutoreleaseObject(id obj);
-id TQRetainAutoreleaseObject(id obj);
-
 // These implement support for dynamic instance variables (But use existing properties if available)
 void TQSetValueForKey(id obj, char *key, id value);
 id TQValueForKey(id obj, const char *key);
@@ -122,6 +116,26 @@ extern SEL TQRegexWithPatSel;
 extern SEL TQMoveToHeapSel;
 
 extern Class TQNumberClass;
+
+// ARC
+id objc_retain(id obj) __asm__("_objc_retain");
+void objc_release(id obj) __asm__("_objc_release");
+id objc_autorelease(id obj) __asm__("_objc_autorelease");
+// wraps objc_autorelease(obj) in a useful way when used with return values
+id objc_autoreleaseReturnValue(id obj);
+// wraps objc_autorelease(objc_retain(obj)) in a useful way when used with return values
+id objc_retainAutoreleaseReturnValue(id obj);
+// called ONLY by ARR by callers to undo the autorelease (if possible), otherwise objc_retain
+id objc_retainAutoreleasedReturnValue(id obj);
+id objc_retainAutorelease(id obj);
+
+void objc_storeStrong(id *location, id obj);
+
+id objc_loadWeakRetained(id *location);
+id  objc_initWeak(id *addr, id val);
+void objc_destroyWeak(id *addr);
+void objc_copyWeak(id *to, id *from);
+void objc_moveWeak(id *to, id *from);
 
 #ifdef __cplusplus
 }

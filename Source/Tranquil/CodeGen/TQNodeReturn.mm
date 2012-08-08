@@ -46,7 +46,7 @@ using namespace llvm;
     retVal = [_value generateCodeInProgram:aProgram block:aBlock error:aoErr];
     retVal = aBlock.builder->CreateCall(aProgram.TQPrepareObjectForReturn, retVal);
     aBlock.builder->CreateCall(aProgram.objc_autoreleasePoolPop, aBlock.autoreleasePool);
-    retVal = aBlock.builder->CreateCall(aProgram.TQAutoreleaseObject, retVal);
+    retVal = aBlock.builder->CreateCall(aProgram.objc_autoreleaseReturnValue, retVal);
     return aBlock.builder->CreateRet(retVal);
 }
 @end

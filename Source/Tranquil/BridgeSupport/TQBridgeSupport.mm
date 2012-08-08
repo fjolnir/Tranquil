@@ -523,8 +523,7 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
                                                 callBuilder->CreateBitCast(resultAlloca, int8PtrTy),
                                                 [aProgram getGlobalStringPtr:_retType withBuilder:callBuilder]);
         // Retain/autorelease to force a TQBoxedObject move to the heap in case the returned value is stored in stack memory
-        boxed = callBuilder->CreateCall(aProgram.TQRetainObject, boxed);
-        boxed = callBuilder->CreateCall(aProgram.TQAutoreleaseObject, boxed);
+        boxed = callBuilder->CreateCall(aProgram.objc_retainAutoreleaseReturnValue, boxed);
         callBuilder->CreateRet(boxed);
     }
 

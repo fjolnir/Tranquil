@@ -321,7 +321,7 @@ using namespace llvm;
         valueToRetain = builder->CreateBitCast(valueToRetain, captureStructTy);
         valueToRetain = builder->CreateLoad(builder->CreateStructGEP(valueToRetain, 4)); // forwarding->capture
 
-        builder->CreateCall(aProgram.TQRetainObject, valueToRetain);
+        builder->CreateCall(aProgram.objc_retain, valueToRetain);
         builder->CreateCall3(aProgram._Block_object_assign, destAddr, varToCopy, flags);
     }
 
@@ -368,7 +368,7 @@ using namespace llvm;
         valueToRelease = builder->CreateBitCast(valueToRelease, captureStructTy);
         valueToRelease = builder->CreateLoad(builder->CreateStructGEP(valueToRelease, 4)); // forwarding->capture
 
-        builder->CreateCall(aProgram.TQReleaseObject, valueToRelease);
+        builder->CreateCall(aProgram.objc_release, valueToRelease);
         builder->CreateCall2(aProgram._Block_object_dispose, varToDisposeOf, flags);
     }
 

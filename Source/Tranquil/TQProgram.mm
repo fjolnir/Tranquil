@@ -53,16 +53,17 @@ using namespace llvm;
     objc_storeWeak=_func_objc_storeWeak, objc_loadWeak=_func_objc_loadWeak, objc_allocateClassPair=_func_objc_allocateClassPair,
     objc_registerClassPair=_func_objc_registerClassPair, objc_destroyWeak=_func_objc_destroyWeak,
     class_replaceMethod=_func_class_replaceMethod, sel_registerName=_func_sel_registerName,
-    objc_getClass=_func_objc_getClass, TQRetainObject=_func_TQRetainObject, TQReleaseObject=_func_TQReleaseObject,
+    objc_getClass=_func_objc_getClass, objc_retain=_func_objc_retain, objc_release=_func_objc_release,
     _Block_copy=_func__Block_copy, _Block_object_assign=_func__Block_object_assign,
     _Block_object_dispose=_func__Block_object_dispose, imp_implementationWithBlock=_func_imp_implementationWithBlock,
     object_getClass=_func_object_getClass, TQPrepareObjectForReturn=_func_TQPrepareObjectForReturn,
-    TQAutoreleaseObject=_func_TQAutoreleaseObject, objc_autoreleasePoolPush=_func_objc_autoreleasePoolPush,
+    objc_autorelease=_func_objc_autorelease, objc_autoreleasePoolPush=_func_objc_autoreleasePoolPush,
     objc_autoreleasePoolPop=_func_objc_autoreleasePoolPop, TQSetValueForKey=_func_TQSetValueForKey,
     TQValueForKey=_func_TQValueForKey, TQGetOrCreateClass=_func_TQGetOrCreateClass,
     TQObjectsAreEqual=_func_TQObjectsAreEqual, TQObjectsAreNotEqual=_func_TQObjectsAreNotEqual, TQObjectGetSuperClass=_func_TQObjectGetSuperClass,
     TQVaargsToArray=_func_TQVaargsToArray, TQUnboxObject=_func_TQUnboxObject,
-    TQBoxValue=_func_TQBoxValue, tq_msgSend=_func_tq_msgSend;
+    TQBoxValue=_func_TQBoxValue, tq_msgSend=_func_tq_msgSend, objc_retainAutoreleaseReturnValue=_func_objc_retainAutoreleaseReturnValue,
+    objc_autoreleaseReturnValue=_func_objc_autoreleaseReturnValue;
 
 + (TQProgram *)programWithName:(NSString *)aName
 {
@@ -217,9 +218,11 @@ using namespace llvm;
     //DEF_EXTERNAL_FUN(objc_storeWeak, ft_i8Ptr__i8PtrPtr_i8Ptr)
     //DEF_EXTERNAL_FUN(objc_loadWeak, ft_i8Ptr__i8PtrPtr)
     //DEF_EXTERNAL_FUN(objc_destroyWeak, ft_void__i8PtrPtr)
-    DEF_EXTERNAL_FUN(TQRetainObject, ft_i8Ptr__i8Ptr)
-    DEF_EXTERNAL_FUN(TQReleaseObject, ft_void__i8Ptr)
-    DEF_EXTERNAL_FUN(TQAutoreleaseObject, ft_i8Ptr__i8Ptr);
+    DEF_EXTERNAL_FUN(objc_retain, ft_i8Ptr__i8Ptr)
+    DEF_EXTERNAL_FUN(objc_retainAutoreleaseReturnValue, ft_i8Ptr__i8Ptr)
+    DEF_EXTERNAL_FUN(objc_autoreleaseReturnValue, ft_i8Ptr__i8Ptr)
+    DEF_EXTERNAL_FUN(objc_release, ft_void__i8Ptr)
+    DEF_EXTERNAL_FUN(objc_autorelease, ft_i8Ptr__i8Ptr);
     DEF_EXTERNAL_FUN(sel_registerName, ft_i8Ptr__i8Ptr)
     DEF_EXTERNAL_FUN(objc_getClass, ft_i8Ptr__i8Ptr)
     DEF_EXTERNAL_FUN(_Block_copy, ft_i8Ptr__i8Ptr);
@@ -305,8 +308,6 @@ using namespace llvm;
 
     //engine->DisableLazyCompilation();
     engine->addGlobalMapping(_func_TQPrepareObjectForReturn, (void*)&TQPrepareObjectForReturn);
-    engine->addGlobalMapping(_func_TQRetainObject, (void*)&TQRetainObject);
-    engine->addGlobalMapping(_func_TQAutoreleaseObject, (void*)&TQAutoreleaseObject);
     engine->addGlobalMapping(_func_TQSetValueForKey, (void*)&TQSetValueForKey);
     engine->addGlobalMapping(_func_TQValueForKey, (void*)&TQValueForKey);
     engine->addGlobalMapping(_func_TQGetOrCreateClass, (void*)&TQGetOrCreateClass);
@@ -314,7 +315,6 @@ using namespace llvm;
     engine->addGlobalMapping(_func_TQObjectsAreNotEqual, (void*)&TQObjectsAreNotEqual);
     engine->addGlobalMapping(_func_TQObjectGetSuperClass, (void*)&TQObjectGetSuperClass);
     engine->addGlobalMapping(_func_TQVaargsToArray, (void*)&TQVaargsToArray);
-    engine->addGlobalMapping(_func_TQReleaseObject, (void*)&TQReleaseObject);
     engine->addGlobalMapping(_func_TQUnboxObject, (void*)&TQUnboxObject);
     engine->addGlobalMapping(_func_TQBoxValue, (void*)&TQBoxValue);
 
