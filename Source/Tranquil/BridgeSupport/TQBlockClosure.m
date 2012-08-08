@@ -52,7 +52,6 @@ static void _closureFunction(ffi_cif *closureCif, void *ret, void *args[], TQBlo
 }
 @end
 
-// The opposite of the above
 void _closureFunction(ffi_cif *closureCif, void *ret, void *args[], TQBlockClosure *closureObj)
 {
     // Construct an ffi call to the block that forwards the arguments passed to the closure
