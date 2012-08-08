@@ -63,7 +63,7 @@ using namespace llvm;
     TQObjectsAreEqual=_func_TQObjectsAreEqual, TQObjectsAreNotEqual=_func_TQObjectsAreNotEqual, TQObjectGetSuperClass=_func_TQObjectGetSuperClass,
     TQVaargsToArray=_func_TQVaargsToArray, TQUnboxObject=_func_TQUnboxObject,
     TQBoxValue=_func_TQBoxValue, tq_msgSend=_func_tq_msgSend, objc_retainAutoreleaseReturnValue=_func_objc_retainAutoreleaseReturnValue,
-    objc_autoreleaseReturnValue=_func_objc_autoreleaseReturnValue;
+    objc_autoreleaseReturnValue=_func_objc_autoreleaseReturnValue, objc_storeStrong=_func_objc_storeStrong;
 
 + (TQProgram *)programWithName:(NSString *)aName
 {
@@ -208,22 +208,22 @@ using namespace llvm;
     std::vector<Type*> args_empty;
     FunctionType *ft_i8Ptr__void = FunctionType::get(_llInt8PtrTy, args_empty, false);
 
-    DEF_EXTERNAL_FUN(objc_allocateClassPair, ft_i8Ptr__i8Ptr_i8Ptr_sizeT)
-    DEF_EXTERNAL_FUN(objc_registerClassPair, ft_void__i8Ptr)
-    DEF_EXTERNAL_FUN(class_replaceMethod, ft_i8__i8Ptr_i8Ptr_i8Ptr_i8Ptr)
-    DEF_EXTERNAL_FUN(imp_implementationWithBlock, ft_i8Ptr__i8Ptr)
-    DEF_EXTERNAL_FUN(object_getClass, ft_i8Ptr__i8Ptr)
-    DEF_EXTERNAL_FUN(objc_msgSend, ft_i8ptr__i8ptr_i8ptr_variadic)
-    DEF_EXTERNAL_FUN(objc_msgSendSuper, ft_i8ptr__i8ptr_i8ptr_variadic)
-    //DEF_EXTERNAL_FUN(objc_storeWeak, ft_i8Ptr__i8PtrPtr_i8Ptr)
-    //DEF_EXTERNAL_FUN(objc_loadWeak, ft_i8Ptr__i8PtrPtr)
-    //DEF_EXTERNAL_FUN(objc_destroyWeak, ft_void__i8PtrPtr)
-    DEF_EXTERNAL_FUN(objc_retain, ft_i8Ptr__i8Ptr)
-    DEF_EXTERNAL_FUN(objc_retainAutoreleaseReturnValue, ft_i8Ptr__i8Ptr)
-    DEF_EXTERNAL_FUN(objc_autoreleaseReturnValue, ft_i8Ptr__i8Ptr)
-    DEF_EXTERNAL_FUN(objc_release, ft_void__i8Ptr)
+    DEF_EXTERNAL_FUN(objc_allocateClassPair, ft_i8Ptr__i8Ptr_i8Ptr_sizeT);
+    DEF_EXTERNAL_FUN(objc_registerClassPair, ft_void__i8Ptr);
+    DEF_EXTERNAL_FUN(class_replaceMethod, ft_i8__i8Ptr_i8Ptr_i8Ptr_i8Ptr);
+    DEF_EXTERNAL_FUN(imp_implementationWithBlock, ft_i8Ptr__i8Ptr);
+    DEF_EXTERNAL_FUN(object_getClass, ft_i8Ptr__i8Ptr);
+    DEF_EXTERNAL_FUN(objc_msgSend, ft_i8ptr__i8ptr_i8ptr_variadic);
+    DEF_EXTERNAL_FUN(objc_msgSendSuper, ft_i8ptr__i8ptr_i8ptr_variadic);
+    //DEF_EXTERNAL_FUN(objc_storeWeak, ft_i8Ptr__i8PtrPtr_i8Ptr);
+    //DEF_EXTERNAL_FUN(objc_loadWeak, ft_i8Ptr__i8PtrPtr);
+    //DEF_EXTERNAL_FUN(objc_destroyWeak, ft_void__i8PtrPtr);
+    DEF_EXTERNAL_FUN(objc_retain, ft_i8Ptr__i8Ptr);
+    DEF_EXTERNAL_FUN(objc_retainAutoreleaseReturnValue, ft_i8Ptr__i8Ptr);
+    DEF_EXTERNAL_FUN(objc_autoreleaseReturnValue, ft_i8Ptr__i8Ptr);
+    DEF_EXTERNAL_FUN(objc_release, ft_void__i8Ptr);
     DEF_EXTERNAL_FUN(objc_autorelease, ft_i8Ptr__i8Ptr);
-    DEF_EXTERNAL_FUN(sel_registerName, ft_i8Ptr__i8Ptr)
+    DEF_EXTERNAL_FUN(sel_registerName, ft_i8Ptr__i8Ptr);
     DEF_EXTERNAL_FUN(objc_getClass, ft_i8Ptr__i8Ptr)
     DEF_EXTERNAL_FUN(_Block_copy, ft_i8Ptr__i8Ptr);
     DEF_EXTERNAL_FUN(_Block_object_assign, ft_void__i8Ptr_i8Ptr_int);
@@ -231,6 +231,7 @@ using namespace llvm;
     DEF_EXTERNAL_FUN(TQPrepareObjectForReturn, ft_i8Ptr__i8Ptr);
     DEF_EXTERNAL_FUN(objc_autoreleasePoolPush, ft_i8Ptr__void);
     DEF_EXTERNAL_FUN(objc_autoreleasePoolPop, ft_void__i8Ptr);
+    DEF_EXTERNAL_FUN(objc_storeStrong, ft_i8Ptr__i8PtrPtr_i8Ptr);
     DEF_EXTERNAL_FUN(TQSetValueForKey, ft_void__i8Ptr_i8Ptr_i8Ptr);
     DEF_EXTERNAL_FUN(TQValueForKey, ft_i8Ptr__i8Ptr_i8Ptr);
     DEF_EXTERNAL_FUN(TQGetOrCreateClass, ft_i8Ptr__i8Ptr_i8Ptr);

@@ -23,6 +23,14 @@ GlutKeyboardFunc({ key, x, y |
    "#{key} pushed (Mouse at #{x}, #{y})" print
 })
 
+lastPos = #[0,0]
+GlutMotionFunc({ x, y |
+    delta = #[x - lastPos[0], y - lastPos[1]]
+    GlRotatef(-delta[0], 0, 1, 0)
+    GlRotatef(-delta[1], 1, 0, 0)
+    lastPos = #[x,y]
+})
+
 GlutSpecialFunc({ key, x, y |
     if key == GLUT_KEY_RIGHT
         GlRotatef(0.6, 0, 1, 0)
