@@ -73,8 +73,8 @@
 - (TQNumber *)modulo:(id)b;
 - (TQNumber *)pow:(id)b;
 
-- (TQNumber *)and:(id)b;
-- (TQNumber *)or:(id)b;
+- (TQNumber *)bitAnd:(id)b;
+- (TQNumber *)bitOr:(id)b;
 - (TQNumber *)xor:(id)b;
 - (TQNumber *)lshift:(id)b;
 - (TQNumber *)rshift:(id)b;

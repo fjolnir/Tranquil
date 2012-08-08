@@ -1,5 +1,4 @@
-// Supports boxing scalar, struct, union, block & function pointer types
-// TODO: Support arrays
+// Supports boxing scalar, struct, union, pointer, array, block & function pointer types
 #import <Tranquil/TQObject.h>
 #import <objc/runtime.h>
 #import <objc/message.h>

@@ -1,0 +1,37 @@
+GlutInit(TQPointer to:0 withType:"i", nil)
+
+GlutInitDisplayMode(GLUT_RGBA bitOr: GLUT_DOUBLE)
+GlutInitWindowSize(400, 300)
+GlutInitWindowPosition(200, 200)
+GlutCreateWindow("Test")
+
+GlClearColor(0, 0, 0, 0)
+GlScalef(0.4, 0.4, 0.4)
+
+GlutDisplayFunc({
+    GlClear(GL_COLOR_BUFFER_BIT)
+    GlutWireDodecahedron()
+    GlutSwapBuffers()
+})
+
+GlutIdleFunc({
+    GlRotatef(0.1, 0, 1, 0)
+    GlutPostRedisplay()
+})
+
+GlutKeyboardFunc({ key, x, y |
+   "#{key} pushed (Mouse at #{x}, #{y})" print
+})
+
+GlutSpecialFunc({ key, x, y |
+    if key == GLUT_KEY_RIGHT
+        GlRotatef(0.6, 0, 1, 0)
+    else if key == GLUT_KEY_LEFT
+        GlRotatef(-0.6, 0, 1, 0)
+    else if key == GLUT_KEY_UP
+        GlRotatef(0.6, 1, 0, 0)
+    else if key == GLUT_KEY_DOWN
+        GlRotatef(-0.6, 1, 0, 0)
+})
+
+GlutMainLoop()

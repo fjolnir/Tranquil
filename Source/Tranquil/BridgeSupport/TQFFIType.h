@@ -1,4 +1,4 @@
-#import <ffi/ffi.h>
+#import <ffi.h>
 #import <Foundation/Foundation.h>
 #import <Tranquil/TQBatching.h>
 

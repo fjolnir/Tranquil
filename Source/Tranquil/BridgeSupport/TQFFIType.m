@@ -1,5 +1,7 @@
 #import "TQFFIType.h"
 #import "TQBoxedObject.h"
+#import "../Runtime/TQRuntime.h"
+#import "bs.h"
 
 @implementation TQFFIType
 + (ffi_type *)scalarTypeToFFIType:(const char *)aType
@@ -31,6 +33,8 @@
             return &ffi_type_uint;
         case _C_USHT:
             return &ffi_type_ushort;
+        case _C_UCHR:
+            return &ffi_type_uchar;
         case _C_ULNG:
             return &ffi_type_ulong;
         case _C_ULNG_LNG:
@@ -61,12 +65,14 @@
     _referencedTypes = nil;
 
     if(aoNextType) {
-        const char *next = NSGetSizeAndAlignment(_encoding, NULL, NULL);
+        const char *next = TQGetSizeAndAlignment(_encoding, NULL, NULL);
         *aoNextType = next;
     }
 
     if([TQBoxedObject typeIsScalar:_encoding])
         _ffiType = [TQFFIType scalarTypeToFFIType:_encoding];
+    else if(*_encoding == _MR_C_LAMBDA_B || *_encoding == _C_PTR)
+        _ffiType = &ffi_type_pointer;
     else if(*_encoding == _C_STRUCT_B) {
         _referencedTypes = [[NSMutableArray alloc] init];
         ffi_type type;
@@ -79,7 +85,7 @@
             const char *currField = fieldEncoding;
             do {
                 ++numFields;
-            } while((currField = NSGetSizeAndAlignment(currField, NULL, NULL)) && *currField != _C_STRUCT_E);
+            } while((currField = TQGetSizeAndAlignment(currField, NULL, NULL)) && *currField != _C_STRUCT_E);
         }
         _ffiType->size = type.alignment = 0;
         _ffiType->elements = (ffi_type **)malloc(sizeof(ffi_type*) * numFields + 1);
@@ -88,12 +94,14 @@
             TQFFIType *fieldType = [TQFFIType typeWithEncoding:fieldEncoding];
             [_referencedTypes addObject:fieldType];
             _ffiType->elements[i] = fieldType.ffiType;
-            fieldEncoding = NSGetSizeAndAlignment(fieldEncoding, NULL, NULL);
+            fieldEncoding = TQGetSizeAndAlignment(fieldEncoding, NULL, NULL);
         }
         _ffiType->elements[numFields] = NULL;
-    } else
+    } else {
+        NSLog(@"%s", _encoding);
         // TODO: handle unions by returning a type matching the largest field?
         assert(NO);
+    }
     return self;
 }
 

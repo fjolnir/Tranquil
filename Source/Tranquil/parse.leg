@@ -685,6 +685,7 @@ void printHelpAndExit(int status)
     printf("-d    Print debugging information (Including the llvm assembly output)\n");
     exit(status);
 }
+
 int main(int argc, char **argv)
 {
     BOOL showDebugOutput = NO;

@@ -82,6 +82,39 @@ static __inline__ _tqfloat _TQNumberValue(TQNumber *ptr)
     } else {
         // Register our tagged pointer slot
         _objc_insert_tagged_isa(kTagSlot, [TQTaggedNumber class]);
+
+        IMP imp;
+        // ==
+        imp = imp_implementationWithBlock(^(TQNumber *a, id b) {
+            if(!b)
+                return (id)nil;
+            else if(object_getClass(a) != object_getClass(b))
+                return _TQNumberValue(a) == [b doubleValue] ? (id)TQValid : nil;
+            return (_TQNumberValue(a) == _TQNumberValue(b))  ? (id)TQValid : nil;
+        });
+        class_replaceMethod(TQNumberClass, TQEqOpSel, imp, "@@:@");
+        // !=
+        imp = imp_implementationWithBlock(^(TQNumber *a, id b) {
+            if(!b)
+                return (id)nil;
+            else if(object_getClass(a) != object_getClass(b))
+                return _TQNumberValue(a) != [b doubleValue] ? (id)TQValid : (id)nil;
+            return (_TQNumberValue(a) != _TQNumberValue(b)) ? (id)TQValid : (id)nil;
+        });
+        class_replaceMethod(TQNumberClass, TQNeqOpSel, imp, "@@:@");
+
+        class_replaceMethod(TQNumberClass, TQAddOpSel,  class_getMethodImplementation(TQNumberClass, @selector(add:)),             "@@:@");
+        class_replaceMethod(TQNumberClass, TQSubOpSel,  class_getMethodImplementation(TQNumberClass, @selector(subtract:)),        "@@:@");
+        class_replaceMethod(TQNumberClass, TQUnaryMinusOpSel, class_getMethodImplementation(TQNumberClass, @selector(negate)),     "@@:" );
+        class_replaceMethod(TQNumberClass, TQMultOpSel, class_getMethodImplementation(TQNumberClass, @selector(multiply:)),        "@@:@");
+        class_replaceMethod(TQNumberClass, TQDivOpSel,  class_getMethodImplementation(TQNumberClass, @selector(divideBy:)),        "@@:@");
+        class_replaceMethod(TQNumberClass, TQModOpSel,  class_getMethodImplementation(TQNumberClass, @selector(modulo:)),          "@@:@");
+
+        class_replaceMethod(TQNumberClass, TQLTOpSel,  class_getMethodImplementation(TQNumberClass, @selector(isLesser:)),         "@@:@");
+        class_replaceMethod(TQNumberClass, TQGTOpSel,  class_getMethodImplementation(TQNumberClass, @selector(isGreater:)),        "@@:@");
+        class_replaceMethod(TQNumberClass, TQLTEOpSel, class_getMethodImplementation(TQNumberClass, @selector(isLesserOrEqual:)),  "@@:@");
+        class_replaceMethod(TQNumberClass, TQGTEOpSel, class_getMethodImplementation(TQNumberClass, @selector(isGreaterOrEqual:)), "@@:@");
+        class_replaceMethod(TQNumberClass, TQExpOpSel, class_getMethodImplementation(TQNumberClass, @selector(pow:)),              "@@:@");
     }
     numberWithDoubleImp = (id (*)(id, SEL, double))method_getImplementation(class_getClassMethod(self, @selector(numberWithDouble:)));
     numberWithLongImp   = (id (*)(id, SEL, long))method_getImplementation(class_getClassMethod(self, @selector(numberWithLong:)));
@@ -346,14 +379,14 @@ static __inline__ _tqfloat _TQNumberValue(TQNumber *ptr)
     return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), pow(_TQNumberValue(self), _TQNumberValue(b) ));
 }
 
-- (TQNumber *)and:(id)b
+- (TQNumber *)bitAnd:(id)b
 {
     if(object_getClass(self) != object_getClass(b))
         return numberWithLongImp(object_getClass(self), @selector(numberWithLong:), (long)_TQNumberValue(self) & [b longValue]);
     return numberWithLongImp(object_getClass(self), @selector(numberWithLong:), (long)_TQNumberValue(self) & (long)_TQNumberValue(b));
 }
 
-- (TQNumber *)or:(id)b
+- (TQNumber *)bitOr:(id)b
 {
     if(object_getClass(self) != object_getClass(b))
         return numberWithLongImp(object_getClass(self), @selector(numberWithLong:), (long)_TQNumberValue(self) | [b longValue]);

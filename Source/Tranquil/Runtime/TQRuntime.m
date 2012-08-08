@@ -183,10 +183,11 @@ const char *TQGetSizeAndAlignment(const char *typePtr, NSUInteger *sizep, NSUInt
                 ++depth;
             else if(*typePtr == _MR_C_LAMBDA_E)
                 --depth;
+            ++typePtr;
             if(depth == 0)
                 break;
-            ++typePtr;
         } while(*typePtr != '\0');
+
         return typePtr;
     }
     return NSGetSizeAndAlignment(typePtr, sizep, alignp);
@@ -452,39 +453,6 @@ void TQInitializeRuntime()
         return a;
     });
     class_addMethod([NSMutableString class], TQRShiftOpSel, imp, "@@:@");
-
-    // Add optimized operators to TQNumber
-    // ==
-    imp = imp_implementationWithBlock(^(TQNumber *a, id b) {
-        if(!b)
-            return (id)nil;
-        else if(object_getClass(a) != object_getClass(b))
-            return a->_value == [b doubleValue] ? (id)nil : (id)TQValid;
-        return a->_value == ((TQNumber*)b)->_value ? (id)TQValid : nil;
-    });
-    class_replaceMethod(TQNumberClass, TQEqOpSel, imp, "@@:@");
-    // !=
-    imp = imp_implementationWithBlock(^(TQNumber *a, id b) {
-        if(!b)
-            return (id)nil;
-        else if(object_getClass(a) != object_getClass(b))
-            return a->_value != [b doubleValue] ? (id)nil : (id)TQValid;
-        return (a->_value != ((TQNumber*)b)->_value) ? nil : (id)TQValid;
-    });
-    class_replaceMethod(TQNumberClass, TQNeqOpSel, imp, "@@:@");
-
-    class_replaceMethod(TQNumberClass, TQAddOpSel,  class_getMethodImplementation(TQNumberClass, @selector(add:)),             "@@:@");
-    class_replaceMethod(TQNumberClass, TQSubOpSel,  class_getMethodImplementation(TQNumberClass, @selector(subtract:)),        "@@:@");
-    class_replaceMethod(TQNumberClass, TQUnaryMinusOpSel, class_getMethodImplementation(TQNumberClass, @selector(negate)),     "@@:" );
-    class_replaceMethod(TQNumberClass, TQMultOpSel, class_getMethodImplementation(TQNumberClass, @selector(multiply:)),        "@@:@");
-    class_replaceMethod(TQNumberClass, TQDivOpSel,  class_getMethodImplementation(TQNumberClass, @selector(divideBy:)),        "@@:@");
-    class_replaceMethod(TQNumberClass, TQModOpSel,  class_getMethodImplementation(TQNumberClass, @selector(modulo:)),          "@@:@");
-
-    class_replaceMethod(TQNumberClass, TQLTOpSel,  class_getMethodImplementation(TQNumberClass, @selector(isLesser:)),         "@@:@");
-    class_replaceMethod(TQNumberClass, TQGTOpSel,  class_getMethodImplementation(TQNumberClass, @selector(isGreater:)),        "@@:@");
-    class_replaceMethod(TQNumberClass, TQLTEOpSel, class_getMethodImplementation(TQNumberClass, @selector(isLesserOrEqual:)),  "@@:@");
-    class_replaceMethod(TQNumberClass, TQGTEOpSel, class_getMethodImplementation(TQNumberClass, @selector(isGreaterOrEqual:)), "@@:@");
-    class_replaceMethod(TQNumberClass, TQExpOpSel, class_getMethodImplementation(TQNumberClass, @selector(pow:)),              "@@:@");
 }
 
 #ifdef __cplusplus
