@@ -368,7 +368,7 @@ using namespace llvm;
         valueToRelease = builder->CreateBitCast(valueToRelease, captureStructTy);
         valueToRelease = builder->CreateStructGEP(valueToRelease, 4); // forwarding->capture
 
-        builder->CreateCall2(aProgram.objc_storeStrong, valueToRelease, ConstantPointerNull::get((PointerType*)int8PtrTy));
+        builder->CreateCall(aProgram.objc_release, valueToRelease);
         builder->CreateCall2(aProgram._Block_object_dispose, varToDisposeOf, flags);
     }
 
