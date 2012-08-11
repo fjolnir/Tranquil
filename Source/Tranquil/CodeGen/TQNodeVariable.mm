@@ -13,6 +13,11 @@ using namespace llvm;
 @implementation TQNodeVariable
 @synthesize name=_name, alloca=_alloca, forwarding=_forwarding;
 
++ (TQNodeVariable *)node
+{
+    return (TQNodeVariable *)[super node];
+}
+
 + (TQNodeVariable *)nodeWithName:(NSString *)aName
 {
     return [[[self alloc] initWithName:aName] autorelease];

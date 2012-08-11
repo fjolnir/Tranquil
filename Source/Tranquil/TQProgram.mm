@@ -6,6 +6,7 @@
 #import <mach/mach_time.h>
 #import "Runtime/TQRuntime.h"
 #import "BridgeSupport/TQBoxedObject.h"
+#import "CodeGen/Processors/TQProcessor.h"
 #import <objc/runtime.h>
 #import <objc/message.h>
 
@@ -259,8 +260,28 @@ using namespace llvm;
     [super dealloc];
 }
 
+
+#pragma mark - Execution
+
+// Prepares & optimizes the program tree before execution
+- (void)_preprocessNode:(TQNode *)aNodeToIterate withTrace:(NSMutableArray *)aTrace
+{
+    if(!aNodeToIterate)
+        return;
+    [aTrace addObject:aNodeToIterate];
+    [aNodeToIterate iterateChildNodes:^(TQNode *node) {
+        for(Class processor in [TQProcessor allProcessors]) {
+            [processor processNode:node withTrace:aTrace];
+        }
+        [self _preprocessNode:node withTrace:aTrace];
+   }];
+   [aTrace removeLastObject];
+}
+
+// Executes the current program tree
 - (BOOL)run
 {
+    [self _preprocessNode:_root withTrace:[NSMutableArray array]];
     TQInitializeRuntime();
     InitializeNativeTarget();
 
@@ -275,17 +296,17 @@ using namespace llvm;
         NSLog(@"Error: %@", err);
         return NO;
     }
-    llvm::EnableStatistics();
 
 
     if(_shouldShowDebugInfo) {
+        llvm::EnableStatistics();
         _llModule->dump();
         // Verify that the program is valid
         verifyModule(*_llModule, PrintMessageAction);
     }
 
     // Compile program
-    llvm::TargetOptions Opts;
+    TargetOptions Opts;
     Opts.JITEmitDebugInfo = true;
     Opts.GuaranteedTailCallOpt = true;
 
@@ -310,25 +331,8 @@ using namespace llvm;
     ExecutionEngine *engine = factory.create();
 
     //engine->DisableLazyCompilation();
-    engine->addGlobalMapping(_func_TQPrepareObjectForReturn, (void*)&TQPrepareObjectForReturn);
-    engine->addGlobalMapping(_func_TQSetValueForKey, (void*)&TQSetValueForKey);
-    engine->addGlobalMapping(_func_TQValueForKey, (void*)&TQValueForKey);
-    engine->addGlobalMapping(_func_TQGetOrCreateClass, (void*)&TQGetOrCreateClass);
-    engine->addGlobalMapping(_func_TQObjectsAreEqual, (void*)&TQObjectsAreEqual);
-    engine->addGlobalMapping(_func_TQObjectsAreNotEqual, (void*)&TQObjectsAreNotEqual);
-    engine->addGlobalMapping(_func_TQObjectGetSuperClass, (void*)&TQObjectGetSuperClass);
-    engine->addGlobalMapping(_func_TQVaargsToArray, (void*)&TQVaargsToArray);
-    engine->addGlobalMapping(_func_TQUnboxObject, (void*)&TQUnboxObject);
-    engine->addGlobalMapping(_func_TQBoxValue, (void*)&TQBoxValue);
 
-    //std::vector<GenericValue> noargs;
-    //GenericValue val = engine->runFunction(_root.function, noargs);
-    //void *ret = val.PointerVal;
-    //NSLog(@"'root' ret:  %p: %@\n", ret, ret ? ret : nil);
-    //return YES;
     // Optimization pass
-
-
     FunctionPassManager fpm = FunctionPassManager(_llModule);
 
     fpm.add(new TargetData(*engine->getTargetData()));
@@ -384,10 +388,8 @@ using namespace llvm;
     return YES;
 }
 
-- (NSString *)description
-{
-    return [NSString stringWithFormat:@"<prog@\n%@\n}>", _root];
-}
+
+#pragma mark - Utilities
 
 - (llvm::Value *)getGlobalStringPtr:(NSString *)aStr withBuilder:(llvm::IRBuilder<> *)aBuilder
 {
@@ -424,6 +426,11 @@ using namespace llvm;
     args.push_back([self getGlobalStringPtr:@"> %s\n" withBuilder:aBuilder]);
     args.push_back([self getGlobalStringPtr:txt withBuilder:aBuilder]);
     aBuilder->CreateCall(func_printf, args);
+}
+
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<prog@\n%@\n}>", _root];
 }
 
 @end

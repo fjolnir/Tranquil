@@ -34,7 +34,7 @@ enum TQBlockFieldFlag_t {
 struct TQBlockLiteral {
     void *isa; // initialized to &_NSConcreteStackBlock or &_NSConcreteGlobalBlock
     int flags;
-    int reserved; 
+    int reserved;
     id (*invoke)(void *, ...);
     struct TQBlockDescriptor {
     unsigned long int reserved;	// NULL

@@ -4,6 +4,7 @@
 @property(readwrite, retain) NSString *name;
 @property(readwrite, assign) llvm::Value *alloca, *forwarding;
 
++ (TQNodeVariable *)node;
 + (TQNodeVariable *)nodeWithName:(NSString *)aName;
 - (id)initWithName:(NSString *)aName;
 

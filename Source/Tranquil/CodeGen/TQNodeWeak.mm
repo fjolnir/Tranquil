@@ -4,6 +4,7 @@
 using namespace llvm;
 
 @implementation TQNodeWeak
+@synthesize value=_value;
 
 + (TQNodeWeak *)node
 {
@@ -29,6 +30,11 @@ using namespace llvm;
     //return [_value referencesNode:aNode];
 }
 
+- (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
+{
+    aBlock(_value);
+}
+
 - (NSString *)description
 {
     return [NSString stringWithFormat:@"<weak: ~%@>", _value];
@@ -38,9 +44,11 @@ using namespace llvm;
                                  block:(TQNodeBlock *)aBlock
                                  error:(NSError **)aoError
 {
+    IRBuilder<> *builder = aBlock.builder;
     Module *mod     = aProgram.llModule;
     Value *selector = aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQWeakSel", aProgram.llInt8PtrTy), "weakSel");
     Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_TQWeak", aProgram.llInt8Ty);
+
 
     return aBlock.builder->CreateCall3(aProgram.objc_msgSend, klass, selector, [_value generateCodeInProgram:aProgram block:aBlock error:aoError]);
 }

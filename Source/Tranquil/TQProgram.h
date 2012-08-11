@@ -10,7 +10,7 @@
 @property(readwrite, retain) NSString *name;
 @property(readwrite, retain) TQNodeBlock *root;
 @property(readonly) TQBridgeSupport *bridge;
-@property(readwrite, assign) BOOL shouldShowDebugInfo;
+@property(readwrite) BOOL shouldShowDebugInfo;
 @property(readonly) llvm::Module *llModule;
 @property(readonly) llvm::IRBuilder<> *irBuilder;
 
@@ -23,7 +23,7 @@
 @property(readonly) llvm::Type *llFloatTy, *llDoubleTy;
 // int
 @property(readonly) llvm::IntegerType *llIntTy;
-    // intptr_t, size_t, and ptrdiff_t, which we assume are the same size.
+// intptr_t, size_t, and ptrdiff_t, which we assume are the same size.
 @property(readonly) llvm::IntegerType *llIntPtrTy, *llSizeTy, *llPtrDiffTy;
 // void* in address space 0
 @property(readonly) llvm::PointerType *llVoidPtrTy, *llInt8PtrTy;
