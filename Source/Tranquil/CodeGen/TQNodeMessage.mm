@@ -75,9 +75,9 @@ using namespace llvm;
 {
     NSString *selStr = [self selector];
     BOOL needsAutorelease = NO;
-    if([selStr hasPrefix:@"init"])
+    if([selStr hasPrefix:@"alloc"])
         needsAutorelease = YES;
-    else if([selStr hasPrefix:@"copy"])
+    else if([selStr hasSuffix:@"copy"])
         needsAutorelease = YES;
     else if([selStr isEqualToString:@"new"])
         needsAutorelease = YES;
@@ -106,8 +106,7 @@ using namespace llvm;
     if([_receiver isMemberOfClass:[TQNodeSuper class]])
         ret = aBlock.builder->CreateCall(aProgram.objc_msgSendSuper, aArgs);
     else {
-        // TODO: only use boxed msg send when there's an identical selector known take non-object arguments (from BridgeSupport)
-        ret = aBlock.builder->CreateCall(aProgram.tq_msgSend, aArgs); //objc_msgSend, aArgs); 
+        ret = aBlock.builder->CreateCall(aProgram.tq_msgSend, aArgs);
         if(needsAutorelease)
             ret = aBlock.builder->CreateCall(aProgram.objc_autoreleaseReturnValue, ret);
     }
@@ -116,12 +115,16 @@ using namespace llvm;
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
 {
+    Module *mod = aProgram.llModule;
     std::vector<Value*> args;
     for(TQNodeArgument *arg in _arguments) {
         if(!arg.passedNode)
             break;
         args.push_back([arg generateCodeInProgram:aProgram block:aBlock error:aoErr]);
     }
+    // From what I can tell having read the ABI spec for x86-64, it is safe to pass this added argument. TODO: verify this holds for ARM&x86
+    // Sentinel argument to make variadic methods possible (without resorting to special cases in tq_msgsend, and using libffi; which would kill performance)
+    args.push_back(aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQSentinel", aProgram.llInt8PtrTy), "sentinel"));
 
     return [self generateCodeInProgram:aProgram block:aBlock withArguments:args error:aoErr];
 }
