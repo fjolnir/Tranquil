@@ -12,6 +12,7 @@ PEGFLAGS = [
 ].join(' ')
 
 CXXFLAGS = [
+    '-I/usr/local/Cellar/libffi/3.0.11/lib/libffi-3.0.11/include', # This is a weirdness of the libffi homebrew package..
     '-DDEBUG',
     '-std=gnu++98',
     '-mmacosx-version-min=10.7',
@@ -30,6 +31,7 @@ LDFLAGS = [
     '-lstdc++',
     '`llvm-config --libs core jit nativecodegen bitwriter ipo instrumentation`',
     '`llvm-config --ldflags`',
+    '-L`brew --prefix libffi`/lib',
     '-framework Foundation',
     '-framework AppKit',
     '-all_load',
