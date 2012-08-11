@@ -63,7 +63,8 @@ using namespace llvm;
     TQObjectsAreEqual=_func_TQObjectsAreEqual, TQObjectsAreNotEqual=_func_TQObjectsAreNotEqual, TQObjectGetSuperClass=_func_TQObjectGetSuperClass,
     TQVaargsToArray=_func_TQVaargsToArray, TQUnboxObject=_func_TQUnboxObject,
     TQBoxValue=_func_TQBoxValue, tq_msgSend=_func_tq_msgSend, objc_retainAutoreleaseReturnValue=_func_objc_retainAutoreleaseReturnValue,
-    objc_autoreleaseReturnValue=_func_objc_autoreleaseReturnValue, objc_storeStrong=_func_objc_storeStrong;
+    objc_autoreleaseReturnValue=_func_objc_autoreleaseReturnValue, objc_retainAutoreleasedReturnValue=_func_objc_retainAutoreleasedReturnValue,
+    objc_storeStrong=_func_objc_storeStrong;
 
 + (TQProgram *)programWithName:(NSString *)aName
 {
@@ -220,6 +221,7 @@ using namespace llvm;
     //DEF_EXTERNAL_FUN(objc_destroyWeak, ft_void__i8PtrPtr);
     DEF_EXTERNAL_FUN(objc_retain, ft_i8Ptr__i8Ptr);
     DEF_EXTERNAL_FUN(objc_retainAutoreleaseReturnValue, ft_i8Ptr__i8Ptr);
+    DEF_EXTERNAL_FUN(objc_retainAutoreleasedReturnValue, ft_i8Ptr__i8Ptr);
     DEF_EXTERNAL_FUN(objc_autoreleaseReturnValue, ft_i8Ptr__i8Ptr);
     DEF_EXTERNAL_FUN(objc_release, ft_void__i8Ptr);
     DEF_EXTERNAL_FUN(objc_autorelease, ft_i8Ptr__i8Ptr);

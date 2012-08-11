@@ -1,0 +1,9 @@
+#NSBlock {
+    - test { "I am a block!" print }
+}
+
+blk = { "I really am." print }
+
+blk test
+blk()
+blk print

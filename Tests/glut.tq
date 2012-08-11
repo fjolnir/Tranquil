@@ -11,6 +11,7 @@ GlScalef(0.4, 0.4, 0.4)
 GlutDisplayFunc({
     GlClear(GL_COLOR_BUFFER_BIT)
     GlutWireDodecahedron()
+    GlutWireTeapot(0.7)
     GlutSwapBuffers()
 })
 
