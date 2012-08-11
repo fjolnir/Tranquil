@@ -47,6 +47,7 @@ SEL TQPointerArrayWithObjectsSel;
 SEL TQMapWithObjectsAndKeysSel;
 SEL TQRegexWithPatSel;
 SEL TQMoveToHeapSel;
+SEL TQWeakSel;
 
 Class TQNumberClass;
 
@@ -363,6 +364,7 @@ void TQInitializeRuntime()
     TQMapWithObjectsAndKeysSel   = @selector(tq_mapTableWithObjectsAndKeys:);
     TQRegexWithPatSel            = @selector(tq_regularExpressionWithUTF8String:options:);
     TQMoveToHeapSel              = @selector(moveValueToHeap);
+    TQWeakSel                    = @selector(with:);
 
     TQNumberClass     = [TQNumber class];
 

@@ -25,6 +25,9 @@
 	a, b = 1, 2 \ Comma separated operands can be used for multiple assignment
 	a, b = b, a \ The right hand sides are evaluated before the assignment, so swapping values works
 	
+	\ Weak references
+	a = ~b \ Assigns a to a weak reference to b. (Concept explained later)
+	
 	\ Collection literals (Arrays & Dictionaries)
 	anArray = [ a, b, c ]                           \ Initialises an array containing 3 elements
 	aDict   = { key => value, anotherKey => value } \ Initializes a dictionary
@@ -207,6 +210,43 @@ The +,-,* and / operators can also be used in assignment form, that is:
 	a += b \ Shorthand for a = a+b
 	a *= b \ Shorthand for a = a*b
 	\ etc..
+
+## Weak references
+
+Usually when assigning to a variable, or using one in a block, you want the value in question to be kept around for as long as the variable/block does. But there are cases where this can cause an issue called a "reference cycle":
+
+	c.ref = a
+	a.ref = b
+	b.ref = a
+	
+	c.ref = nil
+
+in the example above, `a` & `b` both hold references to the other, and `c` holds one to `a`. Then at the end, `c`'s reference is removed. One would assume that since `a` & `b` are now unreachable, that they would be deallocated. However this is not the case. Because they still hold a reference to each other, the runtime can't know that they are in fact unreachable. We can fix this by instead writing the previous example as follows:
+
+	c.ref = a
+	a.ref = b
+	b.ref = ~a
+	
+	c.ref = nil
+
+Now `b` holds a "weak" reference to `a`. That means that it does not hold on to `a`, so when `a` has no other remaining references, it is deallocated and `b`'s reference is set to `nil`, breaking the cycle.
+
+A good way of knowing when to use weak references is to think about object references as ownership. If `a` "owns" `b` then `a` should hold a strong reference to `b`, but because `b` is the owned object, if it for some reason must have a reference to `a`, it should hold a weak one:
+
+	#Klass {
+		- new {
+			super new
+			self#someBlock = {
+				~self someMethod
+			}
+			^self
+		}
+		- startUpdating {
+			PeriodicUpdater callBlockPeriodically: self#someBlock
+		}
+	}
+
+In this example we had a block that is a property of `Klass`. This block was being used to periodically call a method on `self` but because this block is owned by the `Klass` object, we use a weak reference to `self` in order to not cause the block to complete a cyclical strong reference between it and `self`.
 
 
 ## Examples

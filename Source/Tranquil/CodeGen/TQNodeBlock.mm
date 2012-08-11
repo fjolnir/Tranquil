@@ -21,7 +21,7 @@ using namespace llvm;
 @end
 
 @implementation TQNodeBlock
-@synthesize arguments=_arguments, statements=_statements, locals=_locals,
+@synthesize arguments=_arguments, statements=_statements, locals=_locals, capturedVariables=_capturedVariables,
     basicBlock=_basicBlock, function=_function, builder=_builder, autoreleasePool=_autoreleasePool,
     isCompactBlock=_isCompactBlock, parent=_parent, isVariadic=_isVariadic, isTranquilBlock=_isTranquilBlock;
 
@@ -421,7 +421,7 @@ using namespace llvm;
     const char *functionName = [[NSString stringWithFormat:@"__tq_block_invoke"] UTF8String];
 
     _function = Function::Create(funType, GlobalValue::ExternalLinkage, functionName, mod);
-    // If it's a void, object or a stret return we don't allocate a buffer for the return value
+    // If the return is a void, object or a stret return we don't need to allocate a buffer for the return value
     if(![_retType hasPrefix:@"v"] && ![_retType hasPrefix:@"@"] && !returningOnStack)
         resultAlloca = _builder->CreateAlloca(retType);
     if(returningOnStack)
@@ -525,10 +525,8 @@ using namespace llvm;
             break;
     }
 
-    if(!_basicBlock->getTerminator()) {
-        _builder->CreateCall(aProgram.objc_autoreleasePoolPop, _autoreleasePool);
-        ReturnInst::Create(mod->getContext(), ConstantPointerNull::get(int8PtrTy), _basicBlock);
-    }
+    if(!_basicBlock->getTerminator())
+        [[TQNodeReturn node] generateCodeInProgram:aProgram block:self error:aoErr];
     return _function;
 }
 

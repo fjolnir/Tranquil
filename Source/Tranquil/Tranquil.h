@@ -28,3 +28,4 @@
 #import <Tranquil/CodeGen/TQNodeConditionalBlock.h>
 #import <Tranquil/CodeGen/TQNodeLoopBlock.h>
 #import <Tranquil/CodeGen/TQNodeValid.h>
+#import <Tranquil/CodeGen/TQNodeWeak.h>

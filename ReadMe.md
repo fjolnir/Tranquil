@@ -26,7 +26,7 @@ To learn more about Tranquil you should read the [specification](https://github.
 But here're a couple of examples:
 
 ### Array iteration
-    alternatives = #["Objective-C", "Ruby", "Nu", "Perl", "Python"]
+    alternatives = ["Objective-C", "Ruby", "Nu", "Perl", "Python"]
     alternatives each: `alternative | "Tranquil is nicer than #{alternative}" print`
     "Or so I hope at least." print
 

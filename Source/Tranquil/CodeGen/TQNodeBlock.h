@@ -11,7 +11,6 @@
     llvm::Function *_function;
     llvm::Constant *_blockDescriptor;
     llvm::Type *_literalType;
-    NSMutableDictionary *_capturedVariables;
     NSString *_retType;
     NSMutableArray *_argTypes;
 }
@@ -20,7 +19,7 @@
 @property(readwrite, retain) TQNodeBlock *parent;
 @property(readwrite, copy) NSMutableArray *arguments;
 @property(readwrite, copy, nonatomic) NSMutableArray *statements;
-@property(readwrite, retain) NSMutableDictionary *locals;
+@property(readwrite, retain) NSMutableDictionary *locals, *capturedVariables;
 @property(readwrite, assign) BOOL isVariadic;
 @property(readwrite, assign) llvm::BasicBlock *basicBlock;
 @property(readwrite, assign) llvm::Function *function;

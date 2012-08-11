@@ -157,9 +157,19 @@ using namespace llvm;
     Value *forwarding = builder->CreateLoad(builder->CreateStructGEP(_alloca, 1), [self _llvmRegisterName:@"forwarding"]);
     forwarding = builder->CreateBitCast(forwarding, PointerType::getUnqual([self captureStructTypeInProgram:aProgram]));
 
-    //aBlock.builder->CreateCall(aProgram.objc_retainAutoreleasedReturnValue, aValue);
-    //return aBlock.builder->CreateStore(aValue, builder->CreateStructGEP(forwarding, 4));
     return aBlock.builder->CreateCall2(aProgram.objc_storeStrong, builder->CreateStructGEP(forwarding, 4), aValue);
+}
+
+- (void)generateRetainInProgram:(TQProgram *)aProgram
+                          block:(TQNodeBlock *)aBlock
+{
+    aBlock.builder->CreateCall(aProgram.objc_retain, [self _getForwardingInProgram:aProgram block:aBlock]);
+}
+
+- (void)generateReleaseInProgram:(TQProgram *)aProgram
+                           block:(TQNodeBlock *)aBlock
+{
+    aBlock.builder->CreateCall(aProgram.objc_release, [self _getForwardingInProgram:aProgram block:aBlock]);
 }
 
 - (TQNodeVariable *)_getExistingIdenticalInBlock:(TQNodeBlock *)aBlock

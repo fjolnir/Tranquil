@@ -131,6 +131,7 @@ _OtherExpr   = Call
              | Literal
              | Constant
              | Variable
+             | Weak
              | ParenExpr
 
 ParenExpr    = '(' -- expr:Expression -- ')' { ExtendToken(); $$ = expr; }
@@ -178,6 +179,7 @@ UnaryMsgRcvr = Call
              | Variadic
              | Literal
              | Variable
+             | Weak
              | ParenExpr
 KwdMsgRcvr   = UnaryMsg
              | UnaryMsgRcvr
@@ -227,6 +229,7 @@ Callee       = Block
              | SubscriptExp
              | Property
              | Variable
+             | Weak
 CallArg      = arg:Expression { [StackTop addObject:arg]; }
 
 
@@ -592,6 +595,19 @@ DictItem     = key:Expression -- "=>" -- value:Expression
 Variable     = name:Identifier
                {
                    $$ = [TQNodeVariable nodeWithName:name];
+               }
+
+Weak         = '~' --
+               ( Block
+               | UnaryOp
+               | SubscriptExp
+               | Property
+               | Self
+               | Variadic
+               | Variable
+               | ParenExpr)
+               {
+                   $$ = [TQNodeWeak nodeWithValue:$$];
                }
 
 Literal      = Number

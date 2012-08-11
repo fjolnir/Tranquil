@@ -11,6 +11,11 @@
                                    block:(TQNodeBlock *)aBlock
                                    error:(NSError **)aoError;
 - (llvm::Type *)captureStructTypeInProgram:(TQProgram *)aProgram;
+
+- (void)generateRetainInProgram:(TQProgram *)aProgram
+                          block:(TQNodeBlock *)aBlock;
+- (void)generateReleaseInProgram:(TQProgram *)aProgram
+                           block:(TQNodeBlock *)aBlock;
 @end
 
 @interface TQNodeSelf : TQNodeVariable

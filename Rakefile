@@ -49,9 +49,12 @@ O_FILES        = OBJC_SOURCES.pathmap(PATHMAP)
 O_FILES << MSGSEND_OUT
 PEG_SOURCE     = FileList['Source/Tranquil/*.leg'].first
 
+ARC_FILES = ['Source/Tranquil/Runtime/TQWeak.m']
 
 def compile(file, flags=CXXFLAGS, cc=CXX)
-    sh "#{cc} #{file[:in].join(' ')} #{flags} -c -o #{file[:out]}"
+    cmd = "#{cc} #{file[:in].join(' ')} #{flags} -c -o #{file[:out]}"
+    cmd << " -fobjc-arc" if ARC_FILES.member? file[:in].first
+    sh cmd
 end
 
 file PARSER_OUTPATH => PEG_SOURCE do |f|
