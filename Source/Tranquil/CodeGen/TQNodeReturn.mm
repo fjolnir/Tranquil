@@ -48,8 +48,10 @@ using namespace llvm;
         retVal = aBlock.builder->CreateCall(aProgram.TQPrepareObjectForReturn, retVal);
         aBlock.builder->CreateCall(aProgram.objc_autoreleasePoolPop, aBlock.autoreleasePool);
         retVal = aBlock.builder->CreateCall(aProgram.objc_autoreleaseReturnValue, retVal);
-    } else
+    } else {
+        aBlock.builder->CreateCall(aProgram.objc_autoreleasePoolPop, aBlock.autoreleasePool);
         retVal = ConstantPointerNull::get(aProgram.llInt8PtrTy);
+    }
 
     // Release variables created in this block up to this point (captured variables do not need to be released as they will be in the dispose helper)
     for(NSString *varName in aBlock.locals.allKeys) {
