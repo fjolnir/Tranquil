@@ -40,6 +40,10 @@ using namespace llvm;
     return ref;
 }
 
+- (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
+{
+    aBlock(_receiver);
+}
 
 - (NSString *)description
 {

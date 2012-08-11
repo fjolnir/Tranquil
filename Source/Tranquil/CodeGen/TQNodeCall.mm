@@ -60,6 +60,15 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
     return nil;
 }
 
+
+- (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
+{
+    aBlock(_callee);
+    for(TQNode *node in _arguments) {
+        aBlock(node);
+    }
+}
+
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock
                          withArguments:(std::vector<llvm::Value*>)aArgs error:(NSError **)aoErr
 {

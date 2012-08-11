@@ -24,7 +24,9 @@
 #include <Foundation/Foundation.h>
 
 
-@class TQNodeBlock, TQProgram;
+@class TQNode, TQNodeBlock, TQProgram;
+
+typedef void (^TQNodeIteratorBlock)(TQNode *aNode);
 
 @interface TQNode : NSObject
 + (TQNode *)node;
@@ -35,6 +37,10 @@
                  error:(NSError **)aoError;
 // Checks if this node references a node equal to aNode and returns it if it does
 - (TQNode *)referencesNode:(TQNode *)aNode;
+- (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock;
+
+- (BOOL)insertChildNode:(TQNode *)aNodeToInsert before:(TQNode *)aNodeToShift;
+- (BOOL)replaceChildNodesIdenticalTo:(TQNode *)aNodeToReplace with:(TQNode *)aNodeToInsert;
 @end
 
 @interface NSArray (TQReferencesNode)

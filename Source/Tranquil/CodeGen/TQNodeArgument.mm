@@ -31,6 +31,11 @@ using namespace llvm;
     return ref;
 }
 
+- (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
+{
+    aBlock(_passedNode);
+}
+
 - (NSString *)description
 {
     return [NSString stringWithFormat:@"<arg@ %@: %@>", _selectorPart, _passedNode];

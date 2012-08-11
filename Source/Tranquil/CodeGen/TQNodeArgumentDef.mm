@@ -45,6 +45,13 @@ using namespace llvm;
         return ref;
     return nil;
 }
+
+- (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
+{
+    if(_defaultArgument)
+        aBlock(_defaultArgument);
+}
+
 @end
 
 @implementation TQNodeMethodArgumentDef

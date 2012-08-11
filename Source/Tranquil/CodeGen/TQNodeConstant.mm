@@ -21,4 +21,10 @@ using namespace llvm;
     else
         return aBlock.builder->CreateCall(aProgram.objc_getClass, [aProgram getGlobalStringPtr:self.value inBlock:aBlock]);
 }
+
+- (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
+{
+    // Nothing to iterate
+}
+
 @end

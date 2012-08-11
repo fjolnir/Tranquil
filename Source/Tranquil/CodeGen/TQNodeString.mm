@@ -42,6 +42,22 @@ using namespace llvm;
     return nil;
 }
 
+- (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
+{
+    for(TQNode *node in _embeddedValues) {
+        aBlock(node);
+    }
+}
+
+- (BOOL)replaceChildNodesIdenticalTo:(TQNode *)aNodeToReplace with:(TQNode *)aNodeToInsert
+{
+    NSUInteger idx = [_embeddedValues indexOfObject:aNodeToReplace];
+    if(idx == NSNotFound)
+        return NO;
+    [_embeddedValues replaceObjectAtIndex:idx withObject:aNodeToInsert];
+    return NO;
+}
+
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
 {

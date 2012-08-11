@@ -15,6 +15,11 @@ using namespace llvm;
     return nil;
 }
 
+- (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
+{
+    // Nothing to iterate
+}
+
 - (NSString *)description
 {
     return [NSString stringWithFormat:@"<nil>"];

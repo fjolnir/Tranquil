@@ -11,7 +11,6 @@ using namespace llvm;
 @implementation TQNodeIfBlock
 @synthesize condition=_condition, elseBlockStatements=_elseBlockStatements, containingLoop=_containingLoop;
 
-
 + (TQNodeIfBlock *)node { return (TQNodeIfBlock *)[super node]; }
 
 - (id)init
@@ -65,6 +64,15 @@ using namespace llvm;
         return ref;
 
     return nil;
+}
+
+- (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
+{
+    aBlock(_condition);
+    [super iterateChildNodes:aBlock];
+    for(TQNode *node in _elseBlockStatements) {
+        aBlock(node);
+    }
 }
 
 

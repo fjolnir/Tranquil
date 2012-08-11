@@ -39,16 +39,26 @@ using namespace llvm;
 
     if([self isEqual:aNode])
         return self;
-	NSEnumerator *keyEnum = [_items keyEnumerator];
-	TQNode *key;
-	while(key = [keyEnum nextObject]) {
-		if((ref = [key referencesNode:aNode]))
-			return ref;
-		else if((ref = [[_items objectForKey:key] referencesNode:aNode]))
-			return ref;
-	}
+    NSEnumerator *keyEnum = [_items keyEnumerator];
+    TQNode *key;
+    while(key = [keyEnum nextObject]) {
+        if((ref = [key referencesNode:aNode]))
+            return ref;
+        else if((ref = [[_items objectForKey:key] referencesNode:aNode]))
+            return ref;
+    }
 
     return nil;
+}
+
+- (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
+{
+    NSEnumerator *keyEnum = [_items keyEnumerator];
+    TQNode *key;
+    while(key = [keyEnum nextObject]) {
+        aBlock(key);
+        aBlock([_items objectForKey:key]);
+    }
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr

@@ -44,6 +44,28 @@ using namespace llvm;
     return nil;
 }
 
+- (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
+{
+    if(_left)
+        aBlock(_left);
+    if(_right)
+        aBlock(_right);
+}
+
+- (BOOL)replaceChildNodesIdenticalTo:(TQNode *)aNodeToReplace with:(TQNode *)aNodeToInsert
+{
+    BOOL ret = NO;
+    if(_left == aNodeToReplace) {
+        _left = aNodeToInsert;
+        ret = YES;
+    }
+    if(_right == aNodeToReplace) {
+        _right = aNodeToInsert;
+        ret = YES;
+    }
+    return ret;
+}
+
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
 {
     if(_type == kTQOperatorAssign) {

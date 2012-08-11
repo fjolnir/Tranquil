@@ -75,4 +75,13 @@ using namespace llvm;
     return _classPtr;
 }
 
+- (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
+{
+    for(TQNode *node in _classMethods) {
+        aBlock(node);
+    }
+    for(TQNode *node in _instanceMethods) {
+        aBlock(node);
+    }
+}
 @end

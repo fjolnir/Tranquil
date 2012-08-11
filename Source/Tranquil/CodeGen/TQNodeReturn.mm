@@ -40,6 +40,11 @@ using namespace llvm;
     return nil;
 }
 
+- (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
+{
+    aBlock(_value);
+}
+
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
 {
     Value *retVal;

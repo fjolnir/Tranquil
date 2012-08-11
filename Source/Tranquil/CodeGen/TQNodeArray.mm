@@ -44,6 +44,13 @@ using namespace llvm;
     return nil;
 }
 
+- (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
+{
+    for(TQNode *node in _items) {
+        aBlock(node);
+    }
+}
+
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
 {
     IRBuilder<> *builder = aBlock.builder;

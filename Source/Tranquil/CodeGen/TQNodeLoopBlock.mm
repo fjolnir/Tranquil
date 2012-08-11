@@ -58,6 +58,11 @@ using namespace llvm;
     return nil;
 }
 
+- (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
+{
+    aBlock(_condition);
+    [super iterateChildNodes:aBlock];
+}
 
 #pragma mark - Code generation
 

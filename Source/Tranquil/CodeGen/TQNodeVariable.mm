@@ -47,9 +47,13 @@ using namespace llvm;
 }
 - (TQNode *)referencesNode:(TQNode *)aNode
 {
-    return (_name && [aNode isEqual:self]) ? self : nil;
+    return (aNode == self) || (_name && [aNode isEqual:self]) ? self : nil;
 }
 
+- (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
+{
+    // Nothing to iterate
+}
 
 - (void)dealloc
 {

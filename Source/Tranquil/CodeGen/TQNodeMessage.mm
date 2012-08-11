@@ -43,6 +43,15 @@ using namespace llvm;
     return nil;
 }
 
+- (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
+{
+    aBlock(_receiver);
+    for(TQNode *node in _arguments) {
+        aBlock(node);
+    }
+}
+
+
 - (NSString *)description
 {
     NSMutableString *out = [NSMutableString stringWithString:@"<msg@ "];

@@ -547,7 +547,7 @@ using namespace llvm;
     // Generate a list of variables to capture
     if(aBlock) {
         [_capturedVariables release];
-        _capturedVariables = [[NSMutableDictionary alloc] init];
+        _capturedVariables = [NSMutableDictionary new];
         // Load actual captured variables
         for(NSString *name in [aBlock.locals allKeys]) {
             if([_locals objectForKey:name])
@@ -577,6 +577,32 @@ using namespace llvm;
         return ref;
 
     return nil;
+}
+
+- (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
+{
+    NSMutableArray *statements = [_statements copy];
+    for(TQNode *node in statements) {
+        aBlock(node);
+    }
+    [statements release];
+}
+
+- (BOOL)insertChildNode:(TQNode *)aNodeToInsert before:(TQNode *)aNodeToShift
+{
+    NSUInteger idx = [_statements indexOfObject:aNodeToShift];
+    if(idx == NSNotFound)
+        return NO;
+    [_statements insertObject:aNodeToInsert atIndex:idx];
+    return YES;
+}
+- (BOOL)replaceChildNodesIdenticalTo:(TQNode *)aNodeToReplace with:(TQNode *)aNodeToInsert
+{
+    NSUInteger idx = [_statements indexOfObject:aNodeToReplace];
+    if(idx == NSNotFound)
+        return NO;
+    [_statements replaceObjectAtIndex:idx withObject:aNodeToInsert];
+    return NO;
 }
 
 @end
