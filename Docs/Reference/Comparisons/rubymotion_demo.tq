@@ -13,6 +13,6 @@
         (UIBezierPath bezierPathWithRect: dirtyRect) fill
 
         UIColor whiteColor set
-        text drawAtPoint: #[10, 20] withFont: (UIFont systemFontOfSize: 24)
+        text drawAtPoint: [10, 20] withFont: (UIFont systemFontOfSize: 24)
     }
 }

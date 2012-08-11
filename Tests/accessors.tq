@@ -2,7 +2,7 @@ a = 1
 a#foo = "bar"
 "a#foo: #{a#foo}" print
 
-view = NSView alloc initWithFrame: #[[1,2], [3,4]]
+view = NSView alloc initWithFrame: [[1,2], [3,4]]
 "view: #{view}" print
 view#frame = NSMakeRect(4,3,2,1)
 "frame: #{view#frame[0][1]}" print

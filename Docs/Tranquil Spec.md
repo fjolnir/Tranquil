@@ -26,9 +26,8 @@
 	a, b = b, a \ The right hand sides are evaluated before the assignment, so swapping values works
 	
 	\ Collection literals (Arrays & Dictionaries)
-	anArray = #[ a, b, c ]                           \ Initialises an array containing 3 elements
-	aDict   = #{ key => value, anotherKey => value } \ Initializes a dictionary
-	arrayWithSubArrays = #[1, [2], [3, 4]]           \ Embedded collection literals do not require the prepended '#'
+	anArray = [ a, b, c ]                           \ Initialises an array containing 3 elements
+	aDict   = { key => value, anotherKey => value } \ Initializes a dictionary
 	
 	\ Blocks
 	aBlock = { ..body.. } \ A block. Defines scope
@@ -228,7 +227,7 @@ The +,-,* and / operators can also be used in assignment form, that is:
 
 	#Iterator {
 		- map: lambda {
-			^self reduce: { obj, accum=#[] |
+			^self reduce: { obj, accum=[] |
 				accum push lambda(obj)
 				^accum
 			}
@@ -249,5 +248,5 @@ The +,-,* and / operators can also be used in assignment form, that is:
 		- isEmpty? `valid` \ Implemented in subclasses
 	}
 	
-	sum = #[1,2,3] reduce:`n, sum=0| sum + n`
+	sum = [1,2,3] reduce:`n, sum=0| sum + n`
 	\ Sum now equals 0+1+2+3 = 6

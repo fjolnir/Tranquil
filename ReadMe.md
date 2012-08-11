@@ -67,7 +67,7 @@ But here're a couple of examples:
     appMenuItem setSubmenu: appMenu
     
     \ Create a window
-    win = NSWindow alloc initWithContentRect: #[NSZeroPoint, [300, 200]]
+    win = NSWindow alloc initWithContentRect: [NSZeroPoint, [300, 200]]
                                    styleMask: NSTitledWindowMask
                                      backing: NSBackingStoreBuffered
                                        defer: no

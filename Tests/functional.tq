@@ -11,7 +11,7 @@ min = { a, b | if (a < b) ^a else ^b }
     }
 
     - map: lambda {
-        ^self fold: `elem, result=#[] | result push: lambda(elem)`
+        ^self fold: `elem, result=[] | result push: lambda(elem)`
     }
 
     - appendArray: anotherArray {
@@ -24,7 +24,7 @@ min = { a, b | if (a < b) ^a else ^b }
     }
 
     - concat {
-        ^self fold: { elem, accum=#[] |
+        ^self fold: { elem, accum=[] |
             ^elem fold: `subElem, newAccum=accum | newAccum push: subElem`
         }
     }
@@ -38,7 +38,7 @@ min = { a, b | if (a < b) ^a else ^b }
     }
 
     - reverse {
-        result = #[]
+        result = []
         i = self size
         until --i == 0
             result push: self[i]
@@ -46,7 +46,7 @@ min = { a, b | if (a < b) ^a else ^b }
     }
 
     - filter:lambda {
-        result = #[]
+        result = []
         self each: { elem |
             if lambda(elem)
                 result push: elem
@@ -63,22 +63,22 @@ min = { a, b | if (a < b) ^a else ^b }
     }
 
     - partition:lambda {
-        a = #[]
-        b = #[]
+        a = []
+        b = []
         self each: { elem |
             if lambda(elem)
                 a push:elem
             else
                 b push:elem
         }
-        ^#[a,b]
+        ^[a,b]
     }
 
     - zip:otherArray {
         length = self size
         if (otherArray size) > (self size)
             length = otherArray size
-        result = #[]
+        result = []
         i = -1
         until ++i >= length {
             result push: self[i]
@@ -88,12 +88,12 @@ min = { a, b | if (a < b) ^a else ^b }
     }
 }
 
-a = #[1,2,3] zip: #[4,5,6]
+a = [1,2,3] zip: [4,5,6]
 a print
 
-a = #[#[1,2,3], #[4,5,6]] concat
+a = [[1,2,3], [4,5,6]] concat
 a print
 
-foo = #[1,2,3,4,5,6,7,8,9] partition:`obj | obj < 5`
+foo = [1,2,3,4,5,6,7,8,9] partition:`obj | obj < 5`
 foo print
 max(1,2) print

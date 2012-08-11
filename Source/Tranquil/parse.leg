@@ -553,8 +553,7 @@ PropSubscr   = "#" - prop:Identifier { ExtendToken(); [StackTop addObject:prop];
 
 
 # Built-in constructors
-Array        = "#" ArrayProto
-ArrayProto   = "["
+Array        = "["
                {
                    UpdateToken();
                    PushStack([NSMutableArray array]);
@@ -566,18 +565,12 @@ ArrayProto   = "["
                    NSMutableArray *items = PopStack();
                    [$$ setItems:items];
                }
-ArrItem      = (subarray:ArrayProto
-               {
-                   [StackTop addObject:subarray];
-               }
-               | item:Expression
+ArrItem      = item:Expression
                {
                    [StackTop addObject:item];
                }
-               )
 
-Dictionary     = "#" DictProto
-DictProto      = "{" --
+Dictionary   = "{" --
                {
                    UpdateToken();
                    PushStack([NSMapTable mapTableWithStrongToStrongObjects]);
@@ -589,12 +582,11 @@ DictProto      = "{" --
                    [$$ setItems:items];
 
                }
-DictItem     = key:DictValue -- "=>" -- value:DictValue
+DictItem     = key:Expression -- "=>" -- value:Expression
                {
                    ExtendToken();
                    [StackTop setObject:value forKey:key];
                }
-DictValue    = DictProto | Expression
 
 # Basic components
 Variable     = name:Identifier
