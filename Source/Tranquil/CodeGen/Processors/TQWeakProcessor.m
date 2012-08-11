@@ -29,7 +29,8 @@
         // The containing block, must be a TQNodeBlock, however the parent of that block could be any block subtype.
         if(!containingBlock && ([node isMemberOfClass:[TQNodeBlock class]] || [node isMemberOfClass:[TQNodeRootBlock class]]))
             containingBlock = (TQNodeBlock *)node;
-        else if(!parentBlock && [node isKindOfClass:[TQNodeBlock class]]) {
+        // The parent block is the first one to hold a strong reference to the variable
+        else if(!parentBlock && [node isKindOfClass:[TQNodeBlock class]] && [node referencesNode:referencedVar]) {
             parentBlock = (TQNodeBlock *)node;
             break;
         }
