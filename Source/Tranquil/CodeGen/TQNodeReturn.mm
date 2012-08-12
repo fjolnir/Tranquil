@@ -25,6 +25,12 @@ using namespace llvm;
     return self;
 }
 
+- (void)dealloc
+{
+    [_value release];
+    [super dealloc];
+}
+
 - (NSString *)description
 {
     return [NSString stringWithFormat:@"<ret@ %@>", _value];
@@ -43,6 +49,18 @@ using namespace llvm;
 - (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
 {
     aBlock(_value);
+}
+
+- (BOOL)replaceChildNodesIdenticalTo:(TQNode *)aNodeToReplace with:(TQNode *)aNodeToInsert
+{
+    if(aNodeToReplace != _value)
+        return NO;
+
+    [aNodeToInsert retain];
+    [_value release];
+    _value = aNodeToInsert;
+
+    return YES;
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr

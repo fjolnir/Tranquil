@@ -49,8 +49,9 @@
     TQNodeOperator *assignment = [TQNodeOperator nodeWithType:kTQOperatorAssign
                                                          left:var
                                                         right:weak];
-    [parentBlock insertChildNode:assignment before:[aTrace objectAtIndex:[aTrace indexOfObject:parentBlock]+1]];
-    [[aTrace lastObject] replaceChildNodesIdenticalTo:weak with:var];
+
+    assert([parentBlock insertChildNode:assignment before:[aTrace objectAtIndex:[aTrace indexOfObject:parentBlock]+1]]);
+    assert([[aTrace lastObject] replaceChildNodesIdenticalTo:weak with:var]);
 
     return aNode;
 }

@@ -56,11 +56,11 @@ using namespace llvm;
 {
     BOOL ret = NO;
     if(_left == aNodeToReplace) {
-        _left = aNodeToInsert;
+        self.left = aNodeToInsert;
         ret = YES;
     }
     if(_right == aNodeToReplace) {
-        _right = aNodeToInsert;
+        self.right = aNodeToInsert;
         ret = YES;
     }
     return ret;
