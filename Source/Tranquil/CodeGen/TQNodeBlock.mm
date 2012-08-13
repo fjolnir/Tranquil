@@ -7,9 +7,6 @@
 #import <llvm/Intrinsics.h>
 #include <iostream>
 
-// Block invoke functions are numbered from 0
-#define TQ_BLOCK_FUN_PREFIX @"__tq_block_invoke_"
-
 // The struct index where captured variables begin
 #define TQ_CAPTURE_IDX 5
 
@@ -375,6 +372,11 @@ using namespace llvm;
 }
 
 // Invokes the body of this block
+- (NSString *)_invokeName
+{
+    return @"__tq_block_invoke";
+}
+
 - (llvm::Function *)_generateInvokeInProgram:(TQProgram *)aProgram error:(NSError **)aoErr
 {
     if(_function)
@@ -415,9 +417,7 @@ using namespace llvm;
 
     Module *mod = aProgram.llModule;
 
-    const char *functionName = [[NSString stringWithFormat:@"__tq_block_invoke"] UTF8String];
-
-    _function = Function::Create(funType, GlobalValue::ExternalLinkage, functionName, mod);
+    _function = Function::Create(funType, GlobalValue::ExternalLinkage, [[self _invokeName] UTF8String], mod);
     if(returningOnStack)
         _function->addAttribute(1, Attribute::StructRet);
     for(NSNumber *idx in byValArgIndices) {

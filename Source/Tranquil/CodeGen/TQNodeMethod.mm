@@ -74,6 +74,10 @@ using namespace llvm;
     return out;
 }
 
+- (NSString *)_invokeName
+{
+    return [NSString stringWithFormat:@"%@[%@ %@]", _type==kTQClassMethod ? @"+" : @"-", _class.name, [self _selectorString]];
+}
 
 - (NSString *)_selectorString
 {
@@ -110,6 +114,7 @@ using namespace llvm;
                                  class:(TQNodeClass *)aClass
                                  error:(NSError **)aoErr
 {
+    _class = aClass;
     // If a matching bridged method is found, use the types from there
     TQBridgedClassInfo *classInfo = [aProgram.bridge classNamed:aClass.superClassName];
     TQBridgedMethodInfo *methodInfo = [classInfo.instanceMethods objectForKey:[self _selectorString]];
@@ -145,6 +150,7 @@ using namespace llvm;
         classPtr = builder->CreateCall(aProgram.object_getClass, classPtr);
     builder->CreateCall4(aProgram.class_replaceMethod, classPtr, selector, imp, signature);
 
+    _class = nil;
     return NULL;
 }
 

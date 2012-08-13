@@ -9,7 +9,9 @@ typedef enum {
 } TQMethodType;
 
 // A method definition (+ aMethod: argument { body })
-@interface TQNodeMethod : TQNodeBlock
+@interface TQNodeMethod : TQNodeBlock {
+    TQNodeClass *_class;
+}
 @property(readwrite, assign) TQMethodType type;
 + (TQNodeMethod *)node;
 + (TQNodeMethod *)nodeWithType:(TQMethodType)aType;
