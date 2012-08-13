@@ -28,7 +28,7 @@ int main(int argc, char **argv)
     }
 
     TQProgram *program = [TQProgram programWithName:@"Root"];
-    program.shouldShowDebugInfo = NO;
+    program.shouldShowDebugInfo = showDebugOutput;
     NSString *script;
     if(inputPath)
         script = [NSString stringWithContentsOfFile:[NSString stringWithUTF8String:inputPath] encoding:NSUTF8StringEncoding error:nil];
