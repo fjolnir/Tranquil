@@ -6,6 +6,8 @@
 #include <llvm/IRBuilder.h>
 #include <Foundation/NSObject.h>
 
+extern "C" NSString * const kTQSyntaxErrorException;
+
 @interface TQProgram : NSObject
 @property(readwrite, retain) NSString *name;
 @property(readonly) TQBridgeSupport *bridge;

@@ -37,19 +37,34 @@ typedef struct _TQParserState TQParserState;
 
 
 #define SyntaxError(msg) do { \
-    NSString *source = [NSString stringWithUTF8String:G->buf]; \
-        NSRange tokRange         = state->currentToken; \
-        NSRange interestingRange = NSIntersectionRange(NSMakeRange(0, [source length]), NSMakeRange(tokRange.location - 10, tokRange.length + 20)); \
-        if(interestingRange.length > 0) { \
-            NSMutableString *errStr = [[[source substringWithRange:interestingRange] mutableCopy] autorelease]; \
-            NSLog(@"%@", errStr);\
-            NSRange errRange = NSMakeRange(tokRange.location - interestingRange.location, tokRange.length); \
-            [errStr insertString:@" >> " atIndex:errRange.location]; \
-            [errStr insertString:@" << " atIndex:NSMaxRange(errRange) + 4]; \
-            NSLog(@"Syntax error! %@ near %@", (msg), errStr); \
-        } else \
-            NSLog(@"Syntax error! %@", (msg)); \
-    exit(1); \
+    unsigned int lineNo = 1; \
+    for(int i = 0; i <= G->pos; ++i) { \
+        if(G->data->script[i] == '\n') \
+            ++lineNo; \
+    } \
+    NSString *exceptionReason; \
+    NSString *source         = [NSString stringWithFormat:@"%s", G->buf]; \
+    NSRange tokRange         = state->currentToken; \
+    NSRange interestingRange = NSIntersectionRange(NSMakeRange(0, [source length]), NSMakeRange(G->pos - 20, G->pos + 20)); \
+    if(interestingRange.length > 0) { \
+        NSMutableString *errStr = [[[source substringWithRange:interestingRange] mutableCopy] autorelease]; \
+        const char *errCStr = [errStr UTF8String]; \
+        \
+        for(int i = G->pos; i <= [source length]; ++i) { \
+            if(errCStr[i] == '\n' || errCStr[i] == '\0') { \
+                int idx = i - interestingRange.location; \
+                NSMutableString *spaceStr = [NSMutableString stringWithString:@"\n"]; \
+                int temp = idx; \
+                while(errCStr[temp] != '\n' && temp >= 0) { --temp; [spaceStr appendString:@" "]; } \
+                [spaceStr replaceCharactersInRange:(NSRange) { [spaceStr length]-2, 1} withString:@"^"]; \
+                [errStr insertString:spaceStr atIndex:idx+1]; \
+                break; \
+            } \
+        } \
+        exceptionReason = [NSString stringWithFormat:@"Line %d: Syntax error! %@ near:\n%@", lineNo, (msg), errStr]; \
+    } else \
+         exceptionReason = [NSString stringWithFormat:@"Line %d: Syntax error! %@", lineNo, (msg)]; \
+    [NSException raise:kTQSyntaxErrorException format:@"%@", exceptionReason]; \
 } while(0)
 
 //#define YY_DEBUG
@@ -237,7 +252,8 @@ Call         = callee:Callee
                     PushStack([TQNodeCall nodeWithCallee:callee]);
                     PushStack([NSMutableArray array]);
                }
-               '(' -- (CallArg (-- ',' -- CallArg)*)? -- ')'
+               '(' -- (CallArg (-- ',' -- CallArg)*)? --
+               _rightParen ~{ SyntaxError(@"Unterminated block call"); }
                {
                     ExtendToken();
                     NSMutableArray *arguments = PopStack();
@@ -275,14 +291,15 @@ Block        = '{' --
                     $$ = PopStack();
                     [$$ setStatements:statements];
                }
-               '}'
+               _rightBrace ~{ SyntaxError(@"Unterminated block"); }
              | '`' -
                {
                    UpdateToken();
                    PushStack([NSMutableArray array]);
                }
                ( (BlockArgDef - (',' -- BlockArgDef --)*)?
-               (',' -- BlkVarArgDef --)? -- '|' -)? expr:Expression - '`'
+               (',' -- BlkVarArgDef --)? -- '|' -)? expr:Expression -
+               _backtick ~{ SyntaxError(@"Unterminated block"); }
                {
                    ExtendToken();
                    NSMutableArray *arguments = PopStack();
@@ -294,7 +311,11 @@ Block        = '{' --
                    [$$ setStatements:[NSMutableArray arrayWithObject:[TQNodeReturn nodeWithValue:expr]]];
                }
 BlockArgDef  = name:Identifier { [StackTop addObject:[TQNodeArgumentDef nodeWithName:name]]; }
-                (- "=" -- default:Expression { [[StackTop lastObject] setDefaultArgument:default]; })? 
+                (- "=" --
+                  default:Expression ~{ SyntaxError(@"Expected default argument expression after '='"); }
+                  {
+                      [[StackTop lastObject] setDefaultArgument:default];
+                  })? 
 BlkVarArgDef = Variadic        { [StackGet(-1) setIsVariadic:YES]; }
 
 
@@ -304,7 +325,11 @@ Class        = '#' name:Constant --
                    UpdateToken();
                    PushStack([TQNodeClass nodeWithName:[(TQNodeConstant *)name value]]);
                }
-               ( "<" -- SuperClsName -- )? '{' -- (Method --)* '}'
+               ( "<" --
+                 SuperClsName ~{ SyntaxError(@"Expected Super class after '<'"); }
+                 -- )?
+               '{' -- (Method --)*
+               _rightBrace ~{ SyntaxError(@"Unterminated class"); }
                {
                    ExtendToken();
                    $$ = PopStack();
@@ -331,13 +356,15 @@ MethodImpl   = arguments:MethodArgs  --
                    ExtendToken();
                    PushStack([NSMutableArray array]);
                }
-               ( '{' -- (Statement --)* '}'
+               ( '{' -- (Statement --)*
+                 _rightBrace ~{ SyntaxError(@"Unterminated method"); }
                {
                    NSMutableArray *statements = PopStack();
                    $$ = [TQNodeMethod node];
                    [$$ setStatements:statements];
                }
-               | '`' - expr:Expression - '`'
+               | '`' - expr:Expression -
+                 _backtick ~{ SyntaxError(@"Unterminated method"); }
                {
                    ExtendToken();
                    PopStack(); // Ignore
@@ -359,7 +386,8 @@ MethodArgs   = selIdentifier:SelIdent
                    PushStack([NSMutableArray array]);
                    [StackTop addObject:[TQNodeMethodArgumentDef nodeWithName:nil selectorPart:selIdentifier]];
                }
-               (':' -- name:Identifier
+               (':' --
+                name:Identifier ~{ SyntaxError(@"Missing parameter name"); }
                 {
                     [[StackTop lastObject] setName:name];
                 }
@@ -368,7 +396,8 @@ MethodArgs   = selIdentifier:SelIdent
                    ExtendToken();
                    $$ = PopStack();
                }
-MethodArg    = identifier:SelIdent':' -- name:Identifier
+MethodArg    = identifier:SelIdent':' --
+               name:Identifier ~{ SyntaxError(@"Missing parameter name"); }
                {
                    ExtendToken();
                    [StackTop addObject:[TQNodeMethodArgumentDef nodeWithName:name selectorPart:identifier]];
@@ -379,13 +408,15 @@ MethodArg    = identifier:SelIdent':' -- name:Identifier
 If           = ( "if"        { UpdateToken();  PushStack([TQNodeIfBlock node]);     }
                | "unless"    { UpdateToken();  PushStack([TQNodeUnlessBlock node]); }
                )
-               - cond:Expression --
+               - cond:Expression -- ~{ SyntaxError(@"Condition missing"); }
                {
                    ExtendToken();
                    [StackTop setCondition:cond];
                    PushStack([NSMutableArray array]);
                }
-               ('{' -- ( Statement --)* '}' | -- Statement)
+               ('{' -- ( Statement --)*
+                _rightBrace ~{ SyntaxError(@"Unterminated if/unless block"); }
+               | -- Statement)
                ( -- "else" - elsif:If
                  {
                      [StackGet(-1) setElseBlockStatements:[NSMutableArray arrayWithObject:elsif]];
@@ -394,7 +425,9 @@ If           = ( "if"        { UpdateToken();  PushStack([TQNodeIfBlock node]); 
                  {
                      PushStack([NSMutableArray array]);
                  }
-                 ("{" -- (Statement --)* "}" | -- Statement)
+                 ("{" -- (Statement --)*
+                  "}" ~{ SyntaxError(@"Unterminated else block"); }
+                 | -- Statement)
                  {
                      NSMutableArray *statements = PopStack();
                      [StackGet(-1) setElseBlockStatements:statements];
@@ -407,13 +440,15 @@ If           = ( "if"        { UpdateToken();  PushStack([TQNodeIfBlock node]); 
                    [$$ setStatements:statements];
                }
 
-TernaryExpr    = cond:NoTernExpr --- "?" --- ifExpr:Expression
+TernaryExpr    = cond:NoTernExpr --- "?" ---
+                 ifExpr:Expression ~{ SyntaxError(@"Ternary expression missing non-nil case value"); }
                  {
                      PushStack([TQNodeTernaryOperator node]);
                      [StackTop setCondition:cond];
                      [StackTop setIfExpr:ifExpr];
                  }
-                 (--- ":" --- elseExpr:Expression
+                 (--- ":" ---
+                  elseExpr:Expression ~{ SyntaxError(@"Ternary expression missing nil case value"); }
                   {
                       [StackTop setElseExpr:elseExpr];
                   }
@@ -427,13 +462,15 @@ TernaryExpr    = cond:NoTernExpr --- "?" --- ifExpr:Expression
 Loop         = ( "while"  { UpdateToken(); PushStack([TQNodeWhileBlock node]); }
                | "until"  { UpdateToken(); PushStack([TQNodeUntilBlock node]); }
                )
-               -- cond:Expression --
+               -- cond:Expression --  ~{ SyntaxError(@"Loop condition missing"); }
                {
                    ExtendToken();
                    [StackTop setCondition:cond];
                    PushStack([NSMutableArray array]);
                }
-               ('{' -- ( Statement --)* '}' | -- Statement)
+               ('{' -- ( Statement --)*
+                '}' ~{ SyntaxError(@"Unterminated loop"); }
+               | -- Statement)
                {
                    ExtendToken();
                    NSMutableArray *statements = PopStack();
@@ -553,7 +590,9 @@ SubscriptLhs = Property
              | Constant
              | Variadic
              | ParenExpr
-Subscript    = "[" -- subscript:Expression -- "]" { ExtendToken(); [StackTop addObject:subscript]; }
+Subscript    = "[" -- subscript:Expression --
+               _rightBracket ~{ SyntaxError(@"Expected ']' to close subscript expression"); }
+               { ExtendToken(); [StackTop addObject:subscript]; }
 
 Property     = {
                    UpdateToken();
@@ -585,7 +624,10 @@ Array        = "["
                    UpdateToken();
                    PushStack([NSMutableArray array]);
                }
-               (ArrItem -- ("," -- ArrItem)*)?  -- "]"
+               (ArrItem -- ("," --
+                ArrItem ~{ SyntaxError(@"Expected array item after ','"); }
+                )*)?  --
+               _rightBracket ~{ SyntaxError(@"Array missing closing bracket"); }
                {
                    ExtendToken();
                    $$ = [TQNodeArray node];
@@ -602,14 +644,16 @@ Dictionary   = "{" --
                    UpdateToken();
                    PushStack([NSMapTable mapTableWithStrongToStrongObjects]);
                }
-               (DictItem -- ("," -- DictItem)*)? -- "}"
+               (DictItem -- ("," -- DictItem)*)? --
+               _rightBrace ~{ SyntaxError(@"Dictionary missing closing brace"); }
                {
                    $$ = [TQNodeDictionary node];
                    NSMutableArray *items = PopStack();
                    [$$ setItems:items];
 
                }
-DictItem     = key:Expression -- "=>" -- value:Expression
+DictItem     = key:Expression -- "=>" --
+               value:Expression ~{ SyntaxError(@"Expected dictionary item after '=>'"); }
                {
                    ExtendToken();
                    [StackTop setObject:value forKey:key];
@@ -629,7 +673,7 @@ Weak         = '~' --
                | Self
                | Variadic
                | Variable
-               | ParenExpr)
+               | ParenExpr) ~{ SyntaxError(@"Value for weak reference missing"); }
                {
                    $$ = [TQNodeWeak nodeWithValue:$$];
                }
@@ -682,7 +726,8 @@ String       = '"'
                    ExtendToken();
                    PushStack([TQNodeString nodeWithString:[NSMutableString string]]);
                }
-               (StrEmbeddExpr|StrInside)* '"'
+               (StrEmbeddExpr|StrInside)*
+               _dblQuot ~{ SyntaxError(@"String literal left unclosed"); }
                {
                    $$ = PopStack();
                }
@@ -708,4 +753,11 @@ Space        = [ \t]
 ---          = (Space | EOL | Comment)+
 EOL          = (- ('\n' | '\r\n' | '\r'))+
 EOF          = - !.
+
+# Rules to implement syntax errors
+_dblQuot      = '"'
+_backtick     = "`"
+_rightParen   = ')'
+_rightBrace   = "}"
+_rightBracket = "]"
 %%

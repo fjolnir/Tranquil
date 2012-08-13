@@ -44,6 +44,8 @@ extern "C" {
 
 using namespace llvm;
 
+NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
+
 @implementation TQProgram
 @synthesize name=_name, llModule=_llModule, irBuilder=_irBuilder, shouldShowDebugInfo=_shouldShowDebugInfo,
             bridge=_bridge, rootBlock=_currentRoot;
@@ -404,8 +406,14 @@ using namespace llvm;
 
     [parserState.stack addObject:[NSMutableArray array]];
 
-    while(yyparse(&greg));
-    yydeinit(&greg);
+    @try {
+        while(yyparse(&greg));
+    } @catch(NSException *e) {
+        NSLog(@"%@", [e reason]);
+        return nil;
+    } @finally {
+        yydeinit(&greg);
+    }
 
     if(!parserState.root)
         return nil;
