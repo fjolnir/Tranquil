@@ -254,11 +254,11 @@ In this example we had a block that is a property of `Klass`. This block was bei
 ### Fibonacci
 
     fibonacci = { index, curr=0, succ=1 |
-        num = curr + succ
-        if index > 2 {
+        num = curr + succ 
+        if index > 2
             ^fibonacci(index - 1, succ, num)
-        }
-        ^num
+        else
+	        ^num
     }
     fib = fibonacci(50) \ Calculate the 50th number in the fibonacci sequence
 
