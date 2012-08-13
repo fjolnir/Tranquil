@@ -19,8 +19,8 @@
 	valid  \ Represents non-nilness, for use in cases where the actual object value is not of concern ('yes' is a synonym)
 	
 	\ Built-in Operators
-	||  \ Or:  Evaluates to the first non-nil expression: (nil || 123) == 123
-	&&  \ And: Evaluates to the last non-nil expression:  (1 && 2) == 2
+	||  \ Or:  Evaluates to the first non-nil expression: (nil || 123) == 123 (Can be chained)
+	&&  \ And: Evaluates to the last non-nil expression:  (1 && 2) == 2       (Can be chained)
 	
 	\ Variable assignment
 	a = b \ Variables are local in scope
@@ -28,6 +28,7 @@
 	      \ are reserved for classes
 	a, b = 1, 2 \ Comma separated operands can be used for multiple assignment
 	a, b = b, a \ The right hand sides are evaluated before the assignment, so swapping values works
+	a, b = nil  \ If there are fewer operands on the right hand side the last one is used for the missing ones
 	
 	\ Weak references
 	a = ~b \ Assigns a to a weak reference to b. (Concept explained later)

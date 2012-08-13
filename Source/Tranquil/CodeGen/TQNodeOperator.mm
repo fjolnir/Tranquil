@@ -317,4 +317,14 @@ using namespace llvm;
         return ref;
     return nil;
 }
+
+- (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
+{
+    for(TQNode *node in self.left) {
+        aBlock(node);
+    }
+    for(TQNode *node in self.right) {
+        aBlock(node);
+    }
+}
 @end
