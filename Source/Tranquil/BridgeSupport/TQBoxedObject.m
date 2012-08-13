@@ -205,6 +205,10 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
                     ofs += size;
                 }
             }
+            // If nil, we just give 0 bits
+            else if(!aValue) {
+                memset(aDest, 0, size);
+            }
             // If it's a dictionary we can unbox based on it's keys
             else if([aValue isKindOfClass:[NSDictionary class]] || [aValue isKindOfClass:[NSMapTable class]]) {
                   [NSException raise:@"Unimplemented"
