@@ -30,9 +30,14 @@ using namespace llvm;
     [super dealloc];
 }
 
+- (NSString *)_name
+{
+    return @"if";
+}
+
 - (NSString *)description
 {
-    NSMutableString *out = [NSMutableString stringWithString:@"<if@ "];
+    NSMutableString *out = [NSMutableString stringWithFormat:@"<%@@ ", [self _name]];
     [out appendFormat:@"(%@)", _condition];
     [out appendString:@" {\n"];
 
@@ -92,7 +97,6 @@ using namespace llvm;
     else if([aBlock isKindOfClass:[self class]] && [(TQNodeIfBlock *)aBlock containingLoop])
         _containingLoop = [(TQNodeIfBlock *)aBlock containingLoop];
 
-    IRBuilder<> *builder = aBlock.builder;
     Module *mod = aProgram.llModule;
 
     // Pose as the parent block for the duration of code generation
@@ -135,7 +139,7 @@ using namespace llvm;
         }
     }
 
-    BasicBlock *endifBB = BasicBlock::Create(mod->getContext(), "endif", aBlock.function);
+    BasicBlock *endifBB = BasicBlock::Create(mod->getContext(), [[NSString stringWithFormat:@"end%@", [self _name]] UTF8String], aBlock.function);
     IRBuilder<> *endifBuilder = new IRBuilder<>(endifBB);
 
     // If our basic block has been changed that means there was a nested conditional
@@ -155,7 +159,7 @@ using namespace llvm;
     delete thenBuilder;
     delete elseBuilder;
 
-    builder->CreateCondBr(testResult, thenBB, elseBB ? elseBB : endifBB);
+    aBlock.builder->CreateCondBr(testResult, thenBB, elseBB ? elseBB : endifBB);
 
     // Make the parent block continue from the end of the statement
     aBlock.basicBlock = endifBB;
@@ -183,15 +187,32 @@ using namespace llvm;
 
 @implementation TQNodeUnlessBlock
 - (llvm::Value *)generateTestExpressionInProgram:(TQProgram *)aProgram
-                                           block:(TQNodeBlock *)aBlock
+                                     withBuilder:(IRBuilder<> *)aBuilder
                                            value:(llvm::Value *)aValue
 {
-    return aBlock.builder->CreateICmpEQ(aValue, ConstantPointerNull::get(aProgram.llInt8PtrTy), "ifTest");
+    return aBuilder->CreateICmpEQ(aValue, ConstantPointerNull::get(aProgram.llInt8PtrTy), "unlessTest");
+}
+- (NSString *)_name
+{
+    return @"unless";
 }
 @end
 
 @implementation TQNodeTernaryOperator
 @synthesize ifExpr=_ifExpr, elseExpr=_elseExpr;
+
++ (TQNodeTernaryOperator *)node
+{
+    return (TQNodeTernaryOperator *)[super node];
+}
+
++ (TQNodeTernaryOperator *)nodeWithIfExpr:(TQNode *)aIfExpr else:(TQNode *)aElseExpr
+{
+    TQNodeTernaryOperator *ret = [self node];
+    ret.ifExpr = aIfExpr;
+    ret.elseExpr = aElseExpr;
+    return ret;
+}
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
 {
@@ -215,7 +236,9 @@ using namespace llvm;
 - (TQNode *)referencesNode:(TQNode *)aNode
 {
     TQNode *ref;
-    if((ref = [_ifExpr referencesNode:aNode]))
+    if((ref = [self.condition referencesNode:aNode]))
+        return ref;
+    else if((ref = [_ifExpr referencesNode:aNode]))
         return ref;
     return [_elseExpr referencesNode:aNode];
 }
