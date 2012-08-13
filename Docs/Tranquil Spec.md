@@ -18,6 +18,10 @@
 	...    \ Array of passed variadic arguments
 	valid  \ Represents non-nilness, for use in cases where the actual object value is not of concern ('yes' is a synonym)
 	
+	\ Built-in Operators
+	||  \ Or:  Evaluates to the first non-nil expression: (nil || 123) == 123
+	&&  \ And: Evaluates to the last non-nil expression:  (1 && 2) == 2
+	
 	\ Variable assignment
 	a = b \ Variables are local in scope
 	      \ Variables must begin with a lowercase letter, as uppercase names

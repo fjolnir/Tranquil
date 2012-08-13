@@ -387,19 +387,19 @@ If           = ( "if"        { UpdateToken();  PushStack([TQNodeIfBlock node]); 
                }
 
 TernaryExpr    = cond:NoTernExpr --- "?" --- ifExpr:Expression
-               {
-                   PushStack([TQNodeTernaryOperator node]);
-                   [StackTop setCondition:cond];
-                   [StackTop setIfExpr:ifExpr];
-               }
-               (--- ":" --- elseExpr:Expression
-                {
-                    [StackTop setElseExpr:elseExpr];
-                }
-               )?
-               {
-                   $$ = PopStack();
-               }
+                 {
+                     PushStack([TQNodeTernaryOperator node]);
+                     [StackTop setCondition:cond];
+                     [StackTop setIfExpr:ifExpr];
+                 }
+                 (--- ":" --- elseExpr:Expression
+                  {
+                      [StackTop setElseExpr:elseExpr];
+                  }
+                 )?
+                 {
+                     $$ = PopStack();
+                 }
 
 # Loops
 
@@ -441,7 +441,7 @@ ShiftRhs     = "<<" - b:Product      { ExtendToken(); ReplaceStackTop([TQNodeOpe
 ShiftStmt    = a:NoEqExpr { PushStack(a); }
                - ShiftRhs { $$ = PopStack(); }
 
-Equation     = a:Sum                 { UpdateToken(); PushStack(a);                                                                                   }
+EqualityTest = a:Sum                 { UpdateToken(); PushStack(a);                                                                                   }
                ( - "<" -  b:Equation { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorLesser         left:StackTop right:b]); }
                | - ">" -  b:Equation { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorGreater        left:StackTop right:b]); }
                | - "<=" - b:Equation { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorLesserOrEqual  left:StackTop right:b]); }
@@ -450,6 +450,10 @@ Equation     = a:Sum                 { UpdateToken(); PushStack(a);             
                | - "!=" - b:Equation { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorInequal        left:StackTop right:b]); }
                )*                    { $$ = PopStack();                                                                                               }
 
+Equation     = a:EqualityTest        { UpdateToken(); PushStack(a);                                                                                   }
+               ( - "&&" - b:Equation { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAnd            left:StackTop right:b]); }
+               | - "||" - b:Equation { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorOr             left:StackTop right:b]); }
+               )*                    { $$ = PopStack();                                                                                               }
 
 Assignment     = a:AssgnLhs
                  {

@@ -8,6 +8,8 @@ enum {
     kTQOperatorModulo,
     kTQOperatorLesser,
     kTQOperatorAssign,
+    kTQOperatorAnd,
+    kTQOperatorOr,
     kTQOperatorGreater,
     kTQOperatorLesserOrEqual,
     kTQOperatorGreaterOrEqual,

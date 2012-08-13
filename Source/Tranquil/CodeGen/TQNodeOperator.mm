@@ -4,6 +4,7 @@
 #import "../TQProgram.h"
 #import "../TQDebug.h"
 #import "TQNodeNumber.h"
+#import "TQNodeConditionalBlock.h"
 
 using namespace llvm;
 
@@ -116,6 +117,25 @@ using namespace llvm;
         Value *left  = [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
         Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
         return aBlock.builder->CreateCall2(aProgram.TQObjectsAreNotEqual, left, right);
+    } else if(_type == kTQOperatorAnd || _type == kTQOperatorOr) {
+        // Generate:
+        // temp = left
+        // unless/if temp { temp = right }
+        TQNodeVariable *tempVar = [TQNodeVariable new];
+        [tempVar createStorageInProgram:aProgram block:aBlock error:aoError];
+
+        Class condKls = _type == kTQOperatorAnd ? [TQNodeIfBlock class] : [TQNodeUnlessBlock class];
+        TQNodeIfBlock *conditional = (TQNodeIfBlock *)[condKls node];
+
+        TQNodeOperator *leftAsgn  = [TQNodeOperator nodeWithType:kTQOperatorAssign left:tempVar right:_left];
+        [leftAsgn generateCodeInProgram:aProgram block:aBlock error:aoError];
+        conditional.condition = tempVar;
+        TQNodeOperator *rightAsgn  = [TQNodeOperator nodeWithType:kTQOperatorAssign left:tempVar right:_right];
+        conditional.statements = [NSArray arrayWithObject:rightAsgn];
+        [conditional generateCodeInProgram:aProgram block:aBlock error:aoError];
+
+        [tempVar release];
+        return [tempVar generateCodeInProgram:aProgram block:aBlock error:aoError];
     } else {
         Value *left  = [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
         Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
@@ -188,6 +208,10 @@ using namespace llvm;
             case kTQOperatorSubtract: opStr = @"-";
             break;
             case kTQOperatorDivide: opStr = @"/";
+            break;
+            case kTQOperatorAnd: opStr = @"&&";
+            break;
+            case kTQOperatorOr: opStr = @"||";
             break;
             case kTQOperatorLesser: opStr = @"<";
             break;
