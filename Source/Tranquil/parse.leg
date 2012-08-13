@@ -6,9 +6,10 @@ struct _TQParserState {
     int currentLine;
 
     NSMutableArray *stack;
-    TQProgram *program;
+    TQNodeBlock *root;
 
-    FILE *stream;
+    const char *script;
+    unsigned int length, cursor;
 };
 typedef struct _TQParserState TQParserState;
 
@@ -53,17 +54,15 @@ typedef struct _TQParserState TQParserState;
 
 //#define YY_DEBUG
 
-#define YY_INPUT(buf, result, maxSize, state) yyInput(buf, &result, maxSize, state)
+#define YY_INPUT(buf, result, maxSize, state) result = yyInput(buf, maxSize, state)
 
-void yyInput(char *buf, int *result, int maxSize, TQParserState *state) {
-    (*result) = fread(buf, 1, maxSize, state->stream);
-    static int doneNewlineHack = 0;
-    if((*result) == 0 && doneNewlineHack == 0) {
-        doneNewlineHack = 1;
-        (*buf) = '\n';
-        (*result) = 1;
-        return;
+int yyInput(char *buf, int maxSize, TQParserState *state) {
+    if(state->cursor >= state->length) {
+        *buf = EOF;
+        return 0;
     }
+    *buf = state->script[state->cursor++];
+    return 1;
 }
 %}
 
@@ -72,7 +71,7 @@ Program      = -- ((Statement (- '.')?|Comment) --)+ EOF
                    NSMutableArray *statements = PopStack();
                    TQNodeBlock *root = [TQNodeRootBlock node];
                    [root setStatements:statements];
-                   [state->program setRoot:root];
+                   state->root = root;
                }
              | - ( !EOL . )* EOL { SyntaxError(@"") }
 
@@ -685,58 +684,3 @@ Space        = [ \t]
 EOL          = (- ('\n' | '\r\n' | '\r'))+
 EOF          = - !.
 %%
-
-void printHelpAndExit(int status)
-{
-    printf("Usage: tranquil [options] [program path]\n");
-    printf("-h    Show this help message\n");
-    printf("-d    Print debugging information (Including the llvm assembly output)\n");
-    exit(status);
-}
-
-int main(int argc, char **argv)
-{
-    BOOL showDebugOutput = NO;
-    char *inputPath = NULL;
-
-    char *arg;
-    for(int i = 1; i < argc; ++i) {
-        arg = argv[i];
-        if(arg[0] == '-') {
-            if(strcmp(arg, "-d") == 0) showDebugOutput = YES;
-            else if(strcmp(arg, "-h") == 0) printHelpAndExit(0);
-            else {
-                fprintf(stderr, "Unknown argument %s\n", arg);
-                printHelpAndExit(1);
-            }
-        } else
-            inputPath = arg;
-    }
-
-    GREG greg;
-    yyinit(&greg);
-
-    TQParserState parserState = {0};
-    parserState.currentLine = 1;
-    parserState.stack = [NSMutableArray array];
-    parserState.program = [TQProgram programWithName:@"Test"];
-    parserState.program.shouldShowDebugInfo = showDebugOutput;
-    parserState.stream = inputPath ? fopen(inputPath, "r") : stdin;
-    if(!parserState.stream) {
-        fprintf(stderr, "Input file '%s' not found", inputPath);
-        exit(1);
-    }
-    greg.data = &parserState;
-
-    [parserState.stack addObject:[NSMutableArray array]];
-
-    while(yyparse(&greg));
-    yydeinit(&greg);
-
-    if(showDebugOutput)
-        NSLog(@"%@", parserState.program);
-    [parserState.program run];
-
-    return 0;
-}
-

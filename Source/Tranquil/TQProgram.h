@@ -8,11 +8,13 @@
 
 @interface TQProgram : NSObject
 @property(readwrite, retain) NSString *name;
-@property(readwrite, retain) TQNodeBlock *root;
 @property(readonly) TQBridgeSupport *bridge;
 @property(readwrite) BOOL shouldShowDebugInfo;
 @property(readonly) llvm::Module *llModule;
 @property(readonly) llvm::IRBuilder<> *irBuilder;
+
+// This property is set during compilation, in order for nodes in the tree to be able to easily access the root block
+@property(readonly) TQNodeBlock *rootBlock;
 
 #pragma mark - Cached types
 // void
@@ -51,7 +53,7 @@
 
 + (TQProgram *)programWithName:(NSString *)aName;
 - (id)initWithName:(NSString *)aName;
-- (BOOL)run;
+- (id)executeScript:(NSString *)aScript error:(NSError **)aoErr;
 
 - (void)insertLogUsingBuilder:(llvm::IRBuilder<> *)aBuilder withStr:(NSString *)txt;
 - (llvm::Value *)getGlobalStringPtr:(NSString *)aStr withBuilder:(llvm::IRBuilder<> *)aBuilder;

@@ -52,8 +52,6 @@ using namespace llvm;
     [_statements release];
     [_argTypes release];
     [_retType release];
-    delete _basicBlock;
-    delete _function;
     delete _builder;
     [super dealloc];
 }
@@ -416,7 +414,7 @@ using namespace llvm;
     }
     FunctionType* funType = FunctionType::get(retType, paramTypes, _isVariadic);
 
-    llvm::Module *mod = aProgram.llModule;
+    Module *mod = aProgram.llModule;
 
     const char *functionName = [[NSString stringWithFormat:@"__tq_block_invoke"] UTF8String];
 
@@ -620,15 +618,9 @@ using namespace llvm;
     // No arguments for the root block ([super init] adds the block itself as an arg)
     [self.arguments removeAllObjects];
     _retType = @"@";
-    _argTypes = [NSArray array];
+    _argTypes = [NSMutableArray new];
 
     return self;
-}
-
-- (void)dealloc
-{
-    [_argTypes release];
-    [super dealloc];
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr

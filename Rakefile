@@ -4,7 +4,7 @@ PEG = 'greg'
 
 BUILD_DIR = 'Build'
 
-PARSER_OUTPATH = "#{BUILD_DIR}/parse.mm"
+PARSER_OUTPATH = "#{BUILD_DIR}/parse.m"
 
 PEGFLAGS = [
     "-o #{PARSER_OUTPATH}",
@@ -17,6 +17,7 @@ CXXFLAGS = [
     '-std=gnu++98',
     '-mmacosx-version-min=10.7',
     '-I`pwd`/Source',
+    '-I`pwd`/Build',
     '-I/usr/include/libxml2',
     '-Wno-deprecated-writable-strings', # BridgeSupport uses this in a few places
     '`llvm-config --cflags`',
@@ -46,7 +47,7 @@ STUB_OUTPATH   = 'Build/block_stubs.mm'
 STUB_SCRIPT    = 'Source/Tranquil/gen_stubs.rb'
 MSGSEND_SOURCE = 'Source/Tranquil/Runtime/msgsend.s'
 MSGSEND_OUT    = "Build/msgsend.o"
-OBJC_SOURCES   = FileList['Source/Tranquil/**/*.m*'].add('Source/Tranquil/**/*.c').add(PARSER_OUTPATH).add(STUB_OUTPATH)
+OBJC_SOURCES   = FileList['Source/Tranquil/**/*.m*'].add('Source/Tranquil/**/*.c').add(STUB_OUTPATH)
 O_FILES        = OBJC_SOURCES.pathmap(PATHMAP)
 O_FILES << MSGSEND_OUT
 PEG_SOURCE     = FileList['Source/Tranquil/*.leg'].first
@@ -82,7 +83,7 @@ file :build_dir do
     sh "mkdir -p #{File.dirname(__FILE__)}/Build"
 end
 
-file :tranquil => O_FILES do |t|
+file :tranquil => [PARSER_OUTPATH] + O_FILES do |t|
     sh "#{LD} #{LDFLAGS} #{LIBS} #{O_FILES} -o #{BUILD_DIR}/#{t.name}"
 end
 

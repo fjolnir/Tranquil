@@ -326,7 +326,7 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
 
     // With constants we just want to unbox them once and then keep that object around
     Module *mod = aProgram.llModule;
-    Function *rootFunction = aProgram.root.function;
+    Function *rootFunction = aProgram.rootBlock.function;
     IRBuilder<> rootBuilder(&rootFunction->getEntryBlock(), rootFunction->getEntryBlock().begin());
     Value *constant = mod->getOrInsertGlobal([_name UTF8String], [TQBridgeSupport llvmTypeFromEncoding:[_type UTF8String] inProgram:aProgram]);
     constant = rootBuilder.CreateBitCast(constant, aProgram.llInt8PtrTy);

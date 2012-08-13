@@ -9,6 +9,9 @@
 #import "CodeGen/Processors/TQProcessor.h"
 #import <objc/runtime.h>
 #import <objc/message.h>
+extern "C" {
+#import "parse.m"
+}
 
 # include <llvm/Module.h>
 # include <llvm/DerivedTypes.h>
@@ -42,8 +45,8 @@
 using namespace llvm;
 
 @implementation TQProgram
-@synthesize root=_root, name=_name, llModule=_llModule, irBuilder=_irBuilder, shouldShowDebugInfo=_shouldShowDebugInfo,
-            bridge=_bridge;
+@synthesize name=_name, llModule=_llModule, irBuilder=_irBuilder, shouldShowDebugInfo=_shouldShowDebugInfo,
+            bridge=_bridge, rootBlock=_currentRoot;
 @synthesize llVoidTy=_llVoidTy, llInt8Ty=_llInt8Ty, llInt16Ty=_llInt16Ty, llInt32Ty=_llInt32Ty, llInt64Ty=_llInt64Ty,
     llFloatTy=_llFloatTy, llDoubleTy=_llDoubleTy, llIntTy=_llIntTy, llIntPtrTy=_llIntPtrTy, llSizeTy=_llSizeTy,
     llPtrDiffTy=_llPtrDiffTy, llVoidPtrTy=_llVoidPtrTy, llInt8PtrTy=_llInt8PtrTy, llVoidPtrPtrTy=_llVoidPtrPtrTy,
@@ -255,7 +258,6 @@ using namespace llvm;
 {
     delete _irBuilder;
     delete _llModule;
-    [_root release];
     [_bridge release];
     [super dealloc];
 }
@@ -279,9 +281,11 @@ using namespace llvm;
 }
 
 // Executes the current program tree
-- (BOOL)run
+- (id)_executeNode:(TQNodeBlock *)aNode
 {
-    [self _preprocessNode:_root withTrace:[NSMutableArray array]];
+    [self _preprocessNode:aNode withTrace:[NSMutableArray array]];
+    NSLog(@"%@", aNode);
+
     TQInitializeRuntime();
     InitializeNativeTarget();
 
@@ -291,7 +295,7 @@ using namespace llvm;
     [_bridge loadFramework:@"/System/Library/Frameworks/GLUT.framework"];
 
     NSError *err = nil;
-    [_root generateCodeInProgram:self block:nil error:&err];
+    [aNode generateCodeInProgram:self block:nil error:&err];
     if(err) {
         NSLog(@"Error: %@", err);
         return NO;
@@ -357,7 +361,7 @@ using namespace llvm;
 
 
     if(!_shouldShowDebugInfo) {
-        fpm.run(*_root.function);
+        fpm.run(*aNode.function);
         modulePasses.run(*_llModule);
     }
 
@@ -366,7 +370,7 @@ using namespace llvm;
         llvm::PrintStatistics();
     }
 
-    id(*rootPtr)() = (id(*)())engine->getPointerToFunction(_root.function);
+    id(*rootPtr)() = (id(*)())engine->getPointerToFunction(aNode.function);
 
     if(_shouldShowDebugInfo)
         fprintf(stderr, "---------------------\n");
@@ -385,7 +389,39 @@ using namespace llvm;
         TQLog(@"'root' retval:  %p: %@ (%@)", ret, ret ? ret : nil, [ret class]);
     }
 
-    return YES;
+    return ret;
+}
+
+- (id)executeScript:(NSString *)aScript error:(NSError **)aoErr
+{
+    GREG greg;
+    yyinit(&greg);
+
+    TQParserState parserState = {0};
+    parserState.currentLine = 1;
+    parserState.stack = [NSMutableArray array];
+    parserState.script = [aScript UTF8String];
+    parserState.length = [aScript length];
+    greg.data = &parserState;
+
+    [parserState.stack addObject:[NSMutableArray array]];
+
+    while(yyparse(&greg));
+    yydeinit(&greg);
+
+    if(!parserState.root)
+        return nil;
+
+    if(_shouldShowDebugInfo)
+        NSLog(@"%@", parserState.root);
+
+    _currentRoot = parserState.root;
+    id result = [self _executeNode:parserState.root];
+    NSLog(@"executed");
+    _currentRoot = nil;
+    [parserState.root release];
+    NSLog(@"Released AST");
+    return result;
 }
 
 
@@ -427,10 +463,4 @@ using namespace llvm;
     args.push_back([self getGlobalStringPtr:txt withBuilder:aBuilder]);
     aBuilder->CreateCall(func_printf, args);
 }
-
-- (NSString *)description
-{
-    return [NSString stringWithFormat:@"<prog@\n%@\n}>", _root];
-}
-
 @end

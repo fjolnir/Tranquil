@@ -95,7 +95,7 @@ using namespace llvm;
     Module *mod = aProgram.llModule;
     Value *selectorGlobal = mod->getGlobalVariable([selStr UTF8String], false);
     if(!selectorGlobal) {
-        Function *rootFunction = aProgram.root.function;
+        Function *rootFunction = aProgram.rootBlock.function;
         IRBuilder<> rootBuilder(&rootFunction->getEntryBlock(), rootFunction->getEntryBlock().begin());
         Value *selector = [aProgram getGlobalStringPtr:selStr inBlock:aBlock];
 
