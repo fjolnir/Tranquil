@@ -11,26 +11,40 @@ PEGFLAGS = [
     #"-v"
 ].join(' ')
 
-CXXFLAGS = [
-    '-DDEBUG',
-    '-std=gnu++98',
-    '-mmacosx-version-min=10.7',
-    '-I`pwd`/Source',
-    '-I`pwd`/Build',
-    '-I/usr/include/libxml2',
-    '-Wno-deprecated-writable-strings', # BridgeSupport uses this in a few places
-    '`llvm-config --cflags`',
-    '-O0',
-    '-g',
-    '-ObjC++',
-    #'--analyze'
-].join(' ')
 
+CXXFLAGS = {
+    :release => [
+        '-DDEBUG',
+        '-std=gnu++98',
+        '-mmacosx-version-min=10.7',
+        '-I`pwd`/Source',
+        '-I`pwd`/Build',
+        '-I/usr/include/libxml2',
+        '-Wno-deprecated-writable-strings', # BridgeSupport uses this in a few places
+        '`/usr/local/bin/llvm-config --cflags`',
+        '-O3',
+        '-ObjC++',
+    ].join(' '),
+    :development => [
+        '-DDEBUG',
+        '-std=gnu++98',
+        '-mmacosx-version-min=10.7',
+        '-I`pwd`/Source',
+        '-I`pwd`/Build',
+        '-I/usr/include/libxml2',
+        '-Wno-deprecated-writable-strings', # BridgeSupport uses this in a few places
+        '`/usr/local/bin/llvm-config --cflags`',
+        '-O0',
+        '-g',
+        '-ObjC++',
+        #'--analyze'
+    ].join(' ')
+}
 
 LDFLAGS = [
     '-lstdc++',
-    '`llvm-config --libs core jit nativecodegen bitwriter ipo instrumentation`',
-    '`llvm-config --ldflags`',
+    '`/usr/local/bin/llvm-config --libs core jit nativecodegen bitwriter ipo instrumentation`',
+    '`/usr/local/bin/llvm-config --ldflags`',
     '-framework Foundation',
     '-framework AppKit',
     '-all_load',
@@ -52,8 +66,10 @@ PEG_SOURCE     = FileList['Source/Tranquil/*.leg'].first
 
 ARC_FILES = ['Source/Tranquil/Runtime/TQWeak.m']
 
+@buildMode = :development
+
 def compile(file, flags=CXXFLAGS, cc=CXX)
-    cmd = "#{cc} #{file[:in].join(' ')} #{flags} -c -o #{file[:out]}"
+    cmd = "#{cc} #{file[:in].join(' ')} #{flags[@buildMode]} -c -o #{file[:out]}"
     cmd << " -fobjc-arc" if ARC_FILES.member? file[:in].first
     sh cmd
 end
@@ -83,10 +99,16 @@ file :build_dir do
 end
 
 file :tranquil => [PARSER_OUTPATH] + O_FILES do |t|
-    sh "#{LD} #{LDFLAGS} #{LIBS} #{O_FILES} -o #{BUILD_DIR}/#{t.name}"
+    sh "#{LD} #{LDFLAGS} #{LIBS} #{O_FILES} -o #{BUILD_DIR}/tranquil"
+end
+
+file :setReleaseOpts do
+    p "Release build"
+    @buildMode = :release
 end
 
 task :default => [:build_dir, :tranquil]
+task :release => [:setReleaseOpts, :build_dir, :tranquil]
 
 task :run => [:default] do
     sh "#{BUILD_DIR}/tranquil"
