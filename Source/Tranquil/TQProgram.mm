@@ -284,7 +284,6 @@ using namespace llvm;
 - (id)_executeNode:(TQNodeBlock *)aNode
 {
     [self _preprocessNode:aNode withTrace:[NSMutableArray array]];
-    NSLog(@"%@", aNode);
 
     TQInitializeRuntime();
     InitializeNativeTarget();
@@ -300,7 +299,6 @@ using namespace llvm;
         NSLog(@"Error: %@", err);
         return NO;
     }
-
 
     if(_shouldShowDebugInfo) {
         llvm::EnableStatistics();
@@ -417,10 +415,9 @@ using namespace llvm;
 
     _currentRoot = parserState.root;
     id result = [self _executeNode:parserState.root];
-    NSLog(@"executed");
     _currentRoot = nil;
     [parserState.root release];
-    NSLog(@"Released AST");
+
     return result;
 }
 
