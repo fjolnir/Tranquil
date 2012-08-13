@@ -9,6 +9,7 @@
 	else
 	while
 	until
+	or
 	break  \ Prematurely terminates a loop
 	skip   \ Skips to the end of the current iteration of a loop
 	nil    \ Represents 'nothing' ('no' is a synonym)
@@ -70,6 +71,8 @@
 	
 	\ Ternary operator
 	..condition.. ? ..expression.. : ..expression..
+	\ 'or' operator
+	variable = ..expression.. or ..expression.. \ Equivalent to `var = exprA ? exprA : exprB` except that exprA is only evaluated once
 	
 	\ Objects
 	
