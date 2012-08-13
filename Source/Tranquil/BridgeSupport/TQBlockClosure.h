@@ -1,11 +1,12 @@
 #import <Tranquil/TQObject.h>
-#import <ffi.h>
+#import <ffi/ffi.h>
 
 @interface TQBlockClosure : NSObject {
     @public
     const char *_type;
     ffi_cif *_cif;
     ffi_closure *_closure;
+    ffi_type **_argTypes;
     void *_functionPointer;
     NSMutableArray *_ffiTypeObjects;
     id _block;

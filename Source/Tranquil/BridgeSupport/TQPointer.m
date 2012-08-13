@@ -38,7 +38,7 @@
 }
 + (TQPointer *)withType:(NSString *)aType count:(NSNumber *)aCount
 {
-    return [[self alloc] initWithType:[aType UTF8String] count:[aCount unsignedIntegerValue]];
+    return [[[self alloc] initWithType:[aType UTF8String] count:[aCount unsignedIntegerValue]] autorelease];
 }
 + (TQPointer *)withType:(NSString *)aType
 {

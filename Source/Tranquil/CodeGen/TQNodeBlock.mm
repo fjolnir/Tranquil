@@ -386,7 +386,6 @@ using namespace llvm;
     std::vector<Type *> paramTypes;
 
     Type *retType = [TQBridgeSupport llvmTypeFromEncoding:[_retType UTF8String] inProgram:aProgram];
-    AllocaInst *resultAlloca;
 
     NSUInteger retTypeSize;
     NSGetSizeAndAlignment([_retType UTF8String], &retTypeSize, NULL);
@@ -419,9 +418,6 @@ using namespace llvm;
     const char *functionName = [[NSString stringWithFormat:@"__tq_block_invoke"] UTF8String];
 
     _function = Function::Create(funType, GlobalValue::ExternalLinkage, functionName, mod);
-    // If the return is a void, object or a stret return we don't need to allocate a buffer for the return value
-    if(![_retType hasPrefix:@"v"] && ![_retType hasPrefix:@"@"] && !returningOnStack)
-        resultAlloca = _builder->CreateAlloca(retType);
     if(returningOnStack)
         _function->addAttribute(1, Attribute::StructRet);
     for(NSNumber *idx in byValArgIndices) {

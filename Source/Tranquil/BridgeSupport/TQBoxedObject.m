@@ -170,7 +170,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
         case _MR_C_LAMBDA_B: {
             if(*(aType+1) == _MR_C_LAMBDA_FUNCPTR) {
                 // The block can't be autoreleased since there is no way of knowing how long the function receiving it requires it.
-                TQBlockClosure *closure = [[[TQBlockClosure alloc] initWithBlock:[aValue copy] type:aType] autorelease];
+                TQBlockClosure *closure = [[[TQBlockClosure alloc] initWithBlock:[[aValue copy] autorelease] type:aType] autorelease];
                 *(void **)aDest = closure.functionPointer;
             } else {
                 TQBoxedBlockLiteral *wrapperBlock = (TQBoxedBlockLiteral *)aValue;

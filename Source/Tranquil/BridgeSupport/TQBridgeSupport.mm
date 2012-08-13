@@ -77,7 +77,7 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
         } break;
         case BS_ELEMENT_CLASS: {
             bs_element_class_t *kls = (bs_element_class_t*)value;
-            TQBridgedClassInfo *classInfo = [[TQBridgedClassInfo alloc] init];
+            TQBridgedClassInfo *classInfo = [TQBridgedClassInfo new];
             classInfo.name = [NSString stringWithUTF8String:kls->name];
             bs_element_method_t *method;
             bs_element_arg_t *arg;
@@ -110,6 +110,7 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
             //NSLog(@"}");
             classInfo.instanceMethods = instanceMethods;
             [bs->_classes setObject:classInfo forKey:classInfo.name];
+            [classInfo release];
         } break;
         case BS_ELEMENT_INFORMAL_PROTOCOL_METHOD:
             // Protocols are not a thing in Tranquil and probably won't be
@@ -423,9 +424,8 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
     std::vector<Type *> argTypes;
     std::vector<Value *> args;
     NSUInteger typeSize;
-    BasicBlock  *currBlock, *nextBlock;
+    BasicBlock  *nextBlock;
     IRBuilder<> *currBuilder, *nextBuilder;
-    currBlock   = entryBlock;
     currBuilder = entryBuilder;
 
     Type *retType = [TQBridgeSupport llvmTypeFromEncoding:[_retType UTF8String] inProgram:aProgram];    
@@ -486,7 +486,6 @@ static void _parserCallback(bs_parser_t *parser, const char *path, bs_element_ty
                 args.push_back(nextBuilder->CreateLoad(unboxedArgAlloca));
 
             ++argumentIterator;
-            currBlock   = nextBlock;
             currBuilder = nextBuilder;
         }
     } else {

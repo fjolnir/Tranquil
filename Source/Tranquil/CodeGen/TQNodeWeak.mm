@@ -14,7 +14,7 @@ using namespace llvm;
 {
     TQNodeWeak *ret = [self node];
     ret->_value = [aValue retain];
-    return [ret autorelease];
+    return ret;
 }
 - (void)dealloc
 {
@@ -44,7 +44,6 @@ using namespace llvm;
                                  block:(TQNodeBlock *)aBlock
                                  error:(NSError **)aoError
 {
-    IRBuilder<> *builder = aBlock.builder;
     Module *mod     = aProgram.llModule;
     Value *selector = aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQWeakSel", aProgram.llInt8PtrTy), "weakSel");
     Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_TQWeak", aProgram.llInt8Ty);

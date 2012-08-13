@@ -423,7 +423,6 @@ void TQInitializeRuntime()
     // Operators for NS(Mutable)String
     imp = class_getMethodImplementation([NSString class], @selector(stringByAppendingString:));
     class_addMethod([NSString class], TQConcatOpSel, imp, "@@:@");
-    imp = class_getMethodImplementation([NSMutableString class], @selector(appendString:));
     imp = imp_implementationWithBlock(^(id a, id b)   {
          _objc_msgSend_hack2(a, @selector(appendString:), [b toString]);
          return a;

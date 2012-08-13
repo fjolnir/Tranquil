@@ -31,15 +31,15 @@ static void _closureFunction(ffi_cif *closureCif, void *ret, void *args[], TQBlo
             [_ffiTypeObjects addObject:[TQFFIType typeWithEncoding:typeIterator nextType:&typeIterator]];
         }
 
-        ffi_cif *cif = (ffi_cif *)malloc(sizeof(ffi_cif));
+        _cif = (ffi_cif *)malloc(sizeof(ffi_cif));
         unsigned int nargs = [_ffiTypeObjects count] - 1;
-        ffi_type **argTypes = (ffi_type**)malloc(sizeof(void*)*nargs);
+        _argTypes = (ffi_type**)malloc(sizeof(void*)*nargs);
         for(int i = 0; i < nargs; ++i) {
-            argTypes[i] = [[_ffiTypeObjects objectAtIndex:i+1] ffiType];
+            _argTypes[i] = [[_ffiTypeObjects objectAtIndex:i+1] ffiType];
         }
 
-        if(ffi_prep_cif(cif, FFI_DEFAULT_ABI, nargs, [retTypeObj ffiType], argTypes) == FFI_OK) {
-            if(_PrepareClosure(closure, cif, (void (*)(ffi_cif*,void*,void**,void*))_closureFunction, self, _functionPointer) == FFI_OK)
+        if(ffi_prep_cif(_cif, FFI_DEFAULT_ABI, nargs, [retTypeObj ffiType], _argTypes) == FFI_OK) {
+            if(_PrepareClosure(closure, _cif, (void (*)(ffi_cif*,void*,void**,void*))_closureFunction, self, _functionPointer) == FFI_OK)
                 objc_setAssociatedObject(_block, (void*)_cif, self, OBJC_ASSOCIATION_RETAIN);
         }
     }
@@ -50,6 +50,7 @@ static void _closureFunction(ffi_cif *closureCif, void *ret, void *args[], TQBlo
 {
     _DeallocateClosure(_closure);
     free(_cif);
+    free(_argTypes);
     [_ffiTypeObjects release];
 
     [super dealloc];

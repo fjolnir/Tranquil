@@ -31,7 +31,7 @@
     static NSMethodSignature *nilRetSignature;
     if(!__obj) {
         if(!nilRetSignature) {
-            @synchronized(nilRetSignature) {
+            @synchronized(self) {
                 nilRetSignature = [NSMethodSignature signatureWithObjCTypes:"@:"];
             }
         }
