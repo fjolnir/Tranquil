@@ -1,0 +1,14 @@
+#Kls {
+    - foo {
+        "foo" print
+    }
+    - bar: arg {
+        "bar #{arg}" print
+    }
+    - baz {
+        "baz" print
+    }
+}
+
+obj = Kls new
+obj foo; bar: 123; baz

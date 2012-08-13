@@ -94,6 +94,9 @@
 	instance aMethod: 123 and: 456
 	instance aMethod: 123. \ To explicitly terminate a message you use a period
 	
+	instance aMethod: 123; anotherMethod: 456 \ A semicolon can be used to separate multiple messages to the same receiver
+	                                          \ This is referred to as "cascading"
+	
 	\ Accessing member variables
 	obj#member = 123
 	a = obj#member

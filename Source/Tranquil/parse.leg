@@ -137,38 +137,37 @@ ParenExpr    = '(' -- expr:Expression -- ')' { ExtendToken(); $$ = expr; }
 
 
 # Messages
-UnaryMsg     = rcvr:UnaryMsgRcvr - name:Identifier - !":"
-               {
-                    PushStack([TQNodeMessage nodeWithReceiver:rcvr]);
-                    [(NSMutableArray*)[StackTop arguments] addObject:[TQNodeArgument nodeWithPassedNode:nil
-                                                                                           selectorPart:name]];
+UnaryMsg     = rcvr:UnaryMsgRcvr {
+                   ExtendToken();
+                   PushStack([TQNodeMessage nodeWithReceiver:rcvr]);
                }
-               (- extraName:Identifier - !":"
-                  {
-                      ReplaceStackTop([TQNodeMessage nodeWithReceiver:StackTop]);
-                      [(NSMutableArray*)[StackTop arguments] addObject:[TQNodeArgument nodeWithPassedNode:nil
-                                                                                             selectorPart:extraName]];
-
-                  }
-               )*
-               {
-                   $$ = PopStack();
-               }
+               body:UnaryMsgBody { $$ = PopStack(); }
 
 KeywordMsg   = rcvr:KwdMsgRcvr -
                {
                     ExtendToken();
                     PushStack([TQNodeMessage nodeWithReceiver:rcvr]);
+               }
+               body:KwdMsgBody { $$ = PopStack(); }
+Message      = {
                     PushStack([NSMutableArray array]);
                }
-               (SelectorPart --)+
+               (KeywordMsg|UnaryMsg)
                {
-                    ExtendToken();
-                    NSMutableArray *arguments = PopStack();
-                    $$ = PopStack();
-                    [$$ setArguments:arguments];
+                   [StackTop addObject:$$];
                }
-Message      = KeywordMsg|UnaryMsg
+               (-- ";" --
+                {
+                    PushStack([TQNodeMessage nodeWithReceiver:[[StackTop firstObject] receiver]]);
+                }
+                (UnaryMsgBody | KwdMsgBody)
+                {
+                    TQNodeMessage *msg = PopStack();
+                    [StackTop addObject:msg];
+                })*
+               {
+                   $$ = PopStack();
+               }
 
 UnaryMsgRcvr = Call
              | SubscriptExp
@@ -180,11 +179,33 @@ UnaryMsgRcvr = Call
              | Variable
              | Weak
              | ParenExpr
+UnaryMsgBody =  - name:Identifier - !":"
+               {
+                   [(NSMutableArray*)[StackTop arguments] addObject:[TQNodeArgument nodeWithPassedNode:nil
+                                                                                           selectorPart:name]];
+               }
+               (- extraName:Identifier - !":"
+                  {
+                      ReplaceStackTop([TQNodeMessage nodeWithReceiver:StackTop]);
+                      [(NSMutableArray*)[StackTop arguments] addObject:[TQNodeArgument nodeWithPassedNode:nil
+                                                                                             selectorPart:extraName]];
+
+                  }
+               )*
+
+
 KwdMsgRcvr   = UnaryMsg
              | UnaryMsgRcvr
+KwdMsgBody   = { PushStack([NSMutableArray array]); }
+               (SelectorPart --)+
+               {
+                    ExtendToken();
+                    $$ = PopStack();
+                    [StackTop setArguments:$$];
+               }
 
 SelectorPart = { PushStack([TQNodeArgument node]); }
-               (name:SelIdent  { [StackTop setSelectorPart:name]; }) #?
+               (name:SelIdent  { [StackTop setSelectorPart:name]; })
                 - ':' -- param:MessageArg
                {
                     ExtendToken();
