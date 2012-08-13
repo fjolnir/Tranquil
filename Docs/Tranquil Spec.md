@@ -85,6 +85,9 @@
 		- aMethodTaking: a and: b {     \ Instance method taking two arguments ('self' refers to an instance of Klass)
 			^self#ivar = a + b          \ Returns the value of self#ivar after setting it to a+b
 		}
+		- doSomethingWith:value1 [and:value2 = 123] { \ Instance method with an optional parameter named `and:`
+			^value1 + value2
+		}
 	}
 	
 	\ Passing messages to objects
