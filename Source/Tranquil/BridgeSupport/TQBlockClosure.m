@@ -4,6 +4,10 @@
 #import "TQBoxedObject.h"
 #import "bs.h"
 
+static ffi_closure *_AllocateClosure(void **codePtr);
+static void _DeallocateClosure(void *closure);
+static ffi_status _PrepareClosure(ffi_closure *closure, ffi_cif *cif, void (*fun)(ffi_cif*,void*,void**,void*), void *user_data, void *codeloc);
+
 static void _closureFunction(ffi_cif *closureCif, void *ret, void *args[], TQBlockClosure *closureObj);
 
 @implementation TQBlockClosure
@@ -17,7 +21,7 @@ static void _closureFunction(ffi_cif *closureCif, void *ret, void *args[], TQBlo
 
     _block = aBlock;
 
-    ffi_closure *closure = (ffi_closure *)ffi_closure_alloc(sizeof(ffi_closure), &_functionPointer);
+    ffi_closure *closure = _AllocateClosure(&_functionPointer);
     if(closure) {
         const char *typeIterator = _type;
         _ffiTypeObjects = [NSMutableArray new];
@@ -35,7 +39,7 @@ static void _closureFunction(ffi_cif *closureCif, void *ret, void *args[], TQBlo
         }
 
         if(ffi_prep_cif(cif, FFI_DEFAULT_ABI, nargs, [retTypeObj ffiType], argTypes) == FFI_OK) {
-            if(ffi_prep_closure_loc(closure, cif, (void (*)(ffi_cif*,void*,void**,void*))_closureFunction, self, _functionPointer) == FFI_OK)
+            if(_PrepareClosure(closure, cif, (void (*)(ffi_cif*,void*,void**,void*))_closureFunction, self, _functionPointer) == FFI_OK)
                 objc_setAssociatedObject(_block, (void*)_cif, self, OBJC_ASSOCIATION_RETAIN);
         }
     }
@@ -44,7 +48,7 @@ static void _closureFunction(ffi_cif *closureCif, void *ret, void *args[], TQBlo
 
 - (void)dealloc
 {
-    ffi_closure_free(_closure);
+    _DeallocateClosure(_closure);
     free(_cif);
     [_ffiTypeObjects release];
 
@@ -88,4 +92,43 @@ void _closureFunction(ffi_cif *closureCif, void *ret, void *args[], TQBlockClosu
         *(id*)ret = retPtr;
     else if(*returnType != _C_VOID)
         [TQBoxedObject unbox:retPtr to:ret usingType:returnType];
+}
+
+#pragma mark - LibFFI Utilities
+static ffi_closure *_AllocateClosure(void **codePtr)
+{
+#if USE_LIBFFI_CLOSURE_ALLOC
+    return ffi_closure_alloc(sizeof(ffi_closure), codePtr);
+#else
+    ffi_closure *closure = (ffi_closure *)mmap(NULL, sizeof(ffi_closure), PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+    if(closure == (void *)-1) {
+        perror("mmap");
+        return NULL;
+    }
+    *codePtr = closure;
+    return closure;
+#endif
+}
+
+static void _DeallocateClosure(void *closure)
+{
+#if USE_LIBFFI_CLOSURE_ALLOC
+    ffi_closure_free(closure);
+#else
+    munmap(closure, sizeof(ffi_closure));
+#endif
+}
+
+static ffi_status _PrepareClosure(ffi_closure *closure, ffi_cif *cif, void (*fun)(ffi_cif*,void*,void**,void*), void *user_data, void *codeloc)
+{
+#if USE_LIBFFI_CLOSURE_ALLOC
+    return ffi_prep_closure_loc(closure, cif, fun, user_data, codeloc);
+#else
+    ffi_status status = ffi_prep_closure(closure, cif, fun, user_data);
+    if(status != FFI_OK)
+        return status;
+    if(mprotect(closure, sizeof(closure), PROT_READ | PROT_EXEC) == -1)
+        return (ffi_status)1;
+    return FFI_OK;
+#endif
 }

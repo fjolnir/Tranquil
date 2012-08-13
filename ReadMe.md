@@ -11,7 +11,6 @@ Tranquil is still extremely experimental and you shouldn't use it for anything o
 The following will create a binary called `tranquil` in the `Build` folder and install "full" BridgeSupport files in your user Library folder.
 
     > brew install llvm --HEAD --jit --enable-optimized
-    > brew install libffi
     > git clone git://github.com/fjolnir/Tranquil.git
     > cd Tranquil
     > rake
