@@ -6,20 +6,29 @@
 using namespace llvm;
 
 @implementation TQNodeMessage
-@synthesize receiver=_receiver, arguments=_arguments;
+@synthesize receiver=_receiver, arguments=_arguments, cascadedMessages=_cascadedMessages, receiverLLVMValue=_receiverLLVMValue;
 
 + (TQNodeMessage *)nodeWithReceiver:(TQNode *)aNode
 {
     return [[[self alloc] initWithReceiver:aNode] autorelease];
 }
 
-- (id)initWithReceiver:(TQNode *)aNode
+- (id)init
 {
     if(!(self = [super init]))
         return nil;
 
+    _arguments = [NSMutableArray new];
+    _cascadedMessages = [NSMutableArray new];
+
+    return self;
+}
+- (id)initWithReceiver:(TQNode *)aNode
+{
+    if(!(self = [self init]))
+        return nil;
+
     _receiver = [aNode retain];
-    _arguments = [[NSMutableArray alloc] init];
 
     return self;
 }
@@ -28,6 +37,7 @@ using namespace llvm;
 {
     [_receiver release];
     [_arguments release];
+    [_cascadedMessages release];
     [super dealloc];
 }
 
@@ -108,7 +118,7 @@ using namespace llvm;
 
 
     aArgs.insert(aArgs.begin(), selectorGlobal);
-    aArgs.insert(aArgs.begin(), [_receiver generateCodeInProgram:aProgram block:aBlock error:aoErr]);
+    aArgs.insert(aArgs.begin(), _receiverLLVMValue ? _receiverLLVMValue : [_receiver generateCodeInProgram:aProgram block:aBlock error:aoErr]);
 
 
     Value *ret;
@@ -118,6 +128,12 @@ using namespace llvm;
         ret = aBlock.builder->CreateCall(aProgram.tq_msgSend, aArgs);
         if(needsAutorelease)
             ret = aBlock.builder->CreateCall(aProgram.objc_autoreleaseReturnValue, ret);
+    }
+
+    Value *origRet = ret;
+    for(TQNodeMessage *cascadedMessage in _cascadedMessages) {
+        cascadedMessage.receiverLLVMValue = origRet;
+        ret = [cascadedMessage generateCodeInProgram:aProgram block:aBlock error:aoErr];
     }
     return ret;
 }

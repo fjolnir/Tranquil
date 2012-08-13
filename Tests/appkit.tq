@@ -7,20 +7,23 @@ menuBar addItem: appMenuItem
 nsapp setMainMenu: menuBar
 
 \ Add the Application menu & the quit item
-appMenu      = NSMenu new
 quitMenuItem = NSMenuItem alloc initWithTitle: "Quit #{NSProcessInfo processInfo processName}"
                                        action: "terminate:"
                                 keyEquivalent: "q"
-appMenu addItem: quitMenuItem
+appMenu = NSMenu new;
+             addItem: quitMenuItem;
+                self
+
 appMenuItem setSubmenu: appMenu
 
 \ Create a window
 win = NSWindow alloc initWithContentRect: [NSZeroPoint, [300, 200]]
                                styleMask: (NSTitledWindowMask bitOr: NSResizableWindowMask)
                                  backing: NSBackingStoreBuffered
-                                   defer: no
-win#title = "Tranquil!"
-win makeKeyAndOrderFront: nil
+                                   defer: no;
+                                setTitle: "Tranquil!";
+                    makeKeyAndOrderFront: nil;
+                                    self
 
 \ Create a little view
 #TestView < NSView {
@@ -30,7 +33,7 @@ win makeKeyAndOrderFront: nil
     }
 }
 
-view = TestView alloc initWithFrame: (win contentView bounds)
+view = TestView new; setFrame: (win contentView bounds); self
 win#contentView = view
 
 \ Start the app

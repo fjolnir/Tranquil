@@ -45,7 +45,8 @@ typedef struct _TQParserState TQParserState;
     NSString *exceptionReason; \
     NSString *source         = [NSString stringWithFormat:@"%s", G->buf]; \
     NSRange tokRange         = state->currentToken; \
-    NSRange interestingRange = NSIntersectionRange(NSMakeRange(0, [source length]), NSMakeRange(G->pos - 20, G->pos + 20)); \
+    NSRange srcRange         = NSMakeRange(0, [source length]); \
+    NSRange interestingRange = NSIntersectionRange(srcRange, NSMakeRange(G->pos - 20, G->pos + 20)); \
     if(interestingRange.length > 0) { \
         NSMutableString *errStr = [[[source substringWithRange:interestingRange] mutableCopy] autorelease]; \
         const char *errCStr = [errStr UTF8String]; \
@@ -56,7 +57,7 @@ typedef struct _TQParserState TQParserState;
                 NSMutableString *spaceStr = [NSMutableString stringWithString:@"\n"]; \
                 int temp = idx; \
                 while(errCStr[temp] != '\n' && temp >= 0) { --temp; [spaceStr appendString:@" "]; } \
-                [spaceStr replaceCharactersInRange:(NSRange) { [spaceStr length]-2, 1} withString:@"^"]; \
+                [spaceStr replaceCharactersInRange:NSIntersectionRange(srcRange, (NSRange) { [spaceStr length]-2, 1}) withString:@"^"]; \
                 [errStr insertString:spaceStr atIndex:idx+1]; \
                 break; \
             } \
@@ -122,7 +123,7 @@ Return       = "^" retVal:Expression { UpdateToken(); $$ = [TQNodeReturn nodeWit
 
 # Expression
 Expression   = TernaryExpr
-             | KeywordMsg
+             | Message
              | Assignment
              | Equation
              | _OtherExpr
@@ -152,7 +153,7 @@ ParenExpr    = '(' -- expr:Expression -- ')' { ExtendToken(); $$ = expr; }
 
 
 # Messages
-UnaryMsg     = rcvr:UnaryMsgRcvr {
+UnaryMsg     = rcvr:UnaryMsgRcvr - {
                    ExtendToken();
                    PushStack([TQNodeMessage nodeWithReceiver:rcvr]);
                }
@@ -164,21 +165,18 @@ KeywordMsg   = rcvr:KwdMsgRcvr -
                     PushStack([TQNodeMessage nodeWithReceiver:rcvr]);
                }
                body:KwdMsgBody { $$ = PopStack(); }
-Message      = {
-                    PushStack([NSMutableArray array]);
-               }
-               (KeywordMsg|UnaryMsg)
+Message      = (KeywordMsg|UnaryMsg)
                {
-                   [StackTop addObject:$$];
+                   PushStack($$);
                }
-               (-- ";" --
+               (- ";" ---
                 {
-                    PushStack([TQNodeMessage nodeWithReceiver:[[StackTop firstObject] receiver]]);
+                    PushStack([TQNodeMessage node]);
                 }
                 (UnaryMsgBody | KwdMsgBody)
                 {
                     TQNodeMessage *msg = PopStack();
-                    [StackTop addObject:msg];
+                    [[StackTop cascadedMessages] addObject:msg];
                 })*
                {
                    $$ = PopStack();
@@ -194,7 +192,7 @@ UnaryMsgRcvr = Call
              | Variable
              | Weak
              | ParenExpr
-UnaryMsgBody =  - name:Identifier - !":"
+UnaryMsgBody =  name:Identifier - !":"
                {
                    [(NSMutableArray*)[StackTop arguments] addObject:[TQNodeArgument nodeWithPassedNode:nil
                                                                                            selectorPart:name]];
