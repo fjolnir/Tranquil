@@ -285,7 +285,7 @@ Block        = '{' --
                     }
                     PushStack([NSMutableArray array]);
                }
-               (Statement --)*
+               (Statement --)+
                {
                     NSMutableArray *statements = PopStack();
                     $$ = PopStack();
@@ -645,7 +645,7 @@ Dictionary   = "{" --
                    PushStack([NSMapTable mapTableWithStrongToStrongObjects]);
                }
                (DictItem -- ("," -- DictItem)*)? --
-               _rightBrace ~{ SyntaxError(@"Dictionary missing closing brace"); }
+               "}"
                {
                    $$ = [TQNodeDictionary node];
                    NSMutableArray *items = PopStack();
