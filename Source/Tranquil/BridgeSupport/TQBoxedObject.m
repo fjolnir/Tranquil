@@ -51,7 +51,7 @@ static struct TQBoxedBlockDescriptor boxedBlockDescriptor = {
 static id _box_C_ID_imp(TQBoxedObject *self, SEL _cmd, id *aPtr);
 static id _box_C_SEL_imp(TQBoxedObject *self, SEL _cmd, SEL *aPtr);
 static id _box_C_VOID_imp(TQBoxedObject *self, SEL _cmd, id *aPtr);
-static id _box_C_CHARPTR_imp(TQBoxedObject *self, SEL _cmd, const char *aPtr);
+static id _box_C_CHARPTR_imp(TQBoxedObject *self, SEL _cmd, const char **aPtr);
 static id _box_C_DBL_imp(TQBoxedObject *self, SEL _cmd, double *aPtr);
 static id _box_C_FLT_imp(TQBoxedObject *self, SEL _cmd, float *aPtr);
 static id _box_C_INT_imp(TQBoxedObject *self, SEL _cmd, int *aPtr);
@@ -709,7 +709,7 @@ extern "C" id tq_boxedMsgSend(id self, SEL selector, ...)
 id _box_C_ID_imp(TQBoxedObject *self, SEL _cmd, id *aPtr)                       { return *aPtr;                                           }
 id _box_C_SEL_imp(TQBoxedObject *self, SEL _cmd, SEL *aPtr)                     { return NSStringFromSelector(*aPtr);                     }
 id _box_C_VOID_imp(TQBoxedObject *self, SEL _cmd, id *aPtr)                     { return nil;                                             }
-id _box_C_CHARPTR_imp(TQBoxedObject *self, SEL _cmd, const char *aPtr)          { return @(*aPtr);                                        }
+id _box_C_CHARPTR_imp(TQBoxedObject *self, SEL _cmd, const char **aPtr)         { return [NSMutableString stringWithUTF8String:*aPtr];    }
 id _box_C_DBL_imp(TQBoxedObject *self, SEL _cmd, double *aPtr)                  { return [TQNumber numberWithDouble:*aPtr];               }
 id _box_C_FLT_imp(TQBoxedObject *self, SEL _cmd, float *aPtr)                   { return [TQNumber numberWithFloat:*aPtr];                }
 id _box_C_INT_imp(TQBoxedObject *self, SEL _cmd, int *aPtr)                     { return [TQNumber numberWithInt:*aPtr];                  }
