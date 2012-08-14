@@ -7,8 +7,11 @@
 using namespace llvm;
 
 @interface TQHeaderParser ()
-@property(readonly) NSMutableDictionary *functions, *classes, *literalConstants, *constants, *protocols;
+@property(readonly) NSMutableDictionary *functions, *classes, *literalConstants, *constants, *protocols, *typedefs;
 @property(readwrite, retain) TQBridgedClassInfo *currentClass;
+
+- (const char *)encodingForBlockPtrCursor:(CXCursor)cursor;
+- (const char *)encodingForCursor:(CXCursor)cursor;
 @end
 
 static void _indexerCallback(CXClientData client_data, const CXIdxDeclInfo *declaration)
@@ -65,14 +68,41 @@ static void _indexerCallback(CXClientData client_data, const CXIdxDeclInfo *decl
                 //NSLog(@"@interface %@ (%@)", className, name);
                 parser.currentClass = [parser.classes objectForKey:className];
             } break;
+            case CXIdxEntity_Typedef: {
+                if(![name hasPrefix:@"NS"])
+                    break;
+                CXType type = clang_getTypedefDeclUnderlyingType(cursor);
+                if(type.kind != CXType_BlockPointer)
+                    break;
+                printf("foo: %s\n", clang_getCString(clang_getTypeKindSpelling(type.kind)));
+                printf("typedef: %d %d %s %s\n", type.kind, cursor.kind, [name UTF8String], clang_getCString(clang_getDeclObjCTypeEncoding(cursor)));
+                clang_visitChildrenWithBlock(cursor, ^(CXCursor child, CXCursor parent) {
+                    //if(child.kind == CXCursor_ParmDecl)
+                        //return CXChildVisit_Recurse;
+                    const char *childEnc = [parser encodingForCursor:child];
+                    printf("    %d %s -- %s\n", child.kind, childEnc, clang_getCString(clang_getCursorSpelling(child)));
+                    if(child.kind == 43) {
+                        CXType typeDef = clang_getCursorType(child);
+                        if(typeDef.kind == CXType_Typedef) { // Verify that it's in fact a typedef
+                            printf("      typedef!\n");
+                            CXType type = clang_getTypedefDeclUnderlyingType(child);
+                            printf("      underlying type: %p\n", type.kind);
+                        }
+                        //const char *declEnc = tq_clang_getDeclObjCTypeEncoding(decl);
+                        //printf("       %d %s -- %s\n", decl.kind, declEnc, clang_getCString(clang_getCursorSpelling(decl)));
+                    }
+                    return CXChildVisit_Continue;
+                });
+
+            } break;
             case CXIdxEntity_ObjCClassMethod:
             case CXIdxEntity_ObjCInstanceMethod: {
                 if(declaration->isImplicit || !parser.currentClass)
                     break;
                 BOOL isClassMethod = declaration->entityInfo->kind == CXIdxEntity_ObjCClassMethod;
                 NSString *selector = name;
-                NSString *encoding = [NSString stringWithUTF8String:clang_getCString(clang_getDeclObjCTypeEncoding(cursor))];
-                //NSLog(@"[%@ %@] %@ %d", parser.currentClass.name, selector, encoding, declaration->entityInfo->kind);
+                NSString *encoding = [NSString stringWithUTF8String:[parser encodingForCursor:cursor]];
+                NSLog(@"[%@ %@] %@ %d", parser.currentClass.name, selector, encoding, declaration->entityInfo->kind);
                 if(isClassMethod)
                     [parser.currentClass.classMethods    setObject:encoding forKey:selector];
                 else
@@ -109,7 +139,7 @@ static IndexerCallbacks indexerCallbacks = {
 
 @implementation TQHeaderParser
 @synthesize currentClass=_currentClass, functions=_functions, classes=_classes, literalConstants=_literalConstants,
-            constants=_constants, protocols=_protocols;
+            constants=_constants, protocols=_protocols, typedefs=_typedefs;
 
 - (id)init
 {
@@ -123,6 +153,7 @@ static IndexerCallbacks indexerCallbacks = {
     _constants        = [NSMutableDictionary new];
     _classes          = [NSMutableDictionary new];
     _protocols        = [NSMutableDictionary new];
+    _typedefs         = [NSMutableDictionary new];
 
     return self;
 }
@@ -133,6 +164,8 @@ static IndexerCallbacks indexerCallbacks = {
     [_classes release];
     [_constants release];
     [_literalConstants release];
+    [_protocols release];
+    [_typedefs release];
     clang_disposeIndex(_index);
 
     [super dealloc];
@@ -142,8 +175,7 @@ static IndexerCallbacks indexerCallbacks = {
 {
     const char *args[] = { "-ObjC" };
     CXTranslationUnit translationUnit = clang_parseTranslationUnit(_index, [aPath fileSystemRepresentation], args, 1, NULL, 0,
-                                                                   CXTranslationUnit_DetailedPreprocessingRecord|CXTranslationUnit_SkipFunctionBodies);
-    //CXTranslationUnit translationUnit = clang_createTranslationUnit(index, "test.pch");
+                                                                   CXTranslationUnit_SkipFunctionBodies);
     if (!translationUnit) {
         NSLog(@"Couldn't parse header %@\n", aPath);
         return nil;
@@ -159,6 +191,26 @@ static IndexerCallbacks indexerCallbacks = {
     clang_disposeTranslationUnit(translationUnit);
     return TQValid;
 }
+
+- (id)parsePCH:(NSString *)aPath
+{
+    CXTranslationUnit translationUnit = clang_createTranslationUnit(_index, [aPath fileSystemRepresentation]);
+    if (!translationUnit) {
+        NSLog(@"Couldn't parse pch %@\n", aPath);
+        return nil;
+    }
+    CXIndexAction action = clang_IndexAction_create(_index);
+    int indexResult = clang_indexTranslationUnit(action,
+                                                 (CXClientData)self,
+                                                 &indexerCallbacks,
+                                                 sizeof(indexerCallbacks),
+                                                 CXIndexOpt_SuppressWarnings | CXIndexOpt_SuppressRedundantRefs,
+                                                 translationUnit);
+    clang_IndexAction_dispose(action);
+    clang_disposeTranslationUnit(translationUnit);
+    return TQValid;
+}
+
 
 - (TQNode *)entityNamed:(NSString *)aName
 {
@@ -184,6 +236,57 @@ static IndexerCallbacks indexerCallbacks = {
 - (TQBridgedClassInfo *)classNamed:(NSString *)aName
 {
     return [_classes objectForKey:aName];
+}
+
+
+#pragma mark - Objective-C encoding generator
+
+// Because the clang-c api doesn't allow us to access the "extended" encoding stuff inside libclang we must roll our own (It's less work than using the C++ api)
+- (const char *)encodingForBlockPtrCursor:(CXCursor)cursor
+{
+    printf("    ..come on %s %s\n", clang_getCString(clang_getDeclObjCTypeEncoding(cursor)), clang_getCString(clang_getCursorSpelling(cursor)));
+    NSMutableString *realEncoding = [NSMutableString stringWithString:@"<@"];
+    clang_visitChildrenWithBlock(cursor, ^(CXCursor child, CXCursor parent) {
+        //if(child.kind == CXCursor_ParmDecl)
+            //return CXChildVisit_Recurse;
+        const char *childEnc = [self encodingForCursor:child];
+        printf("    %d %s -- '%s'\n", child.kind, childEnc, clang_getCString(clang_getCursorSpelling(child)));
+        if(strstr(childEnc, "@?") == childEnc)
+            [realEncoding appendFormat:@"%s", [self encodingForCursor:child]];
+        else
+            [realEncoding appendFormat:@"%s", childEnc];
+        if(child.kind == 43) {
+            CXType typeDef = clang_getCursorType(child);
+            if(typeDef.kind == CXType_Typedef) { // Verify that it's in fact a typedef
+                printf("      typedef!\n");
+                CXType type = clang_getTypedefDeclUnderlyingType(child);
+                printf("      underlying type: %p\n", type.kind);
+            }
+        }
+        return CXChildVisit_Continue;
+    });
+    [realEncoding appendString:@">"];
+    return [realEncoding UTF8String];
+}
+
+- (const char *)encodingForCursor:(CXCursor)cursor
+{
+    const char *vanillaEncoding = clang_getCString(clang_getDeclObjCTypeEncoding(cursor));
+    CXCursorKind kind = cursor.kind;
+    if(strstr(vanillaEncoding, "@?")) {
+        // Contains a block argument so we need to manually create the encoding for it
+        NSMutableString *realEncoding = [NSMutableString string];
+        clang_visitChildrenWithBlock(cursor, ^(CXCursor child, CXCursor parent) {
+            const char *childEnc = clang_getCString(clang_getDeclObjCTypeEncoding(child));
+            if(strstr(childEnc, "@?") == childEnc)
+                [realEncoding appendFormat:@"%s", [self encodingForBlockPtrCursor:child]];
+            else
+                [realEncoding appendFormat:@"%s", childEnc];
+            return CXChildVisit_Continue;
+        });
+        return [realEncoding UTF8String];
+    }
+    return vanillaEncoding;
 }
 @end
 
@@ -426,7 +529,6 @@ static IndexerCallbacks indexerCallbacks = {
         boxed = callBuilder->CreateCall(aProgram.objc_retainAutoreleaseReturnValue, boxed);
         callBuilder->CreateRet(boxed);
     }
-
     return _function;
 }
 
@@ -440,9 +542,9 @@ static IndexerCallbacks indexerCallbacks = {
     return literal;
 }
 
-
 - (NSString *)description
 {
     return [NSString stringWithFormat:@"<bridged function@ %@>", _name];
 }
 @end
+

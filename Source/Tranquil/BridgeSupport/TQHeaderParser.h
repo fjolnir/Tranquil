@@ -12,8 +12,11 @@
     NSMutableDictionary *_literalConstants;
     // Other constants
     NSMutableDictionary *_constants;
+
     // Protocols (Only used internally)
     NSMutableDictionary *_protocols;
+    // Typedef encodings (Only used internally)
+    NSMutableDictionary *_typedefs;
 
     TQBridgedClassInfo *_currentClass;
     CXIndex _index;
