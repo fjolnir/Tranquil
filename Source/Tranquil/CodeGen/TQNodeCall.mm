@@ -20,7 +20,7 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
         return nil;
 
     _callee = [aCallee retain];
-    _arguments = [[NSMutableArray alloc] init];
+    _arguments = [NSMutableArray new];
 
     return self;
 }

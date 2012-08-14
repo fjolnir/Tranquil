@@ -8,7 +8,7 @@ using namespace llvm;
 
 + (TQNodeRegex *)nodeWithPattern:(NSString *)aPattern
 {
-    TQNodeRegex *regex = [[self alloc] init];
+    TQNodeRegex *regex = [self new];
     regex.pattern = aPattern;
     return [regex autorelease];
 }

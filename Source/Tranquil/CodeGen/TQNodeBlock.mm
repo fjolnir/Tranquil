@@ -29,9 +29,10 @@ using namespace llvm;
     if(!(self = [super init]))
         return nil;
 
-    _arguments       = [[NSMutableArray alloc] init];
-    _statements      = [[NSMutableArray alloc] init];
-    _locals          = [[NSMutableDictionary alloc] init];
+    _arguments       = [NSMutableArray new];
+    _argTypes        = [NSMutableArray new];
+    _statements      = [NSMutableArray new];
+    _locals          = [NSMutableDictionary new];
     _function        = NULL;
     _basicBlock      = NULL;
     _isTranquilBlock = YES;

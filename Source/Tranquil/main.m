@@ -10,6 +10,7 @@ void printHelpAndExit(int status)
 
 int main(int argc, char **argv)
 {
+    @autoreleasepool {
     BOOL showDebugOutput = NO;
     char *inputPath = NULL;
 
@@ -38,6 +39,6 @@ int main(int argc, char **argv)
         script = [[[NSString alloc] initWithData:inputData encoding:NSUTF8StringEncoding] autorelease];
     }
     [program executeScript:script error:nil];
-
+    }
     return 0;
 }

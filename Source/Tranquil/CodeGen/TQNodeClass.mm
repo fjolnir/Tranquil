@@ -20,8 +20,8 @@ using namespace llvm;
 
     _name = [aName retain];
 
-    _classMethods = [[NSMutableArray alloc] init];
-    _instanceMethods = [[NSMutableArray alloc] init];
+    _classMethods    = [NSMutableArray new];
+    _instanceMethods = [NSMutableArray new];
 
     return self;
 }

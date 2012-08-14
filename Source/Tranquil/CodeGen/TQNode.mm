@@ -5,7 +5,7 @@ using namespace llvm;
 @implementation TQNode
 + (TQNode *)node
 {
-    return [[[self alloc] init] autorelease];
+    return [[self new] autorelease];
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr

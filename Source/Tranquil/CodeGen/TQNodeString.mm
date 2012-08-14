@@ -8,7 +8,7 @@ using namespace llvm;
 
 + (TQNodeString *)nodeWithString:(NSMutableString *)aStr
 {
-    TQNodeString *node = [[self alloc] init];
+    TQNodeString *node = [self new];
     node.value = aStr;
     return [node autorelease];
 }
@@ -17,7 +17,7 @@ using namespace llvm;
 {
     if(!(self = [super init]))
         return nil;
-    _embeddedValues = [[NSMutableArray alloc] init];
+    _embeddedValues = [NSMutableArray new];
     return self;
 }
 

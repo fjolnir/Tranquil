@@ -11,7 +11,7 @@ using namespace llvm;
 @implementation TQNodeMethod
 @synthesize type=_type;
 
-+ (TQNodeMethod *)node { return [[[self alloc] init] autorelease]; }
++ (TQNodeMethod *)node { return [[self new] autorelease]; }
 
 + (TQNodeMethod *)nodeWithType:(TQMethodType)aType
 {
@@ -97,16 +97,6 @@ using namespace llvm;
 {
     TQAssertSoft(NO, kTQGenericErrorDomain, kTQGenericError, NULL, @"Methods require their class to be passed to generate code.");
     return NULL;
-}
-
-- (NSArray *)_determineArgTypesUsingBridgeSupport:(TQBridgeSupport *)aBridge
-{
-    return _argTypes;
-}
-
-- (NSString *)_determineReturnTypeUsingBridgeSupport:(TQBridgeSupport *)aBridge
-{
-    return _retType;
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram

@@ -7,7 +7,7 @@ static TQValidObject *sharedInstance;
 {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        sharedInstance = [[self alloc] init];
+        sharedInstance = [self new];
     });
     return sharedInstance;
 }

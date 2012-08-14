@@ -180,7 +180,7 @@
 @end
 
 int main(int argc, char *argv[]) {
-    NSAutoreleasePool *p = [[NSAutoreleasePool alloc] init];
+    NSAutoreleasePool *p = [NSAutoreleasePool new];
 
     struct { id isa; double value; } stackObj = { NSClassFromString(@"TQStackNumber"), &stackObj, 0.0 };
     TQStackNumber *stackObjPtr = (TQStackNumber *)&stackObj;

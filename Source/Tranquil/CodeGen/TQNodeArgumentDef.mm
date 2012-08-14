@@ -8,7 +8,7 @@ using namespace llvm;
 
 + (TQNodeArgumentDef *)nodeWithName:(NSString *)aName
 {
-    TQNodeArgumentDef *ret = [[self alloc] init];
+    TQNodeArgumentDef *ret = [self new];
     ret.name = aName;
 
     return [ret autorelease];
