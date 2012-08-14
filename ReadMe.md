@@ -8,13 +8,10 @@ Tranquil is still extremely experimental and you shouldn't use it for anything o
 
 ## How to build and run
 
-The following will create a binary called `tranquil` in the `Build` folder.
+The following will install Tranquil into ~/Tranquil (And two dependencies into /usr/local).
 
-    > brew install llvm --HEAD --jit --enable-optimized
-    > git clone git://github.com/fjolnir/Tranquil.git
-    > cd Tranquil
-    > rake
-    > build/tranquil -h
+    > curl -fsSkL https://github.com/fjolnir/tranquil/Tools/RemoteInstall.sh | /bin/zsh
+    > ~/Tranquil/build/tranquil -h
 
 ## Learning the language
 
