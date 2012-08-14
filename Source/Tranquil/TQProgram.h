@@ -3,7 +3,7 @@
 
 #include <Tranquil/CodeGen/TQNodeBlock.h>
 #include <Tranquil/BridgeSupport/TQHeaderParser.h>
-#include <llvm/IRBuilder.h>
+#include <llvm/Support/IRBuilder.h>
 #include <Foundation/NSObject.h>
 
 extern "C" NSString * const kTQSyntaxErrorException;

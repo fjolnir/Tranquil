@@ -1,7 +1,7 @@
 #import "TQNodeVariable.h"
 #import "../TQProgram.h"
 #import "../TQDebug.h"
-#import <llvm/IRBuilder.h>
+#import <llvm/Support/IRBuilder.h>
 
 using namespace llvm;
 

@@ -19,7 +19,6 @@ extern "C" {
 # include <llvm/CallingConv.h>
 # include <llvm/Instructions.h>
 # include <llvm/PassManager.h>
-# include <llvm/DebugInfo.h>
 # include <llvm/Analysis/Verifier.h>
 # include <llvm/Target/TargetData.h>
 # include <llvm/ExecutionEngine/JIT.h>
@@ -295,7 +294,8 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     //[_bridge loadBridgesupportFile:[@"~/Library/BridgeSupport/math.bridgesupport" stringByExpandingTildeInPath]];
     //[_bridge loadFramework:@"/System/Library/Frameworks/GLUT.framework"];
     [_objcParser parseHeader:@"/System/Library/Frameworks/Foundation.framework/Headers/Foundation.h"];
-    //return nil;
+    //[_objcParser parsePCH:@"/Users/fyolnish/test.pch"];
+    return nil;
 
     NSError *err = nil;
     [aNode generateCodeInProgram:self block:nil error:&err];

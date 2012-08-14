@@ -1,5 +1,5 @@
 #import "TQNodeBlock.h"
-#include <llvm/IRBuilder.h>
+#include <llvm/Support/IRBuilder.h>
 
 @interface TQNodeWhileBlock : TQNodeBlock
 @property(readwrite, retain) TQNode *condition;

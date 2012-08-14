@@ -1,7 +1,7 @@
 #import <Tranquil/CodeGen/TQNode.h>
 #include "TQNodeReturn.h"
 #include "../Runtime/TQRuntime.h"
-#include <llvm/IRBuilder.h>
+#include <llvm/Support/IRBuilder.h>
 
 @class TQNodeArgumentDef;
 

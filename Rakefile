@@ -21,7 +21,7 @@ CXXFLAGS = {
         '-I`pwd`/Build',
         '-I/usr/include/libxml2',
         '-Wno-deprecated-writable-strings', # BridgeSupport uses this in a few places
-        '`/usr/local/bin/llvm-config --cflags`',
+        '`/usr/local/llvm/bin/llvm-config --cflags`',
         '-O3',
         '-ObjC++',
     ].join(' '),
@@ -33,7 +33,7 @@ CXXFLAGS = {
         '-I`pwd`/Build',
         '-I/usr/include/libxml2',
         '-Wno-deprecated-writable-strings', # BridgeSupport uses this in a few places
-        '`/usr/local/bin/llvm-config --cflags`',
+        '`/usr/local/llvm/bin/llvm-config --cflags`',
         '-O0',
         '-g',
         '-ObjC++',
@@ -43,9 +43,9 @@ CXXFLAGS = {
 
 LDFLAGS = [
     '-lstdc++',
+    '`/usr/local/llvm/bin/llvm-config --libs core jit nativecodegen bitwriter ipo instrumentation`',
+    '`/usr/local/llvm/bin/llvm-config --ldflags`',
     '-lclang',
-    '`/usr/local/bin/llvm-config --libs core jit nativecodegen bitwriter ipo instrumentation`',
-    '`/usr/local/bin/llvm-config --ldflags`',
     '-framework Foundation',
     '-framework AppKit',
     '-all_load',
@@ -60,7 +60,7 @@ STUB_OUTPATH   = 'Build/block_stubs.mm'
 STUB_SCRIPT    = 'Source/Tranquil/gen_stubs.rb'
 MSGSEND_SOURCE = 'Source/Tranquil/Runtime/msgsend.s'
 MSGSEND_OUT    = "Build/msgsend.o"
-OBJC_SOURCES   = FileList['Source/Tranquil/**/*.m*'].add('Source/Tranquil/**/*.c').add(STUB_OUTPATH)
+OBJC_SOURCES   = FileList['Source/Tranquil/**/*.m*'].add('Source/Tranquil/**/*.c*').add(STUB_OUTPATH)
 O_FILES        = OBJC_SOURCES.pathmap(PATHMAP)
 O_FILES << MSGSEND_OUT
 PEG_SOURCE     = FileList['Source/Tranquil/*.leg'].first
