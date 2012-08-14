@@ -1,5 +1,4 @@
 #import "TQBoxedObject.h"
-#import "bs.h"
 #import "TQFFIType.h"
 #import "../Runtime/TQRuntime.h"
 #import "../Runtime/TQNumber.h"
@@ -128,7 +127,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
         boxingClass = [self _prepareScalarWrapper:className withType:aType];
     else if(*aType == _C_STRUCT_B || *aType == _C_UNION_B)
         boxingClass = [self _prepareAggregateWrapper:className withType:aType];
-    else if(*aType == _MR_C_LAMBDA_B)
+    else if(*aType == _TQ_C_LAMBDA_B)
         boxingClass = [self _prepareLambdaWrapper:className withType:aType];
     else {
         NSLog(@"Type %s cannot be unboxed", aType);
@@ -167,8 +166,8 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
         case _C_ULNG:     *(unsigned long *)aDest      = [aValue unsignedLongValue];      break;
         case _C_ULNG_LNG: *(unsigned long long *)aDest = [aValue unsignedLongLongValue];  break;
 
-        case _MR_C_LAMBDA_B: {
-            if(*(aType+1) == _MR_C_LAMBDA_FUNCPTR) {
+        case _TQ_C_LAMBDA_B: {
+            if(*(aType+1) == _TQ_C_LAMBDA_FUNCPTR) {
                 // The block can't be autoreleased since there is no way of knowing how long the function receiving it requires it.
                 TQBlockClosure *closure = [[[TQBlockClosure alloc] initWithBlock:[[aValue copy] autorelease] type:aType] autorelease];
                 *(void **)aDest = closure.functionPointer;
@@ -297,7 +296,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
 
 + (BOOL)typeIsScalar:(const char *)aType
 {
-    return !(*aType == _C_STRUCT_B || *aType == _C_UNION_B || *aType == _C_ARY_B || *aType == _MR_C_LAMBDA_B || *aType == _C_PTR);
+    return !(*aType == _C_STRUCT_B || *aType == _C_UNION_B || *aType == _C_ARY_B || *aType == _TQ_C_LAMBDA_B || *aType == _C_PTR);
 }
 
 + (const char *)_findEndOfPair:(const char *)aStr start:(char)aStartChar end:(char)aEndChar
@@ -317,7 +316,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
 + (const char *)_skipQualifiers:(const char *)aType
 {
     while(*aType == 'r' || *aType == 'n' || *aType == 'N' || *aType == 'o' || *aType == 'O'
-          || *aType == 'R' || *aType == 'V' || (*aType >= '0' && *aType <= '9')) {
+          || *aType == 'R' || *aType == 'V' || isdigit(*aType)) {
         ++aType;
     }
     return aType;
@@ -332,8 +331,8 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
         len = [self _findEndOfPair:aType start:_C_UNION_B end:_C_UNION_E] - aType + 1;
     else if(*aType == _C_ARY_B)
         len = [self _findEndOfPair:aType start:_C_ARY_B end:_C_ARY_E] - aType + 1;
-    else if(*aType == _MR_C_LAMBDA_B)
-        len = [self _findEndOfPair:aType start:_MR_C_LAMBDA_B end:_MR_C_LAMBDA_E] - aType + 1;
+    else if(*aType == _TQ_C_LAMBDA_B)
+        len = [self _findEndOfPair:aType start:_TQ_C_LAMBDA_B end:_TQ_C_LAMBDA_E] - aType + 1;
     else if(*aType == _C_PTR) {
         const char *nextType = TQGetSizeAndAlignment(aType, NULL, NULL);
         len = nextType - aType;
@@ -399,21 +398,21 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     NSMutableArray *fieldGetters = [NSMutableArray array];
     NSMutableArray *fieldSetters = [NSMutableArray array];
 
-    id fieldGetter, fieldSetter;
-    NSUInteger fieldSize, fieldOffset;
-    const char *nextType;
+    __block id fieldGetter, fieldSetter;
+    __block NSUInteger ofs;
     const char *fieldType = strstr(aType, "=")+1;
     assert((uintptr_t)fieldType > 1);
 
     // Add properties for each field
-    fieldOffset = 0;
-    while((nextType = TQGetSizeAndAlignment(fieldType, &fieldSize, NULL))) {
-        NSString *name = [self _getFieldName:&fieldType];
+    ofs = 0;
+    TQIterateTypesInEncoding(fieldType, ^(const char *type, NSUInteger size, NSUInteger align, BOOL *stop) {
+        NSString *name = [self _getFieldName:&type];
+        NSUInteger currOfs = ofs;
         fieldGetter = [[^(TQBoxedObject *self) {
-            return [TQBoxedObject box:(char*)self->_ptr+fieldOffset withType:fieldType];
+            return [TQBoxedObject box:(char*)self->_ptr+currOfs withType:type];
         } copy] autorelease];
         fieldSetter = [[^(TQBoxedObject *self, id value) {
-            [TQBoxedObject unbox:value to:(char*)self->_ptr+fieldOffset usingType:fieldType];
+            [TQBoxedObject unbox:value to:(char*)self->_ptr+currOfs usingType:type];
         } copy] autorelease];
 
         if(name) {
@@ -423,13 +422,10 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
         [fieldGetters addObject:fieldGetter];
         [fieldSetters addObject:fieldSetter];
 
-        if((isStruct && *nextType == _C_STRUCT_E) || (!isStruct && *nextType == _C_UNION_E))
-            break;
         // If it's a union, the offset is always 0
         if(isStruct)
-            fieldOffset += fieldSize;
-        fieldType = nextType;
-    }
+            ofs += size;
+    });
 
     IMP subscriptGetterImp = BlockImp(^(id self, NSInteger idx) {
         id (^getter)(id) = [fieldGetters objectAtIndex:idx];
@@ -457,7 +453,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
 // Handles blocks&function pointers
 + (Class)_prepareLambdaWrapper:(const char *)aClassName withType:(const char *)aType
 {
-    BOOL isBlock = *(++aType) == _MR_C_LAMBDA_BLOCK;
+    BOOL isBlock = *(++aType) == _TQ_C_LAMBDA_BLOCK;
 
     BOOL needsWrapping = NO;
     // If the value is a funptr, the return value or any argument is not an object, then the value needs to be wrapped up
@@ -479,17 +475,13 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
         TQFFIType *retType = [TQFFIType typeWithEncoding:aType+1 nextType:&argTypes];
 
         // And now the argument types
-        NSUInteger numArgs = isBlock;
-        NSUInteger argSize, currArgSize;
-        argSize = 0;
-        if(*argTypes != _MR_C_LAMBDA_E) {
-            const char *currArg = argTypes;
-            while((currArg = TQGetSizeAndAlignment(currArg, &currArgSize, NULL))) {
+        __block NSUInteger numArgs = isBlock;
+        __block NSUInteger argSize = 0;
+        if(*argTypes != _TQ_C_LAMBDA_E) {
+            TQIterateTypesInEncoding(argTypes, ^(const char *argType, NSUInteger size, NSUInteger align, BOOL *stop) {
                 ++numArgs;
-                argSize += currArgSize;
-                if(*currArg == _MR_C_LAMBDA_E)
-                    break;
-            }
+                argSize += size;
+            });
         }
 
         ffi_cif *cif = (ffi_cif*)malloc(sizeof(ffi_cif));

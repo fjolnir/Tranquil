@@ -48,7 +48,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 
 @implementation TQProgram
 @synthesize name=_name, llModule=_llModule, irBuilder=_irBuilder, shouldShowDebugInfo=_shouldShowDebugInfo,
-            bridge=_bridge, rootBlock=_currentRoot;
+            objcParser=_objcParser, rootBlock=_currentRoot;
 @synthesize llVoidTy=_llVoidTy, llInt8Ty=_llInt8Ty, llInt16Ty=_llInt16Ty, llInt32Ty=_llInt32Ty, llInt64Ty=_llInt64Ty,
     llFloatTy=_llFloatTy, llDoubleTy=_llDoubleTy, llIntTy=_llIntTy, llIntPtrTy=_llIntPtrTy, llSizeTy=_llSizeTy,
     llPtrDiffTy=_llPtrDiffTy, llVoidPtrTy=_llVoidPtrTy, llInt8PtrTy=_llInt8PtrTy, llVoidPtrPtrTy=_llVoidPtrPtrTy,
@@ -83,7 +83,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
         return nil;
 
     _name = [aName retain];
-    _bridge = [[TQBridgeSupport alloc] init];
+    _objcParser = [TQHeaderParser new];
     _llModule = new Module([_name UTF8String], getGlobalContext());
     llvm::LLVMContext &ctx = _llModule->getContext();
     _irBuilder = new IRBuilder<>(ctx);
@@ -260,7 +260,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 {
     delete _irBuilder;
     delete _llModule;
-    [_bridge release];
+    [_objcParser release];
     [super dealloc];
 }
 
@@ -291,9 +291,11 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     InitializeNativeTarget();
 
     //[_bridge loadFramework:@"/System/Library/Frameworks/Foundation.framework"];
-    [_bridge loadFramework:@"/System/Library/Frameworks/AppKit.framework"];
-    [_bridge loadBridgesupportFile:[@"~/Library/BridgeSupport/math.bridgesupport" stringByExpandingTildeInPath]];
-    [_bridge loadFramework:@"/System/Library/Frameworks/GLUT.framework"];
+    //[_bridge loadFramework:@"/System/Library/Frameworks/AppKit.framework"];
+    //[_bridge loadBridgesupportFile:[@"~/Library/BridgeSupport/math.bridgesupport" stringByExpandingTildeInPath]];
+    //[_bridge loadFramework:@"/System/Library/Frameworks/GLUT.framework"];
+    [_objcParser parseHeader:@"/System/Library/Frameworks/Foundation.framework/Headers/Foundation.h"];
+    //return nil;
 
     NSError *err = nil;
     [aNode generateCodeInProgram:self block:nil error:&err];
@@ -424,7 +426,6 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     _currentRoot = parserState.root;
     id result = [self _executeNode:parserState.root];
     _currentRoot = nil;
-    [parserState.root release];
 
     return result;
 }
@@ -467,5 +468,62 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     args.push_back([self getGlobalStringPtr:@"> %s\n" withBuilder:aBuilder]);
     args.push_back([self getGlobalStringPtr:txt withBuilder:aBuilder]);
     aBuilder->CreateCall(func_printf, args);
+}
+
+- (llvm::Type *)llvmTypeFromEncoding:(const char *)aEncoding
+{
+    switch(*aEncoding) {
+        case _C_ID:
+        case _C_CLASS:
+        case _C_SEL:
+        case _C_PTR:
+        case _C_CHARPTR:
+        case _TQ_C_LAMBDA_B:
+            return _llInt8PtrTy;
+        case _C_DBL:
+            return _llDoubleTy;
+        case _C_FLT:
+            return _llFloatTy;
+        case _C_INT:
+            return _llIntTy;
+        case _C_SHT:
+            return _llInt16Ty;
+        case _C_CHR:
+            return _llInt8Ty;
+        case _C_BOOL:
+            return _llInt8Ty;
+        case _C_LNG:
+            return _llInt64Ty;
+        case _C_LNG_LNG:
+            return _llInt64Ty;
+        case _C_UINT:
+            return _llIntTy;
+        case _C_USHT:
+            return _llInt16Ty;
+        case _C_ULNG:
+            return _llInt64Ty;
+        case _C_ULNG_LNG:
+            return _llInt64Ty;
+        case _C_VOID:
+            return _llVoidTy;
+        case _C_STRUCT_B: {
+            const char *field = strstr(aEncoding, "=") + 1;
+            assert((uintptr_t)field > 1);
+            std::vector<Type*> fields;
+            while(*field != _C_STRUCT_E) {
+                fields.push_back([self llvmTypeFromEncoding:field]);
+                field = TQGetSizeAndAlignment(field, NULL, NULL);
+            }
+            return StructType::get(_llModule->getContext(), fields);
+        }
+        case _C_UNION_B:
+            NSLog(@"unions -> llvm not yet supported");
+            exit(1);
+        break;
+        default:
+            [NSException raise:NSGenericException
+                        format:@"Unsupported type %c!", *aEncoding];
+            return NULL;
+    }
 }
 @end

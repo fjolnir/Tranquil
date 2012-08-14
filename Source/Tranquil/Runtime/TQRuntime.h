@@ -8,6 +8,14 @@
 extern "C" {
 #endif
 
+// Extend objc/runtime.h and add function pointers and blocks tokens.
+// A pointer to `void foo (int, char)' will be encoded as <^vic>.
+// A `void (^)(int, char)' block will be encoded as <@vic>.
+#define _TQ_C_LAMBDA_B        '<'
+#define _TQ_C_LAMBDA_FUNCPTR  '^'
+#define _TQ_C_LAMBDA_BLOCK    '@'
+#define _TQ_C_LAMBDA_E        '>'
+
 extern id TQSentinel;
 extern TQValidObject *TQValid;
 
@@ -51,6 +59,8 @@ struct TQBlockLiteral {
     // imported variables
 };
 
+typedef void (^TQTypeIterationBlock)(const char *type, NSUInteger size, NSUInteger align, BOOL *stop);
+
 // These implement support for dynamic instance variables (But use existing properties if available)
 void TQSetValueForKey(id obj, char *key, id value);
 id TQValueForKey(id obj, const char *key);
@@ -74,6 +84,8 @@ id TQBoxValue(void *value, const char *type);
 BOOL TQStructSizeRequiresStret(int size);
 // NSGetSizeAndAlignment augmented to handle MacRuby lambda notation <@>
 const char *TQGetSizeAndAlignment(const char *typePtr, NSUInteger *sizep, NSUInteger *alignp);
+// Iterates the types in an encoding string by calling the passed block with each
+void TQIterateTypesInEncoding(const char *typePtr, TQTypeIterationBlock blk);
 
 // Returns the number of arguments a tranquil block takes (If the object is not a block originating from tranquil, it returns -1)
 NSInteger TQBlockGetNumberOfArguments(id block);

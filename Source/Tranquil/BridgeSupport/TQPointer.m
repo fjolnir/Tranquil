@@ -11,10 +11,10 @@
     NSUInteger count = NSNotFound;
 
     if(*aType++ == _C_ARY_B) {
-        assert(*aType >= '0' && *aType <= '9');
+        assert(isdigit(*aType));
         count = atoi(aType);
         // Move on to the enclosed type
-        while(*aType >= '0' && *aType <= '9') ++aType;
+        while(isdigit(*aType)) ++aType;
     }
 
     return [[[self alloc] initWithType:aType address:aPtr count:count] autorelease];

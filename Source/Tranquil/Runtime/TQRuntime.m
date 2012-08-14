@@ -6,7 +6,7 @@
 #import <objc/message.h>
 #import "TQNumber.h"
 #import "NSObject+TQAdditions.h"
-#import "../BridgeSupport/bs.h"
+#import "../BridgeSupport/TQHeaderParser.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -98,7 +98,7 @@ BOOL TQMethodTypeRequiresBoxing(const char *aEncoding)
     while(*(++aEncoding) != ':') {} // Just iterate till the selector
     // First run of this loop skips over the selector
     while(*(++aEncoding) != '\0') {
-        if((*aEncoding != '@' && !(*aEncoding >= '0' && *aEncoding <= '9')) && !(*aEncoding == '?' && *(aEncoding - 1) == '@'))
+        if((*aEncoding != '@' && !isdigit(*aEncoding)) && !(*aEncoding == '?' && *(aEncoding - 1) == '@'))
             return YES;
     }
     return NO;
@@ -152,25 +152,45 @@ BOOL TQStructSizeRequiresStret(int size)
 
 const char *TQGetSizeAndAlignment(const char *typePtr, NSUInteger *sizep, NSUInteger *alignp)
 {
-    if(*typePtr == _MR_C_LAMBDA_B) {
+    if(*typePtr == _TQ_C_LAMBDA_B) {
         if(sizep)
             *sizep = sizeof(void*);
         if(alignp)
             *alignp = __alignof(id (*)()); // TODO: Make this handle cross compilation
         unsigned depth = 0;
         do {
-            if(*typePtr == _MR_C_LAMBDA_B)
+            if(*typePtr == _TQ_C_LAMBDA_B)
                 ++depth;
-            else if(*typePtr == _MR_C_LAMBDA_E)
+            else if(*typePtr == _TQ_C_LAMBDA_E)
                 --depth;
             ++typePtr;
             if(depth == 0)
                 break;
         } while(*typePtr != '\0');
+    } else
+        typePtr = NSGetSizeAndAlignment(typePtr, sizep, alignp);
 
-        return typePtr;
-    }
-    return NSGetSizeAndAlignment(typePtr, sizep, alignp);
+    // Get rid of the aligning numbers inserted into method signatures
+    while(isdigit(*typePtr)) ++typePtr;
+    return typePtr;
+}
+
+void TQIterateTypesInEncoding(const char *typePtr, TQTypeIterationBlock blk)
+{
+    assert(blk);
+    if(!typePtr || strlen(typePtr) == 0)
+        return;
+    NSUInteger size, align;
+    const char *nextPtr;
+    BOOL shouldStop = NO;
+    do {
+        nextPtr = TQGetSizeAndAlignment(typePtr, &size, &align);
+        blk(typePtr, size, align, &shouldStop);
+        if(shouldStop)
+            break;
+        typePtr = nextPtr;
+    } while(typePtr && *typePtr != '\0' && *typePtr != _C_STRUCT_E && *typePtr != _TQ_C_LAMBDA_E
+            && *typePtr != _C_UNION_E && *typePtr != _C_ARY_E);
 }
 
 NSInteger TQBlockGetNumberOfArguments(id block)

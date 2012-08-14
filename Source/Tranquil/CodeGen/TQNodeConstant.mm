@@ -15,7 +15,7 @@ using namespace llvm;
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
 {
-    TQNode *bridgedNode = [aProgram.bridge entityNamed:self.value];
+    TQNode *bridgedNode = [aProgram.objcParser entityNamed:self.value];
     if(bridgedNode)
         return [bridgedNode generateCodeInProgram:aProgram block:aBlock error:aoErr];
     else

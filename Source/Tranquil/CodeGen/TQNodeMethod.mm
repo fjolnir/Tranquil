@@ -116,23 +116,31 @@ using namespace llvm;
 {
     _class = aClass;
     // If a matching bridged method is found, use the types from there
-    TQBridgedClassInfo *classInfo = [aProgram.bridge classNamed:aClass.superClassName];
-    TQBridgedMethodInfo *methodInfo = [classInfo.instanceMethods objectForKey:[self _selectorString]];
+    TQBridgedClassInfo *classInfo = [aProgram.objcParser classNamed:aClass.superClassName];
+    NSString *bridgedEncoding = [classInfo.instanceMethods objectForKey:[self _selectorString]];
 
-    if([methodInfo.returnType isEqualToString:@"v"]) // No such thing as a void return in tranquil
+    if(bridgedEncoding && *[bridgedEncoding UTF8String] == _C_VOID) // No such thing as a void return in tranquil
         _retType = @"@";
     else
-        _retType = [methodInfo.returnType retain];
+        _retType = bridgedEncoding;
     _argTypes = [[NSMutableArray arrayWithCapacity:self.arguments.count] retain];
-    NSMutableString *methodSignature = [NSMutableString stringWithString:@"@@:"];
-    if(methodInfo) {
+    NSString *methodSignature;
+    if(bridgedEncoding) {
+        methodSignature = bridgedEncoding;
         [_argTypes addObject:@"@"]; // __blk
         [_argTypes addObject:@"@"]; // self
-        [_argTypes addObjectsFromArray:methodInfo.argTypes];
-        [methodSignature appendString:[methodInfo.argTypes componentsJoinedByString:@""]];
+        __block int i = 0;
+        TQIterateTypesInEncoding([bridgedEncoding UTF8String], ^(const char *type, NSUInteger size, NSUInteger align, BOOL *stop) {
+            if(i++ <= 1)
+                return;
+            NSString *nsstr = [NSString stringWithUTF8String:type];
+            [_argTypes addObject:nsstr];
+        });
     } else {
+        methodSignature = [NSMutableString stringWithString:@"@@:"];
         for(int i = 1; i < self.arguments.count+1; ++i) {
             [_argTypes addObject:@"@"];
+            [(NSMutableString*)methodSignature appendString:@"@"];
         }
     }
 

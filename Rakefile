@@ -43,6 +43,7 @@ CXXFLAGS = {
 
 LDFLAGS = [
     '-lstdc++',
+    '-lclang',
     '`/usr/local/bin/llvm-config --libs core jit nativecodegen bitwriter ipo instrumentation`',
     '`/usr/local/bin/llvm-config --ldflags`',
     '-framework Foundation',

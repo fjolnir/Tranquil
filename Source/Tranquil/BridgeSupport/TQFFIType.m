@@ -1,7 +1,6 @@
 #import "TQFFIType.h"
 #import "TQBoxedObject.h"
 #import "../Runtime/TQRuntime.h"
-#import "bs.h"
 
 @implementation TQFFIType
 + (ffi_type *)scalarTypeToFFIType:(const char *)aType
@@ -71,10 +70,10 @@
 
     if([TQBoxedObject typeIsScalar:_encoding])
         _ffiType = [TQFFIType scalarTypeToFFIType:_encoding];
-    else if(*_encoding == _MR_C_LAMBDA_B || *_encoding == _C_PTR)
+    else if(*_encoding == _TQ_C_LAMBDA_B || *_encoding == _C_PTR)
         _ffiType = &ffi_type_pointer;
     else if(*_encoding == _C_STRUCT_B) {
-        _referencedTypes = [[NSMutableArray alloc] init];
+        _referencedTypes = [NSMutableArray new];
         ffi_type type;
         _ffiType = (ffi_type*)malloc(sizeof(ffi_type));
         _ffiType->type = FFI_TYPE_STRUCT;

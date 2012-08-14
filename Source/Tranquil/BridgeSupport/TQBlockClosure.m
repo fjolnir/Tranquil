@@ -2,7 +2,6 @@
 #import "TQFFIType.h"
 #import "../Runtime/TQRuntime.h"
 #import "TQBoxedObject.h"
-#import "bs.h"
 
 static ffi_closure *_AllocateClosure(void **codePtr);
 static void _DeallocateClosure(void *closure);
@@ -15,7 +14,7 @@ static void _closureFunction(ffi_cif *closureCif, void *ret, void *args[], TQBlo
 
 - (id)initWithBlock:(id)aBlock type:(const char *)aType
 {
-    assert(*aType == _MR_C_LAMBDA_B);
+    assert(*aType == _TQ_C_LAMBDA_B);
     aType += 2;
     _type = aType;
 
@@ -27,7 +26,7 @@ static void _closureFunction(ffi_cif *closureCif, void *ret, void *args[], TQBlo
         _ffiTypeObjects = [NSMutableArray new];
         TQFFIType *retTypeObj = [TQFFIType typeWithEncoding:typeIterator nextType:&typeIterator];
         [_ffiTypeObjects addObject:retTypeObj];
-        while(typeIterator && *typeIterator != _MR_C_LAMBDA_E) {
+        while(typeIterator && *typeIterator != _TQ_C_LAMBDA_E) {
             [_ffiTypeObjects addObject:[TQFFIType typeWithEncoding:typeIterator nextType:&typeIterator]];
         }
 

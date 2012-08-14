@@ -2,7 +2,7 @@
 #define _TQ_PROGRAM_H_
 
 #include <Tranquil/CodeGen/TQNodeBlock.h>
-#include <Tranquil/BridgeSupport/TQBridgeSupport.h>
+#include <Tranquil/BridgeSupport/TQHeaderParser.h>
 #include <llvm/IRBuilder.h>
 #include <Foundation/NSObject.h>
 
@@ -10,7 +10,7 @@ extern "C" NSString * const kTQSyntaxErrorException;
 
 @interface TQProgram : NSObject
 @property(readwrite, retain) NSString *name;
-@property(readonly) TQBridgeSupport *bridge;
+@property(readonly) TQHeaderParser *objcParser;
 @property(readwrite) BOOL shouldShowDebugInfo;
 @property(readonly) llvm::Module *llModule;
 @property(readonly) llvm::IRBuilder<> *irBuilder;
@@ -60,5 +60,7 @@ extern "C" NSString * const kTQSyntaxErrorException;
 - (void)insertLogUsingBuilder:(llvm::IRBuilder<> *)aBuilder withStr:(NSString *)txt;
 - (llvm::Value *)getGlobalStringPtr:(NSString *)aStr withBuilder:(llvm::IRBuilder<> *)aBuilder;
 - (llvm::Value *)getGlobalStringPtr:(NSString *)aStr inBlock:(TQNodeBlock *)aBlock;
+
+- (llvm::Type *)llvmTypeFromEncoding:(const char *)aEncoding;
 @end
 #endif

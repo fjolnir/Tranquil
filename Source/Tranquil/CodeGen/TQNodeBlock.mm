@@ -1,7 +1,7 @@
 #import "TQNodeBlock.h"
 #import "../TQProgram.h"
 #import "../TQDebug.h"
-#import "../BridgeSupport/TQBridgeSupport.h"
+#import "../BridgeSupport/TQHeaderParser.h"
 #import "TQNodeVariable.h"
 #import "TQNodeArgumentDef.h"
 #import <llvm/Intrinsics.h>
@@ -387,7 +387,7 @@ using namespace llvm;
     // Build the invoke function
     std::vector<Type *> paramTypes;
 
-    Type *retType = [TQBridgeSupport llvmTypeFromEncoding:[_retType UTF8String] inProgram:aProgram];
+    Type *retType = [aProgram llvmTypeFromEncoding:[_retType UTF8String]];
 
     NSUInteger retTypeSize;
     NSGetSizeAndAlignment([_retType UTF8String], &retTypeSize, NULL);
@@ -406,7 +406,7 @@ using namespace llvm;
     for(int i = 0; i < [_argTypes count]; ++i) {
         currEncoding = [[_argTypes objectAtIndex:i] UTF8String];
         NSGetSizeAndAlignment(currEncoding, &argTypeSize, NULL);
-        Type *llType = [TQBridgeSupport llvmTypeFromEncoding:currEncoding inProgram:aProgram];
+        Type *llType = [aProgram llvmTypeFromEncoding:currEncoding];
         if(TQStructSizeRequiresStret(argTypeSize)) {
             llType = PointerType::getUnqual(llType);
             [byValArgIndices addObject:[NSNumber numberWithInt:i+1]]; // Add one to jump over retval
