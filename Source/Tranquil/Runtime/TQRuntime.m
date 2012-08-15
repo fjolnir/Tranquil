@@ -170,8 +170,8 @@ const char *TQGetSizeAndAlignment(const char *typePtr, NSUInteger *sizep, NSUInt
     } else
         typePtr = NSGetSizeAndAlignment(typePtr, sizep, alignp);
 
-    // Get rid of the aligning numbers inserted into method signatures
-    while(isdigit(*typePtr)) ++typePtr;
+    // Get rid of the aligning numbers and qualifiers unused at runtime
+    while(isdigit(*typePtr) || *typePtr == _C_CONST) ++typePtr;
     return typePtr;
 }
 

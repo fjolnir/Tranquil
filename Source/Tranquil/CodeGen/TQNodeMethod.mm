@@ -106,8 +106,11 @@ using namespace llvm;
 {
     _class = aClass;
     // If a matching bridged method is found, use the types from there
-    TQBridgedClassInfo *classInfo = [aProgram.objcParser classNamed:aClass.superClassName];
-    NSString *bridgedEncoding = [classInfo.instanceMethods objectForKey:[self _selectorString]];
+    NSString *bridgedEncoding;
+    if(_type == kTQInstanceMethod)
+        bridgedEncoding = [[aProgram.objcParser classNamed:aClass.superClassName] typeForInstanceMethod:[self _selectorString]];
+    else
+        bridgedEncoding = [[aProgram.objcParser classNamed:aClass.superClassName] typeForClassMethod:[self _selectorString]];
 
     if(bridgedEncoding && *[bridgedEncoding UTF8String] == _C_VOID) // No such thing as a void return in tranquil
         _retType = @"@";
@@ -121,10 +124,9 @@ using namespace llvm;
         [_argTypes addObject:@"@"]; // self
         __block int i = 0;
         TQIterateTypesInEncoding([bridgedEncoding UTF8String], ^(const char *type, NSUInteger size, NSUInteger align, BOOL *stop) {
-            if(i++ <= 1)
+            if(i++ <= 2) // Skip over the return, self & selector types
                 return;
-            NSString *nsstr = [NSString stringWithUTF8String:type];
-            [_argTypes addObject:nsstr];
+            [_argTypes addObject:[NSString stringWithUTF8String:type]];
         });
     } else {
         methodSignature = [NSMutableString stringWithString:@"@@:"];

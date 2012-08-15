@@ -1,6 +1,6 @@
-CXX = 'clang++'
+CXX = '/usr/local/llvm/bin/clang++'
 LD  = CXX
-PEG = 'greg'
+PEG = '/usr/local/greg/bin/greg'
 
 BUILD_DIR = 'Build'
 
@@ -14,7 +14,6 @@ PEGFLAGS = [
 
 CXXFLAGS = {
     :release => [
-        '-DDEBUG',
         '-std=gnu++98',
         '-mmacosx-version-min=10.7',
         '-I`pwd`/Source',
@@ -29,6 +28,7 @@ CXXFLAGS = {
         '-DDEBUG',
         '-std=gnu++98',
         '-mmacosx-version-min=10.7',
+        '-I/usr/local/clang/include',
         '-I`pwd`/Source',
         '-I`pwd`/Build',
         '-I/usr/include/libxml2',
@@ -108,9 +108,6 @@ file :setReleaseOpts do
     @buildMode = :release
 end
 
-task :default => [:build_dir, :tranquil]
-task :release => [:setReleaseOpts, :build_dir, :tranquil]
-
 task :run => [:default] do
     sh "#{BUILD_DIR}/tranquil"
 end
@@ -122,3 +119,10 @@ end
 task :lldb => [:default] do
     sh "lldb #{BUILD_DIR}/tranquil"
 end
+
+task :clean do
+    sh "rm Build/*"
+end
+
+task :default => [:build_dir, :tranquil]
+task :release => [:clean, :setReleaseOpts, :build_dir, :tranquil]

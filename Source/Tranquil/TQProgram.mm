@@ -293,9 +293,12 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     //[_bridge loadFramework:@"/System/Library/Frameworks/AppKit.framework"];
     //[_bridge loadBridgesupportFile:[@"~/Library/BridgeSupport/math.bridgesupport" stringByExpandingTildeInPath]];
     //[_bridge loadFramework:@"/System/Library/Frameworks/GLUT.framework"];
-    [_objcParser parseHeader:@"/System/Library/Frameworks/Foundation.framework/Headers/Foundation.h"];
+    //[_objcParser parseHeader:@"/System/Library/Frameworks/Foundation.framework/Headers/Foundation.h"];
+    [_objcParser parseHeader:@"/System/Library/Frameworks/AppKit.framework/Headers/AppKit.h"];
+    [_objcParser parseHeader:@"/System/Library/Frameworks/GLUT.framework/Headers/glut.h"];
+    //[_objcParser parseHeader:@"/System/Library/Frameworks/OpenGL.framework/Headers/gl.h"];
     //[_objcParser parsePCH:@"/Users/fyolnish/test.pch"];
-    return nil;
+    //return nil;
 
     NSError *err = nil;
     [aNode generateCodeInProgram:self block:nil error:&err];

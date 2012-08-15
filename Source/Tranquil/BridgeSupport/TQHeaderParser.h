@@ -31,9 +31,13 @@
 @end
 
 @interface TQBridgedClassInfo : NSObject
-@property(readwrite, retain) NSString *name, *superClassName;
+@property(readwrite, retain) NSString *name;
+@property(readwrite, retain) TQBridgedClassInfo *superclass;
 // Keyed by selector, values are type encoding strings
 @property(readwrite, retain) NSMutableDictionary *instanceMethods, *classMethods;
+
+- (NSString *)typeForInstanceMethod:(NSString *)aSelector;
+- (NSString *)typeForClassMethod:(NSString *)aSelector;
 @end
 
 @interface TQBridgedConstant : TQNode {
