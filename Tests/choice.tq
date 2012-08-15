@@ -1,0 +1,11 @@
+a = nil
+b = 1
+c = a || b
+d = a && b
+"c: #{c} d: #{d}" print
+
+e = 1 || 2
+"e: #{e}" print
+
+if 1 && 2 && nil
+    "hmmm" print
