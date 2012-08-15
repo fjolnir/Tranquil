@@ -5,7 +5,7 @@
 
 @class TQProgram, TQBridgedFunction, TQBridgedConstant, TQBridgedClassInfo;
 
-@interface TQHeaderParser : NSObject {
+@interface TQHeaderParser : TQObject {
     @public
     NSMutableDictionary *_functions, *_classes;
     // String constants & enums (Entities whose values are only defined in headers and not stored in the binary)
