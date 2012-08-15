@@ -20,7 +20,7 @@ then
 else
     curl http://llvm.org/releases/3.1/clang+llvm-3.1-x86_64-apple-darwin11.tar.gz -o /tmp/llvm3.1.tgz
     tar -C /usr/local -xzf /tmp/llvm3.1.tgz
-    mv /usr/local/clang+llvm-3.1-x86_64-apple-darwin1 /usr/local/llvm
+    mv /usr/local/clang+llvm-3.1-x86_64-apple-darwin11 /usr/local/llvm
 fi
 
 echo "\n\033[0;34mInstalling Greg the parser generator...\033[0m"
