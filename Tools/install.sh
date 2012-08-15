@@ -19,13 +19,14 @@ then
   echo "\033[0;32mYou already have llvm installed to /usr/local/llvm.\033[0m\n\033[0;31mIf it's not version 3.1, you might have compatibility problems.\033[0m"
 else
     curl http://llvm.org/releases/3.1/clang+llvm-3.1-x86_64-apple-darwin11.tar.gz -o /tmp/llvm3.1.tgz
-    tar xzf /tmp/llvm3.1.tgz /usr/local/llvm
+    tar -C /usr/local -xzf /tmp/llvm3.1.tgz
+    mv /usr/local/clang+llvm-3.1-x86_64-apple-darwin1 /usr/local/llvm
 fi
 
 echo "\n\033[0;34mInstalling Greg the parser generator...\033[0m"
 if [ -d /usr/local/greg ]
 then
-  echo "\033[0;32mYou already have greg installed.033[0m"
+  echo "\033[0;32mYou already have greg installed.\033[0m"
 else
     git clone https://github.com/nddrylliog/greg.git /tmp/greg-git
     pushd /tmp/greg-git
