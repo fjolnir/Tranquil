@@ -77,11 +77,7 @@ using namespace llvm;
         NSString *nsName = [NSString stringWithUTF8String:name];
 
         switch(cursor.kind) {
-            case CXCursor_StructDecl: {
-                //printf("CXCursor_StructDecl %s\n", name);
-            } break;
             case CXCursor_ObjCInterfaceDecl: {
-                //printf("@interface %s\n", name);
                 TQBridgedClassInfo *info = [TQBridgedClassInfo new];
                 info.name = nsName;
                 [_classes setObject:info forKey:nsName];
@@ -103,7 +99,6 @@ using namespace llvm;
                 }
             } break;
             case CXCursor_ObjCCategoryDecl: {
-                //printf("@category %s\n", name);
                 return CXChildVisit_Recurse;
             } break;
             case CXCursor_ObjCClassRef: {
@@ -111,7 +106,6 @@ using namespace llvm;
                     _currentClass = [_classes objectForKey:nsName];
             } break;
             case CXCursor_ObjCProtocolDecl: {
-                //printf("CXCursor_ObjCProtocolDecl %s\n", name);
                  TQBridgedClassInfo *info = [TQBridgedClassInfo new];
                 [_protocols setObject:info forKey:nsName];
                 _currentClass = info;
@@ -123,17 +117,14 @@ using namespace llvm;
                 BOOL isClassMethod = cursor.kind == CXCursor_ObjCClassMethodDecl;
                 NSString *selector = nsName;
                 NSString *encoding = [NSString stringWithUTF8String:[self _encodingForCursor:cursor]];
-                //TQLog(@"[%@ %@] %@", _currentClass.name, selector, encoding);
                 if(isClassMethod)
                     [_currentClass.classMethods    setObject:encoding forKey:selector];
                 else
                     [_currentClass.instanceMethods setObject:encoding forKey:selector];
             } break;
             case CXCursor_FunctionDecl: {
-                //printf("CXCursor_FunctionDecl %s\n", name);
-                // TODO: Support bridging variadic functions, support or ignore inlined functions
+                // TODO: Support bridging variadic functions. Support or ignore inlined functions
                 const char *encoding = [self _encodingForCursor:cursor];
-                //printf("fun: %s -- %s\n", name, encoding);
                 TQBridgedFunction *fun = [TQBridgedFunction functionWithName:nsName
                                                                     encoding:encoding];
                 [_functions setObject:fun
@@ -167,6 +158,7 @@ using namespace llvm;
             } break;
             // Ignored
             case CXCursor_UnexposedAttr:
+            case CXCursor_StructDecl:
             case CXCursor_TypedefDecl:
             case CXCursor_TypeRef:
             case CXCursor_ObjCIvarDecl:
@@ -176,7 +168,7 @@ using namespace llvm;
             case CXCursor_UnionDecl: {
             } break;
             default:
-                printf("Unhandled Objective-C entity: %s of type %d %s = %s\n", name, cursor.kind, clang_getCString(clang_getCursorKindSpelling(cursor.kind)),
+                TQLog(@"Unhandled Objective-C entity: %s of type %d %s = %s\n", name, cursor.kind, clang_getCString(clang_getCursorKindSpelling(cursor.kind)),
                       clang_getCString(clang_getTypeKindSpelling(clang_getCursorType(cursor).kind)));
                 break;
         }
@@ -228,7 +220,6 @@ using namespace llvm;
     else
         assert(0); // Should never reach here..
 
-    //printf("    ..come on %s %s kind: %d type: %s\n", clang_getCString(clang_getDeclObjCTypeEncoding(cursor)), clang_getCString(clang_getCursorSpelling(cursor)), cursor.kind, clang_getCString(clang_getTypeKindSpelling(clang_getCursorType(cursor).kind)));
     __block BOOL isFirstChild = YES;
     clang_visitChildrenWithBlock(cursor, ^(CXCursor child, CXCursor parent) {
         // If the function returns void, we don't have a node for the return type
@@ -237,19 +228,10 @@ using namespace llvm;
         isFirstChild = NO;
 
         const char *childEnc = [self _encodingForCursor:child];
-        //printf("    %d %s -- '%s'\n", child.kind, childEnc, clang_getCString(clang_getCursorSpelling(child)));
         if(strstr(childEnc, "@?") == childEnc || strstr(childEnc, "^?") == childEnc)
             [realEncoding appendFormat:@"%s", [self _encodingForFunPtrCursor:child]];
         else
             [realEncoding appendFormat:@"%s", childEnc];
-        if(child.kind == 43) {
-            CXType typeDef = clang_getCursorType(child);
-            if(typeDef.kind == CXType_Typedef) { // Verify that it's in fact a typedef
-                //printf("      typedef!\n");
-                CXType type = clang_getTypedefDeclUnderlyingType(child);
-                //printf("      underlying type: %p\n", type.kind);
-            }
-        }
         return CXChildVisit_Continue;
     });
     if(isFirstChild) // No children => void return and no args
@@ -272,7 +254,6 @@ using namespace llvm;
                 [realEncoding appendString:@"v"];
             }
             const char *childEnc = clang_getCString(clang_getDeclObjCTypeEncoding(child));
-            //printf("child: %s\n", childEnc);
             if(strstr(childEnc, "@?") == childEnc || strstr(childEnc, "^?") == childEnc)
                 [realEncoding appendFormat:@"%s", [self _encodingForFunPtrCursor:child]];
             else
