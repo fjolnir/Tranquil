@@ -11,6 +11,9 @@ then
   exit
 fi
 
+# Just for install count stats for me; completely anonymous.
+curl "http://d.asgeirsson.is/JX9I"
+
 echo "\033[0;32mI'm about to retrieve and compile Tranquil for you. This shouldn't take more than a few minutes,\ndepending on your connection.\n"
 
 echo "\033[0;34mInstalling LLVM...\033[0m"
