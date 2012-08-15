@@ -19,22 +19,31 @@
     return [ret autorelease];
 }
 
-id TQDispatchBlock0(struct TQBlockLiteral *)      __asm("_TQDispatchBlock0");
-id TQDispatchBlock1(struct TQBlockLiteral *, id ) __asm("_TQDispatchBlock1");
+extern "C" id TQDispatchBlock0(id);
+extern "C" id TQDispatchBlock1(id, id);
+extern "C" id TQDispatchBlock2(id, id, id);
+
 - (id)each:(id (^)())aBlock
 {
     if(TQBlockGetNumberOfArguments(aBlock) == 1) {
         for(int i = 0; i < [_length intValue]; ++i) {
-            TQDispatchBlock1((struct TQBlockLiteral *)aBlock, [TQNumber numberWithInt:i]);
+            TQDispatchBlock1(aBlock, [TQNumber numberWithInt:i]);
         }
     } else {
         for(int i = 0; i < [_length intValue]; ++i) {
-            TQDispatchBlock0((struct TQBlockLiteral *)aBlock);
+            TQDispatchBlock0(aBlock);
         }
     }
     return nil;
+}
 
-    return nil;
+- (id)reduce:(id (^)(id, id))aBlock
+{
+    id accum = TQSentinel; // Make the block use it's default accumulator on the first call
+    for(int i = 0; i < [_length intValue]; ++i) {
+        accum = TQDispatchBlock2(aBlock, [TQNumber numberWithInt:i], accum);
+    }
+    return accum;
 }
 
 - (NSString *)description

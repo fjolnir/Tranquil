@@ -5,6 +5,8 @@
 #import <Tranquil/TQObject.h>
 #import <Tranquil/TQBatching.h>
 
+@class TQRange;
+
 @interface TQNumber : TQObject {
     @public
     double _value;
@@ -79,5 +81,6 @@
 - (TQNumber *)lshift:(id)b;
 - (TQNumber *)rshift:(id)b;
 
+- (TQRange *)to:(TQNumber *)b;
 - (id)times:(id (^)())block;
 @end

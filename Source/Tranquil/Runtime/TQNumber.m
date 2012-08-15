@@ -1,6 +1,7 @@
 #import "TQNumber.h"
 #import <objc/runtime.h>
 #import "TQRuntime.h"
+#import "TQRange.h"
 
 #ifdef __LP64__
     #define _tqfloat double
@@ -465,6 +466,13 @@ static __inline__ _tqfloat _TQNumberValue(TQNumber *ptr)
         return NSOrderedAscending;
     else
         return NSOrderedSame;
+}
+
+#pragma mark -
+
+- (TQRange *)to:(TQNumber *)b
+{
+    return [TQRange from:self to:b];
 }
 
 #pragma mark -
