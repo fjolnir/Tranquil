@@ -105,13 +105,13 @@ But here're a couple of examples:
 	#TestView < NSView {
 	    - init {
 	        super init
-	        self#gradient = NSGradient alloc initWithStartingColor: NSColor redColor
-	                                                  endingColor: NSColor yellowColor
+	        #gradient = NSGradient alloc initWithStartingColor: NSColor redColor
+	                                               endingColor: NSColor yellowColor
 	        ^self
 	    }
 	    - drawRect: dirtyRect {
 	        NSColor cyanColor set
-	        self#gradient drawInRect: dirtyRect angle: 45
+	        #gradient drawInRect: dirtyRect angle: 45
 	    }
 	}
 

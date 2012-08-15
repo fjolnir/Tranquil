@@ -7,7 +7,7 @@ nsapp = NSApplication sharedApplication
     }
 
     - reshape {
-        pixelSize = (self convertRectToBase: self#bounds)[1]
+        pixelSize = (self convertRectToBase: #bounds)[1]
         GlViewport(0, 0, pixelSize[0], pixelSize[1])
         GlMatrixMode(GL_PROJECTION)   GlLoadIdentity()
         GluPerspective(25, pixelSize[0] / pixelSize[1], 1, 100)
@@ -24,7 +24,7 @@ nsapp = NSApplication sharedApplication
         GlColor3f(1,1,1)
         GlutWireTeapot(1)
 
-        self#openGLContext flushBuffer
+        #openGLContext flushBuffer
     }
 }
 

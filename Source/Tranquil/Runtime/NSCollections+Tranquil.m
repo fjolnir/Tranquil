@@ -3,7 +3,7 @@
 #import <objc/runtime.h>
 
 @implementation NSMapTable (Tranquil)
-+ (NSMapTable *)tq_mapTableWithObjectsAndKeys:(id)firstObject , ...
++ (NSMapTable *)tq_mapTableWithObjectsAndKeys:(id)firstObject, ...
 {
     NSMapTable *ret = [NSMapTable mapTableWithStrongToStrongObjects];
 
