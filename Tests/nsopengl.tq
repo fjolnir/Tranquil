@@ -1,0 +1,48 @@
+nsapp = NSApplication sharedApplication
+
+#TestView < NSOpenGLView {
+    + defaultPixelFormat {
+        attribs = TQPointer withObjects: [NSOpenGLPFADoubleBuffer, nil] type: "I"
+        ^NSOpenGLPixelFormat alloc initWithAttributes: attribs
+    }
+
+    - reshape {
+        pixelSize = (self convertRectToBase: self#bounds)[1]
+        GlViewport(0, 0, pixelSize[0], pixelSize[1])
+        GlMatrixMode(GL_PROJECTION)   GlLoadIdentity()
+        GluPerspective(25, pixelSize[0] / pixelSize[1], 1, 100)
+        GlMatrixMode(GL_MODELVIEW)    GlLoadIdentity()
+        GlTranslatef(0,0,-10)
+    }
+
+    - prepareOpenGL {
+        GlClearColor(0,0,0,1)
+    }
+
+    - drawRect: dirtyRect {
+        GlClear(GL_COLOR_BUFFER_BIT bitOr: GL_DEPTH_BUFFER_BIT)
+        GlColor3f(1,1,1)
+        GlutWireTeapot(1)
+
+        self#openGLContext flushBuffer
+    }
+}
+
+\ Create a window to display the view
+win = NSWindow alloc initWithContentRect: [[400, 400], [300, 200]]
+                               styleMask: (NSResizableWindowMask bitOr: NSTitledWindowMask)
+                                 backing: NSBackingStoreBuffered
+                                   defer: no
+win makeKeyAndOrderFront: nil
+view = TestView   new;
+             setFrame: (win contentView bounds);
+  setAutoresizingMask: (NSViewWidthSizable bitOr: NSViewHeightSizable);
+                 self
+
+win#contentView addSubview: view
+win#movableByWindowBackground = yes
+
+\ Start the app
+nsapp setActivationPolicy: NSApplicationActivationPolicyRegular
+nsapp activateIgnoringOtherApps: yes
+nsapp run
