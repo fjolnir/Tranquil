@@ -27,9 +27,15 @@ win = NSWindow alloc initWithContentRect: [NSZeroPoint, [300, 200]]
 
 \ Create a little view
 #TestView < NSView {
+    - init {
+        super init
+        self#gradient = NSGradient alloc initWithStartingColor: NSColor redColor
+                                                  endingColor: NSColor yellowColor
+        ^self
+    }
     - drawRect: dirtyRect {
         NSColor cyanColor set
-        (NSBezierPath bezierPathWithRect: dirtyRect) fill
+        self#gradient drawInRect: dirtyRect angle: 45
     }
 }
 

@@ -93,22 +93,30 @@ But here're a couple of examples:
     appMenuItem setSubmenu: appMenu
     
     \ Create a window
-    win = NSWindow alloc initWithContentRect: [NSZeroPoint, [300, 200]]
+    win = NSWindow alloc initWithContentRect: [[400, 400], [300, 200]]
                                    styleMask: NSTitledWindowMask
                                      backing: NSBackingStoreBuffered
-                                       defer: no
-    win#title = "Tranquil!"
+                                       defer: no;
+                                    setTitle: "Tranquil!";
+                                        self
     win makeKeyAndOrderFront: nil
     
     \ Create a little view
-    #TestView < NSView {
-        - drawRect: dirtyRect {
-            NSColor redColor set
-            (NSBezierPath bezierPathWithRect: dirtyRect) fill
-        }
-    }
+	#TestView < NSView {
+	    - init {
+	        super init
+	        self#gradient = NSGradient alloc initWithStartingColor: NSColor redColor
+	                                                  endingColor: NSColor yellowColor
+	        ^self
+	    }
+	    - drawRect: dirtyRect {
+	        NSColor cyanColor set
+	        self#gradient drawInRect: dirtyRect angle: 45
+	    }
+	}
+
     
-    view = TestView alloc initWithFrame: (win contentView bounds)
+    view = TestView new; setFrame: (win contentView bounds); self
     win#contentView = view
     
     \ Start the app
