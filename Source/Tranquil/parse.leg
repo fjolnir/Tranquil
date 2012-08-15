@@ -600,7 +600,7 @@ Property     = {
                {
                    PushStack([NSMutableArray array]);
                }
-               - (PropSubscr -)+
+               (PropSubscr -)+
                {
                    NSMutableArray *subscripts = PopStack();
                    TQNode *receiver = PopStack();
