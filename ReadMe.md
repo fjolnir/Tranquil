@@ -10,7 +10,7 @@ Tranquil is still extremely experimental and you shouldn't use it for anything o
 
 The following will install Tranquil into ~/Tranquil (And two dependencies into /usr/local).
 
-    > curl -fsSkL https://github.com/fjolnir/tranquil/Tools/RemoteInstall.sh | /bin/zsh
+    > curl -fsSkL https://github.com/fjolnir/Tranquil/blob/master/Tools/install.sh | /bin/zsh
     > ~/Tranquil/build/tranquil -h
 
 ## Learning the language
@@ -41,6 +41,38 @@ But here're a couple of examples:
 
     if /foo[a-z]+/i matches: "Foobar"
     	"Foobar starts with foo." print
+
+### Using the OpenGL & GLUT APIs
+
+	GlutInit(0, nil)
+	GlutInitDisplayMode(GLUT_DOUBLE)
+	GlutInitWindowSize(640, 480)
+	GlutInitWindowPosition(200, 200)
+	GlutCreateWindow("Tranquil is cool as beans!")
+	
+	GlClearColor(0, 0, 0, 0)
+	GlScalef(0.4, 0.4, 0.4)
+	
+	GlutDisplayFunc({
+	    GlRotatef(0.1, 0, 1, 0)
+	    GlClear(GL_COLOR_BUFFER_BIT)
+	    GlColor3f(0, 1, 0)
+	        GlutWireDodecahedron()
+	    GlColor3f(1, 1, 1)
+	        GlutWireTeapot(0.7)
+	    GlutSwapBuffers()
+	})
+	
+	lastX, lastY = 0
+	GlutMotionFunc({ x, y |
+	    dx, dy = lastX - x, lastY - y
+	    GlRotatef(dx, 0, 1, 0)
+	    GlRotatef(dy, 1, 0, 0)
+	    lastX, lastY = x, y
+	})
+	
+	GlutIdleFunc(GlutPostRedisplay)
+	GlutMainLoop()
 
 ### Talking to Cocoa
 
