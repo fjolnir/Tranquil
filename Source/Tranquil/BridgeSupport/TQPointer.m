@@ -4,6 +4,22 @@
 
 @implementation TQPointer
 
++ (void)load
+{
+    if(self != [TQPointer class])
+        return;
+    IMP imp;
+    imp = imp_implementationWithBlock(^(id a, id idx)   {
+        return objc_msgSend(a, @selector(objectAtIndexedSubscript:), [idx unsignedIntegerValue]);
+    });
+    class_addMethod(self, sel_registerName("[]:"), imp, "@@:@");
+    // []=
+    imp = imp_implementationWithBlock(^(id a, id idx, id val)   {
+        return objc_msgSend(a, @selector(setObject:atIndexedSubscript:), val, [idx unsignedIntegerValue]);
+    });
+    class_addMethod(self, sel_registerName("[]:=:"), imp, "@@:@@");
+}
+
 + (TQPointer *)box:(void *)aPtr withType:(const char *)aType
 {
     assert(aPtr);
