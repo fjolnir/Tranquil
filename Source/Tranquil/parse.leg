@@ -617,7 +617,7 @@ PropSubscr   = "#" - prop:Identifier { ExtendToken(); [StackTop addObject:prop];
 
 
 # Built-in constructors
-Array        = "["
+Array        = "[" --
                {
                    UpdateToken();
                    PushStack([NSMutableArray array]);
