@@ -106,7 +106,7 @@
 
 - (void)dealloc
 {
-    if(![TQBoxedObject typeIsScalar:_encoding]) {
+    if(![TQBoxedObject typeIsScalar:_encoding] && _ffiType != &ffi_type_pointer) {
         free(_ffiType->elements);
         free(_ffiType);
     }
