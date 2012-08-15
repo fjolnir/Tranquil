@@ -28,6 +28,10 @@ But here're a couple of examples:
 
     sum = (0 to: 1000000) reduce: `obj, accum=0 | obj+accum`
 
+### Message chaining (Without having to return self from every method you write)
+
+	var = Character new; setName: "Deckard"; setOccupation: "Tough Guy"; self
+
 ### Multiple assignment
 
     a, b = b, a  \ Swap b&a

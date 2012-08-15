@@ -85,7 +85,7 @@
 			^instance             \ Returns the instance
 		}
 		- aMethodTaking: a and: b {     \ Instance method taking two arguments ('self' refers to an instance of Klass)
-			^self#ivar = a + b          \ Returns the value of self#ivar after setting it to a+b
+			^#ivar = a + b          \ Returns the value of self#ivar after setting it to a+b
 		}
 	}
 	
@@ -276,8 +276,7 @@ In this example we had a block that is a property of `Klass`. This block was bei
 	#Iterator {
 		- map: lambda {
 			^self reduce: { obj, accum=[] |
-				accum push lambda(obj)
-				^accum
+				^accum push lambda(obj); self
 			}
 		}
 	

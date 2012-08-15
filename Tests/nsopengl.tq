@@ -33,7 +33,7 @@ win = NSWindow alloc initWithContentRect: [[400, 400], [300, 200]]
                                styleMask: (NSResizableWindowMask bitOr: NSTitledWindowMask)
                                  backing: NSBackingStoreBuffered
                                    defer: no
-win makeKeyAndOrderFront: nil
+
 view = TestView   new;
              setFrame: (win contentView bounds);
   setAutoresizingMask: (NSViewWidthSizable bitOr: NSViewHeightSizable);
@@ -43,6 +43,7 @@ win#contentView addSubview: view
 win#movableByWindowBackground = yes
 
 \ Start the app
+win makeKeyAndOrderFront: nil
 nsapp setActivationPolicy: NSApplicationActivationPolicyRegular
 nsapp activateIgnoringOtherApps: yes
 nsapp run
