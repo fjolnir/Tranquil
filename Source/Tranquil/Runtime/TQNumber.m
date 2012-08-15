@@ -74,7 +74,7 @@ static __inline__ _tqfloat _TQNumberValue(TQNumber *ptr)
 + (void)load
 {
     if(self != [TQNumber class]) {
-        NSLog(@"Warning: Subclassing TQNumber is a bad idea!");
+        TQLog(@"Warning: Subclassing TQNumber is a bad idea!");
         // These cannot be overridden
         assert((typeof(allocImp))method_getImplementation(class_getClassMethod(self, @selector(allocWithZone:))) == allocImp);
         assert((typeof(initImp))class_getMethodImplementation(self, @selector(initWithDouble:)) == initImp);

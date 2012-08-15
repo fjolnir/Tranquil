@@ -97,7 +97,7 @@
         }
         _ffiType->elements[numFields] = NULL;
     } else {
-        NSLog(@"%s", _encoding);
+        TQLog(@"%s", _encoding);
         // TODO: handle unions by returning a type matching the largest field?
         assert(NO);
     }

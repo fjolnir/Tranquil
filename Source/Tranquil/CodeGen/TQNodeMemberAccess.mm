@@ -69,7 +69,7 @@ using namespace llvm;
 	//NSString *keyVarName = [NSString stringWithFormat:@"TQPropertyKey_%@", _property];
 
     //Value *key = aProgram.llModule->getGlobalVariable([keyVarName UTF8String], true);
-	//NSLog(@"var for %@: %p", keyVarName, key);
+	//TQLog(@"var for %@: %p", keyVarName, key);
 	//if(!key)
 		//key = builder->CreateGlobalString([_property UTF8String], [keyVarName UTF8String]);
     //Value *zero = ConstantInt::get(Type::getInt32Ty(aProgram.llModule->getContext()), 0);

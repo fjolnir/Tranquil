@@ -9,7 +9,7 @@
     NSError *err = nil;
     NSRegularExpression *regex = [self regularExpressionWithPattern:str options:aOpts error:&err];
     if(err)
-        NSLog(@"%@", err);
+        TQLog(@"%@", err);
     return regex;
 }
 

@@ -30,7 +30,6 @@ using namespace llvm;
         return nil;
 
     _arguments       = [NSMutableArray new];
-    _argTypes        = [NSMutableArray new];
     _statements      = [NSMutableArray new];
     _locals          = [NSMutableDictionary new];
     _function        = NULL;
@@ -513,7 +512,7 @@ using namespace llvm;
     for(TQNode *stmt in _statements) {
         [stmt generateCodeInProgram:aProgram block:self error:aoErr];
         if(*aoErr) {
-            NSLog(@"Error: %@", *aoErr);
+            TQLog(@"Error: %@", *aoErr);
             return NULL;
         }
         if([stmt isKindOfClass:[TQNodeReturn class]])

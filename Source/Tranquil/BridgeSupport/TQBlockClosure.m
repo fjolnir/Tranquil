@@ -82,7 +82,7 @@ void _closureFunction(ffi_cif *closureCif, void *ret, void *args[], TQBlockClosu
     ffi_cif callCif;
     if(ffi_prep_cif(&callCif, FFI_DEFAULT_ABI, nargs, retType, argTypes) != FFI_OK) {
         // TODO: be more graceful
-        NSLog(@"unable to wrap block call");
+        TQLog(@"unable to wrap block call");
         exit(1);
     }
     id retPtr;

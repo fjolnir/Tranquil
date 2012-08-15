@@ -1,4 +1,5 @@
 #import "TQNode.h"
+#import "../TQDebug.h"
 
 using namespace llvm;
 
@@ -10,7 +11,7 @@ using namespace llvm;
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
 {
-    NSLog(@"Code generation has not been implemented for %@.", [self class]);
+    TQLog(@"Code generation has not been implemented for %@.", [self class]);
     return NULL;
 }
 
@@ -19,29 +20,29 @@ using namespace llvm;
                  block:(TQNodeBlock *)aBlock
                  error:(NSError **)aoError
 {
-    NSLog(@"Store has not been implemented for %@.", [self class]);
+    TQLog(@"Store has not been implemented for %@.", [self class]);
     return NULL;
 }
 
 - (TQNode *)referencesNode:(TQNode *)aNode
 {
-    NSLog(@"Node reference check has not been implemented for %@.", [self class]);
+    TQLog(@"Node reference check has not been implemented for %@.", [self class]);
     return nil;
 }
 
 - (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
 {
-    NSLog(@"Node iteration has not been implemented for %@.", [self class]);
+    TQLog(@"Node iteration has not been implemented for %@.", [self class]);
 }
 
 - (BOOL)insertChildNode:(TQNode *)aNodeToInsert before:(TQNode *)aNodeToShift
 {
-    NSLog(@"%@ does not support child node insertion.", [self class]);
+    TQLog(@"%@ does not support child node insertion.", [self class]);
     return NO;
 }
 - (BOOL)replaceChildNodesIdenticalTo:(TQNode *)aNodeToReplace with:(TQNode *)aNodeToInsert
 {
-    NSLog(@"%@ does not support child node replacement.", [self class]);
+    TQLog(@"%@ does not support child node replacement.", [self class]);
     return NO;
 }
 @end

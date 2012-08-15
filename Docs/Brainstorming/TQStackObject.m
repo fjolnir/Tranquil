@@ -186,7 +186,7 @@ int main(int argc, char *argv[]) {
     TQStackNumber *stackObjPtr = (TQStackNumber *)&stackObj;
     [stackObjPtr setValue:3];
 
-    NSLog(@"%f %@", [stackObjPtr value], [stackObjPtr description]);
+    TQLog(@"%f %@", [stackObjPtr value], [stackObjPtr description]);
 
     [p release];
 }

@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import <Tranquil/TQDebug.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
 
@@ -37,7 +38,7 @@ static inline TQBatch *TQNewObjectBatch(TQBatchPool *pool, long batchInstanceSiz
 
         len = size * OBJECTS_PER_BUNCH + BatchSize;
         if(!(batch = (TQBatch *)calloc(1, len))){
-            NSLog(@"Failed to allocate object. Out of memory?");
+            TQLog(@"Failed to allocate object. Out of memory?");
             return nil;
         }
         batch->_instance_size = batchInstanceSize;

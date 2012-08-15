@@ -300,7 +300,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     NSError *err = nil;
     [aNode generateCodeInProgram:self block:nil error:&err];
     if(err) {
-        NSLog(@"Error: %@", err);
+        TQLog(@"Error: %@", err);
         return NO;
     }
 
@@ -411,7 +411,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     @try {
         while(yyparse(&greg));
     } @catch(NSException *e) {
-        NSLog(@"%@", [e reason]);
+        TQLog(@"%@", [e reason]);
         return nil;
     } @finally {
         yydeinit(&greg);
@@ -421,7 +421,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
         return nil;
 
     if(_shouldShowDebugInfo)
-        NSLog(@"%@", parserState.root);
+        TQLog(@"%@", parserState.root);
 
     _currentRoot = parserState.root;
     id result = [self _executeNode:parserState.root];
@@ -517,7 +517,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
             return StructType::get(_llModule->getContext(), fields);
         }
         case _C_UNION_B:
-            NSLog(@"unions -> llvm not yet supported");
+            TQLog(@"unions -> llvm not yet supported");
             exit(1);
         break;
         default:
