@@ -130,7 +130,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     else if(*aType == _TQ_C_LAMBDA_B)
         boxingClass = [self _prepareLambdaWrapper:className withType:aType];
     else {
-        NSLog(@"Type %s cannot be unboxed", aType);
+        TQLog(@"Type %s cannot be unboxed", aType);
         return nil;
     }
     objc_registerClassPair(boxingClass);
@@ -504,7 +504,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
 
         if(ffi_prep_cif(cif, FFI_DEFAULT_ABI, numArgs, retType.ffiType, args) != FFI_OK) {
             // TODO: be more graceful
-            NSLog(@"unable to wrap block");
+            TQLog(@"unable to wrap block");
             exit(1);
         }
 
@@ -614,7 +614,7 @@ extern "C" id tq_boxedMsgSend(id self, SEL selector, ...)
                     format:@"Unknown selector %@ sent to object %@", NSStringFromSelector(selector), self];
         return nil;
     } else if((uintptr_t)method == 0x1) {
-        NSLog(@"Error: Tried to use tq_boxedMsgSend to call a method that does not require boxing");
+        TQLog(@"Error: Tried to use tq_boxedMsgSend to call a method that does not require boxing");
         return nil;
     }
 
@@ -693,7 +693,7 @@ extern "C" id tq_boxedMsgSend(id self, SEL selector, ...)
     ffi_cif cif;
     if(ffi_prep_cif(&cif, FFI_DEFAULT_ABI, nargs, retType, argTypes) != FFI_OK) {
         // TODO: be more graceful
-        NSLog(@"unable to wrap method call");
+        TQLog(@"unable to wrap method call");
         exit(1);
     }
     ffi_call(&cif, FFI_FN(imp), retPtr, argPtrs);
