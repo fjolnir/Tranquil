@@ -29,6 +29,7 @@ static __inline__ id _createTaggedPointer(_tqfloat value)
 {
     uintptr_t ptr;
     memcpy(&ptr, &value, sizeof(_tqfloat));
+    ptr &= ~0xf; // Mask out the tag bits
     ptr |= kTag;
     return (id)ptr;
 }
