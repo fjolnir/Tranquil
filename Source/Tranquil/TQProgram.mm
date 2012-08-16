@@ -47,7 +47,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 
 @implementation TQProgram
 @synthesize name=_name, llModule=_llModule, irBuilder=_irBuilder, shouldShowDebugInfo=_shouldShowDebugInfo,
-            objcParser=_objcParser, rootBlock=_currentRoot;
+            objcParser=_objcParser;
 @synthesize llVoidTy=_llVoidTy, llInt8Ty=_llInt8Ty, llInt16Ty=_llInt16Ty, llInt32Ty=_llInt32Ty, llInt64Ty=_llInt64Ty,
     llFloatTy=_llFloatTy, llDoubleTy=_llDoubleTy, llIntTy=_llIntTy, llIntPtrTy=_llIntPtrTy, llSizeTy=_llSizeTy,
     llPtrDiffTy=_llPtrDiffTy, llVoidPtrTy=_llVoidPtrTy, llInt8PtrTy=_llInt8PtrTy, llVoidPtrPtrTy=_llVoidPtrPtrTy,
@@ -433,11 +433,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     if(_shouldShowDebugInfo)
         TQLog(@"%@", parserState.root);
 
-    _currentRoot = parserState.root;
-    id result = [self _executeRoot:parserState.root];
-    _currentRoot = nil;
-
-    return result;
+    return [self _executeRoot:parserState.root];
 }
 
 

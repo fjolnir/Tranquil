@@ -15,9 +15,6 @@ extern "C" NSString * const kTQSyntaxErrorException;
 @property(readonly) llvm::Module *llModule;
 @property(readonly) llvm::IRBuilder<> *irBuilder;
 
-// This property is set during compilation, in order for nodes in the tree to be able to easily access the root block
-@property(readonly) TQNodeBlock *rootBlock;
-
 #pragma mark - Cached types
 // void
 @property(readonly) llvm::Type *llVoidTy;

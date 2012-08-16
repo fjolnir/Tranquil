@@ -53,7 +53,7 @@ using namespace llvm;
     NSString *globalName = [NSString stringWithFormat:@"TQConstNum_%f", [_value doubleValue]];
     Value *num =  mod->getGlobalVariable([globalName UTF8String], true);
     if(!num) {
-        Function *rootFunction = aProgram.rootBlock.function;
+        Function *rootFunction = aRoot.function;
         IRBuilder<> rootBuilder(&rootFunction->getEntryBlock(), rootFunction->getEntryBlock().begin());
 
         Value *selector = rootBuilder.CreateLoad(mod->getOrInsertGlobal("TQNumberWithDoubleSel", aProgram.llInt8PtrTy));
