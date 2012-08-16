@@ -78,7 +78,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 
 - (id)initWithName:(NSString *)aName
 {
-    if(!(self = [super init]))
+    if(!(self = [super init])) 
         return nil;
 
     _name = [aName retain];
@@ -252,6 +252,9 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 
 #undef DEF_EXTERNAL_FUN
 
+    [_objcParser parseHeader:@"/System/Library/Frameworks/AppKit.framework/Headers/AppKit.h"];
+    [_objcParser parseHeader:@"/System/Library/Frameworks/GLUT.framework/Headers/glut.h"];
+
     return self;
 }
 
@@ -282,7 +285,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 }
 
 // Executes the current program tree
-- (id)_executeNode:(TQNodeBlock *)aNode
+- (id)_executeRoot:(TQNodeRootBlock *)aNode
 {
     TQInitializeRuntime();
     InitializeNativeTarget();
@@ -292,14 +295,12 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     //[_bridge loadBridgesupportFile:[@"~/Library/BridgeSupport/math.bridgesupport" stringByExpandingTildeInPath]];
     //[_bridge loadFramework:@"/System/Library/Frameworks/GLUT.framework"];
     //[_objcParser parseHeader:@"/System/Library/Frameworks/Foundation.framework/Headers/Foundation.h"];
-    [_objcParser parseHeader:@"/System/Library/Frameworks/AppKit.framework/Headers/AppKit.h"];
-    [_objcParser parseHeader:@"/System/Library/Frameworks/GLUT.framework/Headers/glut.h"];
     //[_objcParser parseHeader:@"/System/Library/Frameworks/OpenGL.framework/Headers/gl.h"];
     //[_objcParser parsePCH:@"/Users/fyolnish/test.pch"];
     //return nil;
 
     NSError *err = nil;
-    [aNode generateCodeInProgram:self block:nil error:&err];
+    [aNode generateCodeInProgram:self block:nil root:aNode error:&err];
     if(err) {
         TQLog(@"Error: %@", err);
         return NO;
@@ -371,12 +372,11 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     if(_shouldShowDebugInfo) {
         //_llModule->dump();
         llvm::PrintStatistics();
+        fprintf(stderr, "---------------------\n");
     }
 
     id(*rootPtr)() = (id(*)())engine->getPointerToFunction(aNode.function);
 
-    if(_shouldShowDebugInfo)
-        fprintf(stderr, "---------------------\n");
     uint64_t startTime = mach_absolute_time();
     // Execute code
     id ret = rootPtr();
@@ -393,6 +393,14 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     }
 
     return ret;
+}
+
+- (id)executeScriptAtPath:(NSString *)aPath error:(NSError **)aoErr
+{
+    NSString *script = [NSString stringWithContentsOfFile:aPath usedEncoding:NULL error:nil];
+    if(!script)
+        TQAssert(NO, @"Unable to load script from %@", aPath);
+    return [self executeScript:script error:aoErr];
 }
 
 - (id)executeScript:(NSString *)aScript error:(NSError **)aoErr
@@ -426,7 +434,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
         TQLog(@"%@", parserState.root);
 
     _currentRoot = parserState.root;
-    id result = [self _executeNode:parserState.root];
+    id result = [self _executeRoot:parserState.root];
     _currentRoot = nil;
 
     return result;
