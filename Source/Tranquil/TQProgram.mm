@@ -1,8 +1,9 @@
-#include "TQProgram.h"
-#include "TQDebug.h"
-#include "CodeGen/TQNode.h"
-#include <llvm/Transforms/IPO/PassManagerBuilder.h>
-#include <llvm/Target/TargetData.h>
+#import "TQProgram.h"
+#import "TQDebug.h"
+#import "TQProgram+Private.h"
+#import "CodeGen/TQNode.h"
+#import <llvm/Transforms/IPO/PassManagerBuilder.h>
+#import <llvm/Target/TargetData.h>
 #import <mach/mach_time.h>
 #import "Runtime/TQRuntime.h"
 #import "BridgeSupport/TQBoxedObject.h"
@@ -46,7 +47,7 @@ using namespace llvm;
 NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 
 @implementation TQProgram
-@synthesize name=_name, llModule=_llModule, irBuilder=_irBuilder, shouldShowDebugInfo=_shouldShowDebugInfo,
+@synthesize name=_name, llModule=_llModule, shouldShowDebugInfo=_shouldShowDebugInfo,
             objcParser=_objcParser;
 @synthesize llVoidTy=_llVoidTy, llInt8Ty=_llInt8Ty, llInt16Ty=_llInt16Ty, llInt32Ty=_llInt32Ty, llInt64Ty=_llInt64Ty,
     llFloatTy=_llFloatTy, llDoubleTy=_llDoubleTy, llIntTy=_llIntTy, llIntPtrTy=_llIntPtrTy, llSizeTy=_llSizeTy,
@@ -85,7 +86,6 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     _objcParser = [TQHeaderParser new];
     _llModule = new Module([_name UTF8String], getGlobalContext());
     llvm::LLVMContext &ctx = _llModule->getContext();
-    _irBuilder = new IRBuilder<>(ctx);
 
     // Cache the types
     _llVoidTy               = llvm::Type::getVoidTy(ctx);
@@ -252,6 +252,9 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 
 #undef DEF_EXTERNAL_FUN
 
+    TQInitializeRuntime();
+    InitializeNativeTarget();
+
     [_objcParser parseHeader:@"/System/Library/Frameworks/AppKit.framework/Headers/AppKit.h"];
     [_objcParser parseHeader:@"/System/Library/Frameworks/GLUT.framework/Headers/glut.h"];
 
@@ -260,7 +263,6 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 
 - (void)dealloc
 {
-    delete _irBuilder;
     delete _llModule;
     [_objcParser release];
     [super dealloc];
@@ -287,9 +289,6 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 // Executes the current program tree
 - (id)_executeRoot:(TQNodeRootBlock *)aNode
 {
-    TQInitializeRuntime();
-    InitializeNativeTarget();
-
     //[_bridge loadFramework:@"/System/Library/Frameworks/Foundation.framework"];
     //[_bridge loadFramework:@"/System/Library/Frameworks/AppKit.framework"];
     //[_bridge loadBridgesupportFile:[@"~/Library/BridgeSupport/math.bridgesupport" stringByExpandingTildeInPath]];
@@ -395,15 +394,19 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     return ret;
 }
 
-- (id)executeScriptAtPath:(NSString *)aPath error:(NSError **)aoErr
+- (TQNodeRootBlock *)_rootFromFile:(NSString *)aPath error:(NSError **)aoErr
 {
     NSString *script = [NSString stringWithContentsOfFile:aPath usedEncoding:NULL error:nil];
     if(!script)
         TQAssert(NO, @"Unable to load script from %@", aPath);
-    return [self executeScript:script error:aoErr];
+    return [self _parseScript:script error:aoErr];
+}
+- (id)executeScriptAtPath:(NSString *)aPath error:(NSError **)aoErr
+{
+    return [self _executeRoot:[self _rootFromFile:aPath error:aoErr]];
 }
 
-- (id)executeScript:(NSString *)aScript error:(NSError **)aoErr
+- (TQNodeRootBlock *)_parseScript:(NSString *)aScript error:(NSError **)aoErr
 {
     GREG greg;
     yyinit(&greg);
@@ -432,8 +435,11 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     [self _preprocessNode:parserState.root withTrace:[NSMutableArray array]];
     if(_shouldShowDebugInfo)
         TQLog(@"%@", parserState.root);
-
-    return [self _executeRoot:parserState.root];
+    return parserState.root;
+}
+- (id)executeScript:(NSString *)aScript error:(NSError **)aoErr
+{
+    return [self _executeRoot:[self _parseScript:aScript error:aoErr]];
 }
 
 

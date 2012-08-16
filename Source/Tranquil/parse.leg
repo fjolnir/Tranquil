@@ -6,7 +6,7 @@ struct _TQParserState {
     int currentLine;
 
     NSMutableArray *stack;
-    TQNodeBlock *root;
+    TQNodeRootBlock *root;
 
     const char *script;
     unsigned int length, cursor;
@@ -82,15 +82,22 @@ int yyInput(char *buf, int maxSize, TQParserState *state) {
 }
 %}
 
-Program      = -- ((Statement (- '.')?|Comment) --)+ EOF
+Program      = -- ((TopLevelStmt (- '.')?|Comment) --)+ EOF
                {
                    NSMutableArray *statements = PopStack();
-                   TQNodeBlock *root = [TQNodeRootBlock node];
+                   TQNodeRootBlock *root = [TQNodeRootBlock node];
                    [root setStatements:statements];
                    state->root = root;
                }
              | - ( !EOL . )* EOL { SyntaxError(@"") }
 
+TopLevelStmt = ImportStmt | Statement
+
+# Import (can only appear in the top level)
+ImportStmt   = "import" - path:String
+             {
+                 [StackTop addObject:[TQNodeImport nodeWithPath:[(TQNodeString *)path value]]];
+             }
 
 # Statement
 Statement    = (

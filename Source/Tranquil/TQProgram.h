@@ -13,7 +13,6 @@ extern "C" NSString * const kTQSyntaxErrorException;
 @property(readonly) TQHeaderParser *objcParser;
 @property(readwrite) BOOL shouldShowDebugInfo;
 @property(readonly) llvm::Module *llModule;
-@property(readonly) llvm::IRBuilder<> *irBuilder;
 
 #pragma mark - Cached types
 // void

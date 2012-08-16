@@ -9,6 +9,7 @@
 	else
 	while
 	until
+	import
 	break  \ Prematurely terminates a loop
 	skip   \ Skips to the end of the current iteration of a loop
 	nil    \ Represents 'nothing' ('no' is a synonym)
@@ -109,6 +110,13 @@
 	\ String interpolation
 	a = "expression"
 	b = "A string with an embedded #{a}." \ Evaluates to "A string with an embedded expression."
+	
+	\ Importing other files
+	import "..filename.."  \ Imports `filename`.
+	                       \ (import statements must appear at the beginning of the
+	                       \ file, since they are evaluated at compile-time)
+	import "AppKit"        \ You can also import Objective-C headers.
+	                       \ In this case the header AppKit.h in AppKit.framework is read.
 
 
 ## Blocks
