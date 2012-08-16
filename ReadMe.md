@@ -80,49 +80,45 @@ But here're a couple of examples:
 
 ### Talking to Cocoa
 
-    nsapp = NSApplication sharedApplication
-
-    \ Create the menubar
-    menuBar     = NSMenu new
-    appMenuItem = NSMenuItem new
-    menuBar addItem: appMenuItem
-    nsapp setMainMenu: menuBar
-    
-    \ Add the Application menu & the quit item
-    appMenu      = NSMenu new
-    quitMenuItem = NSMenuItem alloc initWithTitle: "Quit #{NSProcessInfo processInfo processName}"
-                                           action: "terminate:"
-                                    keyEquivalent: "q"
-    appMenu addItem: quitMenuItem
-    appMenuItem setSubmenu: appMenu
-    
-    \ Create a window
-    win = NSWindow alloc initWithContentRect: [[400, 400], [300, 200]]
-                                   styleMask: NSTitledWindowMask
-                                     backing: NSBackingStoreBuffered
-                                       defer: no;
-                                    setTitle: "Tranquil!";
-                                        self
-    win makeKeyAndOrderFront: nil
-    
-    \ Create a little view
-    #TestView < NSView {
-        - init {
-            #gradient = NSGradient alloc initWithStartingColor: NSColor redColor
-                                                   endingColor: NSColor yellowColor
-            ^self
-        }
-        - drawRect: dirtyRect {
-            NSColor cyanColor set
-            #gradient drawInRect: dirtyRect angle: 45
-        }
-    }
-
-    
-    view = TestView new; setFrame: (win contentView bounds); self
-    win#contentView = view
-    
-    \ Start the app
-    nsapp setActivationPolicy: NSApplicationActivationPolicyRegular
-    nsapp activateIgnoringOtherApps: yes
-    nsapp run
+	nsapp = NSApplication sharedApplication
+	
+	\ Create the menubar
+	quitMenuItem = NSMenuItem new; setTitle: "Quit #{NSProcessInfo processInfo processName}";
+	                              setAction: "terminate:";
+	                       setKeyEquivalent: "q";
+	                                   self
+	appMenu     = NSMenu new; addItem: quitMenuItem;   self
+	appMenuItem = NSMenuItem new; setSubmenu: appMenu; self
+	menuBar     = NSMenu new; addItem: appMenuItem;    self
+	
+	nsapp setMainMenu: menuBar
+	
+	\ Create a little view
+	#TestView < NSView {
+	    - init {
+	        #gradient = NSGradient alloc initWithStartingColor: NSColor redColor
+	                                               endingColor: NSColor yellowColor
+	        ^self
+	    }
+	    - drawRect: dirtyRect {
+	        NSColor cyanColor set
+	        #gradient drawInRect: dirtyRect angle: 45
+	    }
+	}
+	
+	view = TestView new; setFrame: (win contentView bounds); self
+	
+	\ Create a window
+	win = NSWindow alloc initWithContentRect: [NSZeroPoint, [300, 200]]
+	                               styleMask: (NSTitledWindowMask bitOr: NSResizableWindowMask)
+	                                 backing: NSBackingStoreBuffered
+	                                   defer: no;
+	                                setTitle: "Tranquil!";
+	                          setContentView: view;
+	                                    self
+	
+	\ Start the app
+	win makeKeyAndOrderFront: nil
+	nsapp setActivationPolicy: NSApplicationActivationPolicyRegular
+	nsapp activateIgnoringOtherApps: yes
+	nsapp run
