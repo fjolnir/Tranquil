@@ -20,6 +20,7 @@ To learn more about Tranquil you should read the [specification](https://github.
 But here're a couple of examples:
 
 ### Array iteration
+
     alternatives = ["Objective-C", "Ruby", "Nu", "Perl", "Python"]
     alternatives each: `alternative | "Tranquil is nicer than #{alternative}" print`
     "Or so I hope at least." print
@@ -30,7 +31,7 @@ But here're a couple of examples:
 
 ### Message chaining (Without having to return self from every method you write)
 
-    var = Character new; setName: "Deckard"; setOccupation: "Tough Guy"; self
+    var = Character new; setName: "Deckard"; setOccupation: "Blade Runner"; self
 
 ### Multiple assignment
 
@@ -104,16 +105,14 @@ But here're a couple of examples:
 	        #gradient drawInRect: dirtyRect angle: 45
 	    }
 	}
-	
-	view = TestView new; setFrame: (win contentView bounds); self
-	
+		
 	\ Create a window
-	win = NSWindow alloc initWithContentRect: [NSZeroPoint, [300, 200]]
+	win = NSWindow alloc initWithContentRect: [[0, 0], [300, 200]]
 	                               styleMask: (NSTitledWindowMask bitOr: NSResizableWindowMask)
 	                                 backing: NSBackingStoreBuffered
 	                                   defer: no;
 	                                setTitle: "Tranquil!";
-	                          setContentView: view;
+	                          setContentView: TestView new;
 	                                    self
 	
 	\ Start the app
