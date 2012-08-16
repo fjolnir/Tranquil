@@ -46,6 +46,7 @@ LDFLAGS = [
     '`/usr/local/llvm/bin/llvm-config --libs core jit nativecodegen bitwriter ipo instrumentation`',
     '`/usr/local/llvm/bin/llvm-config --ldflags`',
     '-lclang',
+    '-rpath /usr/local/llvm/lib',
     '-framework Foundation',
     '-framework AppKit',
     '-all_load',
