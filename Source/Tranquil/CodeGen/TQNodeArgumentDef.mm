@@ -30,7 +30,10 @@ using namespace llvm;
     [super dealloc];
 }
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
 {
     TQAssert(NO, "Argument definitions do not generate code");
     return NULL;

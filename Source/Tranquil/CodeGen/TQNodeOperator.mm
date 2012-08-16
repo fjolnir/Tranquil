@@ -76,7 +76,10 @@ using namespace llvm;
     return ret;
 }
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
 {
     if(_type == kTQOperatorAssign) {
         BOOL isVar = [_left isKindOfClass:[TQNodeVariable class]];
@@ -87,14 +90,14 @@ using namespace llvm;
         // We must make sure the storage exists before evaluating the right side, so that if the assigned value is a
         // block, it can reference itself
         if(isVar)
-            [(TQNodeVariable *)_left createStorageInProgram:aProgram block:aBlock error:aoError];
-        Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
-        [(TQNodeVariable *)_left store:right inProgram:aProgram block:aBlock error:aoError];
-        if(*aoError)
+            [(TQNodeVariable *)_left createStorageInProgram:aProgram block:aBlock error:aoErr];
+        Value *right = [_right generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        [(TQNodeVariable *)_left store:right inProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        if(*aoErr)
             return NULL;
         return right;
     } else if(_type == kTQOperatorUnaryMinus) {
-        Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
+        Value *right = [_right generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         Value *selector  = aProgram.llModule->getOrInsertGlobal("TQUnaryMinusOpSel", aProgram.llInt8PtrTy);
         return aBlock.builder->CreateCall2(aProgram.objc_msgSend, right, aBlock.builder->CreateLoad(selector));
     } else if(_type == kTQOperatorIncrement || _type == kTQOperatorDecrement) {
@@ -103,13 +106,13 @@ using namespace llvm;
         Value *selector  = aProgram.llModule->getOrInsertGlobal([selName UTF8String], aProgram.llInt8PtrTy);
         TQNode *incrementee = _left ? _left : _right;
 
-        Value *one = [[TQNodeNumber nodeWithDouble:1.0] generateCodeInProgram:aProgram block:aBlock error:aoError];
-        Value *beforeVal = [incrementee generateCodeInProgram:aProgram block:aBlock error:aoError];
-        if(*aoError)
+        Value *one = [[TQNodeNumber nodeWithDouble:1.0] generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        Value *beforeVal = [incrementee generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        if(*aoErr)
             return NULL;
         Value *incrementedVal = aBlock.builder->CreateCall3(aProgram.objc_msgSend, beforeVal, aBlock.builder->CreateLoad(selector), one);
-        [incrementee store:incrementedVal inProgram:aProgram block:aBlock error:aoError];
-        if(*aoError)
+        [incrementee store:incrementedVal inProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        if(*aoErr)
             return NULL;
 
         // Return original value and increment (var++)
@@ -119,35 +122,35 @@ using namespace llvm;
         else
             return incrementedVal;
     } else if(_type == kTQOperatorEqual) {
-        Value *left  = [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
-        Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
+        Value *left  = [_left generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        Value *right = [_right generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         return aBlock.builder->CreateCall2(aProgram.TQObjectsAreEqual, left, right);
     } else if(_type == kTQOperatorInequal) {
-        Value *left  = [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
-        Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
+        Value *left  = [_left generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        Value *right = [_right generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         return aBlock.builder->CreateCall2(aProgram.TQObjectsAreNotEqual, left, right);
     } else if(_type == kTQOperatorAnd || _type == kTQOperatorOr) {
         // Generate:
         // temp = left
         // unless/if temp { temp = right }
         TQNodeVariable *tempVar = [TQNodeVariable new];
-        [tempVar createStorageInProgram:aProgram block:aBlock error:aoError];
+        [tempVar createStorageInProgram:aProgram block:aBlock error:aoErr];
 
         Class condKls = _type == kTQOperatorAnd ? [TQNodeIfBlock class] : [TQNodeUnlessBlock class];
         TQNodeIfBlock *conditional = (TQNodeIfBlock *)[condKls node];
 
         TQNodeOperator *leftAsgn  = [TQNodeOperator nodeWithType:kTQOperatorAssign left:tempVar right:_left];
-        [leftAsgn generateCodeInProgram:aProgram block:aBlock error:aoError];
+        [leftAsgn generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         conditional.condition = tempVar;
         TQNodeOperator *rightAsgn  = [TQNodeOperator nodeWithType:kTQOperatorAssign left:tempVar right:_right];
         conditional.statements = [NSArray arrayWithObject:rightAsgn];
-        [conditional generateCodeInProgram:aProgram block:aBlock error:aoError];
+        [conditional generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
 
         [tempVar release];
-        return [tempVar generateCodeInProgram:aProgram block:aBlock error:aoError];
+        return [tempVar generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     } else {
-        Value *left  = [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
-        Value *right = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
+        Value *left  = [_left generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        Value *right = [_right generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
 
         Value *selector = NULL;
         switch(_type) {
@@ -254,15 +257,16 @@ using namespace llvm;
 - (llvm::Value *)store:(llvm::Value *)aValue
              inProgram:(TQProgram *)aProgram
                  block:(TQNodeBlock *)aBlock
-                 error:(NSError **)aoError
+                  root:(TQNodeRootBlock *)aRoot
+                 error:(NSError **)aoErr
 {
     assert(_type == kTQOperatorGetter);
 
     // Call []:=:
     Value *selector  = aProgram.llModule->getOrInsertGlobal("TQSetterOpSel", aProgram.llInt8PtrTy);
-    Value *key = [_right generateCodeInProgram:aProgram block:aBlock error:aoError];
-    Value *settee = [_left generateCodeInProgram:aProgram block:aBlock error:aoError];
-    if(*aoError)
+    Value *key = [_right generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+    Value *settee = [_left generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+    if(*aoErr)
         return NULL;
 
     IRBuilder<> *builder = aBlock.builder;
@@ -283,12 +287,15 @@ using namespace llvm;
     return self;
 }
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
 {
     // We must first evaluate the values in order for cases like a,b = b,a to work
     std::vector<Value*> values;
     for(int i = 0; i < MIN([self.right count], [self.left count]); ++i) {
-        values.push_back([[self.right objectAtIndex:i] generateCodeInProgram:aProgram block:aBlock error:aoError]);
+        values.push_back([[self.right objectAtIndex:i] generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr]);
     }
 
     // Then store the values
@@ -297,7 +304,8 @@ using namespace llvm;
         [[self.left objectAtIndex:i] store:values[MIN(i, maxIdx)]
                                  inProgram:aProgram
                                      block:aBlock
-                                     error:aoError];
+                                      root:aRoot
+                                     error:aoErr];
     }
 
     return NULL;

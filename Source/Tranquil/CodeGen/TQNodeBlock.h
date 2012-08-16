@@ -31,8 +31,9 @@
 + (TQNodeBlock *)node;
 - (NSString *)signatureInProgram:(TQProgram *)aProgram;
 - (NSUInteger)argumentCount;
-- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoError;
+- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoErr;
 @end
 
 @interface TQNodeRootBlock : TQNodeBlock
++ (TQNodeRootBlock *)node;
 @end

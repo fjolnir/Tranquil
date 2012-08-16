@@ -19,7 +19,10 @@ using namespace llvm;
     // Nothing to iterate
 }
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
 {
     Module *mod = aProgram.llModule;
     llvm::IRBuilder<> *builder = aBlock.builder;

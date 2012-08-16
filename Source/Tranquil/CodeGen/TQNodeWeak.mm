@@ -42,13 +42,14 @@ using namespace llvm;
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
-                                 error:(NSError **)aoError
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
 {
     Module *mod     = aProgram.llModule;
     Value *selector = aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQWeakSel", aProgram.llInt8PtrTy), "weakSel");
     Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_TQWeak", aProgram.llInt8Ty);
 
 
-    return aBlock.builder->CreateCall3(aProgram.objc_msgSend, klass, selector, [_value generateCodeInProgram:aProgram block:aBlock error:aoError]);
+    return aBlock.builder->CreateCall3(aProgram.objc_msgSend, klass, selector, [_value generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr]);
 }
 @end

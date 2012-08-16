@@ -69,10 +69,10 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
     }
 }
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock root:(TQNodeRootBlock *)aRoot
                          withArguments:(std::vector<llvm::Value*>)aArgs error:(NSError **)aoErr
 {
-    Value *callee = [_callee generateCodeInProgram:aProgram block:aBlock error:aoErr];
+    Value *callee = [_callee generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     aArgs.insert(aArgs.begin(), callee);
 
     // Load&Call the dispatcher
@@ -89,14 +89,17 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
 }
 
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
 {
     IRBuilder<> *builder = aBlock.builder;
 
     std::vector<Value*> args;
     for(TQNodeArgument *arg in _arguments) {
-        args.push_back([arg generateCodeInProgram:aProgram block:aBlock error:aoErr]);
+        args.push_back([arg generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr]);
     }
-    return [self generateCodeInProgram:aProgram block:aBlock withArguments:args error:aoErr];
+    return [self generateCodeInProgram:aProgram block:aBlock root:aRoot withArguments:args error:aoErr];
 }
 @end

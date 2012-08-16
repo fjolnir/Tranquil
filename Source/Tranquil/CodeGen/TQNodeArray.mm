@@ -51,7 +51,10 @@ using namespace llvm;
     }
 }
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
 {
     IRBuilder<> *builder = aBlock.builder;
     Module *mod = aProgram.llModule;
@@ -60,7 +63,7 @@ using namespace llvm;
     args.push_back(mod->getOrInsertGlobal("OBJC_CLASS_$_NSPointerArray", aProgram.llInt8Ty));
     args.push_back(builder->CreateLoad(mod->getOrInsertGlobal("TQPointerArrayWithObjectsSel", aProgram.llInt8PtrTy)));
     for(TQNode *item in _items) {
-        args.push_back([item generateCodeInProgram:aProgram block:aBlock error:aoErr]);
+        args.push_back([item generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr]);
         if(*aoErr)
             return NULL;
     }

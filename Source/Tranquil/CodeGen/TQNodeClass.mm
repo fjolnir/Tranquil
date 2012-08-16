@@ -55,7 +55,10 @@ using namespace llvm;
     return out;
 }
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
 {
     // -- Type definitions
     // -- Method definitions
@@ -68,7 +71,7 @@ using namespace llvm;
 
     // Add the methods for the class
     for(TQNodeMethod *method in [_classMethods arrayByAddingObjectsFromArray:_instanceMethods]) {
-        [method generateCodeInProgram:aProgram block:aBlock class:self error:aoErr];
+        [method generateCodeInProgram:aProgram block:aBlock class:self root:aRoot error:aoErr];
         if(*aoErr) return NULL;
     }
 

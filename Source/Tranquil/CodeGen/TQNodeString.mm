@@ -59,7 +59,10 @@ using namespace llvm;
 }
 
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
 {
     Module *mod = aProgram.llModule;
     IRBuilder<> *builder = aBlock.builder;
@@ -79,7 +82,7 @@ using namespace llvm;
         args.push_back(formatSelector);
         args.push_back(strValue);
         for(TQNode *value in _embeddedValues) {
-            args.push_back([value generateCodeInProgram:aProgram block:aBlock error:aoErr]);
+            args.push_back([value generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr]);
         }
         strValue = builder->CreateCall(aProgram.objc_msgSend, args);
     }

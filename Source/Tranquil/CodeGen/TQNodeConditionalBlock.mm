@@ -90,7 +90,10 @@ using namespace llvm;
     return aBuilder->CreateICmpNE(aValue, ConstantPointerNull::get(aProgram.llInt8PtrTy), "ifTest");
 }
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
 {
     if([aBlock isKindOfClass:[TQNodeWhileBlock class]])
         _containingLoop = (TQNodeWhileBlock *)aBlock;
@@ -104,7 +107,7 @@ using namespace llvm;
     self.autoreleasePool = aBlock.autoreleasePool;
     self.locals = aBlock.locals;
 
-    Value *testExpr = [_condition generateCodeInProgram:aProgram block:aBlock error:aoErr];
+    Value *testExpr = [_condition generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     if(*aoErr)
         return NULL;
     Value *testResult = [self generateTestExpressionInProgram:aProgram withBuilder:aBlock.builder value:testExpr];
@@ -120,7 +123,7 @@ using namespace llvm;
     self.basicBlock = thenBB;
     self.builder = thenBuilder;
     for(TQNode *stmt in self.statements) {
-        [stmt generateCodeInProgram:aProgram block:self error:aoErr];
+        [stmt generateCodeInProgram:aProgram block:self root:aRoot error:aoErr];
         if(*aoErr)
             return NULL;
         if([stmt isKindOfClass:[TQNodeReturn class]])
@@ -133,7 +136,7 @@ using namespace llvm;
         self.basicBlock = elseBB;
         self.builder = elseBuilder;
         for(TQNode *stmt in _elseBlockStatements) {
-            [stmt generateCodeInProgram:aProgram block:self error:aoErr];
+            [stmt generateCodeInProgram:aProgram block:self root:aRoot error:aoErr];
             if(*aoErr)
                 return NULL;
         }
@@ -174,12 +177,12 @@ using namespace llvm;
 
 #pragma mark - Unused methods from TQNodeBlock
 - (NSString *)signature { return nil; }
-- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoError { return NO; }
+- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoErr { return NO; }
 - (llvm::Constant *)_generateBlockDescriptorInProgram:(TQProgram *)aProgram { return NULL; }
 - (llvm::Value *)_generateBlockLiteralInProgram:(TQProgram *)aProgram parentBlock:(TQNodeBlock *)aParentBlock { return NULL; }
 - (llvm::Function *)_generateCopyHelperInProgram:(TQProgram *)aProgram { return NULL; }
 - (llvm::Function *)_generateDisposeHelperInProgram:(TQProgram *)aProgram { return NULL; }
-- (llvm::Function *)_generateInvokeInProgram:(TQProgram *)aProgram error:(NSError **)aoErr { return NULL; }
+- (llvm::Function *)_generateInvokeInProgram:(TQProgram *)aProgram root:(TQNodeRootBlock *)aRoot error:(NSError **)aoErr { return NULL; }
 - (llvm::Type *)_blockDescriptorTypeInProgram:(TQProgram *)aProgram { return NULL; }
 - (llvm::Type *)_genericBlockLiteralTypeInProgram:(TQProgram *)aProgram { return NULL; }
 - (llvm::Type *)_blockLiteralTypeInProgram:(TQProgram *)aProgram { return NULL; }
@@ -219,7 +222,10 @@ using namespace llvm;
     return ret;
 }
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
 {
     TQAssert(_ifExpr, @"Ternary operator missing truth result");
     TQNodeVariable *tempVar = [TQNodeVariable new];
@@ -232,10 +238,10 @@ using namespace llvm;
         TQNodeOperator *elseAsgn  = [TQNodeOperator nodeWithType:kTQOperatorAssign left:tempVar right:_elseExpr];
         self.elseBlockStatements = [NSArray arrayWithObject:elseAsgn];
     }
-    [super generateCodeInProgram:aProgram block:aBlock error:aoErr];
+    [super generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
 
     [tempVar release];
-    return [tempVar generateCodeInProgram:aProgram block:aBlock error:aoErr];
+    return [tempVar generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
 }
 
 - (TQNode *)referencesNode:(TQNode *)aNode

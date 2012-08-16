@@ -13,11 +13,14 @@ using namespace llvm;
     return [NSString stringWithFormat:@"<const@ %@>", [self value]];
 }
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
 {
     TQNode *bridgedNode = [aProgram.objcParser entityNamed:self.value];
     if(bridgedNode)
-        return [bridgedNode generateCodeInProgram:aProgram block:aBlock error:aoErr];
+        return [bridgedNode generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     else
         return aBlock.builder->CreateCall(aProgram.objc_getClass, [aProgram getGlobalStringPtr:self.value inBlock:aBlock]);
 }

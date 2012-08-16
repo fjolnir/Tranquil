@@ -16,11 +16,11 @@
     #define TQAssertSoft(cond, errDomain, errCode, retVal, fmt, ...) \
     do { \
         if(!(cond)) { \
-            if(aoError) { \
+            if(aoErr) { \
                 NSString *errorDesc = [NSString stringWithFormat:fmt, ##__VA_ARGS__]; \
                 NSDictionary *userInfo = [NSDictionary dictionaryWithObject:errorDesc \
                                                                      forKey:NSLocalizedDescriptionKey]; \
-                *aoError = [NSError errorWithDomain:(errDomain) code:(errCode) userInfo:userInfo]; \
+                *aoErr = [NSError errorWithDomain:(errDomain) code:(errCode) userInfo:userInfo]; \
             } \
             TQLog(fmt, ##__VA_ARGS__); \
             return retVal; \

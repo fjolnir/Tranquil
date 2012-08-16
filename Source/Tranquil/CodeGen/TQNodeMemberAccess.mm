@@ -52,18 +52,20 @@ using namespace llvm;
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
-                                 error:(NSError **)aoError
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
 {
     IRBuilder<> *builder = aBlock.builder;
 	Value *key = [aProgram getGlobalStringPtr:_property inBlock:aBlock];
-    Value *object = [_receiver generateCodeInProgram:aProgram block:aBlock error:aoError];
+    Value *object = [_receiver generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     return builder->CreateCall2(aProgram.TQValueForKey, object, key);
 }
 
 - (llvm::Value *)store:(llvm::Value *)aValue
              inProgram:(TQProgram *)aProgram
                  block:(TQNodeBlock *)aBlock
-                 error:(NSError **)aoError
+                  root:(TQNodeRootBlock *)aRoot
+                 error:(NSError **)aoErr
 {
     IRBuilder<> *builder = aBlock.builder;
 	//NSString *keyVarName = [NSString stringWithFormat:@"TQPropertyKey_%@", _property];
@@ -76,7 +78,7 @@ using namespace llvm;
     //Value *Args[] = { zero, zero };
     //key = builder->CreateInBoundsGEP(key, Args, );
 	Value *key = [aProgram getGlobalStringPtr:_property inBlock:aBlock];
-    Value *object = [_receiver generateCodeInProgram:aProgram block:aBlock error:aoError];
+    Value *object = [_receiver generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     return builder->CreateCall3(aProgram.TQSetValueForKey, object, key, aValue);
 }
 @end

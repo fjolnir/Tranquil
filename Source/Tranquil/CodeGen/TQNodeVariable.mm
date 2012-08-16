@@ -106,14 +106,15 @@ using namespace llvm;
 
 - (llvm::Value *)createStorageInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
-                                 error:(NSError **)aoError
+                                 error:(NSError **)aoErr
 {
     if(_alloca)
         return _alloca;
 
     TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock];
     if(existingVar) {
-        if(![existingVar generateCodeInProgram:aProgram block:aBlock error:aoError])
+        //if(![existingVar generateCodeInProgram:aProgram block:aBlock root:nil error:aoErr])
+        if(![existingVar createStorageInProgram:aProgram block:aBlock error:aoErr]) /// BUG?
             return NULL;
         _alloca = existingVar.alloca;
 
@@ -141,12 +142,13 @@ using namespace llvm;
 }
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
-                                 error:(NSError **)aoError
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
 {
     if(_alloca)
         return [self _getForwardingInProgram:aProgram block:aBlock];
 
-    if(![self createStorageInProgram:aProgram block:aBlock error:aoError])
+    if(![self createStorageInProgram:aProgram block:aBlock error:aoErr])
         return NULL;
 
     return [self _getForwardingInProgram:aProgram block:aBlock];
@@ -155,10 +157,11 @@ using namespace llvm;
 - (llvm::Value *)store:(llvm::Value *)aValue
              inProgram:(TQProgram *)aProgram
                  block:(TQNodeBlock *)aBlock
-                 error:(NSError **)aoError
+                  root:(TQNode *)aRoot
+                 error:(NSError **)aoErr
 {
     if(!_alloca) {
-        if(![self createStorageInProgram:aProgram block:aBlock error:aoError])
+        if(![self createStorageInProgram:aProgram block:aBlock error:aoErr])
             return NULL;
     }
     IRBuilder<> *builder = aBlock.builder;
@@ -232,7 +235,8 @@ using namespace llvm;
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
-                                 error:(NSError **)aoError
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
 {
     IRBuilder<> *builder = aBlock.builder;
     IRBuilder<> entryBuilder(&aBlock.function->getEntryBlock(), aBlock.function->getEntryBlock().begin());
@@ -240,8 +244,8 @@ using namespace llvm;
 
     TQNodeSelf *selfNode = [aBlock.locals objectForKey:@"self"];
     TQAssertSoft(selfNode, kTQSyntaxErrorDomain, kTQUnexpectedExpression, NULL, @"super is only applicable with in methods");
-    Value *selfValue = [selfNode generateCodeInProgram:aProgram block:aBlock error:aoError];
-    if(*aoError)
+    Value *selfValue = [selfNode generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+    if(*aoErr)
         return NULL;
 
     Value *superClass = builder->CreateCall(aProgram.TQObjectGetSuperClass, selfValue);
@@ -255,7 +259,8 @@ using namespace llvm;
 - (llvm::Value *)store:(llvm::Value *)aValue
              inProgram:(TQProgram *)aProgram
                  block:(TQNodeBlock *)aBlock
-                 error:(NSError **)aoError
+                  root:(TQNode *)aRoot
+                 error:(NSError **)aoErr
 {
     TQAssertSoft(NO, kTQSyntaxErrorDomain, kTQInvalidAssignee, NO, @"Tried to assign to super!");
     return NULL;

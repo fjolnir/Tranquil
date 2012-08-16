@@ -54,8 +54,11 @@ using namespace llvm;
     [super dealloc];
 }
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
 {
-    return [_passedNode generateCodeInProgram:aProgram block:aBlock error:aoError];
+    return [_passedNode generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
 }
 @end

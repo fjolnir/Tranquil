@@ -7,6 +7,6 @@
 + (TQNodeCall *)nodeWithCallee:(TQNode *)aCallee;
 - (id)initWithCallee:(TQNode *)aCallee;
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock root:(TQNodeRootBlock *)aRoot
                          withArguments:(std::vector<llvm::Value*>)aArgs error:(NSError **)aoErr;
 @end

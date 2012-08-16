@@ -9,7 +9,10 @@ using namespace llvm;
     return [[self new] autorelease];
 }
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
 {
     TQLog(@"Code generation has not been implemented for %@.", [self class]);
     return NULL;
@@ -18,7 +21,8 @@ using namespace llvm;
 - (llvm::Value *)store:(llvm::Value *)aValue
              inProgram:(TQProgram *)aProgram
                  block:(TQNodeBlock *)aBlock
-                 error:(NSError **)aoError
+                  root:(TQNodeRootBlock *)aRoot
+                 error:(NSError **)aoErr
 {
     TQLog(@"Store has not been implemented for %@.", [self class]);
     return NULL;

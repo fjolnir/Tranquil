@@ -40,7 +40,7 @@ using namespace llvm;
     return [self initWithType:kTQInstanceMethod];
 }
 
-- (BOOL)addArgument:(TQNodeMethodArgumentDef *)aArgument error:(NSError **)aoError
+- (BOOL)addArgument:(TQNodeMethodArgumentDef *)aArgument error:(NSError **)aoErr
 {
     if(self.arguments.count == 2)
         TQAssertSoft(aArgument.selectorPart != nil,
@@ -95,7 +95,10 @@ using namespace llvm;
     return selector;
 }
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
 {
     TQAssertSoft(NO, kTQGenericErrorDomain, kTQGenericError, NULL, @"Methods require their class to be passed to generate code.");
     return NULL;
@@ -104,6 +107,7 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                  class:(TQNodeClass *)aClass
+                                  root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
     _class = aClass;
@@ -138,7 +142,7 @@ using namespace llvm;
         }
     }
 
-    Value *block = [super generateCodeInProgram:aProgram block:aBlock error:aoErr];
+    Value *block = [super generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     if(*aoErr)
         return NULL;
     IRBuilder<> *builder = aBlock.builder;

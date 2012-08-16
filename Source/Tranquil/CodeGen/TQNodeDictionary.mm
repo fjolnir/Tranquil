@@ -61,7 +61,10 @@ using namespace llvm;
     }
 }
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
 {
     IRBuilder<> *builder = aBlock.builder;
     Module *mod = aProgram.llModule;
@@ -76,9 +79,9 @@ using namespace llvm;
         ++count;
         assert(![key isKindOfClass:[TQNodeNil class]]);
         value = [_items objectForKey:key];
-        args.push_back([value generateCodeInProgram:aProgram block:aBlock error:aoErr]);
+        args.push_back([value generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr]);
         if(*aoErr) return NULL;
-        args.push_back([key generateCodeInProgram:aProgram block:aBlock error:aoErr]);
+        args.push_back([key generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr]);
         if(*aoErr) return NULL;
     }
     args.push_back(builder->CreateLoad(mod->getOrInsertGlobal("TQSentinel", aProgram.llInt8PtrTy)));

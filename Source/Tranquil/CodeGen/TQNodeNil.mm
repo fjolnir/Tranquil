@@ -27,7 +27,8 @@ using namespace llvm;
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
-                                 error:(NSError **)aoError
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
 {
     return ConstantPointerNull::get(aProgram.llInt8PtrTy);
 }

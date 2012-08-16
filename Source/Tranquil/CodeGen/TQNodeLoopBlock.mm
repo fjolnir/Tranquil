@@ -73,7 +73,10 @@ using namespace llvm;
     return aBuilder->CreateICmpNE(aValue, ConstantPointerNull::get(aProgram.llInt8PtrTy), "whileTest");
 }
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
 {
     Module *mod = aProgram.llModule;
 
@@ -98,7 +101,7 @@ using namespace llvm;
 
 
     for(TQNode *stmt in self.statements) {
-        [stmt generateCodeInProgram:aProgram block:self error:aoErr];
+        [stmt generateCodeInProgram:aProgram block:self root:aRoot error:aoErr];
         if(*aoErr)
             return NULL;
         if([stmt isKindOfClass:[TQNodeReturn class]])
@@ -127,7 +130,7 @@ using namespace llvm;
     // Generate the condition instructions
     self.basicBlock = condBB;
     self.builder    = condBuilder;
-    Value *testExpr = [_condition generateCodeInProgram:aProgram block:self error:aoErr];
+    Value *testExpr = [_condition generateCodeInProgram:aProgram block:self root:aRoot error:aoErr];
     if(*aoErr)
         return NULL;
     Value *testResult = [self generateTestExpressionInProgram:aProgram withBuilder:condBuilder value:testExpr];
@@ -145,7 +148,7 @@ using namespace llvm;
 {
     return nil;
 }
-- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoError
+- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoErr
 {
     return NO;
 }
@@ -165,7 +168,7 @@ using namespace llvm;
 {
     return NULL;
 }
-- (llvm::Function *)_generateInvokeInProgram:(TQProgram *)aProgram error:(NSError **)aoErr
+- (llvm::Function *)_generateInvokeInProgram:(TQProgram *)aProgram root:(TQNodeRootBlock *)aRoot error:(NSError **)aoErr
 {
     return NULL;
 }
@@ -195,7 +198,10 @@ using namespace llvm;
 @implementation TQNodeBreak
 + (TQNodeBreak *)node { return (TQNodeBreak *)[super node]; }
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
 {
     TQNodeWhileBlock *loop = nil;
     if([aBlock isKindOfClass:[TQNodeWhileBlock class]])
@@ -211,7 +217,10 @@ using namespace llvm;
 @implementation TQNodeSkip
 + (TQNodeSkip *)node { return (TQNodeSkip *)[super node]; }
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
 {
     TQNodeWhileBlock *loop = nil;
     if([aBlock isKindOfClass:[TQNodeWhileBlock class]])

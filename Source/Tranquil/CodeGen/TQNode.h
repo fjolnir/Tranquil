@@ -24,17 +24,21 @@
 #include <Foundation/Foundation.h>
 
 
-@class TQNode, TQNodeBlock, TQProgram;
+@class TQNode, TQNodeBlock, TQNodeRootBlock, TQProgram;
 
 typedef void (^TQNodeIteratorBlock)(TQNode *aNode);
 
 @interface TQNode : NSObject
 + (TQNode *)node;
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr;
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr;
 - (llvm::Value *)store:(llvm::Value *)aValue
              inProgram:(TQProgram *)aProgram
                  block:(TQNodeBlock *)aBlock
-                 error:(NSError **)aoError;
+                  root:(TQNodeRootBlock *)aRoot
+                 error:(NSError **)aoErr;
 // Checks if this node references a node equal to aNode and returns it if it does
 - (TQNode *)referencesNode:(TQNode *)aNode;
 - (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock;

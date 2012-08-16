@@ -55,6 +55,7 @@ extern "C" NSString * const kTQSyntaxErrorException;
 
 + (TQProgram *)programWithName:(NSString *)aName;
 - (id)initWithName:(NSString *)aName;
+- (id)executeScriptAtPath:(NSString *)aPath error:(NSError **)aoErr;
 - (id)executeScript:(NSString *)aScript error:(NSError **)aoErr;
 
 - (void)insertLogUsingBuilder:(llvm::IRBuilder<> *)aBuilder withStr:(NSString *)txt;

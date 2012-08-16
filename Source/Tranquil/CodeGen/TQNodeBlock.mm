@@ -91,7 +91,7 @@ using namespace llvm;
     return sig;
 }
 
-- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoError
+- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoErr
 {
     TQAssertSoft(![_arguments containsObject:aArgument],
                  kTQSyntaxErrorDomain, kTQUnexpectedIdentifier, NO,
@@ -379,7 +379,7 @@ using namespace llvm;
     return @"__tq_block_invoke";
 }
 
-- (llvm::Function *)_generateInvokeInProgram:(TQProgram *)aProgram error:(NSError **)aoErr
+- (llvm::Function *)_generateInvokeInProgram:(TQProgram *)aProgram root:(TQNodeRootBlock *)aRoot error:(NSError **)aoErr
 {
     if(_function)
         return _function;
@@ -472,7 +472,7 @@ using namespace llvm;
             if(![argDef defaultArgument])
                 defaultValue = ConstantPointerNull::get(aProgram.llInt8PtrTy);
             else
-                defaultValue = [[argDef defaultArgument] generateCodeInProgram:aProgram block:self error:aoErr];
+                defaultValue = [[argDef defaultArgument] generateCodeInProgram:aProgram block:self root:aRoot error:aoErr];
 
             isMissingCond = _builder->CreateICmpEQ(argumentIterator, sentinel);
             argValue = _builder->CreateSelect(isMissingCond, defaultValue, argumentIterator);
@@ -492,7 +492,7 @@ using namespace llvm;
                                              [aProgram getGlobalStringPtr:argTypeEncoding withBuilder:_builder]);
         }
         TQNodeVariable *local = [TQNodeVariable nodeWithName:[argDef name]];
-        [local store:argValue inProgram:aProgram block:self error:aoErr];
+        [local store:argValue inProgram:aProgram block:self root:aRoot error:aoErr];
         [_locals setObject:local forKey:[argDef name]];
     }
     if(_isVariadic) {
@@ -506,13 +506,13 @@ using namespace llvm;
         Value *vaargArray = _builder->CreateCall(aProgram.TQVaargsToArray, valistCast);
         _builder->CreateCall(vaEnd, valistCast);
         TQNodeVariable *dotDotDot = [TQNodeVariable nodeWithName:@"..."];
-        [dotDotDot store:vaargArray inProgram:aProgram block:self error:aoErr];
+        [dotDotDot store:vaargArray inProgram:aProgram block:self root:aRoot error:aoErr];
         [_locals setObject:dotDotDot forKey:[dotDotDot name]];
     }
 
     Value *val;
     for(TQNode *stmt in _statements) {
-        [stmt generateCodeInProgram:aProgram block:self error:aoErr];
+        [stmt generateCodeInProgram:aProgram block:self root:aRoot error:aoErr];
         if(*aoErr) {
             TQLog(@"Error: %@", *aoErr);
             return NULL;
@@ -520,14 +520,16 @@ using namespace llvm;
         if([stmt isKindOfClass:[TQNodeReturn class]])
             break;
     }
-
     if(!_basicBlock->getTerminator())
-        [[TQNodeReturn node] generateCodeInProgram:aProgram block:self error:aoErr];
+        [[TQNodeReturn node] generateCodeInProgram:aProgram block:self root:aRoot error:aoErr];
     return _function;
 }
 
 // Generates a block on the stack
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
 {
     TQAssert(!_basicBlock && !_function, @"Tried to regenerate code for block");
 
@@ -555,7 +557,7 @@ using namespace llvm;
         }
     }
 
-    if(![self _generateInvokeInProgram:aProgram error:aoErr])
+    if(![self _generateInvokeInProgram:aProgram root:aRoot error:aoErr])
         return NULL;
 
     Value *literal = [self _generateBlockLiteralInProgram:aProgram parentBlock:aBlock];
@@ -607,6 +609,10 @@ using namespace llvm;
 #pragma mark - Root block
 
 @implementation TQNodeRootBlock
++ (TQNodeRootBlock *)node
+{
+    return [[self new] autorelease];
+}
 
 - (id)init
 {
@@ -621,11 +627,19 @@ using namespace llvm;
     return self;
 }
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
+- (NSString *)_invokeName
+{
+    return @"root";
+}
+
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
 {
     // The root block is just a function that executes the body of the program
     // so we only need to create&return it's invocation function
-    return [self _generateInvokeInProgram:aProgram error:aoErr];
+    return [self _generateInvokeInProgram:aProgram root:aRoot error:aoErr];
 }
 
 @end

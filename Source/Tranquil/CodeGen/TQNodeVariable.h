@@ -10,7 +10,7 @@
 
  - (llvm::Value *)createStorageInProgram:(TQProgram *)aProgram
                                    block:(TQNodeBlock *)aBlock
-                                   error:(NSError **)aoError;
+                                   error:(NSError **)aoErr;
 - (llvm::Type *)captureStructTypeInProgram:(TQProgram *)aProgram;
 
 - (void)generateRetainInProgram:(TQProgram *)aProgram

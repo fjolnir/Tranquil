@@ -45,7 +45,6 @@ using namespace llvm;
 {
     if(![aOther isMemberOfClass:[self class]])
         return NO;
-        NSLog(@"%@  \n %@", _arguments, [aOther arguments]);
     return [_receiver isEqual:[aOther receiver]] && [_arguments isEqual:[aOther arguments]];
 }
 
@@ -97,7 +96,7 @@ using namespace llvm;
 }
 
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock root:(TQNodeRootBlock *)aRoot
                          withArguments:(std::vector<llvm::Value*>)aArgs error:(NSError **)aoErr
 {
     NSString *selStr = [self selector];
@@ -126,7 +125,7 @@ using namespace llvm;
 
 
     aArgs.insert(aArgs.begin(), selectorGlobal);
-    aArgs.insert(aArgs.begin(), _receiverLLVMValue ? _receiverLLVMValue : [_receiver generateCodeInProgram:aProgram block:aBlock error:aoErr]);
+    aArgs.insert(aArgs.begin(), _receiverLLVMValue ? _receiverLLVMValue : [_receiver generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr]);
 
 
     Value *ret;
@@ -141,25 +140,28 @@ using namespace llvm;
     Value *origRet = ret;
     for(TQNodeMessage *cascadedMessage in _cascadedMessages) {
         cascadedMessage.receiverLLVMValue = origRet;
-        ret = [cascadedMessage generateCodeInProgram:aProgram block:aBlock error:aoErr];
+        ret = [cascadedMessage generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     }
     return ret;
 }
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
 {
     Module *mod = aProgram.llModule;
     std::vector<Value*> args;
     for(TQNodeArgument *arg in _arguments) {
         if(!arg.passedNode)
             break;
-        args.push_back([arg generateCodeInProgram:aProgram block:aBlock error:aoErr]);
+        args.push_back([arg generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr]);
     }
     // From what I can tell having read the ABI spec for x86-64, it is safe to pass this added argument. TODO: verify this holds for ARM&x86
     // Sentinel argument to make variadic methods possible (without resorting to special cases in tq_msgsend, and using libffi; which would kill performance)
     args.push_back(aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQSentinel", aProgram.llInt8PtrTy), "sentinel"));
 
-    return [self generateCodeInProgram:aProgram block:aBlock withArguments:args error:aoErr];
+    return [self generateCodeInProgram:aProgram block:aBlock root:aRoot withArguments:args error:aoErr];
 }
 
 @end
