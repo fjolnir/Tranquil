@@ -12,7 +12,7 @@ then
 fi
 
 # Just for install count stats for me; completely anonymous.
-curl "http://d.asgeirsson.is/JX9I"
+curl -fsSkL "http://d.asgeirsson.is/JX9I" > /dev/null
 
 echo "\033[0;32mI'm about to retrieve and compile Tranquil for you. This shouldn't take more than a few minutes,\ndepending on your connection.\n"
 
