@@ -108,7 +108,7 @@ But here're a couple of examples:
     \ Create a little view
 	#TestView < NSView {
 	    - init {
-	        super init
+	        self = super init
 	        #gradient = NSGradient alloc initWithStartingColor: NSColor redColor
 	                                               endingColor: NSColor yellowColor
 	        ^self
