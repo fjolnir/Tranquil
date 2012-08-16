@@ -321,6 +321,7 @@ using namespace llvm;
     }
 
     builder->CreateRetVoid();
+    delete builder;
     return function;
 }
 
@@ -368,6 +369,7 @@ using namespace llvm;
     }
 
     builder->CreateRetVoid();
+    delete builder;
     return function;
 }
 

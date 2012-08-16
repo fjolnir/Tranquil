@@ -8,7 +8,7 @@ using namespace llvm;
 
 @interface TQHeaderParser ()
 - (const char *)_encodingForFunPtrCursor:(CXCursor)cursor;
-- (const char *)_encodingForCursor:(CXCursor)cursor;
+- (char *)_encodingForCursor:(CXCursor)cursor;
 - (void)_parseTranslationUnit:(CXTranslationUnit)translationUnit;
 @end
 
@@ -71,7 +71,8 @@ using namespace llvm;
 - (void)_parseTranslationUnit:(CXTranslationUnit)translationUnit
 {
     clang_visitChildrenWithBlock(clang_getTranslationUnitCursor(translationUnit), ^(CXCursor cursor, CXCursor parent) {
-        const char *name = clang_getCString(clang_getCursorSpelling(cursor));
+        CXString spelling = clang_getCursorSpelling(cursor);
+        const char *name = clang_getCString(spelling);
         if(!name)
             return CXChildVisit_Continue;
         NSString *nsName = [NSString stringWithUTF8String:name];
@@ -83,7 +84,7 @@ using namespace llvm;
                 [_classes setObject:info forKey:nsName];
                 _currentClass = info;
                 [info release];
-                return CXChildVisit_Recurse;
+                goto recurse;
             } break;
             case CXCursor_ObjCSuperClassRef: {
                 if(parent.kind == CXCursor_ObjCInterfaceDecl)
@@ -99,7 +100,7 @@ using namespace llvm;
                 }
             } break;
             case CXCursor_ObjCCategoryDecl: {
-                return CXChildVisit_Recurse;
+                goto recurse;
             } break;
             case CXCursor_ObjCClassRef: {
                 if(parent.kind == CXCursor_ObjCCategoryDecl)
@@ -110,25 +111,28 @@ using namespace llvm;
                 [_protocols setObject:info forKey:nsName];
                 _currentClass = info;
                 [info release];
-                return CXChildVisit_Recurse;
+                goto recurse;
             } break;
             case CXCursor_ObjCClassMethodDecl:
             case CXCursor_ObjCInstanceMethodDecl: {
-                BOOL isClassMethod = cursor.kind == CXCursor_ObjCClassMethodDecl;
-                NSString *selector = nsName;
-                NSString *encoding = [NSString stringWithUTF8String:[self _encodingForCursor:cursor]];
+                BOOL isClassMethod    = cursor.kind == CXCursor_ObjCClassMethodDecl;
+                NSString *selector    = nsName;
+                char *encoding_ = [self _encodingForCursor:cursor];
+                NSString *encoding    = [NSString stringWithUTF8String:encoding_];
                 if(isClassMethod)
                     [_currentClass.classMethods    setObject:encoding forKey:selector];
                 else
                     [_currentClass.instanceMethods setObject:encoding forKey:selector];
+                free(encoding_);
             } break;
             case CXCursor_FunctionDecl: {
                 // TODO: Support bridging variadic functions. Support or ignore inlined functions
-                const char *encoding = [self _encodingForCursor:cursor];
+                char *encoding = [self _encodingForCursor:cursor];
                 TQBridgedFunction *fun = [TQBridgedFunction functionWithName:nsName
                                                                     encoding:encoding];
                 [_functions setObject:fun
                                forKey:[nsName stringByCapitalizingFirstLetter]];
+                free(encoding);
 
             } break;
             case CXCursor_MacroDefinition: {
@@ -139,18 +143,22 @@ using namespace llvm;
                 if(tokenCount >= 2) {
                     // TODO: Support string constants?
                     if(clang_getTokenKind(tokens[1]) == CXToken_Literal) {
-                        const char *value = clang_getCString(clang_getTokenSpelling(translationUnit, tokens[1]));
+                        CXString tokenSpelling = clang_getTokenSpelling(translationUnit, tokens[1]);
+                        const char *value = clang_getCString(tokenSpelling);
                         [_literalConstants setObject:[TQNodeNumber nodeWithDouble:atof(value)] forKey:nsName];
+                        clang_disposeString(tokenSpelling);
                     }
                 }
                 clang_disposeTokens(translationUnit, tokens, tokenCount);
             } break;
             case CXCursor_VarDecl: {
-                [_constants setObject:[TQBridgedConstant constantWithName:nsName encoding:[self _encodingForCursor:cursor]]
+                char *encoding = [self _encodingForCursor:cursor];
+                [_constants setObject:[TQBridgedConstant constantWithName:nsName encoding:encoding]
                                forKey:nsName];
+                free(encoding);
             } break;
             case CXCursor_EnumDecl: {
-                return CXChildVisit_Recurse;
+                goto recurse;
             } break;
             case CXCursor_EnumConstantDecl: {
                 [_literalConstants setObject:[TQNodeNumber nodeWithDouble:clang_getEnumConstantDeclValue(cursor)]
@@ -172,7 +180,12 @@ using namespace llvm;
                       clang_getCString(clang_getTypeKindSpelling(clang_getCursorType(cursor).kind)));
                 break;
         }
+        clang_disposeString(spelling);
         return CXChildVisit_Continue;
+
+        recurse:
+            clang_disposeString(spelling);
+            return CXChildVisit_Recurse;
     });
 }
 
@@ -227,11 +240,12 @@ using namespace llvm;
             [realEncoding appendString:@"v"];
         isFirstChild = NO;
 
-        const char *childEnc = [self _encodingForCursor:child];
+        char *childEnc = [self _encodingForCursor:child];
         if(strstr(childEnc, "@?") == childEnc || strstr(childEnc, "^?") == childEnc)
             [realEncoding appendFormat:@"%s", [self _encodingForFunPtrCursor:child]];
         else
             [realEncoding appendFormat:@"%s", childEnc];
+        free(childEnc);
         return CXChildVisit_Continue;
     });
     if(isFirstChild) // No children => void return and no args
@@ -240,11 +254,14 @@ using namespace llvm;
     return [realEncoding UTF8String];
 }
 
-- (const char *)_encodingForCursor:(CXCursor)cursor
+// You are responsible for freeing the returned string
+- (char *)_encodingForCursor:(CXCursor)cursor
 {
-    const char *vanillaEncoding = clang_getCString(clang_getDeclObjCTypeEncoding(cursor));
+    CXString cxvanillaEncoding = clang_getDeclObjCTypeEncoding(cursor);
+    char *vanillaEncoding = (char*)clang_getCString(cxvanillaEncoding);
     CXCursorKind kind = cursor.kind;
     if(strstr(vanillaEncoding, "@?") || strstr(vanillaEncoding, "^?")) {
+        clang_disposeString(cxvanillaEncoding);
         // Contains a block argument so we need to manually create the encoding for it
         NSMutableString *realEncoding = [NSMutableString string];
         __block BOOL isFirstChild = YES;
@@ -253,15 +270,19 @@ using namespace llvm;
                                                                    || kind == CXIdxEntity_ObjCClassMethod || kind == CXIdxEntity_ObjCInstanceMethod)) {
                 [realEncoding appendString:@"v"];
             }
-            const char *childEnc = clang_getCString(clang_getDeclObjCTypeEncoding(child));
+            CXString childEnc_  = clang_getDeclObjCTypeEncoding(child);
+            const char *childEnc = clang_getCString(childEnc_);
             if(strstr(childEnc, "@?") == childEnc || strstr(childEnc, "^?") == childEnc)
                 [realEncoding appendFormat:@"%s", [self _encodingForFunPtrCursor:child]];
             else
                 [realEncoding appendFormat:@"%s", childEnc];
+            clang_disposeString(childEnc_);
             return CXChildVisit_Continue;
         });
-        return [realEncoding UTF8String];
+        return strdup([realEncoding UTF8String]);
     }
+    vanillaEncoding = strdup(vanillaEncoding);
+    clang_disposeString(cxvanillaEncoding);
     return vanillaEncoding;
 }
 @end
@@ -302,6 +323,10 @@ using namespace llvm;
 }
 @end
 
+@interface TQBridgedConstant ()
+@property(readwrite) char *encoding;
+@end
+
 @implementation TQBridgedConstant
 @synthesize name=_name, encoding=_encoding;
 
@@ -309,12 +334,14 @@ using namespace llvm;
 {
     TQBridgedConstant *cnst = (TQBridgedConstant *)[self node];
     cnst.name = aName;
-    cnst.encoding = aEncoding;
+    cnst.encoding = strdup((char *)aEncoding);
     return cnst;
 }
 
 - (void)dealloc
 {
+    if(_encoding)
+        free(_encoding);
     [_name release];
     [super dealloc];
 }
@@ -357,7 +384,7 @@ using namespace llvm;
         return nil;
 
     _name     = [aName retain];
-    _encoding = aEncoding;
+    _encoding = strdup(aEncoding);
     _argTypes = [NSMutableArray new];
     TQIterateTypesInEncoding(aEncoding, ^(const char *type, NSUInteger size, NSUInteger align, BOOL *stop) {
         if(!_retType)
@@ -370,6 +397,8 @@ using namespace llvm;
 
 - (void)dealloc
 {
+    if(_encoding)
+        free(_encoding);
     [_name release];
     [super dealloc];
 }
@@ -400,13 +429,13 @@ using namespace llvm;
     _function = Function::Create(wrapperFunType, GlobalValue::ExternalLinkage, wrapperFunctionName, mod);
 
     BasicBlock *entryBlock    = BasicBlock::Create(mod->getContext(), "entry", _function, 0);
-    IRBuilder<> *entryBuilder = new IRBuilder<>(entryBlock);
+    IRBuilder<> entryBuilder(entryBlock);
 
     BasicBlock *callBlock     = BasicBlock::Create(mod->getContext(), "call", _function);
-    IRBuilder<> *callBuilder  = new IRBuilder<>(callBlock);
+    IRBuilder<> callBuilder(callBlock);
 
     BasicBlock *errBlock      = BasicBlock::Create(mod->getContext(), "invalidArgError", _function);
-    IRBuilder<> *errBuilder   = new IRBuilder<>(errBlock);
+    IRBuilder<> errBuilder(errBlock);
 
     // Load the block pointer argument (must do this before captures, which must be done before arguments in case a default value references a capture)
     llvm::Function::arg_iterator argumentIterator = _function->arg_begin();
@@ -422,13 +451,13 @@ using namespace llvm;
     NSUInteger typeSize;
     BasicBlock  *nextBlock;
     IRBuilder<> *currBuilder, *nextBuilder;
-    currBuilder = entryBuilder;
+    currBuilder = &entryBuilder;
 
     Type *retType = [aProgram llvmTypeFromEncoding:[_retType UTF8String]];
     AllocaInst *resultAlloca = NULL;
     // If it's a void return we don't allocate a return buffer
     if(![_retType hasPrefix:@"v"])
-        resultAlloca = entryBuilder->CreateAlloca(retType);
+        resultAlloca = entryBuilder.CreateAlloca(retType);
 
     TQGetSizeAndAlignment([_retType UTF8String], &typeSize, NULL);
     // Return doesn't fit in a register so we must pass an alloca before the function arguments
@@ -441,8 +470,9 @@ using namespace llvm;
     }
 
     NSMutableArray *byValArgIndices = [NSMutableArray array];
+    std::vector<IRBuilder <>*> argCheckBuilders;
     if([_argTypes count] > 0) {
-        Value *sentinel = entryBuilder->CreateLoad(mod->getOrInsertGlobal("TQSentinel", aProgram.llInt8PtrTy));
+        Value *sentinel = entryBuilder.CreateLoad(mod->getOrInsertGlobal("TQSentinel", aProgram.llInt8PtrTy));
         for(int i = 0; i < [_argTypes count]; ++i)
         {
             argTypeEncoding = [_argTypes objectAtIndex:i];
@@ -464,10 +494,11 @@ using namespace llvm;
             // Create the block for the next argument check (or set it to the call block)
             if(i == [_argTypes count]-1) {
                 nextBlock = callBlock;
-                nextBuilder = callBuilder;
+                nextBuilder = &callBuilder;
             } else {
                 nextBlock = BasicBlock::Create(mod->getContext(), [[NSString stringWithFormat:@"check%d", i] UTF8String], _function, callBlock);
                 nextBuilder = new IRBuilder<>(nextBlock);
+                argCheckBuilders.push_back(nextBuilder);
             }
 
             currBuilder->CreateCondBr(notPassedCond, errBlock, nextBlock);
@@ -490,8 +521,8 @@ using namespace llvm;
 
     // Populate the error block
     // TODO: Come up with a global error reporting mechanism and make this crash
-    [aProgram insertLogUsingBuilder:errBuilder withStr:[@"Invalid number of arguments passed to " stringByAppendingString:_name]];
-    errBuilder->CreateRet(ConstantPointerNull::get(int8PtrTy));
+    [aProgram insertLogUsingBuilder:&errBuilder withStr:[@"Invalid number of arguments passed to " stringByAppendingString:_name]];
+    errBuilder.CreateRet(ConstantPointerNull::get(int8PtrTy));
 
     // Populate call block
     FunctionType *funType = FunctionType::get(retType, argTypes, false);
@@ -506,20 +537,24 @@ using namespace llvm;
         }
     }
 
-    Value *callResult = callBuilder->CreateCall(function, args);
+    Value *callResult = callBuilder.CreateCall(function, args);
     if([_retType hasPrefix:@"v"])
-        callBuilder->CreateRet(ConstantPointerNull::get(aProgram.llInt8PtrTy));
+        callBuilder.CreateRet(ConstantPointerNull::get(aProgram.llInt8PtrTy));
     else if([_retType hasPrefix:@"@"])
-        callBuilder->CreateRet(callResult);
+        callBuilder.CreateRet(callResult);
     else {
         if(!returningOnStack)
-            callBuilder->CreateStore(callResult, resultAlloca);
-        Value *boxed = callBuilder->CreateCall2(aProgram.TQBoxValue,
-                                                callBuilder->CreateBitCast(resultAlloca, int8PtrTy),
-                                                [aProgram getGlobalStringPtr:_retType withBuilder:callBuilder]);
+            callBuilder.CreateStore(callResult, resultAlloca);
+        Value *boxed = callBuilder.CreateCall2(aProgram.TQBoxValue,
+                                               callBuilder.CreateBitCast(resultAlloca, int8PtrTy),
+                                               [aProgram getGlobalStringPtr:_retType withBuilder:&callBuilder]);
         // Retain/autorelease to force a TQBoxedObject move to the heap in case the returned value is stored in stack memory
-        boxed = callBuilder->CreateCall(aProgram.objc_retainAutoreleaseReturnValue, boxed);
-        callBuilder->CreateRet(boxed);
+        boxed = callBuilder.CreateCall(aProgram.objc_retainAutoreleaseReturnValue, boxed);
+        callBuilder.CreateRet(boxed);
+    }
+
+    for(int i = 0; i < argCheckBuilders.size(); ++i) {
+        delete argCheckBuilders[i];
     }
     return _function;
 }

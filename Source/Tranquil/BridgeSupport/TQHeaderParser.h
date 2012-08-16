@@ -44,12 +44,12 @@
     llvm::Value *_global;
 }
 @property(readwrite, retain) NSString *name;
-@property(readwrite) const char *encoding;
+@property(readonly) char *encoding;
 + (TQBridgedConstant *)constantWithName:(NSString *)aName encoding:(const char *)aEncoding;
 @end
 
 @interface TQBridgedFunction : TQNodeBlock
 @property(readwrite, retain) NSString *name;
-@property(readwrite) const char *encoding;
+@property(readonly) char *encoding;
 + (TQBridgedFunction *)functionWithName:(NSString *)aName encoding:(const char *)aEncoding;
 @end
