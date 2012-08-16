@@ -186,6 +186,11 @@ using namespace llvm;
 @end
 
 @implementation TQNodeUnlessBlock
++ (TQNodeUnlessBlock *)node
+{
+    return (TQNodeUnlessBlock *)[super node];
+}
+
 - (llvm::Value *)generateTestExpressionInProgram:(TQProgram *)aProgram
                                      withBuilder:(IRBuilder<> *)aBuilder
                                            value:(llvm::Value *)aValue

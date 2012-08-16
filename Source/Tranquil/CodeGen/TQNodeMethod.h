@@ -15,6 +15,7 @@ typedef enum {
 @property(readwrite, assign) TQMethodType type;
 + (TQNodeMethod *)node;
 + (TQNodeMethod *)nodeWithType:(TQMethodType)aType;
+- (NSString *)selector;
 - (id)initWithType:(TQMethodType)aType;
 - (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoError;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram

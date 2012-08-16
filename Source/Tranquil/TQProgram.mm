@@ -284,8 +284,6 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 // Executes the current program tree
 - (id)_executeNode:(TQNodeBlock *)aNode
 {
-    [self _preprocessNode:aNode withTrace:[NSMutableArray array]];
-
     TQInitializeRuntime();
     InitializeNativeTarget();
 
@@ -423,6 +421,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     if(!parserState.root)
         return nil;
 
+    [self _preprocessNode:parserState.root withTrace:[NSMutableArray array]];
     if(_shouldShowDebugInfo)
         TQLog(@"%@", parserState.root);
 

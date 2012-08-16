@@ -30,7 +30,7 @@ But here're a couple of examples:
 
 ### Message chaining (Without having to return self from every method you write)
 
-	var = Character new; setName: "Deckard"; setOccupation: "Tough Guy"; self
+    var = Character new; setName: "Deckard"; setOccupation: "Tough Guy"; self
 
 ### Multiple assignment
 
@@ -44,39 +44,39 @@ But here're a couple of examples:
 ### Evaluate a regular expression
 
     if /foo[a-z]+/i matches: "Foobar"
-    	"Foobar starts with foo." print
+        "Foobar starts with foo." print
 
 ### Using the OpenGL & GLUT APIs
 
-	GlutInit(0, nil)
-	GlutInitDisplayMode(GLUT_DOUBLE)
-	GlutInitWindowSize(640, 480)
-	GlutInitWindowPosition(200, 200)
-	GlutCreateWindow("Tranquil is cool as beans!")
-	
-	GlClearColor(0, 0, 0, 0)
-	GlScalef(0.4, 0.4, 0.4)
-	
-	GlutDisplayFunc({
-	    GlRotatef(0.1, 0, 1, 0)
-	    GlClear(GL_COLOR_BUFFER_BIT)
-	    GlColor3f(0, 1, 0)
-	        GlutWireDodecahedron()
-	    GlColor3f(1, 1, 1)
-	        GlutWireTeapot(0.7)
-	    GlutSwapBuffers()
-	})
-	
-	lastX, lastY = 0
-	GlutMotionFunc({ x, y |
-	    dx, dy = lastX - x, lastY - y
-	    GlRotatef(dx, 0, 1, 0)
-	    GlRotatef(dy, 1, 0, 0)
-	    lastX, lastY = x, y
-	})
-	
-	GlutIdleFunc(GlutPostRedisplay)
-	GlutMainLoop()
+    GlutInit(0, nil)
+    GlutInitDisplayMode(GLUT_DOUBLE)
+    GlutInitWindowSize(640, 480)
+    GlutInitWindowPosition(200, 200)
+    GlutCreateWindow("Tranquil is cool as beans!")
+    
+    GlClearColor(0, 0, 0, 0)
+    GlScalef(0.4, 0.4, 0.4)
+    
+    GlutDisplayFunc({
+        GlRotatef(0.1, 0, 1, 0)
+        GlClear(GL_COLOR_BUFFER_BIT)
+        GlColor3f(0, 1, 0)
+            GlutWireDodecahedron()
+        GlColor3f(1, 1, 1)
+            GlutWireTeapot(0.7)
+        GlutSwapBuffers()
+    })
+    
+    lastX, lastY = 0
+    GlutMotionFunc({ x, y |
+        dx, dy = lastX - x, lastY - y
+        GlRotatef(dx, 0, 1, 0)
+        GlRotatef(dy, 1, 0, 0)
+        lastX, lastY = x, y
+    })
+    
+    GlutIdleFunc(GlutPostRedisplay)
+    GlutMainLoop()
 
 ### Talking to Cocoa
 
@@ -106,18 +106,17 @@ But here're a couple of examples:
     win makeKeyAndOrderFront: nil
     
     \ Create a little view
-	#TestView < NSView {
-	    - init {
-	        self = super init
-	        #gradient = NSGradient alloc initWithStartingColor: NSColor redColor
-	                                               endingColor: NSColor yellowColor
-	        ^self
-	    }
-	    - drawRect: dirtyRect {
-	        NSColor cyanColor set
-	        #gradient drawInRect: dirtyRect angle: 45
-	    }
-	}
+    #TestView < NSView {
+        - init {
+            #gradient = NSGradient alloc initWithStartingColor: NSColor redColor
+                                                   endingColor: NSColor yellowColor
+            ^self
+        }
+        - drawRect: dirtyRect {
+            NSColor cyanColor set
+            #gradient drawInRect: dirtyRect angle: 45
+        }
+    }
 
     
     view = TestView new; setFrame: (win contentView bounds); self

@@ -252,6 +252,15 @@ using namespace llvm;
     return builder->CreateBitCast(alloca, aProgram.llInt8PtrTy);
 }
 
+- (llvm::Value *)store:(llvm::Value *)aValue
+             inProgram:(TQProgram *)aProgram
+                 block:(TQNodeBlock *)aBlock
+                 error:(NSError **)aoError
+{
+    TQAssertSoft(NO, kTQSyntaxErrorDomain, kTQInvalidAssignee, NO, @"Tried to assign to super!");
+    return NULL;
+}
+
 - (TQNode *)referencesNode:(TQNode *)aNode
 {
     if([aNode isEqual:self])

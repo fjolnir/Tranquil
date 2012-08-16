@@ -35,10 +35,19 @@ using namespace llvm;
     [super dealloc];
 }
 
+- (BOOL)isEqual:(id)aOther
+{
+    if(![aOther isMemberOfClass:[self class]])
+        return NO;
+    return [_left isEqual:[aOther left]] && [_right isEqual:[aOther right]];
+}
+
 - (TQNode *)referencesNode:(TQNode *)aNode
 {
     TQNode *ref = nil;
-    if((ref = [_left referencesNode:aNode]))
+    if([self isEqual:aNode])
+        return self;
+    else if((ref = [_left referencesNode:aNode]))
         return ref;
     else if((ref = [_right referencesNode:aNode]))
         return ref;
@@ -70,7 +79,7 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock error:(NSError **)aoError
 {
     if(_type == kTQOperatorAssign) {
-        BOOL isVar = [_left isMemberOfClass:[TQNodeVariable class]];
+        BOOL isVar = [_left isKindOfClass:[TQNodeVariable class]];
         BOOL isProperty = [_left isMemberOfClass:[TQNodeMemberAccess class]];
         BOOL isGetterOp = [_left isMemberOfClass:[self class]] && [(TQNodeOperator*)_left type] == kTQOperatorGetter;
         TQAssertSoft(isVar || isProperty || isGetterOp, kTQSyntaxErrorDomain, kTQInvalidAssignee, NO, @"Only variables and object properties can be assigned to");

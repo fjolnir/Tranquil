@@ -41,6 +41,14 @@ using namespace llvm;
     [super dealloc];
 }
 
+- (BOOL)isEqual:(id)aOther
+{
+    if(![aOther isMemberOfClass:[self class]])
+        return NO;
+        NSLog(@"%@  \n %@", _arguments, [aOther arguments]);
+    return [_receiver isEqual:[aOther receiver]] && [_arguments isEqual:[aOther arguments]];
+}
+
 - (TQNode *)referencesNode:(TQNode *)aNode
 {
     TQNode *ref = nil;

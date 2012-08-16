@@ -5,6 +5,8 @@
 #import "../TQProgram.h"
 #import "../TQDebug.h"
 #import "TQNodeArgumentDef.h"
+#import "TQNodeOperator.h"
+#import "TQNodeVariable.h"
 
 using namespace llvm;
 
@@ -76,10 +78,10 @@ using namespace llvm;
 
 - (NSString *)_invokeName
 {
-    return [NSString stringWithFormat:@"%@[%@ %@]", _type==kTQClassMethod ? @"+" : @"-", _class.name, [self _selectorString]];
+    return [NSString stringWithFormat:@"%@[%@ %@]", _type==kTQClassMethod ? @"+" : @"-", _class.name, [self selector]];
 }
 
-- (NSString *)_selectorString
+- (NSString *)selector
 {
     NSMutableString *selector = [NSMutableString string];
     for(TQNodeMethodArgumentDef *arg in self.arguments) {
@@ -108,9 +110,9 @@ using namespace llvm;
     // If a matching bridged method is found, use the types from there
     NSString *bridgedEncoding;
     if(_type == kTQInstanceMethod)
-        bridgedEncoding = [[aProgram.objcParser classNamed:aClass.superClassName] typeForInstanceMethod:[self _selectorString]];
+        bridgedEncoding = [[aProgram.objcParser classNamed:aClass.superClassName] typeForInstanceMethod:[self selector]];
     else
-        bridgedEncoding = [[aProgram.objcParser classNamed:aClass.superClassName] typeForClassMethod:[self _selectorString]];
+        bridgedEncoding = [[aProgram.objcParser classNamed:aClass.superClassName] typeForClassMethod:[self selector]];
 
     if(bridgedEncoding && *[bridgedEncoding UTF8String] == _C_VOID) // No such thing as a void return in tranquil
         _retType = @"@";
@@ -143,7 +145,7 @@ using namespace llvm;
 
     Value *imp = builder->CreateCall(aProgram.imp_implementationWithBlock, block);
     Value *signature = [aProgram getGlobalStringPtr:methodSignature inBlock:aBlock];
-    Value *selector = builder->CreateCall(aProgram.sel_registerName, [aProgram getGlobalStringPtr:[self _selectorString] inBlock:aBlock]);
+    Value *selector = builder->CreateCall(aProgram.sel_registerName, [aProgram getGlobalStringPtr:[self selector] inBlock:aBlock]);
 
     Value *classPtr = aClass.classPtr;
     if(_type == kTQClassMethod)

@@ -16,6 +16,7 @@
 @end
 
 @interface TQNodeUnlessBlock : TQNodeIfBlock
++ (TQNodeUnlessBlock *)node;
 @end
 
 @interface TQNodeTernaryOperator : TQNodeIfBlock

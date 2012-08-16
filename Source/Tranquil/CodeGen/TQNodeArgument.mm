@@ -21,6 +21,12 @@ using namespace llvm;
     return self;
 }
 
+- (BOOL)isEqual:(id)aOther
+{
+    if(![aOther isMemberOfClass:[self class]])
+        return NO;
+    return (_passedNode == [aOther passedNode] || [_passedNode isEqual:[aOther passedNode]]) && [_selectorPart isEqual:[aOther selectorPart]];
+}
 - (TQNode *)referencesNode:(TQNode *)aNode
 {
     TQNode *ref = nil;
