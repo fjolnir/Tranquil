@@ -101,7 +101,6 @@ But here're a couple of examples:
 	        ^self
 	    }
 	    - drawRect: dirtyRect {
-	        NSColor cyanColor set
 	        #gradient drawInRect: dirtyRect angle: 45
 	    }
 	}

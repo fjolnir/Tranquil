@@ -5,6 +5,7 @@ quitMenuItem = NSMenuItem new; setTitle: "Quit #{NSProcessInfo processInfo proce
                               setAction: "terminate:";
                        setKeyEquivalent: "q";
                                    self
+
 appMenu     = NSMenu new; addItem: quitMenuItem;   self
 appMenuItem = NSMenuItem new; setSubmenu: appMenu; self
 menuBar     = NSMenu new; addItem: appMenuItem;    self
@@ -19,7 +20,6 @@ nsapp setMainMenu: menuBar
         ^self
     }
     - drawRect: dirtyRect {
-        NSColor cyanColor set
         #gradient drawInRect: dirtyRect angle: 45
     }
 }
