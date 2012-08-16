@@ -469,7 +469,7 @@ using namespace llvm;
         retType = aProgram.llVoidTy;
     }
 
-    NSMutableArray *byValArgIndices = [NSMutableArray array];
+    NSMutableIndexSet *byValArgIndices = [NSMutableIndexSet indexSet];
     std::vector<IRBuilder <>*> argCheckBuilders;
     if([_argTypes count] > 0) {
         Value *sentinel = entryBuilder.CreateLoad(mod->getOrInsertGlobal("TQSentinel", aProgram.llInt8PtrTy));
@@ -481,7 +481,7 @@ using namespace llvm;
             // Larger structs should be passed as pointers to their location on the stack
             if(TQStructSizeRequiresStret(typeSize)) {
                 argTypes.push_back(PointerType::getUnqual(argType));
-                [byValArgIndices addObject:[NSNumber numberWithInt:i+1]]; // Add one to jump over retval
+                [byValArgIndices addIndex:i+1]; // Add one to jump over retval
             } else
                 argTypes.push_back(argType);
 
@@ -532,9 +532,9 @@ using namespace llvm;
         function->setCallingConv(CallingConv::C);
         if(returningOnStack)
             function->addAttribute(1, Attribute::StructRet);
-        for(NSNumber *idx in byValArgIndices) {
-            function->addAttribute([idx intValue], Attribute::ByVal);
-        }
+        [byValArgIndices enumerateIndexesWithOptions:0 usingBlock:^(NSUInteger idx, BOOL *stop) {
+            function->addAttribute(idx, Attribute::ByVal);
+        }];
     }
 
     Value *callResult = callBuilder.CreateCall(function, args);
