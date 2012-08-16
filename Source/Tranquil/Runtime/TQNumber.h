@@ -81,6 +81,11 @@
 - (TQNumber *)lshift:(id)b;
 - (TQNumber *)rshift:(id)b;
 
+- (id)isGreater:(id)b;
+- (id)isLesser:(id)b;
+- (id)isGreaterOrEqual:(id)b;
+- (id)isLesserOrEqual:(id)b;
+
 - (TQRange *)to:(TQNumber *)b;
 - (id)times:(id (^)())block;
 @end

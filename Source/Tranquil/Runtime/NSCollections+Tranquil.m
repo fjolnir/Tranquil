@@ -150,3 +150,26 @@
     return out;
 }
 @end
+
+@implementation NSUserDefaults (WBSubscripts)
+- (void)setObject:(id)obj forKeyedSubscript:(id <NSObject,NSCopying>)key
+{
+    NSAssert([key isKindOfClass:[NSString class]], @"User defaults keys must be strings!");
+    [self setObject:obj forKey:(NSString *)key];
+}
+- (id)objectForKeyedSubscript:(id)key
+{
+    return [self objectForKey:key];
+}
+@end
+
+@implementation NSCache (WBSubscripts)
+- (void)setObject:(id)obj forKeyedSubscript:(id <NSObject,NSCopying>)key
+{
+    [self setObject:obj forKey:(NSString *)key];
+}
+- (id)objectForKeyedSubscript:(id)key
+{
+    return [self objectForKey:key];
+}
+@end

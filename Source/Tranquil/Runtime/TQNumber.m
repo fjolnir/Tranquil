@@ -22,7 +22,7 @@ extern id _objc_msgSend_hack2(id, SEL, id) asm("_objc_msgSend");
 // Tagged pointer niceness (Uses floats by truncating the mantissa by 1 byte)
 void _objc_insert_tagged_isa(unsigned char slotNumber, Class isa) asm("__objc_insert_tagged_isa");
 
-static const unsigned char kTagSlot  = 7; // Take the last slot (0b111)
+static const unsigned char kTagSlot  = 5; // Free slot
 static const uintptr_t     kTag      = (kTagSlot << 1) | 1;
 
 static __inline__ id _createTaggedPointer(_tqfloat value)
@@ -416,33 +416,32 @@ static __inline__ _tqfloat _TQNumberValue(TQNumber *ptr)
 }
 
 
-
-- (TQNumber *)isGreater:(id)b
+- (id)isGreater:(id)b
 {
     if(object_getClass(self) != object_getClass(b))
-        return _TQNumberValue(self) > [b doubleValue] ? (TQNumber*)TQValid : nil;
-    return _TQNumberValue(self) > _TQNumberValue(b)  ? (TQNumber*)TQValid : nil;
+        return _TQNumberValue(self) > [b doubleValue] ? TQValid : nil;
+    return _TQNumberValue(self) > _TQNumberValue(b)  ? TQValid : nil;
 }
 
-- (TQNumber *)isLesser:(id)b
+- (id)isLesser:(id)b
 {
     if(object_getClass(self) != object_getClass(b))
-        return _TQNumberValue(self) < [b doubleValue] ? (TQNumber*)TQValid : nil;
-    return _TQNumberValue(self) < _TQNumberValue(b)  ? (TQNumber*)TQValid : nil;
+        return _TQNumberValue(self) < [b doubleValue] ? TQValid : nil;
+    return _TQNumberValue(self) < _TQNumberValue(b)  ? TQValid : nil;
 }
 
-- (TQNumber *)isGreaterOrEqual:(id)b
+- (id)isGreaterOrEqual:(id)b
 {
     if(object_getClass(self) != object_getClass(b))
-        return _TQNumberValue(self) >= [b doubleValue] ? (TQNumber*)TQValid : nil;
-    return _TQNumberValue(self) >= _TQNumberValue(b)  ? (TQNumber*)TQValid : nil;
+        return _TQNumberValue(self) >= [b doubleValue] ? TQValid : nil;
+    return _TQNumberValue(self) >= _TQNumberValue(b)  ? TQValid : nil;
 }
 
-- (TQNumber *)isLesserOrEqual:(id)b
+- (id)isLesserOrEqual:(id)b
 {
     if(object_getClass(self) != object_getClass(b))
-        return _TQNumberValue(self) <= [b doubleValue] ? (TQNumber*)TQValid : nil;
-    return _TQNumberValue(self) <= _TQNumberValue(b)  ? (TQNumber*)TQValid : nil;
+        return _TQNumberValue(self) <= [b doubleValue] ? TQValid : nil;
+    return _TQNumberValue(self) <= _TQNumberValue(b)  ? TQValid : nil;
 }
 
 
