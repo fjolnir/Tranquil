@@ -142,8 +142,10 @@ using namespace llvm;
     entryBuilder.CreateStore(ConstantInt::get(intTy, 0), entryBuilder.CreateStructGEP(_alloca, 2, [self _llvmRegisterName:@"flags"]));
     Constant *size = ConstantExpr::getTruncOrBitCast(ConstantExpr::getSizeOf(byRefType), intTy);
     entryBuilder.CreateStore(size, entryBuilder.CreateStructGEP(_alloca, 3, [self _llvmRegisterName:@"size"]));
-    entryBuilder.CreateStore(ConstantPointerNull::get(aProgram.llInt8PtrTy),
-                             entryBuilder.CreateStructGEP(_alloca, 4, [self _llvmRegisterName:@"marked_variable"]));
+
+    if(!_isGlobal) // Globals are pre initialized
+        entryBuilder.CreateStore(ConstantPointerNull::get(aProgram.llInt8PtrTy),
+                                 entryBuilder.CreateStructGEP(_alloca, 4, [self _llvmRegisterName:@"marked_variable"]));
 
     return _alloca;
 }

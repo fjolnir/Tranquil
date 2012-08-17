@@ -84,7 +84,8 @@ using namespace llvm;
         if([aBlock.capturedVariables objectForKey:varName])
             continue;
         TQNodeVariable *var = [aBlock.locals objectForKey:varName];
-        [var generateReleaseInProgram:aProgram block:aBlock];
+        if(!var.isGlobal || aRoot != aBlock)
+            [var generateReleaseInProgram:aProgram block:aBlock];
     }
 
     return aBlock.builder->CreateRet(retVal);
