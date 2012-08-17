@@ -2,6 +2,7 @@
 
 @interface TQNodeVariable : TQNode
 @property(readwrite, retain) NSString *name;
+@property(readonly) BOOL isGlobal;
 @property(readwrite, assign) llvm::Value *alloca, *forwarding;
 
 + (TQNodeVariable *)node;
@@ -10,6 +11,7 @@
 
  - (llvm::Value *)createStorageInProgram:(TQProgram *)aProgram
                                    block:(TQNodeBlock *)aBlock
+                                    root:(TQNodeRootBlock *)aRoot
                                    error:(NSError **)aoErr;
 - (llvm::Type *)captureStructTypeInProgram:(TQProgram *)aProgram;
 

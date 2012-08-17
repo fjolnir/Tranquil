@@ -229,7 +229,7 @@ using namespace llvm;
 {
     TQAssert(_ifExpr, @"Ternary operator missing truth result");
     TQNodeVariable *tempVar = [TQNodeVariable new];
-    [tempVar createStorageInProgram:aProgram block:aBlock error:aoErr];
+    [tempVar createStorageInProgram:aProgram block:aBlock root:aRoot error:aoErr];
 
     TQNodeOperator *ifAsgn  = [TQNodeOperator nodeWithType:kTQOperatorAssign left:tempVar right:_ifExpr];
     self.statements = [NSArray arrayWithObject:ifAsgn];

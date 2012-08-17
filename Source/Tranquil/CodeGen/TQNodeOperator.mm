@@ -90,7 +90,7 @@ using namespace llvm;
         // We must make sure the storage exists before evaluating the right side, so that if the assigned value is a
         // block, it can reference itself
         if(isVar)
-            [(TQNodeVariable *)_left createStorageInProgram:aProgram block:aBlock error:aoErr];
+            [(TQNodeVariable *)_left createStorageInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         Value *right = [_right generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         [(TQNodeVariable *)_left store:right inProgram:aProgram block:aBlock root:aRoot error:aoErr];
         if(*aoErr)
@@ -134,7 +134,7 @@ using namespace llvm;
         // temp = left
         // unless/if temp { temp = right }
         TQNodeVariable *tempVar = [TQNodeVariable new];
-        [tempVar createStorageInProgram:aProgram block:aBlock error:aoErr];
+        [tempVar createStorageInProgram:aProgram block:aBlock root:aRoot error:aoErr];
 
         Class condKls = _type == kTQOperatorAnd ? [TQNodeIfBlock class] : [TQNodeUnlessBlock class];
         TQNodeIfBlock *conditional = (TQNodeIfBlock *)[condKls node];

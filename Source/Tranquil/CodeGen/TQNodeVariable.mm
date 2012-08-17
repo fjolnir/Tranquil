@@ -11,7 +11,7 @@ using namespace llvm;
 @end
 
 @implementation TQNodeVariable
-@synthesize name=_name, alloca=_alloca, forwarding=_forwarding;
+@synthesize name=_name, alloca=_alloca, forwarding=_forwarding, isGlobal=_isGlobal;
 
 + (TQNodeVariable *)node
 {
@@ -106,6 +106,7 @@ using namespace llvm;
 
 - (llvm::Value *)createStorageInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
     if(_alloca)
@@ -113,30 +114,39 @@ using namespace llvm;
 
     TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock];
     if(existingVar) {
-        //if(![existingVar generateCodeInProgram:aProgram block:aBlock root:nil error:aoErr])
-        if(![existingVar createStorageInProgram:aProgram block:aBlock error:aoErr]) /// BUG?
+        if(![existingVar createStorageInProgram:aProgram block:aBlock root:aRoot error:aoErr])
             return NULL;
         _alloca = existingVar.alloca;
 
         return _alloca;
     }
+
     Type *intTy   = aProgram.llIntTy;
     Type *i8PtrTy = aProgram.llInt8PtrTy;
 
     Type *byRefType = [self captureStructTypeInProgram:aProgram];
     IRBuilder<> entryBuilder(&aBlock.function->getEntryBlock(), aBlock.function->getEntryBlock().begin());
-    AllocaInst *alloca = entryBuilder.CreateAlloca(byRefType, 0, [self _llvmRegisterName:@"alloca"]);
+
+    if(aBlock == aRoot) {
+        _isGlobal = YES;
+        const char *globalName = [[NSString stringWithFormat:@"TQGlobalVar_%@", _name] UTF8String];
+        _alloca = aProgram.llModule->getGlobalVariable(globalName, true);
+        if(!_alloca)
+            _alloca = new GlobalVariable(*aProgram.llModule, byRefType, false, GlobalVariable::InternalLinkage, ConstantAggregateZero::get(byRefType), globalName);
+    } else
+        _alloca = entryBuilder.CreateAlloca(byRefType, 0, [self _llvmRegisterName:@"alloca"]);
+
+
+    //AllocaInst *alloca = entryBuilder.CreateAlloca(byRefType, 0, [self _llvmRegisterName:@"alloca"]);
 
     // Initialize the variable to nil
-    entryBuilder.CreateStore(entryBuilder.CreateBitCast(alloca, i8PtrTy),
-                             entryBuilder.CreateStructGEP(alloca, 1, [self _llvmRegisterName:@"forwardingAssign"]));
-    entryBuilder.CreateStore(ConstantInt::get(intTy, 0), entryBuilder.CreateStructGEP(alloca, 2, [self _llvmRegisterName:@"flags"]));
+    entryBuilder.CreateStore(entryBuilder.CreateBitCast(_alloca, i8PtrTy),
+                             entryBuilder.CreateStructGEP(_alloca, 1, [self _llvmRegisterName:@"forwardingAssign"]));
+    entryBuilder.CreateStore(ConstantInt::get(intTy, 0), entryBuilder.CreateStructGEP(_alloca, 2, [self _llvmRegisterName:@"flags"]));
     Constant *size = ConstantExpr::getTruncOrBitCast(ConstantExpr::getSizeOf(byRefType), intTy);
-    entryBuilder.CreateStore(size, entryBuilder.CreateStructGEP(alloca, 3, [self _llvmRegisterName:@"size"]));
+    entryBuilder.CreateStore(size, entryBuilder.CreateStructGEP(_alloca, 3, [self _llvmRegisterName:@"size"]));
     entryBuilder.CreateStore(ConstantPointerNull::get(aProgram.llInt8PtrTy),
-                             entryBuilder.CreateStructGEP(alloca, 4, [self _llvmRegisterName:@"marked_variable"]));
-
-    _alloca = alloca;
+                             entryBuilder.CreateStructGEP(_alloca, 4, [self _llvmRegisterName:@"marked_variable"]));
 
     return _alloca;
 }
@@ -148,7 +158,7 @@ using namespace llvm;
     if(_alloca)
         return [self _getForwardingInProgram:aProgram block:aBlock];
 
-    if(![self createStorageInProgram:aProgram block:aBlock error:aoErr])
+    if(![self createStorageInProgram:aProgram block:aBlock root:aRoot error:aoErr])
         return NULL;
 
     return [self _getForwardingInProgram:aProgram block:aBlock];
@@ -157,11 +167,11 @@ using namespace llvm;
 - (llvm::Value *)store:(llvm::Value *)aValue
              inProgram:(TQProgram *)aProgram
                  block:(TQNodeBlock *)aBlock
-                  root:(TQNode *)aRoot
+                  root:(TQNodeRootBlock *)aRoot
                  error:(NSError **)aoErr
 {
     if(!_alloca) {
-        if(![self createStorageInProgram:aProgram block:aBlock error:aoErr])
+        if(![self createStorageInProgram:aProgram block:aBlock root:aRoot error:aoErr])
             return NULL;
     }
     IRBuilder<> *builder = aBlock.builder;

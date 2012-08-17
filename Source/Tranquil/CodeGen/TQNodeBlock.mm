@@ -212,7 +212,7 @@ using namespace llvm;
 }
 
 // The block literal is a stack allocated struct representing a single instance of this block
-- (llvm::Value *)_generateBlockLiteralInProgram:(TQProgram *)aProgram parentBlock:(TQNodeBlock *)aParentBlock
+- (llvm::Value *)_generateBlockLiteralInProgram:(TQProgram *)aProgram parentBlock:(TQNodeBlock *)aParentBlock root:(TQNodeRootBlock *)aRoot
 {
     Module *mod = aProgram.llModule;
     IRBuilder<> *pBuilder = aParentBlock.builder;
@@ -255,7 +255,7 @@ using namespace llvm;
         int i = TQ_CAPTURE_IDX;
         for(NSString *name in _capturedVariables) {
             TQNodeVariable *varToCapture = [_capturedVariables objectForKey:name];
-            [varToCapture createStorageInProgram:aProgram block:aParentBlock error:nil];
+            [varToCapture createStorageInProgram:aProgram block:aParentBlock root:aRoot error:nil];
             NSString *fieldName = [NSString stringWithFormat:@"block.%@", name];
             pBuilder->CreateStore(pBuilder->CreateBitCast(varToCapture.alloca, i8PtrTy), pBuilder->CreateStructGEP(alloca, i++, [fieldName UTF8String]));
         }
@@ -560,7 +560,7 @@ using namespace llvm;
     if(![self _generateInvokeInProgram:aProgram root:aRoot error:aoErr])
         return NULL;
 
-    Value *literal = [self _generateBlockLiteralInProgram:aProgram parentBlock:aBlock];
+    Value *literal = [self _generateBlockLiteralInProgram:aProgram parentBlock:aBlock root:aRoot];
 
     return literal;
 }
