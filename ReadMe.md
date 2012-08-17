@@ -49,6 +49,8 @@ But here're a couple of examples:
 
 ### Using the OpenGL & GLUT APIs
 
+    import "GLUT"
+    
     GlutInit(0, nil)
     GlutInitDisplayMode(GLUT_DOUBLE)
     GlutInitWindowSize(640, 480)
@@ -81,6 +83,8 @@ But here're a couple of examples:
 
 ### Talking to Cocoa
 
+    import "AppKit"
+    
 	nsapp = NSApplication sharedApplication
 	
 	\ Create the menubar

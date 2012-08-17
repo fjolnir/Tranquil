@@ -34,7 +34,7 @@ using namespace llvm;
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<import: ~%@>", _path];
+    return [NSString stringWithFormat:@"<import: %@>", _path];
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
@@ -42,8 +42,16 @@ using namespace llvm;
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
-    TQNodeRootBlock *importedRoot = [aProgram _rootFromFile:_path error:aoErr];
-    Value *rootFun = [importedRoot generateCodeInProgram:aProgram block:aBlock root:importedRoot error:aoErr];
-    return aBlock.builder->CreateCall(rootFun);
+    NSString *path = [aProgram _resolveImportPath:_path];
+    if(!path)
+        return NULL;
+    if([[path pathExtension] isEqualToString:@"h"]) {
+        [aProgram.objcParser parseHeader:path];
+        return NULL;
+    } else {
+        TQNodeRootBlock *importedRoot = [aProgram _rootFromFile:path error:aoErr];
+        Value *rootFun = [importedRoot generateCodeInProgram:aProgram block:aBlock root:importedRoot error:aoErr];
+        return aBlock.builder->CreateCall(rootFun);
+    }
 }
 @end

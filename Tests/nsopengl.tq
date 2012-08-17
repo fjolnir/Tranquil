@@ -1,3 +1,6 @@
+import "AppKit"
+import "GLUT"
+
 nsapp = NSApplication sharedApplication
 
 #TestView < NSOpenGLView {

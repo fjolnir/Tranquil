@@ -1,3 +1,5 @@
+import "GLUT"
+
 GlutInit(0, nil)
 
 GlutInitDisplayMode(GLUT_RGBA bitOr: GLUT_DOUBLE)

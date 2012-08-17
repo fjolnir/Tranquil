@@ -13,6 +13,8 @@ extern "C" NSString * const kTQSyntaxErrorException;
 @property(readonly) TQHeaderParser *objcParser;
 @property(readwrite) BOOL shouldShowDebugInfo;
 @property(readonly) llvm::Module *llModule;
+// Search path related
+@property(readwrite, retain) NSMutableArray *searchPaths, *allowedFileExtensions;
 
 #pragma mark - Cached types
 // void

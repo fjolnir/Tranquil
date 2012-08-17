@@ -9,7 +9,7 @@
     do { \
         if(!(cond)) { \
             TQLog(@"Assertion failed: " fmt, ##__VA_ARGS__); \
-            exit(1); \
+            abort(); \
         } \
     } while(0)
 

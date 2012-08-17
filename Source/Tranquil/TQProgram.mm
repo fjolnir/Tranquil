@@ -48,7 +48,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 
 @implementation TQProgram
 @synthesize name=_name, llModule=_llModule, shouldShowDebugInfo=_shouldShowDebugInfo,
-            objcParser=_objcParser;
+            objcParser=_objcParser, searchPaths=_searchPaths, allowedFileExtensions=_allowedFileExtensions;
 @synthesize llVoidTy=_llVoidTy, llInt8Ty=_llInt8Ty, llInt16Ty=_llInt16Ty, llInt32Ty=_llInt32Ty, llInt64Ty=_llInt64Ty,
     llFloatTy=_llFloatTy, llDoubleTy=_llDoubleTy, llIntTy=_llIntTy, llIntPtrTy=_llIntPtrTy, llSizeTy=_llSizeTy,
     llPtrDiffTy=_llPtrDiffTy, llVoidPtrTy=_llVoidPtrTy, llInt8PtrTy=_llInt8PtrTy, llVoidPtrPtrTy=_llVoidPtrPtrTy,
@@ -255,14 +255,18 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     TQInitializeRuntime();
     InitializeNativeTarget();
 
-    [_objcParser parseHeader:@"/System/Library/Frameworks/AppKit.framework/Headers/AppKit.h"];
-    [_objcParser parseHeader:@"/System/Library/Frameworks/GLUT.framework/Headers/glut.h"];
+    _searchPaths = [[NSMutableArray alloc] initWithObjects:@".",
+                        @"~/Library/Frameworks", @"/Library/Frameworks",
+                        @"/System/Library/Frameworks/", nil];
+    _allowedFileExtensions = [[NSMutableArray alloc] initWithObjects:@"tq", @"h", nil];
 
     return self;
 }
 
 - (void)dealloc
 {
+    [_searchPaths release];
+    [_allowedFileExtensions release];
     delete _llModule;
     [_objcParser release];
     [super dealloc];
@@ -289,15 +293,6 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 // Executes the current program tree
 - (id)_executeRoot:(TQNodeRootBlock *)aNode
 {
-    //[_bridge loadFramework:@"/System/Library/Frameworks/Foundation.framework"];
-    //[_bridge loadFramework:@"/System/Library/Frameworks/AppKit.framework"];
-    //[_bridge loadBridgesupportFile:[@"~/Library/BridgeSupport/math.bridgesupport" stringByExpandingTildeInPath]];
-    //[_bridge loadFramework:@"/System/Library/Frameworks/GLUT.framework"];
-    //[_objcParser parseHeader:@"/System/Library/Frameworks/Foundation.framework/Headers/Foundation.h"];
-    //[_objcParser parseHeader:@"/System/Library/Frameworks/OpenGL.framework/Headers/gl.h"];
-    //[_objcParser parsePCH:@"/Users/fyolnish/test.pch"];
-    //return nil;
-
     NSError *err = nil;
     [aNode generateCodeInProgram:self block:nil root:aNode error:&err];
     if(err) {
@@ -444,6 +439,56 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 
 
 #pragma mark - Utilities
+
+- (NSString *)_resolveImportPath:(NSString *)aPath
+{
+#define NOT_FOUND() do { TQLog(@"No file found for path '%@'", aPath); return nil; } while(0)
+    BOOL isDir;
+    NSFileManager *fm = [NSFileManager defaultManager];
+    if([aPath hasPrefix:@"/"]) {
+        NSLog(@"Returning %@", aPath);
+        if([fm fileExistsAtPath:aPath isDirectory:&isDir] && !isDir)
+            return aPath;
+        NOT_FOUND();
+    }
+    NSArray *testPathComponents = [aPath pathComponents];
+    if(![testPathComponents count])
+        NOT_FOUND();
+
+    BOOL hasExtension = [[aPath pathExtension] length] > 0;
+    BOOL usesSubdir   = [testPathComponents count] > 1;
+
+    for(NSString *searchPath in _searchPaths) {
+        if(![fm fileExistsAtPath:searchPath isDirectory:&isDir] || !isDir)
+            continue;
+
+        for(NSString *candidate in [fm contentsOfDirectoryAtPath:searchPath error:nil]) {
+            if([[candidate pathExtension] isEqualToString:@"framework"]) {
+                NSString *frameworkDirName = usesSubdir ? [testPathComponents objectAtIndex:0] : [[aPath lastPathComponent] stringByDeletingPathExtension];
+                if(![[[candidate lastPathComponent] stringByDeletingPathExtension] isEqualToString:frameworkDirName])
+                    continue;
+                if(usesSubdir)
+                    aPath = [[testPathComponents subarrayWithRange:(NSRange){ 1, [testPathComponents count] - 1 }] componentsJoinedByString:@"/"];
+                searchPath = [[searchPath stringByAppendingPathComponent:candidate] stringByAppendingPathComponent:@"Headers"];
+                break;
+            }
+        }
+        NSString *finalPath = [searchPath stringByAppendingPathComponent:aPath];
+        if(hasExtension) {
+            if([fm fileExistsAtPath:finalPath isDirectory:&isDir] && !isDir)
+                return finalPath;
+        } else {
+            for(NSString *ext in _allowedFileExtensions) {
+                NSString *currPath = [finalPath stringByAppendingPathExtension:ext];
+                if([fm fileExistsAtPath:currPath isDirectory:&isDir] && !isDir)
+                    return currPath;
+            }
+        }
+    }
+
+    NOT_FOUND();
+#undef NOT_FOUND
+}
 
 - (llvm::Value *)getGlobalStringPtr:(NSString *)aStr withBuilder:(llvm::IRBuilder<> *)aBuilder
 {
