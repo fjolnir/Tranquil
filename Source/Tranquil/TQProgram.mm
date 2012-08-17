@@ -13,7 +13,7 @@
 extern "C" {
 #import "parse.m"
 }
-
+#include <iostream>
 # include <llvm/Module.h>
 # include <llvm/DerivedTypes.h>
 # include <llvm/Constants.h>
@@ -40,6 +40,9 @@ extern "C" {
 # include <llvm/Intrinsics.h>
 # include <llvm/Bitcode/ReaderWriter.h>
 # include <llvm/LLVMContext.h>
+# include <llvm/Support/ToolOutputFile.h>
+# include <llvm/Support/TargetRegistry.h>
+# include <llvm/Support/Host.h>
 # include "llvm/ADT/Statistic.h"
 
 using namespace llvm;
@@ -48,7 +51,8 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 
 @implementation TQProgram
 @synthesize name=_name, llModule=_llModule, shouldShowDebugInfo=_shouldShowDebugInfo,
-            objcParser=_objcParser, searchPaths=_searchPaths, allowedFileExtensions=_allowedFileExtensions;
+            objcParser=_objcParser, searchPaths=_searchPaths, allowedFileExtensions=_allowedFileExtensions,
+            useAOTCompilation=_useAOTCompilation, outputPath=_outputPath;
 @synthesize llVoidTy=_llVoidTy, llInt8Ty=_llInt8Ty, llInt16Ty=_llInt16Ty, llInt32Ty=_llInt32Ty, llInt64Ty=_llInt64Ty,
     llFloatTy=_llFloatTy, llDoubleTy=_llDoubleTy, llIntTy=_llIntTy, llIntPtrTy=_llIntPtrTy, llSizeTy=_llSizeTy,
     llPtrDiffTy=_llPtrDiffTy, llVoidPtrTy=_llVoidPtrTy, llInt8PtrTy=_llInt8PtrTy, llVoidPtrPtrTy=_llVoidPtrPtrTy,
@@ -70,7 +74,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     TQVaargsToArray=_func_TQVaargsToArray, TQUnboxObject=_func_TQUnboxObject,
     TQBoxValue=_func_TQBoxValue, tq_msgSend=_func_tq_msgSend, objc_retainAutoreleaseReturnValue=_func_objc_retainAutoreleaseReturnValue,
     objc_autoreleaseReturnValue=_func_objc_autoreleaseReturnValue, objc_retainAutoreleasedReturnValue=_func_objc_retainAutoreleasedReturnValue,
-    objc_storeStrong=_func_objc_storeStrong;
+    objc_storeStrong=_func_objc_storeStrong, TQInitializeRuntime=_func_TQInitializeRuntime;
 
 + (TQProgram *)programWithName:(NSString *)aName
 {
@@ -125,6 +129,10 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     args_i8Ptr_i8Ptr_sizeT.push_back(_llInt8PtrTy);
     args_i8Ptr_i8Ptr_sizeT.push_back(size_tTy);
     FunctionType *ft_i8Ptr__i8Ptr_i8Ptr_sizeT = FunctionType::get(_llInt8PtrTy, args_i8Ptr_i8Ptr_sizeT, false);
+
+    // void(void)
+    std::vector<Type*> args_void;
+    FunctionType *ft_void__void = FunctionType::get(_llVoidTy, args_void, false);
 
     // void(id)
     std::vector<Type*> args_i8Ptr;
@@ -249,11 +257,13 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     DEF_EXTERNAL_FUN(TQUnboxObject, ft_void__i8Ptr_i8Ptr_i8Ptr)
     DEF_EXTERNAL_FUN(TQBoxValue, ft_i8Ptr__i8Ptr_i8Ptr)
     DEF_EXTERNAL_FUN(tq_msgSend, ft_i8ptr__i8ptr_i8ptr_variadic)
+    DEF_EXTERNAL_FUN(TQInitializeRuntime, ft_void__void);
 
 #undef DEF_EXTERNAL_FUN
 
     TQInitializeRuntime();
     InitializeNativeTarget();
+    LLVMInitializeX86Target();
 
     _searchPaths = [[NSMutableArray alloc] initWithObjects:@".",
                         @"~/Library/Frameworks", @"/Library/Frameworks",
@@ -290,7 +300,6 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
    [aTrace removeLastObject];
 }
 
-// Executes the current program tree
 - (id)_executeRoot:(TQNodeRootBlock *)aNode
 {
     NSError *err = nil;
@@ -326,22 +335,24 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 
     PassManager modulePasses;
 
-    EngineBuilder factory(_llModule);
-    factory.setEngineKind(llvm::EngineKind::JIT);
-    factory.setTargetOptions(Opts);
-    factory.setOptLevel(CodeGenOpt::Aggressive);
-    ExecutionEngine *engine = factory.create();
-
-    //engine->DisableLazyCompilation();
-
-    // Optimization pass
     FunctionPassManager fpm = FunctionPassManager(_llModule);
 
-    fpm.add(new TargetData(*engine->getTargetData()));
+    ExecutionEngine *engine = NULL;
+    if(!_useAOTCompilation) {
+        EngineBuilder factory(_llModule);
+        factory.setEngineKind(llvm::EngineKind::JIT);
+        factory.setTargetOptions(Opts);
+        factory.setOptLevel(CodeGenOpt::Aggressive);
+        engine = factory.create();
+        //engine->DisableLazyCompilation();
+        fpm.add(new TargetData(*engine->getTargetData()));
+    }
+
+    // Optimization pass
     PassManagerBuilder builder = PassManagerBuilder();
     builder.OptLevel = 3;
     PassManagerBuilder Builder;
-    builder.Inliner = createFunctionInliningPass(275);
+    builder.Inliner = createFunctionInliningPass();
     builder.populateFunctionPassManager(fpm);
     builder.populateModulePassManager(modulePasses);
 
@@ -357,6 +368,47 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     // Eliminate tail calls.
     fpm.add(createTailCallEliminationPass());
 
+   if(_useAOTCompilation) {
+        // Generate a main function
+        std::vector<Type *> paramTypes;
+        paramTypes.push_back(_llIntTy);
+        paramTypes.push_back(_llInt8PtrTy);
+
+        Function *mainFun = Function::Create(FunctionType::get(_llIntTy, paramTypes, false),
+                                             GlobalValue::ExternalLinkage, "main", _llModule);
+        BasicBlock *mainEntry = BasicBlock::Create(_llModule->getContext(), "entry", mainFun, 0);
+        IRBuilder<> mainBuilder(mainEntry);
+
+        mainBuilder.CreateCall(_func_TQInitializeRuntime);
+        mainBuilder.CreateCall(aNode.function);
+        mainBuilder.CreateRet(ConstantInt::get(_llIntTy, 0));
+
+        // Output
+        Opts.JITEmitDebugInfo = false;
+        std::string err;
+        const std::string targetTriple = sys::getDefaultTargetTriple();
+        const std::string featureStr   = "";
+        const std::string cpuName      = sys::getHostCPUName();
+
+        const Target *target = TargetRegistry::lookupTarget(targetTriple, err);
+        TQAssert(err.empty(), "Unable to get target data");
+
+        TargetMachine *machine = target->createTargetMachine(targetTriple, cpuName, featureStr, Opts);
+        TQAssert(machine, @"Unable to create llvm target machine");
+        modulePasses.add(new TargetData(*(machine->getTargetData())));
+        modulePasses.run(*_llModule);
+        fpm.run(*aNode.function);
+
+        _llModule->dump();
+        llvm::PrintStatistics();
+        verifyModule(*_llModule, PrintMessageAction);
+
+        raw_fd_ostream out([_outputPath UTF8String], err, raw_fd_ostream::F_Binary);
+        TQAssert(err.empty(), "Error opening output file for bitcode: %@", _outputPath);
+        WriteBitcodeToFile(_llModule, out);
+        out.close();
+        return nil;
+    }
 
     if(!_shouldShowDebugInfo) {
         fpm.run(*aNode.function);
@@ -411,6 +463,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     parserState.stack = [NSMutableArray array];
     parserState.script = [aScript UTF8String];
     parserState.length = [aScript length];
+    parserState.root   = [TQNodeRootBlock node];
     greg.data = &parserState;
 
     [parserState.stack addObject:[NSMutableArray array]];
@@ -446,7 +499,6 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     BOOL isDir;
     NSFileManager *fm = [NSFileManager defaultManager];
     if([aPath hasPrefix:@"/"]) {
-        NSLog(@"Returning %@", aPath);
         if([fm fileExistsAtPath:aPath isDirectory:&isDir] && !isDir)
             return aPath;
         NOT_FOUND();
@@ -492,7 +544,13 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 
 - (llvm::Value *)getGlobalStringPtr:(NSString *)aStr withBuilder:(llvm::IRBuilder<> *)aBuilder
 {
-    NSString *globalName = [NSString stringWithFormat:@"TQConstCStr_%@", aStr];
+    NSString *globalName;
+    // When compiling AOT certain symbols in the global name can cause llvm to generate invalid ASM => we use the hash in that case (which destroys the output's readbility)
+    if(_useAOTCompilation)
+        globalName = [NSString stringWithFormat:@"TQConstCStr_%ld", [aStr hash]];
+    else
+        globalName = [NSString stringWithFormat:@"TQConstCStr_%@", aStr];
+
     GlobalVariable *global = _llModule->getGlobalVariable([globalName UTF8String], true);
     if(!global) {
         Constant *strConst = ConstantDataArray::getString(_llModule->getContext(), [aStr UTF8String]);

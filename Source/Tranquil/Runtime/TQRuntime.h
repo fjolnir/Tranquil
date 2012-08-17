@@ -45,8 +45,8 @@ struct TQBlockLiteral {
     int reserved;
     id (*invoke)(void *, ...);
     struct TQBlockDescriptor {
-    unsigned long int reserved;	// NULL
-        unsigned long int size;  // sizeof(struct TQBlockLiteral)
+    unsigned long int reserved; // NULL
+        unsigned long int size; // sizeof(struct TQBlockLiteral)
     // optional helper functions
         void (*copy_helper)(void *dst, void *src);
         void (*dispose_helper)(void *src);

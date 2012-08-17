@@ -8,13 +8,19 @@
 
 extern "C" NSString * const kTQSyntaxErrorException;
 
-@interface TQProgram : NSObject
+@interface TQProgram : NSObject {
+    BOOL _initializedTQRuntime;
+}
+
 @property(readwrite, retain) NSString *name;
 @property(readonly) TQHeaderParser *objcParser;
 @property(readwrite) BOOL shouldShowDebugInfo;
 @property(readonly) llvm::Module *llModule;
 // Search path related
 @property(readwrite, retain) NSMutableArray *searchPaths, *allowedFileExtensions;
+// AOT compilation related
+@property(readwrite, retain) NSString *outputPath;
+@property(readwrite) BOOL useAOTCompilation;
 
 #pragma mark - Cached types
 // void
@@ -47,7 +53,8 @@ extern "C" NSString * const kTQSyntaxErrorException;
     *object_getClass, *TQPrepareObjectForReturn, *objc_autorelease, *objc_storeStrong,
     *objc_autoreleasePoolPush, *objc_autoreleasePoolPop, *TQSetValueForKey, *TQValueForKey,
     *TQGetOrCreateClass, *TQObjectsAreEqual, *TQObjectsAreNotEqual, *TQObjectGetSuperClass,
-    *TQVaargsToArray, *TQUnboxObject, *TQBoxValue, *tq_msgSend, *objc_retainAutoreleasedReturnValue;
+    *TQVaargsToArray, *TQUnboxObject, *TQBoxValue, *tq_msgSend, *objc_retainAutoreleasedReturnValue,
+    *TQInitializeRuntime;
 
 #pragma mark - Methods
 

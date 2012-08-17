@@ -75,7 +75,9 @@ PEG_SOURCE     = FileList['Source/Tranquil/*.leg'].first
 
 ARC_FILES = ['Source/Tranquil/Runtime/TQWeak.m']
 
-MAIN_SOURCE = 'Source/main.m'
+MAIN_SOURCE  = 'Source/main.m'
+MAIN_OUTPATH = 'Build/main.o'
+
 
 @buildMode = :development
 
@@ -113,11 +115,14 @@ file :libtranquil => [PARSER_OUTPATH] + O_FILES do |t|
     sh "#{LD} #{LDFLAGS} #{LIBS} #{O_FILES} -dynamiclib -o #{BUILD_DIR}/libtranquil.dylib"
 end
 
-file :tranquil => [:libtranquil] do |t|
-    oFile = "#{BUILD_DIR}/main.o"
-    cmd = "#{CXX} #{MAIN_SOURCE} #{CXXFLAGS[@buildMode]} -c -o  #{BUILD_DIR}/main.o"
-    sh "#{LD} #{TOOL_LDFLAGS} #{LIBS} #{oFile} -LBuild -ltranquil -o #{BUILD_DIR}/tranquil"
+file MAIN_OUTPATH => MAIN_SOURCE do |t|
+    sh "#{CXX} #{MAIN_SOURCE} #{CXXFLAGS[@buildMode]} -c -o #{MAIN_OUTPATH}"
 end
+
+file :tranquil => [:libtranquil, MAIN_OUTPATH] do |t|
+    sh "#{LD} #{TOOL_LDFLAGS} #{LIBS} #{MAIN_OUTPATH} -LBuild -ltranquil -o #{BUILD_DIR}/tranquil"
+end
+
 file :setReleaseOpts do
     p "Release build"
     @buildMode = :release
