@@ -136,9 +136,6 @@ using namespace llvm;
     } else
         _alloca = entryBuilder.CreateAlloca(byRefType, 0, [self _llvmRegisterName:@"alloca"]);
 
-
-    //AllocaInst *alloca = entryBuilder.CreateAlloca(byRefType, 0, [self _llvmRegisterName:@"alloca"]);
-
     // Initialize the variable to nil
     entryBuilder.CreateStore(entryBuilder.CreateBitCast(_alloca, i8PtrTy),
                              entryBuilder.CreateStructGEP(_alloca, 1, [self _llvmRegisterName:@"forwardingAssign"]));
