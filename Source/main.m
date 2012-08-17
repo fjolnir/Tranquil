@@ -1,4 +1,4 @@
-#import "TQProgram.h"
+#import <Tranquil/TQProgram.h>
 
 void printHelpAndExit(int status)
 {

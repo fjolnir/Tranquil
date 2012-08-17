@@ -53,20 +53,29 @@ LDFLAGS = [
     '-lxml2 -lffi',
 ].join(' ')
 
+TOOL_LDFLAGS = [
+    '-framework Foundation',
+    '-framework AppKit',
+    '-all_load',
+].join(' ')
+
+
 LIBS = ['-framework Foundation', '-framework GLUT'].join(' ')
 
-PATHMAP = "build/%n.o"
+PATHMAP = 'build/%n.o'
 
 STUB_OUTPATH   = 'Build/block_stubs.mm'
 STUB_SCRIPT    = 'Source/Tranquil/gen_stubs.rb'
 MSGSEND_SOURCE = 'Source/Tranquil/Runtime/msgsend.s'
-MSGSEND_OUT    = "Build/msgsend.o"
+MSGSEND_OUT    = 'Build/msgsend.o'
 OBJC_SOURCES   = FileList['Source/Tranquil/**/*.m*'].add('Source/Tranquil/**/*.c*').add(STUB_OUTPATH)
 O_FILES        = OBJC_SOURCES.pathmap(PATHMAP)
 O_FILES << MSGSEND_OUT
 PEG_SOURCE     = FileList['Source/Tranquil/*.leg'].first
 
 ARC_FILES = ['Source/Tranquil/Runtime/TQWeak.m']
+
+MAIN_SOURCE = 'Source/main.m'
 
 @buildMode = :development
 
@@ -100,10 +109,15 @@ file :build_dir do
     sh "mkdir -p #{File.dirname(__FILE__)}/Build"
 end
 
-file :tranquil => [PARSER_OUTPATH] + O_FILES do |t|
-    sh "#{LD} #{LDFLAGS} #{LIBS} #{O_FILES} -o #{BUILD_DIR}/tranquil"
+file :libtranquil => [PARSER_OUTPATH] + O_FILES do |t|
+    sh "#{LD} #{LDFLAGS} #{LIBS} #{O_FILES} -dynamiclib -o #{BUILD_DIR}/libtranquil.dylib"
 end
 
+file :tranquil => [:libtranquil] do |t|
+    oFile = "#{BUILD_DIR}/main.o"
+    cmd = "#{CXX} #{MAIN_SOURCE} #{CXXFLAGS[@buildMode]} -c -o  #{BUILD_DIR}/main.o"
+    sh "#{LD} #{TOOL_LDFLAGS} #{LIBS} #{oFile} -LBuild -ltranquil -o #{BUILD_DIR}/tranquil"
+end
 file :setReleaseOpts do
     p "Release build"
     @buildMode = :release
