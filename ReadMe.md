@@ -21,34 +21,47 @@ But here're a couple of examples:
 
 ### Array iteration
 
+```st
     alternatives = ["Objective-C", "Ruby", "Nu", "Perl", "Python"]
     alternatives each: `alternative | "Tranquil is nicer than #{alternative}" print`
     "Or so I hope at least." print
+```
 
 ### Reduction
 
+```st
     sum = (0 to: 1000000) reduce: `obj, accum=0 | obj+accum`
+```
 
 ### Message chaining (Without having to return self from every method you write)
 
+```st
     var = Character new; setName: "Deckard"; setOccupation: "Blade Runner"; self
+```
 
 ### Multiple assignment
 
+```st
     a, b = b, a  \ Swap b&a
+```
 
 ### Calculate fibonacci numbers (In a not-so-performant manner)
 
+```st
     fib = `n | n > 1 ? fib(n-1) + fib(n-2) : n`
     fib(10) print
+```
 
 ### Evaluate a regular expression
 
+```st
     if /foo[a-z]+/i matches: "Foobar"
         "Foobar starts with foo." print
+```
 
 ### Using the OpenGL & GLUT APIs
 
+```st
     import "GLUT"
     
     GlutInit(0, nil)
@@ -80,9 +93,11 @@ But here're a couple of examples:
     
     GlutIdleFunc(GlutPostRedisplay)
     GlutMainLoop()
+```
 
 ### Talking to Cocoa
 
+```st
     import "AppKit"
     
 	nsapp = NSApplication sharedApplication
@@ -124,3 +139,4 @@ But here're a couple of examples:
 	nsapp setActivationPolicy: NSApplicationActivationPolicyRegular
 	nsapp activateIgnoringOtherApps: yes
 	nsapp run
+```
