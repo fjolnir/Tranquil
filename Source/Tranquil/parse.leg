@@ -58,7 +58,7 @@ typedef struct _TQParserState TQParserState;
                 int temp = idx; \
                 while(errCStr[temp] != '\n' && temp >= 0) { --temp; [spaceStr appendString:@" "]; } \
                 [spaceStr replaceCharactersInRange:NSIntersectionRange(srcRange, (NSRange) { [spaceStr length]-2, 1}) withString:@"^"]; \
-                [errStr insertString:spaceStr atIndex:idx+1]; \
+                [errStr insertString:spaceStr atIndex:idx]; \
                 break; \
             } \
         } \
@@ -106,7 +106,7 @@ Statement    = (
              | BreakStmt
              | SkipStmt
              | ShiftStmt
-             | Message
+             | CascadedMsg
              | Call
              | IncrDecrOp
              | Class
@@ -130,9 +130,10 @@ Return       = "^" retVal:Expression { UpdateToken(); $$ = [TQNodeReturn nodeWit
 
 # Expression
 Expression   = TernaryExpr
-             | Message
-             | Assignment
+             | KeywordMsg
              | Equation
+             | UnaryMsg
+             | Assignment
              | _OtherExpr
 
 NoTernExpr   = Equation
@@ -140,9 +141,9 @@ NoTernExpr   = Equation
 
 NoEqExpr     = _OtherExpr
 
-_OtherExpr   = Call
+_OtherExpr   = UnaryMsg
+             | Call
              | Valid
-             | UnaryMsg
              | Block
              | UnaryOp
              | Nil
@@ -172,7 +173,7 @@ KeywordMsg   = rcvr:KwdMsgRcvr -
                     PushStack([TQNodeMessage nodeWithReceiver:rcvr]);
                }
                body:KwdMsgBody { $$ = PopStack(); }
-Message      = (KeywordMsg|UnaryMsg)
+CascadedMsg  = (KeywordMsg|UnaryMsg)
                {
                    PushStack($$);
                }
@@ -412,14 +413,14 @@ MethodArg    = identifier:SelIdent':' --
 # Conditionals
 If           = ( "if"        { UpdateToken();  PushStack([TQNodeIfBlock node]);     }
                | "unless"    { UpdateToken();  PushStack([TQNodeUnlessBlock node]); }
-               )
-               - cond:Expression -- ~{ SyntaxError(@"Condition missing"); }
+               ) -
+               cond:Expression ~{ SyntaxError(@"Condition missing"); }
                {
                    ExtendToken();
                    [StackTop setCondition:cond];
                    PushStack([NSMutableArray array]);
                }
-               ('{' -- ( Statement --)*
+               -- ('{' -- ( Statement --)*
                 _rightBrace ~{ SyntaxError(@"Unterminated if/unless block"); }
                | -- Statement)
                ( -- "else" - elsif:If
@@ -528,7 +529,7 @@ AssgnLhs       = Property
                | SubscriptExp
                | Variable
 
-AssgnRhs       = -- ( "=" -- b:Expression { PushStack(b);                                                                       }
+AssgnRhs       = -- ( "=" -- b:AssignValue { PushStack(b);                                                                       }
                  | "+=" -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorAdd left:StackTop right:b]);      }
                  | "-=" -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorSubtract left:StackTop right:b]); }
                  | "*=" -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorMultiply left:StackTop right:b]); }
@@ -547,6 +548,8 @@ MultiAssgnmt   = { PushStack([TQNodeMultiAssignOperator node]); }
                  }
 MultiAsgnLhs   = AssgnLhs   { [[(TQNodeMultiAssignOperator *)StackTop left] addObject:$$]; }
 MultiAsgnRhs   = Expression { [[(TQNodeMultiAssignOperator *)StackTop right] addObject:$$]; }
+
+AssignValue    = CascadedMsg | Expression
 
 
 UnaryOp        = UnaryPrefixOp | UnaryMinusOp | UnaryPostfixOp
