@@ -11,13 +11,14 @@
     llvm::Function *_function;
     llvm::Constant *_blockDescriptor;
     llvm::Type *_literalType;
-    NSString *_retType;
+    NSString *_retType, *_invokeName;
     NSMutableArray *_argTypes;
 }
+@property(readwrite, retain) NSString *invokeName, *retType;
 @property(readwrite, assign) BOOL isCompactBlock; // Was the block written in the form of `expr` ?
 @property(readwrite, assign) BOOL isTranquilBlock; // Should the block be treated as a tranquil block? (arg count check etc)
 @property(readwrite, retain) TQNodeBlock *parent;
-@property(readwrite, copy) NSMutableArray *arguments;
+@property(readwrite, copy) NSMutableArray *arguments, *argTypes;
 @property(readwrite, copy, nonatomic) NSMutableArray *statements;
 @property(readwrite, retain) NSMutableDictionary *locals, *capturedVariables;
 @property(readwrite, assign) BOOL isVariadic;

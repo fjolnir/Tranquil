@@ -297,6 +297,15 @@ NSPointerArray *TQVaargsToArray(va_list *items)
     return arr;
 }
 
+NSPointerArray *TQCliArgsToArray(int argc, char **argv)
+{
+    NSPointerArray *arr = [NSPointerArray pointerArrayWithStrongObjects];
+    for(int i = 0; i < argc; ++i) {
+        [arr addPointer:(void *)[NSMutableString stringWithUTF8String:argv[i]]];
+    }
+    return arr;
+}
+
 #pragma mark - Operators
 
 BOOL TQAugmentClassWithOperators(Class klass)

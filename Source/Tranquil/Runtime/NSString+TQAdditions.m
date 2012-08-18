@@ -16,14 +16,14 @@
 - (NSMutableString *)trim
 {
     const char *chars = [self UTF8String];
-    NSUInteger len = [self length];
+    NSUInteger len    = [self length];
     NSUInteger startLen, endLen;
-    for(startLen = 0; chars[startLen] == ' ' && startLen < len; ++startLen);
-    for(endLen = 0; chars[len - startLen - 1] == ' ' && endLen < len; ++endLen);
+    for(startLen = 0; chars[startLen]         == ' ' && startLen < len; ++startLen);
+    for(endLen   = 0; chars[len - endLen - 1] == ' ' && endLen < len;   ++endLen);
     if(startLen > 0)
         [self deleteCharactersInRange:(NSRange){ 0, startLen }];
-    if(endLen > 0)
-        [self deleteCharactersInRange:(NSRange){ len - endLen - 1, endLen }];
+    if(endLen > 0 && startLen != len)
+        [self deleteCharactersInRange:(NSRange){ [self length] - endLen, endLen }];
 
     return self;
 }

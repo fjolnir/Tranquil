@@ -370,7 +370,7 @@ using namespace llvm;
 @end
 
 @interface TQNodeBlock (Privates)
-- (llvm::Value *)_generateBlockLiteralInProgram:(TQProgram *)aProgram parentBlock:(TQNodeBlock *)aParentBlock;
+- (llvm::Value *)_generateBlockLiteralInProgram:(TQProgram *)aProgram parentBlock:(TQNodeBlock *)aParentBlock root:(TQNodeRootBlock *)aRoot;
 @end
 
 @implementation TQBridgedFunction
@@ -571,7 +571,7 @@ using namespace llvm;
     if(![self _generateInvokeInProgram:aProgram root:aRoot error:aoErr])
         return NULL;
 
-    Value *literal = (Value*)[self _generateBlockLiteralInProgram:aProgram parentBlock:aBlock];
+    Value *literal = (Value*)[self _generateBlockLiteralInProgram:aProgram parentBlock:aBlock root:aRoot];
 
     return literal;
 }

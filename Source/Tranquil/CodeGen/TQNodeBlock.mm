@@ -20,7 +20,8 @@ using namespace llvm;
 @implementation TQNodeBlock
 @synthesize arguments=_arguments, statements=_statements, locals=_locals, capturedVariables=_capturedVariables,
     basicBlock=_basicBlock, function=_function, builder=_builder, autoreleasePool=_autoreleasePool,
-    isCompactBlock=_isCompactBlock, parent=_parent, isVariadic=_isVariadic, isTranquilBlock=_isTranquilBlock;
+    isCompactBlock=_isCompactBlock, parent=_parent, isVariadic=_isVariadic, isTranquilBlock=_isTranquilBlock,
+    invokeName=_invokeName, argTypes=_argTypes, retType=_retType;
 
 + (TQNodeBlock *)node { return (TQNodeBlock *)[super node]; }
 
@@ -35,6 +36,7 @@ using namespace llvm;
     _function        = NULL;
     _basicBlock      = NULL;
     _isTranquilBlock = YES;
+    _invokeName      = @"__tq_block_invoke";
 
     // Block invocations are always passed the block itself as the first argument
     [self addArgument:[TQNodeArgumentDef nodeWithName:@"__blk"] error:nil];
@@ -374,11 +376,6 @@ using namespace llvm;
 }
 
 // Invokes the body of this block
-- (NSString *)_invokeName
-{
-    return @"__tq_block_invoke";
-}
-
 - (llvm::Function *)_generateInvokeInProgram:(TQProgram *)aProgram root:(TQNodeRootBlock *)aRoot error:(NSError **)aoErr
 {
     if(_function)
@@ -419,7 +416,7 @@ using namespace llvm;
 
     Module *mod = aProgram.llModule;
 
-    _function = Function::Create(funType, GlobalValue::ExternalLinkage, [[self _invokeName] UTF8String], mod);
+    _function = Function::Create(funType, GlobalValue::ExternalLinkage, [_invokeName UTF8String], mod);
     if(returningOnStack)
         _function->addAttribute(1, Attribute::StructRet);
     for(NSNumber *idx in byValArgIndices) {
@@ -623,13 +620,9 @@ using namespace llvm;
     [self.arguments removeAllObjects];
     _retType = @"@";
     _argTypes = [NSMutableArray new];
+    _invokeName = @"root";
 
     return self;
-}
-
-- (NSString *)_invokeName
-{
-    return @"root";
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram

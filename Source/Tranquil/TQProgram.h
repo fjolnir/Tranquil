@@ -16,6 +16,8 @@ extern "C" NSString * const kTQSyntaxErrorException;
 @property(readonly) TQHeaderParser *objcParser;
 @property(readwrite) BOOL shouldShowDebugInfo;
 @property(readonly) llvm::Module *llModule;
+@property(readonly) llvm::Value *cliArgGlobal;
+
 // Search path related
 @property(readwrite, retain) NSMutableArray *searchPaths, *allowedFileExtensions;
 // AOT compilation related
@@ -54,7 +56,7 @@ extern "C" NSString * const kTQSyntaxErrorException;
     *objc_autoreleasePoolPush, *objc_autoreleasePoolPop, *TQSetValueForKey, *TQValueForKey,
     *TQGetOrCreateClass, *TQObjectsAreEqual, *TQObjectsAreNotEqual, *TQObjectGetSuperClass,
     *TQVaargsToArray, *TQUnboxObject, *TQBoxValue, *tq_msgSend, *objc_retainAutoreleasedReturnValue,
-    *TQInitializeRuntime;
+    *TQInitializeRuntime, *TQCliArgsToArray;
 
 #pragma mark - Methods
 

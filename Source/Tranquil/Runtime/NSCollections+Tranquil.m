@@ -106,6 +106,17 @@
     [self removePointerAtIndex:[self count]-1];
     return val;
 }
+
+- (id)add:(NSPointerArray *)aArray
+{
+    NSPointerArray *result = [NSPointerArray pointerArrayWithStrongObjects];
+    for(id obj in self)
+        [result push:obj];
+    for(id obj in aArray)
+        [result push:obj];
+    return result;
+}
+
 #pragma mark - Iterators
 
 - (id)each:(id (^)(id))aBlock

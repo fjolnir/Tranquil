@@ -68,6 +68,7 @@ id TQValueForKey(id obj, const char *key);
 BOOL TQObjectIsStackBlock(id obj);
 id TQPrepareObjectForReturn(id obj);
 NSPointerArray *TQVaargsToArray(va_list *items);
+NSPointerArray *TQCliArgsToArray(int argc, char **argv);
 
 // Looks up a class if it exists, otherwise registers it
 Class TQGetOrCreateClass(const char *name, const char *superName);

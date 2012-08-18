@@ -25,6 +25,8 @@ int main(int argc, char **argv)
                 else if(strcmp(arg, "-h") == 0) printHelpAndExit(0);
                 else if(strcmp(arg, "-aot") == 0)
                     compileToFile = YES;
+                else if(strcmp(arg, "-o") == 0)
+                    outputPath = argv[++i];
                 else {
                     fprintf(stderr, "Unknown argument %s\n", arg);
                     printHelpAndExit(1);

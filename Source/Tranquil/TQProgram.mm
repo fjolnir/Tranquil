@@ -10,10 +10,11 @@
 #import "CodeGen/Processors/TQProcessor.h"
 #import <objc/runtime.h>
 #import <objc/message.h>
+
 extern "C" {
-#import "parse.m"
+    #import "parse.m"
 }
-#include <iostream>
+
 # include <llvm/Module.h>
 # include <llvm/DerivedTypes.h>
 # include <llvm/Constants.h>
@@ -50,7 +51,7 @@ using namespace llvm;
 NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 
 @implementation TQProgram
-@synthesize name=_name, llModule=_llModule, shouldShowDebugInfo=_shouldShowDebugInfo,
+@synthesize name=_name, llModule=_llModule, cliArgGlobal=_cliArgGlobal, shouldShowDebugInfo=_shouldShowDebugInfo,
             objcParser=_objcParser, searchPaths=_searchPaths, allowedFileExtensions=_allowedFileExtensions,
             useAOTCompilation=_useAOTCompilation, outputPath=_outputPath;
 @synthesize llVoidTy=_llVoidTy, llInt8Ty=_llInt8Ty, llInt16Ty=_llInt16Ty, llInt32Ty=_llInt32Ty, llInt64Ty=_llInt64Ty,
@@ -74,7 +75,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     TQVaargsToArray=_func_TQVaargsToArray, TQUnboxObject=_func_TQUnboxObject,
     TQBoxValue=_func_TQBoxValue, tq_msgSend=_func_tq_msgSend, objc_retainAutoreleaseReturnValue=_func_objc_retainAutoreleaseReturnValue,
     objc_autoreleaseReturnValue=_func_objc_autoreleaseReturnValue, objc_retainAutoreleasedReturnValue=_func_objc_retainAutoreleasedReturnValue,
-    objc_storeStrong=_func_objc_storeStrong, TQInitializeRuntime=_func_TQInitializeRuntime;
+    objc_storeStrong=_func_objc_storeStrong, TQInitializeRuntime=_func_TQInitializeRuntime, TQCliArgsToArray=_func_TQCliArgsToArray;
 
 + (TQProgram *)programWithName:(NSString *)aName
 {
@@ -222,6 +223,12 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     std::vector<Type*> args_empty;
     FunctionType *ft_i8Ptr__void = FunctionType::get(_llInt8PtrTy, args_empty, false);
 
+    // id(int, void**)
+    std::vector<Type*> args_int_i8PtrPtr;
+    args_int_i8PtrPtr.push_back(_llIntTy);
+    args_int_i8PtrPtr.push_back(_llInt8PtrPtrTy);
+    FunctionType *ft_i8Ptr__i32_i8PtrPtr = FunctionType::get(_llInt8PtrTy, args_int_i8PtrPtr, false);
+
     DEF_EXTERNAL_FUN(objc_allocateClassPair, ft_i8Ptr__i8Ptr_i8Ptr_sizeT);
     DEF_EXTERNAL_FUN(objc_registerClassPair, ft_void__i8Ptr);
     DEF_EXTERNAL_FUN(class_replaceMethod, ft_i8__i8Ptr_i8Ptr_i8Ptr_i8Ptr);
@@ -258,6 +265,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     DEF_EXTERNAL_FUN(TQBoxValue, ft_i8Ptr__i8Ptr_i8Ptr)
     DEF_EXTERNAL_FUN(tq_msgSend, ft_i8ptr__i8ptr_i8ptr_variadic)
     DEF_EXTERNAL_FUN(TQInitializeRuntime, ft_void__void);
+    DEF_EXTERNAL_FUN(TQCliArgsToArray, ft_i8Ptr__i32_i8PtrPtr);
 
 #undef DEF_EXTERNAL_FUN
 
@@ -302,6 +310,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 
 - (id)_executeRoot:(TQNodeRootBlock *)aNode
 {
+    assert(aNode);
     NSError *err = nil;
     [aNode generateCodeInProgram:self block:nil root:aNode error:&err];
     if(err) {
@@ -372,16 +381,34 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
         // Generate a main function
         std::vector<Type *> paramTypes;
         paramTypes.push_back(_llIntTy);
-        paramTypes.push_back(_llInt8PtrTy);
+        paramTypes.push_back(_llInt8PtrPtrTy);
 
-        Function *mainFun = Function::Create(FunctionType::get(_llIntTy, paramTypes, false),
-                                             GlobalValue::ExternalLinkage, "main", _llModule);
-        BasicBlock *mainEntry = BasicBlock::Create(_llModule->getContext(), "entry", mainFun, 0);
-        IRBuilder<> mainBuilder(mainEntry);
+        TQNodeRootBlock *mainBlk = [TQNodeRootBlock node];
+        mainBlk.invokeName = @"main";
+        mainBlk.retType    = @"i";
+        mainBlk.argTypes   = [NSMutableArray arrayWithObjects:@"i", @"^*", nil];
 
-        mainBuilder.CreateCall(_func_TQInitializeRuntime);
-        mainBuilder.CreateCall(aNode.function);
-        mainBuilder.CreateRet(ConstantInt::get(_llIntTy, 0));
+        TQNodeVariable *cliArgVar = [TQNodeVariable nodeWithName:@"..."];
+        __unsafe_unretained id weakSelf = self;
+        [mainBlk.statements addObject:[TQNodeCustom nodeWithBlock:^(TQProgram *aProgram, TQNodeBlock *aBlock, TQNodeRootBlock *aRoot) {
+            aBlock.builder->CreateCall(_func_TQInitializeRuntime);
+            llvm::Function::arg_iterator argumentIterator = aBlock.function->arg_begin();
+
+            [cliArgVar store:aBlock.builder->CreateCall2(_func_TQCliArgsToArray, argumentIterator, ++argumentIterator)
+                   inProgram:weakSelf
+                       block:aBlock
+                        root:(TQNodeRootBlock *)aBlock
+                       error:nil];
+
+            aBlock.builder->CreateCall(aNode.function);
+            aBlock.builder->CreateCall(_func_objc_autoreleasePoolPop, aBlock.autoreleasePool);
+            aBlock.builder->CreateRet(ConstantInt::get(_llIntTy, 0));
+
+            return (Value *)NULL;
+        }]];
+
+        [mainBlk generateCodeInProgram:self block:nil root:mainBlk error:&err];
+        _llModule->dump();
 
         // Output
         Opts.JITEmitDebugInfo = false;
@@ -399,15 +426,14 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
         modulePasses.run(*_llModule);
         fpm.run(*aNode.function);
 
-        _llModule->dump();
-        llvm::PrintStatistics();
+        //llvm::PrintStatistics();
         verifyModule(*_llModule, PrintMessageAction);
 
         raw_fd_ostream out([_outputPath UTF8String], err, raw_fd_ostream::F_Binary);
         TQAssert(err.empty(), "Error opening output file for bitcode: %@", _outputPath);
         WriteBitcodeToFile(_llModule, out);
         out.close();
-        return nil;
+        exit(0);
     }
 
     if(!_shouldShowDebugInfo) {
@@ -591,7 +617,6 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
         case _C_ID:
         case _C_CLASS:
         case _C_SEL:
-        case _C_PTR:
         case _C_CHARPTR:
         case _TQ_C_LAMBDA_B:
             return _llInt8PtrTy;
@@ -635,6 +660,12 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
             TQLog(@"unions -> llvm not yet supported");
             exit(1);
         break;
+        case _C_PTR: {
+            if(*(aEncoding + 1) == _C_PTR || *(aEncoding + 1) == _C_CHARPTR || *(aEncoding + 1) == _C_ID)
+                return _llInt8PtrPtrTy;
+            else
+                return _llInt8PtrTy;
+        }
         default:
             [NSException raise:NSGenericException
                         format:@"Unsupported type %c!", *aEncoding];
