@@ -129,8 +129,10 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
         boxingClass = [self _prepareAggregateWrapper:className withType:aType];
     else if(*aType == _TQ_C_LAMBDA_B)
         boxingClass = [self _prepareLambdaWrapper:className withType:aType];
+    else if(strstr(aType, "^{__CF") == aType) // CF types accept messages, and many are toll free bridged
+        return [*(id*)aPtr autorelease];
     else {
-        TQLog(@"Type %s cannot be unboxed", aType);
+        TQLog(@"Type %s cannot be boxed", aType);
         return nil;
     }
     objc_registerClassPair(boxingClass);
@@ -227,6 +229,8 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
             // void* doesn't tell us anything about the output format so we must return NULL
             if(!aValue)
                 *(void **)aDest = NULL;
+            else if(strstr(aType, "^{__CF") == aType)
+                *(id *)aDest = aValue;
             else if(![aValue isKindOfClass:[TQPointer class]]) {
                 TQPointer *ptr = [[TQPointer alloc] initWithType:aType+1 count:1];
                 [ptr setObject:aValue atIndexedSubscript:0];
