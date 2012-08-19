@@ -1,12 +1,11 @@
 #import "TQRuntime.h"
-#import "../BridgeSupport/TQBoxedObject.h"
+#import "TQBoxedObject.h"
 #import "NSString+TQAdditions.h"
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
 #import "TQNumber.h"
 #import "NSObject+TQAdditions.h"
-#import "../BridgeSupport/TQHeaderParser.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -195,7 +194,7 @@ void TQIterateTypesInEncoding(const char *typePtr, TQTypeIterationBlock blk)
 
 NSInteger TQBlockGetNumberOfArguments(id block)
 {
-    TQBlockLiteral *blk = (TQBlockLiteral *)block;
+    struct TQBlockLiteral *blk = (struct TQBlockLiteral *)block;
     if(blk->flags & TQ_BLOCK_IS_TRANQUIL_BLOCK)
         return blk->descriptor->numArgs;
     return -1;

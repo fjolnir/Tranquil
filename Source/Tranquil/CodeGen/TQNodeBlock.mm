@@ -1,7 +1,7 @@
 #import "TQNodeBlock.h"
 #import "TQProgram.h"
 #import "../Shared/TQDebug.h"
-#import "../BridgeSupport/TQHeaderParser.h"
+#import "ObjcSupport/TQHeaderParser.h"
 #import "TQNodeVariable.h"
 #import "TQNodeArgumentDef.h"
 #import <llvm/Intrinsics.h>

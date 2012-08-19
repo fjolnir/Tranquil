@@ -2,6 +2,24 @@
 #import "TQBoxedObject.h"
 #import <objc/runtime.h>
 
+NSString * const TQTypeObj       = @"@";
+NSString * const TQTypeClass     = @"#";
+NSString * const TQTypeSel       = @":";
+NSString * const TQTypeChar      = @"c";
+NSString * const TQTypeUChar     = @"C";
+NSString * const TQTypeShort     = @"s";
+NSString * const TQTypeUShort    = @"S";
+NSString * const TQTypeInt       = @"i";
+NSString * const TQTypeUInt      = @"I";
+NSString * const TQTypeLong      = @"l";
+NSString * const TQTypeULong     = @"L";
+NSString * const TQTypeLongLong  = @"q";
+NSString * const TQTypeULongLong = @"Q";
+NSString * const TQTypeFloat     = @"f";
+NSString * const TQTypeDouble    = @"d";
+NSString * const TQTypeBool      = @"B";
+NSString * const TQTypeString    = @"*";
+
 @implementation TQPointer
 
 + (void)load

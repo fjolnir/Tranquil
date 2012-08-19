@@ -1,5 +1,6 @@
 %{
 #import <Tranquil/Tranquil.h>
+#import <Tranquil/CodeGen/CodeGen.h>
 
 struct _TQParserState {
     NSRange currentToken;

@@ -1,6 +1,6 @@
 #import "TQHeaderParser.h"
-#import "../Tranquil.h"
-#import "../Runtime/NSString+TQAdditions.h"
+#import "../CodeGen.h"
+#import "../../Runtime/NSString+TQAdditions.h"
 #import <objc/runtime.h>
 
 using namespace llvm;

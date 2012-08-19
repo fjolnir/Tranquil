@@ -1,9 +1,9 @@
 #import "TQProgram.h"
 #import "TQProgram+Private.h"
+#import "TQNode.h"
+#import "Processors/TQProcessor.h"
 #import "../Runtime/TQRuntime.h"
-#import "../BridgeSupport/TQBoxedObject.h"
-#import "../CodeGen/Processors/TQProcessor.h"
-#import "../CodeGen/TQNode.h"
+#import "../Runtime/TQBoxedObject.h"
 #import "../Shared/TQDebug.h"
 #import <objc/runtime.h>
 #import <objc/message.h>

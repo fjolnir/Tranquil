@@ -1,5 +1,6 @@
+CC  = '/usr/local/llvm/bin/clang'
 CXX = '/usr/local/llvm/bin/clang++'
-LD  = CXX
+LD  = CC
 PEG = '/usr/local/greg/bin/greg'
 
 BUILD_DIR = 'Build'
@@ -14,7 +15,6 @@ PEGFLAGS = [
 
 CXXFLAGS = {
     :release => [
-        '-std=gnu++98',
         '-mmacosx-version-min=10.7',
         '-I`pwd`/Source',
         '-I`pwd`/Build',
@@ -22,11 +22,9 @@ CXXFLAGS = {
         '-Wno-deprecated-writable-strings', # BridgeSupport uses this in a few places
         '`/usr/local/llvm/bin/llvm-config --cflags`',
         '-O3',
-        '-ObjC++',
     ].join(' '),
     :development => [
         '-DDEBUG',
-        '-std=gnu++98',
         '-mmacosx-version-min=10.7',
         '-I/usr/local/clang/include',
         '-I`pwd`/Source',
@@ -36,24 +34,29 @@ CXXFLAGS = {
         '`/usr/local/llvm/bin/llvm-config --cflags`',
         '-O0',
         '-g',
-        '-ObjC++',
         #'--analyze'
     ].join(' ')
 }
 
 LDFLAGS = [
+    '-L`pwd`/Build',
+    '-framework Foundation',
+    '-framework AppKit',
+    '-all_load',
+    '-lffi',
+].join(' ')
+
+CODEGEN_LDFLAGS = LDFLAGS + ' ' + [
     '-lstdc++',
     '`/usr/local/llvm/bin/llvm-config --libs core jit nativecodegen bitwriter ipo instrumentation`',
     '`/usr/local/llvm/bin/llvm-config --ldflags`',
     '-lclang',
-    '-rpath /usr/local/llvm/lib',
-    '-framework Foundation',
-    '-framework AppKit',
-    '-all_load',
-    '-lxml2 -lffi',
+    '-rpath /usr/local/llvm/lib'
 ].join(' ')
 
 TOOL_LDFLAGS = [
+    '-lstdc++',
+    '-lffi',
     '-framework Foundation',
     '-framework AppKit',
     '-all_load',
@@ -64,14 +67,18 @@ LIBS = ['-framework Foundation', '-framework GLUT'].join(' ')
 
 PATHMAP = 'build/%n.o'
 
-STUB_OUTPATH   = 'Build/block_stubs.mm'
-STUB_SCRIPT    = 'Source/Tranquil/gen_stubs.rb'
-MSGSEND_SOURCE = 'Source/Tranquil/Runtime/msgsend.s'
-MSGSEND_OUT    = 'Build/msgsend.o'
-OBJC_SOURCES   = FileList['Source/Tranquil/**/*.m*'].add('Source/Tranquil/**/*.c*').add(STUB_OUTPATH)
-O_FILES        = OBJC_SOURCES.pathmap(PATHMAP)
-O_FILES << MSGSEND_OUT
-PEG_SOURCE     = FileList['Source/Tranquil/*.leg'].first
+STUB_OUTPATH    = 'Build/block_stubs.m'
+STUB_SCRIPT     = 'Source/Tranquil/gen_stubs.rb'
+MSGSEND_SOURCE  = 'Source/Tranquil/Runtime/msgsend.s'
+MSGSEND_OUT     = 'Build/msgsend.o'
+RUNTIME_SOURCES = FileList['Source/Tranquil/BridgeSupport/*.m*'].add('Source/Tranquil/Dispatch/*.m*').add('Source/Tranquil/Runtime/*.m*').add('Source/Tranquil/Shared/*.m*').add(STUB_OUTPATH)
+RUNTIME_O_FILES = RUNTIME_SOURCES.pathmap(PATHMAP)
+RUNTIME_O_FILES << MSGSEND_OUT
+
+CODEGEN_SOURCES = FileList['Source/Tranquil/CodeGen/**/*.m*']
+CODEGEN_O_FILES = CODEGEN_SOURCES.pathmap(PATHMAP)
+
+PEG_SOURCE      = FileList['Source/Tranquil/*.leg'].first
 
 ARC_FILES = ['Source/Tranquil/Runtime/TQWeak.m']
 
@@ -84,6 +91,8 @@ MAIN_OUTPATH = 'Build/main.o'
 def compile(file, flags=CXXFLAGS, cc=CXX)
     cmd = "#{cc} #{file[:in].join(' ')} #{flags[@buildMode]} -c -o #{file[:out]}"
     cmd << " -fobjc-arc" if ARC_FILES.member? file[:in].first
+    cmd << " -ObjC++"     if cc == CXX
+    cmd << " -ObjC"       if cc == CC
     sh cmd
 end
 
@@ -101,26 +110,38 @@ file MSGSEND_OUT => MSGSEND_SOURCE do |f|
 end
 
 
-OBJC_SOURCES.each { |src|
+RUNTIME_SOURCES.each { |src|
+    file src.pathmap(PATHMAP) => src do |f|
+        compile({:in => f.prerequisites, :out => f.name}, CXXFLAGS, CC)
+    end
+}
+CODEGEN_SOURCES.each { |src|
     file src.pathmap(PATHMAP) => src do |f|
         compile :in => f.prerequisites, :out => f.name
     end
 }
 
+
 file :build_dir do
     sh "mkdir -p #{File.dirname(__FILE__)}/Build"
 end
 
-file :libtranquil => [PARSER_OUTPATH] + O_FILES do |t|
-    sh "#{LD} #{LDFLAGS} #{LIBS} #{O_FILES} -dynamiclib -o #{BUILD_DIR}/libtranquil.dylib"
+file :libtranquil => RUNTIME_O_FILES do |t|
+    #sh "#{LD} #{LDFLAGS} #{LIBS} #{RUNTIME_O_FILES} -static -o #{BUILD_DIR}/libtranquil.a"
+    sh "ar rcs #{BUILD_DIR}/libtranquil.a #{RUNTIME_O_FILES}"
 end
+
+file :libtranquil_codegen => [PARSER_OUTPATH] + CODEGEN_O_FILES do |t|
+    sh "#{LD} #{CODEGEN_LDFLAGS} #{LIBS} #{CODEGEN_O_FILES} -ltranquil -dynamiclib -o #{BUILD_DIR}/libtranquil_codegen.dylib"
+end
+
 
 file MAIN_OUTPATH => MAIN_SOURCE do |t|
-    sh "#{CXX} #{MAIN_SOURCE} #{CXXFLAGS[@buildMode]} -c -o #{MAIN_OUTPATH}"
+    sh "#{CXX} #{MAIN_SOURCE} #{CXXFLAGS[@buildMode]} -ObjC++ -c -o #{MAIN_OUTPATH}"
 end
 
-file :tranquil => [:libtranquil, MAIN_OUTPATH] do |t|
-    sh "#{LD} #{TOOL_LDFLAGS} #{LIBS} #{MAIN_OUTPATH} -LBuild -ltranquil -o #{BUILD_DIR}/tranquil"
+file :tranquil => [:libtranquil, :libtranquil_codegen, MAIN_OUTPATH] do |t|
+    sh "#{LD} #{TOOL_LDFLAGS} #{LIBS} #{MAIN_OUTPATH} -LBuild -ltranquil_codegen -o #{BUILD_DIR}/tranquil"
 end
 
 file :setReleaseOpts do

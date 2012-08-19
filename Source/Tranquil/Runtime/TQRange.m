@@ -19,9 +19,9 @@
     return [ret autorelease];
 }
 
-extern "C" id TQDispatchBlock0(id);
-extern "C" id TQDispatchBlock1(id, id);
-extern "C" id TQDispatchBlock2(id, id, id);
+extern id TQDispatchBlock0(id);
+extern id TQDispatchBlock1(id, id);
+extern id TQDispatchBlock2(id, id, id);
 
 - (id)each:(id (^)())aBlock
 {

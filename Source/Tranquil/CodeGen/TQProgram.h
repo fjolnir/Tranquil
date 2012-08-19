@@ -1,10 +1,9 @@
 #ifndef _TQ_PROGRAM_H_
 #define _TQ_PROGRAM_H_
 
-#include <Tranquil/CodeGen/TQNodeBlock.h>
-#include <Tranquil/BridgeSupport/TQHeaderParser.h>
-#include <llvm/Support/IRBuilder.h>
 #include <Foundation/NSObject.h>
+#include <llvm/Support/IRBuilder.h>
+#include <Tranquil/CodeGen/CodeGen.h>
 
 extern "C" NSString * const kTQSyntaxErrorException;
 

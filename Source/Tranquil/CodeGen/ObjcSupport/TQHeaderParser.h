@@ -1,6 +1,6 @@
 #import <Tranquil/Runtime/TQObject.h>
 #import <Tranquil/CodeGen/TQNodeBlock.h>
-#import <Tranquil/BridgeSupport/TQBoxedObject.h>
+#import <Tranquil/RunTime/TQBoxedObject.h>
 #import <clang-c/Index.h>
 
 @class TQProgram, TQBridgedFunction, TQBridgedConstant, TQBridgedClassInfo;

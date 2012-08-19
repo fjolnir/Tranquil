@@ -3,6 +3,10 @@
 #import <objc/runtime.h>
 #import <objc/message.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define TQBoxedObject_PREFIX "TQBoxedObject_"
 #define BlockImp imp_implementationWithBlock
 
@@ -30,9 +34,13 @@
 
 // The tranquil message dispatcher. Automatically performs any (un)boxing required for a message
 // to be dispatched.
-extern "C" id tq_msgSend(id self, SEL selector, ...);
+id tq_msgSend(id self, SEL selector, ...);
 
 // Sends a message boxing the return value and unboxing arguments as necessary
 // WAY slower than objc_msgSend and should never be used directly.
 // tq_msgSend is a more intelligent message dispatcher that calls tq_boxedMsgSend only if necessary
-extern "C" id tq_boxedMsgSend(id self, SEL selector, ...);
+id tq_boxedMsgSend(id self, SEL selector, ...);
+
+#ifdef __cplusplus
+}
+#endif

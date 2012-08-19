@@ -1,22 +1,22 @@
 #import <Foundation/Foundation.h>
 
-NSString * const TQTypeObj       = @"@";
-NSString * const TQTypeClass     = @"#";
-NSString * const TQTypeSel       = @":";
-NSString * const TQTypeChar      = @"c";
-NSString * const TQTypeUChar     = @"C";
-NSString * const TQTypeShort     = @"s";
-NSString * const TQTypeUShort    = @"S";
-NSString * const TQTypeInt       = @"i";
-NSString * const TQTypeUInt      = @"I";
-NSString * const TQTypeLong      = @"l";
-NSString * const TQTypeULong     = @"L";
-NSString * const TQTypeLongLong  = @"q";
-NSString * const TQTypeULongLong = @"Q";
-NSString * const TQTypeFloat     = @"f";
-NSString * const TQTypeDouble    = @"d";
-NSString * const TQTypeBool      = @"B";
-NSString * const TQTypeString    = @"*";
+extern NSString * const TQTypeObj;
+extern NSString * const TQTypeClass;
+extern NSString * const TQTypeSel;
+extern NSString * const TQTypeChar;
+extern NSString * const TQTypeUChar;
+extern NSString * const TQTypeShort;
+extern NSString * const TQTypeUShort;
+extern NSString * const TQTypeInt;
+extern NSString * const TQTypeUInt;
+extern NSString * const TQTypeLong;
+extern NSString * const TQTypeULong;
+extern NSString * const TQTypeLongLong;
+extern NSString * const TQTypeULongLong;
+extern NSString * const TQTypeFloat;
+extern NSString * const TQTypeDouble;
+extern NSString * const TQTypeBool;
+extern NSString * const TQTypeString;
 
 // A class to enable use of (Obj-)C APIs that utilize pointers
 @interface TQPointer : NSObject {

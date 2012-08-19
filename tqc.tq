@@ -1,0 +1,46 @@
+\ Tranquil compiler
+import "CoreFoundation"
+
+inPath         = nil
+outPath        = "a.out"
+runtimeLibPath = "Build/libtranquil.a"
+ldFlags        = ["-all_load", "-framework", "AppKit", "-lobjc", "-lffi", runtimeLibPath]
+
+args = ...
+(0 to: ... count) each: { i |
+    if ...[i] == "-o"
+        outPath = ...[++i]
+    else if inPath == nil
+        inPath = ...[i]
+}
+
+unless inPath != nil {
+    "No input provided" print
+    Exit(1)
+}
+
+uuid = `CFUUIDCreateString(nil, CFUUIDCreate(nil))`
+
+irPath = "/tmp/#{uuid()}.bc"
+compilationTask = NSTask launchedTaskWithLaunchPath: "Build/tranquil"
+                                          arguments: ["-aot", "-o", irPath, inPath];
+                                      waitUntilExit;
+                                               self
+
+if compilationTask terminationStatus != 0
+    Exit(1)
+
+asmPath = "/tmp/#{uuid()}.s"
+assemblingTask = NSTask launchedTaskWithLaunchPath: "/usr/local/llvm/bin/llc"
+                                         arguments: ["-O2", "-o", asmPath, irPath];
+                                     waitUntilExit;
+                                              self
+if assemblingTask terminationStatus != 0
+    Exit(1)
+
+linkingTask = NSTask launchedTaskWithLaunchPath: "/usr/local/llvm/bin/clang"
+                                      arguments: ldFlags + ["-o", outPath, asmPath];
+                                  waitUntilExit;
+                                           self
+if linkingTask terminationStatus != 0
+    Exit(1)
