@@ -3,7 +3,7 @@
 
 #import <Foundation/Foundation.h>
 #import <Tranquil/Runtime/TQObject.h>
-#import <Tranquil/TQBatching.h>
+#import <Tranquil/Shared/TQBatching.h>
 
 @class TQRange;
 

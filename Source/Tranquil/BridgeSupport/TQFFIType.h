@@ -1,6 +1,6 @@
 #import <ffi/ffi.h>
 #import <Foundation/Foundation.h>
-#import <Tranquil/TQBatching.h>
+#import <Tranquil/Shared/TQBatching.h>
 
 @interface TQFFIType : NSObject {
     NSMutableArray *_referencedTypes;
