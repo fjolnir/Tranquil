@@ -1,5 +1,5 @@
 #import "TQNodeWeak.h"
-#import "../TQProgram.h"
+#import "TQProgram.h"
 
 using namespace llvm;
 

@@ -10,9 +10,12 @@ extern "C" NSString * const kTQSyntaxErrorException;
 
 @interface TQProgram : NSObject {
     BOOL _initializedTQRuntime;
+    NSArray *_arguments;
+    struct TQBlockByRef _argumentGlobal;
 }
 
 @property(readwrite, retain) NSString *name;
+@property(readwrite, retain) NSArray *arguments;
 @property(readonly) TQHeaderParser *objcParser;
 @property(readwrite) BOOL shouldShowDebugInfo;
 @property(readonly) llvm::Module *llModule;

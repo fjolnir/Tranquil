@@ -300,7 +300,9 @@ NSPointerArray *TQVaargsToArray(va_list *items)
 NSPointerArray *TQCliArgsToArray(int argc, char **argv)
 {
     NSPointerArray *arr = [NSPointerArray pointerArrayWithStrongObjects];
-    for(int i = 0; i < argc; ++i) {
+    if(argc <= 1)
+        return arr;
+    for(int i = 1; i < argc; ++i) {
         [arr addPointer:(void *)[NSMutableString stringWithUTF8String:argv[i]]];
     }
     return arr;

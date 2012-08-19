@@ -1,6 +1,6 @@
 #import "TQNodeImport.h"
-#import "../TQProgram.h"
-#import "../TQProgram+Private.h"
+#import "TQProgram.h"
+#import "TQProgram+Private.h"
 
 using namespace llvm;
 

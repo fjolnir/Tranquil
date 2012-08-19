@@ -1,6 +1,6 @@
 #import "TQNodeVariable.h"
-#import "../TQProgram.h"
-#import "../TQDebug.h"
+#import "TQProgram.h"
+#import "../Shared/TQDebug.h"
 #import <llvm/Support/IRBuilder.h>
 
 using namespace llvm;
@@ -75,12 +75,12 @@ using namespace llvm;
     IRBuilder<> *builder = aBlock.builder;
     Value *forwarding;
     forwarding = builder->CreateLoad(builder->CreateStructGEP(_alloca, 1), [self _llvmRegisterName:@"forwardingPtr"]);
-    forwarding = builder->CreateBitCast(forwarding, PointerType::getUnqual([self captureStructTypeInProgram:aProgram]), [self _llvmRegisterName:@"forwarding"]);
+    forwarding = builder->CreateBitCast(forwarding, PointerType::getUnqual([[self class] captureStructTypeInProgram:aProgram]), [self _llvmRegisterName:@"forwarding"]);
 
     return builder->CreateLoad(builder->CreateStructGEP(forwarding, 4));
 }
 
-- (llvm::Type *)captureStructTypeInProgram:(TQProgram *)aProgram
++ (llvm::Type *)captureStructTypeInProgram:(TQProgram *)aProgram
 {
     static Type *captureType = NULL;
     if(captureType)
@@ -96,6 +96,7 @@ using namespace llvm;
                                      intTy,   // size ( = sizeof(id))
                                      i8PtrTy, // Captured variable (id)
                                      NULL);
+
     return captureType;
 }
 
@@ -124,7 +125,7 @@ using namespace llvm;
     Type *intTy   = aProgram.llIntTy;
     Type *i8PtrTy = aProgram.llInt8PtrTy;
 
-    Type *byRefType = [self captureStructTypeInProgram:aProgram];
+    Type *byRefType = [[self class] captureStructTypeInProgram:aProgram];
     IRBuilder<> entryBuilder(&aBlock.function->getEntryBlock(), aBlock.function->getEntryBlock().begin());
 
     if(aBlock == aRoot) {
@@ -176,7 +177,7 @@ using namespace llvm;
     IRBuilder<> *builder = aBlock.builder;
 
     Value *forwarding = builder->CreateLoad(builder->CreateStructGEP(_alloca, 1), [self _llvmRegisterName:@"forwarding"]);
-    forwarding = builder->CreateBitCast(forwarding, PointerType::getUnqual([self captureStructTypeInProgram:aProgram]));
+    forwarding = builder->CreateBitCast(forwarding, PointerType::getUnqual([[self class] captureStructTypeInProgram:aProgram]));
 
     return aBlock.builder->CreateCall2(aProgram.objc_storeStrong, builder->CreateStructGEP(forwarding, 4), aValue);
 }

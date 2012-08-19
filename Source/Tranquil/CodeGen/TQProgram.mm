@@ -1,15 +1,15 @@
 #import "TQProgram.h"
-#import "TQDebug.h"
 #import "TQProgram+Private.h"
-#import "CodeGen/TQNode.h"
+#import "../Runtime/TQRuntime.h"
+#import "../BridgeSupport/TQBoxedObject.h"
+#import "../CodeGen/Processors/TQProcessor.h"
+#import "../CodeGen/TQNode.h"
+#import "../Shared/TQDebug.h"
+#import <objc/runtime.h>
+#import <objc/message.h>
 #import <llvm/Transforms/IPO/PassManagerBuilder.h>
 #import <llvm/Target/TargetData.h>
 #import <mach/mach_time.h>
-#import "Runtime/TQRuntime.h"
-#import "BridgeSupport/TQBoxedObject.h"
-#import "CodeGen/Processors/TQProcessor.h"
-#import <objc/runtime.h>
-#import <objc/message.h>
 
 extern "C" {
     #import "parse.m"
@@ -53,7 +53,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 @implementation TQProgram
 @synthesize name=_name, llModule=_llModule, cliArgGlobal=_cliArgGlobal, shouldShowDebugInfo=_shouldShowDebugInfo,
             objcParser=_objcParser, searchPaths=_searchPaths, allowedFileExtensions=_allowedFileExtensions,
-            useAOTCompilation=_useAOTCompilation, outputPath=_outputPath;
+            useAOTCompilation=_useAOTCompilation, outputPath=_outputPath, arguments=_arguments;
 @synthesize llVoidTy=_llVoidTy, llInt8Ty=_llInt8Ty, llInt16Ty=_llInt16Ty, llInt32Ty=_llInt32Ty, llInt64Ty=_llInt64Ty,
     llFloatTy=_llFloatTy, llDoubleTy=_llDoubleTy, llIntTy=_llIntTy, llIntPtrTy=_llIntPtrTy, llSizeTy=_llSizeTy,
     llPtrDiffTy=_llPtrDiffTy, llVoidPtrTy=_llVoidPtrTy, llInt8PtrTy=_llInt8PtrTy, llVoidPtrPtrTy=_llVoidPtrPtrTy,
@@ -311,6 +311,21 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 - (id)_executeRoot:(TQNodeRootBlock *)aNode
 {
     assert(aNode);
+
+    GlobalVariable *argGlobal;
+    if(!_useAOTCompilation) {
+        // Create a global for the argument array
+        Type *byRefType = [TQNodeVariable captureStructTypeInProgram:self];
+        argGlobal = new GlobalVariable(*_llModule, byRefType, false, GlobalVariable::InternalLinkage,
+                                       ConstantAggregateZero::get(byRefType), "TQGlobalVar_...");
+        _argumentGlobal.isa        = nil;
+        _argumentGlobal.forwarding = &_argumentGlobal;
+        _argumentGlobal.flags      = 0;
+        _argumentGlobal.size       = sizeof(TQBlockByRef);
+        _argumentGlobal.value      = nil;
+        _argumentGlobal.forwarding->value = _arguments;
+    }
+
     NSError *err = nil;
     [aNode generateCodeInProgram:self block:nil root:aNode error:&err];
     if(err) {
@@ -355,6 +370,8 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
         engine = factory.create();
         //engine->DisableLazyCompilation();
         fpm.add(new TargetData(*engine->getTargetData()));
+
+        engine->addGlobalMapping(argGlobal, (void*)&_argumentGlobal);
     }
 
     // Optimization pass
@@ -389,13 +406,12 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
         mainBlk.argTypes   = [NSMutableArray arrayWithObjects:@"i", @"^*", nil];
 
         TQNodeVariable *cliArgVar = [TQNodeVariable nodeWithName:@"..."];
-        __unsafe_unretained id weakSelf = self;
         [mainBlk.statements addObject:[TQNodeCustom nodeWithBlock:^(TQProgram *aProgram, TQNodeBlock *aBlock, TQNodeRootBlock *aRoot) {
             aBlock.builder->CreateCall(_func_TQInitializeRuntime);
             llvm::Function::arg_iterator argumentIterator = aBlock.function->arg_begin();
 
             [cliArgVar store:aBlock.builder->CreateCall2(_func_TQCliArgsToArray, argumentIterator, ++argumentIterator)
-                   inProgram:weakSelf
+                   inProgram:aProgram
                        block:aBlock
                         root:(TQNodeRootBlock *)aBlock
                        error:nil];
@@ -408,7 +424,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
         }]];
 
         [mainBlk generateCodeInProgram:self block:nil root:mainBlk error:&err];
-        _llModule->dump();
+        //_llModule->dump();
 
         // Output
         Opts.JITEmitDebugInfo = false;

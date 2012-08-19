@@ -1,9 +1,9 @@
 #import "TQNodeConditionalBlock.h"
 #import "TQNodeLoopBlock.h"
-#import "../TQProgram.h"
+#import "TQProgram.h"
 #import "TQNodeVariable.h"
 #import "TQNodeReturn.h"
-#import "../TQDebug.h"
+#import "../Shared/TQDebug.h"
 #import "TQNodeOperator.h"
 
 using namespace llvm;

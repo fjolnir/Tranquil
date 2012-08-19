@@ -1,7 +1,7 @@
 #import "TQNodeLoopBlock.h"
 #import "TQNodeConditionalBlock.h"
-#import "../TQDebug.h"
-#import "../TQProgram.h"
+#import "../Shared/TQDebug.h"
+#import "TQProgram.h"
 #import "TQNodeVariable.h"
 #import "TQNodeReturn.h"
 

@@ -3,6 +3,7 @@
 #import <Foundation/Foundation.h>
 #import <stdarg.h>
 #import <Tranquil/Runtime/TQValidObject.h>
+#import <Tranquil/Shared/TQDebug.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,6 +58,14 @@ struct TQBlockLiteral {
         BOOL isVariadic;
     } *descriptor;
     // imported variables
+};
+
+// Memory layout for a __block variable
+struct TQBlockByRef {
+    id isa;
+    struct TQBlockByRef *forwarding;
+    int flags, size;
+    id value;
 };
 
 typedef void (^TQTypeIterationBlock)(const char *type, NSUInteger size, NSUInteger align, BOOL *stop);

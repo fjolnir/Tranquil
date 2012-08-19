@@ -1,6 +1,6 @@
 #import "TQNodeBlock.h"
-#import "../TQProgram.h"
-#import "../TQDebug.h"
+#import "TQProgram.h"
+#import "../Shared/TQDebug.h"
 #import "../BridgeSupport/TQHeaderParser.h"
 #import "TQNodeVariable.h"
 #import "TQNodeArgumentDef.h"
@@ -312,7 +312,7 @@ using namespace llvm;
         destAddr  = builder->CreateBitCast(builder->CreateStructGEP(dstBlock, i), int8PtrTy, [dstName UTF8String]);
         varToCopy = builder->CreateLoad(builder->CreateStructGEP(srcBlock, i++), [srcName UTF8String]);
 
-        captureStructTy = PointerType::getUnqual([var captureStructTypeInProgram:aProgram]);
+        captureStructTy = PointerType::getUnqual([TQNodeVariable captureStructTypeInProgram:aProgram]);
         valueToRetain = builder->CreateBitCast(varToCopy, captureStructTy);
         valueToRetain = builder->CreateLoad(builder->CreateStructGEP(valueToRetain, 1)); // var->forwarding
         valueToRetain = builder->CreateBitCast(valueToRetain, captureStructTy);
@@ -360,7 +360,7 @@ using namespace llvm;
         NSString *name = [NSString stringWithFormat:@"block.%@", var.name];
         varToDisposeOf =  builder->CreateLoad(builder->CreateStructGEP(block, i++), [name UTF8String]);
 
-        captureStructTy = PointerType::getUnqual([var captureStructTypeInProgram:aProgram]);
+        captureStructTy = PointerType::getUnqual([TQNodeVariable captureStructTypeInProgram:aProgram]);
         valueToRelease = builder->CreateBitCast(varToDisposeOf, captureStructTy);
         valueToRelease = builder->CreateLoad(builder->CreateStructGEP(valueToRelease, 1)); // var->forwarding
         valueToRelease = builder->CreateBitCast(valueToRelease, captureStructTy);
@@ -443,7 +443,7 @@ using namespace llvm;
         for(NSString *name in [_capturedVariables allKeys]) {
             varToLoad = [TQNodeVariable nodeWithName:name];
             Value *valueToLoad = _builder->CreateLoad(_builder->CreateStructGEP(thisBlock, i++), [name UTF8String]);
-            valueToLoad = _builder->CreateBitCast(valueToLoad, PointerType::getUnqual([varToLoad captureStructTypeInProgram:aProgram]));
+            valueToLoad = _builder->CreateBitCast(valueToLoad, PointerType::getUnqual([TQNodeVariable captureStructTypeInProgram:aProgram]));
             varToLoad.alloca = (AllocaInst *)valueToLoad;
 
             [_locals setObject:varToLoad forKey:name];

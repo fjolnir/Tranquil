@@ -13,7 +13,7 @@
                                    block:(TQNodeBlock *)aBlock
                                     root:(TQNodeRootBlock *)aRoot
                                    error:(NSError **)aoErr;
-- (llvm::Type *)captureStructTypeInProgram:(TQProgram *)aProgram;
++ (llvm::Type *)captureStructTypeInProgram:(TQProgram *)aProgram;
 
 - (void)generateRetainInProgram:(TQProgram *)aProgram
                           block:(TQNodeBlock *)aBlock;

@@ -1,8 +1,8 @@
 #import "TQNodeOperator.h"
 #import "TQNodeVariable.h"
 #import "TQNodeMemberAccess.h"
-#import "../TQProgram.h"
-#import "../TQDebug.h"
+#import "TQProgram.h"
+#import "../Shared/TQDebug.h"
 #import "TQNodeNumber.h"
 #import "TQNodeConditionalBlock.h"
 

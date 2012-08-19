@@ -2,7 +2,7 @@
 // Currently numbers are always stored as doubles, need to add handling of integers(long, int, short, char) that doesn't mess up their data layout
 
 #import <Foundation/Foundation.h>
-#import <Tranquil/TQObject.h>
+#import <Tranquil/Runtime/TQObject.h>
 #import <Tranquil/TQBatching.h>
 
 @class TQRange;

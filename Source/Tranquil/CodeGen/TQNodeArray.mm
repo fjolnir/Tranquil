@@ -1,5 +1,5 @@
 #import "TQNodeArray.h"
-#import "../TQProgram.h"
+#import "TQProgram.h"
 #import "TQNodeBlock.h"
 #import "TQNodeArgument.h"
 #import "TQNodeVariable.h"

@@ -89,7 +89,7 @@ end
 
 file PARSER_OUTPATH => PEG_SOURCE do |f|
     sh "#{PEG} #{PEGFLAGS} #{PEG_SOURCE}"
-    compile :in => ['Source/Tranquil/TQProgram.mm'], :out => 'Build/TQProgram.o'
+    compile :in => ['Source/Tranquil/CodeGen/TQProgram.mm'], :out => 'Build/TQProgram.o'
 end
 
 file STUB_OUTPATH => STUB_SCRIPT do |f|

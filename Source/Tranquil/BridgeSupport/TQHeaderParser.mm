@@ -1,6 +1,5 @@
 #import "TQHeaderParser.h"
 #import "../Tranquil.h"
-#import "../TQDebug.h"
 #import "../Runtime/NSString+TQAdditions.h"
 #import <objc/runtime.h>
 

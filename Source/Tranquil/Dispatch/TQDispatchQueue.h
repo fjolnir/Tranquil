@@ -1,4 +1,4 @@
-#import <Tranquil/TQObject.h>
+#import <Tranquil/Runtime/TQObject.h>
 
 @class TQNumber;
 

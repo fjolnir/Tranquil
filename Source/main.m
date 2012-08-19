@@ -1,11 +1,12 @@
-#import <Tranquil/TQProgram.h>
+#import <Tranquil/CodeGen/TQProgram.h>
 
 void printHelpAndExit(int status)
 {
-    printf("Usage: tranquil [options] [program path]\n");
-    printf("-h        Show this help message\n");
-    printf("-d        Print debugging information (Including the llvm assembly output)\n");
-    printf("-aot      Enable ahead of time compilation (Outputs LLVM IR to stdout)\n");
+    fprintf(stderr, "tranquil - The Tranquil interpreter\n");
+    fprintf(stderr, "Usage: tranquil [options] [program path] [program arguments]\n");
+    fprintf(stderr, "-h        Show this help message\n");
+    fprintf(stderr, "-d        Print debugging information (Including the llvm assembly output)\n");
+    fprintf(stderr, "-aot      Enable ahead of time compilation (Outputs LLVM IR to stdout)\n");
     exit(status);
 }
 
@@ -18,9 +19,14 @@ int main(int argc, char **argv)
         char *outputPath     = "tqapp.bc";
 
         char *arg;
+        NSMutableArray *scriptArgs = [NSMutableArray array];
         for(int i = 1; i < argc; ++i) {
             arg = argv[i];
-            if(arg[0] == '-') {
+
+            // Args after the script path are considered to be args to the script itself
+            if(inputPath)
+                [scriptArgs addObject:[NSString stringWithUTF8String:arg]];
+            else if(arg[0] == '-') {
                 if(strcmp(arg, "-d") == 0) showDebugOutput = YES;
                 else if(strcmp(arg, "-h") == 0) printHelpAndExit(0);
                 else if(strcmp(arg, "-aot") == 0)
@@ -35,7 +41,8 @@ int main(int argc, char **argv)
                 inputPath = arg;
         }
 
-        TQProgram *program = [TQProgram programWithName:@"Root"];
+        TQProgram *program          = [TQProgram programWithName:@"Root"];
+        program.arguments           = scriptArgs;
         program.useAOTCompilation   = compileToFile;
         program.outputPath          = [NSString stringWithUTF8String:outputPath];
         program.shouldShowDebugInfo = showDebugOutput;

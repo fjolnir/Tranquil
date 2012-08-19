@@ -1,6 +1,6 @@
 #import "TQNodeMemberAccess.h"
 #import "TQNodeBlock.h"
-#import "../TQProgram.h"
+#import "TQProgram.h"
 
 using namespace llvm;
 
