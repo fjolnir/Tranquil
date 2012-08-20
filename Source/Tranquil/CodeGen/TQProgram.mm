@@ -324,6 +324,8 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
         _argumentGlobal.size       = sizeof(TQBlockByRef);
         _argumentGlobal.value      = nil;
         _argumentGlobal.forwarding->value = _arguments;
+        // Insert a reference to the '...' variable so that child blocks know to capture it
+        [aNode.statements insertObject:[TQNodeVariable nodeWithName:@"..."] atIndex:0];
     }
 
     NSError *err = nil;
