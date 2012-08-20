@@ -15,22 +15,20 @@ PEGFLAGS = [
 
 CXXFLAGS = {
     :release => [
-        '-mmacosx-version-min=10.7',
+        '-mmacosx-version-min=10.8',
         '-I`pwd`/Source',
         '-I`pwd`/Build',
         '-I/usr/include/libxml2',
-        '-Wno-deprecated-writable-strings', # BridgeSupport uses this in a few places
         '`/usr/local/tranquil/llvm/bin/llvm-config --cflags`',
         '-O3',
     ].join(' '),
     :development => [
         '-DDEBUG',
-        '-mmacosx-version-min=10.7',
+        '-mmacosx-version-min=10.8',
         '-I/usr/local/clang/include',
         '-I`pwd`/Source',
         '-I`pwd`/Build',
         '-I/usr/include/libxml2',
-        '-Wno-deprecated-writable-strings', # BridgeSupport uses this in a few places
         '`/usr/local/tranquil/llvm/bin/llvm-config --cflags`',
         '-O0',
         '-g',
