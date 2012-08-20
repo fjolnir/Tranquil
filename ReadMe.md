@@ -8,10 +8,10 @@ Tranquil is still extremely experimental and you shouldn't use it for anything o
 
 ## How to build and run
 
-The following will install Tranquil into ~/Tranquil (And two dependencies into /usr/local).
+The following will install Tranquil into /usr/local/tranquil (Along with two dependencies).
 
     > curl -fsSkL https://raw.github.com/fjolnir/Tranquil/master/Tools/install.sh | /bin/zsh
-    > ~/Tranquil/build/tranquil -h
+    > /usr/local/tranquil/bin/tranquil -h
 
 ## Learning the language
 

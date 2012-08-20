@@ -118,11 +118,13 @@ end
 
 file :libtranquil => RUNTIME_O_FILES do |t|
     sh "ar rcs #{BUILD_DIR}/libtranquil.a #{RUNTIME_O_FILES}"
+    sh "mkdir -p /usr/local/tranquil/lib"
     sh "cp Build/libtranquil.a /usr/local/tranquil/lib"
 end
 
 file :libtranquil_codegen => [PARSER_OUTPATH] + CODEGEN_O_FILES do |t|
     sh "ar rcs #{BUILD_DIR}/libtranquil_codegen.a #{CODEGEN_O_FILES}"
+    sh "mkdir -p /usr/local/tranquil/lib"
     sh "cp Build/libtranquil_codegen.a /usr/local/tranquil/lib"
 end
 
