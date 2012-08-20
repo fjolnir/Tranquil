@@ -1,7 +1,7 @@
-CC  = '/usr/local/llvm/bin/clang'
-CXX = '/usr/local/llvm/bin/clang++'
+CC  = '/usr/local/tranquil/llvm/bin/clang'
+CXX = '/usr/local/tranquil/llvm/bin/clang++'
 LD  = CC
-PEG = '/usr/local/greg/bin/greg'
+PEG = '/usr/local/tranquil/greg/bin/greg'
 
 BUILD_DIR = 'Build'
 
@@ -38,28 +38,18 @@ CXXFLAGS = {
     ].join(' ')
 }
 
-LDFLAGS = [
-    '-L`pwd`/Build',
-    '-framework Foundation',
-    '-framework AppKit',
-    '-all_load',
-    '-lffi',
-].join(' ')
-
-CODEGEN_LDFLAGS = LDFLAGS + ' ' + [
-    '-lstdc++',
-    '`/usr/local/llvm/bin/llvm-config --libs core jit nativecodegen bitwriter ipo instrumentation`',
-    '`/usr/local/llvm/bin/llvm-config --ldflags`',
-    '-lclang',
-    '-rpath /usr/local/llvm/lib'
-].join(' ')
-
 TOOL_LDFLAGS = [
+    '-L`pwd`/Build',
     '-lstdc++',
+    '`/usr/local/tranquil/llvm/bin/llvm-config --libs core jit nativecodegen bitwriter ipo instrumentation`',
+    '`/usr/local/tranquil/llvm/bin/llvm-config --ldflags`',
+    '-lclang',
+    '-ltranquil',
+    '-ltranquil_codegen',
+    '-rpath /usr/local/tranquil/llvm/lib',
     '-lffi',
-    '-framework Foundation',
     '-framework AppKit',
-    '-all_load',
+    '-all_load'
 ].join(' ')
 
 
@@ -127,12 +117,13 @@ file :build_dir do
 end
 
 file :libtranquil => RUNTIME_O_FILES do |t|
-    #sh "#{LD} #{LDFLAGS} #{LIBS} #{RUNTIME_O_FILES} -static -o #{BUILD_DIR}/libtranquil.a"
     sh "ar rcs #{BUILD_DIR}/libtranquil.a #{RUNTIME_O_FILES}"
+    sh "cp Build/libtranquil.a /usr/local/tranquil/lib"
 end
 
 file :libtranquil_codegen => [PARSER_OUTPATH] + CODEGEN_O_FILES do |t|
-    sh "#{LD} #{CODEGEN_LDFLAGS} #{LIBS} #{CODEGEN_O_FILES} -ltranquil -dynamiclib -o #{BUILD_DIR}/libtranquil_codegen.dylib"
+    sh "ar rcs #{BUILD_DIR}/libtranquil_codegen.a #{CODEGEN_O_FILES}"
+    sh "cp Build/libtranquil_codegen.a /usr/local/tranquil/lib"
 end
 
 
@@ -141,10 +132,10 @@ file MAIN_OUTPATH => MAIN_SOURCE do |t|
 end
 
 file :tranquil => [:libtranquil, :libtranquil_codegen, MAIN_OUTPATH] do |t|
-    sh "#{LD} #{TOOL_LDFLAGS} #{LIBS} #{MAIN_OUTPATH} -LBuild -ltranquil_codegen -o #{BUILD_DIR}/tranquil"
+    sh "#{LD} #{TOOL_LDFLAGS} #{LIBS} #{MAIN_OUTPATH} -ltranquil_codegen -o #{BUILD_DIR}/tranquil"
 end
 
-file :setReleaseOpts do
+task :setReleaseOpts do
     p "Release build"
     @buildMode = :release
 end
@@ -162,8 +153,25 @@ task :lldb => [:default] do
 end
 
 task :clean do
-    sh "rm Build/*"
+    sh "rm -rf Build/*"
 end
 
-task :default => [:build_dir, :tranquil]
-task :release => [:clean, :setReleaseOpts, :build_dir, :tranquil]
+task :install => [:tranquil] do
+end
+
+task :tqc => [:install] do |t|
+    sh "/usr/local/tranquil/bin/tranquil Tools/tqc.tq Tools/tqc.tq -o /usr/local/tranquil/bin/tqc"
+end
+
+def _install
+    sh "mkdir -p /usr/local/tranquil/bin"
+    sh "mv Build/tranquil /usr/local/tranquil/bin"
+end
+
+task :default => [:build_dir, :tranquil] do |t|
+    _install
+end
+task :release => [:clean, :setReleaseOpts, :build_dir, :tranquil] do |t|
+    _install
+end
+

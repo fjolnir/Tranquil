@@ -5,11 +5,12 @@ then
   exit
 fi
 
-if [ -d ~/Tranquil ]
+if [ -d /usr/local/tranquil ]
 then
-  echo "\033[0;31mYou already have something in ~/Tranquil.\033[0m\nYou'll need to rename that directory before you use this installation script."
+  echo "\033[0;31mYou already have something in /usr/local/tranquil.\033[0m\nYou'll need to rename that directory before you use this installation script."
   exit
 fi
+mkdir -p /usr/local/tranquil
 
 # Just for install count stats for me; completely anonymous.
 curl -fsSkL "http://d.asgeirsson.is/JX9I" > /dev/null
@@ -17,39 +18,42 @@ curl -fsSkL "http://d.asgeirsson.is/JX9I" > /dev/null
 echo "\033[0;32mI'm about to retrieve and compile Tranquil for you. This shouldn't take more than a few minutes,\ndepending on your connection.\n"
 
 echo "\033[0;34mInstalling LLVM...\033[0m"
-if [ -d /usr/local/llvm ]
+if [ -d /usr/local/tranquil/llvm ]
 then
-  echo "\033[0;32mYou already have llvm installed to /usr/local/llvm.\033[0m\n\033[0;31mIf it's not version 3.1, you might have compatibility problems.\033[0m"
+  echo "\033[0;32mYou already have llvm installed.\033[0m"
 else
-    curl http://llvm.org/releases/3.1/clang+llvm-3.1-x86_64-apple-darwin11.tar.gz -o /tmp/llvm3.1.tgz
-    tar -C /usr/local -xzf /tmp/llvm3.1.tgz
-    mv /usr/local/clang+llvm-3.1-x86_64-apple-darwin11 /usr/local/llvm
+    pushd /tmp
+    curl http://llvm.org/releases/3.1/clang+llvm-3.1-x86_64-apple-darwin11.tar.gz -o llvm3.1.tgz
+    tar -xzf llvm3.1.tgz
+    mv clang+llvm-3.1-x86_64-apple-darwin11 /usr/local/tranquil/llvm
+    popd
 fi
 
 echo "\n\033[0;34mInstalling Greg the parser generator...\033[0m"
-if [ -d /usr/local/greg ]
+if [ -d /usr/local/tranquil/greg ]
 then
   echo "\033[0;32mYou already have greg installed.\033[0m"
 else
     git clone https://github.com/nddrylliog/greg.git /tmp/greg-git
     pushd /tmp/greg-git
     make
-    mkdir -p /usr/local/greg/bin
-    cp greg /usr/local/greg/bin
+    mkdir -p /usr/local/tranquil/greg/bin
+    cp greg /usr/local/tranquil/greg/bin
+    popd
 fi
 
 echo "\n\033[0;34mCloning Tranquil from GitHub...\033[0m"
 
-hash git >/dev/null && /usr/bin/env git clone git://github.com/fjolnir/Tranquil.git ~/Tranquil || {
+hash git >/dev/null && /usr/bin/env git clone git://github.com/fjolnir/Tranquil.git /usr/local/tranquil/src || {
   echo "\033[0;31mgit not installed\033[0m"
   exit
 }
 
 echo "\033[0;34mCompiling...\033[0m"
-pushd ~/Tranquil
+pushd /usr/local/tranquil/src/
 rake
 popd
 
-echo "\n\033[0;32mCongratulations!\n\033[0;33mYou can now find the Tranquil binary at '\033[0m~/Tranquil/Build/tranquil\033[0;33m'\033[0m"
+echo "\n\033[0;32mCongratulations!\n\033[0;33mYou can now find the Tranquil binary at '\033[0m/usr/local/tranquil/bin/tranquil\033[0;33m'\033[0m"
 
 
