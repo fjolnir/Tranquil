@@ -502,6 +502,14 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     GREG greg;
     yyinit(&greg);
 
+    // Remove shebang
+    if([aScript hasPrefix:@"#!"]) {
+        int lineEnd = 0;
+        const char *cStr = [aScript UTF8String];
+        for(lineEnd = 0; lineEnd < [aScript length] && cStr[lineEnd] != '\n'; ++lineEnd);
+        aScript = [aScript substringFromIndex:lineEnd];
+    }
+
     TQParserState parserState = {0};
     parserState.currentLine = 1;
     parserState.stack = [NSMutableArray array];
