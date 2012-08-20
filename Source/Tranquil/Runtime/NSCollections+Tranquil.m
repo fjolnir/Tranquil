@@ -2,6 +2,14 @@
 #import "TQNumber.h"
 #import <objc/runtime.h>
 
+@interface TQPointerArrayEnumerator : NSEnumerator {
+    NSPointerArray *_array;
+    NSUInteger _currIdx;
+}
++ (TQPointerArrayEnumerator *)enumeratorWithArray:(NSPointerArray *)aArray;
+@end
+
+
 @implementation NSMapTable (Tranquil)
 + (NSMapTable *)tq_mapTableWithObjectsAndKeys:(id)firstObject, ...
 {
@@ -119,6 +127,11 @@
 
 #pragma mark - Iterators
 
+- (NSEnumerator *)objectEnumerator
+{
+    return [TQPointerArrayEnumerator enumeratorWithArray:self];
+}
+
 - (id)each:(id (^)(id))aBlock
 {
     for(id obj in self) {
@@ -184,3 +197,31 @@
     return [self objectForKey:key];
 }
 @end
+
+#pragma mark -
+
+@implementation TQPointerArrayEnumerator
++ (TQPointerArrayEnumerator *)enumeratorWithArray:(NSPointerArray *)aArray
+{
+    TQPointerArrayEnumerator *ret = [self new];
+    ret->_array = [aArray retain];
+    return [ret autorelease];
+}
+- (void)dealloc
+{
+    [_array release];
+    [super dealloc];
+}
+- (id)nextObject
+{
+    if(_currIdx >= [_array count])
+        return nil;
+    return [_array pointerAtIndex:_currIdx++];
+}
+
+- (NSArray *)allObjects
+{
+    return [_array allObjects];
+}
+@end
+
