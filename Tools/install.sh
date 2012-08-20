@@ -5,11 +5,6 @@ then
   exit
 fi
 
-if [ -d /usr/local/tranquil ]
-then
-  echo "\033[0;31mYou already have something in /usr/local/tranquil.\033[0m\nYou'll need to rename that directory before you use this installation script."
-  exit
-fi
 mkdir -p /usr/local/tranquil
 
 # Just for install count stats for me; completely anonymous.
