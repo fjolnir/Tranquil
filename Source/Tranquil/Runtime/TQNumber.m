@@ -128,36 +128,57 @@ static __inline__ _tqfloat _TQNumberValue(TQNumber *ptr)
 
 + (TQNumber *)numberWithBool:(BOOL)aValue
 {
+    if(_fitsInTaggedPointer(aValue))
+        return _createTaggedPointer(aValue);
+
     TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithBool:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 + (TQNumber *)numberWithChar:(char)aValue
 {
+    if(_fitsInTaggedPointer(aValue))
+        return _createTaggedPointer(aValue);
+
     TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithDouble:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 + (TQNumber *)numberWithShort:(short)aValue
 {
+    if(_fitsInTaggedPointer(aValue))
+        return _createTaggedPointer(aValue);
+
     TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithShort:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 + (TQNumber *)numberWithInt:(int)aValue
 {
+    if(_fitsInTaggedPointer(aValue))
+        return _createTaggedPointer(aValue);
+
     TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithInt:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 + (TQNumber *)numberWithLong:(long)aValue
 {
+    if(_fitsInTaggedPointer(aValue))
+        return _createTaggedPointer(aValue);
+
     TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithLong:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 + (TQNumber *)numberWithLongLong:(long long)aValue
 {
+    if(_fitsInTaggedPointer(aValue))
+        return _createTaggedPointer(aValue);
+
     TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithLongLong:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 + (TQNumber *)numberWithFloat:(float)aValue
 {
+    if(_fitsInTaggedPointer(aValue))
+        return _createTaggedPointer(aValue);
+
     TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithFloat:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
