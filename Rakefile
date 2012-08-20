@@ -20,7 +20,7 @@ CXXFLAGS = {
         '-I`pwd`/Build',
         '-I/usr/include/libxml2',
         '-Wno-deprecated-writable-strings', # BridgeSupport uses this in a few places
-        '`/usr/local/llvm/bin/llvm-config --cflags`',
+        '`/usr/local/tranquil/llvm/bin/llvm-config --cflags`',
         '-O3',
     ].join(' '),
     :development => [
@@ -31,7 +31,7 @@ CXXFLAGS = {
         '-I`pwd`/Build',
         '-I/usr/include/libxml2',
         '-Wno-deprecated-writable-strings', # BridgeSupport uses this in a few places
-        '`/usr/local/llvm/bin/llvm-config --cflags`',
+        '`/usr/local/tranquil/llvm/bin/llvm-config --cflags`',
         '-O0',
         '-g',
         #'--analyze'
