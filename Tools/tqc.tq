@@ -3,7 +3,7 @@ import "CoreFoundation"
 
 inPath         = nil
 outPath        = "a.out"
-runtimeLibPath = "Build/libtranquil.a"
+runtimeLibPath = "/usr/local/tranquil/lib/libtranquil.a"
 ldFlags        = ["-all_load", "-framework", "AppKit", "-lobjc", "-lffi", runtimeLibPath]
 
 args = ... objectEnumerator
@@ -24,7 +24,7 @@ unless inPath != nil {
 uuid = `CFUUIDCreateString(nil, CFUUIDCreate(nil))`
 
 irPath = "/tmp/#{uuid()}.bc"
-compilationTask = NSTask launchedTaskWithLaunchPath: "Build/tranquil"
+compilationTask = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/bin/tranquil"
                                           arguments: ["-aot", "-o", irPath, inPath];
                                       waitUntilExit;
                                                self

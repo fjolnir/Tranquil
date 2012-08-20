@@ -168,6 +168,7 @@ end
 def _install
     sh "mkdir -p /usr/local/tranquil/bin"
     sh "mv Build/tranquil /usr/local/tranquil/bin"
+    sh "/usr/local/tranquil/bin/tranquil Tools/tqc.tq Tools/tqc.tq -o /usr/local/tranquil/bin/tqc"
 end
 
 task :default => [:build_dir, :tranquil] do |t|
