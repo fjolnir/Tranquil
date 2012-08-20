@@ -145,7 +145,6 @@ NoEqExpr     = _OtherExpr
 _OtherExpr   = UnaryMsg
              | Call
              | Valid
-             | Block
              | UnaryOp
              | Nil
              | SubscriptExp
@@ -153,6 +152,7 @@ _OtherExpr   = UnaryMsg
              | Self
              | Variadic
              | Literal
+             | Block
              | Constant
              | Variable
              | Weak
@@ -198,6 +198,7 @@ UnaryMsgRcvr = Call
              | Super
              | Variadic
              | Literal
+             | Block
              | Variable
              | Weak
              | ParenExpr
@@ -292,7 +293,7 @@ Block        = '{' --
                     }
                     PushStack([NSMutableArray array]);
                }
-               (Statement --)+
+               (Statement --)*
                {
                     NSMutableArray *statements = PopStack();
                     $$ = PopStack();
