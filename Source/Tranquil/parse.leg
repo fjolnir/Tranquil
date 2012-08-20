@@ -132,9 +132,9 @@ Return       = "^" retVal:Expression { UpdateToken(); $$ = [TQNodeReturn nodeWit
 # Expression
 Expression   = TernaryExpr
              | KeywordMsg
+             | Assignment
              | Equation
              | UnaryMsg
-             | Assignment
              | _OtherExpr
 
 NoTernExpr   = Equation

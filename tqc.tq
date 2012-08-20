@@ -6,12 +6,14 @@ outPath        = "a.out"
 runtimeLibPath = "Build/libtranquil.a"
 ldFlags        = ["-all_load", "-framework", "AppKit", "-lobjc", "-lffi", runtimeLibPath]
 
-args = ...
-(0 to: ... count) each: { i |
-    if ...[i] == "-o"
-        outPath = ...[++i]
+args = ... objectEnumerator
+while arg = args nextObject {
+    if arg == "-o"
+        outPath = args nextObject
     else if inPath == nil
-        inPath = ...[i]
+        inPath = arg
+    else
+        ldFlags << arg
 }
 
 unless inPath != nil {
