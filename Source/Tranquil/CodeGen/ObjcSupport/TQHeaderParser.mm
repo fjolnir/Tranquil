@@ -6,8 +6,8 @@
 using namespace llvm;
 
 @interface TQHeaderParser ()
-- (const char *)_encodingForFunPtrCursor:(CXCursor)cursor;
-- (char *)_encodingForCursor:(CXCursor)cursor;
++ (const char *)_encodingForFunPtrCursor:(CXCursor)cursor;
++ (char *)_encodingForCursor:(CXCursor)cursor;
 - (void)_parseTranslationUnit:(CXTranslationUnit)translationUnit;
 @end
 
@@ -22,7 +22,6 @@ using namespace llvm;
     _constants        = [NSMutableDictionary new];
     _classes          = [NSMutableDictionary new];
     _protocols        = [NSMutableDictionary new];
-    _typedefs         = [NSMutableDictionary new];
     _index            = clang_createIndex(0, 1);
 
     return self;
@@ -35,7 +34,6 @@ using namespace llvm;
     [_constants release];
     [_literalConstants release];
     [_protocols release];
-    [_typedefs release];
     clang_disposeIndex(_index);
 
     [super dealloc];
@@ -116,7 +114,7 @@ using namespace llvm;
             case CXCursor_ObjCInstanceMethodDecl: {
                 BOOL isClassMethod    = cursor.kind == CXCursor_ObjCClassMethodDecl;
                 NSString *selector    = nsName;
-                char *encoding_ = [self _encodingForCursor:cursor];
+                char *encoding_       = [[self class] _encodingForCursor:cursor];
                 NSString *encoding    = [NSString stringWithUTF8String:encoding_];
                 if(isClassMethod)
                     [_currentClass.classMethods    setObject:encoding forKey:selector];
@@ -126,9 +124,8 @@ using namespace llvm;
             } break;
             case CXCursor_FunctionDecl: {
                 // TODO: Support bridging variadic functions. Support or ignore inlined functions
-                char *encoding = [self _encodingForCursor:cursor];
-                TQBridgedFunction *fun = [TQBridgedFunction functionWithName:nsName
-                                                                    encoding:encoding];
+                char *encoding         = [[self class] _encodingForCursor:cursor];
+                TQBridgedFunction *fun = [TQBridgedFunction functionWithName:nsName encoding:encoding];
                 [_functions setObject:fun
                                forKey:[nsName stringByCapitalizingFirstLetter]];
                 free(encoding);
@@ -151,7 +148,7 @@ using namespace llvm;
                 clang_disposeTokens(translationUnit, tokens, tokenCount);
             } break;
             case CXCursor_VarDecl: {
-                char *encoding = [self _encodingForCursor:cursor];
+                char *encoding = [[self class] _encodingForCursor:cursor];
                 [_constants setObject:[TQBridgedConstant constantWithName:nsName encoding:encoding]
                                forKey:nsName];
                 free(encoding);
@@ -164,16 +161,16 @@ using namespace llvm;
                                       forKey:nsName];
             } break;
             // Ignored
-            case CXCursor_UnexposedAttr:
             case CXCursor_StructDecl:
             case CXCursor_TypedefDecl:
+            case CXCursor_UnexposedAttr:
             case CXCursor_TypeRef:
             case CXCursor_ObjCIvarDecl:
             case CXCursor_ObjCPropertyDecl:
             case CXCursor_MacroExpansion:
             case CXCursor_InclusionDirective:
-            case CXCursor_UnionDecl: {
-            } break;
+            case CXCursor_UnionDecl:
+            break;
             default:
                 TQLog(@"Unhandled Objective-C entity: %s of type %d %s = %s\n", name, cursor.kind, clang_getCString(clang_getCursorKindSpelling(cursor.kind)),
                       clang_getCString(clang_getTypeKindSpelling(clang_getCursorType(cursor).kind)));
@@ -217,20 +214,23 @@ using namespace llvm;
 
 #pragma mark - Objective-C encoding generator
 
-// Because the clang-c api doesn't allow us to access the "extended" encoding stuff inside libclang we must roll our own (It's less work than using the C++ api)
-- (const char *)_encodingForFunPtrCursor:(CXCursor)cursor
+// Because the clang-c api doesn't allow us to access the "extended" encoding stuff inside libclang we must roll our own (From what I can tell, it's less work than using the C++ api)
++ (const char *)_encodingForFunPtrCursor:(CXCursor)cursor
 {
     CXType type = clang_getCursorType(cursor);
     NSMutableString *realEncoding = [NSMutableString stringWithString:@"<"];
+    // Resolve any typedef to it's original type
+    while(type.kind == CXType_Typedef) {
+        cursor = clang_getTypeDeclaration(type);
+        type = clang_getTypedefDeclUnderlyingType(cursor);
+    }
 
-    if(type.kind == CXType_Typedef)
-        return "@?"; // TODO: Typedef'd pointers
-    else if(type.kind == CXType_BlockPointer)
+    if(type.kind == CXType_BlockPointer)
         [realEncoding appendString:@"@"];
     else if(type.kind == CXType_Pointer)
         [realEncoding appendString:@"^"];
     else
-        assert(0); // Should never reach here..
+        TQAssert(nil, @"PANIC (%s: %s)",  clang_getCString(clang_getCursorSpelling(cursor)), clang_getCString(clang_getTypeKindSpelling(type.kind)));
 
     __block BOOL isFirstChild = YES;
     clang_visitChildrenWithBlock(cursor, ^(CXCursor child, CXCursor parent) {
@@ -239,9 +239,15 @@ using namespace llvm;
             [realEncoding appendString:@"v"];
         isFirstChild = NO;
 
-        char *childEnc = [self _encodingForCursor:child];
-        if(strstr(childEnc, "@?") == childEnc || strstr(childEnc, "^?") == childEnc)
-            [realEncoding appendFormat:@"%s", [self _encodingForFunPtrCursor:child]];
+        char *childEnc = [[self class] _encodingForCursor:child];
+        if(!childEnc || strlen(childEnc) == 0) {
+            CXType type = clang_getCursorType(child);
+            CXTypeKind kind = type.kind;
+            if(kind == CXType_Enum)
+                [realEncoding appendFormat:@"i"];
+        }
+        else if(strstr(childEnc, "@?") == childEnc || strstr(childEnc, "^?") == childEnc)
+            [realEncoding appendFormat:@"%s", [[self class] _encodingForFunPtrCursor:child]];
         else
             [realEncoding appendFormat:@"%s", childEnc];
         free(childEnc);
@@ -254,7 +260,7 @@ using namespace llvm;
 }
 
 // You are responsible for freeing the returned string
-- (char *)_encodingForCursor:(CXCursor)cursor
++ (char *)_encodingForCursor:(CXCursor)cursor
 {
     CXString cxvanillaEncoding = clang_getDeclObjCTypeEncoding(cursor);
     char *vanillaEncoding = (char*)clang_getCString(cxvanillaEncoding);
@@ -269,11 +275,12 @@ using namespace llvm;
                                                                    || kind == CXIdxEntity_ObjCClassMethod || kind == CXIdxEntity_ObjCInstanceMethod)) {
                 [realEncoding appendString:@"v"];
             }
+            isFirstChild = NO;
             CXString childEnc_  = clang_getDeclObjCTypeEncoding(child);
             const char *childEnc = clang_getCString(childEnc_);
-            if(strstr(childEnc, "@?") == childEnc || strstr(childEnc, "^?") == childEnc)
-                [realEncoding appendFormat:@"%s", [self _encodingForFunPtrCursor:child]];
-            else
+            if(strstr(childEnc, "@?") == childEnc || strstr(childEnc, "^?") == childEnc) {
+                [realEncoding appendFormat:@"%s", [[self class] _encodingForFunPtrCursor:child]];
+            } else
                 [realEncoding appendFormat:@"%s", childEnc];
             clang_disposeString(childEnc_);
             return CXChildVisit_Continue;
@@ -384,11 +391,10 @@ using namespace llvm;
 {
     if(!(self = [super init]))
         return nil;
-
     _name     = [aName retain];
     _encoding = strdup(aEncoding);
     _argTypes = [NSMutableArray new];
-    TQIterateTypesInEncoding(aEncoding, ^(const char *type, NSUInteger size, NSUInteger align, BOOL *stop) {
+    TQIterateTypesInEncoding(_encoding, ^(const char *type, NSUInteger size, NSUInteger align, BOOL *stop) {
         if(!_retType)
             _retType = [[NSString stringWithUTF8String:type] retain];
         else
@@ -567,6 +573,7 @@ using namespace llvm;
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
+    //NSLog(@"generating %@: %s\n", _name, _encoding);
     if(![self _generateInvokeInProgram:aProgram root:aRoot error:aoErr])
         return NULL;
 

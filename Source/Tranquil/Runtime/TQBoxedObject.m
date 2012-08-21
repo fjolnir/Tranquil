@@ -130,7 +130,11 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
         boxingClass = [self _prepareLambdaWrapper:className withType:aType];
     else if(strstr(aType, "^{__CF") == aType) // CF types accept messages, and many are toll free bridged
         return [*(id*)aPtr autorelease];
-    else {
+    else if(*aType == '^') {
+        TQPointer *ptr = [TQPointer withType:[NSString stringWithUTF8String:aType+1]];
+        ptr->_addr = *(void **)aPtr;
+        return ptr;
+    } else {
         TQLog(@"Type %s cannot be boxed", aType);
         return nil;
     }
