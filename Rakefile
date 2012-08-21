@@ -126,12 +126,14 @@ file :libtranquil_codegen => [PARSER_OUTPATH] + CODEGEN_O_FILES do |t|
     sh "cp Build/libtranquil_codegen.a /usr/local/tranquil/lib"
 end
 
-
-file MAIN_OUTPATH => MAIN_SOURCE do |t|
+def _buildMain
     sh "#{CXX} #{MAIN_SOURCE} #{CXXFLAGS[@buildMode]} -ObjC++ -c -o #{MAIN_OUTPATH}"
+end
+file MAIN_OUTPATH => MAIN_SOURCE do |t|
 end
 
 file :tranquil => [:libtranquil, :libtranquil_codegen, MAIN_OUTPATH] do |t|
+    _buildMain
     sh "#{LD} #{TOOL_LDFLAGS} #{LIBS} #{MAIN_OUTPATH} -ltranquil_codegen -o #{BUILD_DIR}/tranquil"
 end
 
@@ -165,7 +167,7 @@ end
 
 def _install
     sh "mkdir -p /usr/local/tranquil/bin"
-    sh "mv Build/tranquil /usr/local/tranquil/bin"
+    sh "cp Build/tranquil /usr/local/tranquil/bin"
     sh "/usr/local/tranquil/bin/tranquil Tools/tqc.tq Tools/tqc.tq -o /usr/local/tranquil/bin/tqc"
 end
 
