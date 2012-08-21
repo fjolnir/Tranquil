@@ -13,10 +13,10 @@ void printHelpAndExit(int status)
 int main(int argc, char **argv)
 {
     @autoreleasepool {
-        BOOL showDebugOutput = NO;
-        BOOL compileToFile   = NO;
-        char *inputPath      = NULL;
-        char *outputPath     = "tqapp.bc";
+        BOOL showDebugOutput   = NO;
+        BOOL compileToFile     = NO;
+        const char *inputPath  = NULL;
+        const char *outputPath = "tqapp.bc";
 
         char *arg;
         NSMutableArray *scriptArgs = [NSMutableArray array];
