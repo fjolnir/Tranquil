@@ -45,14 +45,18 @@
     // If there are no strong references to the variable in the containing block then
     // we create an anonymous variable in the parent block, move the weak to it, and then replace the weak in
     // the containing block of the weak, with a reference to said variable
+    TQNode *lastRefInTrace         = [aTrace objectAtIndex:[aTrace indexOfObject:parentBlock]+1];
+    TQNode *possibleExistingAssign = [parentBlock.statements objectAtIndex:MAX(0, [parentBlock.statements indexOfObject:lastRefInTrace] - 1)];
     TQNodeVariable *var = [TQNodeVariable nodeWithName:[@" TQ_weak_" stringByAppendingString:[referencedVar name]]];
+
     TQNodeOperator *assignment = [TQNodeOperator nodeWithType:kTQOperatorAssign
                                                          left:var
                                                         right:weak];
-
-    assert([parentBlock insertChildNode:assignment before:[aTrace objectAtIndex:[aTrace indexOfObject:parentBlock]+1]]);
-    assert([[aTrace lastObject] replaceChildNodesIdenticalTo:weak with:var]);
-
+    if([assignment isEqual:possibleExistingAssign])
+        assignment = (TQNodeOperator *)possibleExistingAssign;
+    else
+        [parentBlock insertChildNode:assignment before:lastRefInTrace];
+    [[aTrace lastObject] replaceChildNodesIdenticalTo:weak with:var];
     return aNode;
 }
 @end
