@@ -22,12 +22,18 @@ using namespace llvm;
     [super dealloc];
 }
 
+- (BOOL)isEqual:(id)b
+{
+    if(![b isMemberOfClass:[self class]])
+        return NO;
+    return [_value isEqual:[b value]];
+}
+
 - (id)referencesNode:(TQNode *)aNode
 {
     if([aNode isEqual:self])
         return self;
     return nil;
-    //return [_value referencesNode:aNode];
 }
 
 - (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
