@@ -503,8 +503,8 @@ static __inline__ _tqfloat _TQNumberValue(TQNumber *ptr)
     return [NSString stringWithFormat:@"%f", _TQNumberValue(self)];
 }
 
-id TQDispatchBlock0(struct TQBlockLiteral *)      __asm("_TQDispatchBlock0");
-id TQDispatchBlock1(struct TQBlockLiteral *, id ) __asm("_TQDispatchBlock1");
+id TQDispatchBlock0(struct TQBlockLiteral *);
+id TQDispatchBlock1(struct TQBlockLiteral *, id );
 
 - (id)times:(id (^)())block
 {
