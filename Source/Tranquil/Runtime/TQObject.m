@@ -5,8 +5,4 @@
 
 @implementation TQObject
 
-+ (void)load
-{
-}
-
 @end

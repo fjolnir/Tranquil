@@ -591,6 +591,7 @@ using namespace llvm;
     [_statements insertObject:aNodeToInsert atIndex:idx];
     return YES;
 }
+
 - (BOOL)replaceChildNodesIdenticalTo:(TQNode *)aNodeToReplace with:(TQNode *)aNodeToInsert
 {
     NSUInteger idx = [_statements indexOfObject:aNodeToReplace];

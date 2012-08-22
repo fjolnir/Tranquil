@@ -93,7 +93,6 @@ BOOL TQMethodTypeRequiresBoxing(const char *aEncoding)
 {
     if(*aEncoding != '@' && *aEncoding != 'v')
         return YES;
-    ++aEncoding;
     while(*(++aEncoding) != ':') {} // Just iterate till the selector
     // First run of this loop skips over the selector
     while(*(++aEncoding) != '\0') {
