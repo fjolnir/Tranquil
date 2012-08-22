@@ -26,6 +26,7 @@ extern NSString * const TQTypeString;
     @public
     char *_addr; // Only ever meant to be accessed by TQBoxedObject
 }
++ (TQPointer *)box:(void *)aPtr withType:(const char *)aType;
 + (TQPointer *)withObjects:(NSArray *)aObjs type:(NSString *)aType;
 + (TQPointer *)to:(id)aObj withType:(NSString *)aType;
 + (TQPointer *)withType:(NSString *)aType count:(NSNumber *)aCount;

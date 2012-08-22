@@ -1,5 +1,6 @@
 #import "TQPointer.h"
 #import "TQBoxedObject.h"
+#import "TQRuntime.h"
 #import <objc/runtime.h>
 
 NSString * const TQTypeObj       = @"@";
@@ -40,8 +41,9 @@ NSString * const TQTypeString    = @"*";
 
 + (TQPointer *)box:(void *)aPtr withType:(const char *)aType
 {
-    assert(aPtr);
-    assert(*aType == _C_PTR || *aType == _C_ARY_B);
+    if(!aPtr)
+        return nil;
+    TQAssert(*aType == _C_PTR || *aType == _C_ARY_B, @"Tried to create a pointer using a non-pointer type");
     NSUInteger count = NSNotFound;
 
     if(*aType++ == _C_ARY_B) {
@@ -102,7 +104,7 @@ NSString * const TQTypeString    = @"*";
     _addr          = (char *)aAddr;
     _freeOnDealloc = NO;
     _count         = aCount;
-    NSGetSizeAndAlignment(_itemType, &_itemSize, NULL);
+    TQGetSizeAndAlignment(_itemType, &_itemSize, NULL);
     assert(_itemSize > 0);
 
     return self;
