@@ -11,6 +11,10 @@
 #import <llvm/Target/TargetData.h>
 #import <mach/mach_time.h>
 
+#ifdef TQ_PROFILE
+#import <google/profiler.h>
+#endif
+
 extern "C" {
     #import "parse.m"
 }
@@ -60,7 +64,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     llInt8PtrPtrTy=_llInt8PtrPtrTy, llPointerWidthInBits=_llPointerWidthInBits, llPointerAlignInBytes=_llPointerAlignInBytes,
     llPointerSizeInBytes=_llPointerSizeInBytes;
 @synthesize llBlockDescriptorTy=_blockDescriptorTy, llBlockLiteralType=_blockLiteralType;
-@synthesize objc_msgSend=_func_objc_msgSend, objc_msgSendSuper=_func_objc_msgSendSuper,
+@synthesize objc_msgSend=_func_objc_msgSend, objc_msgSend_fixup=_func_objc_msgSend_fixup, objc_msgSendSuper=_func_objc_msgSendSuper,
     objc_storeWeak=_func_objc_storeWeak, objc_loadWeak=_func_objc_loadWeak, objc_allocateClassPair=_func_objc_allocateClassPair,
     objc_registerClassPair=_func_objc_registerClassPair, objc_destroyWeak=_func_objc_destroyWeak,
     class_replaceMethod=_func_class_replaceMethod, sel_registerName=_func_sel_registerName,
@@ -235,6 +239,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     DEF_EXTERNAL_FUN(imp_implementationWithBlock, ft_i8Ptr__i8Ptr);
     DEF_EXTERNAL_FUN(object_getClass, ft_i8Ptr__i8Ptr);
     DEF_EXTERNAL_FUN(objc_msgSend, ft_i8ptr__i8ptr_i8ptr_variadic);
+    DEF_EXTERNAL_FUN(objc_msgSend_fixup, ft_i8ptr__i8ptr_i8ptr_variadic);
     DEF_EXTERNAL_FUN(objc_msgSendSuper, ft_i8ptr__i8ptr_i8ptr_variadic);
     //DEF_EXTERNAL_FUN(objc_storeWeak, ft_i8Ptr__i8PtrPtr_i8Ptr);
     //DEF_EXTERNAL_FUN(objc_loadWeak, ft_i8Ptr__i8PtrPtr);
@@ -369,6 +374,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
         factory.setEngineKind(llvm::EngineKind::JIT);
         factory.setTargetOptions(Opts);
         factory.setOptLevel(CodeGenOpt::Aggressive);
+        factory.setUseMCJIT(true);
         engine = factory.create();
         //engine->DisableLazyCompilation();
         fpm.add(new TargetData(*engine->getTargetData()));
@@ -469,7 +475,13 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 
     uint64_t startTime = mach_absolute_time();
     // Execute code
+#ifdef TQ_PROFILE
+    ProfilerStart("tqprof.txt");
+#endif
     id ret = rootPtr();
+#ifdef TQ_PROFILE
+    ProfilerStop();
+#endif
 
     uint64_t ns = mach_absolute_time() - startTime;
     struct mach_timebase_info timebase;
@@ -644,6 +656,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
         case _C_CLASS:
         case _C_SEL:
         case _C_CHARPTR:
+        case _C_ARY_B:
         case _TQ_C_LAMBDA_B:
             return _llInt8PtrTy;
         case _C_DBL:

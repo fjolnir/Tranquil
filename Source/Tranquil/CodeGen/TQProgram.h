@@ -49,7 +49,7 @@ extern "C" NSString * const kTQSyntaxErrorException;
 @property(readonly) llvm::Type *llBlockDescriptorTy, *llBlockLiteralType;
 
 #pragma mark - Cached functions
-@property(readonly) llvm::Function *objc_msgSend, *objc_msgSendSuper, *objc_storeWeak,
+@property(readonly) llvm::Function *objc_msgSend, *objc_msgSend_fixup, *objc_msgSendSuper, *objc_storeWeak,
     *objc_loadWeak, *objc_destroyWeak, *objc_retain, *objc_release, *objc_allocateClassPair,
     *objc_registerClassPair, *class_replaceMethod, *objc_getClass,
     *sel_registerName, *_Block_copy, *objc_retainAutoreleaseReturnValue, *objc_autoreleaseReturnValue,

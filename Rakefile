@@ -32,6 +32,7 @@ CXXFLAGS = {
         '`/usr/local/tranquil/llvm/bin/llvm-config --cflags`',
         '-O0',
         '-g',
+        #'-DTQ_PROFILE',
         #'--analyze'
     ].join(' ')
 }
@@ -46,6 +47,7 @@ TOOL_LDFLAGS = [
     '-ltranquil_codegen',
     '-rpath /usr/local/tranquil/llvm/lib',
     '-lffi',
+    #'-lprofiler',
     '-framework AppKit',
     '-all_load'
 ].join(' ')
