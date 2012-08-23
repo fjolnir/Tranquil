@@ -1,6 +1,7 @@
 #import "TQPointer.h"
 #import "TQBoxedObject.h"
 #import "TQRuntime.h"
+#import "TQNumber.h"
 #import <objc/runtime.h>
 
 NSString * const TQTypeObj       = @"@";
@@ -44,7 +45,7 @@ NSString * const TQTypeString    = @"*";
     if(!aPtr)
         return nil;
     TQAssert(*aType == _C_PTR || *aType == _C_ARY_B, @"Tried to create a pointer using a non-pointer type");
-    NSUInteger count = NSNotFound;
+    NSUInteger count = 1;
 
     if(*aType++ == _C_ARY_B) {
         assert(isdigit(*aType));
@@ -52,8 +53,7 @@ NSString * const TQTypeString    = @"*";
         // Move on to the enclosed type
         while(isdigit(*aType)) ++aType;
     }
-
-    return [[[self alloc] initWithType:aType address:aPtr count:count] autorelease];
+    return [[[self alloc] initWithType:aType address:*(void**)aPtr count:count] autorelease];
 }
 
 + (TQPointer *)withObjects:(NSArray *)aObjs type:(NSString *)aType
@@ -105,7 +105,10 @@ NSString * const TQTypeString    = @"*";
     _freeOnDealloc = NO;
     _count         = aCount;
     TQGetSizeAndAlignment(_itemType, &_itemSize, NULL);
-    assert(_itemSize > 0);
+    if(_itemSize == 0) {
+        _itemType = "v";
+        _itemSize = sizeof(void*);
+    }
 
     return self;
 }
@@ -114,6 +117,11 @@ NSString * const TQTypeString    = @"*";
 {
     [NSException raise:@"Illegal Method" format:@"TQPointer can not be initialized without a type"];
     return nil;
+}
+
+- (TQNumber *)count
+{
+    return [TQNumber numberWithInt:_count];
 }
 
 - (void *)_addrForIndex:(NSUInteger)aIdx
