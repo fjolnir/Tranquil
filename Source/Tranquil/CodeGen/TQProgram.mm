@@ -652,6 +652,8 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 - (llvm::Type *)llvmTypeFromEncoding:(const char *)aEncoding
 {
     switch(*aEncoding) {
+        case _C_CONST:
+            return [self llvmTypeFromEncoding:aEncoding+1];
         case _C_ID:
         case _C_CLASS:
         case _C_SEL:
