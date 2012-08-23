@@ -189,7 +189,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
             // If it's a boxed object we just make sure the sizes match and then copy the bits
             if([aValue isKindOfClass:self]) {
                 TQBoxedObject *value = aValue;
-                assert(value->_size == size);
+                TQAssert(value->_size == size, @"Tried to unbox a boxed struct to a type of a different size");
                 memmove(aDest, value->_ptr, size);
             }
             // If it's an array  we unbox based on indices
@@ -229,7 +229,6 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
 
         }
         case _C_PTR: {
-            // void* doesn't tell us anything about the output format so we must return NULL
             if(!aValue)
                 *(void **)aDest = NULL;
             else if(strstr(aType, "^{__CF") == aType)
