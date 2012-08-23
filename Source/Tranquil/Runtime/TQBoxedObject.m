@@ -129,11 +129,11 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     else if(*aType == _TQ_C_LAMBDA_B)
         boxingClass = [self _prepareLambdaWrapper:className withType:aType];
     else if(strstr(aType, "^{__CF") == aType) // CF types accept messages, and many are toll free bridged
+        // TODO: actually generate a wrapper class that does this without going through the tests above
         return [*(id*)aPtr autorelease];
-    else if(*aType == '^') {
-        TQPointer *ptr = [TQPointer withType:[NSString stringWithUTF8String:aType+1]];
-        ptr->_addr = *(void **)aPtr;
-        return ptr;
+    else if(*aType == _C_PTR || *aType == _C_ARY_B) {
+        // TODO: actually generate a wrapper class that does this without going through the tests above
+        return [TQPointer box:aPtr withType:aType];
     } else {
         TQLog(@"Type %s cannot be boxed", aType);
         return nil;
@@ -170,14 +170,18 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
         case _C_USHT:     *(unsigned short *)aDest     = [aValue unsignedShortValue];     break;
         case _C_ULNG:     *(unsigned long *)aDest      = [aValue unsignedLongValue];      break;
         case _C_ULNG_LNG: *(unsigned long long *)aDest = [aValue unsignedLongLongValue];  break;
+        case _C_VOID:     TQAssert(NO, @"You cannot unbox a value of type void");         break;
 
         case _TQ_C_LAMBDA_B: {
-            if(*(aType+1) == _TQ_C_LAMBDA_FUNCPTR) {
+            if(!aValue)
+                *(void **)aDest = NULL;
+            else if(*(aType+1) == _TQ_C_LAMBDA_FUNCPTR) {
                 // The block can't be autoreleased since there is no way of knowing how long the function receiving it requires it.
                 TQBlockClosure *closure = [[[TQBlockClosure alloc] initWithBlock:[[aValue copy] autorelease] type:aType] autorelease];
                 *(void **)aDest = closure.functionPointer;
             } else {
                 struct TQBoxedBlockLiteral *wrapperBlock = (struct TQBoxedBlockLiteral *)aValue;
+                TQAssert(wrapperBlock->flags & TQ_BLOCK_IS_WRAPPER_BLOCK, @"Tried to unbox non-boxed block");
                 memmove(aDest, wrapperBlock->funPtr, sizeof(void*));
             }
         } break;
@@ -414,11 +418,21 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     TQIterateTypesInEncoding(fieldType, ^(const char *type, NSUInteger size, NSUInteger align, BOOL *stop) {
         NSString *name = [self _getFieldName:&type];
         NSUInteger currOfs = ofs;
-        fieldGetter = [[^(TQBoxedObject *self) {
-            return [TQBoxedObject box:(char*)self->_ptr+currOfs withType:type];
-        } copy] autorelease];
+        if(*type == _C_ARY_B) {
+            // For an array we must box a pointer to the address of the array (the location within the struct is a pointer
+            // to it's first element, not to the array itself)
+            fieldGetter = ^(TQBoxedObject *self) {
+                void *tmp = self->_ptr+currOfs;
+                return [TQBoxedObject box:&tmp withType:type];
+            };
+        } else {
+            fieldGetter = ^(TQBoxedObject *self) {
+                return [TQBoxedObject box:self->_ptr+currOfs withType:type];
+            };
+        }
+        fieldGetter = [[fieldGetter copy] autorelease];
         fieldSetter = [[^(TQBoxedObject *self, id value) {
-            [TQBoxedObject unbox:value to:(char*)self->_ptr+currOfs usingType:type];
+            [TQBoxedObject unbox:value to:self->_ptr+currOfs usingType:type];
         } copy] autorelease];
 
         if(name) {
