@@ -733,16 +733,17 @@ Character    = ([A-Za-z0-9_])
 # String with support for embedding expressions
 String       = ConstString | MutableStr
 MutableStr   = '"' { PushStack([TQNodeString nodeWithString:[NSMutableString string]]); }
-               (StrEmbeddExpr|StrInside)*
+               (StrEmbeddExpr|DQuotStrIn)*
                _dblQuot ~{ SyntaxError(@"String literal left unclosed"); }
-               {
-                   $$ = PopStack();
-               }
+               { $$ = PopStack(); }
+             | "\'" { PushStack([TQNodeString nodeWithString:[NSMutableString string]]); }
+               (StrEmbeddExpr|SQuotStrIn)*
+               _snglQuot ~{ SyntaxError(@"String literal left unclosed"); }
+               { $$ = PopStack(); }
 
-StrInside    = <("#" !"{" |[^\"#])+ >
-               {
-                   [[(TQNodeString *)StackTop value] appendString:YYNSSTR];
-               }
+DQuotStrIn   = <("#" !"{" |[^\"#])+ > { [[(TQNodeString *)StackTop value] appendString:YYNSSTR]; }
+SQuotStrIn   = <("#" !"{" |[^\'#])+ > { [[(TQNodeString *)StackTop value] appendString:YYNSSTR]; }
+
 StrEmbeddExpr= ("#{"-"}"
                | "#{" - expr:Expression - "}"
                  {
