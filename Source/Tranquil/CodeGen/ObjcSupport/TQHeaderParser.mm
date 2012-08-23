@@ -546,14 +546,17 @@ using namespace llvm;
         }];
     }
 
-    Value *callResult = callBuilder.CreateCall(function, args);
+    CallInst *call = callBuilder.CreateCall(function, args);
+    [byValArgIndices enumerateIndexesWithOptions:0 usingBlock:^(NSUInteger idx, BOOL *stop) {
+        call->addAttribute(idx, Attribute::ByVal);
+    }];
     if([_retType hasPrefix:@"v"])
         callBuilder.CreateRet(ConstantPointerNull::get(aProgram.llInt8PtrTy));
     else if([_retType hasPrefix:@"@"])
-        callBuilder.CreateRet(callResult);
+        callBuilder.CreateRet(call);
     else {
         if(!returningOnStack)
-            callBuilder.CreateStore(callResult, resultAlloca);
+            callBuilder.CreateStore(call, resultAlloca);
         Value *boxed = callBuilder.CreateCall2(aProgram.TQBoxValue,
                                                callBuilder.CreateBitCast(resultAlloca, int8PtrTy),
                                                [aProgram getGlobalStringPtr:_retType withBuilder:&callBuilder]);
