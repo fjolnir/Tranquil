@@ -656,7 +656,6 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
         case _C_CLASS:
         case _C_SEL:
         case _C_CHARPTR:
-        case _C_ARY_B:
         case _TQ_C_LAMBDA_B:
             return _llInt8PtrTy;
         case _C_DBL:
@@ -699,6 +698,16 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
             TQLog(@"unions -> llvm not yet supported");
             exit(1);
         break;
+        case _C_ARY_B: {
+            unsigned count;
+            ++aEncoding; // Skip past the '['
+            assert(isdigit(*aEncoding));
+            count = atoi(aEncoding);
+            // Move on to the enclosed type
+            while(isdigit(*aEncoding)) ++aEncoding;
+            Type *enclosedType = [self llvmTypeFromEncoding:aEncoding];
+            return ArrayType::get(enclosedType, count);
+        } break;
         case _C_PTR: {
             if(*(aEncoding + 1) == _C_PTR || *(aEncoding + 1) == _C_CHARPTR || *(aEncoding + 1) == _C_ID)
                 return _llInt8PtrPtrTy;
