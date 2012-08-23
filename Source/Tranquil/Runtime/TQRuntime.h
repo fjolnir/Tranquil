@@ -23,11 +23,11 @@ extern TQValidObject *TQValid;
 enum TQBlockFlag_t {
     // I chose a flag right in the middle of the unused space, so let's hope Apple doesn't decide to use it
     TQ_BLOCK_IS_TRANQUIL_BLOCK = (1 << 19),
-    TQ_BLOCK_HAS_COPY_DISPOSE =  (1 << 25),
-    TQ_BLOCK_HAS_CXX_OBJ =       (1 << 26),
-    TQ_BLOCK_IS_GLOBAL =         (1 << 28),
-    TQ_BLOCK_USE_STRET =         (1 << 29),
-    TQ_BLOCK_HAS_SIGNATURE  =    (1 << 30)
+    TQ_BLOCK_HAS_COPY_DISPOSE  = (1 << 25),
+    TQ_BLOCK_HAS_CXX_OBJ       = (1 << 26),
+    TQ_BLOCK_IS_GLOBAL         = (1 << 28),
+    TQ_BLOCK_USE_STRET         = (1 << 29),
+    TQ_BLOCK_HAS_SIGNATURE     = (1 << 30)
 };
 
 enum TQBlockFieldFlag_t {
