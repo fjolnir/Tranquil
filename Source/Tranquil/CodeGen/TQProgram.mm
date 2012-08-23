@@ -280,7 +280,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 
     _searchPaths = [[NSMutableArray alloc] initWithObjects:@".",
                         @"~/Library/Frameworks", @"/Library/Frameworks",
-                        @"/System/Library/Frameworks/", nil];
+                        @"/System/Library/Frameworks/", @"/usr/include/", @"/usr/local/include/", nil];
     _allowedFileExtensions = [[NSMutableArray alloc] initWithObjects:@"tq", @"h", nil];
 
     return self;
