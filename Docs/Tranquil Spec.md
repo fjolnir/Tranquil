@@ -4,12 +4,14 @@
 
 	\ A backslash outside a string starts a comment
 	
-	\ Keywords
+	\ Reserved Keywords
 	if
 	else
 	while
 	until
 	import
+	async
+	wait
 	break  \ Prematurely terminates a loop
 	skip   \ Skips to the end of the current iteration of a loop
 	nil    \ Represents 'nothing' ('no' is a synonym)
@@ -39,7 +41,7 @@
 	aDict   = { key => value, anotherKey => value } \ Initializes a dictionary
 	
 	\ Blocks
-	aBlock = { ..body.. } \ A block. Defines scope
+	aBlock = { ..body.. } \ A block. Defines scope (Empty braces: `{}` constitute an empty dictionary, not an empty block)
 	aBlockWith = { arg0, arg1 | ^arg0 } \ A block that takes two arguments
 	                                    \ and returns its first argument as-is
 	aBlock = { arg=123 |  ..statements.. } \ Assignment in the argument list indicates a default value
@@ -117,6 +119,17 @@
 	                       \ file, since they are evaluated at compile-time)
 	import "AppKit"        \ You can also import Objective-C headers.
 	                       \ In this case the header AppKit.h in AppKit.framework is read.
+	                       
+    \ Concurrency (Unimplemented)
+    async ..expression..        \ Executes `expression` asynchronously
+    var = async ..expression..  \ Assigns the result of `expression` to `var` when the operation is complete    
+    wait                        \ Waits for any asynchronous operations created in the current block to finish
+    whenFinished ..block..      \ Executes `block` when all asynchronous operations created in the current block are finished, without blocking. (`block` is executed on the program's main thread)
+    synchronized(..expression..) { \ Acquires a lock on the result of `expression`. If one has already been taken, waits
+        ..statements..
+    }
+    
+    
 
 
 ## Blocks
@@ -124,6 +137,8 @@
 A block is ..a block of code. It is either used as a function or a method. (A method is simply a block that is executed in response to a message)
 
 By default a block returns `nil`. To return a value the `^` symbol is prefixed to the expression to return.
+
+**Planned for the future:** Non-local returns: to return from a parent block one can use the number of carets corresponding to the current block's depth relative to it, so for example: `^^1` would return 1 from caller of the current block. (I don't know if this is possible yet)
 
 All arguments are optional and if no default value is specified, `nil` is used.
 
@@ -264,6 +279,41 @@ A good way of knowing when to use weak references is to think about object refer
 
 In this example we had a block that is a property of `Klass`. This block was being used to periodically call a method on `self` but because this block is owned by the `Klass` object, we use a weak reference to `self` in order to not cause the block to complete a cyclical strong reference between it and `self`.
 
+## Concurrency
+
+Using the `async` keyword, an expression can be executed asynchronously. If one wishes to execute multiple expressions and then wait for all of them to finish, the `wait` keyword is used.
+
+`async` is a statement and can not be used for example as a message parameter (`obj foo: async block()` **is not ok**). With one exception: assignment. `var = async ..expression..` is valid, and simply sets `var` to the result of `expression` once it has finished executing.
+
+    fib = { n |
+        if n > 1 {
+            a = async fib(n-1)
+            b = fib(n-2)
+            wait
+            ^a + b
+        }
+        ^n
+    }
+
+The following example shows a block that spawns a few operations and returns immediately. Then when the operations are finished, updateUI() is called on the program's main thread.
+    
+    #Array {
+        - mapInParallel: lambda {
+            i = 0
+            until i >= self count
+				self[i] = async lambda(self[i])
+		    wait
+		}
+	}
+    executeOperations = {
+        async [1,2,3,4] mapInParallel: `i | expensiveOp(i)`
+        whenFinished { updateUI() }
+    }
+
+`var = async ..expression..` is roughly equal to:
+
+    var = nil \ If the variable already exists in this scope, it's value is unchanged 
+    async { var = ..expression.. }()
 
 ## Examples
 
