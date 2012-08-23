@@ -731,11 +731,8 @@ Constant     = < [A-Z] Character* >                        { ExtendToken(); $$ =
 Character    = ([A-Za-z0-9_])
 
 # String with support for embedding expressions
-String       = '"'
-               {
-                   ExtendToken();
-                   PushStack([TQNodeString nodeWithString:[NSMutableString string]]);
-               }
+String       = ConstString | MutableStr
+MutableStr   = '"' { PushStack([TQNodeString nodeWithString:[NSMutableString string]]); }
                (StrEmbeddExpr|StrInside)*
                _dblQuot ~{ SyntaxError(@"String literal left unclosed"); }
                {
@@ -753,6 +750,19 @@ StrEmbeddExpr= ("#{"-"}"
                      [[StackTop embeddedValues] addObject:expr];
                  }
                )
+
+# Constant string
+ConstString  = "$"
+                   ( < Character+ >
+                   | '"' < [^\"]+ >
+                     _dblQuot ~{ SyntaxError(@"Constant string literal left unclosed"); }
+                   | "\'" < [^\']+ >
+                     _snglQuot ~{ SyntaxError(@"Constant string literal left unclosed"); }
+                   ) ~{ SyntaxError(@"Expected string literal after '$'"); }
+                   {
+                       $$ = [TQNodeConstString nodeWithString:YYNSSTR];
+                   }
+
 RegExp       = < "/" ("\\/"|[^/])* "/"[im]* >              { ExtendToken(); $$ = [TQNodeRegex nodeWithPattern:YYNSSTR];   }
 
 Comment      = - (('\\') (!EOL .)* EOL)+
@@ -765,6 +775,7 @@ EOL          = (- ('\n' | '\r\n' | '\r'))+
 EOF          = - !.
 
 # Rules to implement syntax errors
+_snglQuot     = "\'"
 _dblQuot      = '"'
 _backtick     = "`"
 _rightParen   = ')'

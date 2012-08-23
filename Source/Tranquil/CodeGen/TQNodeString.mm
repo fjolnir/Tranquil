@@ -58,7 +58,6 @@ using namespace llvm;
     return NO;
 }
 
-
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
@@ -87,5 +86,46 @@ using namespace llvm;
         strValue = builder->CreateCall(aProgram.objc_msgSend, args);
     }
     return strValue;
+}
+@end
+
+@implementation TQNodeConstString
++ (TQNodeConstString *)nodeWithString:(NSMutableString *)aStr
+{
+    return (TQNodeConstString *)[super nodeWithString:aStr];
+}
+
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
+{
+    Module *mod = aProgram.llModule;
+    IRBuilder<> *builder = aBlock.builder;
+
+    NSString *globalName;
+    if(aProgram.useAOTCompilation)
+        globalName = [NSString stringWithFormat:@"TQConstNSStr_%ld", [self.value hash]];
+    else
+        globalName = [NSString stringWithFormat:@"TQConstNSStr_%@", self.value];
+
+    Value *str = mod->getGlobalVariable([globalName UTF8String], true);
+    if(!str) {
+         Function *rootFunction = aRoot.function;
+        IRBuilder<> rootBuilder(&rootFunction->getEntryBlock(), rootFunction->getEntryBlock().begin());
+
+        Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_NSString", aProgram.llInt8Ty);
+        Value *selector = rootBuilder.CreateLoad(mod->getOrInsertGlobal("TQStringWithUTF8StringSel", aProgram.llInt8PtrTy));
+
+        Value *result = rootBuilder.CreateCall3(aProgram.objc_msgSend, klass, selector, [aProgram getGlobalStringPtr:self.value withBuilder:&rootBuilder]);
+        result = rootBuilder.CreateCall(aProgram.objc_retain, result);
+
+        str = new GlobalVariable(*mod, aProgram.llInt8PtrTy, false, GlobalVariable::InternalLinkage,
+                                 ConstantPointerNull::get(aProgram.llInt8PtrTy), [globalName UTF8String]);
+
+        rootBuilder.CreateStore(result, str);
+
+    }
+    return aBlock.builder->CreateLoad(str);
 }
 @end

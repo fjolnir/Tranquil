@@ -5,3 +5,7 @@
 @property(readwrite, retain) NSMutableArray *embeddedValues;
 + (TQNodeString *)nodeWithString:(NSMutableString *)aStr;
 @end
+
+@interface TQNodeConstString : TQNodeString
++ (TQNodeConstString *)nodeWithString:(NSMutableString *)aStr;
+@end

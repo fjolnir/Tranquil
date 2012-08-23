@@ -22,7 +22,7 @@
 	valid  \ Represents non-nilness, for use in cases where the actual object value is not of concern ('yes' is a synonym)
 	
 	\ Built-in Operators
-	||  \ Or:  Evaluates to the first non-nil expression: (nil || 123) == 123      (Can be chained)
+	||  \ Or:  Evaluates to the first non-nil expression: (123 || nil) == 123      (Can be chained)
 	&&  \ And: Evaluates to the last expression if all are non-nil:  (1 && 2) == 2 (Can be chained)
 	
 	\ Variable assignment
@@ -112,6 +112,10 @@
 	\ String interpolation
 	a = "expression"
 	b = "A string with an embedded #{a}." \ Evaluates to "A string with an embedded expression."
+	
+	\ Unique strings
+	a = $string
+	b = $"constant string with spaces"
 	
 	\ Importing other files
 	import "..filename.."  \ Imports `filename`.
