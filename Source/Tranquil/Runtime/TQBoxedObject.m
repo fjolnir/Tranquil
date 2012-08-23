@@ -173,16 +173,13 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
         case _C_VOID:     TQAssert(NO, @"You cannot unbox a value of type void");         break;
 
         case _TQ_C_LAMBDA_B: {
+            TQAssert(!aValue || [aValue isKindOfClass:NSClassFromString(@"NSBlock")], @"Tried to unbox a non block to a block/function pointer type");
+            struct TQBoxedBlockLiteral *wrapperBlock = (struct TQBoxedBlockLiteral *)aValue;
             if(!aValue)
                 *(void **)aDest = NULL;
-            else if(*(aType+1) == _TQ_C_LAMBDA_FUNCPTR) {
-                // The block can't be autoreleased since there is no way of knowing how long the function receiving it requires it.
+            else  {
                 TQBlockClosure *closure = [[[TQBlockClosure alloc] initWithBlock:[[aValue copy] autorelease] type:aType] autorelease];
-                *(void **)aDest = closure.functionPointer;
-            } else {
-                struct TQBoxedBlockLiteral *wrapperBlock = (struct TQBoxedBlockLiteral *)aValue;
-                TQAssert(wrapperBlock->flags & TQ_BLOCK_IS_WRAPPER_BLOCK, @"Tried to unbox non-boxed block");
-                memmove(aDest, wrapperBlock->funPtr, sizeof(void*));
+                *(void **)aDest = closure.pointer;
             }
         } break;
 
