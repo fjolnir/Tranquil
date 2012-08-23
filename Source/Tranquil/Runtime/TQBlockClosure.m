@@ -61,7 +61,7 @@ void _closureFunction(ffi_cif *closureCif, void *ret, void *args[], TQBlockClosu
     // Construct an ffi call to the block that forwards the arguments passed to the closure
     struct TQBlockLiteral *block = (struct TQBlockLiteral *)closureObj->_block;
     unsigned int nargs = closureCif->nargs + 1;
-    ffi_type *retType = &ffi_type_pointer;
+    ffi_type *retType  = &ffi_type_pointer;
     ffi_type *argTypes[nargs];
     void     *argPtrs[nargs];
 
