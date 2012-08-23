@@ -72,34 +72,53 @@
         _ffiType = [TQFFIType scalarTypeToFFIType:_encoding];
     else if(*_encoding == _TQ_C_LAMBDA_B || *_encoding == _C_PTR)
         _ffiType = &ffi_type_pointer;
-    else if(*_encoding == _C_STRUCT_B) {
+    else if(*_encoding == _C_STRUCT_B || *_encoding ==_C_ARY_B) {
+        BOOL isArray = *_encoding ==_C_ARY_B; // An array is essentially a struct containing fields all with the same type.
+
         _referencedTypes = [NSMutableArray new];
         ffi_type type;
         _ffiType = (ffi_type*)malloc(sizeof(ffi_type));
         _ffiType->type = FFI_TYPE_STRUCT;
         _ffiType->size = _ffiType->alignment= 0;
         int numFields = 0;
-        const char *fieldEncoding = strstr(_encoding, "=") + 1;
-        if(*fieldEncoding != _C_STRUCT_E) {
-            const char *currField = fieldEncoding;
-            do {
-                ++numFields;
-            } while((currField = TQGetSizeAndAlignment(currField, NULL, NULL)) && *currField != _C_STRUCT_E);
+        const char *fieldEncoding;
+        if(isArray) {
+            ++aEncoding; // Skip past the '['
+            assert(isdigit(*aEncoding));
+            numFields = atoi(aEncoding);
+            // Move on to the enclosed type
+            while(isdigit(*aEncoding)) ++aEncoding;
+            fieldEncoding = aEncoding;
+        } else { // Is struct
+            fieldEncoding = strstr(_encoding, "=") + 1;
+            if(*fieldEncoding != _C_STRUCT_E) {
+                const char *currField = fieldEncoding;
+                do {
+                    ++numFields;
+                } while((currField = TQGetSizeAndAlignment(currField, NULL, NULL)) && *currField != _C_STRUCT_E);
+            }
         }
         _ffiType->size = type.alignment = 0;
         _ffiType->elements = (ffi_type **)malloc(sizeof(ffi_type*) * numFields + 1);
 
-        for(int i = 0; i < numFields; i++) {
+        if(isArray) {
             TQFFIType *fieldType = [TQFFIType typeWithEncoding:fieldEncoding];
             [_referencedTypes addObject:fieldType];
-            _ffiType->elements[i] = fieldType.ffiType;
-            fieldEncoding = TQGetSizeAndAlignment(fieldEncoding, NULL, NULL);
+            for(int i = 0; i < numFields; i++) {
+                _ffiType->elements[i] = fieldType.ffiType;
+            }
+        } else {
+            for(int i = 0; i < numFields; i++) {
+                TQFFIType *fieldType = [TQFFIType typeWithEncoding:fieldEncoding];
+                [_referencedTypes addObject:fieldType];
+                _ffiType->elements[i] = fieldType.ffiType;
+                fieldEncoding = TQGetSizeAndAlignment(fieldEncoding, NULL, NULL);
+            }
         }
         _ffiType->elements[numFields] = NULL;
     } else {
-        TQLog(@"%s", _encoding);
         // TODO: handle unions by returning a type matching the largest field?
-        assert(NO);
+        TQAssert(NO, @"Unhandled encoding: %s", _encoding);
     }
     return self;
 }
