@@ -9,7 +9,11 @@ static ffi_status _PrepareClosure(ffi_closure *closure, ffi_cif *cif, void (*fun
 static void _closureFunction(ffi_cif *closureCif, void *ret, void *args[], TQBlockClosure *closureObj);
 static void _blockClosureFunction(ffi_cif *closureCif, void *ret, void *args[], TQBlockClosure *closureObj);
 
-struct { unsigned long int reserved, size; } _BlockDescriptor = { 0, sizeof(struct TQBlockLiteral) };
+static void TQClosureBlock_copy(struct TQClosureBlockLiteral *dst, struct TQClosureBlockLiteral *src);
+static void TQClosureBlock_dispose(struct TQClosureBlockLiteral *src);
+
+struct TQClosureBlockDescriptor _BlockDescriptor = { 0, sizeof(struct TQBlockLiteral),
+                                                     &TQClosureBlock_copy, &TQClosureBlock_dispose };
 
 @implementation TQBlockClosure
 @synthesize pointer=_pointer;
@@ -53,8 +57,10 @@ struct { unsigned long int reserved, size; } _BlockDescriptor = { 0, sizeof(stru
 
     if(isBlock) {
         _boxedBlock.isa        = &_NSConcreteStackBlock;
+        _boxedBlock.flags      = TQ_BLOCK_HAS_COPY_DISPOSE;
         _boxedBlock.invoke     = _functionPointer;
-        _boxedBlock.descriptor = (struct TQBlockDescriptor *)&_BlockDescriptor;
+        _boxedBlock.descriptor = &_BlockDescriptor;
+        _boxedBlock.closure    = self;
     }
     _pointer = isBlock ? &_boxedBlock : _functionPointer;
     return self;
@@ -145,6 +151,15 @@ void _blockClosureFunction(ffi_cif *closureCif, void *ret, void *args[], TQBlock
         *(id*)ret = retPtr;
     else if(*returnType != _C_VOID)
         [TQBoxedObject unbox:retPtr to:ret usingType:returnType];
+}
+
+void TQClosureBlock_copy(struct TQClosureBlockLiteral *dst, struct TQClosureBlockLiteral *src)
+{
+    _Block_object_assign(&dst->closure, src->closure, TQ_BLOCK_FIELD_IS_OBJECT);
+}
+void TQClosureBlock_dispose(struct TQClosureBlockLiteral *src)
+{
+    _Block_object_dispose(src->closure, TQ_BLOCK_FIELD_IS_OBJECT);
 }
 
 
