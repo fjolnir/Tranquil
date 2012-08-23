@@ -1,5 +1,7 @@
 #import <Foundation/Foundation.h>
 
+@class TQNumber;
+
 extern NSString * const TQTypeObj;
 extern NSString * const TQTypeClass;
 extern NSString * const TQTypeSel;
@@ -37,4 +39,6 @@ extern NSString * const TQTypeString;
 
 - (id)objectAtIndexedSubscript:(NSUInteger)aIdx;
 - (void)setObject:(id)aObj atIndexedSubscript:(NSUInteger)aIdx;
+
+- (TQNumber *)count;
 @end
