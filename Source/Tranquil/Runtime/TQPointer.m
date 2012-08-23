@@ -132,6 +132,11 @@ NSString * const TQTypeString    = @"*";
     [TQBoxedObject unbox:aObj to:[self _addrForIndex:aIdx] usingType:_itemType];
 }
 
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<%@:%p to: %p type: %s>", [self class], self, _addr, _itemType];
+}
+
 - (void)dealloc
 {
     if(_freeOnDealloc)
