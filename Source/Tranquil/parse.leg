@@ -753,16 +753,13 @@ StrEmbeddExpr= ("#{"-"}"
                )
 
 # Constant string
-ConstString  = "$"
-                   ( < Character+ >
+ConstString  = "$" ( < Character+ >
                    | '"' < [^\"]+ >
                      _dblQuot ~{ SyntaxError(@"Constant string literal left unclosed"); }
                    | "\'" < [^\']+ >
                      _snglQuot ~{ SyntaxError(@"Constant string literal left unclosed"); }
                    ) ~{ SyntaxError(@"Expected string literal after '$'"); }
-                   {
-                       $$ = [TQNodeConstString nodeWithString:YYNSSTR];
-                   }
+                   { $$ = [TQNodeConstString nodeWithString:YYNSSTR]; }
 
 RegExp       = < "/" ("\\/"|[^/])* "/"[im]* >              { ExtendToken(); $$ = [TQNodeRegex nodeWithPattern:YYNSSTR];   }
 
