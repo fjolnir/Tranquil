@@ -90,9 +90,9 @@ using namespace llvm;
 @end
 
 @implementation TQNodeConstString
-+ (TQNodeConstString *)nodeWithString:(NSMutableString *)aStr
++ (TQNodeConstString *)nodeWithString:(NSString *)aStr
 {
-    return (TQNodeConstString *)[super nodeWithString:aStr];
+    return (TQNodeConstString *)[super nodeWithString:[[aStr mutableCopy] autorelease]];
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram

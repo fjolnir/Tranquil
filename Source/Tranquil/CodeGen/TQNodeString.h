@@ -7,5 +7,5 @@
 @end
 
 @interface TQNodeConstString : TQNodeString
-+ (TQNodeConstString *)nodeWithString:(NSMutableString *)aStr;
++ (TQNodeConstString *)nodeWithString:(NSString *)aStr;
 @end
