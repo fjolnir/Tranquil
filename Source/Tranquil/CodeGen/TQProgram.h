@@ -10,7 +10,10 @@ extern "C" NSString * const kTQSyntaxErrorException;
 @interface TQProgram : NSObject {
     BOOL _initializedTQRuntime;
     NSArray *_arguments;
-    struct TQBlockByRef _argumentGlobal;
+
+    // Values used for globals under JIT compilation
+    struct TQBlockByRef _argGlobalForJIT;
+    dispatch_queue_t _globalQueueForJIT;
 }
 
 @property(readwrite, retain) NSString *name;
@@ -25,6 +28,9 @@ extern "C" NSString * const kTQSyntaxErrorException;
 // AOT compilation related
 @property(readwrite, retain) NSString *outputPath;
 @property(readwrite) BOOL useAOTCompilation;
+
+#pragma mark - Global values
+@property(readonly) llvm::GlobalVariable *globalQueue;
 
 #pragma mark - Cached types
 // void
@@ -58,7 +64,9 @@ extern "C" NSString * const kTQSyntaxErrorException;
     *objc_autoreleasePoolPush, *objc_autoreleasePoolPop, *TQSetValueForKey, *TQValueForKey,
     *TQGetOrCreateClass, *TQObjectsAreEqual, *TQObjectsAreNotEqual, *TQObjectGetSuperClass,
     *TQVaargsToArray, *TQUnboxObject, *TQBoxValue, *tq_msgSend, *objc_retainAutoreleasedReturnValue,
-    *TQInitializeRuntime, *TQCliArgsToArray;
+    *TQInitializeRuntime, *TQCliArgsToArray,
+    *dispatch_get_global_queue, *dispatch_group_create, *dispatch_release, *dispatch_group_wait,
+    *dispatch_group_notify, *dispatch_group_async;
 
 #pragma mark - Methods
 

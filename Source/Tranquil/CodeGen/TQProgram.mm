@@ -64,6 +64,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     llInt8PtrPtrTy=_llInt8PtrPtrTy, llPointerWidthInBits=_llPointerWidthInBits, llPointerAlignInBytes=_llPointerAlignInBytes,
     llPointerSizeInBytes=_llPointerSizeInBytes;
 @synthesize llBlockDescriptorTy=_blockDescriptorTy, llBlockLiteralType=_blockLiteralType;
+@synthesize globalQueue=_globalQueue;
 @synthesize objc_msgSend=_func_objc_msgSend, objc_msgSend_fixup=_func_objc_msgSend_fixup, objc_msgSendSuper=_func_objc_msgSendSuper,
     objc_storeWeak=_func_objc_storeWeak, objc_loadWeak=_func_objc_loadWeak, objc_allocateClassPair=_func_objc_allocateClassPair,
     objc_registerClassPair=_func_objc_registerClassPair, objc_destroyWeak=_func_objc_destroyWeak,
@@ -79,7 +80,10 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     TQVaargsToArray=_func_TQVaargsToArray, TQUnboxObject=_func_TQUnboxObject,
     TQBoxValue=_func_TQBoxValue, tq_msgSend=_func_tq_msgSend, objc_retainAutoreleaseReturnValue=_func_objc_retainAutoreleaseReturnValue,
     objc_autoreleaseReturnValue=_func_objc_autoreleaseReturnValue, objc_retainAutoreleasedReturnValue=_func_objc_retainAutoreleasedReturnValue,
-    objc_storeStrong=_func_objc_storeStrong, TQInitializeRuntime=_func_TQInitializeRuntime, TQCliArgsToArray=_func_TQCliArgsToArray;
+    objc_storeStrong=_func_objc_storeStrong, TQInitializeRuntime=_func_TQInitializeRuntime, TQCliArgsToArray=_func_TQCliArgsToArray,
+    dispatch_get_global_queue=_func_dispatch_get_global_queue, dispatch_group_create=_func_dispatch_group_create,
+    dispatch_release=_func_dispatch_release, dispatch_group_wait=_func_dispatch_group_wait,
+    dispatch_group_notify=_func_dispatch_group_notify, dispatch_group_async=_func_dispatch_group_async;
 
 + (TQProgram *)programWithName:(NSString *)aName
 {
@@ -232,7 +236,19 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     args_int_i8PtrPtr.push_back(_llIntTy);
     args_int_i8PtrPtr.push_back(_llInt8PtrPtrTy);
     FunctionType *ft_i8Ptr__i32_i8PtrPtr = FunctionType::get(_llInt8PtrTy, args_int_i8PtrPtr, false);
+    
+    // void*(long, long)
+    std::vector<Type*> args_i64_i64;
+    args_i64_i64.push_back(_llInt64Ty);
+    args_i64_i64.push_back(_llInt64Ty);
+    FunctionType *ft_i8Ptr__i64_i64 = FunctionType::get(_llInt8PtrTy, args_i64_i64, false);
 
+    // long(void*, long)
+    std::vector<Type*> args_i8Ptr_i64;
+    args_i8Ptr_i64.push_back(_llInt8PtrTy);
+    args_i8Ptr_i64.push_back(_llInt64Ty);
+    FunctionType *ft_i64__i8Ptr_i64 = FunctionType::get(_llInt64Ty, args_i8Ptr_i64, false);
+    
     DEF_EXTERNAL_FUN(objc_allocateClassPair, ft_i8Ptr__i8Ptr_i8Ptr_sizeT);
     DEF_EXTERNAL_FUN(objc_registerClassPair, ft_void__i8Ptr);
     DEF_EXTERNAL_FUN(class_replaceMethod, ft_i8__i8Ptr_i8Ptr_i8Ptr_i8Ptr);
@@ -271,6 +287,12 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     DEF_EXTERNAL_FUN(tq_msgSend, ft_i8ptr__i8ptr_i8ptr_variadic)
     DEF_EXTERNAL_FUN(TQInitializeRuntime, ft_void__void);
     DEF_EXTERNAL_FUN(TQCliArgsToArray, ft_i8Ptr__i32_i8PtrPtr);
+    DEF_EXTERNAL_FUN(dispatch_get_global_queue, ft_i8Ptr__i64_i64);
+    DEF_EXTERNAL_FUN(dispatch_group_create, ft_i8Ptr__void);
+    DEF_EXTERNAL_FUN(dispatch_release, ft_void__i8Ptr);
+    DEF_EXTERNAL_FUN(dispatch_group_wait, ft_i64__i8Ptr_i64);
+    DEF_EXTERNAL_FUN(dispatch_group_notify, ft_void__i8Ptr_i8Ptr_i8Ptr);
+    DEF_EXTERNAL_FUN(dispatch_group_async, ft_void__i8Ptr_i8Ptr_i8Ptr);
 
 #undef DEF_EXTERNAL_FUN
 
@@ -291,8 +313,10 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 {
     [_searchPaths release];
     [_allowedFileExtensions release];
-    delete _llModule;
     [_objcParser release];
+    delete _llModule;
+    [_arguments release];
+    dispatch_release(_globalQueueForJIT);
     [super dealloc];
 }
 
@@ -318,18 +342,24 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 {
     assert(aNode);
 
+    // Global for the dispatch queue
+    _globalQueue = _llModule->getNamedGlobal("TQGlobalQueue");
+    if(!_globalQueue)
+        _globalQueue = new GlobalVariable(*_llModule, _llInt8PtrTy, false, GlobalVariable::InternalLinkage,
+                                          ConstantPointerNull::get(_llInt8PtrTy), "TQGlobalQueue");
+
     GlobalVariable *argGlobal;
     if(!_useAOTCompilation) {
         // Create a global for the argument array
         Type *byRefType = [TQNodeVariable captureStructTypeInProgram:self];
         argGlobal = new GlobalVariable(*_llModule, byRefType, false, GlobalVariable::InternalLinkage,
                                        ConstantAggregateZero::get(byRefType), "TQGlobalVar_...");
-        _argumentGlobal.isa        = nil;
-        _argumentGlobal.forwarding = &_argumentGlobal;
-        _argumentGlobal.flags      = 0;
-        _argumentGlobal.size       = sizeof(TQBlockByRef);
-        _argumentGlobal.value      = nil;
-        _argumentGlobal.forwarding->value = _arguments;
+        _argGlobalForJIT.isa        = nil;
+        _argGlobalForJIT.flags      = 0;
+        _argGlobalForJIT.size       = sizeof(TQBlockByRef);
+        _argGlobalForJIT.value      = nil;
+        _argGlobalForJIT.value      = _arguments;
+        _argGlobalForJIT.forwarding = &_argGlobalForJIT;
         // Insert a reference to the '...' variable so that child blocks know to capture it
         [aNode.statements insertObject:[TQNodeVariable nodeWithName:@"..."] atIndex:0];
     }
@@ -380,7 +410,10 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
         //engine->DisableLazyCompilation();
         fpm.add(new TargetData(*engine->getTargetData()));
 
-        engine->addGlobalMapping(argGlobal, (void*)&_argumentGlobal);
+        engine->addGlobalMapping(argGlobal, (void*)&_argGlobalForJIT);
+        if(!_globalQueueForJIT)
+            _globalQueueForJIT = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+        engine->addGlobalMapping(_globalQueue, &_globalQueueForJIT);
     }
 
     // Optimization pass
@@ -418,6 +451,10 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
         [mainBlk.statements addObject:[TQNodeCustom nodeWithBlock:^(TQProgram *aProgram, TQNodeBlock *aBlock, TQNodeRootBlock *aRoot) {
             aBlock.builder->CreateCall(_func_TQInitializeRuntime);
             llvm::Function::arg_iterator argumentIterator = aBlock.function->arg_begin();
+
+            // Create the app wide dispatch queue
+            Value *queue = aBlock.builder->CreateCall2(_func_dispatch_get_global_queue, ConstantInt::get(_llInt64Ty, DISPATCH_QUEUE_PRIORITY_DEFAULT), ConstantInt::get(_llInt64Ty, 0));
+            aBlock.builder->CreateStore(queue, _globalQueue);
 
             [cliArgVar store:aBlock.builder->CreateCall2(_func_TQCliArgsToArray, argumentIterator, ++argumentIterator)
                    inProgram:aProgram
