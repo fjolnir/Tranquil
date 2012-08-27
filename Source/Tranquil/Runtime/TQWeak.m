@@ -42,9 +42,9 @@ extern BOOL TQObjectIsStackBlock(id aBlock); // We can't #import Runtime.h becau
     return [__obj methodSignatureForSelector:aSelector];
 }
 
-- (NSString *)description    { return [__obj description];      }
-- (Class)class               { return [__obj class];            }
-- (NSUInteger)hash           { return [__obj hash];             }
+- (NSString *)description    { return [__obj description]; }
+- (Class)class               { return [__obj class];       }
+- (NSUInteger)hash           { return [__obj hash];        }
 
 - (BOOL)isEqual:(id)anObject {
     if(!__obj)
