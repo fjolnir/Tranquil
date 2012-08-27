@@ -82,11 +82,14 @@
 	\ Objects
 	
 	#Klass < Object {
+	    message: argument         \ Sends `message:` to the class after it's loaded
+	    
 		+ new {                   \ Class method ('self' refers to the class itself)
 			instance = super new  \ Calls superclass's implementation (which in this case, creates the instance)
 			instance#ivar = 123   \ Sets instance variable
 			^instance             \ Returns the instance
 		}
+		
 		- aMethodTaking: a and: b {     \ Instance method taking two arguments ('self' refers to an instance of Klass)
 			^#ivar = a + b          \ Returns the value of self#ivar after setting it to a+b
 		}

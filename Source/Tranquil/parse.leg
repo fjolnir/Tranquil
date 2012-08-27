@@ -226,6 +226,15 @@ KwdMsgBody   = { PushStack([NSMutableArray array]); }
                     $$ = PopStack();
                     [StackTop setArguments:$$];
                }
+# One line keyword msg
+OLKwdMsgBody = { PushStack([NSMutableArray array]); }
+               (SelectorPart -)+
+               {
+                    ExtendToken();
+                    $$ = PopStack();
+                    [StackTop setArguments:$$];
+               }
+
 
 SelectorPart = { PushStack([TQNodeArgument node]); }
                (name:SelIdent  { [StackTop setSelectorPart:name]; })
@@ -336,7 +345,7 @@ Class        = '#' name:Constant --
                ( "<" --
                  SuperClsName ~{ SyntaxError(@"Expected Super class after '<'"); }
                  -- )?
-               '{' -- (Method --)*
+               '{' -- (OnLoadMsg --)* (Method --)*
                _rightBrace ~{ SyntaxError(@"Unterminated class"); }
                {
                    ExtendToken();
@@ -411,6 +420,12 @@ MethodArg    = identifier:SelIdent':' --
                    [StackTop addObject:[TQNodeMethodArgumentDef nodeWithName:name selectorPart:identifier]];
                }
 
+OnLoadMsg    = { PushStack([TQNodeMessage nodeWithReceiver:StackTop]); }
+               (OLKwdMsgBody | UnaryMsgBody)
+               {
+                   $$ = PopStack();
+                   [[(TQNodeClass *)StackTop onLoadMessages] addObject:$$];
+               }
 
 # Conditionals
 If           = ( "if"        { UpdateToken();  PushStack([TQNodeIfBlock node]);     }

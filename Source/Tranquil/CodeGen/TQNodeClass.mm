@@ -6,7 +6,7 @@ using namespace llvm;
 
 @implementation TQNodeClass
 @synthesize name=_name, superClassName=_superClassName, classMethods=_classMethods, instanceMethods=_instanceMethods,
-    classPtr=_classPtr;
+    classPtr=_classPtr, onLoadMessages=_onloadMessages;
 
 + (TQNodeClass *)nodeWithName:(NSString *)aName
 {
@@ -22,6 +22,7 @@ using namespace llvm;
 
     _classMethods    = [NSMutableArray new];
     _instanceMethods = [NSMutableArray new];
+    _onloadMessages  = [NSMutableArray new];
 
     return self;
 }
@@ -32,6 +33,7 @@ using namespace llvm;
     [_superClassName release];
     [_classMethods release];
     [_instanceMethods release];
+    [_onloadMessages release];
     [super dealloc];
 }
 
@@ -60,6 +62,9 @@ using namespace llvm;
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
+    if(_classPtr)
+        return aBlock.builder->CreateCall2(aProgram.TQGetOrCreateClass, [aProgram getGlobalStringPtr:_name inBlock:aBlock], ConstantPointerNull::get(aProgram.llInt8PtrTy));
+
     // -- Type definitions
     // -- Method definitions
     IRBuilder<> *builder = aBlock.builder;
@@ -75,6 +80,11 @@ using namespace llvm;
         if(*aoErr) return NULL;
     }
 
+    // Execute any onload messages
+    for(TQNodeMessage *msg in _onloadMessages) {
+        [msg generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+    }
+
     return _classPtr;
 }
 
@@ -86,5 +96,10 @@ using namespace llvm;
     for(TQNode *node in _instanceMethods) {
         aBlock(node);
     }
+}
+
+- (id)referencesNode:(TQNode *)aNode
+{
+    return nil;
 }
 @end
