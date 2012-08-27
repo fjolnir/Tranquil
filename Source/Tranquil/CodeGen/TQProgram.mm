@@ -316,7 +316,6 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     [_objcParser release];
     delete _llModule;
     [_arguments release];
-    dispatch_release(_globalQueueForJIT);
     [super dealloc];
 }
 
@@ -342,11 +341,6 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 {
     assert(aNode);
 
-    // Global for the dispatch queue
-    _globalQueue = _llModule->getNamedGlobal("TQGlobalQueue");
-    if(!_globalQueue)
-        _globalQueue = new GlobalVariable(*_llModule, _llInt8PtrTy, false, GlobalVariable::InternalLinkage,
-                                          ConstantPointerNull::get(_llInt8PtrTy), "TQGlobalQueue");
 
     GlobalVariable *argGlobal;
     if(!_useAOTCompilation) {
@@ -362,6 +356,17 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
         _argGlobalForJIT.forwarding = &_argGlobalForJIT;
         // Insert a reference to the '...' variable so that child blocks know to capture it
         [aNode.statements insertObject:[TQNodeVariable nodeWithName:@"..."] atIndex:0];
+
+        // Global for the dispatch queue
+        _globalQueue = _llModule->getNamedGlobal("TQGlobalQueue");
+        if(!_globalQueue)
+            _globalQueue = new GlobalVariable(*_llModule, _llInt8PtrTy, false, GlobalVariable::ExternalLinkage,
+                                              NULL, "TQGlobalQueue");
+    } else {
+        _globalQueue = _llModule->getNamedGlobal("TQGlobalQueue");
+        if(!_globalQueue)
+            _globalQueue = new GlobalVariable(*_llModule, _llInt8PtrTy, false, GlobalVariable::InternalLinkage,
+                                              ConstantPointerNull::get(_llInt8PtrTy), "TQGlobalQueue");
     }
 
     NSError *err = nil;
@@ -413,7 +418,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
         engine->addGlobalMapping(argGlobal, (void*)&_argGlobalForJIT);
         if(!_globalQueueForJIT)
             _globalQueueForJIT = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-        engine->addGlobalMapping(_globalQueue, &_globalQueueForJIT);
+        engine->addGlobalMapping(_globalQueue, (void*)&_globalQueueForJIT);
     }
 
     // Optimization pass
