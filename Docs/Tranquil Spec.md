@@ -132,7 +132,7 @@
     var = async ..expression..  \ Assigns the result of `expression` to `var` when the operation is complete    
     wait                        \ Waits for any asynchronous operations created in the current block to finish
     whenFinished ..block..      \ Executes `block` when all asynchronous operations created in the current block are finished, without blocking. (`block` is executed on the program's main thread)
-    lock ..expression.. { \ Acquires a lock on the result of `expression`. If one has already been taken, waits
+    lock ..expression.. { \ Acquires a lock on the result of `expression`. If one has already been taken, it waits.
         ..statements..
     }
     

@@ -1,18 +1,16 @@
 import "unistd"
 
-value = 123
 async {
     "entered a" print
-    lock value {
+    lock $uniq {
         Sleep(1)
     }
 }
 
 async {
     "entered b" print
-    lock value {
+    lock $uniq {
         "lock released" print
     }
 }
 wait
-
