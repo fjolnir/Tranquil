@@ -67,10 +67,10 @@ using namespace llvm;
         return (Value *)NULL;
     }];
     // Let the block know it needs to release the lock before returning
-    [aBlock.cleanupStatements addObject:exitNode];
+    [aBlock.cleanupStatements insertObject:exitNode atIndex:0];
     // If we're inside a loop, the loop needs to know to release the lock before skipping or breaking
     TQNodeWhileBlock *loop = objc_getAssociatedObject(aBlock, TQCurrLoopKey);
-    [loop.cleanupStatements addObject:exitNode];
+    [loop.cleanupStatements insertObject:exitNode atIndex:0];
 
     for(TQNode *stmt in _statements) {
         [stmt generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
