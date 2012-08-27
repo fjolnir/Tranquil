@@ -18,7 +18,7 @@ using namespace llvm;
 @end
 
 @implementation TQNodeBlock
-@synthesize arguments=_arguments, statements=_statements, locals=_locals, capturedVariables=_capturedVariables,
+@synthesize arguments=_arguments, statements=_statements, cleanupStatements=_cleanupStatements, locals=_locals, capturedVariables=_capturedVariables,
     basicBlock=_basicBlock, function=_function, builder=_builder, autoreleasePool=_autoreleasePool,
     isCompactBlock=_isCompactBlock, parent=_parent, isVariadic=_isVariadic, isTranquilBlock=_isTranquilBlock,
     invokeName=_invokeName, argTypes=_argTypes, retType=_retType, dispatchGroup=_dispatchGroup;
@@ -30,13 +30,14 @@ using namespace llvm;
     if(!(self = [super init]))
         return nil;
 
-    _arguments       = [NSMutableArray new];
-    _statements      = [NSMutableArray new];
-    _locals          = [NSMutableDictionary new];
-    _function        = NULL;
-    _basicBlock      = NULL;
-    _isTranquilBlock = YES;
-    _invokeName      = @"__tq_block_invoke";
+    _arguments         = [NSMutableArray new];
+    _statements        = [NSMutableArray new];
+    _cleanupStatements = [NSMutableArray new];
+    _locals            = [NSMutableDictionary new];
+    _function          = NULL;
+    _basicBlock        = NULL;
+    _isTranquilBlock   = YES;
+    _invokeName        = @"__tq_block_invoke";
 
     // Block invocations are always passed the block itself as the first argument
     [self addArgument:[TQNodeArgumentDef nodeWithName:@"__blk"] error:nil];
@@ -562,6 +563,9 @@ using namespace llvm;
 
 - (void)generateCleanupInProgram:(TQProgram *)aProgram
 {
+    for(TQNode *stmt in _cleanupStatements) {
+        [stmt generateCodeInProgram:aProgram block:self root:nil error:nil];
+    }
     _builder->CreateCall(aProgram.objc_autoreleasePoolPop, _autoreleasePool);
     if(_dispatchGroup)
         _builder->CreateCall(aProgram.dispatch_release, _dispatchGroup);

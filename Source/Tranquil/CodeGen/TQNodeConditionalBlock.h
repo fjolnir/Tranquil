@@ -1,13 +1,12 @@
 #import "TQNodeBlock.h"
 #include <llvm/Support/IRBuilder.h>
 
-@class TQNodeWhileBlock;
-
-@interface TQNodeIfBlock : TQNodeBlock
+@interface TQNodeIfBlock : TQNode {
+    @protected
+     NSMutableArray *_ifStatements, *_elseStatements;
+}
 @property(readwrite, retain) TQNode *condition;
-@property(readwrite, copy) NSMutableArray *elseBlockStatements;
-// If the if block is contained within a loop, then this variable contains a reference to it
-@property(readwrite, assign) TQNodeWhileBlock *containingLoop;
+@property(readwrite, copy) NSMutableArray *ifStatements, *elseStatements;
 
 + (TQNodeIfBlock *)node;
 - (llvm::Value *)generateTestExpressionInProgram:(TQProgram *)aProgram

@@ -7,8 +7,10 @@
 
 using namespace llvm;
 
+void * const TQCurrLoopKey = (void*)&TQCurrLoopKey;
+
 @implementation TQNodeWhileBlock
-@synthesize condition=_condition, loopStartBlock=_loopStartBlock, loopEndBlock=_loopEndBlock;
+@synthesize condition=_condition, loopStartBlock=_loopStartBlock, loopEndBlock=_loopEndBlock, statements=_statements, cleanupStatements=_cleanupStatements;
 
 
 + (TQNodeWhileBlock *)node { return (TQNodeWhileBlock *)[super node]; }
@@ -17,15 +19,15 @@ using namespace llvm;
 {
     if(!(self = [super init]))
         return nil;
-
-    // Loop blocks don't take arguments
-    [[self arguments] removeAllObjects];
-
+    _cleanupStatements = [NSMutableArray new];
+    _statements = [NSMutableArray new];
     return self;
 }
 
 - (void)dealloc
 {
+    [_statements release];
+    [_cleanupStatements release];
     [_condition release];
     [super dealloc];
 }
@@ -61,7 +63,11 @@ using namespace llvm;
 - (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
 {
     aBlock(_condition);
-    [super iterateChildNodes:aBlock];
+    NSMutableArray *statements = [_statements copy];
+    for(TQNode *node in statements) {
+        aBlock(node);
+    }
+    [statements release];
 }
 
 #pragma mark - Code generation
@@ -80,11 +86,6 @@ using namespace llvm;
 {
     Module *mod = aProgram.llModule;
 
-    // Pose as the parent block for the duration of code generation
-    self.function        = aBlock.function;
-    self.autoreleasePool = aBlock.autoreleasePool;
-    self.locals          = aBlock.locals;
-
     BasicBlock *condBB = BasicBlock::Create(mod->getContext(), "loopCond", aBlock.function);
     _loopStartBlock = condBB;
     IRBuilder<> *condBuilder = new IRBuilder<>(condBB);
@@ -92,8 +93,8 @@ using namespace llvm;
 
     BasicBlock *loopBB = BasicBlock::Create(mod->getContext(), "loopBody", aBlock.function);
     IRBuilder<> *loopBuilder = new IRBuilder<>(loopBB);
-    self.basicBlock = loopBB;
-    self.builder = loopBuilder;
+    aBlock.basicBlock = loopBB;
+    aBlock.builder = loopBuilder;
 
     BasicBlock *endloopBB = BasicBlock::Create(mod->getContext(), "endloop", aBlock.function);
     _loopEndBlock = endloopBB;
@@ -101,89 +102,36 @@ using namespace llvm;
 
 
     for(TQNode *stmt in self.statements) {
-        [stmt generateCodeInProgram:aProgram block:self root:aRoot error:aoErr];
+        // Set the current loop once per iteration in case there is a nested loop which would override it.
+        objc_setAssociatedObject(aBlock, TQCurrLoopKey, self, OBJC_ASSOCIATION_ASSIGN);
+        [stmt generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         if(*aoErr)
             return NULL;
         if([stmt isKindOfClass:[TQNodeReturn class]])
             break;
     }
-
-
-    // If our basic block has been changed that means there was a nested conditional/loop
-    // We need to fix it by adding a br pointing to the loop condition
-    if(self.basicBlock != loopBB) {
-        BasicBlock *tailBlock = self.basicBlock;
-        IRBuilder<> *tailBuilder = self.builder;
-
-        if(!tailBlock->getTerminator())
-            tailBuilder->CreateBr(condBB);
-    }
-    if(!loopBB->getTerminator())
-        loopBuilder->CreateBr(condBB);
+    objc_setAssociatedObject(aBlock, TQCurrLoopKey, nil, OBJC_ASSOCIATION_ASSIGN);
+    if(!aBlock.basicBlock->getTerminator())
+        aBlock.builder->CreateBr(condBB);
 
     delete loopBuilder;
 
-    // Make the parent block continue from the end of the statement
-    aBlock.basicBlock = endloopBB;
-    aBlock.builder = endloopBuilder;
-
     // Generate the condition instructions
-    self.basicBlock = condBB;
-    self.builder    = condBuilder;
-    Value *testExpr = [_condition generateCodeInProgram:aProgram block:self root:aRoot error:aoErr];
+    aBlock.basicBlock = condBB;
+    aBlock.builder    = condBuilder;
+    Value *testExpr = [_condition generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     if(*aoErr)
         return NULL;
     Value *testResult = [self generateTestExpressionInProgram:aProgram withBuilder:condBuilder value:testExpr];
     condBuilder->CreateCondBr(testResult, loopBB, endloopBB);
 
-    self.builder = NULL;
-    self.function = NULL;
+    // Make the parent block continue from the end of the statement
+    aBlock.basicBlock = endloopBB;
+    aBlock.builder = endloopBuilder;
 
-    return testResult;
+    return NULL;
 }
 
-
-#pragma mark - Unused methods from TQNodeBlock
-- (NSString *)signature
-{
-    return nil;
-}
-- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoErr
-{
-    return NO;
-}
-- (llvm::Constant *)_generateBlockDescriptorInProgram:(TQProgram *)aProgram
-{
-    return NULL;
-}
-- (llvm::Value *)_generateBlockLiteralInProgram:(TQProgram *)aProgram parentBlock:(TQNodeBlock *)aParentBlock
-{
-    return NULL;
-}
-- (llvm::Function *)_generateCopyHelperInProgram:(TQProgram *)aProgram
-{
-    return NULL;
-}
-- (llvm::Function *)_generateDisposeHelperInProgram:(TQProgram *)aProgram
-{
-    return NULL;
-}
-- (llvm::Function *)_generateInvokeInProgram:(TQProgram *)aProgram root:(TQNodeRootBlock *)aRoot error:(NSError **)aoErr
-{
-    return NULL;
-}
-- (llvm::Type *)_blockDescriptorTypeInProgram:(TQProgram *)aProgram
-{
-    return NULL;
-}
-- (llvm::Type *)_genericBlockLiteralTypeInProgram:(TQProgram *)aProgram
-{
-    return NULL;
-}
-- (llvm::Type *)_blockLiteralTypeInProgram:(TQProgram *)aProgram
-{
-    return NULL;
-}
 @end
 
 @implementation TQNodeUntilBlock
@@ -203,14 +151,17 @@ using namespace llvm;
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
-    TQNodeWhileBlock *loop = nil;
-    if([aBlock isKindOfClass:[TQNodeWhileBlock class]])
-        loop = (TQNodeWhileBlock *)aBlock;
-    else if([aBlock isKindOfClass:[TQNodeIfBlock class]])
-        loop = [(TQNodeIfBlock *)aBlock containingLoop];
+    TQNodeWhileBlock *loop = objc_getAssociatedObject(aBlock, TQCurrLoopKey);
     TQAssertSoft(loop != nil, kTQSyntaxErrorDomain, kTQUnexpectedStatement, NULL, @"break statements can only be used within loops");
-
+    for(TQNode *stmt in loop.cleanupStatements) {
+        [stmt generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+    }
     return aBlock.builder->CreateBr(loop.loopEndBlock);
+}
+
+- (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
+{
+    // Nothing to iterate
 }
 @end
 
@@ -222,13 +173,18 @@ using namespace llvm;
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
-    TQNodeWhileBlock *loop = nil;
-    if([aBlock isKindOfClass:[TQNodeWhileBlock class]])
-        loop = (TQNodeWhileBlock *)aBlock;
-    else if([aBlock isKindOfClass:[TQNodeIfBlock class]])
-        loop = [(TQNodeIfBlock *)aBlock containingLoop];
+    TQNodeWhileBlock *loop = objc_getAssociatedObject(aBlock, TQCurrLoopKey);
     TQAssertSoft(loop != nil, kTQSyntaxErrorDomain, kTQUnexpectedStatement, NULL, @"skip statements can only be used within loops");
 
-    return aBlock.builder->CreateBr(loop.loopStartBlock);
+    for(TQNode *stmt in loop.cleanupStatements) {
+        [stmt generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+    }
+    aBlock.builder->CreateBr(loop.loopStartBlock);
+    return NULL;
+}
+
+- (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
+{
+    // Nothing to iterate
 }
 @end

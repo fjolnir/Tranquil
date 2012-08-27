@@ -1,8 +1,12 @@
 #import "TQNodeBlock.h"
 #include <llvm/Support/IRBuilder.h>
 
-@interface TQNodeWhileBlock : TQNodeBlock
+// Set on a block to know which while loop to break out of
+extern void * const TQCurrLoopKey;
+
+@interface TQNodeWhileBlock : TQNode
 @property(readwrite, retain) TQNode *condition;
+@property(readwrite, copy, nonatomic) NSMutableArray *statements, *cleanupStatements;
 @property(readwrite, assign) llvm::BasicBlock *loopStartBlock, *loopEndBlock;
 
 + (TQNodeWhileBlock *)node;

@@ -19,7 +19,7 @@
 @property(readwrite, assign) BOOL isTranquilBlock; // Should the block be treated as a tranquil block? (arg count check etc)
 @property(readwrite, retain) TQNodeBlock *parent;
 @property(readwrite, copy) NSMutableArray *arguments, *argTypes;
-@property(readwrite, copy, nonatomic) NSMutableArray *statements;
+@property(readwrite, copy, nonatomic) NSMutableArray *statements, *cleanupStatements;
 @property(readwrite, retain) NSMutableDictionary *locals, *capturedVariables;
 @property(readwrite, assign) BOOL isVariadic;
 @property(readwrite, assign) llvm::BasicBlock *basicBlock;
