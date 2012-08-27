@@ -135,8 +135,6 @@
     lock ..expression.. { \ Acquires a lock on the result of `expression`. If one has already been taken, it waits.
         ..statements..
     }
-    
-    
 
 
 ## Blocks
