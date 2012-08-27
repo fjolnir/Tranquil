@@ -25,7 +25,6 @@ CXXFLAGS = {
     :development => [
         '-DDEBUG',
         '-mmacosx-version-min=10.8',
-        '-I/usr/local/clang/include',
         '-I`pwd`/Source',
         '-I`pwd`/Build',
         '-I/usr/include/libxml2',
