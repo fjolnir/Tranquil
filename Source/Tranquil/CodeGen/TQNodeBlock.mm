@@ -567,8 +567,6 @@ using namespace llvm;
         [stmt generateCodeInProgram:aProgram block:self root:nil error:nil];
     }
     _builder->CreateCall(aProgram.objc_autoreleasePoolPop, _autoreleasePool);
-    if(_dispatchGroup)
-        _builder->CreateCall(aProgram.dispatch_release, _dispatchGroup);
 }
 
 - (void)createDispatchGroupInProgram:(TQProgram *)aProgram
@@ -577,6 +575,10 @@ using namespace llvm;
         return;
     IRBuilder<> entryBuilder(&_function->getEntryBlock(), _function->getEntryBlock().begin());
     _dispatchGroup = entryBuilder.CreateCall(aProgram.dispatch_group_create);
+    [self.cleanupStatements addObject:[TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *b, TQNodeRootBlock *r) {
+        _builder->CreateCall(aProgram.dispatch_release, _dispatchGroup);
+        return (Value *)NULL;
+    }]];
 }
 
 - (TQNode *)referencesNode:(TQNode *)aNode
