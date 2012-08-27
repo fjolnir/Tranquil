@@ -127,12 +127,12 @@
 	import "AppKit"        \ You can also import Objective-C headers.
 	                       \ In this case the header AppKit.h in AppKit.framework is read.
 	                       
-    \ Concurrency (Unimplemented)
+    \ Concurrency
     async ..expression..        \ Executes `expression` asynchronously
     var = async ..expression..  \ Assigns the result of `expression` to `var` when the operation is complete    
     wait                        \ Waits for any asynchronous operations created in the current block to finish
     whenFinished ..block..      \ Executes `block` when all asynchronous operations created in the current block are finished, without blocking. (`block` is executed on the program's main thread)
-    synchronized(..expression..) { \ Acquires a lock on the result of `expression`. If one has already been taken, waits
+    lock ..expression.. { \ Acquires a lock on the result of `expression`. If one has already been taken, waits
         ..statements..
     }
     

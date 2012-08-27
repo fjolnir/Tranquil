@@ -105,6 +105,7 @@ Statement    = (
                Async
              | Wait
              | WhenFinished
+             | Lock
              | If
              | Loop
              | BreakStmt
@@ -342,6 +343,22 @@ BlkVarArgDef = Variadic        { [StackGet(-1) setIsVariadic:YES]; }
 Async        = "async" - expr:Expression { $$ = [TQNodeAsync nodeWithExpression:expr]; }
 Wait         = "wait" { $$ = [TQNodeWait node]; }
 WhenFinished = "whenFinished" - expr:Expression { $$ = [TQNodeWhenFinished nodeWithExpression:expr]; }
+Lock         = "lock"  { PushStack([TQNodeLock node]); }
+               -- cond:Expression --  ~{ SyntaxError(@"Lock condition missing"); }
+               {
+                   ExtendToken();
+                   [StackTop setCondition:cond];
+                   PushStack([NSMutableArray array]);
+               }
+               ('{' -- ( Statement --)*
+                '}' ~{ SyntaxError(@"Unterminated lock"); }
+               | -- Statement)
+               {
+                   ExtendToken();
+                   NSMutableArray *statements = PopStack();
+                   $$ = PopStack();
+                   [$$ setStatements:statements];
+               } 
 
 # Class
 Class        = '#' name:Constant --
@@ -449,7 +466,7 @@ If           = ( "if"        { UpdateToken();  PushStack([TQNodeIfBlock node]); 
                | -- Statement)
                ( -- "else" - elsif:If
                  {
-                     [StackGet(-1) setElseBlockStatements:[NSMutableArray arrayWithObject:elsif]];
+                     [StackGet(-1) setElseStatements:[NSMutableArray arrayWithObject:elsif]];
                  }
                | -- "else" --
                  {
@@ -460,14 +477,14 @@ If           = ( "if"        { UpdateToken();  PushStack([TQNodeIfBlock node]); 
                  | -- Statement)
                  {
                      NSMutableArray *statements = PopStack();
-                     [StackGet(-1) setElseBlockStatements:statements];
+                     [StackGet(-1) setElseStatements:statements];
                  }
                )?
                {
                    ExtendToken();
                    NSMutableArray *statements = PopStack();
                    $$ = PopStack();
-                   [$$ setStatements:statements];
+                   [$$ setIfStatements:statements];
                }
 
 TernaryExpr    = cond:NoTernExpr --- "?" ---

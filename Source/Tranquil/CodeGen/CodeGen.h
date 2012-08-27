@@ -26,3 +26,4 @@
 #import <Tranquil/CodeGen/TQNodeImport.h>
 #import <Tranquil/CodeGen/TQNodeCustom.h>
 #import <Tranquil/CodeGen/TQNodeAsync.h>
+#import <Tranquil/CodeGen/TQNodeLock.h>

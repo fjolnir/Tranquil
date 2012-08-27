@@ -83,7 +83,8 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     objc_storeStrong=_func_objc_storeStrong, TQInitializeRuntime=_func_TQInitializeRuntime, TQCliArgsToArray=_func_TQCliArgsToArray,
     dispatch_get_global_queue=_func_dispatch_get_global_queue, dispatch_group_create=_func_dispatch_group_create,
     dispatch_release=_func_dispatch_release, dispatch_group_wait=_func_dispatch_group_wait,
-    dispatch_group_notify=_func_dispatch_group_notify, dispatch_group_async=_func_dispatch_group_async;
+    dispatch_group_notify=_func_dispatch_group_notify, dispatch_group_async=_func_dispatch_group_async,
+    objc_sync_enter=_func_objc_sync_enter, objc_sync_exit=_func_objc_sync_exit;
 
 + (TQProgram *)programWithName:(NSString *)aName
 {
@@ -92,7 +93,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 
 - (id)initWithName:(NSString *)aName
 {
-    if(!(self = [super init])) 
+    if(!(self = [super init]))
         return nil;
 
     _name = [aName retain];
@@ -231,12 +232,15 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     std::vector<Type*> args_empty;
     FunctionType *ft_i8Ptr__void = FunctionType::get(_llInt8PtrTy, args_empty, false);
 
+    // int(id)
+    FunctionType *ft_int__i8Ptr = FunctionType::get(_llIntTy, args_i8Ptr, false);
+
     // id(int, void**)
     std::vector<Type*> args_int_i8PtrPtr;
     args_int_i8PtrPtr.push_back(_llIntTy);
     args_int_i8PtrPtr.push_back(_llInt8PtrPtrTy);
     FunctionType *ft_i8Ptr__i32_i8PtrPtr = FunctionType::get(_llInt8PtrTy, args_int_i8PtrPtr, false);
-    
+
     // void*(long, long)
     std::vector<Type*> args_i64_i64;
     args_i64_i64.push_back(_llInt64Ty);
@@ -248,7 +252,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     args_i8Ptr_i64.push_back(_llInt8PtrTy);
     args_i8Ptr_i64.push_back(_llInt64Ty);
     FunctionType *ft_i64__i8Ptr_i64 = FunctionType::get(_llInt64Ty, args_i8Ptr_i64, false);
-    
+
     DEF_EXTERNAL_FUN(objc_allocateClassPair, ft_i8Ptr__i8Ptr_i8Ptr_sizeT);
     DEF_EXTERNAL_FUN(objc_registerClassPair, ft_void__i8Ptr);
     DEF_EXTERNAL_FUN(class_replaceMethod, ft_i8__i8Ptr_i8Ptr_i8Ptr_i8Ptr);
@@ -293,6 +297,8 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     DEF_EXTERNAL_FUN(dispatch_group_wait, ft_i64__i8Ptr_i64);
     DEF_EXTERNAL_FUN(dispatch_group_notify, ft_void__i8Ptr_i8Ptr_i8Ptr);
     DEF_EXTERNAL_FUN(dispatch_group_async, ft_void__i8Ptr_i8Ptr_i8Ptr);
+    DEF_EXTERNAL_FUN(objc_sync_enter, ft_int__i8Ptr);
+    DEF_EXTERNAL_FUN(objc_sync_exit, ft_int__i8Ptr);
 
 #undef DEF_EXTERNAL_FUN
 
