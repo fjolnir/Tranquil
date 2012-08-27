@@ -62,19 +62,6 @@ static id nilReturner(id self, SEL sel, ...)
     return YES;
 }
 
-- (void)forwardInvocation:(NSInvocation *)anInvocation
-{
-    NSUInteger returnLength = [[anInvocation methodSignature] methodReturnLength];
-    if(returnLength == 0)
-        return;
-
-    // Set return value to all zero bits
-    char buffer[returnLength];
-    memset(buffer, 0, returnLength);
-
-    [anInvocation setReturnValue:buffer];
-}
-
 - (BOOL)respondsToSelector:(SEL)selector
 {
     return NO;
