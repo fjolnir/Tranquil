@@ -102,7 +102,9 @@ ImportStmt   = "import" - path:String
 
 # Statement
 Statement    = (
-               If
+               Async
+             | Wait
+             | If
              | Loop
              | BreakStmt
              | SkipStmt
@@ -332,9 +334,13 @@ BlockArgDef  = name:Identifier { [StackTop addObject:[TQNodeArgumentDef nodeWith
                   default:Expression ~{ SyntaxError(@"Expected default argument expression after '='"); }
                   {
                       [[StackTop lastObject] setDefaultArgument:default];
-                  })? 
+                  })?
 BlkVarArgDef = Variadic        { [StackGet(-1) setIsVariadic:YES]; }
 
+# Concurrency
+Async        = "async" - expr:Expression { $$ = [TQNodeAsync nodeWithExpression:expr]; }
+Wait         = "wait" { $$ = [TQNodeWait node]; }
+WhenFinished = "whenFinished" - expr:Expression
 
 # Class
 Class        = '#' name:Constant --
