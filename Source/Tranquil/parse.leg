@@ -774,7 +774,7 @@ StrEmbeddExpr= ("#{"-"}"
                )
 
 # Constant string
-ConstString  = "$" ( < Character+ >
+ConstString  = "$" ( < [^\n ]+ >
                    | '"' < [^\"]+ >
                      _dblQuot ~{ SyntaxError(@"Constant string literal left unclosed"); }
                    | "\'" < [^\']+ >
