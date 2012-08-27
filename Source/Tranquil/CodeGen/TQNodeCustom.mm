@@ -9,7 +9,7 @@ using namespace llvm;
 + (TQNodeCustom *)nodeWithBlock:(TQNodeCustomBlock)aBlock
 {
     TQNodeCustom *ret = [self new];
-    ret.block = aBlock;
+    ret.block = [aBlock copy];
     return [ret autorelease];
 }
 
