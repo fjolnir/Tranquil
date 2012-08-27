@@ -56,7 +56,10 @@ using namespace llvm;
                                  error:(NSError **)aoErr
 {
     IRBuilder<> *builder = aBlock.builder;
-	Value *key = [aProgram getGlobalStringPtr:_property inBlock:aBlock];
+    Value *key = [[TQNodeConstString nodeWithString:_property] generateCodeInProgram:aProgram
+                                                                               block:aBlock
+                                                                                root:aRoot
+                                                                               error:aoErr];
     Value *object = [_receiver generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     return builder->CreateCall2(aProgram.TQValueForKey, object, key);
 }
