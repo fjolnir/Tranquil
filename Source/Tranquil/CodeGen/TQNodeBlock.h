@@ -33,6 +33,8 @@
 - (NSString *)signatureInProgram:(TQProgram *)aProgram;
 - (NSUInteger)argumentCount;
 - (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoErr;
+- (void)generateCleanupInProgram:(TQProgram *)aProgram;
+- (void)createDispatchGroupInProgram:(TQProgram *)aProgram;
 @end
 
 @interface TQNodeRootBlock : TQNodeBlock

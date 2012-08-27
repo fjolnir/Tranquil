@@ -72,10 +72,10 @@ using namespace llvm;
     if(_value) {
         retVal = [_value generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         retVal = aBlock.builder->CreateCall(aProgram.TQPrepareObjectForReturn, retVal);
-        aBlock.builder->CreateCall(aProgram.objc_autoreleasePoolPop, aBlock.autoreleasePool);
+        [aBlock generateCleanupInProgram:aProgram];
         retVal = aBlock.builder->CreateCall(aProgram.objc_autoreleaseReturnValue, retVal);
     } else {
-        aBlock.builder->CreateCall(aProgram.objc_autoreleasePoolPop, aBlock.autoreleasePool);
+        [aBlock generateCleanupInProgram:aProgram];
         retVal = ConstantPointerNull::get(aProgram.llInt8PtrTy);
     }
 

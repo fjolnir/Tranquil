@@ -348,8 +348,6 @@ using namespace llvm;
     BasicBlock *basicBlock = BasicBlock::Create(mod->getContext(), "entry", function, 0);
     IRBuilder<> *builder = new IRBuilder<>(basicBlock);
     // Load the block
-    [aProgram insertLogUsingBuilder:builder withStr:@"Disposing of block"];
-
     Value *block = builder->CreateBitCast(function->arg_begin(), PointerType::getUnqual([self _blockLiteralTypeInProgram:aProgram]), "block");
     Value *flags = ConstantInt::get(intTy, TQ_BLOCK_FIELD_IS_BYREF);
 
@@ -560,6 +558,21 @@ using namespace llvm;
     Value *literal = [self _generateBlockLiteralInProgram:aProgram parentBlock:aBlock root:aRoot];
 
     return literal;
+}
+
+- (void)generateCleanupInProgram:(TQProgram *)aProgram
+{
+    _builder->CreateCall(aProgram.objc_autoreleasePoolPop, _autoreleasePool);
+    if(_dispatchGroup)
+        _builder->CreateCall(aProgram.dispatch_release, _dispatchGroup);
+}
+
+- (void)createDispatchGroupInProgram:(TQProgram *)aProgram
+{
+    if(_dispatchGroup)
+        return;
+    IRBuilder<> entryBuilder(&_function->getEntryBlock(), _function->getEntryBlock().begin());
+    _dispatchGroup = entryBuilder.CreateCall(aProgram.dispatch_group_create);
 }
 
 - (TQNode *)referencesNode:(TQNode *)aNode
