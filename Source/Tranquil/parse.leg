@@ -104,6 +104,7 @@ ImportStmt   = "import" - path:String
 Statement    = (
                Async
              | Wait
+             | WhenFinished
              | If
              | Loop
              | BreakStmt
@@ -340,7 +341,7 @@ BlkVarArgDef = Variadic        { [StackGet(-1) setIsVariadic:YES]; }
 # Concurrency
 Async        = "async" - expr:Expression { $$ = [TQNodeAsync nodeWithExpression:expr]; }
 Wait         = "wait" { $$ = [TQNodeWait node]; }
-WhenFinished = "whenFinished" - expr:Expression
+WhenFinished = "whenFinished" - expr:Expression { $$ = [TQNodeWhenFinished nodeWithExpression:expr]; }
 
 # Class
 Class        = '#' name:Constant --
@@ -542,27 +543,33 @@ Equation     = a:EqualityTest        { UpdateToken(); PushStack(a);             
                | - "||" - b:Equation { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorOr             left:StackTop right:b]); }
                )*                    { $$ = PopStack();                                                                                               }
 
-Assignment     = a:AssgnLhs
+Assignment     = a:AssgnLhs - "=" - "async" - b:AssignValue
                  {
-                     PushStack(a);
+                     // `a = async { ..stmt.. }` means, assign to result of executing said block => Must convert to a call
+                     // We have to do this here in the parser because `async a = { ..stmt.. }` does not mean the same thing
+                     if([b isMemberOfClass:[TQNodeBlock class]])
+                         b = [TQNodeCall nodeWithCallee:b];
+                     PushStack([TQNodeOperator nodeWithType:kTQOperatorAssign left:a right:b]);
                  }
+                 - (AssgnRhs -)*  { id assgn = PopStack(); $$ = [TQNodeAsync nodeWithExpression:assgn]; }
+               | a:AssgnLhs       { PushStack(a); }
                  - (AssgnRhs -)+  { $$ = PopStack(); }
 
 AssgnLhs       = Property
                | SubscriptExp
                | Variable
 
-AssgnRhs       = -- ( "=" -- b:AssignValue { PushStack(b);                                                                       }
-                 | "+=" -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorAdd left:StackTop right:b]);      }
-                 | "-=" -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorSubtract left:StackTop right:b]); }
-                 | "*=" -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorMultiply left:StackTop right:b]); }
-                 | "/=" -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorDivide left:StackTop right:b]);   }
-                 )
-                 {
-                     ExtendToken();
-                     TQNodeOperator *assignVal = PopStack();
-                     ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAssign left:StackTop right:assignVal]);
-                 }
+AssgnRhs       = -- (  "=" -- b:AssignValue  { PushStack(b);                                                                       }
+                    | "+=" -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorAdd left:StackTop right:b]);      }
+                    | "-=" -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorSubtract left:StackTop right:b]); }
+                    | "*=" -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorMultiply left:StackTop right:b]); }
+                    | "/=" -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorDivide left:StackTop right:b]);   }
+                    )
+               {
+                   ExtendToken();
+                   TQNodeOperator *assignVal = PopStack();
+                   ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAssign left:StackTop right:assignVal]);
+               }
 
 MultiAssgnmt   = { PushStack([TQNodeMultiAssignOperator node]); }
                  MultiAsgnLhs (- "," -- MultiAsgnLhs)+ - "=" -- MultiAsgnRhs (- "," -- MultiAsgnRhs)*

@@ -5,6 +5,11 @@
 
 + (TQNodeAsync *)nodeWithExpression:(TQNode *)aExpression;
 @end
+
 @interface TQNodeWait : TQNode
 + (TQNodeWait *)node;
+@end
+
+@interface TQNodeWhenFinished : TQNodeAsync
++ (TQNodeWhenFinished *)nodeWithExpression:(TQNode *)aExpression;
 @end

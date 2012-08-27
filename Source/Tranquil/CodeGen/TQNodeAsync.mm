@@ -1,5 +1,6 @@
 #import "TQNodeAsync.h"
 #import "TQProgram.h"
+#import "TQNodeOperator.h"
 
 using namespace llvm;
 
@@ -42,15 +43,15 @@ using namespace llvm;
     return [NSString stringWithFormat:@"<async: %@>", _expression];
 }
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
-                                 block:(TQNodeBlock *)aBlock
-                                  root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+- (llvm::Value *)_generateDispatchBlockInProgram:(TQProgram *)aProgram
+                                           block:(TQNodeBlock *)aBlock
+                                            root:(TQNodeRootBlock *)aRoot
+                                           error:(NSError **)aoErr
 {
     [aBlock createDispatchGroupInProgram:aProgram];
 
     TQNodeBlock *block = (TQNodeBlock *)_expression;
-    if(![block isKindOfClass:[TQNodeBlock class]]) {
+    if(![_expression isKindOfClass:[TQNodeBlock class]]) {
         block = [TQNodeBlock node];
         [block.statements addObject:_expression];
     }
@@ -60,9 +61,17 @@ using namespace llvm;
         b.builder->CreateRetVoid();
         return (Value *)NULL;
     }]];
-NSLog(@"async: %@", block);
-    Value *compiledBlock = [block generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-    aBlock.builder->CreateCall3(aProgram.dispatch_group_async, aBlock.dispatchGroup, aBlock.builder->CreateLoad(aProgram.globalQueue), compiledBlock);
+    return [block generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+}
+
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
+{
+    Value *compiledBlock = [self _generateDispatchBlockInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+    aBlock.builder->CreateCall3(aProgram.dispatch_group_async, aBlock.dispatchGroup,
+                                aBlock.builder->CreateLoad(aProgram.globalQueue), compiledBlock);
     return NULL;
 }
 @end
@@ -101,5 +110,28 @@ NSLog(@"async: %@", block);
 - (NSString *)description
 {
     return [NSString stringWithFormat:@"<wait>"];
+}
+@end
+
+@implementation TQNodeWhenFinished
++ (TQNodeWhenFinished *)nodeWithExpression:(TQNode *)aExpression;
+{
+    return (TQNodeWhenFinished *)[super nodeWithExpression:aExpression];
+}
+
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<whenFinished: %@>", self.expression];
+}
+
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
+{
+    Value *compiledBlock = [self _generateDispatchBlockInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+    aBlock.builder->CreateCall3(aProgram.dispatch_group_notify, aBlock.dispatchGroup,
+                                aBlock.builder->CreateLoad(aProgram.globalQueue), compiledBlock);
+    return NULL;
 }
 @end
