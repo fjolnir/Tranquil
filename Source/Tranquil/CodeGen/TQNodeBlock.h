@@ -25,6 +25,7 @@
 @property(readwrite, assign) llvm::BasicBlock *basicBlock;
 @property(readwrite, assign) llvm::Function *function;
 @property(readwrite, assign) llvm::IRBuilder<> *builder;
+@property(readwrite, assign) llvm::Value *dispatchGroup;
 
 // This property is only valid when called from a block's subnode within it's generateCode: method
 @property(readwrite, assign) llvm::Value *autoreleasePool;

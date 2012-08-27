@@ -605,6 +605,15 @@ using namespace llvm;
     return YES;
 }
 
+- (BOOL)insertChildNode:(TQNode *)aNodeToInsert after:(TQNode *)aExistingNode
+{
+    NSUInteger idx = [_statements indexOfObject:aExistingNode];
+    if(idx == NSNotFound)
+        return NO;
+    [_statements insertObject:aNodeToInsert atIndex:idx+1];
+    return YES;
+}
+
 - (BOOL)replaceChildNodesIdenticalTo:(TQNode *)aNodeToReplace with:(TQNode *)aNodeToInsert
 {
     NSUInteger idx = [_statements indexOfObject:aNodeToReplace];

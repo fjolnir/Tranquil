@@ -44,6 +44,7 @@ typedef void (^TQNodeIteratorBlock)(TQNode *aNode);
 - (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock;
 
 - (BOOL)insertChildNode:(TQNode *)aNodeToInsert before:(TQNode *)aNodeToShift;
+- (BOOL)insertChildNode:(TQNode *)aNodeToInsert after:(TQNode *)aExistingNode;
 - (BOOL)replaceChildNodesIdenticalTo:(TQNode *)aNodeToReplace with:(TQNode *)aNodeToInsert;
 @end
 
