@@ -1,0 +1,18 @@
+import "unistd"
+
+value = 123
+async {
+    "entered a" print
+    lock value {
+        Sleep(1)
+    }
+}
+
+async {
+    "entered b" print
+    lock value {
+        "lock released" print
+    }
+}
+wait
+
