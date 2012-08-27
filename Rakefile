@@ -29,6 +29,7 @@ CXXFLAGS = {
         '-I`pwd`/Build',
         '-I/usr/include/libxml2',
         '`/usr/local/tranquil/llvm/bin/llvm-config --cflags`',
+        #'`/usr/local/llvm.dbg/bin/llvm-config --cflags`',
         '-O0',
         '-g',
         #'-DTQ_PROFILE',
@@ -39,16 +40,18 @@ CXXFLAGS = {
 TOOL_LDFLAGS = [
     '-L`pwd`/Build',
     '-lstdc++',
-    '`/usr/local/tranquil/llvm/bin/llvm-config --libs core jit nativecodegen bitwriter ipo instrumentation`',
-    '`/usr/local/tranquil/llvm/bin/llvm-config --ldflags`',
+    '`/usr/local/tranquil/llvm/bin/llvm-config --ldflags --libs core jit nativecodegen bitwriter ipo instrumentation`',
+    #'`/usr/local/llvm.dbg/bin/llvm-config --ldflags --libs core jit nativecodegen bitwriter ipo instrumentation`',
     '-lclang',
     '-ltranquil',
     '-ltranquil_codegen',
     '-rpath /usr/local/tranquil/llvm/lib',
+    #'-rpath /usr/local/llvm.dbg/lib',
     '-lffi',
     #'-lprofiler',
     '-framework AppKit',
-    '-all_load'
+    '-all_load',
+    '-g'
 ].join(' ')
 
 
