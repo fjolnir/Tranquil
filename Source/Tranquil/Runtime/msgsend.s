@@ -56,11 +56,21 @@
     leave
 .endmacro
 
+// tq_msgSend minus the boxing support, but still with nil responder support
+.globl _tq_msgSend_noBoxing
+_tq_msgSend_noBoxing:
+    test %a1, %a1
+    je nilSend
+    jmp normalSend
+
 
 // tq_msgSend: inspects a method and either redirects to objc_msgSend or tq_boxedMsgSend depending on it's signature
 // TODO: Make sure this is thread safe
 .globl _tq_msgSend
 _tq_msgSend:
+    test %a1, %a1
+    je nilSend
+
     SaveRegisters _tq_msgSend
 
     call _object_getClass
@@ -71,9 +81,9 @@ _tq_msgSend:
     call _CFDictionaryGetValue
 
     cmp $1, %rax  // Value 0x1 means it's a safe method and we can simply objc_msgSend
-    je  unboxedCall
+    je  normalSend
     cmp $0, %rax  // Other non-null value means it requires boxing
-    jne boxedCall
+    jne boxedSend
 
     // Otherwise the method has not been processed yet
     RestoreRegisters
@@ -83,9 +93,14 @@ _tq_msgSend:
     // Try again
     jmp _tq_msgSend
 
-boxedCall:
-    RestoreRegisters
-    jmp _tq_boxedMsgSend
-unboxedCall:
+normalSend:
     RestoreRegisters
     jmp _objc_msgSend
+boxedSend:
+    RestoreRegisters
+    jmp _tq_boxedMsgSend
+nilSend:
+    mov  _TQGlobalNil@GOTPCREL(%rip), %a1
+    mov  (%a1), %a1
+    jmp _objc_msgSend
+

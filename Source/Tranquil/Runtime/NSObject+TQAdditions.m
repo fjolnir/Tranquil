@@ -41,4 +41,9 @@
 {
     return [self include:aClass recursive:nil];
 }
+
+- (id)isNil
+{
+    return nil;
+}
 @end

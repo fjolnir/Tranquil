@@ -6,4 +6,5 @@
 - (id)print;
 + (id)include:(Class)aClass recursive:(TQNumber *)aRecursive;
 + (id)include:(Class)aClass;
+- (id)isNil;
 @end
