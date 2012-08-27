@@ -4,6 +4,9 @@
 // Boolean returns from TQObject methods return nil on success and any object on success (Convention is TQNumberTrue=1.0)
 #import <Foundation/Foundation.h>
 
-@interface TQObject : NSObject
+@class TQNumber;
 
+@interface TQObject : NSObject
++ (id)addMethod:(NSString *)aSel withBlock:(id)aBlock replaceExisting:(TQNumber *)shouldReplace;
++ (id)accessor:(NSString *)aPropName;
 @end
