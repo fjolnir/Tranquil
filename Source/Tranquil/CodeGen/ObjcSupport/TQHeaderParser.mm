@@ -576,7 +576,6 @@ using namespace llvm;
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
-    //NSLog(@"generating %@: %s\n", _name, _encoding);
     if(![self _generateInvokeInProgram:aProgram root:aRoot error:aoErr])
         return NULL;
 

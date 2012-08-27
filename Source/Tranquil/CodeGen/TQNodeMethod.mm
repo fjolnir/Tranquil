@@ -136,7 +136,8 @@ using namespace llvm;
         });
     } else {
         methodSignature = [NSMutableString stringWithString:@"@@:"];
-        for(int i = 1; i < self.arguments.count+1; ++i) {
+        //for(int i = 1; i < self.arguments.count+1; ++i) {
+        for(TQNodeMethodArgumentDef *argDef in self.arguments) {
             [_argTypes addObject:@"@"];
             [(NSMutableString*)methodSignature appendString:@"@"];
         }
