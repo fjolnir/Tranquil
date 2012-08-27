@@ -88,6 +88,8 @@ using namespace llvm;
             [var generateReleaseInProgram:aProgram block:aBlock];
     }
 
+    if([aBlock.retType isEqualToString:@"v"])
+        return aBlock.builder->CreateRetVoid();
     return aBlock.builder->CreateRet(retVal);
 }
 @end

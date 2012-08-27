@@ -56,11 +56,6 @@ using namespace llvm;
         [block.statements addObject:_expression];
     }
     block.retType = @"v";
-    [block.statements addObject:[TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *b, TQNodeRootBlock *r) {
-        [b generateCleanupInProgram:aProgram];
-        b.builder->CreateRetVoid();
-        return (Value *)NULL;
-    }]];
     return [block generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
 }
 
