@@ -139,6 +139,8 @@ using namespace llvm;
         //for(int i = 1; i < self.arguments.count+1; ++i) {
         for(TQNodeMethodArgumentDef *argDef in self.arguments) {
             [_argTypes addObject:@"@"];
+            if(!argDef.name || [argDef.name isEqualToString:@"__blk"] || [argDef.name isEqualToString:@"self"])
+                continue;
             [(NSMutableString*)methodSignature appendString:@"@"];
         }
     }
