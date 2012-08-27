@@ -1,0 +1,27 @@
+foo = "captured"
+#NSObject {
+    include: TQObject
+    accessor: $test
+}
+#Klass {
+    test: foo
+    accessor: $prop
+
+    + test: arg {
+        "#{~foo}" print
+        "init: #{arg}" print
+    }
+}
+#Sub < Klass {
+}
+
+
+inst = Klass new
+"setting" print
+inst setProp: "hay"
+"prop: #{inst prop} #{inst#prop}" print
+
+Sub new print
+
+t = NSObject new; setTest: "foobar"; self
+t test print
