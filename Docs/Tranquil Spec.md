@@ -253,19 +253,19 @@ The +,-,* and / operators can also be used in assignment form, that is:
 
 Usually when assigning to a variable, or using one in a block, you want the value in question to be kept around for as long as the variable/block does. But there are cases where this can cause an issue called a "reference cycle":
 
-	c.ref = a
-	a.ref = b
-	b.ref = a
+	c#ref = a
+	a#ref = b
+	b#ref = a
 	
-	c.ref = nil
+	c#ref = nil
 
 in the example above, `a` & `b` both hold references to the other, and `c` holds one to `a`. Then at the end, `c`'s reference is removed. One would assume that since `a` & `b` are now unreachable, that they would be deallocated. However this is not the case. Because they still hold a reference to each other, the runtime can't know that they are in fact unreachable. We can fix this by instead writing the previous example as follows:
 
-	c.ref = a
-	a.ref = b
-	b.ref = ~a
+	c#ref = a
+	a#ref = b
+	b#ref = ~a
 	
-	c.ref = nil
+	c#ref = nil
 
 Now `b` holds a "weak" reference to `a`. That means that it does not hold on to `a`, so when `a` has no other remaining references, it is deallocated and `b`'s reference is set to `nil`, breaking the cycle.
 
