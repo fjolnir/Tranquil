@@ -44,6 +44,13 @@ using namespace llvm;
     TQLog(@"%@ does not support child node insertion.", [self class]);
     return NO;
 }
+
+- (BOOL)insertChildNode:(TQNode *)aNodeToInsert after:(TQNode *)aNodeToShift
+{
+    TQLog(@"%@ does not support child node insertion.", [self class]);
+    return NO;
+}
+
 - (BOOL)replaceChildNodesIdenticalTo:(TQNode *)aNodeToReplace with:(TQNode *)aNodeToInsert
 {
     TQLog(@"%@ does not support child node replacement.", [self class]);
