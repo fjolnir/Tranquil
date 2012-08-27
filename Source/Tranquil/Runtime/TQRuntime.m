@@ -228,6 +228,11 @@ static inline NSMapTable *_TQGetDynamicIvarTable(id obj)
     return ivarTable;
 }
 
+NSMapTable *TQGetDynamicIvarTable(id obj)
+{
+    return _TQGetDynamicIvarTable(obj);
+}
+
 static inline size_t _accessorNameLen(const char *accessorNameLoc)
 {
     const char *accessorNameEnd = strstr(accessorNameLoc, ",");
@@ -251,7 +256,7 @@ id TQValueForKey(id obj, const char *key)
     return (id)NSMapGet(ivarTable, key);
 }
 
-void TQSetValueForKey(id obj, char *key, id value)
+void TQSetValueForKey(id obj, const char *key, id value)
 {
     if(!obj)
         return;

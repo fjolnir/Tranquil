@@ -71,7 +71,8 @@ struct TQBlockByRef {
 typedef void (^TQTypeIterationBlock)(const char *type, NSUInteger size, NSUInteger align, BOOL *stop);
 
 // These implement support for dynamic instance variables (But use existing properties if available)
-void TQSetValueForKey(id obj, char *key, id value);
+NSMapTable *TQGetDynamicIvarTable(id obj);
+void TQSetValueForKey(id obj, const char *key, id value);
 id TQValueForKey(id obj, const char *key);
 
 BOOL TQObjectIsStackBlock(id obj);
