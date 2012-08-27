@@ -1,6 +1,7 @@
 #import "TQWeakProcessor.h"
 #import "../TQNodeWeak.h"
 #import "../TQNodeBlock.h"
+#import "../TQNodeMethod.h"
 #import "../TQNodeOperator.h"
 #import "../TQNodeVariable.h"
 
@@ -27,7 +28,7 @@
 
     for(TQNode *node in [aTrace reverseObjectEnumerator]) {
         // The containing block, must be a TQNodeBlock, however the parent of that block could be any block subtype.
-        if(!containingBlock && ([node isMemberOfClass:[TQNodeBlock class]] || [node isMemberOfClass:[TQNodeRootBlock class]]))
+        if(!containingBlock && ([node isMemberOfClass:[TQNodeBlock class]] || [node isMemberOfClass:[TQNodeMethod class]] || [node isMemberOfClass:[TQNodeRootBlock class]]))
             containingBlock = (TQNodeBlock *)node;
         // The parent block is the first one to hold a strong reference to the variable
         else if(!parentBlock && [node isKindOfClass:[TQNodeBlock class]] && [node referencesNode:referencedVar]) {
