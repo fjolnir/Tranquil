@@ -54,6 +54,10 @@ using namespace llvm;
     if(![_expression isKindOfClass:[TQNodeBlock class]]) {
         block = [TQNodeBlock node];
         [block.statements addObject:_expression];
+    } else if([block.arguments count] != 1) {
+        // Ensure the block is called with nil args
+        block = [TQNodeBlock node];
+        [block.statements addObject:[TQNodeCall nodeWithCallee:_expression]];
     }
     block.retType = @"v";
     return [block generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
