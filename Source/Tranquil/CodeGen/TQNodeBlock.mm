@@ -21,7 +21,7 @@ using namespace llvm;
 @synthesize arguments=_arguments, statements=_statements, locals=_locals, capturedVariables=_capturedVariables,
     basicBlock=_basicBlock, function=_function, builder=_builder, autoreleasePool=_autoreleasePool,
     isCompactBlock=_isCompactBlock, parent=_parent, isVariadic=_isVariadic, isTranquilBlock=_isTranquilBlock,
-    invokeName=_invokeName, argTypes=_argTypes, retType=_retType;
+    invokeName=_invokeName, argTypes=_argTypes, retType=_retType, dispatchGroup=_dispatchGroup;
 
 + (TQNodeBlock *)node { return (TQNodeBlock *)[super node]; }
 
