@@ -9,10 +9,9 @@ a = async {
 }
 
 whenFinished {
-    "done" print
+    "a is: #{a}" print
 }
 
 Usleep(50000)
 shouldStop = yes
 wait
-"a: #{a}" print
