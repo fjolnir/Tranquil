@@ -50,7 +50,8 @@ struct TQClosureBlockDescriptor _BlockDescriptor = { 0, sizeof(struct TQBlockLit
         }
 
         if(ffi_prep_cif(_cif, FFI_DEFAULT_ABI, nargs, [retTypeObj ffiType], _argTypes) == FFI_OK) {
-            if(_PrepareClosure(closure, _cif, (void (*)(ffi_cif*,void*,void**,void*))_blockClosureFunction, self, _functionPointer) == FFI_OK)
+            void *closureFun = isBlock ? _blockClosureFunction : _closureFunction;
+            if(_PrepareClosure(closure, _cif, (void (*)(ffi_cif*,void*,void**,void*))closureFun, self, _functionPointer) == FFI_OK)
                 objc_setAssociatedObject(_block, (void*)_cif, self, OBJC_ASSOCIATION_RETAIN);
         }
     }
