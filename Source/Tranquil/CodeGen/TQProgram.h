@@ -38,7 +38,7 @@ extern "C" NSString * const kTQSyntaxErrorException;
 // i8, i16, i32, and i64
 @property(readonly) llvm::IntegerType *llInt8Ty, *llInt16Ty, *llInt32Ty, *llInt64Ty;
 // float, double
-@property(readonly) llvm::Type *llFloatTy, *llDoubleTy;
+@property(readonly) llvm::Type *llFloatTy, *llDoubleTy, *llFPTy;
 // int
 @property(readonly) llvm::IntegerType *llIntTy;
 // intptr_t, size_t, and ptrdiff_t, which we assume are the same size.

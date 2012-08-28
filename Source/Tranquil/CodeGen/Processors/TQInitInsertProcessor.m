@@ -30,7 +30,7 @@
         if(![method referencesNode:selfAsgn]) {
             TQNodeUnlessBlock *nilTest = [TQNodeUnlessBlock node];
             nilTest.condition = [TQNodeSelf node];
-            [nilTest.statements addObject:[TQNodeReturn node]];
+            [nilTest.ifStatements addObject:[TQNodeReturn node]];
 
             [method.statements insertObject:selfAsgn atIndex:0];
             [method.statements insertObject:nilTest atIndex:1];

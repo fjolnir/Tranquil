@@ -143,7 +143,7 @@ using namespace llvm;
         [leftAsgn generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         conditional.condition = tempVar;
         TQNodeOperator *rightAsgn  = [TQNodeOperator nodeWithType:kTQOperatorAssign left:tempVar right:_right];
-        conditional.statements = [NSArray arrayWithObject:rightAsgn];
+        conditional.ifStatements = [NSArray arrayWithObject:rightAsgn];
         [conditional generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
 
         [tempVar release];

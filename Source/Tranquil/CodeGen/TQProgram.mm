@@ -59,7 +59,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
             objcParser=_objcParser, searchPaths=_searchPaths, allowedFileExtensions=_allowedFileExtensions,
             useAOTCompilation=_useAOTCompilation, outputPath=_outputPath, arguments=_arguments;
 @synthesize llVoidTy=_llVoidTy, llInt8Ty=_llInt8Ty, llInt16Ty=_llInt16Ty, llInt32Ty=_llInt32Ty, llInt64Ty=_llInt64Ty,
-    llFloatTy=_llFloatTy, llDoubleTy=_llDoubleTy, llIntTy=_llIntTy, llIntPtrTy=_llIntPtrTy, llSizeTy=_llSizeTy,
+    llFloatTy=_llFloatTy, llDoubleTy=_llDoubleTy, llFPTy=_llFPTy, llIntTy=_llIntTy, llIntPtrTy=_llIntPtrTy, llSizeTy=_llSizeTy,
     llPtrDiffTy=_llPtrDiffTy, llVoidPtrTy=_llVoidPtrTy, llInt8PtrTy=_llInt8PtrTy, llVoidPtrPtrTy=_llVoidPtrPtrTy,
     llInt8PtrPtrTy=_llInt8PtrPtrTy, llPointerWidthInBits=_llPointerWidthInBits, llPointerAlignInBytes=_llPointerAlignInBytes,
     llPointerSizeInBytes=_llPointerSizeInBytes;
@@ -109,6 +109,11 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     _llInt64Ty              = llvm::Type::getInt64Ty(ctx);
     _llFloatTy              = llvm::Type::getFloatTy(ctx);
     _llDoubleTy             = llvm::Type::getDoubleTy(ctx);
+#ifdef __LP64__
+    _llFPTy = _llDoubleTy;
+#else
+    _llFPTy = _llFloatTy;
+#endif
     _llPointerWidthInBits   = 64;
     _llPointerAlignInBytes  = 8;
     _llIntTy                = TypeBuilder<int, false>::get(ctx); //llvm::IntegerType::get(ctx, 32);
