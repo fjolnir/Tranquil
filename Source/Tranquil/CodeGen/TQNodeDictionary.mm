@@ -66,12 +66,11 @@ using namespace llvm;
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
-    IRBuilder<> *builder = aBlock.builder;
     Module *mod = aProgram.llModule;
 
     std::vector<Value *>args;
     args.push_back(mod->getOrInsertGlobal("OBJC_CLASS_$_NSMapTable", aProgram.llInt8Ty));
-    args.push_back(builder->CreateLoad(mod->getOrInsertGlobal("TQMapWithObjectsAndKeysSel", aProgram.llInt8PtrTy)));
+    args.push_back(aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQMapWithObjectsAndKeysSel", aProgram.llInt8PtrTy)));
     TQNode *value;
 
     int count = 0;
@@ -84,9 +83,9 @@ using namespace llvm;
         args.push_back([key generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr]);
         if(*aoErr) return NULL;
     }
-    args.push_back(builder->CreateLoad(mod->getOrInsertGlobal("TQSentinel", aProgram.llInt8PtrTy)));
+    args.push_back(aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQSentinel", aProgram.llInt8PtrTy)));
 
-    CallInst *call = builder->CreateCall(aProgram.objc_msgSend, args);
+    CallInst *call = aBlock.builder->CreateCall(aProgram.objc_msgSend, args);
     return call;
 }
 
