@@ -33,14 +33,14 @@ if compilationTask terminationStatus != 0
     Exit(1)
 
 asmPath = "/tmp/#{uuid()}.s"
-assemblingTask = NSTask launchedTaskWithLaunchPath: "/usr/local/llvm/bin/llc"
+assemblingTask = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/llvm/bin/llc"
                                          arguments: ["-O3", "-o", asmPath, irPath];
                                      waitUntilExit;
                                               self
 if assemblingTask terminationStatus != 0
     Exit(1)
 
-linkingTask = NSTask launchedTaskWithLaunchPath: "/usr/local/llvm/bin/clang"
+linkingTask = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/llvm/bin/clang"
                                       arguments: ldFlags + ["-o", outPath, asmPath];
                                   waitUntilExit;
                                            self
