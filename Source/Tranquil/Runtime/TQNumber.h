@@ -7,6 +7,10 @@
 
 @class TQRange;
 
+// The tag used to create tagged pointer TQNumbers (Tag is in the least significant byte)
+extern const unsigned char kTQNumberTagSlot;    // The tag as an integer
+extern const uintptr_t     kTQNumberTag;        // The actual bits of the tag (use inverted to get the value of a tagged number)
+
 @interface TQNumber : TQObject {
     @public
     double _value;

@@ -22,15 +22,15 @@ extern id _objc_msgSend_hack2(id, SEL, id) asm("_objc_msgSend");
 // Tagged pointer niceness (Uses floats by truncating the mantissa by 1 byte)
 void _objc_insert_tagged_isa(unsigned char slotNumber, Class isa) asm("__objc_insert_tagged_isa");
 
-static const unsigned char kTagSlot  = 5; // Free slot
-static const uintptr_t     kTag      = (kTagSlot << 1) | 1;
+const unsigned char kTQNumberTagSlot  = 5; // Free slot
+const uintptr_t     kTQNumberTag      = (kTQNumberTagSlot << 1) | 1;
 
 static __inline__ id _createTaggedPointer(_tqfloat value)
 {
     uintptr_t ptr;
     memcpy(&ptr, &value, sizeof(_tqfloat));
     ptr &= ~0xf; // Mask out the tag bits
-    ptr |= kTag;
+    ptr |= kTQNumberTag;
     return (id)ptr;
 }
 
@@ -52,7 +52,7 @@ static __inline__ _tqfloat _TQNumberValue(TQNumber *ptr)
 {
     if(_isTaggedPointer(ptr)) {
         // Zero the isa tag
-        ptr = (id)(((uintptr_t)ptr) & ~kTag);
+        ptr = (id)(((uintptr_t)ptr) & ~kTQNumberTag);
         double val;
         memcpy(&val, &ptr, sizeof(_tqfloat));
         return val;
@@ -83,7 +83,7 @@ static __inline__ _tqfloat _TQNumberValue(TQNumber *ptr)
         assert((typeof(autoreleaseImp))class_getMethodImplementation(self, @selector(autorelease)) == autoreleaseImp);
     } else {
         // Register our tagged pointer slot
-        _objc_insert_tagged_isa(kTagSlot, [TQTaggedNumber class]);
+        _objc_insert_tagged_isa(kTQNumberTagSlot, [TQTaggedNumber class]);
 
         IMP imp;
         // ==
