@@ -5,6 +5,8 @@
 #import "../Shared/TQDebug.h"
 #import "TQNodeNumber.h"
 #import "TQNodeConditionalBlock.h"
+#import "../Runtime/TQNumber.h"
+#import <llvm/Intrinsics.h>
 
 using namespace llvm;
 
@@ -152,34 +154,79 @@ using namespace llvm;
         Value *left  = [_left generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         Value *right = [_right generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
 
-        Value *selector = NULL;
+        Value *selector = NULL;       // Selector to be sent in the general case (where one or both of the operands are not tagged numbers)
+        TQNodeCustom *fastpath = nil; // Block to use in the case where both are tagged numbers
+        Value *numTag     = ConstantInt::get(aProgram.llIntPtrTy, kTQNumberTag);
+        Value *numValMask = ConstantInt::get(aProgram.llIntPtrTy, ~kTQNumberTag);
+        Value *nullPtr    = ConstantPointerNull::get(aProgram.llInt8PtrTy);
+#define PtrToInt(val) aBlock.builder->CreatePtrToInt((val), aProgram.llIntPtrTy)
+#define IntToPtr(val) aBlock.builder->CreateIntToPtr((val), aProgram.llInt8PtrTy)
+#define IntCast(val) aBlock.builder->CreateBitCast((val), aProgram.llIntPtrTy)
+#define FPCast(val) aBlock.builder->CreateBitCast((val), aProgram.llFPTy)
+#define GET_AB() Value *a = FPCast(aBlock.builder->CreateAnd(PtrToInt(left),  numValMask)); \
+                 Value *b = FPCast(aBlock.builder->CreateAnd(PtrToInt(right), numValMask))
+#define GET_VALID() [[TQNodeValid node] generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr]
+#define GET_TQNUM(val) IntToPtr(aBlock.builder->CreateOr(IntCast((val)), numTag))
+
         switch(_type) {
             case kTQOperatorLesser:
                 selector  = aProgram.llModule->getOrInsertGlobal("TQLTOpSel", aProgram.llInt8PtrTy);
+                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
+                    GET_AB();
+                    return aBlock.builder->CreateSelect(aBlock.builder->CreateFCmpOLT(a, b), GET_VALID(), nullPtr);
+                }];
                 break;
             case kTQOperatorGreater:
                 selector  = aProgram.llModule->getOrInsertGlobal("TQGTOpSel", aProgram.llInt8PtrTy);
+                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
+                    GET_AB();
+                    return aBlock.builder->CreateSelect(aBlock.builder->CreateFCmpOGT(a, b), GET_VALID(), nullPtr);
+                }];
                 break;
             case kTQOperatorMultiply:
                 selector  = aProgram.llModule->getOrInsertGlobal("TQMultOpSel", aProgram.llInt8PtrTy);
+                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
+                    GET_AB();
+                    return GET_TQNUM(aBlock.builder->CreateFMul(a, b));
+                }];
                 break;
             case kTQOperatorDivide:
                 selector  = aProgram.llModule->getOrInsertGlobal("TQDivOpSel", aProgram.llInt8PtrTy);
+                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
+                    GET_AB();
+                    return GET_TQNUM(aBlock.builder->CreateFDiv(a, b));
+                }];
                 break;
             case kTQOperatorModulo:
                 selector  = aProgram.llModule->getOrInsertGlobal("TQModOpSel", aProgram.llInt8PtrTy);
                 break;
             case kTQOperatorAdd:
                 selector  = aProgram.llModule->getOrInsertGlobal("TQAddOpSel", aProgram.llInt8PtrTy);
+                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
+                    GET_AB();
+                    return GET_TQNUM(aBlock.builder->CreateFAdd(a, b));
+                }];
                 break;
             case kTQOperatorSubtract:
                 selector  = aProgram.llModule->getOrInsertGlobal("TQSubOpSel", aProgram.llInt8PtrTy);
+                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
+                    GET_AB();
+                    return GET_TQNUM(aBlock.builder->CreateFSub(a, b));
+                }];
                 break;
             case kTQOperatorGreaterOrEqual:
                 selector  = aProgram.llModule->getOrInsertGlobal("TQGTEOpSel", aProgram.llInt8PtrTy);
+                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
+                    GET_AB();
+                    return aBlock.builder->CreateSelect(aBlock.builder->CreateFCmpOGE(a, b), GET_VALID(), nullPtr);
+                }];
                 break;
             case kTQOperatorLesserOrEqual:
                 selector  = aProgram.llModule->getOrInsertGlobal("TQLTEOpSel", aProgram.llInt8PtrTy);
+                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
+                    GET_AB();
+                    return aBlock.builder->CreateSelect(aBlock.builder->CreateFCmpOLE(a, b), GET_VALID(), nullPtr);
+                }];
                 break;
             case kTQOperatorGetter:
                 selector  = aProgram.llModule->getOrInsertGlobal("TQGetterOpSel", aProgram.llInt8PtrTy);
@@ -195,12 +242,52 @@ using namespace llvm;
                 break;
             case kTQOperatorExponent:
                 selector  = aProgram.llModule->getOrInsertGlobal("TQExpOpSel", aProgram.llInt8PtrTy);
+                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
+                    GET_AB();
+                    Function *pow = Intrinsic::getDeclaration(p.llModule, Intrinsic::pow, p.llFPTy);
+                    return GET_TQNUM(aBlock.builder->CreateCall2(pow, a, b));
+                }];
                 break;
-
             default:
                 TQAssertSoft(NO, kTQGenericErrorDomain, kTQGenericError, NULL, @"Unknown binary operator");
         }
-        return aBlock.builder->CreateCall3(aProgram.objc_msgSend, left, aBlock.builder->CreateLoad(selector), right);
+        TQNodeCustom *slowpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
+            return (Value *)aBlock.builder->CreateCall3(p.objc_msgSend, left, aBlock.builder->CreateLoad(selector), right);
+        }];
+        if(fastpath) {
+            // If the operator supports a fast path then we must create the necessary branches
+            Value *cond = aBlock.builder->CreateICmpNE(aBlock.builder->CreateAnd(aBlock.builder->CreateAnd(PtrToInt(left), PtrToInt(right)), numTag), ConstantInt::get(aProgram.llIntPtrTy, 0));
+
+            BasicBlock *fastBB = BasicBlock::Create(aProgram.llModule->getContext(), "opFastpath", aBlock.function);
+            BasicBlock *slowBB = BasicBlock::Create(aProgram.llModule->getContext(), "opSlowpath", aBlock.function);
+            BasicBlock *contBB = BasicBlock::Create(aProgram.llModule->getContext(), "cont", aBlock.function);
+
+            aBlock.builder->CreateCondBr(cond, fastBB, slowBB);
+
+            IRBuilder<> fastBuilder(fastBB);
+            aBlock.basicBlock = fastBB;
+            aBlock.builder = &fastBuilder;
+            Value *fastVal = [fastpath generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+
+            IRBuilder<> slowBuilder(slowBB);
+            aBlock.basicBlock = slowBB;
+            aBlock.builder = &slowBuilder;
+            Value *slowVal = [slowpath generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+
+            IRBuilder<> *contBuilder = new IRBuilder<>(contBB);
+            aBlock.basicBlock = contBB;
+            aBlock.builder = contBuilder;
+
+            fastBuilder.CreateBr(contBB);
+            slowBuilder.CreateBr(contBB);
+
+            PHINode *phi = contBuilder->CreatePHI(aProgram.llInt8PtrTy, 2);
+            phi->addIncoming(fastVal, fastBB);
+            phi->addIncoming(slowVal, slowBB);
+
+            return phi;
+        } else
+            return [slowpath generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     }
 }
 
