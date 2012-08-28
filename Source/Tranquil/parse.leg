@@ -17,7 +17,7 @@ typedef struct _TQParserState TQParserState;
 #define YY_XTYPE TQParserState *
 #define YY_XVAR  state
 #define YYSTYPE id
-#define YYNSSTR [NSString stringWithUTF8String:yytext]
+#define YYNSSTR [NSMutableString stringWithUTF8String:yytext]
 #define YYNUM atof(yytext)
 #define YYNSNUM [NSNumber numberWithDouble:YYNUM]
 
@@ -786,13 +786,13 @@ MutableStr   = '"' { PushStack([TQNodeString nodeWithString:[NSMutableString str
                _snglQuot ~{ SyntaxError(@"String literal left unclosed"); }
                { $$ = PopStack(); }
 
-DQuotStrIn   = <("#" !"{" |[^\"#])+ > { [[(TQNodeString *)StackTop value] appendString:YYNSSTR]; }
-SQuotStrIn   = <("#" !"{" |[^\'#])+ > { [[(TQNodeString *)StackTop value] appendString:YYNSSTR]; }
+DQuotStrIn   = <("#" !"{" |[^\"#])+ > { [(TQNodeString *)StackTop append:YYNSSTR]; }
+SQuotStrIn   = <("#" !"{" |[^\'#])+ > { [(TQNodeString *)StackTop append:YYNSSTR]; }
 
 StrEmbeddExpr= ("#{"-"}"
                | "#{" - expr:Expression - "}"
                  {
-                     [[(TQNodeString *)StackTop value] appendString:@"%@"];
+                     [(TQNodeString *)StackTop append:@"%@"];
                      [[StackTop embeddedValues] addObject:expr];
                  }
                )
@@ -806,7 +806,13 @@ ConstString  = "$" ( < [^\n ]+ >
                    ) ~{ SyntaxError(@"Expected string literal after '$'"); }
                    { $$ = [TQNodeConstString nodeWithString:YYNSSTR]; }
 
-RegExp       = < "/" ("\\/"|[^/])* "/"[im]* >              { ExtendToken(); $$ = [TQNodeRegex nodeWithPattern:YYNSSTR];   }
+RegExp       = "/" { PushStack([TQNodeRegex nodeWithPattern:[NSMutableString stringWithString:@"/"]]); }
+               (StrEmbeddExpr|RegexpIn)* <"/" [im]*>
+             {
+                 $$ = PopStack();
+                 [(TQNodeRegex *)$$ append:YYNSSTR];
+             }
+RegexpIn     = < ("#" !"{" | "\\/" | [^\\/#])+ > { [(TQNodeRegex *)StackTop append:YYNSSTR]; }
 
 Comment      = - (('\\') (!EOL .)* EOL)+
 

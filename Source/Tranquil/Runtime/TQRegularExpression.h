@@ -2,7 +2,7 @@
 #import <Tranquil/Runtime/TQRange.h>
 
 @interface TQRegularExpression : NSRegularExpression
-+ (NSRegularExpression *)tq_regularExpressionWithUTF8String:(char *)aPattern options:(NSRegularExpressionOptions)aOpts;
++ (NSRegularExpression *)tq_regularExpressionWithPattern:(NSString *)aPattern options:(NSRegularExpressionOptions)aOpts;
 @end
 
 @interface NSString (TQRegularExpression)

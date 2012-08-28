@@ -35,6 +35,10 @@ syn match tqComment "\\.*"
 syn region tqString start='"' skip='\\"' end='"' contains=tqInterpolation
 syn region tqInterpolation matchgroup=tqInterpolated start="#{" end="}" contained contains=ALLBUT,tqBlockError
 
+" Normal Regular Expression
+syn region tqRegexp start="/" skip="\\/" end="/[im]*" contains=tqInterpolation,tqStringInRegexp
+
+
 syn case ignore
 
 " Symbols
@@ -81,6 +85,7 @@ if version >= 508 || !exists("did_st_syntax_inits")
     HiLink tqComment         Comment
     HiLink tqCharacter       Constant
     HiLink tqString          Constant
+    HiLink tqRegexp          Special
     HiLink tqSymbol          Special
     HiLink tqMessageColon    Special
     HiLink tqNumber          Type

@@ -3,11 +3,10 @@
 #import <objc/runtime.h>
 
 @implementation TQRegularExpression
-+ (NSRegularExpression *)tq_regularExpressionWithUTF8String:(char *)aPattern options:(NSRegularExpressionOptions)aOpts
++ (NSRegularExpression *)tq_regularExpressionWithPattern:(NSString *)aPattern options:(NSRegularExpressionOptions)aOpts
 {
-    NSString *str = [NSString stringWithUTF8String:aPattern];
     NSError *err = nil;
-    NSRegularExpression *regex = [self regularExpressionWithPattern:str options:aOpts error:&err];
+    NSRegularExpression *regex = [self regularExpressionWithPattern:aPattern options:aOpts error:&err];
     if(err)
         TQLog(@"%@", err);
     return regex;

@@ -1,6 +1,7 @@
-#import <Tranquil/CodeGen/TQNode.h>
+#import <Tranquil/CodeGen/TQNodeString.h>
 
-@interface TQNodeRegex : TQNode
-@property(readwrite, retain) NSString *pattern;
+@interface TQNodeRegex : TQNodeString
+@property(readwrite, retain) NSMutableString *pattern;
+@property(readwrite) NSRegularExpressionOptions options;
 + (TQNodeRegex *)nodeWithPattern:(NSString *)aPattern;
 @end

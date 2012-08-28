@@ -4,13 +4,13 @@
 using namespace llvm;
 
 @implementation TQNodeRegex
-@synthesize pattern=_pattern;
+@synthesize options=_opts, pattern=_pattern;
 
-+ (TQNodeRegex *)nodeWithPattern:(NSString *)aPattern
++ (TQNodeRegex *)nodeWithPattern:(NSMutableString *)aPattern
 {
-    TQNodeRegex *regex = [self new];
-    regex.pattern = aPattern;
-    return [regex autorelease];
+    TQNodeRegex *ret = (TQNodeRegex *)[super node];
+    ret.pattern = aPattern;
+    return ret;
 }
 
 - (void)dealloc
@@ -21,17 +21,12 @@ using namespace llvm;
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<regex@ %@>", _pattern];
+    return [NSString stringWithFormat:@"<regex@ %@>", self.value];
 }
 
-- (TQNode *)referencesNode:(TQNode *)aNode
+- (void)append:(NSString *)aStr
 {
-    return [aNode isEqual:self] ? self : nil;
-}
-
-- (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
-{
-    // Nothing to iterate
+    [_pattern appendString:aStr];
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
@@ -39,10 +34,7 @@ using namespace llvm;
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
-    Module *mod = aProgram.llModule;
-    llvm::IRBuilder<> *builder = aBlock.builder;
-
-    // Returns [NSRegularExpression tq_regularExpressionWithUTF8String:options:]
+    // Generate the regex string
     NSRegularExpression *splitRegex = [NSRegularExpression regularExpressionWithPattern:@"/(([\\/]|[^/])*)/([im]*)"
                                                                                 options:0
                                                                                   error:nil];
@@ -57,19 +49,25 @@ using namespace llvm;
     else
         pattern = @"";
 
-    NSRegularExpressionOptions opts = 0;
+    _opts = 0;
     if(optRange.length > 0) {
         NSString *optStr  = [_pattern substringWithRange:[match rangeAtIndex:3]];
         if([optStr rangeOfString:@"i"].location != NSNotFound)
-            opts |= NSRegularExpressionCaseInsensitive;
+            _opts |= NSRegularExpressionCaseInsensitive;
         if([optStr rangeOfString:@"m"].location != NSNotFound)
-            opts |= NSRegularExpressionAnchorsMatchLines;
+            _opts |= NSRegularExpressionAnchorsMatchLines;
     }
+    [super setValue:[[pattern mutableCopy] autorelease]];
 
+    // Compile
+    Module *mod = aProgram.llModule;
+    llvm::IRBuilder<> *builder = aBlock.builder;
+
+    // Returns [TQRegularExpression tq_regularExpressionWithPattern:options:]
+    Value *patVal   = [super generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     Value *selector = builder->CreateLoad(mod->getOrInsertGlobal("TQRegexWithPatSel", aProgram.llInt8PtrTy));
     Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_TQRegularExpression", aProgram.llInt8Ty);
-    Value *patVal   = [aProgram getGlobalStringPtr:pattern inBlock:aBlock];
-    Value *optsVal  = ConstantInt::get(aProgram.llIntTy, opts);
+    Value *optsVal  = ConstantInt::get(aProgram.llIntTy, _opts);
 
     return builder->CreateCall4(aProgram.objc_msgSend, klass, selector, patVal, optsVal);
 }

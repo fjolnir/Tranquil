@@ -396,7 +396,7 @@ void TQInitializeRuntime()
     TQStringWithFormatSel        = @selector(stringWithFormat:);
     TQPointerArrayWithObjectsSel = @selector(tq_pointerArrayWithObjects:);
     TQMapWithObjectsAndKeysSel   = @selector(tq_mapTableWithObjectsAndKeys:);
-    TQRegexWithPatSel            = @selector(tq_regularExpressionWithUTF8String:options:);
+    TQRegexWithPatSel            = @selector(tq_regularExpressionWithPattern:options:);
     TQMoveToHeapSel              = @selector(moveValueToHeap);
     TQWeakSel                    = @selector(with:);
 

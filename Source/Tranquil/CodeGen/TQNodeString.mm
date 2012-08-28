@@ -49,6 +49,11 @@ using namespace llvm;
     }
 }
 
+- (void)append:(NSString *)aStr
+{
+    [_value appendString:aStr];
+}
+
 - (BOOL)replaceChildNodesIdenticalTo:(TQNode *)aNodeToReplace with:(TQNode *)aNodeToInsert
 {
     NSUInteger idx = [_embeddedValues indexOfObject:aNodeToReplace];
