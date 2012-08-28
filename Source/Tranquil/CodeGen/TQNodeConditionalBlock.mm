@@ -200,21 +200,38 @@ using namespace llvm;
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
-    TQAssert(_ifExpr, @"Ternary operator missing truth result");
-    TQNodeVariable *tempVar = [TQNodeVariable new];
-    [tempVar createStorageInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+    TQNode *elseExpr = _elseExpr ? _elseExpr : [TQNodeNil node];
 
-    TQNodeOperator *ifAsgn  = [TQNodeOperator nodeWithType:kTQOperatorAssign left:tempVar right:_ifExpr];
-    self.ifStatements = [NSArray arrayWithObject:ifAsgn];
+    BasicBlock *thenBB = BasicBlock::Create(aProgram.llModule->getContext(), "then", aBlock.function);
+    BasicBlock *elseBB = NULL;
+    elseBB = BasicBlock::Create(aProgram.llModule->getContext(), "else", aBlock.function);
+    BasicBlock *contBB = BasicBlock::Create(aProgram.llModule->getContext(), "endTernary", aBlock.function);
 
-    if(_elseExpr) {
-        TQNodeOperator *elseAsgn  = [TQNodeOperator nodeWithType:kTQOperatorAssign left:tempVar right:_elseExpr];
-        self.elseStatements = [NSArray arrayWithObject:elseAsgn];
-    }
-    [super generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+    Value *cond = [self.condition generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+    cond = aBlock.builder->CreateICmpNE(cond, ConstantPointerNull::get(aProgram.llInt8PtrTy), "ternaryTest");
+    aBlock.builder->CreateCondBr(cond, thenBB, elseBB ? elseBB : contBB);
 
-    [tempVar release];
-    return [tempVar generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+    IRBuilder<> thenBuilder(thenBB);
+    aBlock.basicBlock = thenBB;
+    aBlock.builder = &thenBuilder;
+    Value *thenVal = [_ifExpr generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+    thenBuilder.CreateBr(contBB);
+
+    IRBuilder<> elseBuilder(elseBB);
+    aBlock.basicBlock = elseBB;
+    aBlock.builder = &elseBuilder;
+    Value *elseVal = [elseExpr generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+    elseBuilder.CreateBr(contBB);
+
+    IRBuilder<> *contBuilder = new IRBuilder<>(contBB);
+    aBlock.basicBlock = contBB;
+    aBlock.builder    = contBuilder;
+
+    PHINode *phi = contBuilder->CreatePHI(aProgram.llInt8PtrTy, 2);
+    phi->addIncoming(thenVal, thenBB);
+    phi->addIncoming(elseVal, elseBB);
+
+    return phi;
 }
 
 - (TQNode *)referencesNode:(TQNode *)aNode
