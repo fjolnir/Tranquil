@@ -72,7 +72,10 @@ using namespace llvm;
 {
     IRBuilder<> *builder = aBlock.builder;
 
-    Value *key = [aProgram getGlobalStringPtr:_property inBlock:aBlock];
+    Value *key = [[TQNodeConstString nodeWithString:_property] generateCodeInProgram:aProgram
+                                                                               block:aBlock
+                                                                                root:aRoot
+                                                                               error:aoErr];
     Value *object = [_receiver generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     return builder->CreateCall3(aProgram.TQSetValueForKey, object, key, aValue);
 }
