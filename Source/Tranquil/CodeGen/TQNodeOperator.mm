@@ -103,7 +103,7 @@ using namespace llvm;
         Value *selector  = aProgram.llModule->getOrInsertGlobal("TQUnaryMinusOpSel", aProgram.llInt8PtrTy);
         return aBlock.builder->CreateCall2(aProgram.objc_msgSend, right, aBlock.builder->CreateLoad(selector));
     } else if(_type == kTQOperatorIncrement || _type == kTQOperatorDecrement) {
-        assert(!_left || !_right);
+        TQAssert(!_left || !_right, @"Panic! in/decrement can't have both left&right hand sides");
         Value *beforeVal = NULL;
 
         // Return original value and increment (var++)
@@ -115,7 +115,6 @@ using namespace llvm;
         TQNodeOperator *op = [TQNodeOperator nodeWithType:kTQOperatorIncrement ? kTQOperatorAdd : kTQOperatorSubtract
                                                      left:incrementee
                                                     right:[TQNodeNumber nodeWithDouble:1.0]];
-
 
         Value *incrementedVal = [op generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         [incrementee store:incrementedVal inProgram:aProgram block:aBlock root:aRoot error:aoErr];
