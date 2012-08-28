@@ -56,21 +56,19 @@ using namespace llvm;
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
-    IRBuilder<> *builder = aBlock.builder;
     Module *mod = aProgram.llModule;
 
     std::vector<Value *>args;
     args.push_back(mod->getOrInsertGlobal("OBJC_CLASS_$_NSPointerArray", aProgram.llInt8Ty));
-    args.push_back(builder->CreateLoad(mod->getOrInsertGlobal("TQPointerArrayWithObjectsSel", aProgram.llInt8PtrTy)));
+    args.push_back(aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQPointerArrayWithObjectsSel", aProgram.llInt8PtrTy)));
     for(TQNode *item in _items) {
         args.push_back([item generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr]);
         if(*aoErr)
             return NULL;
     }
-    args.push_back(builder->CreateLoad(mod->getOrInsertGlobal("TQSentinel", aProgram.llInt8PtrTy)));
+    args.push_back(aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQSentinel", aProgram.llInt8PtrTy)));
 
-    CallInst *call = builder->CreateCall(aProgram.objc_msgSend, args);
-    return call;
+    return aBlock.builder->CreateCall(aProgram.objc_msgSend, args);
 }
 
 @end
