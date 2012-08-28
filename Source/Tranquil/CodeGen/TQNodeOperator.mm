@@ -104,25 +104,27 @@ using namespace llvm;
         return aBlock.builder->CreateCall2(aProgram.objc_msgSend, right, aBlock.builder->CreateLoad(selector));
     } else if(_type == kTQOperatorIncrement || _type == kTQOperatorDecrement) {
         assert(!_left || !_right);
-        NSString *selName = _type == kTQOperatorIncrement ? @"TQAddOpSel" : @"TQSubOpSel";
-        Value *selector  = aProgram.llModule->getOrInsertGlobal([selName UTF8String], aProgram.llInt8PtrTy);
-        TQNode *incrementee = _left ? _left : _right;
+        Value *beforeVal = NULL;
 
-        Value *one = [[TQNodeNumber nodeWithDouble:1.0] generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-        Value *beforeVal = [incrementee generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-        if(*aoErr)
-            return NULL;
-        Value *incrementedVal = aBlock.builder->CreateCall3(aProgram.objc_msgSend, beforeVal, aBlock.builder->CreateLoad(selector), one);
+        // Return original value and increment (var++)
+        TQNode *incrementee = _right;
+        if(_left) {
+            incrementee = _left;
+            beforeVal = [incrementee generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        }
+        TQNodeOperator *op = [TQNodeOperator nodeWithType:kTQOperatorIncrement ? kTQOperatorAdd : kTQOperatorSubtract
+                                                     left:incrementee
+                                                    right:[TQNodeNumber nodeWithDouble:1.0]];
+
+
+        Value *incrementedVal = [op generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         [incrementee store:incrementedVal inProgram:aProgram block:aBlock root:aRoot error:aoErr];
         if(*aoErr)
             return NULL;
 
-        // Return original value and increment (var++)
-        if(_left)
+        if(beforeVal)
             return beforeVal;
-        // Increment and return incremented value (++var)
-        else
-            return incrementedVal;
+        return incrementedVal;
     } else if(_type == kTQOperatorEqual) {
         Value *left  = [_left generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         Value *right = [_right generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
