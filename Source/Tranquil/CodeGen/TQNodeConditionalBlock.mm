@@ -202,26 +202,27 @@ using namespace llvm;
 {
     TQNode *elseExpr = _elseExpr ? _elseExpr : [TQNodeNil node];
 
-    BasicBlock *thenBB = BasicBlock::Create(aProgram.llModule->getContext(), "then", aBlock.function);
-    BasicBlock *elseBB = NULL;
-    elseBB = BasicBlock::Create(aProgram.llModule->getContext(), "else", aBlock.function);
-    BasicBlock *contBB = BasicBlock::Create(aProgram.llModule->getContext(), "endTernary", aBlock.function);
+    BasicBlock *thenBB = BasicBlock::Create(aProgram.llModule->getContext(), "ternThen", aBlock.function);
+    BasicBlock *elseBB = BasicBlock::Create(aProgram.llModule->getContext(), "ternElse", aBlock.function);
+    BasicBlock *contBB = BasicBlock::Create(aProgram.llModule->getContext(), "ternEnd", aBlock.function);
 
     Value *cond = [self.condition generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-    cond = aBlock.builder->CreateICmpNE(cond, ConstantPointerNull::get(aProgram.llInt8PtrTy), "ternaryTest");
+    cond = aBlock.builder->CreateICmpNE(cond, ConstantPointerNull::get(aProgram.llInt8PtrTy), "ternTest");
     aBlock.builder->CreateCondBr(cond, thenBB, elseBB ? elseBB : contBB);
 
     IRBuilder<> thenBuilder(thenBB);
     aBlock.basicBlock = thenBB;
     aBlock.builder = &thenBuilder;
     Value *thenVal = [_ifExpr generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-    thenBuilder.CreateBr(contBB);
+    thenBB = aBlock.basicBlock; // May have changed
+    aBlock.builder->CreateBr(contBB);
 
     IRBuilder<> elseBuilder(elseBB);
     aBlock.basicBlock = elseBB;
     aBlock.builder = &elseBuilder;
     Value *elseVal = [elseExpr generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-    elseBuilder.CreateBr(contBB);
+    elseBB = aBlock.basicBlock; // May have changed
+    aBlock.builder->CreateBr(contBB);
 
     IRBuilder<> *contBuilder = new IRBuilder<>(contBB);
     aBlock.basicBlock = contBB;
