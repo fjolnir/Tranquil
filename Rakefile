@@ -5,7 +5,7 @@ PEG = '/usr/local/tranquil/greg/bin/greg'
 
 BUILD_DIR = 'Build'
 
-PARSER_OUTPATH = "#{BUILD_DIR}/parse.m"
+PARSER_OUTPATH = "#{BUILD_DIR}/parse.mm"
 
 PEGFLAGS = [
     "-o #{PARSER_OUTPATH}",
@@ -70,6 +70,10 @@ RUNTIME_O_FILES << MSGSEND_OUT
 CODEGEN_SOURCES = FileList['Source/Tranquil/CodeGen/**/*.m*']
 CODEGEN_O_FILES = CODEGEN_SOURCES.pathmap(PATHMAP)
 
+HEADERS         = FileList['Source/Tranquil/BridgeSupport/*.h'].add('Source/Tranquil/Dispatch/*.h').add('Source/Tranquil/Runtime/*.h').add('Source/Tranquil/Shared/*.h').add('Source/Tranquil/CodeGen/**/*.h')
+HEADER_PATHMAP  = '/usr/local/tranquil/include/Tranquil/%-1d/%f'
+HEADERS_OUT     = HEADERS.pathmap(HEADER_PATHMAP)
+
 PEG_SOURCE      = FileList['Source/Tranquil/*.leg'].first
 
 ARC_FILES = ['Source/Tranquil/Runtime/TQWeak.m']
@@ -87,6 +91,15 @@ def compile(file, flags=CXXFLAGS, cc=CXX)
     cmd << " -ObjC"       if cc == CC
     sh cmd
 end
+
+HEADERS.each { |header|
+    file header.pathmap(HEADER_PATHMAP) => header do |f|
+        p f.name
+        sh "mkdir -p #{f.name.pathmap('%d')}"
+        sh "cp #{header} #{f.name}"
+    end
+}
+
 
 file PARSER_OUTPATH => PEG_SOURCE do |f|
     sh "#{PEG} #{PEGFLAGS} #{PEG_SOURCE}"
@@ -118,7 +131,7 @@ file :build_dir do
     sh "mkdir -p #{File.dirname(__FILE__)}/Build"
 end
 
-file :libtranquil => RUNTIME_O_FILES do |t|
+file :libtranquil => RUNTIME_O_FILES + HEADERS_OUT do |t|
     sh "ar rcs #{BUILD_DIR}/libtranquil.a #{RUNTIME_O_FILES}"
     sh "mkdir -p /usr/local/tranquil/lib"
     sh "cp Build/libtranquil.a /usr/local/tranquil/lib"
