@@ -4,7 +4,7 @@
 #import <objc/runtime.h>
 
 @implementation TQObject
-+ (id)addMethod:(NSString *)aSel withBlock:(id)aBlock replaceExisting:(TQNumber *)shouldReplace
++ (id)addMethod:(NSString *)aSel withBlock:(id)aBlock replaceExisting:(id)shouldReplace
 {
     IMP imp = imp_implementationWithBlock(aBlock);
     NSMutableString *type = [NSMutableString stringWithString:@"@:"];
@@ -13,11 +13,16 @@
         if(selCStr[i] == ':')
             [type appendString:@"@"];
     }
-    if([shouldReplace boolValue])
+    if(shouldReplace)
         class_replaceMethod(self, NSSelectorFromString(aSel), imp, [type UTF8String]);
     else
         class_addMethod(self, NSSelectorFromString(aSel), imp, [type UTF8String]);
     return TQValid;
+}
+
++ (id)addMethod:(NSString *)aSel withBlock:(id)aBlock
+{
+    return [self addMethod:aSel withBlock:aBlock replaceExisting:TQValid];
 }
 
 + (id)accessor:(NSString *)aPropName

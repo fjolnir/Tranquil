@@ -7,6 +7,7 @@
 @class TQNumber;
 
 @interface TQObject : NSObject
-+ (id)addMethod:(NSString *)aSel withBlock:(id)aBlock replaceExisting:(TQNumber *)shouldReplace;
++ (id)addMethod:(NSString *)aSel withBlock:(id)aBlock replaceExisting:(id)shouldReplace;
++ (id)addMethod:(NSString *)aSel withBlock:(id)aBlock;
 + (id)accessor:(NSString *)aPropName;
 @end
