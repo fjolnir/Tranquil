@@ -70,18 +70,17 @@ using namespace llvm;
                                  error:(NSError **)aoErr
 {
     Module *mod = aProgram.llModule;
-    IRBuilder<> *builder = aBlock.builder;
 
     // Returns [NSMutableString stringWithUTF8String:_value]
     Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_NSMutableString", aProgram.llInt8Ty);
-    Value *selector = builder->CreateLoad(mod->getOrInsertGlobal("TQStringWithUTF8StringSel", aProgram.llInt8PtrTy));
+    Value *selector = aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQStringWithUTF8StringSel", aProgram.llInt8PtrTy));
 
     Value *strValue = [aProgram getGlobalStringPtr:_value inBlock:aBlock];
-    strValue = builder->CreateCall3(aProgram.objc_msgSend, klass, selector, strValue);
+    strValue = aBlock.builder->CreateCall3(aProgram.objc_msgSend, klass, selector, strValue);
 
     // If there are embedded values we must create a string using strValue as its format
     if([_embeddedValues count] > 0) {
-        Value *formatSelector = builder->CreateLoad(mod->getOrInsertGlobal("TQStringWithFormatSel", aProgram.llInt8PtrTy));
+        Value *formatSelector = aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQStringWithFormatSel", aProgram.llInt8PtrTy));
         std::vector<Value*> args;
         args.push_back(klass);
         args.push_back(formatSelector);
@@ -89,7 +88,7 @@ using namespace llvm;
         for(TQNode *value in _embeddedValues) {
             args.push_back([value generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr]);
         }
-        strValue = builder->CreateCall(aProgram.objc_msgSend, args);
+        strValue = aBlock.builder->CreateCall(aProgram.objc_msgSend, args);
     }
     return strValue;
 }
@@ -107,7 +106,6 @@ using namespace llvm;
                                  error:(NSError **)aoErr
 {
     Module *mod = aProgram.llModule;
-    IRBuilder<> *builder = aBlock.builder;
 
     NSString *globalName;
     if(aProgram.useAOTCompilation)
