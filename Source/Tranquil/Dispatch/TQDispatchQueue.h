@@ -11,7 +11,7 @@
 - (id)resume;
 
 - (id)dispatch:(dispatch_block_t)aBlock;
-- (id)dispatch:(dispatch_block_t)aBlock asynchronously:(TQNumber *)aIsAsync;
+- (id)dispatch:(dispatch_block_t)aBlock asynchronously:(id)aIsAsync;
 - (id)dispatch:(dispatch_block_t)aBlock afterDelay:(TQNumber *)aDelay;
 
 @end

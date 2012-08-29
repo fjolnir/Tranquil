@@ -1,5 +1,6 @@
 #import "TQDispatchQueue.h"
 #import "../Runtime/TQNumber.h"
+#import "../Runtime/TQRuntime.h"
 
 @implementation TQDispatchQueue
 + (TQDispatchQueue *)queue
@@ -41,12 +42,12 @@
 
 - (id)dispatch:(dispatch_block_t)aBlock
 {
-    return [self dispatch:aBlock asynchronously:(TQNumber*)@YES];
+    return [self dispatch:aBlock asynchronously:TQValid];
 }
 
-- (id)dispatch:(dispatch_block_t)aBlock asynchronously:(TQNumber *)aIsAsync
+- (id)dispatch:(dispatch_block_t)aBlock asynchronously:(id)aIsAsync
 {
-    if([aIsAsync boolValue])
+    if(aIsAsync)
         dispatch_async(_queue, aBlock);
     else
         dispatch_sync(_queue, aBlock);
