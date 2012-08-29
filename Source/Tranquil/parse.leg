@@ -39,40 +39,16 @@ typedef struct _TQParserState TQParserState;
     ((TQParserState *)state)->currentToken.length += thunk->end - thunk->begin; \
 } while(0)
 
-#define RewindWhitespace() for(; G->pos > 0 && (G->data->script[G->pos] == ' ' \
-                                                || G->data->script[G->pos] == '\n' \
-                                                || G->data->script[G->pos] == '\0'); --G->pos) { \
+#define RewindWhitespace() for(; G->pos > 0 && (G->buf[G->pos] == ' ' \
+                                                || G->buf[G->pos] == '\n' \
+                                                || G->buf[G->pos] == '\0'); --G->pos) { \
     if(G->data->script[G->pos] == '\n') \
         --G->data->currentLine; \
 }
 
 #define SyntaxError(msg) do { \
     RewindWhitespace(); \
-    int lineNo = G->data->currentLine+1; \
-    NSString *exceptionReason; \
-    NSString *source         = [NSString stringWithFormat:@"%s", G->buf]; \
-    NSRange tokRange         = state->currentToken; \
-    NSRange srcRange         = NSMakeRange(0, [source length]); \
-    NSRange interestingRange = NSIntersectionRange(srcRange, NSMakeRange(G->pos - 20, G->pos + 20)); \
-    if(interestingRange.length > 0) { \
-        NSMutableString *errStr = [[[source substringWithRange:interestingRange] mutableCopy] autorelease]; \
-        const char *errCStr = [errStr UTF8String]; \
-        \
-        for(int i = G->pos; i <= [source length]; ++i) { \
-            if(errCStr[i] == '\n' || errCStr[i] == '\0') { \
-                int idx = i - interestingRange.location; \
-                NSMutableString *spaceStr = [NSMutableString stringWithString:@"\n"]; \
-                int temp = idx; \
-                while(errCStr[temp] != '\n' && temp >= 0) { --temp; [spaceStr appendString:@" "]; } \
-                [spaceStr replaceCharactersInRange:NSIntersectionRange(srcRange, (NSRange) { [spaceStr length]-2, 1}) withString:@"^"]; \
-                [errStr insertString:spaceStr atIndex:idx]; \
-                break; \
-            } \
-        } \
-        exceptionReason = [NSString stringWithFormat:@"Line %d: Syntax error! %@ near:\n%@", lineNo, (msg), errStr]; \
-    } else \
-         exceptionReason = [NSString stringWithFormat:@"Line %d: Syntax error! %@", lineNo, (msg)]; \
-    [NSException raise:kTQSyntaxErrorException format:@"%@", exceptionReason]; \
+    [NSException raise:kTQSyntaxErrorException format:@"Line %ld: Syntax error! %@", G->data->currentLine, (msg)]; \
 } while(0)
 
 //#define YY_DEBUG
