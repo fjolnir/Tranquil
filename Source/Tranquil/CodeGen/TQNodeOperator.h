@@ -28,7 +28,7 @@ enum {
 typedef char TQOperatorType;
 // Binary operator (a <operator> b)
 @interface TQNodeOperator : TQNode
-@property(readwrite, assign) TQOperatorType type;
+@property(readwrite) TQOperatorType type;
 @property(readwrite, retain) TQNode *left;
 @property(readwrite, retain) TQNode *right;
 
@@ -37,6 +37,7 @@ typedef char TQOperatorType;
 @end
 
 @interface TQNodeMultiAssignOperator : TQNode
+@property(readwrite) TQOperatorType type;
 @property(readwrite, retain) NSMutableArray *left;
 @property(readwrite, retain) NSMutableArray *right;
 @end

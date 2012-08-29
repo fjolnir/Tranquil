@@ -551,7 +551,13 @@ AssgnRhs       = -- (  "=" -- b:AssignValue  { PushStack(b);                    
                }
 
 MultiAssgnmt   = { PushStack([TQNodeMultiAssignOperator node]); SetLineNo(StackTop); }
-                 MultiAsgnLhs (- "," -- MultiAsgnLhs)+ - "=" -- MultiAsgnRhs (- "," -- MultiAsgnRhs)*
+                 MultiAsgnLhs (- "," -- MultiAsgnLhs)+ -
+                 ("=" | "+=" { [(TQNodeMultiAssignOperator *)StackTop setType:kTQOperatorAdd]; }
+                      | "-=" { [(TQNodeMultiAssignOperator *)StackTop setType:kTQOperatorSubtract]; }
+                      | "*=" { [(TQNodeMultiAssignOperator *)StackTop setType:kTQOperatorMultiply]; }
+                      | "/=" { [(TQNodeMultiAssignOperator *)StackTop setType:kTQOperatorDivide]; }
+                 )
+                 -- MultiAsgnRhs (- "," -- MultiAsgnRhs)*
                  {
                      $$ = PopStack();
                  }

@@ -147,9 +147,7 @@ using namespace llvm;
         // Compile `left ? left : right` or `left ? right : left`
         // We need to ensure the left side is only executed once
         Value *leftVal = [_left generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-        TQNodeCustom *leftWrapper = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
-            return leftVal;
-        }];
+        TQNodeCustom *leftWrapper = [TQNodeCustom nodeReturningValue:leftVal];
         TQNodeTernaryOperator *tern = [TQNodeTernaryOperator nodeWithIfExpr:(_type == kTQOperatorAnd) ? _right : leftWrapper
                                                                        else:(_type == kTQOperatorAnd) ? leftWrapper  : _right];
         tern.condition = leftWrapper;
@@ -162,7 +160,7 @@ using namespace llvm;
         Value *selector = NULL;       // Selector to be sent in the general case (where one or both of the operands are not tagged numbers)
         TQNodeCustom *fastpath = nil; // Block to use in the case where both are tagged numbers
         Value *numTag     = ConstantInt::get(aProgram.llIntPtrTy, kTQNumberTag);
-        Value *numValMask = ConstantInt::get(aProgram.llIntPtrTy, ~kTQNumberTag);
+        Value *numValMask = ConstantInt::get(aProgram.llIntPtrTy, ~0xf);
         Value *nullPtr    = ConstantPointerNull::get(aProgram.llInt8PtrTy);
 #define PtrToInt(val) aBlock.builder->CreatePtrToInt((val), aProgram.llIntPtrTy)
 #define IntToPtr(val) aBlock.builder->CreateIntToPtr((val), aProgram.llInt8PtrTy)
@@ -171,7 +169,7 @@ using namespace llvm;
 #define GET_AB() Value *a = FPCast(aBlock.builder->CreateAnd(PtrToInt(left),  numValMask)); \
                  Value *b = FPCast(aBlock.builder->CreateAnd(PtrToInt(right), numValMask))
 #define GET_VALID() [[TQNodeValid node] generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr]
-#define GET_TQNUM(val) IntToPtr(aBlock.builder->CreateOr(IntCast((val)), numTag))
+#define GET_TQNUM(val) IntToPtr(aBlock.builder->CreateOr(aBlock.builder->CreateAnd(IntCast(val), numValMask), numTag))
 
         switch(_type) {
             case kTQOperatorLesser:
@@ -372,12 +370,13 @@ using namespace llvm;
 @end
 
 @implementation TQNodeMultiAssignOperator
-
+@synthesize left=_left, right=_right, type=_type;
 - (id)init
 {
     if(!(self = [super init]))
         return nil;
 
+    _type = kTQOperatorAssign;
     _left  = [NSMutableArray array];
     _right = [NSMutableArray array];
 
@@ -397,8 +396,24 @@ using namespace llvm;
 
     // Then store the values
     unsigned maxIdx = [self.right count] - 1;
+    Value *val;
     for(int i = 0; i < [self.left count]; ++i) {
-        [[self.left objectAtIndex:i] store:values[MIN(i, maxIdx)]
+        val = values[MIN(i, maxIdx)];
+        switch(_type) {
+            case kTQOperatorAdd:
+            case kTQOperatorSubtract:
+            case kTQOperatorMultiply:
+            case kTQOperatorDivide: {
+                TQNodeOperator *op = [TQNodeOperator nodeWithType:_type left:[self.left objectAtIndex:i] right:[TQNodeCustom nodeReturningValue:val]];
+                val = [op generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+            } break;
+            case kTQOperatorAssign:
+                // Do nothing
+            break;
+            default:
+                TQAssert(NO, @"Unsupported operator type for multi assign");
+        }
+        [[self.left objectAtIndex:i] store:val
                                  inProgram:aProgram
                                      block:aBlock
                                       root:aRoot
