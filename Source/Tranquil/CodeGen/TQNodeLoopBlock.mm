@@ -121,6 +121,9 @@ void * const TQCurrLoopKey = (void*)&TQCurrLoopKey;
     aBlock.basicBlock = condBB;
     aBlock.builder    = condBuilder;
     Value *testExpr = [_condition generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+    // The condition may have changed the basic block
+    condBB      = aBlock.basicBlock;
+    condBuilder = aBlock.builder;
     if(*aoErr)
         return NULL;
     Value *testResult = [self generateTestExpressionInProgram:aProgram withBuilder:condBuilder value:testExpr];

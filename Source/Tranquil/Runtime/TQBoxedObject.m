@@ -605,7 +605,7 @@ id __wrapperBlock_invoke(struct TQBoxedBlockLiteral *__blk, ...)
 
     // retain/autorelease to move the pointer onto the heap
     if(*retType == _C_ID)
-        return *(id*)ffiRet;
+        return *(id *)ffiRet;
     return [[[TQBoxedObject box:ffiRet withType:retType] retain] autorelease];
 }
 
