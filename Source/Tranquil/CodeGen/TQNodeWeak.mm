@@ -59,7 +59,7 @@ using namespace llvm;
 
 
     Value *ret = aBlock.builder->CreateCall3(aProgram.objc_msgSend, klass, selector, [_value generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr]);
-    [self _attachDebugInformationToInstruction:ret inProgram:aProgram root:aRoot];
+    [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];
     return ret;
 }
 @end

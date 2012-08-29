@@ -72,7 +72,7 @@ using namespace llvm;
     Value *optsVal  = ConstantInt::get(aProgram.llIntTy, _opts);
 
     Value *ret = builder->CreateCall4(aProgram.objc_msgSend, klass, selector, patVal, optsVal);
-    [self _attachDebugInformationToInstruction:ret inProgram:aProgram root:aRoot];
+    [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];
     return ret;
 }
 @end

@@ -1,4 +1,5 @@
 #import "TQNodeImport.h"
+#import "TQNode+Private.h"
 #import "TQNodeBlock.h"
 #import "ObjCSupport/TQHeaderParser.h"
 #import "TQProgram.h"
@@ -53,7 +54,7 @@ using namespace llvm;
         TQNodeRootBlock *importedRoot = [aProgram _rootFromFile:path error:aoErr];
         Value *rootFun = [importedRoot generateCodeInProgram:aProgram block:aBlock root:importedRoot error:aoErr];
         Value *ret = aBlock.builder->CreateCall(rootFun);
-        [self _attachDebugInformationToInstruction:ret inProgram:aProgram root:aRoot];
+        [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];
         return ret;
     }
 }

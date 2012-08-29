@@ -68,17 +68,19 @@ using namespace llvm;
     return NO;
 }
 
-- (void)_attachDebugInformationToInstruction:(llvm::Value *)aInst inProgram:(TQProgram *)aProgram root:(TQNodeRootBlock *)aRoot
+- (void)_attachDebugInformationToInstruction:(llvm::Value *)aInst inProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock root:(TQNodeRootBlock *)aRoot
 {
-    NSLog(@"line: %ld %@", _lineNumber, self);
+    //NSLog(@"line: %ld %@", _lineNumber, self);
     if(_lineNumber == NSNotFound)
         return;
+
+    //aBlock.builder->SetCurrentDebugLocation(DebugLoc::get(self.lineNumber, 0, (MDNode*)aBlock.debugInfo, NULL)); <- Crashes llc
 
     Value *args[] = {
         ConstantInt::get(aProgram.llIntTy, _lineNumber),
         ConstantInt::get(aProgram.llIntTy, 0),
-        //(Value *)aRoot.debugUnit,
-        (Value *)aBlock.debugInfo,
+        (Value *)aRoot.debugUnit,
+        //(Value *)aBlock.debugInfo,
         DILocation(NULL)
     };
     LLVMContext *ctx = &aProgram.llModule->getContext();

@@ -80,7 +80,7 @@ using namespace llvm;
     forwarding = builder->CreateBitCast(forwarding, PointerType::getUnqual([[self class] captureStructTypeInProgram:aProgram]), [self _llvmRegisterName:@"forwarding"]);
 
     Value *ret = builder->CreateLoad(builder->CreateStructGEP(forwarding, 4));
-    [self _attachDebugInformationToInstruction:(Instruction *)ret inProgram:aProgram root:aRoot];
+    [self _attachDebugInformationToInstruction:(Instruction *)ret inProgram:aProgram block:aBlock root:aRoot];
     return ret;
 }
 

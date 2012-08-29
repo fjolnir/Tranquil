@@ -377,7 +377,7 @@ using namespace llvm;
 }
 
 // Invokes the body of this block
-- (llvm::Function *)_generateInvokeInProgram:(TQProgram *)aProgram root:(TQNodeRootBlock *)aRoot error:(NSError **)aoErr
+- (llvm::Function *)_generateInvokeInProgram:(TQProgram *)aProgram root:(TQNodeRootBlock *)aRoot block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
 {
     if(_function)
         return _function;
@@ -427,19 +427,26 @@ using namespace llvm;
     _basicBlock = BasicBlock::Create(mod->getContext(), "entry", _function, 0);
     _builder = new IRBuilder<>(_basicBlock);
 
-        // Debug info
+    // Debug info
+    llvm::DIScope parentScope = aBlock ? aBlock.scope : DIScope();
+    llvm::DILexicalBlock lexicalBlock = aProgram.debugBuilder->createLexicalBlock(parentScope, DIFile(), self.lineNumber, 0);
+    lexicalBlock.Verify();
+
+    llvm::DIArray diTypeArr = aProgram.debugBuilder->getOrCreateArray(ArrayRef<Value*>());
     _debugInfo = aProgram.debugBuilder->createFunction(aRoot.debugUnit,
                                                        [_invokeName UTF8String],
-                                                       [_invokeName UTF8String],
-                                                       cast<DIFile>(aRoot.debugUnit),
+                                                       "", //[_invokeName UTF8String],
+                                                       DIFile(), //cast<DIFile>(aRoot.debugUnit),
                                                        self.lineNumber,
-                                                       DIType(),
+                                                       aProgram.debugBuilder->createSubroutineType(DIFile(), diTypeArr),
                                                        true,
                                                        false,
                                                        self.lineNumber,
                                                        0,
                                                        true,
                                                        _function);
+    _debugInfo.Verify();
+
 
     // Start building the function
     _autoreleasePool = _builder->CreateCall(aProgram.objc_autoreleasePoolPush);
@@ -570,7 +577,7 @@ using namespace llvm;
         }
     }
 
-    if(![self _generateInvokeInProgram:aProgram root:aRoot error:aoErr])
+    if(![self _generateInvokeInProgram:aProgram root:aRoot block:aBlock error:aoErr])
         return NULL;
 
     Value *literal = [self _generateBlockLiteralInProgram:aProgram parentBlock:aBlock root:aRoot];
@@ -680,7 +687,7 @@ using namespace llvm;
 {
     // The root block is just a function that executes the body of the program
     // so we only need to create&return it's invocation function
-    return [self _generateInvokeInProgram:aProgram root:aRoot error:aoErr];
+    return [self _generateInvokeInProgram:aProgram root:aRoot block:aBlock error:aoErr];
 }
 
 @end

@@ -28,6 +28,7 @@
 @property(readwrite, assign) llvm::IRBuilder<> *builder;
 @property(readwrite, assign) llvm::Value *dispatchGroup;
 @property(readwrite, assign) llvm::DISubprogram debugInfo;
+@property(readwrite, assign) llvm::DIScope scope;
 
 // This property is only valid when called from a block's subnode within it's generateCode: method
 @property(readwrite, assign) llvm::Value *autoreleasePool;

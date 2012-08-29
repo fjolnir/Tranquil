@@ -64,7 +64,7 @@ using namespace llvm;
                                                                                error:aoErr];
     Value *object = [_receiver generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     Value *ret = builder->CreateCall2(aProgram.TQValueForKey, object, key);
-    [self _attachDebugInformationToInstruction:ret inProgram:aProgram root:aRoot];
+    [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];
     return ret;
 }
 
@@ -82,7 +82,7 @@ using namespace llvm;
                                                                                error:aoErr];
     Value *object = [_receiver generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     Value *ret = builder->CreateCall3(aProgram.TQSetValueForKey, object, key, aValue);
-    [self _attachDebugInformationToInstruction:ret inProgram:aProgram root:aRoot];
+    [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];
     return ret;
 }
 @end

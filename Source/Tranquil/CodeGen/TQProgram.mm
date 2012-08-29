@@ -25,10 +25,6 @@
 #include <llvm/PassManager.h>
 #include <llvm/Analysis/Verifier.h>
 #include <llvm/Target/TargetData.h>
-#include <llvm/ExecutionEngine/JIT.h>
-#include <llvm/ExecutionEngine/JITMemoryManager.h>
-#include <llvm/ExecutionEngine/JITEventListener.h>
-#include <llvm/ExecutionEngine/GenericValue.h>
 #include <llvm/Target/TargetData.h>
 #include <llvm/Target/TargetMachine.h>
 #include <llvm/Target/TargetOptions.h>
@@ -58,33 +54,7 @@ static TQProgram *sharedInstance;
 @synthesize name=_name, llModule=_llModule, cliArgGlobal=_cliArgGlobal, shouldShowDebugInfo=_shouldShowDebugInfo,
             objcParser=_objcParser, searchPaths=_searchPaths, allowedFileExtensions=_allowedFileExtensions,
             useAOTCompilation=_useAOTCompilation, outputPath=_outputPath, arguments=_arguments;
-@synthesize llVoidTy=_llVoidTy, llInt8Ty=_llInt8Ty, llInt16Ty=_llInt16Ty, llInt32Ty=_llInt32Ty, llInt64Ty=_llInt64Ty,
-    llFloatTy=_llFloatTy, llDoubleTy=_llDoubleTy, llFPTy=_llFPTy, llIntTy=_llIntTy, llIntPtrTy=_llIntPtrTy, llSizeTy=_llSizeTy,
-    llPtrDiffTy=_llPtrDiffTy, llVoidPtrTy=_llVoidPtrTy, llInt8PtrTy=_llInt8PtrTy, llVoidPtrPtrTy=_llVoidPtrPtrTy,
-    llInt8PtrPtrTy=_llInt8PtrPtrTy, llPointerWidthInBits=_llPointerWidthInBits, llPointerAlignInBytes=_llPointerAlignInBytes,
-    llPointerSizeInBytes=_llPointerSizeInBytes;
-@synthesize llBlockDescriptorTy=_blockDescriptorTy, llBlockLiteralType=_blockLiteralType;
 @synthesize globalQueue=_globalQueue, debugBuilder=_debugBuilder;
-@synthesize objc_msgSend=_func_objc_msgSend, objc_msgSend_fixup=_func_objc_msgSend_fixup, objc_msgSendSuper=_func_objc_msgSendSuper,
-    objc_storeWeak=_func_objc_storeWeak, objc_loadWeak=_func_objc_loadWeak, objc_allocateClassPair=_func_objc_allocateClassPair,
-    objc_registerClassPair=_func_objc_registerClassPair, objc_destroyWeak=_func_objc_destroyWeak,
-    class_replaceMethod=_func_class_replaceMethod, sel_registerName=_func_sel_registerName,
-    objc_getClass=_func_objc_getClass, objc_retain=_func_objc_retain, objc_release=_func_objc_release,
-    _Block_copy=_func__Block_copy, _Block_object_assign=_func__Block_object_assign,
-    _Block_object_dispose=_func__Block_object_dispose, imp_implementationWithBlock=_func_imp_implementationWithBlock,
-    object_getClass=_func_object_getClass, TQPrepareObjectForReturn=_func_TQPrepareObjectForReturn,
-    objc_autorelease=_func_objc_autorelease, objc_autoreleasePoolPush=_func_objc_autoreleasePoolPush,
-    objc_autoreleasePoolPop=_func_objc_autoreleasePoolPop, TQSetValueForKey=_func_TQSetValueForKey,
-    TQValueForKey=_func_TQValueForKey, TQGetOrCreateClass=_func_TQGetOrCreateClass,
-    TQObjectsAreEqual=_func_TQObjectsAreEqual, TQObjectsAreNotEqual=_func_TQObjectsAreNotEqual, TQObjectGetSuperClass=_func_TQObjectGetSuperClass,
-    TQVaargsToArray=_func_TQVaargsToArray, TQUnboxObject=_func_TQUnboxObject,
-    TQBoxValue=_func_TQBoxValue, tq_msgSend=_func_tq_msgSend, objc_retainAutoreleaseReturnValue=_func_objc_retainAutoreleaseReturnValue,
-    objc_autoreleaseReturnValue=_func_objc_autoreleaseReturnValue, objc_retainAutoreleasedReturnValue=_func_objc_retainAutoreleasedReturnValue,
-    objc_storeStrong=_func_objc_storeStrong, TQInitializeRuntime=_func_TQInitializeRuntime, TQCliArgsToArray=_func_TQCliArgsToArray,
-    dispatch_get_global_queue=_func_dispatch_get_global_queue, dispatch_group_create=_func_dispatch_group_create,
-    dispatch_release=_func_dispatch_release, dispatch_group_wait=_func_dispatch_group_wait,
-    dispatch_group_notify=_func_dispatch_group_notify, dispatch_group_async=_func_dispatch_group_async,
-    objc_sync_enter=_func_objc_sync_enter, objc_sync_exit=_func_objc_sync_exit;
 
 + (void)initialize
 {
@@ -114,212 +84,6 @@ static TQProgram *sharedInstance;
     _llModule = new Module([_name UTF8String], getGlobalContext());
     llvm::LLVMContext &ctx = _llModule->getContext();
 
-    // Cache the types
-    _llVoidTy               = llvm::Type::getVoidTy(ctx);
-    _llInt8Ty               = llvm::Type::getInt8Ty(ctx);
-    _llInt16Ty              = llvm::Type::getInt16Ty(ctx);
-    _llInt32Ty              = llvm::Type::getInt32Ty(ctx);
-    _llInt64Ty              = llvm::Type::getInt64Ty(ctx);
-    _llFloatTy              = llvm::Type::getFloatTy(ctx);
-    _llDoubleTy             = llvm::Type::getDoubleTy(ctx);
-#ifdef __LP64__
-    _llFPTy = _llDoubleTy;
-#else
-    _llFPTy = _llFloatTy;
-#endif
-    _llPointerWidthInBits   = 64;
-    _llPointerAlignInBytes  = 8;
-    _llIntTy                = TypeBuilder<int, false>::get(ctx); //llvm::IntegerType::get(ctx, 32);
-    _llIntPtrTy             = llvm::IntegerType::get(ctx, _llPointerWidthInBits);
-    _llInt8PtrTy            = TypeBuilder<char*, false>::get(ctx); //_llInt8Ty->getPointerTo(0);
-    _llInt8PtrPtrTy         = _llInt8PtrTy->getPointerTo(0);
-
-    // Block types
-    _blockDescriptorTy = llvm::StructType::create("struct.__tq_block_descriptor",
-                              _llInt64Ty, _llInt64Ty, NULL);
-    Type *blockDescriptorPtrTy = llvm::PointerType::getUnqual(_blockDescriptorTy);
-    _blockLiteralType = llvm::StructType::create("struct.__block_literal_generic",
-                                  _llInt8PtrTy, _llIntTy, _llIntTy, _llInt8PtrTy, blockDescriptorPtrTy, NULL);
-
-    // Cache commonly used functions
-    #define DEF_EXTERNAL_FUN(name, type) \
-    _func_##name = _llModule->getFunction(#name); \
-    if(!_func_##name) { \
-        _func_##name = Function::Create((type), GlobalValue::ExternalLinkage, #name, _llModule); \
-        _func_##name->setCallingConv(CallingConv::C); \
-    }
-
-    Type *size_tTy = llvm::TypeBuilder<size_t, false>::get(ctx);
-
-    // id(id, char*, int64)
-    std::vector<Type*> args_i8Ptr_i8Ptr_sizeT;
-    args_i8Ptr_i8Ptr_sizeT.push_back(_llInt8PtrTy);
-    args_i8Ptr_i8Ptr_sizeT.push_back(_llInt8PtrTy);
-    args_i8Ptr_i8Ptr_sizeT.push_back(size_tTy);
-    FunctionType *ft_i8Ptr__i8Ptr_i8Ptr_sizeT = FunctionType::get(_llInt8PtrTy, args_i8Ptr_i8Ptr_sizeT, false);
-
-    // void(void)
-    std::vector<Type*> args_void;
-    FunctionType *ft_void__void = FunctionType::get(_llVoidTy, args_void, false);
-
-    // void(id)
-    std::vector<Type*> args_i8Ptr;
-    args_i8Ptr.push_back(_llInt8PtrTy);
-    FunctionType *ft_void__i8Ptr = FunctionType::get(_llVoidTy, args_i8Ptr, false);
-
-    // void(id, int)
-    std::vector<Type*> args_i8Ptr_int;
-    args_i8Ptr_int.push_back(_llInt8PtrTy);
-    args_i8Ptr_int.push_back(_llIntTy);
-    FunctionType *ft_void__i8Ptr_int = FunctionType::get(_llVoidTy, args_i8Ptr_int, false);
-
-    // void(id, id, int)
-    std::vector<Type*> args_i8Ptr_i8Ptr_int;
-    args_i8Ptr_i8Ptr_int.push_back(_llInt8PtrTy);
-    args_i8Ptr_i8Ptr_int.push_back(_llInt8PtrTy);
-    args_i8Ptr_i8Ptr_int.push_back(_llIntTy);
-    FunctionType *ft_void__i8Ptr_i8Ptr_int = FunctionType::get(_llVoidTy, args_i8Ptr_i8Ptr_int, false);
-
-    // BOOL(Class, char *, size_t, uint8_t, char *)
-    std::vector<Type*> args_i8Ptr_i8Ptr_sizeT_i8_i8Ptr;
-    args_i8Ptr_i8Ptr_sizeT_i8_i8Ptr.push_back(_llInt8PtrTy);
-    args_i8Ptr_i8Ptr_sizeT_i8_i8Ptr.push_back(_llInt8PtrTy);
-    args_i8Ptr_i8Ptr_sizeT_i8_i8Ptr.push_back(size_tTy);
-    args_i8Ptr_i8Ptr_sizeT_i8_i8Ptr.push_back(_llInt8Ty);
-    args_i8Ptr_i8Ptr_sizeT_i8_i8Ptr.push_back(_llInt8PtrTy);
-    FunctionType *ft_i8__i8Ptr_i8Ptr_sizeT_i8_i8Ptr = FunctionType::get(_llInt8Ty, args_i8Ptr_i8Ptr_sizeT_i8_i8Ptr, false);
-
-    // BOOL(Class, SEL, IMP, char *)
-    std::vector<Type*> args_i8Ptr_i8Ptr_i8Ptr_i8Ptr;
-    args_i8Ptr_i8Ptr_i8Ptr_i8Ptr.push_back(_llInt8PtrTy);
-    args_i8Ptr_i8Ptr_i8Ptr_i8Ptr.push_back(_llInt8PtrTy);
-    args_i8Ptr_i8Ptr_i8Ptr_i8Ptr.push_back(_llInt8PtrTy);
-    args_i8Ptr_i8Ptr_i8Ptr_i8Ptr.push_back(_llInt8PtrTy);
-    FunctionType *ft_i8__i8Ptr_i8Ptr_i8Ptr_i8Ptr = FunctionType::get(_llInt8Ty, args_i8Ptr_i8Ptr_i8Ptr_i8Ptr, false);
-
-    // id(id, char*, ...)
-    std::vector<Type*> args_i8Ptr_i8Ptr_variadic;
-    args_i8Ptr_i8Ptr_variadic.push_back(_llInt8PtrTy);
-    args_i8Ptr_i8Ptr_variadic.push_back(_llInt8PtrTy);
-    FunctionType *ft_i8ptr__i8ptr_i8ptr_variadic = FunctionType::get(_llInt8PtrTy, args_i8Ptr_i8Ptr_variadic, true);
-
-    // id(id*, id)
-    std::vector<Type*> args_i8PtrPtr_i8Ptr;
-    args_i8PtrPtr_i8Ptr.push_back(_llInt8PtrPtrTy);
-    args_i8PtrPtr_i8Ptr.push_back(_llInt8PtrTy);
-    FunctionType *ft_i8Ptr__i8PtrPtr_i8Ptr = FunctionType::get(_llInt8PtrTy, args_i8PtrPtr_i8Ptr, false);
-
-    // id(id, id)
-    std::vector<Type*> args_i8Ptr_i8Ptr;
-    args_i8Ptr_i8Ptr.push_back(_llInt8PtrTy);
-    args_i8Ptr_i8Ptr.push_back(_llInt8PtrTy);
-    FunctionType *ft_i8Ptr__i8Ptr_i8Ptr = FunctionType::get(_llInt8PtrTy, args_i8Ptr_i8Ptr, false);
-
-    // id(id, id, id)
-    std::vector<Type*> args_i8Ptr_i8Ptr_i8ptr;
-    args_i8Ptr_i8Ptr_i8ptr.push_back(_llInt8PtrTy);
-    args_i8Ptr_i8Ptr_i8ptr.push_back(_llInt8PtrTy);
-    args_i8Ptr_i8Ptr_i8ptr.push_back(_llInt8PtrTy);
-    FunctionType *ft_i8Ptr__i8Ptr_i8Ptr_i8ptr = FunctionType::get(_llInt8PtrTy, args_i8Ptr_i8Ptr_i8ptr, false);
-
-    // void(id*, id)
-    FunctionType *ft_void__i8PtrPtr_i8Ptr = FunctionType::get(_llVoidTy, args_i8PtrPtr_i8Ptr, false);
-
-    // void(id, id, id)
-    std::vector<Type*> args_i8Ptr_i8Ptr_i8Ptr;
-    args_i8Ptr_i8Ptr_i8Ptr.push_back(_llInt8PtrTy);
-    args_i8Ptr_i8Ptr_i8Ptr.push_back(_llInt8PtrTy);
-    args_i8Ptr_i8Ptr_i8Ptr.push_back(_llInt8PtrTy);
-    FunctionType *ft_void__i8Ptr_i8Ptr_i8Ptr = FunctionType::get(_llVoidTy, args_i8Ptr_i8Ptr_i8Ptr, false);
-
-    // void(id, id)
-    FunctionType *ft_void__i8Ptr_i8Ptr = FunctionType::get(_llVoidTy, args_i8Ptr_i8Ptr, false);
-
-    // id(id*)
-    std::vector<Type*> args_i8PtrPtr;
-    args_i8PtrPtr.push_back(_llInt8PtrPtrTy);
-    FunctionType *ft_i8Ptr__i8PtrPtr = FunctionType::get(_llInt8PtrTy, args_i8PtrPtr, false);
-
-    // void(id*)
-    FunctionType *ft_void__i8PtrPtr = FunctionType::get(_llVoidTy, args_i8PtrPtr, false);
-
-    // id(id)
-    FunctionType *ft_i8Ptr__i8Ptr = FunctionType::get(_llInt8PtrTy, args_i8Ptr, false);
-
-    // id()
-    std::vector<Type*> args_empty;
-    FunctionType *ft_i8Ptr__void = FunctionType::get(_llInt8PtrTy, args_empty, false);
-
-    // int(id)
-    FunctionType *ft_int__i8Ptr = FunctionType::get(_llIntTy, args_i8Ptr, false);
-
-    // id(int, void**)
-    std::vector<Type*> args_int_i8PtrPtr;
-    args_int_i8PtrPtr.push_back(_llIntTy);
-    args_int_i8PtrPtr.push_back(_llInt8PtrPtrTy);
-    FunctionType *ft_i8Ptr__i32_i8PtrPtr = FunctionType::get(_llInt8PtrTy, args_int_i8PtrPtr, false);
-
-    // void*(long, long)
-    std::vector<Type*> args_i64_i64;
-    args_i64_i64.push_back(_llInt64Ty);
-    args_i64_i64.push_back(_llInt64Ty);
-    FunctionType *ft_i8Ptr__i64_i64 = FunctionType::get(_llInt8PtrTy, args_i64_i64, false);
-
-    // long(void*, long)
-    std::vector<Type*> args_i8Ptr_i64;
-    args_i8Ptr_i64.push_back(_llInt8PtrTy);
-    args_i8Ptr_i64.push_back(_llInt64Ty);
-    FunctionType *ft_i64__i8Ptr_i64 = FunctionType::get(_llInt64Ty, args_i8Ptr_i64, false);
-
-    DEF_EXTERNAL_FUN(objc_allocateClassPair, ft_i8Ptr__i8Ptr_i8Ptr_sizeT);
-    DEF_EXTERNAL_FUN(objc_registerClassPair, ft_void__i8Ptr);
-    DEF_EXTERNAL_FUN(class_replaceMethod, ft_i8__i8Ptr_i8Ptr_i8Ptr_i8Ptr);
-    DEF_EXTERNAL_FUN(imp_implementationWithBlock, ft_i8Ptr__i8Ptr);
-    DEF_EXTERNAL_FUN(object_getClass, ft_i8Ptr__i8Ptr);
-    DEF_EXTERNAL_FUN(objc_msgSend, ft_i8ptr__i8ptr_i8ptr_variadic);
-    DEF_EXTERNAL_FUN(objc_msgSend_fixup, ft_i8ptr__i8ptr_i8ptr_variadic);
-    DEF_EXTERNAL_FUN(objc_msgSendSuper, ft_i8ptr__i8ptr_i8ptr_variadic);
-    //DEF_EXTERNAL_FUN(objc_storeWeak, ft_i8Ptr__i8PtrPtr_i8Ptr);
-    //DEF_EXTERNAL_FUN(objc_loadWeak, ft_i8Ptr__i8PtrPtr);
-    //DEF_EXTERNAL_FUN(objc_destroyWeak, ft_void__i8PtrPtr);
-    DEF_EXTERNAL_FUN(objc_retain, ft_i8Ptr__i8Ptr);
-    DEF_EXTERNAL_FUN(objc_retainAutoreleaseReturnValue, ft_i8Ptr__i8Ptr);
-    DEF_EXTERNAL_FUN(objc_retainAutoreleasedReturnValue, ft_i8Ptr__i8Ptr);
-    DEF_EXTERNAL_FUN(objc_autoreleaseReturnValue, ft_i8Ptr__i8Ptr);
-    DEF_EXTERNAL_FUN(objc_release, ft_void__i8Ptr);
-    DEF_EXTERNAL_FUN(objc_autorelease, ft_i8Ptr__i8Ptr);
-    DEF_EXTERNAL_FUN(sel_registerName, ft_i8Ptr__i8Ptr);
-    DEF_EXTERNAL_FUN(objc_getClass, ft_i8Ptr__i8Ptr)
-    DEF_EXTERNAL_FUN(_Block_copy, ft_i8Ptr__i8Ptr);
-    DEF_EXTERNAL_FUN(_Block_object_assign, ft_void__i8Ptr_i8Ptr_int);
-    DEF_EXTERNAL_FUN(_Block_object_dispose, ft_void__i8Ptr_int);
-    DEF_EXTERNAL_FUN(TQPrepareObjectForReturn, ft_i8Ptr__i8Ptr);
-    DEF_EXTERNAL_FUN(objc_autoreleasePoolPush, ft_i8Ptr__void);
-    DEF_EXTERNAL_FUN(objc_autoreleasePoolPop, ft_void__i8Ptr);
-    DEF_EXTERNAL_FUN(objc_storeStrong, ft_i8Ptr__i8PtrPtr_i8Ptr);
-    DEF_EXTERNAL_FUN(TQSetValueForKey, ft_void__i8Ptr_i8Ptr_i8Ptr);
-    DEF_EXTERNAL_FUN(TQValueForKey, ft_i8Ptr__i8Ptr_i8Ptr);
-    DEF_EXTERNAL_FUN(TQGetOrCreateClass, ft_i8Ptr__i8Ptr_i8Ptr);
-    DEF_EXTERNAL_FUN(TQObjectsAreEqual, ft_i8Ptr__i8Ptr_i8Ptr);
-    DEF_EXTERNAL_FUN(TQObjectsAreNotEqual, ft_i8Ptr__i8Ptr_i8Ptr);
-    DEF_EXTERNAL_FUN(TQObjectGetSuperClass, ft_i8Ptr__i8Ptr);
-    DEF_EXTERNAL_FUN(TQVaargsToArray, ft_i8Ptr__i8Ptr);
-    DEF_EXTERNAL_FUN(TQUnboxObject, ft_void__i8Ptr_i8Ptr_i8Ptr)
-    DEF_EXTERNAL_FUN(TQBoxValue, ft_i8Ptr__i8Ptr_i8Ptr)
-    DEF_EXTERNAL_FUN(tq_msgSend, ft_i8ptr__i8ptr_i8ptr_variadic)
-    DEF_EXTERNAL_FUN(TQInitializeRuntime, ft_void__void);
-    DEF_EXTERNAL_FUN(TQCliArgsToArray, ft_i8Ptr__i32_i8PtrPtr);
-    DEF_EXTERNAL_FUN(dispatch_get_global_queue, ft_i8Ptr__i64_i64);
-    DEF_EXTERNAL_FUN(dispatch_group_create, ft_i8Ptr__void);
-    DEF_EXTERNAL_FUN(dispatch_release, ft_void__i8Ptr);
-    DEF_EXTERNAL_FUN(dispatch_group_wait, ft_i64__i8Ptr_i64);
-    DEF_EXTERNAL_FUN(dispatch_group_notify, ft_void__i8Ptr_i8Ptr_i8Ptr);
-    DEF_EXTERNAL_FUN(dispatch_group_async, ft_void__i8Ptr_i8Ptr_i8Ptr);
-    DEF_EXTERNAL_FUN(objc_sync_enter, ft_int__i8Ptr);
-    DEF_EXTERNAL_FUN(objc_sync_exit, ft_int__i8Ptr);
-
-#undef DEF_EXTERNAL_FUN
-
     _debugBuilder = new DIBuilder(*_llModule);
 
     TQInitializeRuntime();
@@ -345,7 +109,6 @@ static TQProgram *sharedInstance;
     [super dealloc];
 }
 
-
 #pragma mark - Execution
 
 // Prepares & optimizes the program tree before execution
@@ -365,8 +128,8 @@ static TQProgram *sharedInstance;
 
 - (id)_executeRoot:(TQNodeRootBlock *)aNode
 {
-    assert(aNode);
-
+    if(!aNode)
+        return nil;
 
     GlobalVariable *argGlobal;
     if(!_useAOTCompilation) {
@@ -386,13 +149,13 @@ static TQProgram *sharedInstance;
         // Global for the dispatch queue
         _globalQueue = _llModule->getNamedGlobal("TQGlobalQueue");
         if(!_globalQueue)
-            _globalQueue = new GlobalVariable(*_llModule, _llInt8PtrTy, false, GlobalVariable::ExternalLinkage,
+            _globalQueue = new GlobalVariable(*_llModule, self.llInt8PtrTy, false, GlobalVariable::ExternalLinkage,
                                               NULL, "TQGlobalQueue");
     } else {
         _globalQueue = _llModule->getNamedGlobal("TQGlobalQueue");
         if(!_globalQueue)
-            _globalQueue = new GlobalVariable(*_llModule, _llInt8PtrTy, false, GlobalVariable::InternalLinkage,
-                                              ConstantPointerNull::get(_llInt8PtrTy), "TQGlobalQueue");
+            _globalQueue = new GlobalVariable(*_llModule, self.llInt8PtrTy, false, GlobalVariable::InternalLinkage,
+                                              ConstantPointerNull::get(self.llInt8PtrTy), "TQGlobalQueue");
     }
 
     NSError *err = nil;
@@ -430,21 +193,21 @@ static TQProgram *sharedInstance;
 
     FunctionPassManager fpm = FunctionPassManager(_llModule);
 
-    ExecutionEngine *engine = NULL;
     if(!_useAOTCompilation) {
-        EngineBuilder factory(_llModule);
-        factory.setEngineKind(llvm::EngineKind::JIT);
-        factory.setTargetOptions(Opts);
-        factory.setOptLevel(CodeGenOpt::Aggressive);
-        factory.setUseMCJIT(true);
-        engine = factory.create();
-        //engine->DisableLazyCompilation();
-        fpm.add(new TargetData(*engine->getTargetData()));
-
-        engine->addGlobalMapping(argGlobal, (void*)&_argGlobalForJIT);
+        if(!_executionEngine) {
+            EngineBuilder factory(_llModule);
+            factory.setEngineKind(llvm::EngineKind::JIT);
+            factory.setTargetOptions(Opts);
+            factory.setOptLevel(CodeGenOpt::Aggressive);
+            factory.setUseMCJIT(true);
+            _executionEngine = factory.create();
+            //_executionEngine->DisableLazyCompilation();
+            fpm.add(new TargetData(*_executionEngine->getTargetData()));
+        }
+        _executionEngine->addGlobalMapping(argGlobal, (void*)&_argGlobalForJIT);
         if(!_globalQueueForJIT)
             _globalQueueForJIT = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-        engine->addGlobalMapping(_globalQueue, (void*)&_globalQueueForJIT);
+        _executionEngine->addGlobalMapping(_globalQueue, (void*)&_globalQueueForJIT);
     }
 
     // Optimization pass
@@ -470,8 +233,8 @@ static TQProgram *sharedInstance;
    if(_useAOTCompilation) {
         // Generate a main function
         std::vector<Type *> paramTypes;
-        paramTypes.push_back(_llIntTy);
-        paramTypes.push_back(_llInt8PtrPtrTy);
+        paramTypes.push_back(self.llIntTy);
+        paramTypes.push_back(self.llInt8PtrPtrTy);
 
         TQNodeRootBlock *mainBlk = [TQNodeRootBlock node];
         mainBlk.invokeName = @"main";
@@ -480,22 +243,22 @@ static TQProgram *sharedInstance;
 
         TQNodeVariable *cliArgVar = [TQNodeVariable nodeWithName:@"..."];
         [mainBlk.statements addObject:[TQNodeCustom nodeWithBlock:^(TQProgram *aProgram, TQNodeBlock *aBlock, TQNodeRootBlock *aRoot) {
-            aBlock.builder->CreateCall(_func_TQInitializeRuntime);
+            aBlock.builder->CreateCall(self.TQInitializeRuntime);
             llvm::Function::arg_iterator argumentIterator = aBlock.function->arg_begin();
 
             // Create the app wide dispatch queue
-            Value *queue = aBlock.builder->CreateCall2(_func_dispatch_get_global_queue, ConstantInt::get(_llInt64Ty, DISPATCH_QUEUE_PRIORITY_DEFAULT), ConstantInt::get(_llInt64Ty, 0));
+            Value *queue = aBlock.builder->CreateCall2(self.dispatch_get_global_queue, ConstantInt::get(self.llInt64Ty, DISPATCH_QUEUE_PRIORITY_DEFAULT), ConstantInt::get(self.llInt64Ty, 0));
             aBlock.builder->CreateStore(queue, _globalQueue);
 
-            [cliArgVar store:aBlock.builder->CreateCall2(_func_TQCliArgsToArray, argumentIterator, ++argumentIterator)
+            [cliArgVar store:aBlock.builder->CreateCall2(self.TQCliArgsToArray, argumentIterator, ++argumentIterator)
                    inProgram:aProgram
                        block:aBlock
                         root:(TQNodeRootBlock *)aBlock
                        error:nil];
 
             aBlock.builder->CreateCall(aNode.function);
-            aBlock.builder->CreateCall(_func_objc_autoreleasePoolPop, aBlock.autoreleasePool);
-            aBlock.builder->CreateRet(ConstantInt::get(_llIntTy, 0));
+            aBlock.builder->CreateCall(self.objc_autoreleasePoolPop, aBlock.autoreleasePool);
+            aBlock.builder->CreateRet(ConstantInt::get(self.llIntTy, 0));
 
             return (Value *)NULL;
         }]];
@@ -540,7 +303,7 @@ static TQProgram *sharedInstance;
         fprintf(stderr, "---------------------\n");
     }
 
-    id(*rootPtr)() = (id(*)())engine->getPointerToFunction(aNode.function);
+    id(*rootPtr)() = (id(*)())_executionEngine->getPointerToFunction(aNode.function);
 
     uint64_t startTime = mach_absolute_time();
     // Execute code
@@ -601,14 +364,14 @@ static TQProgram *sharedInstance;
 
     [parserState.stack addObject:[NSMutableArray array]];
 
-    //@try {
+    @try {
         while(yyparse(&greg));
-    //} @catch(NSException *e) {
-        //TQLog(@"%@", [e reason]);
-        //return nil;
-    //} @finally {
+    } @catch(NSException *e) {
+        TQLog(@"%@", [e reason]);
+        return nil;
+    } @finally {
         yydeinit(&greg);
-    //}
+    }
 
     if(!parserState.root)
         return nil;
@@ -616,7 +379,7 @@ static TQProgram *sharedInstance;
     // Initialize the debug unit on the root
     const char *filename = "<none>";
     const char *dir      = "<none>";
-    _debugBuilder->createCompileUnit(DW_LANG_Tranquil, filename, dir, TRANQUIL_DEBUG_DESCR, true, "", 1);
+    _debugBuilder->createCompileUnit(dwarf::DW_LANG_ObjC, filename, dir, TRANQUIL_DEBUG_DESCR, true, "", 1); // Use DW_LANG_Tranquil ?
     parserState.root.debugUnit = DICompileUnit(_debugBuilder->getCU());
 
 
@@ -712,8 +475,8 @@ static TQProgram *sharedInstance;
 - (void)insertLogUsingBuilder:(llvm::IRBuilder<> *)aBuilder withStr:(NSString *)txt
 {
     std::vector<Type*> nslog_args;
-    nslog_args.push_back(_llInt8PtrTy);
-    FunctionType *printf_type = FunctionType::get(_llIntTy, nslog_args, true);
+    nslog_args.push_back(self.llInt8PtrTy);
+    FunctionType *printf_type = FunctionType::get(self.llIntTy, nslog_args, true);
     Function *func_printf = _llModule->getFunction("printf");
     if(!func_printf) {
         func_printf = Function::Create(printf_type, GlobalValue::ExternalLinkage, "printf", _llModule);
@@ -725,77 +488,4 @@ static TQProgram *sharedInstance;
     aBuilder->CreateCall(func_printf, args);
 }
 
-- (llvm::Type *)llvmTypeFromEncoding:(const char *)aEncoding
-{
-    switch(*aEncoding) {
-        case _C_CONST:
-            return [self llvmTypeFromEncoding:aEncoding+1];
-        case _C_ID:
-        case _C_CLASS:
-        case _C_SEL:
-        case _C_CHARPTR:
-        case _TQ_C_LAMBDA_B:
-            return _llInt8PtrTy;
-        case _C_DBL:
-            return _llDoubleTy;
-        case _C_FLT:
-            return _llFloatTy;
-        case _C_INT:
-            return _llIntTy;
-        case _C_SHT:
-            return _llInt16Ty;
-        case _C_CHR:
-            return _llInt8Ty;
-        case _C_BOOL:
-            return _llInt8Ty;
-        case _C_LNG:
-            return _llInt64Ty;
-        case _C_LNG_LNG:
-            return _llInt64Ty;
-        case _C_UINT:
-            return _llIntTy;
-        case _C_USHT:
-            return _llInt16Ty;
-        case _C_ULNG:
-            return _llInt64Ty;
-        case _C_ULNG_LNG:
-            return _llInt64Ty;
-        case _C_VOID:
-            return _llVoidTy;
-        case _C_STRUCT_B: {
-            const char *field = strstr(aEncoding, "=") + 1;
-            assert((uintptr_t)field > 1);
-            std::vector<Type*> fields;
-            while(*field != _C_STRUCT_E) {
-                fields.push_back([self llvmTypeFromEncoding:field]);
-                field = TQGetSizeAndAlignment(field, NULL, NULL);
-            }
-            return StructType::get(_llModule->getContext(), fields);
-        }
-        case _C_UNION_B:
-            TQLog(@"unions -> llvm not yet supported");
-            exit(1);
-        break;
-        case _C_ARY_B: {
-            unsigned count;
-            ++aEncoding; // Skip past the '['
-            assert(isdigit(*aEncoding));
-            count = atoi(aEncoding);
-            // Move on to the enclosed type
-            while(isdigit(*aEncoding)) ++aEncoding;
-            Type *enclosedType = [self llvmTypeFromEncoding:aEncoding];
-            return ArrayType::get(enclosedType, count);
-        } break;
-        case _C_PTR: {
-            if(*(aEncoding + 1) == _C_PTR || *(aEncoding + 1) == _C_CHARPTR || *(aEncoding + 1) == _C_ID)
-                return _llInt8PtrPtrTy;
-            else
-                return _llInt8PtrTy;
-        }
-        default:
-            [NSException raise:NSGenericException
-                        format:@"Unsupported type %c!", *aEncoding];
-            return NULL;
-    }
-}
 @end

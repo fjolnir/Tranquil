@@ -65,7 +65,7 @@ using namespace llvm;
                                                   root:aRoot
                                                  error:aoErr];
     Value *enterCond = aBlock.builder->CreateCall(aProgram.objc_sync_enter, condVal);
-    [self _attachDebugInformationToInstruction:enterCond inProgram:aProgram root:aRoot];
+    [self _attachDebugInformationToInstruction:enterCond inProgram:aProgram block:aBlock root:aRoot];
 
     TQNode *exitNode = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *b, TQNodeRootBlock *r) {
         aBlock.builder->CreateCall(aProgram.objc_sync_exit, condVal);

@@ -118,7 +118,7 @@ using namespace llvm;
         IRBuilder<> rootBuilder(&rootFunction->getEntryBlock(), rootFunction->getEntryBlock().begin());
         Value *selector = [aProgram getGlobalStringPtr:selStr inBlock:aBlock];
 
-        CallInst *selReg = rootBuilder.CreateCall(aProgram.sel_registerName, selector);
+        CallInst *selReg = rootBuilder.CreateCall(aProgram.sel_registerName, selector, "");
         selectorGlobal =  new GlobalVariable(*mod, aProgram.llInt8PtrTy, false, GlobalVariable::InternalLinkage,
                                              ConstantPointerNull::get(aProgram.llInt8PtrTy), [selStr UTF8String]);
         rootBuilder.CreateStore(selReg, selectorGlobal);
@@ -136,11 +136,11 @@ using namespace llvm;
     else {
         ret = aBlock.builder->CreateCall(aProgram.tq_msgSend, aArgs);
         if(needsAutorelease) {
-            [self _attachDebugInformationToInstruction:ret inProgram:aProgram root:aRoot];
+            [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];
             ret = aBlock.builder->CreateCall(aProgram.objc_autoreleaseReturnValue, ret);
         }
     }
-    [self _attachDebugInformationToInstruction:ret inProgram:aProgram root:aRoot];
+    [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];
 
     Value *origRet = ret;
     for(TQNodeMessage *cascadedMessage in _cascadedMessages) {

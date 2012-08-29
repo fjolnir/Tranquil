@@ -66,7 +66,7 @@ using namespace llvm;
 {
     if(_classPtr) {
         Value *ret = aBlock.builder->CreateCall2(aProgram.TQGetOrCreateClass, [aProgram getGlobalStringPtr:_name inBlock:aBlock], ConstantPointerNull::get(aProgram.llInt8PtrTy));
-        [self _attachDebugInformationToInstruction:ret inProgram:aProgram root:aRoot];
+        [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];
         return ret;
     }
 
@@ -78,7 +78,7 @@ using namespace llvm;
     Value *superName  = [aProgram getGlobalStringPtr:_superClassName ? _superClassName : @"TQObject" inBlock:aBlock];
 
     _classPtr = builder->CreateCall2(aProgram.TQGetOrCreateClass, name, superName);
-    [self _attachDebugInformationToInstruction:_classPtr inProgram:aProgram root:aRoot];
+    [self _attachDebugInformationToInstruction:_classPtr inProgram:aProgram block:aBlock root:aRoot];
 
     // Add the methods for the class
     for(TQNodeMethod *method in [_classMethods arrayByAddingObjectsFromArray:_instanceMethods]) {

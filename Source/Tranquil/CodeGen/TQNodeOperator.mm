@@ -107,7 +107,7 @@ using namespace llvm;
         Value *right = [_right generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         Value *selector  = aProgram.llModule->getOrInsertGlobal("TQUnaryMinusOpSel", aProgram.llInt8PtrTy);
         Value *ret = aBlock.builder->CreateCall2(aProgram.objc_msgSend, right, aBlock.builder->CreateLoad(selector));
-        [self _attachDebugInformationToInstruction:ret inProgram:aProgram root:aRoot];
+        [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];
         return ret;
     } else if(_type == kTQOperatorIncrement || _type == kTQOperatorDecrement) {
         TQAssert(!_left || !_right, @"Panic! in/decrement can't have both left&right hand sides");
@@ -135,13 +135,13 @@ using namespace llvm;
         Value *left  = [_left generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         Value *right = [_right generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         Value *ret = aBlock.builder->CreateCall2(aProgram.TQObjectsAreEqual, left, right);
-        [self _attachDebugInformationToInstruction:ret inProgram:aProgram root:aRoot];
+        [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];
         return ret;
     } else if(_type == kTQOperatorInequal) {
         Value *left  = [_left generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         Value *right = [_right generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         Value *ret   = aBlock.builder->CreateCall2(aProgram.TQObjectsAreNotEqual, left, right);
-        [self _attachDebugInformationToInstruction:ret inProgram:aProgram root:aRoot];
+        [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];
         return ret;
     } else if(_type == kTQOperatorAnd || _type == kTQOperatorOr) {
         // Compile `left ? left : right` or `left ? right : left`
@@ -273,13 +273,13 @@ using namespace llvm;
             aBlock.basicBlock = fastBB;
             aBlock.builder = &fastBuilder;
             Value *fastVal = [fastpath generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-            [self _attachDebugInformationToInstruction:(Instruction *)fastVal inProgram:aProgram root:aRoot];
+            [self _attachDebugInformationToInstruction:fastVal inProgram:aProgram block:aBlock root:aRoot];
 
             IRBuilder<> slowBuilder(slowBB);
             aBlock.basicBlock = slowBB;
             aBlock.builder = &slowBuilder;
             Value *slowVal = [slowpath generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-            [self _attachDebugInformationToInstruction:(Instruction *)fastVal inProgram:aProgram root:aRoot];
+            [self _attachDebugInformationToInstruction:fastVal inProgram:aProgram block:aBlock root:aRoot];
 
             IRBuilder<> *contBuilder = new IRBuilder<>(contBB);
             aBlock.basicBlock = contBB;
@@ -295,7 +295,7 @@ using namespace llvm;
             return phi;
         } else {
             Value *ret = [slowpath generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-            [self _attachDebugInformationToInstruction:ret inProgram:aProgram root:aRoot];
+            [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];
             return ret;
         }
     }

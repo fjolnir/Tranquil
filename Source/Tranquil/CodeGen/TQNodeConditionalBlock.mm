@@ -147,19 +147,6 @@ using namespace llvm;
 
     return NULL;
 }
-
-
-#pragma mark - Unused methods from TQNodeBlock
-- (NSString *)signature { return nil; }
-- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoErr { return NO; }
-- (llvm::Constant *)_generateBlockDescriptorInProgram:(TQProgram *)aProgram { return NULL; }
-- (llvm::Value *)_generateBlockLiteralInProgram:(TQProgram *)aProgram parentBlock:(TQNodeBlock *)aParentBlock { return NULL; }
-- (llvm::Function *)_generateCopyHelperInProgram:(TQProgram *)aProgram { return NULL; }
-- (llvm::Function *)_generateDisposeHelperInProgram:(TQProgram *)aProgram { return NULL; }
-- (llvm::Function *)_generateInvokeInProgram:(TQProgram *)aProgram root:(TQNodeRootBlock *)aRoot error:(NSError **)aoErr { return NULL; }
-- (llvm::Type *)_blockDescriptorTypeInProgram:(TQProgram *)aProgram { return NULL; }
-- (llvm::Type *)_genericBlockLiteralTypeInProgram:(TQProgram *)aProgram { return NULL; }
-- (llvm::Type *)_blockLiteralTypeInProgram:(TQProgram *)aProgram { return NULL; }
 @end
 
 @implementation TQNodeUnlessBlock

@@ -61,7 +61,7 @@ using namespace llvm;
         Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_TQNumber", aProgram.llInt8Ty);
         ConstantFP *doubleValue = ConstantFP::get(aProgram.llModule->getContext(), APFloat([_value doubleValue]));
 
-        Value *result = rootBuilder.CreateCall3(aProgram.objc_msgSend, klass, selector, doubleValue);
+        Value *result = rootBuilder.CreateCall3(aProgram.objc_msgSend, klass, selector, doubleValue, "");
         result = rootBuilder.CreateCall(aProgram.objc_retain, result);
 
         num = new GlobalVariable(*mod, aProgram.llInt8PtrTy, false, GlobalVariable::InternalLinkage,

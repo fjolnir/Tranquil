@@ -90,7 +90,7 @@ using namespace llvm;
             args.push_back([value generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr]);
         }
         strValue = aBlock.builder->CreateCall(aProgram.objc_msgSend, args);
-        [self _attachDebugInformationToInstruction:strValue inProgram:aProgram root:aRoot];
+        [self _attachDebugInformationToInstruction:strValue inProgram:aProgram block:aBlock root:aRoot];
     }
     return strValue;
 }

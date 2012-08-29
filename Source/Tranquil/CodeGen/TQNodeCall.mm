@@ -87,7 +87,7 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
     }
 
     Value *ret = aBlock.builder->CreateCall(dispatcher, aArgs);
-    [self _attachDebugInformationToInstruction:(Instruction *)ret inProgram:aProgram root:aRoot];
+    [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];
     return ret;
 }
 

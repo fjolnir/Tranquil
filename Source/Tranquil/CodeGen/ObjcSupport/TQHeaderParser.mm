@@ -420,7 +420,7 @@ using namespace llvm;
 // Compiles a a wrapper block for the function
 // The reason we don't use TQBoxedObject is that when the function is known at compile time
 // we can generate a far more efficient wrapper that doesn't rely on libffi
-- (llvm::Function *)_generateInvokeInProgram:(TQProgram *)aProgram root:(TQNodeRootBlock *)aRoot error:(NSError **)aoErr
+- (llvm::Function *)_generateInvokeInProgram:(TQProgram *)aProgram root:(TQNodeRootBlock *)aRoot block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
 {
     if(_function)
         return _function;
@@ -576,7 +576,7 @@ using namespace llvm;
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
-    if(![self _generateInvokeInProgram:aProgram root:aRoot error:aoErr])
+    if(![self _generateInvokeInProgram:aProgram root:aRoot block:aBlock error:aoErr])
         return NULL;
 
     Value *literal = (Value*)[self _generateBlockLiteralInProgram:aProgram parentBlock:aBlock root:aRoot];

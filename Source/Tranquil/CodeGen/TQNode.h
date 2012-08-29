@@ -30,7 +30,7 @@
 typedef void (^TQNodeIteratorBlock)(TQNode *aNode);
 
 @interface TQNode : NSObject
-@property(readwrite) NSUInteger lineNumber; // Default: NSNotFound
+@property(readwrite, nonatomic) NSUInteger lineNumber; // Default: NSNotFound
 
 + (TQNode *)node;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
