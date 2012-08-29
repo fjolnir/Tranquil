@@ -1,0 +1,12 @@
+#TQNil {
+    - test {
+        "I am nil!" print
+        ^123
+    }
+}
+
+"test: #{nil test} asdf" print
+"bar:  #{nil foobar}" print
+
+if nil isNil
+    "Nil is Nil" print
