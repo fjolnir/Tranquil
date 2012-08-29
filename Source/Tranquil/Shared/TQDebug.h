@@ -9,7 +9,7 @@
     do { \
         if(!(cond)) { \
             TQLog(@"Assertion failed: " fmt, ##__VA_ARGS__); \
-            abort(); \
+            [NSException raise:@"TQAssertFailed" format:fmt, ##__VA_ARGS__]; \
         } \
     } while(0)
 
