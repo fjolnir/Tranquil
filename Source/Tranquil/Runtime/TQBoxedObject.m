@@ -103,8 +103,8 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     // []=
     imp = imp_implementationWithBlock(^(id a, id key, id val) {
         Class keyKls = object_getClass(key);
-        if(keyKls == TQNumberClass || keyKls == NSNumberClass)
-            return [a setObject:val atIndexedSubscript:[(TQNumber *)key intValue]];
+        if(keyKls == TQNumberClass || keyKls == TQTaggedNumberClass || keyKls == NSNumberClass)
+            return [a setObject:val atIndexedSubscript:[(TQNumber *)key unsignedIntegerValue]];
         else
             return [a setObject:val forKeyedSubscript:key];
     });
@@ -565,6 +565,20 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     // Implemented by subclasses
 }
 
++ (void)setFieldNames:(NSArray *)aNames
+{
+    NSString *sel;
+    for(int i = 0; i < [aNames count]; ++i) {
+        sel = [aNames objectAtIndex:i];
+        class_addMethod(self, NSSelectorFromString(sel), imp_implementationWithBlock(^(id self_) {
+            return [self_ objectAtIndexedSubscript:i];
+        }), "@@:");
+        sel = [NSString stringWithFormat:@"set%@:", [sel capitalizedString]];
+        class_addMethod(self, NSSelectorFromString(sel), imp_implementationWithBlock(^(id self_, id val) {
+            return [self_ setObject:val atIndexedSubscript:i];
+        }), "@@:@");
+    }
+}
 @end
 
 #pragma mark - Block/Function pointer (un)boxing
