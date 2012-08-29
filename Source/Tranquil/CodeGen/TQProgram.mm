@@ -52,6 +52,8 @@ using namespace llvm;
 
 NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 
+static TQProgram *sharedInstance;
+
 @implementation TQProgram
 @synthesize name=_name, llModule=_llModule, cliArgGlobal=_cliArgGlobal, shouldShowDebugInfo=_shouldShowDebugInfo,
             objcParser=_objcParser, searchPaths=_searchPaths, allowedFileExtensions=_allowedFileExtensions,
@@ -83,6 +85,19 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
     dispatch_release=_func_dispatch_release, dispatch_group_wait=_func_dispatch_group_wait,
     dispatch_group_notify=_func_dispatch_group_notify, dispatch_group_async=_func_dispatch_group_async,
     objc_sync_enter=_func_objc_sync_enter, objc_sync_exit=_func_objc_sync_exit;
+
++ (void)initialize
+{
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        sharedInstance = [[self alloc] initWithName:@"Global"];
+    });
+}
+
++ (TQProgram *)sharedProgram
+{
+    return sharedInstance;
+}
 
 + (TQProgram *)programWithName:(NSString *)aName
 {
