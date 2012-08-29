@@ -1,6 +1,7 @@
 #import "TQBlockClosure.h"
 #import "TQFFIType.h"
 #import "TQBoxedObject.h"
+#import <sys/mman.h>
 
 static ffi_closure *_AllocateClosure(void **codePtr);
 static void _DeallocateClosure(void *closure);
