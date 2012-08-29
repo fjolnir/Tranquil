@@ -1,4 +1,5 @@
 #import "TQNodeDictionary.h"
+#import "TQNode+Private.h"
 #import "TQProgram.h"
 #import "TQNodeBlock.h"
 #import "TQNodeArgument.h"
@@ -86,6 +87,7 @@ using namespace llvm;
     args.push_back(aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQSentinel", aProgram.llInt8PtrTy)));
 
     CallInst *call = aBlock.builder->CreateCall(aProgram.objc_msgSend, args);
+    [self _attachDebugInformationToInstruction:call inProgram:aProgram root:aRoot];
     return call;
 }
 

@@ -425,9 +425,23 @@ using namespace llvm;
     }
 
     _basicBlock = BasicBlock::Create(mod->getContext(), "entry", _function, 0);
-    
     _builder = new IRBuilder<>(_basicBlock);
 
+        // Debug info
+    _debugInfo = aProgram.debugBuilder->createFunction(aRoot.debugUnit,
+                                                       [_invokeName UTF8String],
+                                                       [_invokeName UTF8String],
+                                                       cast<DIFile>(aRoot.debugUnit),
+                                                       self.lineNumber,
+                                                       DIType(),
+                                                       true,
+                                                       false,
+                                                       self.lineNumber,
+                                                       0,
+                                                       true,
+                                                       _function);
+
+    // Start building the function
     _autoreleasePool = _builder->CreateCall(aProgram.objc_autoreleasePoolPush);
 
     // Load the block pointer argument (must do this before captures, which must be done before arguments in case a default value references a capture)
@@ -638,6 +652,8 @@ using namespace llvm;
 #pragma mark - Root block
 
 @implementation TQNodeRootBlock
+@synthesize debugUnit=_debugUnit;
+
 + (TQNodeRootBlock *)node
 {
     return [[self new] autorelease];

@@ -1,4 +1,5 @@
 #import "TQNodeMessage.h"
+#import "TQNode+Private.h"
 #import "TQProgram.h"
 #import "TQNodeArgument.h"
 #import "TQNodeVariable.h"
@@ -134,9 +135,12 @@ using namespace llvm;
         ret = aBlock.builder->CreateCall(aProgram.objc_msgSendSuper, aArgs);
     else {
         ret = aBlock.builder->CreateCall(aProgram.tq_msgSend, aArgs);
-        if(needsAutorelease)
+        if(needsAutorelease) {
+            [self _attachDebugInformationToInstruction:ret inProgram:aProgram root:aRoot];
             ret = aBlock.builder->CreateCall(aProgram.objc_autoreleaseReturnValue, ret);
+        }
     }
+    [self _attachDebugInformationToInstruction:ret inProgram:aProgram root:aRoot];
 
     Value *origRet = ret;
     for(TQNodeMessage *cascadedMessage in _cascadedMessages) {

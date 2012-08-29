@@ -1,4 +1,5 @@
 #import "TQNodeReturn.h"
+#import "TQNode+Private.h"
 #import "TQProgram.h"
 #import "TQNodeVariable.h"
 #import "TQNodeBlock.h"
@@ -72,8 +73,10 @@ using namespace llvm;
     if(_value) {
         retVal = [_value generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         retVal = aBlock.builder->CreateCall(aProgram.TQPrepareObjectForReturn, retVal);
+        [self _attachDebugInformationToInstruction:retVal inProgram:aProgram root:aRoot];
         [aBlock generateCleanupInProgram:aProgram];
         retVal = aBlock.builder->CreateCall(aProgram.objc_autoreleaseReturnValue, retVal);
+        [self _attachDebugInformationToInstruction:retVal inProgram:aProgram root:aRoot];
     } else {
         [aBlock generateCleanupInProgram:aProgram];
         retVal = ConstantPointerNull::get(aProgram.llInt8PtrTy);
@@ -85,7 +88,7 @@ using namespace llvm;
             continue;
         TQNodeVariable *var = [aBlock.locals objectForKey:varName];
         if(!var.isGlobal || aRoot != aBlock)
-            [var generateReleaseInProgram:aProgram block:aBlock];
+            [var generateReleaseInProgram:aProgram block:aBlock root:aRoot];
     }
 
     if([aBlock.retType isEqualToString:@"v"])

@@ -64,7 +64,7 @@ static TQProgram *sharedInstance;
     llInt8PtrPtrTy=_llInt8PtrPtrTy, llPointerWidthInBits=_llPointerWidthInBits, llPointerAlignInBytes=_llPointerAlignInBytes,
     llPointerSizeInBytes=_llPointerSizeInBytes;
 @synthesize llBlockDescriptorTy=_blockDescriptorTy, llBlockLiteralType=_blockLiteralType;
-@synthesize globalQueue=_globalQueue;
+@synthesize globalQueue=_globalQueue, debugBuilder=_debugBuilder;
 @synthesize objc_msgSend=_func_objc_msgSend, objc_msgSend_fixup=_func_objc_msgSend_fixup, objc_msgSendSuper=_func_objc_msgSendSuper,
     objc_storeWeak=_func_objc_storeWeak, objc_loadWeak=_func_objc_loadWeak, objc_allocateClassPair=_func_objc_allocateClassPair,
     objc_registerClassPair=_func_objc_registerClassPair, objc_destroyWeak=_func_objc_destroyWeak,
@@ -319,6 +319,8 @@ static TQProgram *sharedInstance;
     DEF_EXTERNAL_FUN(objc_sync_exit, ft_int__i8Ptr);
 
 #undef DEF_EXTERNAL_FUN
+
+    _debugBuilder = new DIBuilder(*_llModule);
 
     TQInitializeRuntime();
     InitializeNativeTarget();
@@ -599,17 +601,24 @@ static TQProgram *sharedInstance;
 
     [parserState.stack addObject:[NSMutableArray array]];
 
-    @try {
+    //@try {
         while(yyparse(&greg));
-    } @catch(NSException *e) {
-        TQLog(@"%@", [e reason]);
-        return nil;
-    } @finally {
+    //} @catch(NSException *e) {
+        //TQLog(@"%@", [e reason]);
+        //return nil;
+    //} @finally {
         yydeinit(&greg);
-    }
+    //}
 
     if(!parserState.root)
         return nil;
+
+    // Initialize the debug unit on the root
+    const char *filename = "<none>";
+    const char *dir      = "<none>";
+    _debugBuilder->createCompileUnit(DW_LANG_Tranquil, filename, dir, TRANQUIL_DEBUG_DESCR, true, "", 1);
+    parserState.root.debugUnit = DICompileUnit(_debugBuilder->getCU());
+
 
     [self _preprocessNode:parserState.root withTrace:[NSMutableArray array]];
     if(_shouldShowDebugInfo)

@@ -5,9 +5,19 @@
 using namespace llvm;
 
 @implementation TQNode
+@synthesize lineNumber=_lineNumber;
+
 + (TQNode *)node
 {
     return [[self new] autorelease];
+}
+
+- (id)init
+{
+    if(!(self = [super init]))
+        return nil;
+    _lineNumber = NSNotFound;
+    return self;
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
@@ -56,6 +66,32 @@ using namespace llvm;
 {
     TQLog(@"%@ does not support child node replacement.", [self class]);
     return NO;
+}
+
+- (void)_attachDebugInformationToInstruction:(llvm::Value *)aInst inProgram:(TQProgram *)aProgram root:(TQNodeRootBlock *)aRoot
+{
+    NSLog(@"line: %ld %@", _lineNumber, self);
+    if(_lineNumber == NSNotFound)
+        return;
+
+    Value *args[] = {
+        ConstantInt::get(aProgram.llIntTy, _lineNumber),
+        ConstantInt::get(aProgram.llIntTy, 0),
+        //(Value *)aRoot.debugUnit,
+        (Value *)aBlock.debugInfo,
+        DILocation(NULL)
+    };
+    LLVMContext *ctx = &aProgram.llModule->getContext();
+    DILocation loc = DILocation(MDNode::get(*ctx, args));
+    dyn_cast<Instruction>(aInst)->setMetadata(ctx->getMDKindID("dbg"), loc);
+}
+
+- (void)setLineNumber:(NSUInteger)aLineNo
+{
+    _lineNumber = aLineNo;
+    [self iterateChildNodes:^(TQNode *aChild) {
+        aChild.lineNumber = aLineNo;
+    }];
 }
 @end
 

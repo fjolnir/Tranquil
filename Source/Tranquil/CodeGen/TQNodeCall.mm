@@ -1,4 +1,5 @@
 #import "TQNodeCall.h"
+#import "TQNode+Private.h"
 #import "TQProgram.h"
 #import "TQNodeBlock.h"
 #import "TQNodeArgument.h"
@@ -85,7 +86,9 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
         dispatcher->setCallingConv(CallingConv::C);
     }
 
-    return aBlock.builder->CreateCall(dispatcher, aArgs);
+    Value *ret = aBlock.builder->CreateCall(dispatcher, aArgs);
+    [self _attachDebugInformationToInstruction:(Instruction *)ret inProgram:aProgram root:aRoot];
+    return ret;
 }
 
 

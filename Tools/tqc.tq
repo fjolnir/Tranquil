@@ -4,7 +4,7 @@ import "CoreFoundation"
 inPath         = nil
 outPath        = "a.out"
 runtimeLibPath = "/usr/local/tranquil/lib/libtranquil.a"
-ldFlags        = ["-all_load", "-framework", "AppKit", "-lobjc", "-lffi", runtimeLibPath]
+ldFlags        = ["-fexceptions", "-all_load", "-framework", "AppKit", "-lobjc", "-lffi", runtimeLibPath]
 
 args = ... objectEnumerator
 while arg = args nextObject {
@@ -34,7 +34,7 @@ if compilationTask terminationStatus != 0
 
 asmPath = "/tmp/#{uuid()}.s"
 assemblingTask = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/llvm/bin/llc"
-                                         arguments: ["-O3", "-o", asmPath, irPath];
+                                         arguments: ["-O0", "-disable-fp-elim", "-stats", "-relocation-model=pic", "-o", asmPath, irPath];
                                      waitUntilExit;
                                               self
 if assemblingTask terminationStatus != 0

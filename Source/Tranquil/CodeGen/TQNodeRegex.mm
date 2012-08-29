@@ -1,4 +1,5 @@
 #import "TQNodeRegex.h"
+#import "TQNode+Private.h"
 #import "TQNodeBlock.h"
 #import "TQProgram.h"
 
@@ -70,6 +71,8 @@ using namespace llvm;
     Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_TQRegularExpression", aProgram.llInt8Ty);
     Value *optsVal  = ConstantInt::get(aProgram.llIntTy, _opts);
 
-    return builder->CreateCall4(aProgram.objc_msgSend, klass, selector, patVal, optsVal);
+    Value *ret = builder->CreateCall4(aProgram.objc_msgSend, klass, selector, patVal, optsVal);
+    [self _attachDebugInformationToInstruction:ret inProgram:aProgram root:aRoot];
+    return ret;
 }
 @end

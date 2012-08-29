@@ -16,9 +16,11 @@
 + (llvm::Type *)captureStructTypeInProgram:(TQProgram *)aProgram;
 
 - (void)generateRetainInProgram:(TQProgram *)aProgram
-                          block:(TQNodeBlock *)aBlock;
+                          block:(TQNodeBlock *)aBlock
+                           root:(TQNodeRootBlock *)aRoot;
 - (void)generateReleaseInProgram:(TQProgram *)aProgram
-                           block:(TQNodeBlock *)aBlock;
+                           block:(TQNodeBlock *)aBlock
+                            root:(TQNodeRootBlock *)aRoot;
 @end
 
 @interface TQNodeSelf : TQNodeVariable

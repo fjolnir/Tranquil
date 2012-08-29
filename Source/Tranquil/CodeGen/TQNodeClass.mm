@@ -1,4 +1,5 @@
 #import "TQNodeClass.h"
+#import "TQNode+Private.h"
 #import "TQNodeMethod.h"
 #import "TQNodeMessage.h"
 #import "TQProgram.h"
@@ -63,8 +64,11 @@ using namespace llvm;
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
-    if(_classPtr)
-        return aBlock.builder->CreateCall2(aProgram.TQGetOrCreateClass, [aProgram getGlobalStringPtr:_name inBlock:aBlock], ConstantPointerNull::get(aProgram.llInt8PtrTy));
+    if(_classPtr) {
+        Value *ret = aBlock.builder->CreateCall2(aProgram.TQGetOrCreateClass, [aProgram getGlobalStringPtr:_name inBlock:aBlock], ConstantPointerNull::get(aProgram.llInt8PtrTy));
+        [self _attachDebugInformationToInstruction:ret inProgram:aProgram root:aRoot];
+        return ret;
+    }
 
     // -- Type definitions
     // -- Method definitions
@@ -74,6 +78,7 @@ using namespace llvm;
     Value *superName  = [aProgram getGlobalStringPtr:_superClassName ? _superClassName : @"TQObject" inBlock:aBlock];
 
     _classPtr = builder->CreateCall2(aProgram.TQGetOrCreateClass, name, superName);
+    [self _attachDebugInformationToInstruction:_classPtr inProgram:aProgram root:aRoot];
 
     // Add the methods for the class
     for(TQNodeMethod *method in [_classMethods arrayByAddingObjectsFromArray:_instanceMethods]) {

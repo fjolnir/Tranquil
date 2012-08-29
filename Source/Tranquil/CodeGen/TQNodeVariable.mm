@@ -1,4 +1,5 @@
 #import "TQNodeVariable.h"
+#import "TQNode+Private.h"
 #import "TQNodeBlock.h"
 #import "TQProgram.h"
 #import "../Shared/TQDebug.h"
@@ -67,18 +68,20 @@ using namespace llvm;
     [super dealloc];
 }
 
-- (llvm::Value *)_getForwardingInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock
+- (llvm::Value *)_getForwardingInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock root:(TQNodeRootBlock *)aRoot
 {
     TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock];
     if(existingVar)
-        return [existingVar _getForwardingInProgram:aProgram block:aBlock];
+        return [existingVar _getForwardingInProgram:aProgram block:aBlock root:aRoot];
 
     IRBuilder<> *builder = aBlock.builder;
     Value *forwarding;
     forwarding = builder->CreateLoad(builder->CreateStructGEP(_alloca, 1), [self _llvmRegisterName:@"forwardingPtr"]);
     forwarding = builder->CreateBitCast(forwarding, PointerType::getUnqual([[self class] captureStructTypeInProgram:aProgram]), [self _llvmRegisterName:@"forwarding"]);
 
-    return builder->CreateLoad(builder->CreateStructGEP(forwarding, 4));
+    Value *ret = builder->CreateLoad(builder->CreateStructGEP(forwarding, 4));
+    [self _attachDebugInformationToInstruction:(Instruction *)ret inProgram:aProgram root:aRoot];
+    return ret;
 }
 
 + (llvm::Type *)captureStructTypeInProgram:(TQProgram *)aProgram
@@ -157,12 +160,12 @@ using namespace llvm;
                                  error:(NSError **)aoErr
 {
     if(_alloca)
-        return [self _getForwardingInProgram:aProgram block:aBlock];
+        return [self _getForwardingInProgram:aProgram block:aBlock root:aRoot];
 
     if(![self createStorageInProgram:aProgram block:aBlock root:aRoot error:aoErr])
         return NULL;
 
-    return [self _getForwardingInProgram:aProgram block:aBlock];
+    return [self _getForwardingInProgram:aProgram block:aBlock root:aRoot];
 }
 
 - (llvm::Value *)store:(llvm::Value *)aValue
@@ -185,14 +188,16 @@ using namespace llvm;
 
 - (void)generateRetainInProgram:(TQProgram *)aProgram
                           block:(TQNodeBlock *)aBlock
+                           root:(TQNodeRootBlock *)aRoot
 {
-    aBlock.builder->CreateCall(aProgram.objc_retain, [self _getForwardingInProgram:aProgram block:aBlock]);
+    aBlock.builder->CreateCall(aProgram.objc_retain, [self _getForwardingInProgram:aProgram block:aBlock root:aRoot]);
 }
 
 - (void)generateReleaseInProgram:(TQProgram *)aProgram
                            block:(TQNodeBlock *)aBlock
+                           root:(TQNodeRootBlock *)aRoot
 {
-    aBlock.builder->CreateCall(aProgram.objc_release, [self _getForwardingInProgram:aProgram block:aBlock]);
+    aBlock.builder->CreateCall(aProgram.objc_release, [self _getForwardingInProgram:aProgram block:aBlock root:aRoot]);
 }
 
 - (TQNodeVariable *)_getExistingIdenticalInBlock:(TQNodeBlock *)aBlock

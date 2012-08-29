@@ -1,4 +1,5 @@
 #import "TQNodeLock.h"
+#import "TQNode+Private.h"
 #import "TQProgram.h"
 #import "TQNodeOperator.h"
 #import "TQNodeLoopBlock.h"
@@ -63,7 +64,9 @@ using namespace llvm;
                                                  block:aBlock
                                                   root:aRoot
                                                  error:aoErr];
-    aBlock.builder->CreateCall(aProgram.objc_sync_enter, condVal);
+    Value *enterCond = aBlock.builder->CreateCall(aProgram.objc_sync_enter, condVal);
+    [self _attachDebugInformationToInstruction:enterCond inProgram:aProgram root:aRoot];
+
     TQNode *exitNode = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *b, TQNodeRootBlock *r) {
         aBlock.builder->CreateCall(aProgram.objc_sync_exit, condVal);
         return (Value *)NULL;

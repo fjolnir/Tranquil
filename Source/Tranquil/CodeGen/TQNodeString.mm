@@ -1,4 +1,5 @@
 #import "TQNodeString.h"
+#import "TQNode+Private.h"
 #import "TQNodeBlock.h"
 #import "TQProgram.h"
 
@@ -89,6 +90,7 @@ using namespace llvm;
             args.push_back([value generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr]);
         }
         strValue = aBlock.builder->CreateCall(aProgram.objc_msgSend, args);
+        [self _attachDebugInformationToInstruction:strValue inProgram:aProgram root:aRoot];
     }
     return strValue;
 }

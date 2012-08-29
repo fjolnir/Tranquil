@@ -1,10 +1,15 @@
 #import "TQNodeOperator.h"
+#import "TQNode+Private.h"
 #import "TQNodeVariable.h"
+#import "TQNodeCustom.h"
+#import "TQNodeConditionalBlock.h"
 #import "TQNodeMemberAccess.h"
 #import "TQProgram.h"
 #import "../Shared/TQDebug.h"
 #import "TQNodeNumber.h"
 #import "TQNodeConditionalBlock.h"
+#import "../Runtime/TQRuntime.h"
+#import "TQNodeValid.h"
 #import "../Runtime/TQNumber.h"
 #import <llvm/Intrinsics.h>
 
@@ -101,7 +106,9 @@ using namespace llvm;
     } else if(_type == kTQOperatorUnaryMinus) {
         Value *right = [_right generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         Value *selector  = aProgram.llModule->getOrInsertGlobal("TQUnaryMinusOpSel", aProgram.llInt8PtrTy);
-        return aBlock.builder->CreateCall2(aProgram.objc_msgSend, right, aBlock.builder->CreateLoad(selector));
+        Value *ret = aBlock.builder->CreateCall2(aProgram.objc_msgSend, right, aBlock.builder->CreateLoad(selector));
+        [self _attachDebugInformationToInstruction:ret inProgram:aProgram root:aRoot];
+        return ret;
     } else if(_type == kTQOperatorIncrement || _type == kTQOperatorDecrement) {
         TQAssert(!_left || !_right, @"Panic! in/decrement can't have both left&right hand sides");
         Value *beforeVal = NULL;
@@ -127,30 +134,27 @@ using namespace llvm;
     } else if(_type == kTQOperatorEqual) {
         Value *left  = [_left generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         Value *right = [_right generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-        return aBlock.builder->CreateCall2(aProgram.TQObjectsAreEqual, left, right);
+        Value *ret = aBlock.builder->CreateCall2(aProgram.TQObjectsAreEqual, left, right);
+        [self _attachDebugInformationToInstruction:ret inProgram:aProgram root:aRoot];
+        return ret;
     } else if(_type == kTQOperatorInequal) {
         Value *left  = [_left generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         Value *right = [_right generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-        return aBlock.builder->CreateCall2(aProgram.TQObjectsAreNotEqual, left, right);
+        Value *ret   = aBlock.builder->CreateCall2(aProgram.TQObjectsAreNotEqual, left, right);
+        [self _attachDebugInformationToInstruction:ret inProgram:aProgram root:aRoot];
+        return ret;
     } else if(_type == kTQOperatorAnd || _type == kTQOperatorOr) {
-        // Generate:
-        // temp = left
-        // unless/if temp { temp = right }
-        TQNodeVariable *tempVar = [TQNodeVariable new];
-        [tempVar createStorageInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-
-        Class condKls = _type == kTQOperatorAnd ? [TQNodeIfBlock class] : [TQNodeUnlessBlock class];
-        TQNodeIfBlock *conditional = (TQNodeIfBlock *)[condKls node];
-
-        TQNodeOperator *leftAsgn  = [TQNodeOperator nodeWithType:kTQOperatorAssign left:tempVar right:_left];
-        [leftAsgn generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-        conditional.condition = tempVar;
-        TQNodeOperator *rightAsgn  = [TQNodeOperator nodeWithType:kTQOperatorAssign left:tempVar right:_right];
-        conditional.ifStatements = [NSArray arrayWithObject:rightAsgn];
-        [conditional generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-
-        [tempVar release];
-        return [tempVar generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        // Compile `left ? left : right` or `left ? right : left`
+        // We need to ensure the left side is only executed once
+        Value *leftVal = [_left generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        TQNodeCustom *leftWrapper = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
+            return leftVal;
+        }];
+        TQNodeTernaryOperator *tern = [TQNodeTernaryOperator nodeWithIfExpr:(_type == kTQOperatorAnd) ? _right : leftWrapper
+                                                                       else:(_type == kTQOperatorAnd) ? leftWrapper  : _right];
+        tern.condition = leftWrapper;
+        tern.lineNumber = self.lineNumber;
+        return [tern generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     } else {
         Value *left  = [_left generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         Value *right = [_right generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
@@ -269,11 +273,13 @@ using namespace llvm;
             aBlock.basicBlock = fastBB;
             aBlock.builder = &fastBuilder;
             Value *fastVal = [fastpath generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+            [self _attachDebugInformationToInstruction:(Instruction *)fastVal inProgram:aProgram root:aRoot];
 
             IRBuilder<> slowBuilder(slowBB);
             aBlock.basicBlock = slowBB;
             aBlock.builder = &slowBuilder;
             Value *slowVal = [slowpath generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+            [self _attachDebugInformationToInstruction:(Instruction *)fastVal inProgram:aProgram root:aRoot];
 
             IRBuilder<> *contBuilder = new IRBuilder<>(contBB);
             aBlock.basicBlock = contBB;
@@ -287,8 +293,11 @@ using namespace llvm;
             phi->addIncoming(slowVal, slowBB);
 
             return phi;
-        } else
-            return [slowpath generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        } else {
+            Value *ret = [slowpath generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+            [self _attachDebugInformationToInstruction:ret inProgram:aProgram root:aRoot];
+            return ret;
+        }
     }
 }
 

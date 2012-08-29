@@ -52,7 +52,9 @@ using namespace llvm;
     } else {
         TQNodeRootBlock *importedRoot = [aProgram _rootFromFile:path error:aoErr];
         Value *rootFun = [importedRoot generateCodeInProgram:aProgram block:aBlock root:importedRoot error:aoErr];
-        return aBlock.builder->CreateCall(rootFun);
+        Value *ret = aBlock.builder->CreateCall(rootFun);
+        [self _attachDebugInformationToInstruction:ret inProgram:aProgram root:aRoot];
+        return ret;
     }
 }
 @end

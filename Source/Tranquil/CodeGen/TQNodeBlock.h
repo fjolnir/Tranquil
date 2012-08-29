@@ -2,6 +2,7 @@
 #include "TQNodeReturn.h"
 #include "../Runtime/TQRuntime.h"
 #include <llvm/Support/IRBuilder.h>
+#include <llvm/Analysis/DebugInfo.h>
 
 @class TQNodeArgumentDef;
 
@@ -26,6 +27,7 @@
 @property(readwrite, assign) llvm::Function *function;
 @property(readwrite, assign) llvm::IRBuilder<> *builder;
 @property(readwrite, assign) llvm::Value *dispatchGroup;
+@property(readwrite, assign) llvm::DISubprogram debugInfo;
 
 // This property is only valid when called from a block's subnode within it's generateCode: method
 @property(readwrite, assign) llvm::Value *autoreleasePool;
@@ -39,5 +41,6 @@
 @end
 
 @interface TQNodeRootBlock : TQNodeBlock
+@property llvm::DICompileUnit debugUnit;
 + (TQNodeRootBlock *)node;
 @end

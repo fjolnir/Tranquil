@@ -4,7 +4,7 @@
 
 struct _TQParserState {
     NSRange currentToken;
-    int currentLine;
+    NSUInteger currentLine;
 
     NSMutableArray *stack;
     TQNodeRootBlock *root;
@@ -31,6 +31,9 @@ typedef struct _TQParserState TQParserState;
     ((TQParserState *)state)->currentToken.location  = thunk->begin + G->offset;  \
     ((TQParserState *)state)->currentToken.length    = thunk->end - thunk->begin; \
 } while(0)
+
+#define CurrentLine ((TQParserState *)state)->currentLine
+#define SetLineNo(node) [node setLineNumber:CurrentLine]
 
 #define ExtendToken() do { \
     ((TQParserState *)state)->currentToken.length += thunk->end - thunk->begin; \
@@ -121,10 +124,13 @@ Statement    = (
              | InvalidStmt
              )
              {
-                 if(![$$ isKindOfClass:[NSArray class]])
+                 if(![$$ isKindOfClass:[NSArray class]]) {
+                     //[$$ setLineNumber:CurrentLine];
                      [StackTop addObject:$$];
-                 else
+                 } else {
+                     //for(TQNode *stmt in $$) [stmt setLineNumber:CurrentLine];
                      [StackTop addObjectsFromArray:$$];
+                 }
              }
 
 InvalidStmt  = Expression            { SyntaxError(@"Unexpected Expression"); }
@@ -140,6 +146,9 @@ Expression   = TernaryExpr
              | Equation
              | UnaryMsg
              | _OtherExpr
+             {
+                 //[$$ setLineNumber:CurrentLine];
+             }
 
 NoTernExpr   = Equation
              | _OtherExpr
@@ -170,12 +179,13 @@ UnaryMsg     = rcvr:UnaryMsgRcvr - {
                    ExtendToken();
                    PushStack([TQNodeMessage nodeWithReceiver:rcvr]);
                }
-               body:UnaryMsgBody { $$ = PopStack(); }
+               body:UnaryMsgBody { $$ = PopStack(); SetLineNo($$); }
 
 KeywordMsg   = rcvr:KwdMsgRcvr -
                {
                     ExtendToken();
                     PushStack([TQNodeMessage nodeWithReceiver:rcvr]);
+                    SetLineNo(StackTop);
                }
                body:KwdMsgBody { $$ = PopStack(); }
 CascadedMsg  = (KeywordMsg|UnaryMsg)
@@ -185,6 +195,7 @@ CascadedMsg  = (KeywordMsg|UnaryMsg)
                (- ";" ---
                 {
                     PushStack([TQNodeMessage node]);
+                    SetLineNo(StackTop);
                 }
                 (UnaryMsgBody | KwdMsgBody)
                 {
@@ -214,6 +225,7 @@ UnaryMsgBody =  name:Identifier - !":"
                (- extraName:Identifier - !":"
                   {
                       ReplaceStackTop([TQNodeMessage nodeWithReceiver:StackTop]);
+                      SetLineNo(StackTop);
                       [(NSMutableArray*)[StackTop arguments] addObject:[TQNodeArgument nodeWithPassedNode:nil
                                                                                              selectorPart:extraName]];
 
@@ -271,6 +283,7 @@ Call         = callee:Callee
                {
                     ExtendToken();
                     PushStack([TQNodeCall nodeWithCallee:callee]);
+                    SetLineNo(StackTop);
                     PushStack([NSMutableArray array]);
                }
                '(' -- (CallArg (-- ',' -- CallArg)*)? --
@@ -295,6 +308,7 @@ Block        = '{' --
                {
                     UpdateToken();
                     PushStack([TQNodeBlock node]);
+                    SetLineNo(StackTop);
                     PushStack([NSMutableArray array]);
                }
                ( ( (BlockArgDef - (',' -- BlockArgDef --)* (',' -- BlkVarArgDef --)?) | ( BlkVarArgDef --) )? '|' --)?
@@ -340,10 +354,10 @@ BlockArgDef  = name:Identifier { [StackTop addObject:[TQNodeArgumentDef nodeWith
 BlkVarArgDef = Variadic        { [StackGet(-1) setIsVariadic:YES]; }
 
 # Concurrency
-Async        = "async" - expr:Expression { $$ = [TQNodeAsync nodeWithExpression:expr]; }
-Wait         = "wait" { $$ = [TQNodeWait node]; }
-WhenFinished = "whenFinished" - expr:Expression { $$ = [TQNodeWhenFinished nodeWithExpression:expr]; }
-Lock         = "lock"  { PushStack([TQNodeLock node]); }
+Async        = "async" - expr:Expression { $$ = [TQNodeAsync nodeWithExpression:expr]; SetLineNo($$); }
+Wait         = "wait" { $$ = [TQNodeWait node]; SetLineNo($$); }
+WhenFinished = "whenFinished" - expr:Expression { $$ = [TQNodeWhenFinished nodeWithExpression:expr]; SetLineNo($$); }
+Lock         = "lock"  { PushStack([TQNodeLock node]); SetLineNo(StackTop); }
                -- cond:Expression --  ~{ SyntaxError(@"Lock condition missing"); }
                {
                    ExtendToken();
@@ -365,6 +379,7 @@ Class        = '#' name:Constant --
                {
                    UpdateToken();
                    PushStack([TQNodeClass nodeWithName:[(TQNodeConstant *)name value]]);
+                   SetLineNo(StackTop);
                }
                ( "<" --
                  SuperClsName ~{ SyntaxError(@"Expected Super class after '<'"); }
@@ -378,6 +393,7 @@ Class        = '#' name:Constant --
 SuperClsName = superName:Constant
                {
                    ExtendToken();
+                   SetLineNo(superName);
                    [StackTop setSuperClassName:[(TQNodeConstant *)superName value]];
                }
 Method       = '+' -- method:MethodImpl
@@ -402,6 +418,7 @@ MethodImpl   = arguments:MethodArgs  --
                {
                    NSMutableArray *statements = PopStack();
                    $$ = [TQNodeMethod node];
+                   SetLineNo($$);
                    [$$ setStatements:statements];
                }
                | '`' - expr:Expression -
@@ -410,6 +427,7 @@ MethodImpl   = arguments:MethodArgs  --
                    ExtendToken();
                    PopStack(); // Ignore
                    $$ = [TQNodeMethod node];
+                   SetLineNo($$);
                    [$$ setStatements:[NSMutableArray arrayWithObject:[TQNodeReturn nodeWithValue:expr]]];
                }
                )
@@ -444,7 +462,7 @@ MethodArg    = identifier:SelIdent':' --
                    [StackTop addObject:[TQNodeMethodArgumentDef nodeWithName:name selectorPart:identifier]];
                }
 
-OnLoadMsg    = { PushStack([TQNodeMessage nodeWithReceiver:StackTop]); }
+OnLoadMsg    = { PushStack([TQNodeMessage nodeWithReceiver:StackTop]); SetLineNo(StackTop); }
                (OLKwdMsgBody | UnaryMsgBody)
                {
                    $$ = PopStack();
@@ -452,8 +470,8 @@ OnLoadMsg    = { PushStack([TQNodeMessage nodeWithReceiver:StackTop]); }
                }
 
 # Conditionals
-If           = ( "if"        { UpdateToken();  PushStack([TQNodeIfBlock node]);     }
-               | "unless"    { UpdateToken();  PushStack([TQNodeUnlessBlock node]); }
+If           = ( "if"        { UpdateToken();  PushStack([TQNodeIfBlock node]);     SetLineNo(StackTop); }
+               | "unless"    { UpdateToken();  PushStack([TQNodeUnlessBlock node]); SetLineNo(StackTop); }
                ) -
                cond:Expression ~{ SyntaxError(@"Condition missing"); }
                {
@@ -491,6 +509,7 @@ TernaryExpr    = cond:NoTernExpr --- "?" ---
                  ifExpr:Expression ~{ SyntaxError(@"Ternary expression missing non-nil case value"); }
                  {
                      PushStack([TQNodeTernaryOperator node]);
+                     SetLineNo(StackTop);
                      [StackTop setCondition:cond];
                      [StackTop setIfExpr:ifExpr];
                  }
@@ -506,8 +525,8 @@ TernaryExpr    = cond:NoTernExpr --- "?" ---
 
 # Loops
 
-Loop         = ( "while"  { UpdateToken(); PushStack([TQNodeWhileBlock node]); }
-               | "until"  { UpdateToken(); PushStack([TQNodeUntilBlock node]); }
+Loop         = ( "while"  { UpdateToken(); PushStack([TQNodeWhileBlock node]); SetLineNo(StackTop); }
+               | "until"  { UpdateToken(); PushStack([TQNodeUntilBlock node]); SetLineNo(StackTop); }
                )
                -- cond:Expression --  ~{ SyntaxError(@"Loop condition missing"); }
                {
@@ -528,23 +547,23 @@ Loop         = ( "while"  { UpdateToken(); PushStack([TQNodeWhileBlock node]); }
 
 # Equations
 Sum          = a:Product             { UpdateToken(); PushStack(a);                                                                             }
-               ( - "+" - b:Product   { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAdd      left:StackTop right:b]); }
-               | - "-" - b:Product   { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorSubtract left:StackTop right:b]); }
-               )*                    { $$ = PopStack();                                                                                         }
+               ( - "+" - b:Product   { ExtendToken(); SetLineNo(StackTop); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAdd      left:StackTop right:b]); }
+               | - "-" - b:Product   { ExtendToken(); SetLineNo(StackTop); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorSubtract left:StackTop right:b]); }
+               )*                    { $$ = PopStack(); SetLineNo($$);                                                                          }
 
 Product      = a:NoEqExpr            { UpdateToken(); PushStack(a);                                                                             }
-               ( - "^"  - b:Product  { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorExponent left:StackTop right:b]); }
-               | - "*"  - b:Product  { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorMultiply left:StackTop right:b]); }
-               | - "/"  - b:Product  { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorDivide   left:StackTop right:b]); }
-               | - "%"  - b:Product  { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorModulo   left:StackTop right:b]); }
+               ( - "^"  - b:Product  { ExtendToken(); SetLineNo(StackTop); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorExponent left:StackTop right:b]); }
+               | - "*"  - b:Product  { ExtendToken(); SetLineNo(StackTop); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorMultiply left:StackTop right:b]); }
+               | - "/"  - b:Product  { ExtendToken(); SetLineNo(StackTop); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorDivide   left:StackTop right:b]); }
+               | - "%"  - b:Product  { ExtendToken(); SetLineNo(StackTop); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorModulo   left:StackTop right:b]); }
                | - ShiftRhs
-               | - ".." - b:Product  { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorConcat   left:StackTop right:b]); }
-               )*                    { $$ = PopStack();                                                                                         }
-ShiftRhs     = "<<" - b:Product      { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorLShift   left:StackTop right:b]); }
-             | ">>" - b:Product      { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorRShift   left:StackTop right:b]); }
+               | - ".." - b:Product  { ExtendToken(); SetLineNo(StackTop); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorConcat   left:StackTop right:b]); }
+               )*                    { $$ = PopStack(); SetLineNo($$);                                                                          }
+ShiftRhs     = "<<" - b:Product      { ExtendToken(); SetLineNo(StackTop); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorLShift   left:StackTop right:b]); }
+             | ">>" - b:Product      { ExtendToken(); SetLineNo(StackTop); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorRShift   left:StackTop right:b]); }
 ## Shifts can also be used as statements (For example to push onto a stack or append to a string)
 ShiftStmt    = a:NoEqExpr { PushStack(a); }
-               - ShiftRhs { $$ = PopStack(); }
+               - ShiftRhs { $$ = PopStack(); SetLineNo($$); }
 
 EqualityTest = a:Sum                 { UpdateToken(); PushStack(a);                                                                                   }
                ( - "<" -  b:Equation { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorLesser         left:StackTop right:b]); }
@@ -553,12 +572,12 @@ EqualityTest = a:Sum                 { UpdateToken(); PushStack(a);             
                | - ">=" - b:Equation { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorGreaterOrEqual left:StackTop right:b]); }
                | - "==" - b:Equation { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorEqual          left:StackTop right:b]); }
                | - "!=" - b:Equation { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorInequal        left:StackTop right:b]); }
-               )*                    { $$ = PopStack();                                                                                               }
+               )*                    { $$ = PopStack(); SetLineNo($$);                                                                                }
 
 Equation     = a:EqualityTest        { UpdateToken(); PushStack(a);                                                                                   }
                ( - "&&" - b:Equation { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAnd            left:StackTop right:b]); }
                | - "||" - b:Equation { ExtendToken(); ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorOr             left:StackTop right:b]); }
-               )*                    { $$ = PopStack();                                                                                               }
+               )*                    { $$ = PopStack(); SetLineNo($$);                                                                                }
 
 Assignment     = a:AssgnLhs - "=" - "async" - b:AssignValue
                  {
@@ -567,6 +586,7 @@ Assignment     = a:AssgnLhs - "=" - "async" - b:AssignValue
                      if([b isMemberOfClass:[TQNodeBlock class]])
                          b = [TQNodeCall nodeWithCallee:b];
                      PushStack([TQNodeOperator nodeWithType:kTQOperatorAssign left:a right:b]);
+                     SetLineNo(StackTop);
                  }
                  - (AssgnRhs -)*  { id assgn = PopStack(); $$ = [TQNodeAsync nodeWithExpression:assgn]; }
                | a:AssgnLhs       { PushStack(a); }
@@ -586,9 +606,10 @@ AssgnRhs       = -- (  "=" -- b:AssignValue  { PushStack(b);                    
                    ExtendToken();
                    TQNodeOperator *assignVal = PopStack();
                    ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAssign left:StackTop right:assignVal]);
+                   SetLineNo(StackTop);
                }
 
-MultiAssgnmt   = { PushStack([TQNodeMultiAssignOperator node]); }
+MultiAssgnmt   = { PushStack([TQNodeMultiAssignOperator node]); SetLineNo(StackTop); }
                  MultiAsgnLhs (- "," -- MultiAsgnLhs)+ - "=" -- MultiAsgnRhs (- "," -- MultiAsgnRhs)*
                  {
                      $$ = PopStack();
@@ -602,16 +623,17 @@ AssignValue    = CascadedMsg | Expression
 UnaryOp        = UnaryPrefixOp | UnaryMinusOp | UnaryPostfixOp
 IncrDecrOp     = UnaryPrefixOp | UnaryPostfixOp
 
-UnaryMinusOp   =  "-" a:AssgnLhs    { ExtendToken(); $$ = [TQNodeOperator nodeWithType:kTQOperatorUnaryMinus left:nil right:a]; }
-               |  "-" a:ParenExpr   { ExtendToken(); $$ = [TQNodeOperator nodeWithType:kTQOperatorUnaryMinus left:nil right:a]; }
+UnaryMinusOp   =  "-" a:AssgnLhs    { ExtendToken(); $$ = [TQNodeOperator nodeWithType:kTQOperatorUnaryMinus left:nil right:a]; SetLineNo($$); }
+               |  "-" a:ParenExpr   { ExtendToken(); $$ = [TQNodeOperator nodeWithType:kTQOperatorUnaryMinus left:nil right:a]; SetLineNo($$); }
 
-UnaryPrefixOp  = ( "++"             { ExtendToken(); PushStack([TQNodeOperator nodeWithType:kTQOperatorIncrement left:nil right:nil]);  }
-                 | "--"             { ExtendToken(); PushStack([TQNodeOperator nodeWithType:kTQOperatorDecrement left:nil right:nil]);  }
+UnaryPrefixOp  = ( "++"             { ExtendToken(); PushStack([TQNodeOperator nodeWithType:kTQOperatorIncrement left:nil right:nil]); }
+                 | "--"             { ExtendToken(); PushStack([TQNodeOperator nodeWithType:kTQOperatorDecrement left:nil right:nil]); }
                  )
                  a:AssgnLhs
                  {
                      $$ = PopStack();
                      [$$ setRight:a];
+                     SetLineNo($$);
                  }
 
 UnaryPostfixOp = a:AssgnLhs         { ExtendToken(); PushStack([TQNodeOperator nodeWithType:0 left:a right:nil]); }
@@ -620,6 +642,7 @@ UnaryPostfixOp = a:AssgnLhs         { ExtendToken(); PushStack([TQNodeOperator n
                  )
                  {
                      $$ = PopStack();
+                     SetLineNo($$);
                  }
 
 
@@ -634,8 +657,10 @@ SubscriptExp = obj:SubscriptLhs
                {
                    NSMutableArray *subscripts = PopStack();
                    $$ = [TQNodeOperator nodeWithType:kTQOperatorGetter left:obj right:[subscripts objectAtIndex:0]];
+                   SetLineNo($$);
                    for(int i = 1; i < [subscripts count]; ++i) {
                       $$ = [TQNodeOperator nodeWithType:kTQOperatorGetter left:$$ right:[subscripts objectAtIndex:i]];
+                      SetLineNo($$);
                    }
 
                }
@@ -652,6 +677,7 @@ Subscript    = "[" -- subscript:Expression --
 Property     = {
                    UpdateToken();
                    PushStack([TQNodeSelf node]);
+                   SetLineNo(StackTop);
                }
                (obj:PropLhs { ReplaceStackTop(obj); })?
                {
@@ -662,8 +688,10 @@ Property     = {
                    NSMutableArray *subscripts = PopStack();
                    TQNode *receiver = PopStack();
                    $$ = [TQNodeMemberAccess nodeWithReceiver:receiver property:[subscripts objectAtIndex:0]];
+                   SetLineNo($$);
                    for(int i = 1; i < [subscripts count]; ++i) {
                       $$ = [TQNodeMemberAccess nodeWithReceiver:$$ property:[subscripts objectAtIndex:i]];
+                      SetLineNo($$);
                    }
                }
 PropLhs      = Self
@@ -686,6 +714,7 @@ Array        = "[" --
                {
                    ExtendToken();
                    $$ = [TQNodeArray node];
+                   SetLineNo($$);
                    NSMutableArray *items = PopStack();
                    [$$ setItems:items];
                }
@@ -703,6 +732,7 @@ Dictionary   = "{" --
                "}"
                {
                    $$ = [TQNodeDictionary node];
+                   SetLineNo($$);
                    NSMutableArray *items = PopStack();
                    [$$ setItems:items];
 
@@ -718,6 +748,7 @@ DictItem     = key:Expression -- "=>" --
 Variable     = name:Identifier
                {
                    $$ = [TQNodeVariable nodeWithName:name];
+                   SetLineNo($$);
                }
 
 Weak         = '~' --
@@ -731,6 +762,7 @@ Weak         = '~' --
                | ParenExpr) ~{ SyntaxError(@"Value for weak reference missing"); }
                {
                    $$ = [TQNodeWeak nodeWithValue:$$];
+                   SetLineNo($$);
                }
 
 Literal      = Number
@@ -739,49 +771,49 @@ Literal      = Number
              | Dictionary
              | RegExp
 
-BreakStmt    = 'break'                     { ExtendToken(); $$ = [TQNodeBreak node]; }
-SkipStmt     = 'skip'                      { ExtendToken(); $$ = [TQNodeSkip node];  }
-Nil          = ('nil' | 'no' | '('--')')   { ExtendToken(); $$ = [TQNodeNil node];   }
-Self         = 'self'                      { ExtendToken(); $$ = [TQNodeSelf node];  }
-Super        = 'super'                     { ExtendToken(); $$ = [TQNodeSuper node]; }
-Variadic     = '...'                       { ExtendToken(); $$ = [TQNodeVariable nodeWithName:@"..."]; }
-Valid        = ('valid'|'yes')             { ExtendToken(); $$ = [TQNodeValid node]; }
+BreakStmt    = 'break'                     { ExtendToken(); $$ = [TQNodeBreak node]; SetLineNo($$); }
+SkipStmt     = 'skip'                      { ExtendToken(); $$ = [TQNodeSkip node];  SetLineNo($$); }
+Nil          = ('nil' | 'no' | '('--')')   { ExtendToken(); $$ = [TQNodeNil node];   SetLineNo($$); }
+Self         = 'self'                      { ExtendToken(); $$ = [TQNodeSelf node];  SetLineNo($$); }
+Super        = 'super'                     { ExtendToken(); $$ = [TQNodeSuper node]; SetLineNo($$); }
+Variadic     = '...'                       { ExtendToken(); $$ = [TQNodeVariable nodeWithName:@"..."]; SetLineNo($$); }
+Valid        = ('valid'|'yes')             { ExtendToken(); $$ = [TQNodeValid node]; SetLineNo($$); }
 
-Operator     = '=='  { ExtendToken(); $$ = @"=="; }
-             | '!='  { ExtendToken(); $$ = @"!="; }
-             | '='   { ExtendToken(); $$ = @"=";  }
-             | '>='  { ExtendToken(); $$ = @">="; }
-             | '<='  { ExtendToken(); $$ = @"<="; }
-             | '*'   { ExtendToken(); $$ = @"*";  }
-             | '/'   { ExtendToken(); $$ = @"/";  }
-             | '%'   { ExtendToken(); $$ = @"%";  }
-             | '+'   { ExtendToken(); $$ = @"+";  }
-             | '-'   { ExtendToken(); $$ = @"-";  }
-             | '<<'  { ExtendToken(); $$ = @"<<"; }
-             | '>>'  { ExtendToken(); $$ = @"<<"; }
-             | '<'   { ExtendToken(); $$ = @"<";  }
-             | '>'   { ExtendToken(); $$ = @">";  }
-             | '..'  { ExtendToken(); $$ = @".."; }
-             | '^'   { ExtendToken(); $$ = @"^";  }
-             | '='   { ExtendToken(); $$ = @"=";  }
-             | '[]'  { ExtendToken(); $$ = @"[]"; }
+Operator     = '=='  { ExtendToken(); $$ = @"=="; SetLineNo($$); }
+             | '!='  { ExtendToken(); $$ = @"!="; SetLineNo($$); }
+             | '='   { ExtendToken(); $$ = @"=";  SetLineNo($$); }
+             | '>='  { ExtendToken(); $$ = @">="; SetLineNo($$); }
+             | '<='  { ExtendToken(); $$ = @"<="; SetLineNo($$); }
+             | '*'   { ExtendToken(); $$ = @"*";  SetLineNo($$); }
+             | '/'   { ExtendToken(); $$ = @"/";  SetLineNo($$); }
+             | '%'   { ExtendToken(); $$ = @"%";  SetLineNo($$); }
+             | '+'   { ExtendToken(); $$ = @"+";  SetLineNo($$); }
+             | '-'   { ExtendToken(); $$ = @"-";  SetLineNo($$); }
+             | '<<'  { ExtendToken(); $$ = @"<<"; SetLineNo($$); }
+             | '>>'  { ExtendToken(); $$ = @"<<"; SetLineNo($$); }
+             | '<'   { ExtendToken(); $$ = @"<";  SetLineNo($$); }
+             | '>'   { ExtendToken(); $$ = @">";  SetLineNo($$); }
+             | '..'  { ExtendToken(); $$ = @".."; SetLineNo($$); }
+             | '^'   { ExtendToken(); $$ = @"^";  SetLineNo($$); }
+             | '='   { ExtendToken(); $$ = @"=";  SetLineNo($$); }
+             | '[]'  { ExtendToken(); $$ = @"[]"; SetLineNo($$); }
 
 
 SelIdent     = Operator | Identifier
 
 Number       = (< '-'? [0-9]+ ('.' [0-9]+)? ('e'[0-9]+)? >
-             | < '-'? '.' [0-9]+ ('e'[0-9]+)? > )          { ExtendToken(); $$ = [TQNodeNumber nodeWithDouble:YYNUM];     }
+             | < '-'? '.' [0-9]+ ('e'[0-9]+)? > )          { ExtendToken(); $$ = [TQNodeNumber nodeWithDouble:YYNUM];     SetLineNo($$); }
 Identifier   = < [a-z_] Character* >                       { ExtendToken(); $$ = YYNSSTR;                                 }
-Constant     = < [A-Z] Character* >                        { ExtendToken(); $$ = [TQNodeConstant nodeWithString:YYNSSTR]; }
+Constant     = < [A-Z] Character* >                        { ExtendToken(); $$ = [TQNodeConstant nodeWithString:YYNSSTR]; SetLineNo($$); }
 Character    = ([A-Za-z0-9_])
 
 # String with support for embedding expressions
 String       = ConstString | MutableStr
-MutableStr   = '"' { PushStack([TQNodeString nodeWithString:[NSMutableString string]]); }
+MutableStr   = '"' { PushStack([TQNodeString nodeWithString:[NSMutableString string]]); SetLineNo(StackTop); }
                (StrEmbeddExpr|DQuotStrIn)*
                _dblQuot ~{ SyntaxError(@"String literal left unclosed"); }
                { $$ = PopStack(); }
-             | "\'" { PushStack([TQNodeString nodeWithString:[NSMutableString string]]); }
+             | "\'" { PushStack([TQNodeString nodeWithString:[NSMutableString string]]); SetLineNo(StackTop); }
                (StrEmbeddExpr|SQuotStrIn)*
                _snglQuot ~{ SyntaxError(@"String literal left unclosed"); }
                { $$ = PopStack(); }
@@ -804,12 +836,13 @@ ConstString  = "$" ( < [^\n ;]+ >
                    | "\'" < [^\']+ >
                      _snglQuot ~{ SyntaxError(@"Constant string literal left unclosed"); }
                    ) ~{ SyntaxError(@"Expected string literal after '$'"); }
-                   { $$ = [TQNodeConstString nodeWithString:YYNSSTR]; }
+                   { $$ = [TQNodeConstString nodeWithString:YYNSSTR]; SetLineNo($$); }
 
 RegExp       = "/" { PushStack([TQNodeRegex nodeWithPattern:[NSMutableString stringWithString:@"/"]]); }
                (StrEmbeddExpr|RegexpIn)* <"/" [im]*>
              {
                  $$ = PopStack();
+                 SetLineNo($$);
                  [(TQNodeRegex *)$$ append:YYNSSTR];
              }
 RegexpIn     = < ("#" !"{" | "\\/" | [^\\/#])+ > { [(TQNodeRegex *)StackTop append:YYNSSTR]; }
@@ -820,7 +853,7 @@ Space        = [ \t]
 -            = Space*
 --           = (Comment | EOL)? -
 ---          = (Space | EOL | Comment)+
-EOL          = (- ('\n' | '\r\n' | '\r'))+
+EOL          = (- ('\n' | '\r\n' | '\r') { CurrentLine++; })+
 EOF          = - !.
 
 # Rules to implement syntax errors

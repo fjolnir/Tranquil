@@ -1,4 +1,5 @@
 #import "TQNodeAsync.h"
+#import "TQNode+Private.h"
 #import "TQNodeBlock.h"
 #import "TQNodeCall.h"
 #import "TQProgram.h"
@@ -55,10 +56,12 @@ using namespace llvm;
     TQNodeBlock *block = (TQNodeBlock *)_expression;
     if(![_expression isKindOfClass:[TQNodeBlock class]]) {
         block = [TQNodeBlock node];
+        block.lineNumber = self.lineNumber;
         [block.statements addObject:_expression];
     } else if([block.arguments count] != 1) {
         // Ensure the block is called with nil args
         block = [TQNodeBlock node];
+        block.lineNumber = self.lineNumber;
         [block.statements addObject:[TQNodeCall nodeWithCallee:_expression]];
     }
     block.retType = @"v";
@@ -71,8 +74,9 @@ using namespace llvm;
                                  error:(NSError **)aoErr
 {
     Value *compiledBlock = [self _generateDispatchBlockInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-    aBlock.builder->CreateCall3(aProgram.dispatch_group_async, aBlock.dispatchGroup,
-                                aBlock.builder->CreateLoad(aProgram.globalQueue), compiledBlock);
+    Value *call = aBlock.builder->CreateCall3(aProgram.dispatch_group_async, aBlock.dispatchGroup,
+                                              aBlock.builder->CreateLoad(aProgram.globalQueue), compiledBlock);
+    [self _attachDebugInformationToInstruction:call inProgram:aProgram root:aRoot];
     return NULL;
 }
 @end
@@ -103,8 +107,10 @@ using namespace llvm;
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
-    if(aBlock.dispatchGroup)
-        aBlock.builder->CreateCall2(aProgram.dispatch_group_wait, aBlock.dispatchGroup, ConstantInt::get(aProgram.llInt64Ty, DISPATCH_TIME_FOREVER));
+    if(aBlock.dispatchGroup) {
+        Value *call = aBlock.builder->CreateCall2(aProgram.dispatch_group_wait, aBlock.dispatchGroup, ConstantInt::get(aProgram.llInt64Ty, DISPATCH_TIME_FOREVER));
+        [self _attachDebugInformationToInstruction:call inProgram:aProgram root:aRoot];
+    }
     return NULL;
 }
 
@@ -131,8 +137,9 @@ using namespace llvm;
                                  error:(NSError **)aoErr
 {
     Value *compiledBlock = [self _generateDispatchBlockInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-    aBlock.builder->CreateCall3(aProgram.dispatch_group_notify, aBlock.dispatchGroup,
-                                aBlock.builder->CreateLoad(aProgram.globalQueue), compiledBlock);
+    Value *call = aBlock.builder->CreateCall3(aProgram.dispatch_group_notify, aBlock.dispatchGroup,
+                                              aBlock.builder->CreateLoad(aProgram.globalQueue), compiledBlock);
+    [self _attachDebugInformationToInstruction:call inProgram:aProgram root:aRoot];
     return NULL;
 }
 @end
