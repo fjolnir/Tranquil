@@ -35,7 +35,7 @@ using namespace llvm;
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
-    TQAssert(NO, "Argument definitions do not generate code");
+    TQAssert(NO, @"Argument definitions do not generate code");
     return NULL;
 }
 

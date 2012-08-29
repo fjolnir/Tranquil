@@ -278,7 +278,7 @@ static TQProgram *sharedInstance;
         const std::string cpuName      = sys::getHostCPUName();
 
         const Target *target = TargetRegistry::lookupTarget(targetTriple, err);
-        TQAssert(err.empty(), "Unable to get target data");
+        TQAssert(err.empty(), @"Unable to get target data");
 
         TargetMachine *machine = target->createTargetMachine(targetTriple, cpuName, featureStr, Opts);
         TQAssert(machine, @"Unable to create llvm target machine");
@@ -290,7 +290,7 @@ static TQProgram *sharedInstance;
         verifyModule(*_llModule, PrintMessageAction);
 
         raw_fd_ostream out([_outputPath UTF8String], err, raw_fd_ostream::F_Binary);
-        TQAssert(err.empty(), "Error opening output file for bitcode: %@", _outputPath);
+        TQAssert(err.empty(), @"Error opening output file for bitcode: %@", _outputPath);
         WriteBitcodeToFile(_llModule, out);
         out.close();
         exit(0);

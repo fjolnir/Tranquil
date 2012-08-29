@@ -94,7 +94,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     imp = imp_implementationWithBlock(^(id a, id key) {
         Class keyKls = object_getClass(key);
         if(keyKls == TQTaggedNumberClass || keyKls == TQNumberClass  || keyKls == NSNumberClass)
-            return [a objectAtIndexedSubscript:[(TQNumber *)key intValue]];
+            return [a objectAtIndexedSubscript:[(TQNumber *)key unsignedIntegerValue]];
         else
             return [a objectForKeyedSubscript:key];
     });

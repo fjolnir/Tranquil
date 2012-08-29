@@ -426,7 +426,7 @@ FunAccessor(objc_sync_exit, ft_int__i8Ptr)
             return StructType::get(self.llModule->getContext(), fields);
         }
         case _C_UNION_B:
-            TQLog(@"unions -> llvm not yet supported");
+            TQLog(@"unions -> llvm not yet supported %s", aEncoding);
             exit(1);
         break;
         case _C_ARY_B: {
