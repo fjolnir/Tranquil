@@ -5,6 +5,7 @@
 #import "TQNodeReturn.h"
 #import "../Shared/TQDebug.h"
 #import "TQNodeOperator.h"
+#import "TQNodeNil.h"
 
 using namespace llvm;
 

@@ -21,7 +21,8 @@
 #include <llvm/ExecutionEngine/GenericValue.h>
 #include <llvm/ExecutionEngine/JIT.h>
 #include <llvm/Support/TargetSelect.h>
-#include <Foundation/Foundation.h>
+#import <Foundation/Foundation.h>
+#import <Tranquil/CodeGen/TQProgram+Internal.h>
 
 
 @class TQNode, TQNodeBlock, TQNodeRootBlock, TQProgram;

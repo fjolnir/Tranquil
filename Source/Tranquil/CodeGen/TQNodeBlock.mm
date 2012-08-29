@@ -4,6 +4,8 @@
 #import "ObjcSupport/TQHeaderParser.h"
 #import "TQNodeVariable.h"
 #import "TQNodeArgumentDef.h"
+#import "TQNodeCustom.h"
+#import "TQNode+Private.h"
 #import <llvm/Intrinsics.h>
 #include <iostream>
 
@@ -423,6 +425,7 @@ using namespace llvm;
     }
 
     _basicBlock = BasicBlock::Create(mod->getContext(), "entry", _function, 0);
+    
     _builder = new IRBuilder<>(_basicBlock);
 
     _autoreleasePool = _builder->CreateCall(aProgram.objc_autoreleasePoolPush);

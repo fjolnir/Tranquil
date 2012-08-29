@@ -1,4 +1,6 @@
 #import "TQNodeConstant.h"
+#import "TQNodeBlock.h"
+#import "ObjcSupport/TQHeaderParser.h"
 #import "TQProgram.h"
 
 

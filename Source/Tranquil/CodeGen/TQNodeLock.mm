@@ -2,6 +2,8 @@
 #import "TQProgram.h"
 #import "TQNodeOperator.h"
 #import "TQNodeLoopBlock.h"
+#import "TQNodeCustom.h"
+#import <objc/runtime.h>
 
 using namespace llvm;
 
@@ -26,7 +28,7 @@ using namespace llvm;
 {
     if(![b isMemberOfClass:[self class]])
         return NO;
-    return [_condition isEqual:[b expression]] && [_statements isEqual:[b statements]];
+    return [_condition isEqual:[(TQNodeLock *)b condition]] && [_statements isEqual:[b statements]];
 }
 
 - (id)referencesNode:(TQNode *)aNode

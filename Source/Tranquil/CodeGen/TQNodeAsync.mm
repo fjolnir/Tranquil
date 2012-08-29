@@ -1,4 +1,6 @@
 #import "TQNodeAsync.h"
+#import "TQNodeBlock.h"
+#import "TQNodeCall.h"
 #import "TQProgram.h"
 #import "TQNodeOperator.h"
 

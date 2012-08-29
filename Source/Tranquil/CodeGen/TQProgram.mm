@@ -1,5 +1,5 @@
 #import "TQProgram.h"
-#import "TQProgram+Private.h"
+#import "TQProgram+Internal.h"
 #import "TQNode.h"
 #import "Processors/TQProcessor.h"
 #import "../Runtime/TQRuntime.h"
@@ -15,40 +15,38 @@
 #import <google/profiler.h>
 #endif
 
-extern "C" {
-    #import "parse.m"
-}
+#import "parse.mm" // Includes the parser source
 
-# include <llvm/Module.h>
-# include <llvm/DerivedTypes.h>
-# include <llvm/Constants.h>
-# include <llvm/CallingConv.h>
-# include <llvm/Instructions.h>
-# include <llvm/PassManager.h>
-# include <llvm/Analysis/Verifier.h>
-# include <llvm/Target/TargetData.h>
-# include <llvm/ExecutionEngine/JIT.h>
-# include <llvm/ExecutionEngine/JITMemoryManager.h>
-# include <llvm/ExecutionEngine/JITEventListener.h>
-# include <llvm/ExecutionEngine/GenericValue.h>
-# include <llvm/Target/TargetData.h>
-# include <llvm/Target/TargetMachine.h>
-# include <llvm/Target/TargetOptions.h>
-# include <llvm/Transforms/Scalar.h>
-# include <llvm/Transforms/IPO.h>
-# include <llvm/Support/raw_ostream.h>
-# if !defined(LLVM_TOT)
-#  include <llvm/Support/system_error.h>
-# endif
-# include <llvm/Support/PrettyStackTrace.h>
-# include <llvm/Support/MemoryBuffer.h>
-# include <llvm/Intrinsics.h>
-# include <llvm/Bitcode/ReaderWriter.h>
-# include <llvm/LLVMContext.h>
-# include <llvm/Support/ToolOutputFile.h>
-# include <llvm/Support/TargetRegistry.h>
-# include <llvm/Support/Host.h>
-# include "llvm/ADT/Statistic.h"
+#include <llvm/Module.h>
+#include <llvm/DerivedTypes.h>
+#include <llvm/Constants.h>
+#include <llvm/CallingConv.h>
+#include <llvm/Instructions.h>
+#include <llvm/PassManager.h>
+#include <llvm/Analysis/Verifier.h>
+#include <llvm/Target/TargetData.h>
+#include <llvm/ExecutionEngine/JIT.h>
+#include <llvm/ExecutionEngine/JITMemoryManager.h>
+#include <llvm/ExecutionEngine/JITEventListener.h>
+#include <llvm/ExecutionEngine/GenericValue.h>
+#include <llvm/Target/TargetData.h>
+#include <llvm/Target/TargetMachine.h>
+#include <llvm/Target/TargetOptions.h>
+#include <llvm/Transforms/Scalar.h>
+#include <llvm/Transforms/IPO.h>
+#include <llvm/Support/raw_ostream.h>
+#if !defined(LLVM_TOT)
+# include <llvm/Support/system_error.h>
+#endif
+#include <llvm/Support/PrettyStackTrace.h>
+#include <llvm/Support/MemoryBuffer.h>
+#include <llvm/Intrinsics.h>
+#include <llvm/Bitcode/ReaderWriter.h>
+#include <llvm/LLVMContext.h>
+#include <llvm/Support/ToolOutputFile.h>
+#include <llvm/Support/TargetRegistry.h>
+#include <llvm/Support/Host.h>
+#include "llvm/ADT/Statistic.h"
 
 using namespace llvm;
 

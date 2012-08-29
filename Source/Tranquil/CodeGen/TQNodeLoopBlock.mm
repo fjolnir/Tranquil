@@ -4,6 +4,7 @@
 #import "TQProgram.h"
 #import "TQNodeVariable.h"
 #import "TQNodeReturn.h"
+#import <objc/runtime.h>
 
 using namespace llvm;
 

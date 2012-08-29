@@ -1,5 +1,6 @@
 #import "TQNode.h"
 #import "../Shared/TQDebug.h"
+#import "TQNodeBlock.h"
 
 using namespace llvm;
 

@@ -7,6 +7,8 @@
 #import "TQNodeArgumentDef.h"
 #import "TQNodeOperator.h"
 #import "TQNodeVariable.h"
+#import "ObjCSupport/TQHeaderParser.h"
+#import <objc/runtime.h>
 
 using namespace llvm;
 

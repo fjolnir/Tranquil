@@ -1,4 +1,5 @@
 #import "TQNodeVariable.h"
+#import "TQNodeBlock.h"
 #import "TQProgram.h"
 #import "../Shared/TQDebug.h"
 #import <llvm/Support/IRBuilder.h>

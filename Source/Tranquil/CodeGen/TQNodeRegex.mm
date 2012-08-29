@@ -1,4 +1,5 @@
 #import "TQNodeRegex.h"
+#import "TQNodeBlock.h"
 #import "TQProgram.h"
 
 using namespace llvm;

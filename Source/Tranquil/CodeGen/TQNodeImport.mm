@@ -1,6 +1,7 @@
 #import "TQNodeImport.h"
+#import "TQNodeBlock.h"
+#import "ObjCSupport/TQHeaderParser.h"
 #import "TQProgram.h"
-#import "TQProgram+Private.h"
 
 using namespace llvm;
 
