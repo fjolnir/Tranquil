@@ -112,7 +112,7 @@ using namespace llvm;
 
     // Cache the selector into a global
     Module *mod = aProgram.llModule;
-    Value *selectorGlobal = mod->getGlobalVariable([selStr UTF8String], false);
+    Value *selectorGlobal = mod->getGlobalVariable([selStr UTF8String], true);
     if(!selectorGlobal) {
         Function *rootFunction = aRoot.function;
         IRBuilder<> rootBuilder(&rootFunction->getEntryBlock(), rootFunction->getEntryBlock().begin());
