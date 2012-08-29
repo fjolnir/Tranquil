@@ -35,6 +35,7 @@
 
 extern NSString * const kTQSyntaxErrorDomain;
 extern NSString * const kTQGenericErrorDomain;
+extern NSString * const kTQRuntimeErrorDomain;
 
 
 typedef enum {
@@ -43,6 +44,7 @@ typedef enum {
     kTQInvalidAssignee,
     kTQUnexpectedStatement,
     kTQUnexpectedExpression,
+    kTQObjCException,
     kTQGenericError
 } TQSyntaxErrorCode;
 
