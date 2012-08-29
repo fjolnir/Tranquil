@@ -41,8 +41,13 @@ using namespace llvm;
 
 - (id)parseHeader:(NSString *)aPath
 {
-    const char *args[] = { "-x", "objective-c" };
-    CXTranslationUnit translationUnit = clang_parseTranslationUnit(_index, [aPath fileSystemRepresentation], args, 2, NULL, 0,
+    NSRange frameworkRange = [aPath rangeOfString:@".framework/"];
+    NSString *frameworksPath = nil;
+    if(frameworkRange.location != NSNotFound)
+        frameworksPath = [[aPath substringToIndex:NSMaxRange(frameworkRange)] stringByDeletingLastPathComponent];
+
+    const char *args[] = { "-x", "objective-c", frameworksPath ? [[@"-F" stringByAppendingString:frameworksPath] UTF8String] : nil  };
+    CXTranslationUnit translationUnit = clang_parseTranslationUnit(_index, [aPath fileSystemRepresentation], args, frameworksPath ? 3 : 2, NULL, 0,
                                                                    CXTranslationUnit_DetailedPreprocessingRecord|CXTranslationUnit_SkipFunctionBodies);
     if (!translationUnit) {
         TQLog(@"Couldn't parse header %@\n", aPath);
