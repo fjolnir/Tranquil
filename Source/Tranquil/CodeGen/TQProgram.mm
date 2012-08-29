@@ -175,7 +175,10 @@ static TQProgram *sharedInstance;
     // Compile program
     TargetOptions Opts;
     Opts.JITEmitDebugInfo = true;
+    Opts.JITExceptionHandling = true;
+    Opts.JITEmitDebugInfoToDisk = true;
     Opts.GuaranteedTailCallOpt = true;
+    Opts.NoFramePointerElim = true;
 
     PassRegistry &Registry = *PassRegistry::getPassRegistry();
     initializeCore(Registry);
@@ -200,6 +203,7 @@ static TQProgram *sharedInstance;
             factory.setTargetOptions(Opts);
             factory.setOptLevel(CodeGenOpt::Aggressive);
             factory.setUseMCJIT(true);
+            factory.setRelocationModel(Reloc::PIC_);
             _executionEngine = factory.create();
             //_executionEngine->DisableLazyCompilation();
             fpm.add(new TargetData(*_executionEngine->getTargetData()));
