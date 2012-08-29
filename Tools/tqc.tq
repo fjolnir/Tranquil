@@ -34,7 +34,7 @@ if compilationTask terminationStatus != 0
 
 asmPath = "/tmp/#{uuid()}.s"
 assemblingTask = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/llvm/bin/llc"
-                                         arguments: ["-O0", "-disable-fp-elim", "-stats", "-relocation-model=pic", "-o", asmPath, irPath];
+                                         arguments: ["-O0", "-disable-fp-elim", "-relocation-model=pic", "-o", asmPath, irPath];
                                      waitUntilExit;
                                               self
 if assemblingTask terminationStatus != 0
