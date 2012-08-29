@@ -39,13 +39,16 @@ typedef struct _TQParserState TQParserState;
     ((TQParserState *)state)->currentToken.length += thunk->end - thunk->begin; \
 } while(0)
 
+#define RewindWhitespace() for(; G->pos > 0 && (G->data->script[G->pos] == ' ' \
+                                                || G->data->script[G->pos] == '\n' \
+                                                || G->data->script[G->pos] == '\0'); --G->pos) { \
+    if(G->data->script[G->pos] == '\n') \
+        --G->data->currentLine; \
+}
 
 #define SyntaxError(msg) do { \
-    unsigned int lineNo = 1; \
-    for(int i = 0; i <= G->pos; ++i) { \
-        if(G->data->script[i] == '\n') \
-            ++lineNo; \
-    } \
+    RewindWhitespace(); \
+    int lineNo = G->data->currentLine+1; \
     NSString *exceptionReason; \
     NSString *source         = [NSString stringWithFormat:@"%s", G->buf]; \
     NSRange tokRange         = state->currentToken; \
