@@ -126,7 +126,7 @@ static TQProgram *sharedInstance;
    [aTrace removeLastObject];
 }
 
-- (id)_executeRoot:(TQNodeRootBlock *)aNode
+- (id)_executeRoot:(TQNodeRootBlock *)aNode error:(NSError **)aoErr
 {
     if(!aNode)
         return nil;
@@ -314,7 +314,15 @@ static TQProgram *sharedInstance;
 #ifdef TQ_PROFILE
     ProfilerStart("tqprof.txt");
 #endif
-    id ret = rootPtr();
+    id ret = nil;
+    @try {
+        ret = rootPtr();
+    } @catch (NSException *e) {
+        if(aoErr) *aoErr = [NSError errorWithDomain:kTQRuntimeErrorDomain
+                                               code:kTQObjCException
+                                           userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[e reason], @"reason",
+                                                                                               e, @"exception", nil]];
+    }
 #ifdef TQ_PROFILE
     ProfilerStop();
 #endif
@@ -342,7 +350,10 @@ static TQProgram *sharedInstance;
 }
 - (id)executeScriptAtPath:(NSString *)aPath error:(NSError **)aoErr
 {
-    return [self _executeRoot:[self _rootFromFile:aPath error:aoErr]];
+    TQNodeRootBlock *root = [self _rootFromFile:aPath error:aoErr];
+    if(!root)
+        return nil;
+    return [self _executeRoot:root error:aoErr];
 }
 
 - (TQNodeRootBlock *)_parseScript:(NSString *)aScript error:(NSError **)aoErr
@@ -394,7 +405,10 @@ static TQProgram *sharedInstance;
 }
 - (id)executeScript:(NSString *)aScript error:(NSError **)aoErr
 {
-    return [self _executeRoot:[self _parseScript:aScript error:aoErr]];
+    TQNodeRootBlock *root = [self _parseScript:aScript error:aoErr];
+    if(!root)
+        return nil;
+    return [self _executeRoot:root error:aoErr];
 }
 
 
