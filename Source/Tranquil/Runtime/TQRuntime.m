@@ -242,13 +242,13 @@ static inline size_t _accessorNameLen(const char *accessorNameLoc)
         return accessorNameEnd - accessorNameLoc;
 }
 
-id TQValueForKey(id obj, const char *key)
+id TQValueForKey(id obj, NSString *key)
 {
     if(!obj)
         return nil;
 
     Class kls = object_getClass(obj);
-    SEL selector = sel_registerName(key);
+    SEL selector = NSSelectorFromString(key);
     if(class_respondsToSelector(kls, selector))
         return tq_msgSend(obj, selector);
 
@@ -256,7 +256,7 @@ id TQValueForKey(id obj, const char *key)
     return (id)NSMapGet(ivarTable, key);
 }
 
-void TQSetValueForKey(id obj, const char *key, id value)
+void TQSetValueForKey(id obj, NSString *key, id value)
 {
     if(!obj)
         return;
@@ -264,7 +264,7 @@ void TQSetValueForKey(id obj, const char *key, id value)
         value = [[value copy] autorelease];
 
     Class kls = object_getClass(obj);
-    NSString *selStr = [NSString stringWithFormat:@"set%@:", [[NSString stringWithUTF8String:key] stringByCapitalizingFirstLetter]];
+    NSString *selStr = [NSString stringWithFormat:@"set%@:", [key stringByCapitalizingFirstLetter]];
     SEL setterSel = NSSelectorFromString(selStr);
     if(class_respondsToSelector(kls, setterSel))
         tq_msgSend(obj, setterSel, value);
@@ -411,7 +411,7 @@ void TQInitializeRuntime()
         return [a substringWithRange:(NSRange){[idx intValue], 1}];
     });
     class_addMethod([NSString class], TQGetterOpSel, imp, "@@:@");
-    
+
     imp = imp_implementationWithBlock(^(id a, TQNumber *idx, NSString *replacement)   {
         int loc = [idx intValue];
         [a deleteCharactersInRange:(NSRange){loc, 1}];
