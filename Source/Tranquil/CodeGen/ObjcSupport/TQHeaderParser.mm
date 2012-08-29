@@ -78,7 +78,7 @@ using namespace llvm;
         if(!name)
             return CXChildVisit_Continue;
         NSString *nsName = [NSString stringWithUTF8String:name];
-
+        @try {
         switch(cursor.kind) {
             case CXCursor_ObjCInterfaceDecl: {
                 TQBridgedClassInfo *info = [TQBridgedClassInfo new];
@@ -187,6 +187,10 @@ using namespace llvm;
         recurse:
             clang_disposeString(spelling);
             return CXChildVisit_Recurse;
+        } @catch(NSException *e) {
+            NSLog(@"Error parsing entity %s! %@", name, e);
+    }
+
     });
 }
 
