@@ -13,6 +13,13 @@ using namespace llvm;
     return [ret autorelease];
 }
 
++ (TQNodeCustom *)nodeReturningValue:(llvm::Value *)aVal
+{
+    return [self nodeWithBlock:^(TQProgram *, TQNodeBlock *, TQNodeRootBlock *) {
+        return aVal;
+    }];
+}
+
 - (void)dealloc
 {
     [_block release];

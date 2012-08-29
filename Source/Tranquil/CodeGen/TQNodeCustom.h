@@ -5,4 +5,5 @@ typedef llvm::Value *(^TQNodeCustomBlock)(TQProgram *, TQNodeBlock *, TQNodeRoot
 @interface TQNodeCustom : TQNode
 @property(readwrite, retain) TQNodeCustomBlock block;
 + (TQNodeCustom *)nodeWithBlock:(TQNodeCustomBlock)aBlock;
++ (TQNodeCustom *)nodeReturningValue:(llvm::Value *)aVal;
 @end
