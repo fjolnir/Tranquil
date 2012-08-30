@@ -178,12 +178,16 @@ using namespace llvm;
         if(![self createStorageInProgram:aProgram block:aBlock root:aRoot error:aoErr])
             return NULL;
     }
-    IRBuilder<> *builder = aBlock.builder;
+    Function *storeFun = aProgram.objc_storeStrong;
+    // If the variable is a capture, or a global we need to use TQStoreStrong because if the assigned value is a
+    // stack block it would escape and cause a crash
+    if(_isGlobal || [aBlock.capturedVariables objectForKey:_name])
+        storeFun = aProgram.TQStoreStrong;
 
-    Value *forwarding = builder->CreateLoad(builder->CreateStructGEP(_alloca, 1), [self _llvmRegisterName:@"forwarding"]);
-    forwarding = builder->CreateBitCast(forwarding, PointerType::getUnqual([[self class] captureStructTypeInProgram:aProgram]));
+    Value *forwarding = aBlock.builder->CreateLoad(aBlock.builder->CreateStructGEP(_alloca, 1), [self _llvmRegisterName:@"forwarding"]);
+    forwarding = aBlock.builder->CreateBitCast(forwarding, PointerType::getUnqual([[self class] captureStructTypeInProgram:aProgram]));
 
-    return aBlock.builder->CreateCall2(aProgram.objc_storeStrong, builder->CreateStructGEP(forwarding, 4), aValue);
+    return aBlock.builder->CreateCall2(storeFun, aBlock.builder->CreateStructGEP(forwarding, 4), aValue);
 }
 
 - (void)generateRetainInProgram:(TQProgram *)aProgram
@@ -278,7 +282,7 @@ using namespace llvm;
                   root:(TQNode *)aRoot
                  error:(NSError **)aoErr
 {
-    TQAssertSoft(NO, kTQSyntaxErrorDomain, kTQInvalidAssignee, NO, @"Tried to assign to super!");
+    TQAssertSoft(NO, kTQSyntaxErrorDomain, kTQInvalidAssignee, NO, @"Tried to assign to super! on line %ld", self.lineNumber);
     return NULL;
 }
 

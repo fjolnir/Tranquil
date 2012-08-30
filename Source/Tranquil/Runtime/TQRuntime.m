@@ -290,6 +290,16 @@ id TQPrepareObjectForReturn(id obj)
     return objc_retain(obj);
 }
 
+void TQStoreStrong(id *location, id obj)
+{
+    if(TQObjectIsStackBlock(obj)) {
+        id prev = *location;
+        *location = _objc_msgSend_hack(obj, @selector(copy));
+        objc_release(prev);
+    } else
+        objc_storeStrong(location, obj);
+}
+
 NSPointerArray *TQVaargsToArray(va_list *items)
 {
     register id arg;

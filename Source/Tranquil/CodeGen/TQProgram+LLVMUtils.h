@@ -38,7 +38,7 @@
     *objc_registerClassPair, *class_replaceMethod, *objc_getClass,
     *sel_registerName, *_Block_copy, *objc_retainAutoreleaseReturnValue, *objc_autoreleaseReturnValue,
     *_Block_object_assign, *_Block_object_dispose, *imp_implementationWithBlock,
-    *object_getClass, *TQPrepareObjectForReturn, *objc_autorelease, *objc_storeStrong,
+    *object_getClass, *TQPrepareObjectForReturn, *objc_autorelease, *objc_storeStrong, *TQStoreStrong,
     *objc_autoreleasePoolPush, *objc_autoreleasePoolPop, *TQSetValueForKey, *TQValueForKey,
     *TQGetOrCreateClass, *TQObjectsAreEqual, *TQObjectsAreNotEqual, *TQObjectGetSuperClass,
     *TQVaargsToArray, *TQUnboxObject, *TQBoxValue, *tq_msgSend, *objc_retainAutoreleasedReturnValue,

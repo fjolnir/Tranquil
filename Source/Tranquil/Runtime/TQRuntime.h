@@ -77,6 +77,8 @@ id TQValueForKey(id obj, NSString *key);
 
 BOOL TQObjectIsStackBlock(id obj);
 id TQPrepareObjectForReturn(id obj);
+// Variant of objc_storeStrong that moves stack blocks to the heap before assigning (Used for captures&globals)
+void TQStoreStrong(id *location, id obj);
 NSPointerArray *TQVaargsToArray(va_list *items);
 NSPointerArray *TQCliArgsToArray(int argc, char **argv);
 
