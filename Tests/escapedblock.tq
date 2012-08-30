@@ -1,0 +1,13 @@
+gblk = nil
+a = { gblk = { "foo" print } }
+a()
+gblk print
+gblk()
+
+{
+    blk = nil
+    a = { blk = { "bar" print } }
+    a()
+    blk print
+    blk()
+}()
