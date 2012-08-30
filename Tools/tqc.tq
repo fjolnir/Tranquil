@@ -1,14 +1,23 @@
 \ Tranquil compiler
-import "CoreFoundation"
+import "stdlib"
+#NSBlock {
+    - if:     cond `cond ? self() : nil`
+    - unless: cond `cond ? nil    : self()`
+}
+
+error = { reason |
+    reason print
+    Exit(1)
+}
 
 inPath         = nil
-outPath        = "a.out"
-runtimeLibPath = "/usr/local/tranquil/lib/libtranquil.a"
-ldFlags        = ["-fexceptions", "-all_load", "-framework", "AppKit", "-lobjc", "-lffi", runtimeLibPath]
+outPath        = $"a.out"
+runtimeLibPath = $"/usr/local/tranquil/lib/libtranquil.a"
+ldFlags        = [$-fexceptions, $-all_load, $-framework, $AppKit, $-lobjc, $-lffi, runtimeLibPath]
 
 args = ... objectEnumerator
 while arg = args nextObject {
-    if arg == "-o"
+    if arg == $-o
         outPath = args nextObject
     else if inPath == nil
         inPath = arg
@@ -16,33 +25,26 @@ while arg = args nextObject {
         ldFlags << arg
 }
 
-unless inPath != nil {
-    "No input provided" print
-    Exit(1)
-}
+`error("No input provided")` unless: inPath != nil
 
-uuid = `CFUUIDCreateString(nil, CFUUIDCreate(nil))`
+uuid = `NSProcessInfo processInfo globallyUniqueString`
 
 irPath = "/tmp/#{uuid()}.bc"
-compilationTask = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/bin/tranquil"
-                                          arguments: ["-aot", "-o", irPath, inPath];
-                                      waitUntilExit;
-                                               self
-
-if compilationTask terminationStatus != 0
-    Exit(1)
+status = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/bin/tranquil"
+                                 arguments: [$-aot, $-o, irPath, inPath];
+                             waitUntilExit;
+                         terminationStatus
+error if: status != 0
 
 asmPath = "/tmp/#{uuid()}.s"
-assemblingTask = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/llvm/bin/llc"
-                                         arguments: ["-O0", "-disable-fp-elim", "-relocation-model=pic", "-o", asmPath, irPath];
-                                     waitUntilExit;
-                                              self
-if assemblingTask terminationStatus != 0
-    Exit(1)
+status = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/llvm/bin/llc"
+                                 arguments: [$-O0, $-disable-fp-elim, $-relocation-model=pic, $-o, asmPath, irPath];
+                             waitUntilExit;
+                         terminationStatus
+error if: status != 0
 
-linkingTask = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/llvm/bin/clang"
-                                      arguments: ldFlags + ["-o", outPath, asmPath];
-                                  waitUntilExit;
-                                           self
-if linkingTask terminationStatus != 0
-    Exit(1)
+status = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/llvm/bin/clang"
+                                 arguments: ldFlags + [$-o, outPath, asmPath];
+                             waitUntilExit;
+                         terminationStatus
+error if: status != 0
