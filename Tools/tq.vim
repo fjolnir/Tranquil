@@ -36,15 +36,14 @@ syn region tqString start='"' skip='\\"' end='"' contains=tqInterpolation
 syn region tqInterpolation matchgroup=tqInterpolated start="#{" end="}" contained contains=ALLBUT,tqBlockError
 
 " Normal Regular Expression
-syn region tqRegexp start="/" skip="\\/" end="/[im]*" contains=tqInterpolation,tqStringInRegexp
-
+syn region tqRegexp matchgroup=tqRegexpDelimit start="/" skip="\\\\\|\\/" end="/[im]*" contains=tqInterpolation,tqStringInRegexp
 
 syn case ignore
 
 " Symbols
-syn match  tqSymbol    "\(\$\<[^\w ]*\>\)"
-syn match  tqSymbol    "\(\$\"[^\"]*\"\)"
-syn match  tqSymbol    "\(\$'[^']*'\)"
+syn match  tqSymbol    "\$\(\w\|-\)\+[ ,;]\@="
+syn match  tqSymbol    "\$\"[^\"]*\""
+syn match  tqSymbol    "\$'[^']*'"
 
 " some representations of numbers
 syn match  tqNumber    "\<\d\+\(u\=l\=\|lu\|f\)\>"
