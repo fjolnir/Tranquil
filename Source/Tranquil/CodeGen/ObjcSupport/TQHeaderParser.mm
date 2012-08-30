@@ -551,13 +551,13 @@ using namespace llvm;
         if(returningOnStack)
             function->addAttribute(1, Attribute::StructRet);
         [byValArgIndices enumerateIndexesWithOptions:0 usingBlock:^(NSUInteger idx, BOOL *stop) {
-            function->addAttribute(idx, Attribute::ByVal);
+            function->addAttribute(returningOnStack ? idx+1 : idx, Attribute::ByVal);
         }];
     }
 
     CallInst *call = callBuilder.CreateCall(function, args);
     [byValArgIndices enumerateIndexesWithOptions:0 usingBlock:^(NSUInteger idx, BOOL *stop) {
-        call->addAttribute(idx, Attribute::ByVal);
+        call->addAttribute(returningOnStack ? idx+1 : idx, Attribute::ByVal);
     }];
     if([_retType hasPrefix:@"v"])
         callBuilder.CreateRet(ConstantPointerNull::get(aProgram.llInt8PtrTy));
