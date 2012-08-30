@@ -440,11 +440,10 @@ FunAccessor(objc_sync_exit, ft_int__i8Ptr)
             return ArrayType::get(enclosedType, count);
         } break;
         case _C_PTR: {
-            return [self llvmTypeFromEncoding:aEncoding+1]->getPointerTo(0);
-            //if(*(aEncoding + 1) == _C_PTR || *(aEncoding + 1) == _C_CHARPTR || *(aEncoding + 1) == _C_ID)
-                //return self.llInt8PtrPtrTy;
-            //else
-                //return self.llInt8PtrTy;
+            if(*(aEncoding + 1) == _C_PTR || *(aEncoding + 1) == _C_CHARPTR || *(aEncoding + 1) == _C_ID)
+                return self.llInt8PtrPtrTy;
+            else
+                return self.llInt8PtrTy;
         }
         default:
             [NSException raise:NSGenericException
