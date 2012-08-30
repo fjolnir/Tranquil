@@ -164,7 +164,7 @@ using namespace llvm;
     }
     // From what I can tell having read the ABI spec for x86-64, it is safe to pass this added argument. TODO: verify this holds for ARM&x86
     // Sentinel argument to make variadic methods possible (without resorting to special cases in tq_msgsend, and using libffi; which would kill performance)
-    args.push_back(aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQSentinel", aProgram.llInt8PtrTy), "sentinel"));
+    //args.push_back(aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQSentinel", aProgram.llInt8PtrTy), "sentinel"));
 
     return [self generateCodeInProgram:aProgram block:aBlock root:aRoot withArguments:args error:aoErr];
 }

@@ -565,7 +565,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     // Implemented by subclasses
 }
 
-+ (void)setFieldNames:(NSArray *)aNames
++ (void)addFieldNames:(NSArray *)aNames
 {
     NSString *sel;
     for(int i = 0; i < [aNames count]; ++i) {

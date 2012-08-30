@@ -164,6 +164,29 @@
     return [[self map:mapBlock] reduce:reduceBlock];
 }
 
+- (id)concat
+{
+    return [self reduce:^(NSPointerArray *subArray, NSPointerArray *accum) {
+        if(accum == TQSentinel)
+            accum = [NSPointerArray pointerArrayWithStrongObjects];
+        return [subArray reduce:^(id obj, id _) {
+             return [accum push:obj];
+        }];
+    }];
+}
+
+- (id)zip:(NSPointerArray *)otherArray {
+    NSUInteger length = [self count];
+    if([otherArray count] > length)
+        length = [otherArray count];
+    NSPointerArray *result = [NSPointerArray pointerArrayWithStrongObjects];
+    for(int i = 0; i < length; ++i) {
+        [result push:[self       objectAtIndexedSubscript:i]];
+        [result push:[otherArray objectAtIndexedSubscript:i]];
+    }
+    return result;
+}
+
 - (NSString *)description
 {
     NSMutableString *out = [NSMutableString stringWithFormat:@"<%@: %p", [self class], self];

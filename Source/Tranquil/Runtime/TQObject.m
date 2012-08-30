@@ -6,6 +6,10 @@
 @implementation TQObject
 + (id)addMethod:(NSString *)aSel withBlock:(id)aBlock replaceExisting:(id)shouldReplace
 {
+    if(!aBlock) {
+        TQLog(@"Tried to add nil block as method");
+        return nil;
+    }
     IMP imp = imp_implementationWithBlock(aBlock);
     NSMutableString *type = [NSMutableString stringWithString:@"@:"];
     const char *selCStr = [aSel UTF8String];

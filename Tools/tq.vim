@@ -41,7 +41,7 @@ syn region tqRegexp matchgroup=tqRegexpDelimit start="/" skip="\\\\\|\\/" end="/
 syn case ignore
 
 " Symbols
-syn match  tqSymbol    "\$\(\w\|-\)\+[ ,;]\@="
+syn match  tqSymbol    "\$\(\w\|[-*/\\:=!+<>]\)\+[ ,;\]\n]\@="
 syn match  tqSymbol    "\$\"[^\"]*\""
 syn match  tqSymbol    "\$'[^']*'"
 

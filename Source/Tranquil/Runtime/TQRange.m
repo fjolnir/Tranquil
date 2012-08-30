@@ -26,11 +26,11 @@ extern id TQDispatchBlock2(id, id, id);
 - (id)each:(id (^)())aBlock
 {
     if(TQBlockGetNumberOfArguments(aBlock) == 1) {
-        for(int i = 0; i < [_length intValue]; ++i) {
+        for(int i = 0; i <= [_length intValue]; ++i) {
             TQDispatchBlock1(aBlock, [TQNumber numberWithInt:i]);
         }
     } else {
-        for(int i = 0; i < [_length intValue]; ++i) {
+        for(int i = 0; i <= [_length intValue]; ++i) {
             TQDispatchBlock0(aBlock);
         }
     }
@@ -40,10 +40,20 @@ extern id TQDispatchBlock2(id, id, id);
 - (id)reduce:(id (^)(id, id))aBlock
 {
     id accum = TQSentinel; // Make the block use it's default accumulator on the first call
-    for(int i = 0; i < [_length intValue]; ++i) {
+    for(int i = 0; i <= [_length intValue]; ++i) {
         accum = TQDispatchBlock2(aBlock, [TQNumber numberWithInt:i], accum);
     }
     return accum;
+}
+
+- (id)map:(id (^)(id))aBlock
+{
+    return [self reduce:^(id n, NSPointerArray *accum) {
+        if(accum == TQSentinel)
+            accum = [NSPointerArray pointerArrayWithStrongObjects];
+        [accum addPointer:aBlock(n)];
+        return accum;
+    }];
 }
 
 - (NSString *)description

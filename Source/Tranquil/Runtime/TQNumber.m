@@ -500,7 +500,7 @@ static __inline__ _tqfloat _TQNumberValue(TQNumber *ptr)
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"%f", _TQNumberValue(self)];
+    return [NSString stringWithFormat:@"%0.7g", _TQNumberValue(self)];
 }
 
 id TQDispatchBlock0(struct TQBlockLiteral *);
