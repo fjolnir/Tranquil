@@ -1,0 +1,20 @@
+if 1 {
+    if foo {
+        "foo" print
+    } else {
+        i = 0
+        while i++ <= 5 {
+            lock i {
+                "bar" print
+                if i == 2
+                    break
+            }
+        }
+        "baz" print
+    }
+} else {
+    if 1 {
+        "bar" print
+    }
+}
+"foo" print
