@@ -745,8 +745,8 @@ id _box_C_DBL_imp(TQBoxedObject *self, SEL _cmd, double *aPtr)                  
 id _box_C_FLT_imp(TQBoxedObject *self, SEL _cmd, float *aPtr)                   { return [TQNumber numberWithFloat:*aPtr];                }
 id _box_C_INT_imp(TQBoxedObject *self, SEL _cmd, int *aPtr)                     { return [TQNumber numberWithInt:*aPtr];                  }
 id _box_C_SHT_imp(TQBoxedObject *self, SEL _cmd, short *aPtr)                   { return [TQNumber numberWithShort:*aPtr];                }
-id _box_C_CHR_imp(TQBoxedObject *self, SEL _cmd, char *aPtr)                    { return [NSMutableString stringWithFormat:@"%c", *aPtr]; }
-id _box_C_UCHR_imp(TQBoxedObject *self, SEL _cmd, char *aPtr)                   { return [NSMutableString stringWithFormat:@"%c", *aPtr]; }
+id _box_C_CHR_imp(TQBoxedObject *self, SEL _cmd, char *aPtr)                    { return *aPtr == '\0' ? nil : [NSMutableString stringWithFormat:@"%c", *aPtr]; }
+id _box_C_UCHR_imp(TQBoxedObject *self, SEL _cmd, char *aPtr)                   { return *aPtr == '\0' ? nil : [NSMutableString stringWithFormat:@"%c", *aPtr]; }
 id _box_C_BOOL_imp(TQBoxedObject *self, SEL _cmd, _Bool *aPtr)                  { return *aPtr ? TQValid : nil;                           }
 id _box_C_LNG_imp(TQBoxedObject *self, SEL _cmd, long *aPtr)                    { return [TQNumber numberWithLong:*aPtr];                 }
 id _box_C_LNG_LNG_imp(TQBoxedObject *self, SEL _cmd, long long *aPtr)           { return [TQNumber numberWithLongLong:*aPtr];             }
