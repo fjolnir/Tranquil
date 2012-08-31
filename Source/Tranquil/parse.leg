@@ -155,23 +155,31 @@ KeywordMsg   = rcvr:KwdMsgRcvr -
                     SetLineNo(StackTop);
                }
                body:KwdMsgBody { $$ = PopStack(); }
-CascadedMsg  = (KeywordMsg|UnaryMsg)
-               {
-                   PushStack($$);
-               }
-               (- ";" ---
-                {
-                    PushStack([TQNodeMessage node]);
-                    SetLineNo(StackTop);
-                }
-                (UnaryMsgBody | KwdMsgBody)
-                {
-                    TQNodeMessage *msg = PopStack();
-                    [[StackTop cascadedMessages] addObject:msg];
-                })*
-               {
-                   $$ = PopStack();
-               }
+CascadedMsg  = ( (KeywordMsg|KwdMsgRcvr)
+                 {
+                     if(![$$ isKindOfClass:[TQNodeMessage class]]) {
+                         $$ = [TQNodeMessage nodeWithReceiver:$$];
+                         [[(TQNodeMessage *)$$  arguments] addObject:[TQNodeArgument nodeWithPassedNode:nil
+                                                                                           selectorPart:@"self"]];
+                     }
+                     PushStack($$);
+                 }
+                 (- ";" ---
+                  {
+                      PushStack([TQNodeMessage node]);
+                      SetLineNo(StackTop);
+                  }
+                  (UnaryMsgBody | KwdMsgBody)
+                  {
+                      TQNodeMessage *msg = PopStack();
+                      [[StackTop cascadedMessages] addObject:msg];
+                  })+
+                 {
+                     $$ = PopStack();
+                 }
+               | KeywordMsg
+               | UnaryMsg
+               )
 
 UnaryMsgRcvr = Call
              | UnaryOp
