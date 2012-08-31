@@ -1,4 +1,4 @@
-#import <Foundation/Foundation.h>
+#import <Tranquil/Runtime/TQObject.h>
 
 @class TQNumber;
 
@@ -21,7 +21,7 @@ extern NSString * const TQTypeBool;
 extern NSString * const TQTypeString;
 
 // A class to enable use of (Obj-)C APIs that utilize pointers
-@interface TQPointer : NSObject {
+@interface TQPointer : TQObject {
     const char *_itemType;
     NSUInteger _itemSize, _count;
     BOOL _freeOnDealloc;

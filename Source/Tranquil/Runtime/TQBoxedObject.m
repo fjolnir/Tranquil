@@ -173,7 +173,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
         case _C_VOID:     TQAssert(NO, @"You cannot unbox a value of type void");         break;
 
         case _TQ_C_LAMBDA_B: {
-            TQAssert(!aValue || [aValue isKindOfClass:NSClassFromString(@"NSBlock")], @"Tried to unbox a non block to a block/function pointer type");
+            TQAssert(!aValue || [aValue isKindOfClass:NSClassFromString(@"NSBlock")], @"Tried to unbox a non block to a block/function pointer type (%@ -> %s)", aValue, aType);
             struct TQBoxedBlockLiteral *wrapperBlock = (struct TQBoxedBlockLiteral *)aValue;
             if(!aValue)
                 *(void **)aDest = NULL;
@@ -190,7 +190,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
             // If it's a boxed object we just make sure the sizes match and then copy the bits
             if([aValue isKindOfClass:self]) {
                 TQBoxedObject *value = aValue;
-                TQAssert(value->_size == size, @"Tried to unbox a boxed struct to a type of a different size");
+                TQAssert(value->_size == size, @"Tried to unbox a boxed struct to a type of a different size (%@ -> %s)", aValue, aType);
                 memmove(aDest, value->_ptr, size);
             }
             // If it's an array  we unbox based on indices

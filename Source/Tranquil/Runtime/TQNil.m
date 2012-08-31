@@ -96,5 +96,10 @@ static id nilReturner(id self, SEL sel, ...)
 {
     return NO;
 }
+
+- (NSString *)description
+{
+    return nil;
+}
 @end
 
