@@ -6,7 +6,7 @@ import "stdlib"
 }
 
 error = { reason |
-    reason print
+    "Error! #{reason}" print
     Exit(1)
 }
 

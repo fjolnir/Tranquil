@@ -7,7 +7,7 @@
 + (id)addMethod:(NSString *)aSel withBlock:(id)aBlock replaceExisting:(id)shouldReplace
 {
     if(!aBlock) {
-        TQLog(@"Tried to add nil block as method");
+        TQLog(@"Tried to add nil block as method (%@)", aSel);
         return nil;
     }
     IMP imp = imp_implementationWithBlock(aBlock);
