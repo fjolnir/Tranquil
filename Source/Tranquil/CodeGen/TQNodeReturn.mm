@@ -86,9 +86,7 @@ using namespace llvm;
     for(NSString *varName in aBlock.locals.allKeys) {
         if([aBlock.capturedVariables objectForKey:varName])
             continue;
-        TQNodeVariable *var = [aBlock.locals objectForKey:varName];
-        if(!var.isGlobal || aRoot != aBlock)
-            [var generateReleaseInProgram:aProgram block:aBlock root:aRoot];
+        [[aBlock.locals objectForKey:varName] generateReleaseInProgram:aProgram block:aBlock root:aRoot];
     }
 
     if([aBlock.retType isEqualToString:@"v"])
