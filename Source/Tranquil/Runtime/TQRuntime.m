@@ -203,9 +203,12 @@ NSInteger TQBlockGetNumberOfArguments(id block)
 // For non equality test operators testing against nil is simply always false so we do not need to implement equivalents for them.
 id TQObjectsAreEqual(id a, id b)
 {
-    if(a)
+    if((uintptr_t)a & (uintptr_t)b & kTQNumberTag)
+        return a == b ? TQValid : nil;
+    else if(a != nil)
         return _objc_msgSend_hack2(a, TQEqOpSel, b);
-    return b == nil ? TQValid : nil;
+    else
+        return b == nil ? TQValid : nil;
 }
 
 id TQObjectsAreNotEqual(id a, id b)
