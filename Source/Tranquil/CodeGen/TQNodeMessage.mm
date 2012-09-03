@@ -139,6 +139,7 @@ using namespace llvm;
         if(needsAutorelease) {
             [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];
             ret = aBlock.builder->CreateCall(aProgram.objc_autoreleaseReturnValue, ret);
+            ((CallInst *)ret)->addAttribute(~0, Attribute::NoUnwind);
         }
     }
     [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];

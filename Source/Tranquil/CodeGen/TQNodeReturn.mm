@@ -73,9 +73,11 @@ using namespace llvm;
     if(_value) {
         retVal = [_value generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         retVal = aBlock.builder->CreateCall(aProgram.TQPrepareObjectForReturn, retVal);
+        ((CallInst *)retVal)->addAttribute(~0, Attribute::NoUnwind);
         [self _attachDebugInformationToInstruction:retVal inProgram:aProgram block:aBlock root:aRoot];
         [aBlock generateCleanupInProgram:aProgram];
         retVal = aBlock.builder->CreateCall(aProgram.objc_autoreleaseReturnValue, retVal);
+        ((CallInst *)retVal)->addAttribute(~0, Attribute::NoUnwind);
         [self _attachDebugInformationToInstruction:retVal inProgram:aProgram block:aBlock root:aRoot];
     } else {
         [aBlock generateCleanupInProgram:aProgram];
