@@ -98,7 +98,6 @@
                 } while((currField = TQGetSizeAndAlignment(currField, NULL, NULL)) && *currField != _C_STRUCT_E);
             }
         }
-        _ffiType->size = type.alignment = 0;
         _ffiType->elements = (ffi_type **)malloc(sizeof(ffi_type*) * numFields + 1);
 
         if(isArray) {
@@ -116,6 +115,10 @@
             }
         }
         _ffiType->elements[numFields] = NULL;
+    } else if(_C_UNION_B) {
+        // For unions we just return the ffi type for the first element in the union
+        const char *fieldEncoding = strstr(_encoding, "=") + 1;
+        return [self initWithEncoding:fieldEncoding nextType:NULL];
     } else {
         // TODO: handle unions by returning a type matching the largest field?
         TQAssert(NO, @"Unhandled encoding: %s", _encoding);
