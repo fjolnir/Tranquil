@@ -1,6 +1,7 @@
 #import "TQNodeNumber.h"
 #import "TQNodeBlock.h"
 #import "TQProgram.h"
+#import "../Runtime/TQNumber.h"
 
 using namespace llvm;
 
@@ -48,6 +49,18 @@ using namespace llvm;
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
+#ifdef __LP64__
+    int64_t ptr;
+    double value = [_value doubleValue];
+#else
+    int32_t ptr;
+    float value = [_value floatValue];
+#endif
+    memcpy(&ptr, &value, sizeof(value));
+    ptr &= ~0xf;
+    ptr |= kTQNumberTag;
+    return aBlock.builder->CreateIntToPtr(ConstantInt::get(aProgram.llIntPtrTy, ptr), aProgram.llInt8PtrTy);
+#if 0
     Module *mod = aProgram.llModule;
 
     // Returns [NSNumber numberWithDouble:_value]
@@ -70,5 +83,6 @@ using namespace llvm;
         rootBuilder.CreateStore(result, num);
     }
     return aBlock.builder->CreateLoad(num);
+#endif
    }
 @end
