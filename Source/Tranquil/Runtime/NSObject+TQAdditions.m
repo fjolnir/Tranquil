@@ -15,6 +15,11 @@
     return self;
 }
 
+- (id)isa:(Class)aClass
+{
+    return [self isKindOfClass:aClass] ? TQValid : nil;
+}
+
 #define CopyMethods(kls, dst) do { \
     unsigned methodCount = 0; \
     Method *methods = class_copyMethodList(kls, &methodCount); \
