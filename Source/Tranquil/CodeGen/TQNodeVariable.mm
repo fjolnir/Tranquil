@@ -8,7 +8,7 @@
 using namespace llvm;
 
 @interface TQNodeVariable (Private)
-- (TQNodeVariable *)_getExistingIdenticalInBlock:(TQNodeBlock *)aBlock;
+- (TQNodeVariable *)_getExistingIdenticalInBlock:(TQNodeBlock *)aBlock program:(TQProgram *)aProgram;
 - (const char *)_llvmRegisterName:(NSString *)subname;
 @end
 
@@ -37,7 +37,7 @@ using namespace llvm;
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<var@ %@>", _name ? _name : @"unnamed"];
+    return [NSString stringWithFormat:@"<var(%@)@ %@>", _isGlobal ? @"global" : @"local", _name ? _name : @"unnamed"];
 }
 
 - (NSUInteger)hash
@@ -70,7 +70,7 @@ using namespace llvm;
 
 - (llvm::Value *)_getForwardingInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock root:(TQNodeRootBlock *)aRoot
 {
-    TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock];
+    TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock program:aProgram];
     if(existingVar)
         return [existingVar _getForwardingInProgram:aProgram block:aBlock root:aRoot];
 
@@ -117,11 +117,12 @@ using namespace llvm;
     if(_alloca)
         return _alloca;
 
-    TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock];
+    TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock program:aProgram];
     if(existingVar) {
         if(![existingVar createStorageInProgram:aProgram block:aBlock root:aRoot error:aoErr])
             return NULL;
         _alloca = existingVar.alloca;
+        _isGlobal = existingVar.isGlobal;
 
         return _alloca;
     }
@@ -134,6 +135,7 @@ using namespace llvm;
 
     if(aBlock == aRoot) {
         _isGlobal = YES;
+        [[aProgram globals] setObject:self forKey:_name];
         const char *globalName = [[NSString stringWithFormat:@"TQGlobalVar_%@", _name] UTF8String];
         _alloca = aProgram.llModule->getGlobalVariable(globalName, true);
         if(!_alloca)
@@ -174,6 +176,10 @@ using namespace llvm;
                   root:(TQNodeRootBlock *)aRoot
                  error:(NSError **)aoErr
 {
+    TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock program:aProgram];
+    if(existingVar)
+        return [existingVar store:aValue inProgram:aProgram block:aBlock root:aRoot error:aoErr];
+
     if(!_alloca) {
         if(![self createStorageInProgram:aProgram block:aBlock root:aRoot error:aoErr])
             return NULL;
@@ -187,31 +193,47 @@ using namespace llvm;
     Value *forwarding = aBlock.builder->CreateLoad(aBlock.builder->CreateStructGEP(_alloca, 1), [self _llvmRegisterName:@"forwarding"]);
     forwarding = aBlock.builder->CreateBitCast(forwarding, PointerType::getUnqual([[self class] captureStructTypeInProgram:aProgram]));
 
-    return aBlock.builder->CreateCall2(storeFun, aBlock.builder->CreateStructGEP(forwarding, 4), aValue);
+    CallInst *storeCall = aBlock.builder->CreateCall2(storeFun, aBlock.builder->CreateStructGEP(forwarding, 4), aValue);
+    storeCall->addAttribute(~0, Attribute::NoUnwind);
+    return storeCall;
 }
 
 - (void)generateRetainInProgram:(TQProgram *)aProgram
                           block:(TQNodeBlock *)aBlock
                            root:(TQNodeRootBlock *)aRoot
 {
-    aBlock.builder->CreateCall(aProgram.objc_retain, [self _getForwardingInProgram:aProgram block:aBlock root:aRoot]);
+    CallInst *retainCall = aBlock.builder->CreateCall(aProgram.objc_retain, [self _getForwardingInProgram:aProgram block:aBlock root:aRoot]);
+    retainCall->addAttribute(~0, Attribute::NoUnwind);
 }
 
 - (void)generateReleaseInProgram:(TQProgram *)aProgram
                            block:(TQNodeBlock *)aBlock
                            root:(TQNodeRootBlock *)aRoot
 {
-    aBlock.builder->CreateCall(aProgram.objc_release, [self _getForwardingInProgram:aProgram block:aBlock root:aRoot]);
+    if(_isGlobal) // Global values are only released when they are replaced
+        return;
+    TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock program:aProgram];
+    if(existingVar)
+        return [existingVar generateReleaseInProgram:aProgram block:aBlock root:aRoot];
+
+    CallInst *releaseCall = aBlock.builder->CreateCall(aProgram.objc_release, [self _getForwardingInProgram:aProgram block:aBlock root:aRoot]);
+    releaseCall->addAttribute(~0, Attribute::NoUnwind);
+    SmallVector<llvm::Value*,1> args;
+    releaseCall->setMetadata("clang.imprecise_release",
+                      llvm::MDNode::get(aProgram.llModule->getContext(), args));
 }
 
-- (TQNodeVariable *)_getExistingIdenticalInBlock:(TQNodeBlock *)aBlock
+- (TQNodeVariable *)_getExistingIdenticalInBlock:(TQNodeBlock *)aBlock program:(TQProgram *)aProgram
 {
     if(!_name)
         return nil;
 
     TQNodeVariable *existingVar = nil;
-    if((existingVar = [aBlock.locals objectForKey:_name]) && existingVar != self)
+    if((existingVar = [[aProgram globals] objectForKey:_name]) && existingVar != self)
         return existingVar;
+    else if(!_isGlobal && (existingVar = [aBlock.locals objectForKey:_name]) && existingVar != self)
+        return existingVar;
+
     [aBlock.locals setObject:self forKey:_name];
     return nil;
 }

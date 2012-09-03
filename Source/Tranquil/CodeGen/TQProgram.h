@@ -25,6 +25,7 @@ TQ_EXTERN_C NSString * const kTQSyntaxErrorException;
 
 @property(readwrite, retain) NSString *name;
 @property(readwrite, retain) NSArray *arguments;
+@property(readonly) NSMutableDictionary *globals;
 @property(readonly) TQHeaderParser *objcParser;
 @property(readwrite) BOOL shouldShowDebugInfo;
 

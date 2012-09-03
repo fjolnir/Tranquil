@@ -53,7 +53,7 @@ static TQProgram *sharedInstance;
 @implementation TQProgram
 @synthesize name=_name, llModule=_llModule, cliArgGlobal=_cliArgGlobal, shouldShowDebugInfo=_shouldShowDebugInfo,
             objcParser=_objcParser, searchPaths=_searchPaths, allowedFileExtensions=_allowedFileExtensions,
-            useAOTCompilation=_useAOTCompilation, outputPath=_outputPath, arguments=_arguments;
+            useAOTCompilation=_useAOTCompilation, outputPath=_outputPath, arguments=_arguments, globals=_globals;
 @synthesize globalQueue=_globalQueue, debugBuilder=_debugBuilder;
 
 + (void)initialize
@@ -89,7 +89,8 @@ static TQProgram *sharedInstance;
     TQInitializeRuntime();
     InitializeNativeTarget();
     LLVMInitializeX86Target();
-
+    
+    _globals     = [NSMutableDictionary new];
     _searchPaths = [[NSMutableArray alloc] initWithObjects:@".",
                         @"~/Library/Frameworks", @"/Library/Frameworks",
                         @"/System/Library/Frameworks/", @"/usr/include/", @"/usr/local/include/",
@@ -102,6 +103,7 @@ static TQProgram *sharedInstance;
 - (void)dealloc
 {
     [_searchPaths release];
+    [_globals release];
     [_allowedFileExtensions release];
     [_objcParser release];
     delete _llModule;
@@ -131,20 +133,23 @@ static TQProgram *sharedInstance;
     if(!aNode)
         return nil;
 
-    GlobalVariable *argGlobal;
+    GlobalVariable *argGlobal = NULL;
     if(!_useAOTCompilation) {
-        // Create a global for the argument array
-        Type *byRefType = [TQNodeVariable captureStructTypeInProgram:self];
-        argGlobal = new GlobalVariable(*_llModule, byRefType, false, GlobalVariable::InternalLinkage,
-                                       ConstantAggregateZero::get(byRefType), "TQGlobalVar_...");
-        _argGlobalForJIT.isa        = nil;
-        _argGlobalForJIT.flags      = 0;
-        _argGlobalForJIT.size       = sizeof(TQBlockByRef);
-        _argGlobalForJIT.value      = nil;
-        _argGlobalForJIT.value      = _arguments;
-        _argGlobalForJIT.forwarding = &_argGlobalForJIT;
-        // Insert a reference to the '...' variable so that child blocks know to capture it
-        [aNode.statements insertObject:[TQNodeVariable nodeWithName:@"..."] atIndex:0];
+        TQNodeVariable *varArgVar = [TQNodeVariable nodeWithName:@"..."];
+        if([aNode referencesNode:varArgVar]) {
+            // Create a global for the argument array
+            Type *byRefType = [TQNodeVariable captureStructTypeInProgram:self];
+            argGlobal = new GlobalVariable(*_llModule, byRefType, false, GlobalVariable::InternalLinkage,
+                                           ConstantAggregateZero::get(byRefType), "TQGlobalVar_...");
+            _argGlobalForJIT.isa        = nil;
+            _argGlobalForJIT.flags      = 0;
+            _argGlobalForJIT.size       = sizeof(TQBlockByRef);
+            _argGlobalForJIT.value      = nil;
+            _argGlobalForJIT.value      = _arguments;
+            _argGlobalForJIT.forwarding = &_argGlobalForJIT;
+            // Insert a reference to the '...' variable so that child blocks know to capture it
+            [aNode.statements insertObject:varArgVar atIndex:0];
+        }
 
         // Global for the dispatch queue
         _globalQueue = _llModule->getNamedGlobal("TQGlobalQueue");
@@ -208,7 +213,8 @@ static TQProgram *sharedInstance;
             //_executionEngine->DisableLazyCompilation();
             fpm.add(new TargetData(*_executionEngine->getTargetData()));
         }
-        _executionEngine->addGlobalMapping(argGlobal, (void*)&_argGlobalForJIT);
+        if(argGlobal)
+            _executionEngine->addGlobalMapping(argGlobal, (void*)&_argGlobalForJIT);
         if(!_globalQueueForJIT)
             _globalQueueForJIT = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
         _executionEngine->addGlobalMapping(_globalQueue, (void*)&_globalQueueForJIT);
@@ -246,6 +252,7 @@ static TQProgram *sharedInstance;
         mainBlk.argTypes   = [NSMutableArray arrayWithObjects:@"i", @"^*", nil];
 
         TQNodeVariable *cliArgVar = [TQNodeVariable nodeWithName:@"..."];
+        [_globals setObject:cliArgVar forKey:@"..."];
         [mainBlk.statements addObject:[TQNodeCustom nodeWithBlock:^(TQProgram *aProgram, TQNodeBlock *aBlock, TQNodeRootBlock *aRoot) {
             aBlock.builder->CreateCall(self.TQInitializeRuntime);
             llvm::Function::arg_iterator argumentIterator = aBlock.function->arg_begin();
@@ -256,8 +263,8 @@ static TQProgram *sharedInstance;
 
             [cliArgVar store:aBlock.builder->CreateCall2(self.TQCliArgsToArray, argumentIterator, ++argumentIterator)
                    inProgram:aProgram
-                       block:aBlock
-                        root:(TQNodeRootBlock *)aBlock
+                       block:mainBlk
+                        root:(TQNodeRootBlock *)mainBlk
                        error:nil];
 
             aBlock.builder->CreateCall(aNode.function);
