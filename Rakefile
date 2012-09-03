@@ -3,6 +3,8 @@ CXX = '/usr/local/tranquil/llvm/bin/clang++'
 LD  = CC
 PEG = '/usr/local/tranquil/greg/bin/greg'
 
+MAXARGS = 32 # The number of block dispatchers to compile
+
 BUILD_DIR = 'Build'
 
 PARSER_OUTPATH = "#{BUILD_DIR}/parse.mm"
@@ -61,6 +63,8 @@ PATHMAP = 'build/%n.o'
 
 STUB_OUTPATH    = 'Build/block_stubs.m'
 STUB_SCRIPT     = 'Source/Tranquil/gen_stubs.rb'
+STUB_H_OUTPATH  = '/usr/local/tranquil/include/Tranquil/Runtime/TQStubs.h'
+STUB_H_SCRIPT   = 'Source/Tranquil/gen_stubs_header.rb'
 MSGSEND_SOURCE  = 'Source/Tranquil/Runtime/msgsend.s'
 MSGSEND_OUT     = 'Build/msgsend.o'
 RUNTIME_SOURCES = FileList['Source/Tranquil/BridgeSupport/*.m*'].add('Source/Tranquil/Dispatch/*.m*').add('Source/Tranquil/Runtime/*.m*').add('Source/Tranquil/Shared/*.m*').add(STUB_OUTPATH)
@@ -72,7 +76,7 @@ CODEGEN_O_FILES = CODEGEN_SOURCES.pathmap(PATHMAP)
 
 HEADERS         = FileList['Source/Tranquil/BridgeSupport/*.h'].add('Source/Tranquil/Dispatch/*.h').add('Source/Tranquil/Runtime/*.h').add('Source/Tranquil/Shared/*.h').add('Source/Tranquil/CodeGen/**/*.h')
 HEADER_PATHMAP  = '/usr/local/tranquil/include/Tranquil/%-1d/%f'
-HEADERS_OUT     = HEADERS.pathmap(HEADER_PATHMAP)
+HEADERS_OUT     = [STUB_H_OUTPATH] + HEADERS.pathmap(HEADER_PATHMAP)
 
 PEG_SOURCE      = FileList['Source/Tranquil/*.leg'].first
 
@@ -107,8 +111,13 @@ file PARSER_OUTPATH => PEG_SOURCE do |f|
 end
 
 file STUB_OUTPATH => STUB_SCRIPT do |f|
-    sh "ruby #{STUB_SCRIPT} > #{STUB_OUTPATH}"
+    sh "ruby #{STUB_SCRIPT} #{MAXARGS} > #{STUB_OUTPATH}"
 end
+
+file STUB_H_OUTPATH => STUB_H_SCRIPT do |f|
+    sh "ruby #{STUB_H_SCRIPT} #{MAXARGS} > #{STUB_H_OUTPATH}"
+end
+
 
 file MSGSEND_OUT => MSGSEND_SOURCE do |f|
     sh "#{CXX} #{MSGSEND_SOURCE} -c -o #{MSGSEND_OUT}"
@@ -131,7 +140,7 @@ file :build_dir do
     sh "mkdir -p #{File.dirname(__FILE__)}/Build"
 end
 
-file :libtranquil => RUNTIME_O_FILES + HEADERS_OUT do |t|
+file :libtranquil => HEADERS_OUT + RUNTIME_O_FILES do |t|
     sh "ar rcs #{BUILD_DIR}/libtranquil.a #{RUNTIME_O_FILES}"
     sh "mkdir -p /usr/local/tranquil/lib"
     sh "cp Build/libtranquil.a /usr/local/tranquil/lib"
