@@ -78,6 +78,17 @@ extern const uintptr_t     kTQNumberTag;        // The actual bits of the tag (u
 - (TQNumber *)divideBy:(id)b;
 - (TQNumber *)modulo:(id)b;
 - (TQNumber *)pow:(id)b;
+- (TQNumber *)sqrt;
+
+- (TQNumber *)sine;
+- (TQNumber *)cosine;
+- (TQNumber *)tan;
+- (TQNumber *)hsine;
+- (TQNumber *)hcosine;
+- (TQNumber *)htan;
+- (TQNumber *)arcsine;
+- (TQNumber *)arcosine;
+- (TQNumber *)arctan;
 
 - (TQNumber *)bitAnd:(id)b;
 - (TQNumber *)bitOr:(id)b;

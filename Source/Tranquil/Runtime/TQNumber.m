@@ -401,6 +401,47 @@ static __inline__ _tqfloat _TQNumberValue(TQNumber *ptr)
         return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), pow(_TQNumberValue(self), [b doubleValue]));
     return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), pow(_TQNumberValue(self), _TQNumberValue(b) ));
 }
+- (TQNumber *)sqrt
+{
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), sqrt(_TQNumberValue(self)));
+}
+
+- (TQNumber *)sine
+{
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), sin(_TQNumberValue(self)));
+}
+- (TQNumber *)cosine
+{
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), sin(_TQNumberValue(self)));
+}
+- (TQNumber *)tan
+{
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), tan(_TQNumberValue(self)));
+}
+- (TQNumber *)hsine
+{
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), sinh(_TQNumberValue(self)));
+}
+- (TQNumber *)hcosine
+{
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), sinh(_TQNumberValue(self)));
+}
+- (TQNumber *)htan
+{
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), tanh(_TQNumberValue(self)));
+}
+- (TQNumber *)arcsine
+{
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), asin(_TQNumberValue(self)));
+}
+- (TQNumber *)arcosine
+{
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), asin(_TQNumberValue(self)));
+}
+- (TQNumber *)arctan
+{
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), atan(_TQNumberValue(self)));
+}
 
 - (TQNumber *)bitAnd:(id)b
 {
