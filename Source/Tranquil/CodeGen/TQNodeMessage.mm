@@ -112,7 +112,8 @@ using namespace llvm;
 
     // Cache the selector into a global
     Module *mod = aProgram.llModule;
-    Value *selectorGlobal = mod->getGlobalVariable([selStr UTF8String], true);
+    const char *selGlobalName = [[@"TQSelector_" stringByAppendingString:selStr] UTF8String];
+    Value *selectorGlobal = mod->getGlobalVariable(selGlobalName, true);
     if(!selectorGlobal) {
         Function *rootFunction = aRoot.function;
         IRBuilder<> rootBuilder(&rootFunction->getEntryBlock(), rootFunction->getEntryBlock().begin());
@@ -120,7 +121,7 @@ using namespace llvm;
 
         CallInst *selReg = rootBuilder.CreateCall(aProgram.sel_registerName, selector, "");
         selectorGlobal =  new GlobalVariable(*mod, aProgram.llInt8PtrTy, false, GlobalVariable::InternalLinkage,
-                                             ConstantPointerNull::get(aProgram.llInt8PtrTy), [selStr UTF8String]);
+                                             ConstantPointerNull::get(aProgram.llInt8PtrTy), selGlobalName);
         rootBuilder.CreateStore(selReg, selectorGlobal);
     }
     selectorGlobal = aBlock.builder->CreateLoad(selectorGlobal);
