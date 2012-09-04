@@ -4,6 +4,9 @@
 #import "TQNodeCall.h"
 #import "TQProgram.h"
 #import "TQNodeOperator.h"
+#import "TQNodeCustom.h"
+#import "TQNodeArgument.h"
+#import "TQNodeVariable.h"
 
 using namespace llvm;
 
@@ -54,6 +57,42 @@ using namespace llvm;
     [aBlock createDispatchGroupInProgram:aProgram];
 
     TQNodeBlock *block = (TQNodeBlock *)_expression;
+    TQNodeCall *callToPrepare = NULL;
+    // In case of an assignment to a subscript, we need to evaluate the subscript synchronously
+    if([_expression isKindOfClass:[TQNodeOperator class]]) {
+        TQNodeOperator *op = (TQNodeOperator *)_expression;
+        if(op.type == kTQOperatorAssign) {
+            if([op.left isKindOfClass:[TQNodeOperator class]] && [(TQNodeOperator *)op.left type] == kTQOperatorSubscript) {
+                TQNodeOperator *subscr = (TQNodeOperator *)op.left;
+                Value *subscriptVal = [subscr.right generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+                TQNodeVariable *tempVar = [TQNodeVariable tempVar];
+                [tempVar store:subscriptVal inProgram:aProgram block:aBlock root:aRoot error:aoErr];
+                subscr.right = tempVar;
+            }
+            if([op.right isKindOfClass:[TQNodeCall class]])
+                callToPrepare = (TQNodeCall *)op.right;
+        }
+    }
+    if([_expression isKindOfClass:[TQNodeCall class]])
+        callToPrepare = (TQNodeCall *)_expression;
+
+    if(callToPrepare) {
+        // In the case of a block call we must synchronously evaluate the parameters before
+        // asynchronously dispatching the block itself
+        NSMutableArray *origArgs = [callToPrepare.arguments copy];
+        callToPrepare.arguments = [NSMutableArray array];
+        for(TQNodeArgument *arg in origArgs) {
+            Value *val = [arg generateCodeInProgram:aProgram
+                                              block:aBlock
+                                               root:aRoot
+                                              error:aoErr];
+            TQNodeVariable *tempVar = [TQNodeVariable tempVar];
+            [tempVar store:val inProgram:aProgram block:aBlock root:aRoot error:aoErr];
+            [callToPrepare.arguments addObject:tempVar];
+        }
+        [origArgs release];
+    }
+
     if(![_expression isKindOfClass:[TQNodeBlock class]]) {
         block = [TQNodeBlock node];
         block.lineNumber = self.lineNumber;
