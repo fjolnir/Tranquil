@@ -303,25 +303,30 @@ using namespace llvm;
 
     Value *dstBlock = builder->CreateBitCast(builder->CreateLoad(dstAlloca), blockPtrTy, "dstBlk");
     Value *srcBlock = builder->CreateBitCast(builder->CreateLoad(srcAlloca), blockPtrTy, "srcBlk");
-    Value *flags = ConstantInt::get(intTy, TQ_BLOCK_FIELD_IS_BYREF);
+    Value *byrefFlags = ConstantInt::get(intTy, TQ_BLOCK_FIELD_IS_BYREF);
+    Value *constFlags = ConstantInt::get(intTy, TQ_BLOCK_FIELD_IS_OBJECT);
 
     int i = TQ_CAPTURE_IDX;
     Value *varToCopy, *destAddr, *valueToRetain;
     Type *captureStructTy;
     for(TQNodeVariable *var in [_capturedVariables allValues]) {
+        Value *flags = var.isAnonymous ? constFlags : byrefFlags;
+
         NSString *dstName = [NSString stringWithFormat:@"dstBlk.%@Addr", var.name];
         NSString *srcName = [NSString stringWithFormat:@"srcBlk.%@", var.name];
 
         destAddr  = builder->CreateBitCast(builder->CreateStructGEP(dstBlock, i), int8PtrTy, [dstName UTF8String]);
         varToCopy = builder->CreateLoad(builder->CreateStructGEP(srcBlock, i++), [srcName UTF8String]);
 
-        captureStructTy = PointerType::getUnqual([TQNodeVariable captureStructTypeInProgram:aProgram]);
-        valueToRetain = builder->CreateBitCast(varToCopy, captureStructTy);
-        valueToRetain = builder->CreateLoad(builder->CreateStructGEP(valueToRetain, 1)); // var->forwarding
-        valueToRetain = builder->CreateBitCast(valueToRetain, captureStructTy);
-        valueToRetain = builder->CreateLoad(builder->CreateStructGEP(valueToRetain, 4)); // forwarding->capture
+        if(!var.isAnonymous) {
+            captureStructTy = PointerType::getUnqual([TQNodeVariable captureStructTypeInProgram:aProgram]);
+            valueToRetain = builder->CreateBitCast(varToCopy, captureStructTy);
+            valueToRetain = builder->CreateLoad(builder->CreateStructGEP(valueToRetain, 1)); // var->forwarding
+            valueToRetain = builder->CreateBitCast(valueToRetain, captureStructTy);
+            valueToRetain = builder->CreateLoad(builder->CreateStructGEP(valueToRetain, 4)); // forwarding->capture
 
-        builder->CreateCall(aProgram.objc_retain, valueToRetain);
+            builder->CreateCall(aProgram.objc_retain, valueToRetain);
+        }
         builder->CreateCall3(aProgram._Block_object_assign, destAddr, varToCopy, flags);
     }
 
@@ -352,22 +357,27 @@ using namespace llvm;
     IRBuilder<> *builder = new IRBuilder<>(basicBlock);
     // Load the block
     Value *block = builder->CreateBitCast(function->arg_begin(), PointerType::getUnqual([self _blockLiteralTypeInProgram:aProgram]), "block");
-    Value *flags = ConstantInt::get(intTy, TQ_BLOCK_FIELD_IS_BYREF);
+    Value *byrefFlags = ConstantInt::get(intTy, TQ_BLOCK_FIELD_IS_BYREF);
+    Value *constFlags = ConstantInt::get(intTy, TQ_BLOCK_FIELD_IS_OBJECT);
 
     int i = TQ_CAPTURE_IDX;
     Value *varToDisposeOf, *valueToRelease;
     Type *captureStructTy;
     for(TQNodeVariable *var in [_capturedVariables allValues]) {
+        Value *flags = var.isAnonymous ? constFlags : byrefFlags;
+
         NSString *name = [NSString stringWithFormat:@"block.%@", var.name];
         varToDisposeOf =  builder->CreateLoad(builder->CreateStructGEP(block, i++), [name UTF8String]);
 
-        captureStructTy = PointerType::getUnqual([TQNodeVariable captureStructTypeInProgram:aProgram]);
-        valueToRelease = builder->CreateBitCast(varToDisposeOf, captureStructTy);
-        valueToRelease = builder->CreateLoad(builder->CreateStructGEP(valueToRelease, 1)); // var->forwarding
-        valueToRelease = builder->CreateBitCast(valueToRelease, captureStructTy);
-        valueToRelease = builder->CreateStructGEP(valueToRelease, 4); // forwarding->capture
+        if(!var.isAnonymous) {
+            captureStructTy = PointerType::getUnqual([TQNodeVariable captureStructTypeInProgram:aProgram]);
+            valueToRelease = builder->CreateBitCast(varToDisposeOf, captureStructTy);
+            valueToRelease = builder->CreateLoad(builder->CreateStructGEP(valueToRelease, 1)); // var->forwarding
+            valueToRelease = builder->CreateBitCast(valueToRelease, captureStructTy);
+            valueToRelease = builder->CreateStructGEP(valueToRelease, 4); // forwarding->capture
 
-        builder->CreateCall(aProgram.objc_release, builder->CreateLoad(valueToRelease));
+            builder->CreateCall(aProgram.objc_release, builder->CreateLoad(valueToRelease));
+        }
         builder->CreateCall2(aProgram._Block_object_dispose, varToDisposeOf, flags);
     }
 
@@ -463,13 +473,15 @@ using namespace llvm;
     if(thisBlock) {
         int i = TQ_CAPTURE_IDX;
         TQNodeVariable *varToLoad;
-        for(NSString *name in [_capturedVariables allKeys]) {
-            varToLoad = [TQNodeVariable nodeWithName:name];
-            Value *valueToLoad = _builder->CreateLoad(_builder->CreateStructGEP(thisBlock, i++), [name UTF8String]);
-            valueToLoad = _builder->CreateBitCast(valueToLoad, PointerType::getUnqual([TQNodeVariable captureStructTypeInProgram:aProgram]));
+        for(TQNodeVariable *parentVar in [_capturedVariables allValues]) {//NSString *name in [_capturedVariables allKeys]) {
+            varToLoad = [parentVar copy];//[TQNodeVariable nodeWithName:name];
+            Value *valueToLoad = _builder->CreateLoad(_builder->CreateStructGEP(thisBlock, i++), [varToLoad.name UTF8String]);
+            if(![varToLoad isAnonymous])
+                valueToLoad = _builder->CreateBitCast(valueToLoad, PointerType::getUnqual([TQNodeVariable captureStructTypeInProgram:aProgram]));
             varToLoad.alloca = (AllocaInst *)valueToLoad;
 
-            [_locals setObject:varToLoad forKey:name];
+            [_locals setObject:varToLoad forKey:varToLoad.name];
+            [varToLoad release];
         }
     }
 

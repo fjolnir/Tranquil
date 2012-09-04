@@ -13,11 +13,18 @@ using namespace llvm;
 @end
 
 @implementation TQNodeVariable
-@synthesize name=_name, alloca=_alloca, forwarding=_forwarding, isGlobal=_isGlobal;
+@synthesize name=_name, alloca=_alloca, forwarding=_forwarding, isGlobal=_isGlobal, isAnonymous=_isAnonymous;
 
 + (TQNodeVariable *)node
 {
     return (TQNodeVariable *)[super node];
+}
+
++ (TQNodeVariable *)tempVar
+{
+    TQNodeVariable *ret = [self node];
+    ret.isAnonymous = YES;
+    return ret;
 }
 
 + (TQNodeVariable *)nodeWithName:(NSString *)aName
@@ -43,6 +50,14 @@ using namespace llvm;
 - (NSUInteger)hash
 {
     return [_name hash];
+}
+
+- (void)setIsAnonymous:(BOOL)flag
+{
+    _isAnonymous = flag;
+    // An anonymous still needs an identifier so that it can be captured properly (only used at compilation time)
+    if(_isAnonymous)
+        self.name = [[NSProcessInfo processInfo] globallyUniqueString];
 }
 
 - (BOOL)isEqual:(id)aObj
@@ -73,6 +88,8 @@ using namespace llvm;
     TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock program:aProgram];
     if(existingVar)
         return [existingVar _getForwardingInProgram:aProgram block:aBlock root:aRoot];
+    if(_isAnonymous)
+        return _alloca;
 
     IRBuilder<> *builder = aBlock.builder;
     Value *forwarding;
@@ -106,7 +123,7 @@ using namespace llvm;
 
 - (const char *)_llvmRegisterName:(NSString *)subname
 {
-    return _name ? [[NSString stringWithFormat:@"%@.%@", _name, subname] UTF8String] : "";
+    return (_name && !_isAnonymous) ? [[NSString stringWithFormat:@"%@.%@", _name, subname] UTF8String] : "";
 }
 
 - (llvm::Value *)createStorageInProgram:(TQProgram *)aProgram
@@ -114,18 +131,19 @@ using namespace llvm;
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
-    if(_alloca)
-        return _alloca;
-
     TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock program:aProgram];
     if(existingVar) {
         if(![existingVar createStorageInProgram:aProgram block:aBlock root:aRoot error:aoErr])
             return NULL;
-        _alloca = existingVar.alloca;
-        _isGlobal = existingVar.isGlobal;
+        _alloca      = existingVar.alloca;
+        _isGlobal    = existingVar.isGlobal;
+        _isAnonymous = existingVar.isAnonymous;
 
         return _alloca;
     }
+
+    if(_alloca)
+        return _alloca;
 
     Type *intTy   = aProgram.llIntTy;
     Type *i8PtrTy = aProgram.llInt8PtrTy;
@@ -180,6 +198,11 @@ using namespace llvm;
     if(existingVar)
         return [existingVar store:aValue inProgram:aProgram block:aBlock root:aRoot error:aoErr];
 
+    if(_isAnonymous) {
+        _alloca = aValue;
+        return NULL;
+    }
+
     if(!_alloca) {
         if(![self createStorageInProgram:aProgram block:aBlock root:aRoot error:aoErr])
             return NULL;
@@ -195,13 +218,20 @@ using namespace llvm;
 
     CallInst *storeCall = aBlock.builder->CreateCall2(storeFun, aBlock.builder->CreateStructGEP(forwarding, 4), aValue);
     storeCall->addAttribute(~0, Attribute::NoUnwind);
-    return storeCall;
+
+    return NULL;
 }
 
 - (void)generateRetainInProgram:(TQProgram *)aProgram
                           block:(TQNodeBlock *)aBlock
                            root:(TQNodeRootBlock *)aRoot
 {
+    if(_isAnonymous)
+        return;
+    TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock program:aProgram];
+    if(existingVar)
+        return [existingVar generateRetainInProgram:aProgram block:aBlock root:aRoot];
+
     CallInst *retainCall = aBlock.builder->CreateCall(aProgram.objc_retain, [self _getForwardingInProgram:aProgram block:aBlock root:aRoot]);
     retainCall->addAttribute(~0, Attribute::NoUnwind);
 }
@@ -210,8 +240,8 @@ using namespace llvm;
                            block:(TQNodeBlock *)aBlock
                            root:(TQNodeRootBlock *)aRoot
 {
-    if(_isGlobal) // Global values are only released when they are replaced
-        return;
+    if(_isGlobal || _isAnonymous) // Global values are only released when they are replaced
+        return;                   // Anons are simply managed by their capturing blocks
     TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock program:aProgram];
     if(existingVar)
         return [existingVar generateReleaseInProgram:aProgram block:aBlock root:aRoot];
@@ -238,6 +268,16 @@ using namespace llvm;
     return nil;
 }
 
+- (id)copyWithZone:(NSZone *)zone
+{
+    TQNodeVariable *copy = [[[self class] alloc] init];
+    copy.isAnonymous = _isAnonymous;
+    copy.name        = _name;
+    copy->_isGlobal  = _isGlobal;
+    copy.alloca      = _alloca;
+
+    return copy;
+}
 @end
 
 

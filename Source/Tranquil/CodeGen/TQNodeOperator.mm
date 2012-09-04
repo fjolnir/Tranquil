@@ -91,8 +91,8 @@ using namespace llvm;
     if(_type == kTQOperatorAssign) {
         BOOL isVar = [_left isKindOfClass:[TQNodeVariable class]];
         BOOL isProperty = [_left isMemberOfClass:[TQNodeMemberAccess class]];
-        BOOL isGetterOp = [_left isMemberOfClass:[self class]] && [(TQNodeOperator*)_left type] == kTQOperatorGetter;
-        TQAssertSoft(isVar || isProperty || isGetterOp, kTQSyntaxErrorDomain, kTQInvalidAssignee, NO, @"Only variables and object properties can be assigned to");
+        BOOL isSubscriptOp = [_left isMemberOfClass:[self class]] && [(TQNodeOperator*)_left type] == kTQOperatorSubscript;
+        TQAssertSoft(isVar || isProperty || isSubscriptOp, kTQSyntaxErrorDomain, kTQInvalidAssignee, NO, @"Only variables and object properties can be assigned to");
 
         // We must make sure the storage exists before evaluating the right side, so that if the assigned value is a
         // block, it can reference itself
@@ -231,7 +231,7 @@ using namespace llvm;
                     return aBlock.builder->CreateSelect(aBlock.builder->CreateFCmpOLE(a, b), GET_VALID(), nullPtr);
                 }];
                 break;
-            case kTQOperatorGetter:
+            case kTQOperatorSubscript:
                 selector  = aProgram.llModule->getOrInsertGlobal("TQGetterOpSel", aProgram.llInt8PtrTy);
                 break;
             case kTQOperatorLShift:
@@ -301,7 +301,7 @@ using namespace llvm;
 
 - (NSString *)description
 {
-    if(_type == kTQOperatorGetter)
+    if(_type == kTQOperatorSubscript)
         return [NSString stringWithFormat:@"<op@ %@[%@]>", _left, _right];
     else if(_type == kTQOperatorUnaryMinus)
         return [NSString stringWithFormat:@"<op@ -%@>", _right];
@@ -355,7 +355,7 @@ using namespace llvm;
                   root:(TQNodeRootBlock *)aRoot
                  error:(NSError **)aoErr
 {
-    assert(_type == kTQOperatorGetter);
+    assert(_type == kTQOperatorSubscript);
 
     // Call []:=:
     Value *selector  = aProgram.llModule->getOrInsertGlobal("TQSetterOpSel", aProgram.llInt8PtrTy);
