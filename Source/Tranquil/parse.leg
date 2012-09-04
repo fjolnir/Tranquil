@@ -611,10 +611,10 @@ SubscriptExp = obj:SubscriptLhs
                - (Subscript -)+
                {
                    NSMutableArray *subscripts = PopStack();
-                   $$ = [TQNodeOperator nodeWithType:kTQOperatorGetter left:obj right:[subscripts objectAtIndex:0]];
+                   $$ = [TQNodeOperator nodeWithType:kTQOperatorSubscript left:obj right:[subscripts objectAtIndex:0]];
                    SetLineNo($$);
                    for(int i = 1; i < [subscripts count]; ++i) {
-                      $$ = [TQNodeOperator nodeWithType:kTQOperatorGetter left:$$ right:[subscripts objectAtIndex:i]];
+                      $$ = [TQNodeOperator nodeWithType:kTQOperatorSubscript left:$$ right:[subscripts objectAtIndex:i]];
                       SetLineNo($$);
                    }
 
