@@ -1,4 +1,5 @@
 #import "NSString+TQAdditions.h"
+#import "TQNumber.h"
 
 @implementation NSString (Tranquil)
 - (NSString *)stringByCapitalizingFirstLetter
@@ -9,6 +10,10 @@
     else if(len == 1)
         return [self uppercaseString];
     return [[[self substringToIndex:1] uppercaseString] stringByAppendingString:[self substringFromIndex:1]];
+}
+- (TQNumber *)toNumber
+{
+    return [TQNumber numberWithDouble:atof([self UTF8String])];
 }
 @end
 
