@@ -1,0 +1,45 @@
+\ Pretty intense test of the boxing support
+import "stdlib"
+import "clang-c/Index"
+
+#HeaderIndex {
+    + parse: path withBlock: lambda `self new parse: path withBlock: lambda`
+
+    - init {
+        self#idx = Clang_createIndex(0, 1)
+        ^self
+    }
+    - dealloc `Clang_disposeIndex(idx)`
+
+    - parse: path withBlock: lambda {
+        clangArgs = TQPointer to: $-ObjC withType: $*
+        clangOpts = CXTranslationUnit_DetailedPreprocessingRecord bitOr: CXTranslationUnit_SkipFunctionBodies
+        header    = Clang_parseTranslationUnit(self#idx, path, clangArgs, clangArgs count, nil, 0, clangOpts)
+
+        if header == nil {
+            "Unable to parse #{headerPath}" print
+            ^nil
+        }
+
+        cursor = Clang_getTranslationUnitCursor(header)
+        Clang_visitChildrenWithBlock(cursor, lambda)
+        Clang_disposeTranslationUnit(header)
+    }
+}
+
+HeaderIndex parse: "/System/Library/Frameworks/Foundation.framework/Headers/Foundation.h"
+        withBlock: { child, parent |
+    name_ = Clang_getCursorSpelling(child)
+    name  = Clang_getCString(name_)
+    kind_ = Clang_getCursorKindSpelling(Clang_getCursorKind(child))
+    kind  = Clang_getCString(kind_)
+    Clang_disposeString(name_)
+    Clang_disposeString(kind_)
+
+    if name length == 0
+        ^CXChildVisit_Continue
+    "#{kind}: #{name}" print
+
+    ^CXChildVisit_Continue
+}
+
