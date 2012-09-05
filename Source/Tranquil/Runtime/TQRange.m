@@ -56,6 +56,17 @@ extern id TQDispatchBlock2(id, id, id);
     }];
 }
 
+- (NSPointerArray *)toArray
+{
+    NSPointerArray *result = [NSPointerArray pointerArrayWithStrongObjects];
+    NSUInteger len = [_length unsignedIntegerValue];
+    result.count = len;
+    for(NSUInteger i = 0; i < len; ++i) {
+        [result replacePointerAtIndex:i withPointer:[TQNumber numberWithUnsignedInteger:i]];
+    }
+    return result;
+}
+
 - (NSString *)description
 {
     return [NSString stringWithFormat:@"<%@: %p loc: %@ len: %@>", [self class], self, _start, _length];

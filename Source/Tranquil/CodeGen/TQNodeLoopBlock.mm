@@ -167,6 +167,11 @@ void * const TQCurrLoopKey = (void*)&TQCurrLoopKey;
 {
     // Nothing to iterate
 }
+
+- (TQNode *)referencesNode:(TQNode *)aNode
+{
+    return [self isEqual:aNode] ? self : nil;
+}
 @end
 
 @implementation TQNodeSkip

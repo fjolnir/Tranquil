@@ -784,7 +784,7 @@ ConstString  = "$" ( '"' < [^\"]* >
                      _dblQuot ~{ SyntaxError(@"Constant string literal left unclosed"); }
                    | "\'" < [^\']* >
                      _snglQuot ~{ SyntaxError(@"Constant string literal left unclosed"); }
-                   | < [^\n ;,\]}.]+ >
+                   | < [^\n ;,\]}.)]+ >
                    ) ~{ SyntaxError(@"Expected string literal after '$'"); }
                    { $$ = [TQNodeConstString nodeWithString:YYNSSTR]; SetLineNo($$); }
 

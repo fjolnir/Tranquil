@@ -19,13 +19,13 @@ int main(int argc, char **argv)
         const char *outputPath = "tqapp.bc";
 
         char *arg;
-        NSMutableArray *scriptArgs = [NSMutableArray array];
+        NSPointerArray *scriptArgs = [NSPointerArray pointerArrayWithStrongObjects];
         for(int i = 1; i < argc; ++i) {
             arg = argv[i];
 
             // Args after the script path are considered to be args to the script itself
             if(inputPath)
-                [scriptArgs addObject:[NSString stringWithUTF8String:arg]];
+                [scriptArgs addPointer:[NSString stringWithUTF8String:arg]];
             else if(arg[0] == '-') {
                 if(strcmp(arg, "-d") == 0) showDebugOutput = YES;
                 else if(strcmp(arg, "-h") == 0) printHelpAndExit(0);
@@ -53,7 +53,10 @@ int main(int argc, char **argv)
             NSFileHandle *input = [NSFileHandle fileHandleWithStandardInput];
             NSData *inputData = [NSData dataWithData:[input readDataToEndOfFile]];
             script = [[[NSString alloc] initWithData:inputData encoding:NSUTF8StringEncoding] autorelease];
-            [program executeScript:script error:nil];
+            NSError *err = nil;
+            [program executeScript:script error:&err];
+            if(err)
+                NSLog(@"Error: %@", err);
         }
     }
     return 0;

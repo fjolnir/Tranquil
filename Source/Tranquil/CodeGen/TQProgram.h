@@ -16,7 +16,6 @@ TQ_EXTERN_C NSString * const kTQSyntaxErrorException;
 
 @interface TQProgram : NSObject {
     BOOL _initializedTQRuntime;
-    NSArray *_arguments;
 
     // Values used for globals under JIT compilation
     struct TQBlockByRef _argGlobalForJIT;
@@ -24,7 +23,7 @@ TQ_EXTERN_C NSString * const kTQSyntaxErrorException;
 }
 
 @property(readwrite, retain) NSString *name;
-@property(readwrite, retain) NSArray *arguments;
+@property(readwrite, retain) NSPointerArray *arguments;
 @property(readonly) NSMutableDictionary *globals;
 @property(readonly) TQHeaderParser *objcParser;
 @property(readwrite) BOOL shouldShowDebugInfo;
