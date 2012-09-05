@@ -22,6 +22,7 @@ CXXFLAGS = {
         '-I`pwd`/Build',
         '-I/usr/include/libxml2',
         '`/usr/local/tranquil/llvm/bin/llvm-config --cflags`',
+        #'`/usr/local/llvm.dbg/bin/llvm-config --cflags`',
         '-O3',
     ].join(' '),
     :development => [
