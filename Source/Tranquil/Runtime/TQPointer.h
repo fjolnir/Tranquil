@@ -22,7 +22,7 @@ extern NSString * const TQTypeString;
 
 // A class to enable use of (Obj-)C APIs that utilize pointers
 @interface TQPointer : TQObject {
-    const char *_itemType;
+    char *_itemType;
     NSUInteger _itemSize, _count;
     BOOL _freeOnDealloc;
     @public

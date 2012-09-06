@@ -100,13 +100,14 @@ NSString * const TQTypeString    = @"*";
     assert(aType != nil);
     assert(aCount > 0);
 
-    _itemType      = aType;
+    _itemType      = strdup(aType);
     _addr          = (char *)aAddr;
     _freeOnDealloc = NO;
     _count         = aCount;
     TQGetSizeAndAlignment(_itemType, &_itemSize, NULL);
     if(_itemSize == 0) {
-        _itemType = "v";
+        free(_itemType);
+        _itemType = strdup("v");
         _itemSize = sizeof(void*);
     }
 
@@ -145,10 +146,27 @@ NSString * const TQTypeString    = @"*";
     return [NSString stringWithFormat:@"<%@:%p to: %p type: %s>", [self class], self, _addr, _itemType];
 }
 
+- (id)print
+{
+    if(*_itemType == _C_CHARPTR)
+        printf("%s", _addr);
+    else if(*_itemType == _C_CHR)
+        fwrite(_addr, sizeof(char), _count, stdout);
+    else
+        printf("%s\n", [[self description] UTF8String]);
+    return nil;
+}
+
+- (const char *)UTF8String
+{
+    return *_itemType == _C_CHARPTR ? _addr : NULL;
+}
+
 - (void)dealloc
 {
     if(_freeOnDealloc)
         free(_addr);
+    free(_itemType);
     [super dealloc];
 }
 @end
