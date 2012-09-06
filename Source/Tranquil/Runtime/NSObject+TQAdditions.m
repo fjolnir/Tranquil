@@ -11,7 +11,12 @@
 
 - (id)print
 {
-    printf("%s\n", [[self description] UTF8String]);
+    printf("%s\n", [[self toString] UTF8String]);
+    return self;
+}
+- (id)printWithoutNl
+{
+    printf("%s", [[self toString] UTF8String]);
     return self;
 }
 
