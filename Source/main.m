@@ -19,7 +19,7 @@ int main(int argc, char **argv)
         const char *outputPath = "tqapp.bc";
 
         char *arg;
-        NSPointerArray *scriptArgs = [NSPointerArray pointerArrayWithStrongObjects];
+        NSPointerArray *scriptArgs = [[NSPointerArray new] autorelease];
         for(int i = 1; i < argc; ++i) {
             arg = argv[i];
 
