@@ -1,5 +1,6 @@
 #import "TQRange.h"
 #import "TQRuntime.h"
+#import "../../../Build/TQStubs.h"
 
 @implementation TQRange
 @synthesize start=_start, length=_length;
@@ -18,10 +19,6 @@
     ret.length = [aEnd subtract:aStart];
     return [ret autorelease];
 }
-
-extern id TQDispatchBlock0(id);
-extern id TQDispatchBlock1(id, id);
-extern id TQDispatchBlock2(id, id, id);
 
 - (id)each:(id (^)())aBlock
 {

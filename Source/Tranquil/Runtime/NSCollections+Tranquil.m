@@ -1,4 +1,5 @@
 #import "NSCollections+Tranquil.h"
+#import "../../../Build/TQStubs.h"
 #import "TQNumber.h"
 #import <objc/runtime.h>
 
@@ -135,7 +136,7 @@
 - (id)each:(id (^)(id))aBlock
 {
     for(id obj in self) {
-        aBlock(obj);
+        TQDispatchBlock1(aBlock, obj);
     }
     return nil;
 }
@@ -145,7 +146,7 @@
     NSPointerArray *ret = [NSPointerArray pointerArrayWithStrongObjects];
 
     for(id obj in self) {
-        [ret addPointer:aBlock(obj)];
+        [ret push:TQDispatchBlock1(aBlock, obj)];
     }
     return ret;
 }
@@ -154,7 +155,7 @@
 {
     id accum = TQSentinel; // Make the block use it's default accumulator on the first call
     for(id obj in self) {
-        accum = aBlock(obj, accum);
+        accum = TQDispatchBlock2(aBlock, obj, accum);
     }
     return accum;
 }

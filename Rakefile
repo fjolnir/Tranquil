@@ -64,7 +64,7 @@ PATHMAP = 'build/%n.o'
 
 STUB_OUTPATH    = 'Build/block_stubs.m'
 STUB_SCRIPT     = 'Source/Tranquil/gen_stubs.rb'
-STUB_H_OUTPATH  = '/usr/local/tranquil/include/Tranquil/Runtime/TQStubs.h'
+STUB_H_OUTPATH  = 'Build/TQStubs.h'
 STUB_H_SCRIPT   = 'Source/Tranquil/gen_stubs_header.rb'
 MSGSEND_SOURCE  = 'Source/Tranquil/Runtime/msgsend.s'
 MSGSEND_OUT     = 'Build/msgsend.o'
@@ -116,7 +116,8 @@ file STUB_OUTPATH => STUB_SCRIPT do |f|
 end
 
 file STUB_H_OUTPATH => STUB_H_SCRIPT do |f|
-    sh "ruby #{STUB_H_SCRIPT} #{MAXARGS} > #{STUB_H_OUTPATH}"
+    sh "ruby #{STUB_H_SCRIPT} #{MAXARGS} > Build/TQStubs.h"
+    sh "cp Build/TQStubs.h /usr/local/tranquil/include/Tranquil/Runtime/TQStubs.h"
 end
 
 

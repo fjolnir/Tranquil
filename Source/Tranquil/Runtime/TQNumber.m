@@ -8,6 +8,7 @@
 #else
     #define _tqfloat float
 #endif
+#import "../../../Build/TQStubs.h"
 
 static id (*numberWithDoubleImp)(id, SEL, double);
 static id (*numberWithLongImp)(id, SEL, long);
@@ -544,18 +545,15 @@ static __inline__ _tqfloat _TQNumberValue(TQNumber *ptr)
     return [NSString stringWithFormat:@"%0.7g", _TQNumberValue(self)];
 }
 
-id TQDispatchBlock0(struct TQBlockLiteral *);
-id TQDispatchBlock1(struct TQBlockLiteral *, id );
-
 - (id)times:(id (^)())block
 {
     if(TQBlockGetNumberOfArguments(block) == 1) {
         for(int i = 0; i < (int)_TQNumberValue(self); ++i) {
-            TQDispatchBlock1((struct TQBlockLiteral *)block, [TQNumber numberWithInt:i]);
+            TQDispatchBlock1(block, [TQNumber numberWithInt:i]);
         }
     } else {
         for(int i = 0; i < (int)_TQNumberValue(self); ++i) {
-            TQDispatchBlock0((struct TQBlockLiteral *)block);
+            TQDispatchBlock0(block);
         }
     }
     return nil;
