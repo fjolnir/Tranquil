@@ -47,7 +47,7 @@
 {
     return [self reduce:^(id n, NSPointerArray *accum) {
         if(accum == TQSentinel)
-            accum = [NSPointerArray pointerArrayWithStrongObjects];
+            accum = [[NSPointerArray new] autorelease];
         [accum addPointer:aBlock(n)];
         return accum;
     }];
@@ -55,13 +55,13 @@
 
 - (NSPointerArray *)toArray
 {
-    NSPointerArray *result = [NSPointerArray pointerArrayWithStrongObjects];
+    NSPointerArray *result = [NSPointerArray new];
     NSUInteger len = [_length unsignedIntegerValue];
     result.count = len;
     for(NSUInteger i = 0; i < len; ++i) {
         [result replacePointerAtIndex:i withPointer:[TQNumber numberWithUnsignedInteger:i]];
     }
-    return result;
+    return [result autorelease];
 }
 
 - (NSString *)description

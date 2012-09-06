@@ -14,7 +14,7 @@
 @implementation NSMapTable (Tranquil)
 + (NSMapTable *)tq_mapTableWithObjectsAndKeys:(id)firstObject, ...
 {
-    NSMapTable *ret = [NSMapTable mapTableWithStrongToStrongObjects];
+    NSMapTable *ret = [NSMapTable new];
 
     va_list args;
     va_start(args, firstObject);
@@ -31,7 +31,7 @@
     }
     va_end(args);
 
-    return ret;
+    return [ret autorelease];
 }
 
 - (id)objectForKeyedSubscript:(id)key
@@ -48,7 +48,7 @@
 @implementation NSPointerArray (Tranquil)
 + (NSPointerArray *)tq_pointerArrayWithObjects:(id)firstObject , ...
 {
-    NSPointerArray *ret = [NSPointerArray pointerArrayWithStrongObjects];
+    NSPointerArray *ret = [NSPointerArray new];
 
     va_list args;
     va_start(args, firstObject);
@@ -59,7 +59,13 @@
     }
     va_end(args);
 
-    return ret;
+    return [ret autorelease];
+}
+
+#pragma mark NSMutableArray compatibility
+- (void)addObject:(id)aObj
+{
+    [self addPointer:aObj];
 }
 
 - (id)objectAtIndex:(NSUInteger)aIdx
@@ -86,12 +92,13 @@
         return nil;
 }
 
+
+#pragma mark - Helpers
+
 - (TQNumber *)size
 {
     return [TQNumber numberWithDouble:(double)[self count]];
 }
-
-#pragma mark - Helpers
 
 - (id)push:(id)aObj
 {
@@ -116,14 +123,14 @@
     return val;
 }
 
-- (id)add:(NSPointerArray *)aArray
+- (id)add:(NSPointerArray *)aArray // add: as in +
 {
-    NSPointerArray *result = [NSPointerArray pointerArrayWithStrongObjects];
+    NSPointerArray *result = [NSPointerArray new];
     for(id obj in self)
         [result push:obj];
     for(id obj in aArray)
         [result push:obj];
-    return result;
+    return [result autorelease];
 }
 
 #pragma mark - Iterators
@@ -141,14 +148,13 @@
     return nil;
 }
 
-- (NSPointerArray *)map:(id (^)(id))aBlock
+- (id)map:(id (^)(id))aBlock
 {
-    NSPointerArray *ret = [NSPointerArray pointerArrayWithStrongObjects];
-
+    id ret = [[self class] new];
     for(id obj in self) {
         [ret push:TQDispatchBlock1(aBlock, obj)];
     }
-    return ret;
+    return [ret autorelease];
 }
 
 - (id)reduce:(id (^)(id, id))aBlock
@@ -167,9 +173,9 @@
 
 - (id)concat
 {
-    return [self reduce:^(NSPointerArray *subArray, NSPointerArray *accum) {
+    return [self reduce:^(id subArray, id accum) {
         if(accum == TQSentinel)
-            accum = [NSPointerArray pointerArrayWithStrongObjects];
+            accum = [[[self class] new] autorelease];
         return [subArray reduce:^(id obj, id _) {
              return [accum push:obj];
         }];
@@ -180,12 +186,12 @@
     NSUInteger length = [self count];
     if([otherArray count] > length)
         length = [otherArray count];
-    NSPointerArray *result = [NSPointerArray pointerArrayWithStrongObjects];
+    id result = [[self class] new];
     for(int i = 0; i < length; ++i) {
         [result push:[self       objectAtIndexedSubscript:i]];
         [result push:[otherArray objectAtIndexedSubscript:i]];
     }
-    return result;
+    return [result autorelease];
 }
 
 - (NSString *)description

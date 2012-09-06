@@ -306,22 +306,22 @@ void TQStoreStrong(id *location, id obj)
 NSPointerArray *TQVaargsToArray(va_list *items)
 {
     register id arg;
-    NSPointerArray *arr = [NSPointerArray pointerArrayWithWeakObjects];
+    NSPointerArray *arr = [NSPointerArray new];
     while((arg = va_arg(*items, id)) != TQSentinel) {
         [arr addPointer:arg];
     }
-    return arr;
+    return [arr autorelease];
 }
 
 NSPointerArray *TQCliArgsToArray(int argc, char **argv)
 {
-    NSPointerArray *arr = [NSPointerArray pointerArrayWithStrongObjects];
+    NSPointerArray *arr = [NSPointerArray new];
     if(argc <= 1)
         return arr;
     for(int i = 1; i < argc; ++i) {
         [arr addPointer:(void *)[NSMutableString stringWithUTF8String:argv[i]]];
     }
-    return arr;
+    return [arr autorelease];
 }
 
 #pragma mark - Operators

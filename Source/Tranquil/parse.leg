@@ -677,7 +677,7 @@ ArrItem      = item:Expression
 
 Dictionary   = "{" --
                {
-                   PushStack([NSMapTable mapTableWithStrongToStrongObjects]);
+                   PushStack([[NSMapTable new] autorelease]);
                }
                (DictItem -- ("," -- DictItem)*)? --
                "}"
