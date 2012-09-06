@@ -2,7 +2,9 @@
 #import "../TQNodeOperator.h"
 #import "../TQNodeNumber.h"
 #import "../TQNodeValid.h"
+#import "../TQNodeCustom.h"
 #import "../TQNodeNil.h"
+#import <objc/runtime.h>
 
 @implementation TQArithmeticProcessor
 + (void)load
@@ -27,7 +29,39 @@
         [self processNode:op.right withTrace:subTrace];
     [subTrace release];
 
-    if(![op.left isKindOfClass:[TQNodeNumber class]] || ![op.right isKindOfClass:[TQNodeNumber class]])
+    if(![op.left isKindOfClass:[TQNodeNumber class]]) {
+        if(op.type != kTQOperatorExponent || ![op.right isKindOfClass:[TQNodeNumber class]])
+            return aNode;
+        // Check if we have an integer exponent, if so we can expand it to a multiplication/division
+        double expf = [[(TQNodeNumber *)op.right value] doubleValue];
+        if(round(expf) != expf)
+            return aNode;
+        if(exp == 0)
+            return [TQNodeNumber nodeWithDouble:1];
+        long exp = (long)expf;
+        BOOL isNeg = exp < 0;
+        exp = abs(exp);
+
+        TQNode *left = op.left;
+        TQNodeCustom *num = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *b, TQNodeRootBlock *r) {
+            // little bit of a hack to make sure we only evaluate the left side once
+            NSValue *val = objc_getAssociatedObject(left, @"ExponentExpansionTemp");
+            if(!val) {
+                val = [NSValue valueWithPointer:[left generateCodeInProgram:p block:b root:r error:nil]];
+                objc_setAssociatedObject(op.left, @"ExponentExpansionTemp", val, OBJC_ASSOCIATION_RETAIN);
+            }
+            return (llvm::Value *)[val pointerValue];
+        }];
+        TQNode *replacement = num;
+        for(int i = 1; i < exp; ++i) {
+            replacement = [TQNodeOperator nodeWithType:kTQOperatorMultiply left:replacement right:num];
+        }
+        if(isNeg)
+            replacement = [TQNodeOperator nodeWithType:kTQOperatorDivide left:[TQNodeNumber nodeWithDouble:1] right:replacement];
+        [[aTrace lastObject] replaceChildNodesIdenticalTo:aNode with:replacement];
+
+        return replacement;
+    } else if(![op.right isKindOfClass:[TQNodeNumber class]])
         return aNode;
 
     TQNode *replacement;
