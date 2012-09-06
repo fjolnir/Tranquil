@@ -70,6 +70,20 @@ using namespace llvm;
     }
 }
 
+- (BOOL)replaceChildNodesIdenticalTo:(TQNode *)aNodeToReplace with:(TQNode *)aNodeToInsert
+{
+    BOOL success = NO;
+    if(_receiver == aNodeToReplace) {
+        self.receiver = aNodeToInsert;
+        success |= YES;
+    } else
+        success |= [_receiver replaceChildNodesIdenticalTo:aNodeToReplace with:aNodeToInsert];
+    for(TQNodeArgument *arg in _arguments) {
+        success |= [arg replaceChildNodesIdenticalTo:aNodeToReplace with:aNodeToInsert];
+    }
+    return success;
+}
+
 
 - (NSString *)description
 {

@@ -449,11 +449,30 @@ using namespace llvm;
 
 - (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
 {
-    for(TQNode *node in self.left) {
+    for(TQNode *node in [[self.left copy] autorelease]) {
         aBlock(node);
     }
-    for(TQNode *node in self.right) {
+    for(TQNode *node in [[self.right copy] autorelease]) {
         aBlock(node);
     }
+}
+
+
+- (BOOL)replaceChildNodesIdenticalTo:(TQNode *)aNodeToReplace with:(TQNode *)aNodeToInsert
+{
+    BOOL success = NO;
+    for(int i = 0; i < [self.left count]; ++i) {
+        if([self.left objectAtIndex:i] == aNodeToReplace) {
+            success |= YES;
+            [self.left replaceObjectAtIndex:i withObject:aNodeToInsert];
+        }
+    }
+    for(int i = 0; i < [self.right count]; ++i) {
+        if([self.right objectAtIndex:i] == aNodeToReplace) {
+            success |= YES;
+            [self.right replaceObjectAtIndex:i withObject:aNodeToInsert];
+        }
+    }
+    return success;
 }
 @end

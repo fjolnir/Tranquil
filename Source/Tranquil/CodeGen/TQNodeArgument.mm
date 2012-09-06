@@ -42,6 +42,15 @@ using namespace llvm;
     aBlock(_passedNode);
 }
 
+- (BOOL)replaceChildNodesIdenticalTo:(TQNode *)aNodeToReplace with:(TQNode *)aNodeToInsert
+{
+    if(_passedNode == aNodeToReplace) {
+        self.passedNode = aNodeToReplace;
+        return YES;
+    }
+    return [_passedNode replaceChildNodesIdenticalTo:aNodeToReplace with:aNodeToInsert];
+}
+
 - (NSString *)description
 {
     return [NSString stringWithFormat:@"<arg@ %@: %@>", _selectorPart, _passedNode];
