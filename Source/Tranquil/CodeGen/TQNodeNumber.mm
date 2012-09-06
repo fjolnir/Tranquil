@@ -49,16 +49,13 @@ using namespace llvm;
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
-#ifdef __LP64__
-    int64_t ptr;
-    double value = [_value doubleValue];
-#else
-    int32_t ptr;
-    float value = [_value floatValue];
+#ifndef __LP64__
+#error "numbers not implemented for 32bit"
 #endif
-    memcpy(&ptr, &value, sizeof(value));
-    ptr &= ~0xf;
-    ptr |= kTQNumberTag;
+
+    float value = [_value floatValue];
+    int64_t ptr = (((*(int64_t *)&value) << 4) | kTQNumberTag);
+
     return aBlock.builder->CreateIntToPtr(ConstantInt::get(aProgram.llIntPtrTy, ptr), aProgram.llInt8PtrTy);
 #if 0
     Module *mod = aProgram.llModule;

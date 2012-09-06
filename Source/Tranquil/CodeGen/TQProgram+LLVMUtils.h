@@ -42,6 +42,7 @@
     *objc_autoreleasePoolPush, *objc_autoreleasePoolPop, *TQSetValueForKey, *TQValueForKey,
     *TQGetOrCreateClass, *TQObjectsAreEqual, *TQObjectsAreNotEqual, *TQObjectGetSuperClass,
     *TQVaargsToArray, *TQUnboxObject, *TQBoxValue, *tq_msgSend, *objc_retainAutoreleasedReturnValue,
+    *TQVaargsToArray, *TQUnboxObject, *TQBoxValue, *tq_msgSend, *tq_msgSend_noBoxing, *objc_retainAutoreleasedReturnValue,
     *TQInitializeRuntime, *TQCliArgsToArray,
     *dispatch_get_global_queue, *dispatch_group_create, *dispatch_release, *dispatch_group_wait,
     *dispatch_group_notify, *dispatch_group_async, *objc_sync_enter, *objc_sync_exit;

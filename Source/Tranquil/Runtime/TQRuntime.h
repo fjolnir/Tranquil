@@ -70,6 +70,18 @@ struct TQBlockByRef {
 
 typedef void (^TQTypeIterationBlock)(const char *type, NSUInteger size, NSUInteger align, BOOL *stop);
 
+// The tranquil message dispatcher. Automatically performs any (un)boxing required for a message
+// to be dispatched.
+id tq_msgSend(id self, SEL selector, ...);
+
+// Same as above except does not perform any (un)boxing
+id tq_msgSend_noBoxing(id self, SEL selector, ...);
+
+// Sends a message boxing the return value and unboxing arguments as necessary
+// WAY slower than objc_msgSend and should never be used directly.
+// tq_msgSend is a more intelligent message dispatcher that calls tq_boxedMsgSend only if necessary
+id tq_boxedMsgSend(id self, SEL selector, ...);
+
 // These implement support for dynamic instance variables (But use existing properties if available)
 NSMapTable *TQGetDynamicIvarTable(id obj);
 void TQSetValueForKey(id obj, NSString *key, id value);
@@ -77,7 +89,7 @@ id TQValueForKey(id obj, NSString *key);
 
 BOOL TQObjectIsStackBlock(id obj);
 id TQPrepareObjectForReturn(id obj);
-// Variant of objc_storeStrong that moves stack blocks to the heap before assigning (Used for captures&globals)
+// Variant of objc_storeStrong that moves stack blocks to the heap
 void TQStoreStrong(id *location, id obj);
 NSPointerArray *TQVaargsToArray(va_list *items);
 NSPointerArray *TQCliArgsToArray(int argc, char **argv);
@@ -102,11 +114,6 @@ void TQIterateTypesInEncoding(const char *typePtr, TQTypeIterationBlock blk);
 
 // Returns the number of arguments a tranquil block takes (If the object is not a block originating from tranquil, it returns -1)
 NSInteger TQBlockGetNumberOfArguments(id block);
-
-// Tests objects for equality (including nil)
-id TQObjectsAreEqual(id a, id b);
-// Tests objects for inequality (including nil)
-id TQObjectsAreNotEqual(id a, id b);
 
 // Adds operator methods to the passed class (such as ==:, >=:, []: etc)
 BOOL TQAugmentClassWithOperators(Class klass);

@@ -1,5 +1,6 @@
 #import "TQNil.h"
 #import "TQRuntime.h"
+#import "TQNumber.h"
 #import <objc/runtime.h>
 
 const TQNil *TQGlobalNil;
@@ -10,11 +11,17 @@ static id nilReturner(id self, SEL sel, ...)
 }
 
 @implementation TQNil
+
 + (void)load
 {
+    if(self != [TQNil class])
+        return;
+
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         TQGlobalNil = [class_createInstance(self, 0) init];
+        class_replaceMethod(self, TQAddOpSel, class_getMethodImplementation(self, @selector(add:)),      "@@:@");
+        class_replaceMethod(self, TQSubOpSel, class_getMethodImplementation(self, @selector(subtract:)), "@@:@");
     });
 }
 
@@ -101,5 +108,9 @@ static id nilReturner(id self, SEL sel, ...)
 {
     return nil;
 }
+
+- (TQNumber *)add:(id)b      { return [[TQNumber numberWithInt:0] add:b];      }
+- (TQNumber *)subtract:(id)b { return [[TQNumber numberWithInt:0] subtract:b]; }
+
 @end
 

@@ -199,25 +199,6 @@ NSInteger TQBlockGetNumberOfArguments(id block)
     return -1;
 }
 
-// We either must use these functions to test nil for equality, or use the private _objc_setNilResponder which I don't feel good doing
-// For non equality test operators testing against nil is simply always false so we do not need to implement equivalents for them.
-id TQObjectsAreEqual(id a, id b)
-{
-    if((uintptr_t)a & (uintptr_t)b & kTQNumberTag)
-        return a == b ? TQValid : nil;
-    else if(a != nil)
-        return _objc_msgSend_hack2(a, TQEqOpSel, b);
-    else
-        return b == nil ? TQValid : nil;
-}
-
-id TQObjectsAreNotEqual(id a, id b)
-{
-    if(a)
-        return _objc_msgSend_hack2(a, TQNeqOpSel, b);
-    return b != nil ? TQValid : nil;
-}
-
 
 #pragma mark - Dynamic instance variables
 

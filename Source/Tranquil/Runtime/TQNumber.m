@@ -2,12 +2,6 @@
 #import <objc/runtime.h>
 #import "TQRuntime.h"
 #import "TQRange.h"
-
-#ifdef __LP64__
-    #define _tqfloat double
-#else
-    #define _tqfloat float
-#endif
 #import "../../../Build/TQStubs.h"
 
 static id (*numberWithDoubleImp)(id, SEL, double);
@@ -21,18 +15,14 @@ extern id _objc_msgSend_hack(id, SEL)      asm("_objc_msgSend");
 extern id _objc_msgSend_hack2(id, SEL, id) asm("_objc_msgSend");
 
 // Tagged pointer niceness (Uses floats by truncating the mantissa by 1 byte)
-void _objc_insert_tagged_isa(unsigned char slotNumber, Class isa) asm("__objc_insert_tagged_isa");
+extern void _objc_insert_tagged_isa(unsigned char slotNumber, Class isa);
 
 const unsigned char kTQNumberTagSlot  = 5; // Free slot
 const uintptr_t     kTQNumberTag      = (kTQNumberTagSlot << 1) | 1;
 
-static __inline__ id _createTaggedPointer(_tqfloat value)
+static __inline__ id _createTaggedPointer(float value)
 {
-    uintptr_t ptr;
-    memcpy(&ptr, &value, sizeof(_tqfloat));
-    ptr &= ~0xf; // Mask out the tag bits
-    ptr |= kTQNumberTag;
-    return (id)ptr;
+    return (void *)(((*(uintptr_t *)&value) << 4) | kTQNumberTag);
 }
 
 static __inline__ BOOL _isTaggedPointer(id ptr)
@@ -43,20 +33,17 @@ static __inline__ BOOL _isTaggedPointer(id ptr)
 static __inline__ BOOL _fitsInTaggedPointer(double aValue)
 {
 #ifdef __LP64__
-    return YES;
-#else
     return (aValue > -FLT_MAX) && (aValue < FLT_MAX);
+#else
+    return NO; // TODO: Figure out a way to do tagging on 32bit
 #endif
 }
 
-static __inline__ _tqfloat _TQNumberValue(TQNumber *ptr)
+static __inline__ double _TQNumberValue(TQNumber *ptr)
 {
     if(_isTaggedPointer(ptr)) {
-        // Zero the isa tag
-        ptr = (id)(((uintptr_t)ptr) & ~kTQNumberTag);
-        double val;
-        memcpy(&val, &ptr, sizeof(_tqfloat));
-        return val;
+        ptr = (void *)((*(uintptr_t *)&ptr) >> 4);
+        return (double)*(float*)&ptr;
     }
     return ptr->_value;
 }
@@ -93,7 +80,7 @@ static __inline__ _tqfloat _TQNumberValue(TQNumber *ptr)
                 return (id)nil;
             else if(object_getClass(a) != object_getClass(b))
                 return _TQNumberValue(a) == [b doubleValue] ? (id)TQValid : nil;
-            return (_TQNumberValue(a) == _TQNumberValue(b))  ? (id)TQValid : nil;
+            return (_TQNumberValue(a) == _TQNumberValue(b)) ? (id)TQValid : nil;
         });
         class_replaceMethod(TQNumberClass, TQEqOpSel, imp, "@@:@");
         // !=
