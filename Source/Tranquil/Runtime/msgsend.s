@@ -61,8 +61,7 @@
 _tq_msgSend_noBoxing:
     test %a1, %a1
     je nilSend
-    jmp normalSend
-
+    jmp _objc_msgSend
 
 // tq_msgSend: inspects a method and either redirects to objc_msgSend or tq_boxedMsgSend depending on it's signature
 // TODO: Make sure this is thread safe
