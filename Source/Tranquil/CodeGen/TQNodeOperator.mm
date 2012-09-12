@@ -150,9 +150,7 @@ using namespace llvm;
         TQNodeCustom *fastpath = nil; // Block to use in the case where both are tagged numbers
 
         Value *numTag     = ConstantInt::get(aProgram.llIntPtrTy, kTQNumberTag);
-        Value *numValMask = ConstantInt::get(aProgram.llIntPtrTy, ~0xf);
         Value *nullPtr    = ConstantPointerNull::get(aProgram.llInt8PtrTy);
-        Value *zero       = [[TQNodeNumber nodeWithDouble:0] generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
 
 #define PtrToInt(val) B->CreatePtrToInt((val), aProgram.llIntPtrTy)
 #define IntToPtr(val) B->CreateIntToPtr((val), aProgram.llInt8PtrTy)
@@ -268,13 +266,13 @@ using namespace llvm;
             // If the operator supports a fast path then we must create the necessary branches
             Value *zeroInt = ConstantInt::get(aProgram.llIntPtrTy, 0);
             // if (!a | a isa TaggedNumber) & (!b | b isa TaggedNumber)
-            Value *aCond = B->CreateOr(B->CreateICmpNE(B->CreateAnd(PtrToInt(left),  numTag), zeroInt), B->CreateICmpEQ(left, nullPtr));
-            Value *bCond = B->CreateOr(B->CreateICmpNE(B->CreateAnd(PtrToInt(right), numTag), zeroInt), B->CreateICmpEQ(right, nullPtr));
+            Value *aCond = B->CreateOr(B->CreateICmpEQ(B->CreateAnd(PtrToInt(left),  numTag), numTag), B->CreateICmpEQ(left, nullPtr));
+            Value *bCond = B->CreateOr(B->CreateICmpEQ(B->CreateAnd(PtrToInt(right), numTag), numTag), B->CreateICmpEQ(right, nullPtr));
             Value *cond = B->CreateAnd(aCond, bCond);
 
-            BasicBlock *fastBB = BasicBlock::Create(aProgram.llModule->getContext(), "opFastpath", aBlock.function);
-            BasicBlock *slowBB = BasicBlock::Create(aProgram.llModule->getContext(), "opSlowpath", aBlock.function);
-            BasicBlock *contBB = BasicBlock::Create(aProgram.llModule->getContext(), "cont", aBlock.function);
+            BasicBlock *fastBB  = BasicBlock::Create(aProgram.llModule->getContext(), "opFastpath", aBlock.function);
+            BasicBlock *slowBB  = BasicBlock::Create(aProgram.llModule->getContext(), "opSlowpath", aBlock.function);
+            BasicBlock *contBB  = BasicBlock::Create(aProgram.llModule->getContext(), "cont", aBlock.function);
 
             B->CreateCondBr(cond, fastBB, slowBB);
 
@@ -283,6 +281,10 @@ using namespace llvm;
             aBlock.builder = &fastBuilder;
             Value *fastVal = [fastpath generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
             [self _attachDebugInformationToInstruction:fastVal inProgram:aProgram block:aBlock root:aRoot];
+
+            // Add a check to see if the result is NaN or Inf, and if so switch to the slow path and redo the calculation
+            Value *resultCheck = B->CreateOr(B->CreateICmpEQ(fastVal, [[TQNodeNumber nodeWithDouble:NAN]      generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr]),
+                                             B->CreateICmpEQ(fastVal, [[TQNodeNumber nodeWithDouble:INFINITY] generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr]));
 
             IRBuilder<> slowBuilder(slowBB);
             aBlock.basicBlock = slowBB;
@@ -294,7 +296,7 @@ using namespace llvm;
             aBlock.basicBlock = contBB;
             aBlock.builder = contBuilder;
 
-            fastBuilder.CreateBr(contBB);
+            fastBuilder.CreateCondBr(resultCheck, slowBB, contBB);
             slowBuilder.CreateBr(contBB);
 
             PHINode *phi = contBuilder->CreatePHI(aProgram.llInt8PtrTy, 2);
