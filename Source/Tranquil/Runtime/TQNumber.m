@@ -56,6 +56,7 @@ static __inline__ double _TQNumberValue(TQNumber *ptr)
 - (oneway void)release {}
 - (id)autorelease { return self; }
 - (void)dealloc { if(NO) [super dealloc]; }
+- (id)copyWithZone:(NSZone *)aZone { return self; }
 @end
 
 @implementation TQNumber
@@ -544,6 +545,11 @@ static __inline__ double _TQNumberValue(TQNumber *ptr)
         }
     }
     return nil;
+}
+
+- (id)copyWithZone:(NSZone *)aZone
+{
+    return [[[self class] numberWithDouble:_value] retain];
 }
 
 
