@@ -157,6 +157,14 @@ NSString * const TQTypeString    = @"*";
     return nil;
 }
 
+- (NSMutableString *)toString
+{
+    const char *cStr = [self UTF8String];
+    if(cStr)
+        return [NSMutableString stringWithUTF8String:cStr];
+    return nil;
+}
+
 - (const char *)UTF8String
 {
     return *_itemType == _C_CHARPTR ? _addr : NULL;
