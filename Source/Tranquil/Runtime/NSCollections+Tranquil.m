@@ -205,7 +205,11 @@
 }
 @end
 
-@implementation NSUserDefaults (WBSubscripts)
+@implementation NSArray (Tranquil)
+@end
+
+
+@implementation NSUserDefaults (Tranquil)
 - (void)setObject:(id)obj forKeyedSubscript:(id <NSObject,NSCopying>)key
 {
     NSAssert([key isKindOfClass:[NSString class]], @"User defaults keys must be strings!");
@@ -217,7 +221,7 @@
 }
 @end
 
-@implementation NSCache (WBSubscripts)
+@implementation NSCache (Tranquil)
 - (void)setObject:(id)obj forKeyedSubscript:(id <NSObject,NSCopying>)key
 {
     [self setObject:obj forKey:(NSString *)key];
@@ -227,6 +231,7 @@
     return [self objectForKey:key];
 }
 @end
+
 
 #pragma mark -
 
