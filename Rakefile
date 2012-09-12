@@ -143,7 +143,7 @@ file :build_dir do
 end
 
 file :libtranquil => HEADERS_OUT + RUNTIME_O_FILES do |t|
-    sh "ar rcs #{BUILD_DIR}/libtranquil.a #{RUNTIME_O_FILES}"
+    sh "libtool -static -o #{BUILD_DIR}/libtranquil.a #{RUNTIME_O_FILES}"
     sh "mkdir -p /usr/local/tranquil/lib"
     sh "cp Build/libtranquil.a /usr/local/tranquil/lib"
 end
