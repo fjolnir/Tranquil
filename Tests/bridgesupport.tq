@@ -1,7 +1,0 @@
-\bs = TQBridgeSupport new
-\bs loadFramework: "/System/Library/Frameworks/Foundation.framework"
-a = NSMakeRect(1,2,3,4)
-
-a       print
-a[0][1] print
-a[1][0] print
