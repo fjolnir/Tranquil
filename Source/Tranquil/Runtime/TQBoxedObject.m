@@ -644,7 +644,7 @@ id tq_boxedMsgSend(id self, SEL selector, ...)
         [NSException raise:NSGenericException
                     format:@"Unknown selector %@ sent to object %@", NSStringFromSelector(selector), self];
         return nil;
-    } else if((uintptr_t)method == 0x1) {
+    } else if((uintptr_t)method == 0x1L) {
         TQLog(@"Error: Tried to use tq_boxedMsgSend to call a method that does not require boxing");
         return nil;
     }

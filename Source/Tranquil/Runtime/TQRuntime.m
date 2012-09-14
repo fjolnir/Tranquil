@@ -112,7 +112,7 @@ void _TQCacheSelector(id obj, SEL sel)
         // Methods that do not have a registered implementation are assumed to take&return only objects
         uintptr_t unboxedVal = 0x1L;
         if(!method) {
-            CFDictionarySetValue(_TQSelectorCache, cacheKey, (void*)0x1);
+            CFDictionarySetValue(_TQSelectorCache, cacheKey, (void*)0x1L);
             return;
         }
 
@@ -120,7 +120,7 @@ void _TQCacheSelector(id obj, SEL sel)
         if(TQMethodTypeRequiresBoxing(enc))
             CFDictionarySetValue(_TQSelectorCache, cacheKey, (void*)method);
         else
-            CFDictionarySetValue(_TQSelectorCache, cacheKey, (void*)0x1);
+            CFDictionarySetValue(_TQSelectorCache, cacheKey, (void*)0x1L);
     }
  }
 
