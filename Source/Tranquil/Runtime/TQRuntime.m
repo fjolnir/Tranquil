@@ -106,7 +106,8 @@ void _TQCacheSelector(id obj, SEL sel)
 {
     @synchronized((NSDictionary *)_TQSelectorCache) {
         Class kls = object_getClass(obj);
-        void *cacheKey = (void*)((uintptr_t)kls ^ (uintptr_t)sel);
+        // See msgsend.s for an explanation of the key
+        void *cacheKey = (void*)((uintptr_t)kls ^ ((uintptr_t)sel << 32));
 
         Method method = class_getInstanceMethod(kls, sel);
         // Methods that do not have a registered implementation are assumed to take&return only objects

@@ -72,6 +72,7 @@ _tq_msgSend:
     SaveRegisters _tq_msgSend
 
     call _object_getClass
+    shlq $32, %a2 // Shift the selector left by 32 bits (Selectors never have useful bits beyond that point)
     xor  %rax, %a2 // klass xor selector -> second param slot
     // Load the global CFDict _TQSelectorCache to first param slot
     mov  __TQSelectorCache@GOTPCREL(%rip), %a1

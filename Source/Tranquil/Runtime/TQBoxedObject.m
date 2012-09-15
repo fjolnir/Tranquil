@@ -634,7 +634,7 @@ id tq_boxedMsgSend(id self, SEL selector, ...)
         return nil;
 
     Class kls = object_getClass(self);
-    void *cacheKey =  (void*)((uintptr_t)kls ^ (uintptr_t)selector);
+    void *cacheKey =  (void*)((uintptr_t)kls ^ (uintptr_t)selector << 32);
     Method method = (Method)CFDictionaryGetValue(_TQSelectorCache, cacheKey);
     if(method == 0x0) {
         _TQCacheSelector(self, selector);
