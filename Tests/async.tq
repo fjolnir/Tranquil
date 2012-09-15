@@ -4,6 +4,7 @@ shouldStop = no
 a = async {
     until shouldStop {
         (NSDate date timeIntervalSince1970 % 10000000) print
+        Usleep(50000)
     }
     ^123
 }
@@ -12,6 +13,6 @@ whenFinished {
     "a is: #{a}" print
 }
 
-Usleep(50000)
+Usleep(500000)
 shouldStop = yes
 wait
