@@ -82,6 +82,7 @@ extern const uintptr_t     kTQNumberTag;        // The actual bits of the tag (u
 - (TQNumber *)log:(TQNumber *)base;
 - (TQNumber *)log;
 - (TQNumber *)log2;
+- (TQNumber *)ln;
 
 - (TQNumber *)sine;
 - (TQNumber *)cosine;
