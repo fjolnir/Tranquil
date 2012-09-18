@@ -11,7 +11,7 @@
 
 @interface NSPointerArray (Tranquil)
 + (NSPointerArray *)tq_pointerArrayWithObjects:(id)firstObject , ...;  // Arguments terminated by TQSentinel
-- (void)setObject:(void*)aPtr atIndexedSubscript:(NSUInteger)aIdx;
+- (void)setObject:(id)aPtr atIndexedSubscript:(NSUInteger)aIdx;
 - (id)objectAtIndexedSubscript:(NSUInteger)aIdx;
 - (TQNumber *)size;
 

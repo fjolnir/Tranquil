@@ -27,21 +27,21 @@
             key = head;
             setImp(ret, @selector(setObject:forKey:), val, key);
         } else
-            val = head;
+            val = TQObjectIsStackBlock(head) ? [[head copy] autorelease] : head;
     }
     va_end(args);
 
     return [ret autorelease];
 }
 
-- (id)objectForKeyedSubscript:(id)key
+- (id)objectForKeyedSubscript:(id)aKey
 {
-    return [self objectForKey:key];
+    return [self objectForKey:aKey];
 }
 
-- (void)setObject:(id)obj forKeyedSubscript:(id)key
+- (void)setObject:(id)aObj forKeyedSubscript:(id)aKey
 {
-    [self setObject:obj forKey:key];
+    [self setObject:TQObjectIsStackBlock(aObj) ? [[aObj copy] autorelease] : aObj forKey:aKey];
 }
 @end
 
@@ -65,7 +65,12 @@
 #pragma mark NSMutableArray compatibility
 - (void)addObject:(id)aObj
 {
-    [self addPointer:aObj];
+    [self addPointer:TQObjectIsStackBlock(aObj) ? [[aObj copy] autorelease] : aObj];
+}
+
+- (void)insertObject:(id)aObj atIndex:(NSUInteger)aIdx
+{
+    [self setObject:(id)aObj atIndexedSubscript:aIdx];
 }
 
 - (id)objectAtIndex:(NSUInteger)aIdx
@@ -73,13 +78,14 @@
     return (id)[self pointerAtIndex:aIdx];
 }
 
-- (void)setObject:(void*)aPtr atIndexedSubscript:(NSUInteger)aIdx
+- (void)setObject:(id)aObj atIndexedSubscript:(NSUInteger)aIdx
 {
     NSUInteger count = [self count];
-    if(aIdx < count)
-        [self replacePointerAtIndex:aIdx withPointer:aPtr];
-    else if(aIdx == count)
-        [self addPointer:aPtr];
+    if(aIdx < count) {
+        [self replacePointerAtIndex:aIdx
+                        withPointer:TQObjectIsStackBlock(aObj) ? [[aObj copy] autorelease] : aObj];
+    } else if(aIdx == count)
+        [self addObject:aObj];
     else
         assert(false);
 }
@@ -102,7 +108,7 @@
 
 - (id)push:(id)aObj
 {
-    [self addPointer:aObj];
+    [self addObject:aObj];
     return self;
 }
 
