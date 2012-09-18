@@ -19,7 +19,6 @@
     TQNodeMethod *method = (TQNodeMethod *)aNode;
 
     if(method.type == kTQInstanceMethod && [[method selector] isEqualToString:@"dealloc"]) {
-        
         TQNodeMessage *superDealloc = [TQNodeMessage nodeWithReceiver:[TQNodeSuper node]];
         [superDealloc.arguments addObject:[TQNodeArgument nodeWithPassedNode:nil selectorPart:@"dealloc"]];
         if(![method referencesNode:superDealloc])

@@ -138,6 +138,7 @@ id TQBoxValue(void *value, const char *type)
     return [TQBoxedObject box:value withType:type];
 }
 
+// TODO: This turns out to not actually be sufficient, there are additional cases to be handled for structs composed of smaller types (on x86-64)
 BOOL TQStructSizeRequiresStret(int size)
 {
     #if defined(__LP64__)
