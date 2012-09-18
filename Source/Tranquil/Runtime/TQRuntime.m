@@ -11,10 +11,10 @@
 extern "C" {
 #endif
 
-id TQSentinel = @"3d2c9ac0bf3911e1afa70800200c9a66aaaaaaaaa";
+id TQSentinel = @"3d2c9ac0bf3911e1afa70800200c9a66a";
 TQValidObject *TQValid = nil;
 
-// A dictionary keyed with `Class xor Selector` with values either being 0x1 (No boxing required for selector)
+// A dictionary keyed with `Class xor (Selector << 32)` with values either being 0x1 (No boxing required for selector)
 // or a pointer the Method object of the method to be boxed. This is only used by tq_msgSend and tq_boxedMsgSend
 CFMutableDictionaryRef _TQSelectorCache = NULL;
 
