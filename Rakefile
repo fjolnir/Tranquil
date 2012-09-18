@@ -51,6 +51,7 @@ TOOL_LDFLAGS = [
     '-rpath /usr/local/tranquil/llvm/lib',
     #'-rpath /usr/local/llvm.dbg/lib',
     '-lffi',
+    '-lreadline',
     #'-lprofiler',
     '-framework AppKit',
     '-all_load',
@@ -189,13 +190,10 @@ end
 task :install => [:tranquil] do
 end
 
-task :tqc => [:install] do |t|
-    sh "/usr/local/tranquil/bin/tranquil Tools/tqc.tq Tools/tqc.tq -o /usr/local/tranquil/bin/tqc"
-end
-
 def _install
     sh "mkdir -p /usr/local/tranquil/bin"
     sh "cp Build/tranquil /usr/local/tranquil/bin"
+    sh "cp Tools/repl.tq /usr/local/tranquil/bin/tqrepl"
     sh "/usr/local/tranquil/bin/tranquil Tools/tqc.tq Tools/tqc.tq -o /usr/local/tranquil/bin/tqc"
 end
 

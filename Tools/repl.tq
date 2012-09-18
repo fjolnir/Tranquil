@@ -1,0 +1,19 @@
+#!/usr/local/tranquil/bin/tranquil
+import "readline/readline"
+import "stdlib"
+
+getInput = {
+    ptr = Readline("tq> ")
+    str = ptr toString
+   `Add_history(str)` if: str length > 0
+    Free(ptr)
+
+    ^"^" << str
+}
+
+while line = getInput() {
+    result = TQProgram sharedProgram executeScript: line error: nil
+    out = " -> #{result}"
+   `out << " (#{result class})"` if: result
+    out print
+}
