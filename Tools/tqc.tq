@@ -1,9 +1,5 @@
 \ Tranquil compiler
 import "stdlib"
-#NSBlock {
-    - if:     cond `cond ? self() : nil`
-    - unless: cond `cond ? nil    : self()`
-}
 
 error = { reason |
     "Error! #{reason}" print
