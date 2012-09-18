@@ -14,12 +14,10 @@ getInput = {
    `Add_history(str)` if: str length > 0
     Free(ptr)
 
-    ^nonReturnable(str) ? str ! "^" << str
+    ^nonReturnable(str) ? str ! "^#{str}"
 }
 
 while line = getInput() {
     result = TQProgram sharedProgram executeScript: line error: nil
-    out = " -> #{result}"
-   `out << " (#{result class})"` if: result
-    out print
+   `" -> #{result} (#{result class})" print` if: result
 }
