@@ -37,10 +37,8 @@ static const int _TQBigNumberMaxDigits;
 
 - (id)initWithDouble:(double)aValue
 {
-    if(isnan(aValue) || aValue == INFINITY || aValue == -INFINITY) {
-        NSLog(@"Tried to create a %f BigNumber", aValue);
-        return nil;
-    }
+    TQAssert(!isnan(aValue) && aValue != INFINITY && aValue != -INFINITY, @"Tried to create a %f BigNumber", aValue);
+
     if(!(self = [self init]))
         return nil;
     mpf_set_d(_value, aValue);
