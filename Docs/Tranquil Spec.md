@@ -77,7 +77,7 @@
 	}
 	
 	\ Ternary operator
-	..condition.. ? ..expression.. : ..expression..
+	..condition.. ? ..expression.. ! ..expression..
 	
 	\ Objects
 	

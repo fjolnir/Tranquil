@@ -466,7 +466,7 @@ TernaryExpr    = cond:NoTernExpr --- "?" ---
                      [StackTop setCondition:cond];
                      [StackTop setIfExpr:ifExpr];
                  }
-                 (--- ":" ---
+                 (--- "!" ---
                   elseExpr:Expression ~{ SyntaxError(@"Ternary expression missing nil case value"); }
                   {
                       [StackTop setElseExpr:elseExpr];
