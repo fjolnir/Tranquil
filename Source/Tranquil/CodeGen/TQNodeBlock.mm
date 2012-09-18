@@ -459,7 +459,8 @@ using namespace llvm;
 
 
     // Start building the function
-    _autoreleasePool = _builder->CreateCall(aProgram.objc_autoreleasePoolPush);
+    if(!_isCompactBlock)
+        _autoreleasePool = _builder->CreateCall(aProgram.objc_autoreleasePoolPush);
 
     // Load the block pointer argument (must do this before captures, which must be done before arguments in case a default value references a capture)
     llvm::Function::arg_iterator argumentIterator = _function->arg_begin();
@@ -603,7 +604,8 @@ using namespace llvm;
     for(TQNode *stmt in _cleanupStatements) {
         [stmt generateCodeInProgram:aProgram block:self root:nil error:nil];
     }
-    _builder->CreateCall(aProgram.objc_autoreleasePoolPop, _autoreleasePool);
+    if(_autoreleasePool)
+        _builder->CreateCall(aProgram.objc_autoreleasePoolPop, _autoreleasePool);
 }
 
 - (void)createDispatchGroupInProgram:(TQProgram *)aProgram
