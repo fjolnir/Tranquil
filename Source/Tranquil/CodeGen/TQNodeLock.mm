@@ -79,9 +79,12 @@ using namespace llvm;
 
     for(TQNode *stmt in _statements) {
         [stmt generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        if([stmt isKindOfClass:[TQNodeReturn class]])
+            break;
     }
 
-    [exitNode generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+    if(!aBlock.basicBlock->getTerminator())
+        [exitNode generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     // Cleanup done already
     [aBlock.cleanupStatements removeObjectIdenticalTo:exitNode];
     [loop.cleanupStatements removeObjectIdenticalTo:exitNode];
