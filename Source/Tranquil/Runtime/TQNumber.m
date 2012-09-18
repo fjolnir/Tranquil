@@ -394,6 +394,18 @@ static __inline__ double _TQNumberValue(TQNumber *ptr)
 {
     return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), sqrt(_TQNumberValue(self)));
 }
+- (TQNumber *)log:(TQNumber *)base;
+{
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), log(_TQNumberValue(self)) / log([base doubleValue]));
+}
+- (TQNumber *)log
+{
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), log10(_TQNumberValue(self)));
+}
+- (TQNumber *)log2
+{
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), log(_TQNumberValue(self)));
+}
 
 - (TQNumber *)sine
 {

@@ -236,7 +236,7 @@ Index assign     |  []=       | []:=:              | Postfix operator (a[b] = c)
 	}
 	#TQNumber {
 		- ..: b {
-			multiplier = 10^(log(10, b) ceil) \ This is pseudo code, the log() block is not implemented
+			multiplier = 10^(b log ceil)
 			^self*multiplier + b
 		}
 	}
