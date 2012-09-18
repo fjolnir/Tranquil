@@ -55,7 +55,28 @@ extern \"C\" {
     source << "}\n\n"
 end
 
-source << "#undef TQS
+# Create a NSBlock category for calling the block as well
+source << "
+    @interface NSBlock : NSObject
+    @end
+
+    @implementation NSBlock (TQStubs)
+    + (void)initialize
+    {
+        if(self != [NSBlock class])
+            return;\n"
+        (0..maxArgs).each { |i|
+            source << "
+            class_addMethod(self, sel_registerName(\"call#{(0...i).reduce("") {|s| s<<":"} }\"),
+                            imp_implementationWithBlock(^(id self#{(0...i).reduce("") {|s, n| s<<", id a#{n}"} }) {
+                return TQDispatchBlock#{i}((struct TQBlockLiteral *)self#{(0...i).reduce("") {|s, n| s<<", a#{n}"} });
+            }), \"@:#{(0...i).reduce("") {|s| s<<"@"} }\");\n"
+        }
+source << "
+    }
+    @end
+
+#undef TQS
 #ifdef __cplusplus
 }
 #endif\n"
