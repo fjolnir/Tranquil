@@ -98,6 +98,23 @@
         return nil;
 }
 
+- (id)lastObject
+{
+    NSUInteger count = [self count];
+    return count == 0 ? nil : [self objectAtIndex:count-1];
+}
+
+- (void)removeObjectAtIndex:(NSUInteger)aIdx
+{
+    [self removePointerAtIndex:aIdx];
+}
+
+- (void)removeLastObject
+{
+    NSUInteger count = [self count];
+    if(count > 0)
+        [self removeObjectAtIndex:count-1];
+}
 
 #pragma mark - Helpers
 

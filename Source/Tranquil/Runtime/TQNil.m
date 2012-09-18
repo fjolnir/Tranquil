@@ -109,6 +109,11 @@ static id nilReturner(id self, SEL sel, ...)
     return nil;
 }
 
+- (Class)class
+{
+    return nil;
+}
+
 - (TQNumber *)add:(id)b      { return [[TQNumber numberWithInt:0] add:b];      }
 - (TQNumber *)subtract:(id)b { return [[TQNumber numberWithInt:0] subtract:b]; }
 

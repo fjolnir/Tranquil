@@ -328,7 +328,7 @@ Block        = '{' --
                    [$$ setStatements:[NSMutableArray arrayWithObject:[TQNodeReturn nodeWithValue:expr]]];
                }
 BlockArgDef  = name:Identifier { [StackTop addObject:[TQNodeArgumentDef nodeWithName:name]]; }
-                (- "=" --
+                (- "=" !"=" --
                   default:Expression ~{ SyntaxError(@"Expected default argument expression after '='"); }
                   {
                       [[StackTop lastObject] setDefaultArgument:default];
