@@ -44,12 +44,7 @@ using namespace llvm;
 
 - (BOOL)addArgument:(TQNodeMethodArgumentDef *)aArgument error:(NSError **)aoErr
 {
-    if(self.arguments.count == 2)
-        TQAssertSoft(aArgument.selectorPart != nil,
-                     kTQSyntaxErrorDomain, kTQUnexpectedIdentifier, NO,
-                     @"No name given for method");
     [self.arguments addObject:aArgument];
-
     return YES;
 }
 

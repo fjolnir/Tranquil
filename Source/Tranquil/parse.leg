@@ -227,8 +227,8 @@ OLKwdMsgBody = { PushStack([NSMutableArray array]); }
 
 
 SelectorPart = { PushStack([TQNodeArgument node]); }
-               (name:SelIdent  { [StackTop setSelectorPart:name]; })
-                - ':' -- param:MessageArg
+               (name:SelIdent  { [StackTop setSelectorPart:name]; })? ':' --
+               param:MessageArg ~{ SyntaxError(@"Missing message parameter"); }
                {
                     TQNodeArgument *arg = PopStack();
                     [arg setPassedNode:param];
@@ -363,7 +363,7 @@ Class        = '#' name:Constant --
                ( "<" --
                  SuperClsName ~{ SyntaxError(@"Expected Super class after '<'"); }
                  -- )?
-               '{' -- (OnLoadMsg --)* (Method --)*
+               '{' -- (OnLoadMsg ---)* (Method --)*
                _rightBrace ~{ SyntaxError(@"Unterminated class"); }
                {
                    $$ = PopStack();
@@ -412,24 +412,25 @@ MethodImpl   = arguments:MethodArgs  --
                            assert(false);
                    }
                }
-MethodArgs   = selIdentifier:SelIdent
-               {
-                   PushStack([NSMutableArray array]);
-                   [StackTop addObject:[TQNodeMethodArgumentDef nodeWithName:nil selectorPart:selIdentifier]];
+MethodArgs   = ( identifier:SelIdent !":"
+                 {
+                     $$ = [TQNodeMethodArgumentDef nodeWithName:nil selectorPart:identifier];
+                 }
+               | {
+                     PushStack([NSMutableArray array]);
+                 }
+                 (MethodArg --)+
+                 {
+                     $$ = PopStack();
+                 }
+               )
+MethodArg    = {
+                   [StackTop addObject:[TQNodeMethodArgumentDef node]];
                }
-               (':' --
-                name:Identifier ~{ SyntaxError(@"Missing parameter name"); }
-                {
-                    [[StackTop lastObject] setName:name];
-                }
-               -- MethodArg*)?
-               {
-                   $$ = PopStack();
-               }
-MethodArg    = identifier:SelIdent':' --
+               (identifier:SelIdent { [[StackTop lastObject] setSelectorPart:identifier]; })? ':' --
                name:Identifier ~{ SyntaxError(@"Missing parameter name"); }
                {
-                   [StackTop addObject:[TQNodeMethodArgumentDef nodeWithName:name selectorPart:identifier]];
+                   [[StackTop lastObject] setName:name];
                }
 
 OnLoadMsg    = { PushStack([TQNodeMessage nodeWithReceiver:StackTop]); SetLineNo(StackTop); }
