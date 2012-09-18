@@ -155,9 +155,7 @@ All arguments are optional and if no default value is specified, `nil` is used.
 If in a block one wishes to accept an arbitrary number of argument, he can use the special '...' argument to do so, its value is an array of arguments which you can iterate over. (... must be the last argument specified)
 
 	variadicBlock = { ... |
-		... each: { arg |
-			print(arg)
-		}
+		... each: `arg | arg print`
 	}
 	
 	variadicBlock("foo", "bar", "baz")
@@ -169,7 +167,7 @@ If in a block one wishes to accept an arbitrary number of argument, he can use t
 
 ## Flow Control
 
-Flow control blocks are different from standard blocks in that they are statements only, and can therefore not be used as expressions. They also execute within the parent block (Unlike standard blocks which have their own execution context) which means they do not create a new scope; and that if one returns from  inside a flow control block, the parent block is returned from.
+Flow control blocks are different from standard blocks in that they are statements only, and can therefore not be used as expressions. They also execute within the parent block (Unlike standard blocks which have their own execution context) which means they do not create a new scope; and that if one returns from inside a flow control block, the parent block is returned from.
 
 
 ## Objects
