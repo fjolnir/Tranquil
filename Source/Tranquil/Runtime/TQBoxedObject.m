@@ -235,6 +235,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
             else if(strstr(aType, "^{__CF") == aType)
                 *(id *)aDest = aValue;
             else if(![aValue isKindOfClass:[TQPointer class]]) {
+                TQAssert([aValue isKindOfClass:[TQBoxedObject class]] || *(aType+1) != 'v', @"Tried to unbox non-boxed object to a void pointer");
                 TQPointer *ptr = [[TQPointer alloc] initWithType:aType+1 count:1];
                 [ptr setObject:aValue atIndexedSubscript:0];
                 *(void **)aDest = ptr->_addr;
@@ -740,7 +741,7 @@ id tq_boxedMsgSend(id self, SEL selector, ...)
 id _box_C_ID_imp(TQBoxedObject *self, SEL _cmd, id *aPtr)                       { return *aPtr;                                           }
 id _box_C_SEL_imp(TQBoxedObject *self, SEL _cmd, SEL *aPtr)                     { return NSStringFromSelector(*aPtr);                     }
 id _box_C_VOID_imp(TQBoxedObject *self, SEL _cmd, id *aPtr)                     { return nil;                                             }
-id _box_C_CHARPTR_imp(TQBoxedObject *self, SEL _cmd, const char **aPtr)         { return [NSMutableString stringWithUTF8String:*aPtr];    }
+id _box_C_CHARPTR_imp(TQBoxedObject *self, SEL _cmd, const char **aPtr)         { return *aPtr == NULL ? nil : [TQPointer box:aPtr withType:"^*"]; }
 id _box_C_DBL_imp(TQBoxedObject *self, SEL _cmd, double *aPtr)                  { return [TQNumber numberWithDouble:*aPtr];               }
 id _box_C_FLT_imp(TQBoxedObject *self, SEL _cmd, float *aPtr)                   { return [TQNumber numberWithFloat:*aPtr];                }
 id _box_C_INT_imp(TQBoxedObject *self, SEL _cmd, int *aPtr)                     { return [TQNumber numberWithInt:*aPtr];                  }

@@ -30,9 +30,9 @@ import "clang-c/Index"
 HeaderIndex parse: "/System/Library/Frameworks/Foundation.framework/Headers/Foundation.h"
         withBlock: { child, parent |
     name_ = Clang_getCursorSpelling(child)
-    name  = Clang_getCString(name_)
+    name  = Clang_getCString(name_) toString
     kind_ = Clang_getCursorKindSpelling(Clang_getCursorKind(child))
-    kind  = Clang_getCString(kind_)
+    kind  = Clang_getCString(kind_) toString
     Clang_disposeString(name_)
     Clang_disposeString(kind_)
 
