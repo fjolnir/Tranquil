@@ -405,7 +405,7 @@ static __inline__ double _TQNumberValue(TQNumber *ptr)
         return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), pow(_TQNumberValue(self), [b doubleValue]));
     double result = pow(_TQNumberValue(self), _TQNumberValue(b) );
     if(isinf(result))
-        return [[TQBigNumber withNumber:self] divide:b];
+        return [[TQBigNumber withNumber:self] pow:b];
     return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), result);
 }
 - (TQNumber *)sqrt
