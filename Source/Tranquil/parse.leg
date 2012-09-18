@@ -84,7 +84,7 @@ Statement    = (
              | SkipStmt
              | ShiftStmt
              | CascadedMsg
-             | Call
+             | CallStmt
              | IncrDecrOp
              | Class
              | MultiAssgnmt
@@ -252,6 +252,21 @@ MessageArg   = TernaryExpr
 
 # Call
 ## callee(expr, expr)
+CallStmt     = callee:Callee
+               {
+                    PushStack([TQNodeCall nodeWithCallee:callee]);
+                    SetLineNo(StackTop);
+                    PushStack([NSMutableArray array]);
+               }
+               ( '(' -- (CallArg (-- ',' -- CallArg)*)? --
+                 _rightParen ~{ SyntaxError(@"Unterminated block call"); }
+               | -- blk:Block { ([StackTop addObject:[TQNodeArgument nodeWithPassedNode:blk selectorPart:nil]]); }
+               )
+               {
+                    NSMutableArray *arguments = PopStack();
+                    $$ = PopStack();
+                    [$$ setArguments:arguments];
+               }
 Call         = callee:Callee
                {
                     PushStack([TQNodeCall nodeWithCallee:callee]);
@@ -337,7 +352,7 @@ Lock         = "lock"  { PushStack([TQNodeLock node]); SetLineNo(StackTop); }
                    NSMutableArray *statements = PopStack();
                    $$ = PopStack();
                    [$$ setStatements:statements];
-               } 
+               }
 
 # Class
 Class        = '#' name:Constant --

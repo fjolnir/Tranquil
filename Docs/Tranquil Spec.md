@@ -52,6 +52,7 @@
 	\ Block calls
 	aBlock()                         \ Calls a block with no arguments
 	aBlock(something, somethingElse) \ Calls a block with a two arguments
+	aBlock { ..statements.. }        \ A valid callee followed by a literal block, is equivalent to a call with a single block argument
 	
 	\ Flow control
 	if ..expression.. {      \ Executes the passed literal block if the expression is non-nil
