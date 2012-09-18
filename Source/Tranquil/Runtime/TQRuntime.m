@@ -335,6 +335,10 @@ BOOL TQAugmentClassWithOperators(Class klass)
     imp = imp_implementationWithBlock(^(id a, id b) { return  _objc_msgSend_hack2(a, @selector(divideBy:), b); });
     class_addMethod(klass, TQDivOpSel, imp, "@@:@");
 
+    // ^ (Unimplemented by default)
+    imp = imp_implementationWithBlock(^(id a, id b) { return  _objc_msgSend_hack2(a, @selector(pow:), b); });
+    class_addMethod(klass, TQExpOpSel, imp, "@@:@");
+
     // <
     imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] == NSOrderedAscending) ? TQValid : nil; });
     class_addMethod(klass, TQLTOpSel, imp, "@@:@");

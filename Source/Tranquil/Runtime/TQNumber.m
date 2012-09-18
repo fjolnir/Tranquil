@@ -2,6 +2,7 @@
 #import <objc/runtime.h>
 #import "TQRuntime.h"
 #import "TQRange.h"
+#import "TQBigNumber.h"
 #import "../../../Build/TQStubs.h"
 
 static id (*numberWithDoubleImp)(id, SEL, double);
@@ -340,17 +341,24 @@ static __inline__ double _TQNumberValue(TQNumber *ptr)
 
 #pragma mark - Operators
 
-- (TQNumber *)add:(id)b
+- (id)add:(id)b
 {
     if(object_getClass(self) != object_getClass(b))
         return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _TQNumberValue(self) + [b doubleValue]);
-    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _TQNumberValue(self) + _TQNumberValue(b) );
+    double result = _TQNumberValue(self) + _TQNumberValue(b);
+    if(isinf(result))
+        return [[TQBigNumber withNumber:self] add:b];
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), result);
+
 }
-- (TQNumber *)subtract:(id)b
+- (id)subtract:(id)b
 {
     if(object_getClass(self) != object_getClass(b))
         return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _TQNumberValue(self) - [b doubleValue]);
-    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _TQNumberValue(self) - _TQNumberValue(b) );
+    double result = _TQNumberValue(self) - _TQNumberValue(b);
+    if(isinf(result))
+        return [[TQBigNumber withNumber:self] subtract:b];
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), result);
 }
 
 - (TQNumber *)negate
@@ -366,17 +374,24 @@ static __inline__ double _TQNumberValue(TQNumber *ptr)
     return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), floor(_TQNumberValue(self)));
 }
 
-- (TQNumber *)multiply:(id)b
+- (id)multiply:(id)b
 {
     if(object_getClass(self) != object_getClass(b))
         return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _TQNumberValue(self) * [b doubleValue]);
-    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _TQNumberValue(self) * _TQNumberValue(b) );
+    double result = _TQNumberValue(self) * _TQNumberValue(b);
+    if(isinf(result))
+        return [[TQBigNumber withNumber:self] multiply:b];
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), result);
+
 }
-- (TQNumber *)divideBy:(id)b
+- (id)divideBy:(id)b
 {
     if(object_getClass(self) != object_getClass(b))
         return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _TQNumberValue(self) / [b doubleValue]);
-    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _TQNumberValue(self) / _TQNumberValue(b) );
+    double result = _TQNumberValue(self) / _TQNumberValue(b);
+    if(isinf(result))
+        return [[TQBigNumber withNumber:self] divide:b];
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), result);
 }
 - (TQNumber *)modulo:(id)b
 {
@@ -384,11 +399,14 @@ static __inline__ double _TQNumberValue(TQNumber *ptr)
         return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), fmod(_TQNumberValue(self), [b doubleValue]));
     return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), fmod(_TQNumberValue(self), _TQNumberValue(b)));
 }
-- (TQNumber *)pow:(id)b
+- (id)pow:(id)b
 {
     if(object_getClass(self) != object_getClass(b))
         return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), pow(_TQNumberValue(self), [b doubleValue]));
-    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), pow(_TQNumberValue(self), _TQNumberValue(b) ));
+    double result = pow(_TQNumberValue(self), _TQNumberValue(b) );
+    if(isinf(result))
+        return [[TQBigNumber withNumber:self] divide:b];
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), result);
 }
 - (TQNumber *)sqrt
 {

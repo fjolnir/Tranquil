@@ -44,6 +44,7 @@ using namespace llvm;
     // Nothing to iterate
 }
 
+#define B aBlock.builder
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
@@ -52,11 +53,18 @@ using namespace llvm;
 #ifndef __LP64__
 #error "numbers not implemented for 32bit"
 #endif
-
     float value = [_value floatValue];
-    int64_t ptr = (((*(int64_t *)&value) << 4) | kTQNumberTag);
+    Value *numTag = ConstantInt::get(aProgram.llIntPtrTy, kTQNumberTag);
 
-    return aBlock.builder->CreateIntToPtr(ConstantInt::get(aProgram.llIntPtrTy, ptr), aProgram.llInt8PtrTy);
+    Value *val;
+    if(value == INFINITY || value == -INFINITY)
+        val = ConstantFP::getInfinity(aProgram.llFloatTy, value == -INFINITY);
+    else
+        val = ConstantFP::get(aProgram.llFloatTy, value);
+    val = B->CreateZExt(B->CreateBitCast(val, aProgram.llIntTy), aProgram.llIntPtrTy);
+    val = B->CreateOr(B->CreateShl(val, 4), numTag);
+
+    return B->CreateIntToPtr(val, aProgram.llInt8PtrTy);
 #if 0
     Module *mod = aProgram.llModule;
 

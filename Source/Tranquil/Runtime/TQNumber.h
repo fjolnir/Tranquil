@@ -69,15 +69,15 @@ extern const uintptr_t     kTQNumberTag;        // The actual bits of the tag (u
 - (unsigned long long)unsignedLongLongValue;
 - (NSUInteger)unsignedIntegerValue;
 
-- (TQNumber *)add:(id)b;
-- (TQNumber *)subtract:(id)b;
-- (TQNumber *)negate;
+- (id)add:(id)b;
+- (id)subtract:(id)b;
+- (id)negate;
+- (id)multiply:(id)b;
+- (id)divideBy:(id)b;
+- (id)pow:(id)b;
 - (TQNumber *)ceil;
 - (TQNumber *)floor;
-- (TQNumber *)multiply:(id)b;
-- (TQNumber *)divideBy:(id)b;
 - (TQNumber *)modulo:(id)b;
-- (TQNumber *)pow:(id)b;
 - (TQNumber *)sqrt;
 - (TQNumber *)log:(TQNumber *)base;
 - (TQNumber *)log;

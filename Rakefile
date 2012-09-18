@@ -48,6 +48,7 @@ TOOL_LDFLAGS = [
     '-lclang',
     '-ltranquil',
     '-ltranquil_codegen',
+    '/usr/local/tranquil/gmp/lib/libgmp.a',
     '-rpath /usr/local/tranquil/llvm/lib',
     #'-rpath /usr/local/llvm.dbg/lib',
     '-lffi',

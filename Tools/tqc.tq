@@ -9,7 +9,7 @@ error = { reason |
 inPath         = nil
 outPath        = $"a.out"
 runtimeLibPath = $"/usr/local/tranquil/lib/libtranquil.a"
-ldFlags        = [$-fexceptions, $-all_load, $-framework, $AppKit, $-lobjc, $-lffi, runtimeLibPath]
+ldFlags        = [$-fexceptions, $-all_load, $-framework, $AppKit, $-lobjc, $-lffi, runtimeLibPath, $"/usr/local/tranquil/gmp/lib/libgmp.a"]
 
 args = ... objectEnumerator
 while arg = args nextObject {

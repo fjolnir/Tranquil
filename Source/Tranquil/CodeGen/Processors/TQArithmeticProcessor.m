@@ -34,7 +34,7 @@
             return aNode;
         // Check if we have an integer exponent, if so we can expand it to a multiplication/division
         double expf = [[(TQNodeNumber *)op.right value] doubleValue];
-        if(round(expf) != expf)
+        if(round(expf) != expf || expf > 6)
             return aNode;
         if(exp == 0)
             return [TQNodeNumber nodeWithDouble:1];

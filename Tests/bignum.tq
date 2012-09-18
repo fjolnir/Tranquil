@@ -1,0 +1,4 @@
+a = 1000
+8 times: `a *= a`
+a print
+a class print

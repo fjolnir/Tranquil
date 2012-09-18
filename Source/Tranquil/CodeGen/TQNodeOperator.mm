@@ -266,7 +266,7 @@ using namespace llvm;
             // If the operator supports a fast path then we must create the necessary branches
             Value *zeroInt = ConstantInt::get(aProgram.llIntPtrTy, 0);
             // if (!a | a isa TaggedNumber) & (!b | b isa TaggedNumber)
-            Value *aCond = B->CreateOr(B->CreateICmpEQ(B->CreateAnd(PtrToInt(left),  numTag), numTag), B->CreateICmpEQ(left, nullPtr));
+            Value *aCond = B->CreateOr(B->CreateICmpEQ(B->CreateAnd(PtrToInt(left),  numTag), numTag), B->CreateICmpEQ(left,  nullPtr));
             Value *bCond = B->CreateOr(B->CreateICmpEQ(B->CreateAnd(PtrToInt(right), numTag), numTag), B->CreateICmpEQ(right, nullPtr));
             Value *cond = B->CreateAnd(aCond, bCond);
 

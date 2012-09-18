@@ -37,6 +37,23 @@ else
     popd
 fi
 
+echo "\n\033[0;34mInstalling GNU MP...\033[0m"
+if [ -d /usr/local/tranquil/gmp ]
+then
+  echo "\033[0;32mYou already have GMP installed.\033[0m"
+else
+    pushd /tmp
+    curl ftp://ftp.gmplib.org/pub/gmp-5.0.5/gmp-5.0.5.tar.bz2 -o gmp-5.0.5.tar.bz2
+    tar xzf gmp-5.0.5.tar.bz2
+    pushd gmp-5.0.5
+    ./configure --with-pic --prefix=/usr/local/tranquil/gmp
+    make
+    make check
+    make install
+    popd
+    popd
+fi
+
 echo "\n\033[0;34mCloning Tranquil from GitHub...\033[0m"
 
 hash git >/dev/null && /usr/bin/env git clone git://github.com/fjolnir/Tranquil.git /usr/local/tranquil/src || {
