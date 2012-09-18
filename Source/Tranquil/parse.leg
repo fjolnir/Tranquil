@@ -816,7 +816,7 @@ Comment      = - (('\\') (!EOL .)* EOL)+
 
 Space        = [ \t]
 -            = Space*
---           = (Comment | EOL)? -
+--           = (Space | EOL | Comment)*
 ---          = (Space | EOL | Comment)+
 EOL          = (- ('\n' | '\r\n' | '\r') { CurrentLine++; })+
 EOF          = - !.
