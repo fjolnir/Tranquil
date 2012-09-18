@@ -414,7 +414,8 @@ MethodImpl   = arguments:MethodArgs  --
                }
 MethodArgs   = ( identifier:SelIdent !":"
                  {
-                     $$ = [NSMutableArray arrayWithObject:[TQNodeMethodArgumentDef nodeWithName:nil selectorPart:identifier]];
+                     $$ = [NSMutableArray arrayWithObject:[TQNodeMethodArgumentDef nodeWithName:nil
+                                                                                   selectorPart:identifier]];
                  }
                | {
                      PushStack([NSMutableArray array]);
