@@ -30,8 +30,8 @@ typedef struct _TQParserState TQParserState;
 #define SetLineNo(node) [node setLineNumber:CurrentLine]
 
 #define RewindWhitespace() for(; G->pos > 0 && (G->buf[G->pos] == ' ' \
-                                                || G->buf[G->pos] == '\n' \
-                                                || G->buf[G->pos] == '\0'); --G->pos) { \
+                                 || G->buf[G->pos] == '\n' \
+                                 || G->buf[G->pos] == '\0'); --G->pos) { \
     if(G->data->script[G->pos] == '\n') \
         --G->data->currentLine; \
 }
@@ -414,7 +414,7 @@ MethodImpl   = arguments:MethodArgs  --
                }
 MethodArgs   = ( identifier:SelIdent !":"
                  {
-                     $$ = [TQNodeMethodArgumentDef nodeWithName:nil selectorPart:identifier];
+                     $$ = [NSMutableArray arrayWithObject:[TQNodeMethodArgumentDef nodeWithName:nil selectorPart:identifier]];
                  }
                | {
                      PushStack([NSMutableArray array]);
