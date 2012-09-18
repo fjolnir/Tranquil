@@ -136,7 +136,10 @@
     lock ..expression.. { \ Acquires a lock on the result of `expression`. If one has already been taken, it waits.
         ..statements..
     }
-
+    
+    \ Memory management
+    collect { ..statements.. } \ Releases all memory used by the statements within the
+                               \ literal block, as soon as it's over. (Usually  memory is released when the containing block returns)
 
 ## Blocks
 

@@ -78,6 +78,7 @@ Statement    = (
              | Wait
              | WhenFinished
              | Lock
+             | Collect
              | If
              | Loop
              | BreakStmt
@@ -348,6 +349,21 @@ Lock         = "lock"  { PushStack([TQNodeLock node]); SetLineNo(StackTop); }
                ('{' -- ( Statement --)*
                 '}' ~{ SyntaxError(@"Unterminated lock"); }
                | -- Statement)
+               {
+                   NSMutableArray *statements = PopStack();
+                   $$ = PopStack();
+                   [$$ setStatements:statements];
+               }
+
+# Memory management
+Collect      = "collect" --
+               {
+                   PushStack([TQNodeCollect node]); SetLineNo(StackTop);
+                   PushStack([NSMutableArray array]);
+               }
+               ('{' -- ( Statement --)*
+                '}' ~{ SyntaxError(@"Unterminated collection block"); }
+               | Statement)
                {
                    NSMutableArray *statements = PopStack();
                    $$ = PopStack();
