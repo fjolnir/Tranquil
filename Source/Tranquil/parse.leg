@@ -771,7 +771,7 @@ Number       = (< '-'? [0-9]+ ('.' [0-9]+)? ('e'[0-9]+)? >
              | < '-'? '.' [0-9]+ ('e'[0-9]+)? > )          { $$ = [TQNodeNumber nodeWithDouble:YYNUM];     SetLineNo($$); }
 Identifier   = < [a-z_] Character* >                       { $$ = YYNSSTR;                                                }
 Constant     = < [A-Z] Character* >                        { $$ = [TQNodeConstant nodeWithString:YYNSSTR]; SetLineNo($$); }
-Character    = ([A-Za-z0-9_])
+Character    = ([A-Za-z0-9_?!])
 
 # String with support for embedding expressions
 String       = ConstString | MutableStr
