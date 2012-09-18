@@ -2,13 +2,19 @@
 import "readline/readline"
 import "stdlib"
 
+nonReturnable = `str | (str hasPrefix: "import ") ||
+                       (str hasPrefix: "if "    ) ||
+                       (str hasPrefix: "unless ") ||
+                       (str hasPrefix: "while " ) ||
+                       (str hasPrefix: "until " )`
+
 getInput = {
     ptr = Readline("tq> ")
     str = ptr toString
    `Add_history(str)` if: str length > 0
     Free(ptr)
 
-    ^"^" << str
+    ^nonReturnable(str) ? str ! "^" << str
 }
 
 while line = getInput() {

@@ -543,8 +543,8 @@ EqualityTest = a:Sum                 { PushStack(a);                            
                )*                    { $$ = PopStack(); SetLineNo($$);                                                                                }
 
 Equation     = a:EqualityTest        { PushStack(a);                                                                                   }
-               ( - "&&" - b:Equation { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAnd            left:StackTop right:b]); }
-               | - "||" - b:Equation { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorOr             left:StackTop right:b]); }
+               ( - "&&" -- b:Equation { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAnd            left:StackTop right:b]); }
+               | - "||" -- b:Equation { ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorOr             left:StackTop right:b]); }
                )*                    { $$ = PopStack(); SetLineNo($$);                                                                                }
 
 Assignment     = a:AssgnLhs - "=" - "async" - b:AssignValue
