@@ -36,7 +36,12 @@
 
 - (NSMutableString *)add:(id)aObj
 {
-    return [NSMutableString stringWithFormat:@"%@%@", self, aObj];
+    return [[[self stringByAppendingString:[aObj toString]] mutableCopy] autorelease];
+}
+
+- (NSMutableString *)toString
+{
+    return [[self mutableCopy] autorelease];
 }
 @end
 
@@ -53,6 +58,11 @@
     if(endLen > 0 && startLen != len)
         [self deleteCharactersInRange:(NSRange){ [self length] - endLen, endLen }];
 
+    return self;
+}
+
+- (NSMutableString *)toString
+{
     return self;
 }
 @end
