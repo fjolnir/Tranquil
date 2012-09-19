@@ -119,6 +119,7 @@ end
 
 file STUB_H_OUTPATH => STUB_H_SCRIPT do |f|
     sh "ruby #{STUB_H_SCRIPT} #{MAXARGS} > Build/TQStubs.h"
+    sh "mkdir -p /usr/local/tranquil/include/Tranquil/Runtime"
     sh "cp Build/TQStubs.h /usr/local/tranquil/include/Tranquil/Runtime/TQStubs.h"
 end
 
@@ -204,4 +205,3 @@ end
 task :release => [:clean, :setReleaseOpts, :build_dir, :tranquil] do |t|
     _install
 end
-
