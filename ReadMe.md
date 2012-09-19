@@ -20,10 +20,10 @@ However, Tranquil is still extremely experimental and you shouldn't use it for a
 
 ## How to build and run
 
-The following will install Tranquil into /usr/local/tranquil (Along with two dependencies).
+The following will install Tranquil into /usr/local/tranquil (Along with a few dependencies).
 
     > curl -fsSkL https://raw.github.com/fjolnir/Tranquil/master/Tools/install.sh | /bin/zsh
-    > /usr/local/tranquil/bin/tranquil -h
+    > /usr/local/tranquil/bin/tqrepl
 
 **Note:** OS X 10.8 is required. (10.7 & iOS ≥ 5 will be supported later)
 
