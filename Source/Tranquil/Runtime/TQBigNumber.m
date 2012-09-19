@@ -72,6 +72,11 @@ static const int _TQBigNumberMaxDigits;
     return ret;
 }
 
+- (NSString *)description
+{
+    return [self toString];
+}
+
 #pragma mark - Operators
 
 - (BOOL)isEqual:(id)b

@@ -45,12 +45,12 @@ extern const uintptr_t     kTQNumberTag;        // The actual bits of the tag (u
 + (TQNumber *)numberWithDouble:(double)value;
 + (TQNumber *)numberWithInteger:(NSInteger)value;
 
-+ (NSNumber *)numberWithUnsignedChar:(unsigned char)value;
-+ (NSNumber *)numberWithUnsignedShort:(unsigned short)value;
-+ (NSNumber *)numberWithUnsignedInt:(unsigned int)value;
-+ (NSNumber *)numberWithUnsignedLong:(unsigned long)value;
-+ (NSNumber *)numberWithUnsignedLongLong:(unsigned long long)value;
-+ (NSNumber *)numberWithUnsignedInteger:(NSUInteger)value;
++ (TQNumber *)numberWithUnsignedChar:(unsigned char)value;
++ (TQNumber *)numberWithUnsignedShort:(unsigned short)value;
++ (TQNumber *)numberWithUnsignedInt:(unsigned int)value;
++ (TQNumber *)numberWithUnsignedLong:(unsigned long)value;
++ (TQNumber *)numberWithUnsignedLongLong:(unsigned long long)value;
++ (TQNumber *)numberWithUnsignedInteger:(NSUInteger)value;
 
 - (char)charValue;
 - (short)shortValue;
