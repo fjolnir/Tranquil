@@ -1,0 +1,198 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Tranquil by fjolnir</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Tranquil</h1>
+        <p>A programming language built on top of the Objective-C runtime and is ABI compatible with Objective-C.</p>
+
+        <p class="view"><a href="https://github.com/fjolnir/Tranquil">View the Project on GitHub <small>fjolnir/Tranquil</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/fjolnir/Tranquil/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/fjolnir/Tranquil/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/fjolnir/Tranquil">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>Tranquil</h1>
+
+<p>Tranquil is a programming language built on top of LLVM &amp; the Objective-C Runtime.</p>
+
+<p>It aims to provide a more expressive &amp; easy to use way to write Mac (and soon, iOS) Apps.</p>
+
+<p>It's features include:</p>
+
+<ul>
+<li>Compatibility with C/ObjC headers, meaning that there is no need to create special bindings for C APIs.</li>
+<li>Automatic memory management.</li>
+<li>Dynamic Typing.</li>
+<li>Language level concurrency support.</li>
+<li>String interpolation.</li>
+<li>Multiple assignment.</li>
+<li>Message cascading.</li>
+<li>Good performance, even at this extremely early stage.</li>
+<li>And more..</li>
+</ul><p>However, Tranquil is still extremely experimental and you shouldn't use it for anything other than fun for now. But to me at least, it is a lot of fun to play with.</p>
+
+<h2>How to build and run</h2>
+
+<p>The following will install Tranquil into /usr/local/tranquil (Along with a few dependencies).</p>
+
+<pre><code>&gt; curl -fsSkL https://raw.github.com/fjolnir/Tranquil/master/Tools/install.sh | /bin/zsh
+&gt; /usr/local/tranquil/bin/tqrepl
+</code></pre>
+
+<p><strong>Note:</strong> OS X 10.8 is required. (10.7 &amp; iOS ≥ 5 will be supported later)</p>
+
+<h2>Learning the language</h2>
+
+<p>To learn more about Tranquil you should read the <a href="https://github.com/fjolnir/Tranquil/blob/master/Docs/Tranquil%20Spec.md">specification</a> and check out the <a href="https://github.com/fjolnir/Tranquil/blob/master/Tests">tests</a>.</p>
+
+<p>But here're a couple of examples:</p>
+
+<h3>Array iteration</h3>
+
+<pre><code>alternatives = ["Objective-C", "Ruby", "Nu", "Perl", "Python"]
+alternatives each: `alternative | "Tranquil is nicer than #{alternative}" print`
+"Or so I hope at least." print
+</code></pre>
+
+<h3>Reduction</h3>
+
+<pre><code>sum = (0 to: 1000000) reduce: `obj, accum=0 | obj+accum`
+</code></pre>
+
+<h3>Do two things at the same time</h3>
+
+<pre><code>a = async foo()
+b = bar()
+whenFinished {
+    "a is #{a} and b is: #{b}" print
+}
+</code></pre>
+
+<h3>Message chaining (Without having to return self from every method you write)</h3>
+
+<pre><code>var = Character new; setName: "Deckard"; setOccupation: "Blade Runner"; self
+</code></pre>
+
+<h3>Multiple assignment</h3>
+
+<pre><code>a, b = b, a  \ Swap b&amp;a
+</code></pre>
+
+<h3>Calculate fibonacci numbers (In a not-so-performant manner)</h3>
+
+<pre><code>fib = `n | n &gt; 1 ? fib(n-1) + fib(n-2) ! n`
+fib(10) print
+</code></pre>
+
+<h3>Evaluate a regular expression</h3>
+
+<pre><code>if /foo[a-z]+/i matches: "Foobar"
+    "Foobar starts with foo." print
+</code></pre>
+
+<h3>Using the OpenGL &amp; GLUT APIs</h3>
+
+<pre><code>import "GLUT" \ This simply reads in your GLUT.h header. No bindings are required.
+
+GlutInit(0, nil)
+GlutInitDisplayMode(GLUT_DOUBLE)
+GlutInitWindowSize(640, 480)
+GlutInitWindowPosition(200, 200)
+GlutCreateWindow("Tranquil is cool as beans!")
+
+GlClearColor(0, 0, 0, 0)
+GlScalef(0.4, 0.4, 0.4)
+
+GlutDisplayFunc({
+    GlRotatef(0.1, 0, 1, 0)
+    GlClear(GL_COLOR_BUFFER_BIT)
+    GlColor3f(0, 1, 0)
+        GlutWireDodecahedron()
+    GlColor3f(1, 1, 1)
+        GlutWireTeapot(0.7)
+    GlutSwapBuffers()
+})
+
+lastX, lastY = 0
+GlutMotionFunc({ x, y |
+    dx, dy = lastX - x, lastY - y
+    GlRotatef(dx, 0, 1, 0)
+    GlRotatef(dy, 1, 0, 0)
+    lastX, lastY = x, y
+})
+
+GlutIdleFunc(GlutPostRedisplay)
+GlutMainLoop()
+</code></pre>
+
+<h3>Talking to Cocoa</h3>
+
+<pre><code>import "AppKit"
+
+nsapp = NSApplication sharedApplication
+
+\ Create the menubar
+quitMenuItem = NSMenuItem new; setTitle: "Quit #{NSProcessInfo processInfo processName}";
+                              setAction: $terminate:;
+                       setKeyEquivalent: $q;
+                                   self
+appMenu     = NSMenu new; addItem: quitMenuItem;   self
+appMenuItem = NSMenuItem new; setSubmenu: appMenu; self
+menuBar     = NSMenu new; addItem: appMenuItem;    self
+
+nsapp setMainMenu: menuBar
+
+\ Create a little view
+#TestView &lt; NSView {
+    - init {
+        #gradient = NSGradient alloc initWithStartingColor: NSColor redColor
+                                               endingColor: NSColor yellowColor
+        ^self
+    }
+    - drawRect: dirtyRect {
+        #gradient drawInRect: dirtyRect angle: 45
+    }
+}
+
+\ Create a window
+win = NSWindow alloc initWithContentRect: [[0, 0], [300, 200]]
+                               styleMask: (NSTitledWindowMask bitOr: NSResizableWindowMask)
+                                 backing: NSBackingStoreBuffered
+                                   defer: no;
+                                setTitle: "Tranquil!";
+                          setContentView: TestView new;
+                                    self
+
+\ Start the app
+win makeKeyAndOrderFront: nil
+nsapp setActivationPolicy: NSApplicationActivationPolicyRegular
+nsapp activateIgnoringOtherApps: yes
+nsapp run
+</code></pre>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/fjolnir">fjolnir</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
