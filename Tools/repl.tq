@@ -2,22 +2,24 @@
 import "readline/readline"
 import "stdlib"
 
-nonReturnable = `str | (str hasPrefix: "import ") ||
-                       (str hasPrefix: "if "    ) ||
-                       (str hasPrefix: "unless ") ||
-                       (str hasPrefix: "while " ) ||
+"welcome; this is tranquil." print
+
+nonReturnable = `str | (str hasPrefix: "import ") || (str hasPrefix: "if "    ) ||
+                       (str hasPrefix: "unless ") || (str hasPrefix: "while " ) ||
                        (str hasPrefix: "until " )`
 
-getInput = {
-    ptr = Readline("tq> ")
+getInput = { indent = 0 |
+    ptr = Readline((" " * indent * 4).."> ")
     str = ptr toString
    `Add_history(str)` if: str length > 0
     Free(ptr)
 
-    ^nonReturnable(str) ? str ! "^#{str}"
+    indent += ((/\{/ matches: str) count) - ((/\}/ matches: str) count)
+    ^(indent > 0) ? (str.."\n"..getInput(indent)) ! str
 }
 
 while line = getInput() {
+   `line = "^#{line}"` unless: nonReturnable(line)
     result = TQProgram sharedProgram executeScript: line error: nil
    `" -> #{result} (#{result class})" print` if: result
 }
