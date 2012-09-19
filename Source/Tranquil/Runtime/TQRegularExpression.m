@@ -14,7 +14,14 @@
 
 - (id)matches:(NSString *)aString
 {
-    return [self numberOfMatchesInString:aString options:0 range:(NSRange){0, [aString length]}] > 0 ? TQValid : nil;
+    NSArray *matches = [self matchesInString:aString options:0 range:(NSRange){0, [aString length]}];
+    NSMutableArray *result = [NSMutableArray arrayWithCapacity:[matches count]];
+    if([matches count] == 0)
+        return nil;
+    for(NSTextCheckingResult *match in matches) {
+        [result addObject:[TQRange withNSRange:[match range]]];
+    }
+    return result;
 }
 
 - (id)match:(NSString *)aString usingBlock:(id (^)(NSString *text, TQRange *range))aBlock
@@ -24,8 +31,7 @@
                              range:(NSRange){0, [aString length]}
                         usingBlock:^(NSTextCheckingResult *match, NSMatchingFlags flags, BOOL *stop) {
         NSRange r = match.range;
-        aBlock([aString substringWithRange:r],
-               [TQRange rangeWithLocation:[TQNumber numberWithInt:r.location] length:[TQNumber numberWithInt:r.length]]);
+        aBlock([aString substringWithRange:r], [TQRange withNSRange:r]);
     }];
     return nil;
 }

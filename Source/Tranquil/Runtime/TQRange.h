@@ -2,9 +2,9 @@
 
 @interface TQRange : TQObject
 @property(readwrite, retain) TQNumber *start, *length;
-+ (TQRange *)rangeWithLocation:(TQNumber *)aStart length:(TQNumber *)aLength;
++ (TQRange *)withLocation:(TQNumber *)aStart length:(TQNumber *)aLength;
 + (TQRange *)from:(TQNumber *)aStart to:(TQNumber *)aEnd;
-
++ (TQRange *)withNSRange:(NSRange)aRange;
 - (id)each:(id (^)())aBlock;
 - (NSPointerArray *)toArray;
 @end

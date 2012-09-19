@@ -4,7 +4,7 @@
 
 @implementation TQRange
 @synthesize start=_start, length=_length;
-+ (TQRange *)rangeWithLocation:(TQNumber *)aStart length:(TQNumber *)aLength
++ (TQRange *)withLocation:(TQNumber *)aStart length:(TQNumber *)aLength
 {
     TQRange *ret = [self new];
     ret.start  = aStart;
@@ -18,6 +18,11 @@
     ret.start  = aStart;
     ret.length = [aEnd subtract:aStart];
     return [ret autorelease];
+}
++ (TQRange *)withNSRange:(NSRange)aRange
+{
+    return [self withLocation:[TQNumber numberWithUnsignedInteger:aRange.location]
+                       length:[TQNumber numberWithUnsignedInteger:aRange.length]];
 }
 
 - (id)each:(id (^)())aBlock
