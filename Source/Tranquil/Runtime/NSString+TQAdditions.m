@@ -11,9 +11,32 @@
         return [self uppercaseString];
     return [[[self substringToIndex:1] uppercaseString] stringByAppendingString:[self substringFromIndex:1]];
 }
+
 - (TQNumber *)toNumber
 {
     return [TQNumber numberWithDouble:atof([self UTF8String])];
+}
+
+- (char)charValue
+{
+    if([self length] == 0)
+        return '\0';
+    const char *str = [self UTF8String];
+    return *str;
+}
+
+- (NSMutableString *)multiply:(TQNumber *)aTimes
+{
+    NSMutableString *ret = [NSMutableString string];
+    for(int i = 0; i < [aTimes intValue]; ++i) {
+        [ret appendString:self];
+    }
+    return ret;
+}
+
+- (NSMutableString *)add:(id)aObj
+{
+    return [NSMutableString stringWithFormat:@"%@%@", self, aObj];
 }
 @end
 

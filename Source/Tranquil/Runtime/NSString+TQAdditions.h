@@ -5,6 +5,9 @@
 @interface NSString (Tranquil)
 - (NSString *)stringByCapitalizingFirstLetter;
 - (TQNumber *)toNumber;
+- (NSMutableString *)multiply:(TQNumber *)aTimes;
+- (NSMutableString *)add:(id)aObj;
+- (char)charValue;
 @end
 
 @interface NSMutableString (Tranquil)
