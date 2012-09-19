@@ -10,7 +10,7 @@ mkdir -p /usr/local/tranquil
 # Just for install count stats for me; completely anonymous.
 curl -fsSkL "http://d.asgeirsson.is/JX9I" > /dev/null
 
-echo "\033[0;32mI'm about to retrieve and compile Tranquil for you. This shouldn't take more than a few minutes,\ndepending on your connection.\n"
+echo "\033[0;32mI'm about to retrieve and compile Tranquil for you. This shouldn't take more than a few minutes,\ndepending on your connection & hardware.\n"
 
 echo "\033[0;34mInstalling LLVM...\033[0m"
 if [ -d /usr/local/tranquil/llvm ]
