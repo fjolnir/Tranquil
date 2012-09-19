@@ -455,7 +455,10 @@ void TQInitializeRuntime()
     class_addMethod([NSPointerArray class], TQRShiftOpSel, imp, "@@:@");
 
     // Operators for NS(Mutable)String
-    imp = class_getMethodImplementation([NSString class], @selector(stringByAppendingString:));
+    imp = imp_implementationWithBlock(^(id a, id b)   {
+         id ret = _objc_msgSend_hack2(a, @selector(stringByAppendingString:), [b toString]);
+         return _objc_msgSend_hack2([NSMutableString class], @selector(stringWithString:), ret);
+    });
     class_addMethod([NSString class], TQConcatOpSel, imp, "@@:@");
     imp = imp_implementationWithBlock(^(id a, id b)   {
          _objc_msgSend_hack2(a, @selector(appendString:), [b toString]);
