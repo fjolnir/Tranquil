@@ -4,9 +4,10 @@ import "stdlib"
 
 "welcome; this is tranquil." print
 
-nonReturnable = `str | (str hasPrefix: "import ") || (str hasPrefix: "if "    ) ||
-                       (str hasPrefix: "unless ") || (str hasPrefix: "while " ) ||
-                       (str hasPrefix: "until " )`
+nonReturnable = `str | (str hasPrefix: "import "      ) || (str hasPrefix: "if "    ) ||
+                       (str hasPrefix: "unless "      ) || (str hasPrefix: "while " ) ||
+                       (str hasPrefix: "until "       ) || (str hasPrefix: "async " ) ||
+                       (str hasPrefix: "whenFinished ")`
 
 getInput = { indent = 0 |
     ptr = Readline((" " * indent * 4).."> ")
