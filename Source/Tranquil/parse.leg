@@ -781,6 +781,8 @@ Operator     = '=='  { $$ = @"=="; SetLineNo($$); }
              | '='   { $$ = @"=";  SetLineNo($$); }
              | '[]'  { $$ = @"[]"; SetLineNo($$); }
 
+Escape       = 'n' { $$ = @"\n"; }
+             | 't' { $$ = @"\t"; }
 
 SelIdent     = Operator | Identifier
 
@@ -801,8 +803,12 @@ MutableStr   = '"' { PushStack([TQNodeString nodeWithString:[NSMutableString str
                _snglQuot ~{ SyntaxError(@"String literal left unclosed"); }
                { $$ = PopStack(); }
 
-DQuotStrIn   = <("#" !"{" |[^\"#])+ > { [(TQNodeString *)StackTop append:YYNSSTR]; }
-SQuotStrIn   = <("#" !"{" |[^\'#])+ > { [(TQNodeString *)StackTop append:YYNSSTR]; }
+DQuotStrIn   = ( "#" !"{"  { [(TQNodeString *)StackTop append:@"#"]; }
+               |  <[^\\]> '\\' esc:Escape   { [[(TQNodeString *)StackTop value] appendFormat:@"%@%@", YYNSSTR, esc]; }
+               |  <'\\' esc:Escape>   { [(TQNodeString *)StackTop append:[[(TQNodeString *)StackTop value] length] == 0 ? esc : YYNSSTR]; }
+               | <[^\"#]> { [(TQNodeString *)StackTop append:YYNSSTR]; }
+               )+
+SQuotStrIn   = <("#" !"{" | [^\'#])+ >                { [(TQNodeString *)StackTop append:YYNSSTR]; }
 
 StrEmbeddExpr= ("#{"-"}"
                | "#{" - expr:Expression - "}"
@@ -828,7 +834,7 @@ RegExp       = "/" { PushStack([TQNodeRegex nodeWithPattern:[NSMutableString str
                  SetLineNo($$);
                  [(TQNodeRegex *)$$ append:YYNSSTR];
              }
-RegexpIn     = < ("#" !"{" | "\\/" | [^\\/#])+ > { [(TQNodeRegex *)StackTop append:YYNSSTR]; }
+RegexpIn     = < ("#" !"{" | "\\/" | [^/#])+ > { [(TQNodeRegex *)StackTop append:YYNSSTR]; }
 
 Comment      = - (('\\') (!EOL .)* EOL)+
 
