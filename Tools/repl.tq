@@ -7,7 +7,7 @@ import "stdlib"
 nonReturnable = `str | (str hasPrefix: "import "      ) || (str hasPrefix: "if "    ) ||
                        (str hasPrefix: "unless "      ) || (str hasPrefix: "while " ) ||
                        (str hasPrefix: "until "       ) || (str hasPrefix: "async " ) ||
-                       (str hasPrefix: "whenFinished ")`
+                       (str hasPrefix: "whenFinished ") || (str matches: /=\s*async /)`
 
 getInput = { indent = 0 |
     ptr = Readline((" " * indent * 4).."> ")
