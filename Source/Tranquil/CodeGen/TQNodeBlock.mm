@@ -529,8 +529,8 @@ using namespace llvm;
         [local store:argValue inProgram:aProgram block:self root:aRoot error:aoErr];
     }
     if(_isVariadic) {
-        // Create a dictionary and loop through the va_list till we reach the sentinel
-        Value *vaList = _builder->CreateAlloca(aProgram.llInt8PtrTy, NULL, "valist");
+        // Create an array and loop through the va_list till we reach the sentinel
+        Value *vaList = _builder->CreateAlloca(aProgram.llVaListTy, NULL, "valist");
         Function *vaStart = Intrinsic::getDeclaration(mod, Intrinsic::vastart);
         Function *vaEnd = Intrinsic::getDeclaration(mod, Intrinsic::vaend);
 

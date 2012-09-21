@@ -41,7 +41,7 @@ using namespace llvm;
 @dynamic llVoidTy, llInt8Ty, llInt16Ty, llInt32Ty, llInt64Ty,
     llFloatTy, llDoubleTy, llFPTy, llIntTy, llIntPtrTy, llSizeTy,
     llPtrDiffTy, llVoidPtrTy, llInt8PtrTy, llVoidPtrPtrTy,
-    llInt8PtrPtrTy, llPointerWidthInBits, llPointerAlignInBytes,
+    llInt8PtrPtrTy, llVaListTy, llPointerWidthInBits, llPointerAlignInBytes,
     llPointerSizeInBytes;
 @dynamic objc_msgSend, objc_msgSend_fixup, objc_msgSendSuper,
     objc_storeWeak, objc_loadWeak, objc_allocateClassPair,
@@ -136,6 +136,27 @@ using namespace llvm;
 - (llvm::PointerType *)llInt8PtrPtrTy
 {
     return self.llInt8PtrTy->getPointerTo(0);
+}
+- (llvm::StructType *)llVaListTy
+{
+#ifdef __LP64__
+    StructType *vaListTy = self.llModule->getTypeByName("struct.__va_list_tag");
+    if(!vaListTy)
+        vaListTy = StructType::create(self.llModule->getContext(), "struct.__va_list_tag");
+    if(vaListTy->isOpaque()) {
+        std::vector<Type*>vaListFields;
+        vaListFields.push_back(self.llInt32Ty);
+        vaListFields.push_back(self.llInt32Ty);
+
+        vaListFields.push_back(self.llInt8PtrTy);
+        vaListFields.push_back(self.llInt8PtrTy);
+
+        vaListTy->setBody(vaListFields, false);
+    }
+    return vaListTy;
+#else
+#error va_list type only implemented for x86_64
+#endif
 }
 
 #pragma mark - Functions

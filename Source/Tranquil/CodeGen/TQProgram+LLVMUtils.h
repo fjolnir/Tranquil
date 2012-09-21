@@ -27,6 +27,8 @@
 @property(readonly) llvm::PointerType *llVoidPtrTy, *llInt8PtrTy;
 // void** in address space 0
 @property(readonly) llvm::PointerType *llVoidPtrPtrTy, *llInt8PtrPtrTy;
+@property(readonly) llvm::StructType *llVaListTy;
+
 // The width of a pointer into the generic address space.
 @property(readonly) unsigned char llPointerWidthInBits;
 // The size and alignment of a pointer into the generic address space.
