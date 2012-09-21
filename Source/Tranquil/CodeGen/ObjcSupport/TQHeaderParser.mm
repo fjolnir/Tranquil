@@ -5,6 +5,13 @@
 
 using namespace llvm;
 
+static NSString *_prepareConstName(NSString *name)
+{
+    if([name hasPrefix:@"_"])
+        return [NSString stringWithFormat:@"_%@", [[name substringFromIndex:1] stringByCapitalizingFirstLetter]];
+    return [name stringByCapitalizingFirstLetter];
+}
+
 @interface TQHeaderParser ()
 + (const char *)_encodingForFunPtrCursor:(CXCursor)cursor;
 + (char *)_encodingForCursor:(CXCursor)cursor;
@@ -132,7 +139,7 @@ using namespace llvm;
                 char *encoding         = [[self class] _encodingForCursor:cursor];
                 TQBridgedFunction *fun = [TQBridgedFunction functionWithName:nsName encoding:encoding];
                 [_functions setObject:fun
-                               forKey:[nsName stringByCapitalizingFirstLetter]];
+                               forKey:_prepareConstName(nsName)];
                 free(encoding);
 
             } break;
@@ -143,19 +150,24 @@ using namespace llvm;
                 clang_tokenize(translationUnit, macroRange, &tokens, &tokenCount);
                 if(tokenCount >= 2) {
                     // TODO: Support string constants?
-                    if(clang_getTokenKind(tokens[1]) == CXToken_Literal) {
-                        CXString tokenSpelling = clang_getTokenSpelling(translationUnit, tokens[1]);
-                        const char *value = clang_getCString(tokenSpelling);
+                    CXTokenKind tokenKind = clang_getTokenKind(tokens[1]);
+                    CXString tokenSpelling = clang_getTokenSpelling(translationUnit, tokens[1]);
+                    const char *value = clang_getCString(tokenSpelling);
+                    if(tokenKind == CXToken_Literal) {
                         [_literalConstants setObject:[TQNodeNumber nodeWithDouble:atof(value)] forKey:nsName];
-                        clang_disposeString(tokenSpelling);
+                    } else if(tokenKind == CXToken_Identifier) { // Treat as alias
+                        id existing = [_literalConstants objectForKey:[NSString stringWithUTF8String:value]];
+                        if(existing)
+                            [_literalConstants setObject:existing forKey:nsName];
                     }
+                    clang_disposeString(tokenSpelling);
                 }
                 clang_disposeTokens(translationUnit, tokens, tokenCount);
             } break;
             case CXCursor_VarDecl: {
                 char *encoding = [[self class] _encodingForCursor:cursor];
                 [_constants setObject:[TQBridgedConstant constantWithName:nsName encoding:encoding]
-                               forKey:nsName];
+                               forKey:_prepareConstName(nsName)];
                 free(encoding);
             } break;
             case CXCursor_EnumDecl: {
@@ -280,6 +292,8 @@ using namespace llvm;
         NSMutableString *realEncoding = [NSMutableString string];
         __block BOOL isFirstChild = YES;
         clang_visitChildrenWithBlock(cursor, ^(CXCursor child, CXCursor parent) {
+            if(child.kind == CXCursor_UnexposedAttr)
+                return CXChildVisit_Continue;
             if(isFirstChild && child.kind == CXCursor_ParmDecl && (kind == CXCursor_FunctionDecl || kind == CXCursor_ObjCForCollectionStmt
                                                                    || kind == CXIdxEntity_ObjCClassMethod || kind == CXIdxEntity_ObjCInstanceMethod)) {
                 [realEncoding appendString:@"v"];
