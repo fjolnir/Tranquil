@@ -525,8 +525,8 @@ using namespace llvm;
                                              [aProgram getGlobalStringPtr:argTypeEncoding withBuilder:_builder]);
         }
         TQNodeVariable *local = [TQNodeVariable nodeWithName:[argDef name]];
+        local.shadows = YES;
         [local store:argValue inProgram:aProgram block:self root:aRoot error:aoErr];
-        [_locals setObject:local forKey:[argDef name]];
     }
     if(_isVariadic) {
         // Create a dictionary and loop through the va_list till we reach the sentinel
@@ -538,9 +538,10 @@ using namespace llvm;
         _builder->CreateCall(vaStart, valistCast);
         Value *vaargArray = _builder->CreateCall(aProgram.TQVaargsToArray, valistCast);
         _builder->CreateCall(vaEnd, valistCast);
+
         TQNodeVariable *dotDotDot = [TQNodeVariable nodeWithName:@"..."];
+        dotDotDot.shadows = YES;
         [dotDotDot store:vaargArray inProgram:aProgram block:self root:aRoot error:aoErr];
-        [_locals setObject:dotDotDot forKey:[dotDotDot name]];
     }
 
     Value *val;
