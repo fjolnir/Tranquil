@@ -141,6 +141,11 @@ NSString * const TQTypeString    = @"*";
     [TQBoxedObject unbox:aObj to:[self _addrForIndex:aIdx] usingType:_itemType];
 }
 
+- (id)value
+{
+    return [self objectAtIndexedSubscript:0];
+}
+
 - (NSString *)description
 {
     return [NSString stringWithFormat:@"<%@:%p to: %p type: %s>", [self class], self, _addr, _itemType];
