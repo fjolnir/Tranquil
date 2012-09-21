@@ -576,8 +576,8 @@ Assignment     = a:AssgnLhs - "=" - "async" - b:AssignValue
                | a:AssgnLhs       { PushStack(a); }
                  - (AssgnRhs -)+  { $$ = PopStack(); }
 
-AssgnLhs       = Property
-               | SubscriptExp
+AssgnLhs       = SubscriptExp
+               | Property
                | Variable
 
 AssgnRhs       = -- (  "="  -- b:AssignValue  { PushStack(b);                                                                       }
