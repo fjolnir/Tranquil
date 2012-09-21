@@ -3,6 +3,7 @@
 #import "TQNodeBlock.h"
 #import "ObjCSupport/TQHeaderParser.h"
 #import "TQProgram.h"
+#import <dlfcn.h>
 
 using namespace llvm;
 
@@ -48,6 +49,18 @@ using namespace llvm;
     if(!path)
         return NULL;
     if([[path pathExtension] isEqualToString:@"h"]) {
+        // If it's a framework and we are not in AOT mode, we should load it
+        if(!aProgram.useAOTCompilation && [path rangeOfString:@".framework"].location != NSNotFound) {
+            NSArray *components = [path pathComponents];
+            NSString *frameworkPath;
+            for(int i = [components count] - 1; i >= 0; --i) {
+                if([[components objectAtIndex:i] hasSuffix:@".framework"]) {
+                    frameworkPath = [[components subarrayWithRange:(NSRange) { 0, i+1 }] componentsJoinedByString:@"/"];
+                    frameworkPath = [frameworkPath stringByAppendingFormat:@"/%@", [[components objectAtIndex:i] stringByDeletingPathExtension]];
+                }
+            }
+            dlopen([frameworkPath fileSystemRepresentation], RTLD_GLOBAL);
+        }
         [aProgram.objcParser parseHeader:path];
         return NULL;
     } else {
