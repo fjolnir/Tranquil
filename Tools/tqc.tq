@@ -34,7 +34,7 @@ status = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/bin/tranquil"
 
 asmPath = "/tmp/#{uuid()}.s"
 status = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/llvm/bin/llc"
-                                 arguments: [$-O0, $-disable-fp-elim, $-relocation-model=pic, $-o, asmPath, irPath];
+                                 arguments: [$-O3, $-disable-fp-elim, $-relocation-model=pic, $-o, asmPath, irPath];
                              waitUntilExit;
                          terminationStatus
 `error("Assembly failed")` if: status != 0
