@@ -580,11 +580,12 @@ AssgnLhs       = Property
                | SubscriptExp
                | Variable
 
-AssgnRhs       = -- (  "=" -- b:AssignValue  { PushStack(b);                                                                       }
-                    | "+=" -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorAdd left:StackTop right:b]);      }
-                    | "-=" -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorSubtract left:StackTop right:b]); }
-                    | "*=" -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorMultiply left:StackTop right:b]); }
-                    | "/=" -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorDivide left:StackTop right:b]);   }
+AssgnRhs       = -- (  "="  -- b:AssignValue  { PushStack(b);                                                                       }
+                    | "+="  -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorAdd left:StackTop right:b]);      }
+                    | "-="  -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorSubtract left:StackTop right:b]); }
+                    | "*="  -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorMultiply left:StackTop right:b]); }
+                    | "/="  -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorDivide left:StackTop right:b]);   }
+                    | "||=" -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorOr left:StackTop right:b]);       }
                     )
                {
                    TQNodeOperator *assignVal = PopStack();
