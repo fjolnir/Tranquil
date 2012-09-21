@@ -13,7 +13,7 @@ using namespace llvm;
 @end
 
 @implementation TQNodeVariable
-@synthesize name=_name, alloca=_alloca, forwarding=_forwarding, isGlobal=_isGlobal, isAnonymous=_isAnonymous;
+@synthesize name=_name, alloca=_alloca, forwarding=_forwarding, isGlobal=_isGlobal, isAnonymous=_isAnonymous, shadows=_shadows;
 
 + (TQNodeVariable *)node
 {
@@ -249,8 +249,7 @@ using namespace llvm;
     CallInst *releaseCall = aBlock.builder->CreateCall(aProgram.objc_release, [self _getForwardingInProgram:aProgram block:aBlock root:aRoot]);
     releaseCall->addAttribute(~0, Attribute::NoUnwind);
     SmallVector<llvm::Value*,1> args;
-    releaseCall->setMetadata("clang.imprecise_release",
-                      llvm::MDNode::get(aProgram.llModule->getContext(), args));
+    releaseCall->setMetadata("clang.imprecise_release", llvm::MDNode::get(aProgram.llModule->getContext(), args));
 }
 
 - (TQNodeVariable *)_getExistingIdenticalInBlock:(TQNodeBlock *)aBlock program:(TQProgram *)aProgram
@@ -259,9 +258,10 @@ using namespace llvm;
         return nil;
 
     TQNodeVariable *existingVar = nil;
-    if((existingVar = [[aProgram globals] objectForKey:_name]) && existingVar != self)
-        return existingVar;
-    else if(!_isGlobal && (existingVar = [aBlock.locals objectForKey:_name]) && existingVar != self)
+
+    if(!_isGlobal && (existingVar = [aBlock.locals objectForKey:_name]) && (existingVar != self || _shadows))
+        return existingVar == self ? nil : existingVar;
+    else if((existingVar = [[aProgram globals] objectForKey:_name]) && existingVar != self && !_shadows)
         return existingVar;
 
     [aBlock.locals setObject:self forKey:_name];
@@ -275,6 +275,7 @@ using namespace llvm;
     copy.name        = _name;
     copy->_isGlobal  = _isGlobal;
     copy.alloca      = _alloca;
+    copy.shadows     = _shadows;
 
     return copy;
 }

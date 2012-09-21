@@ -5,7 +5,7 @@
 @property(readonly) BOOL isGlobal;
 // Anonymous variables are invisible from tranquil, and are captured by value when their
 // capturing block is copied
-@property(readwrite, nonatomic) BOOL isAnonymous;
+@property(readwrite, nonatomic) BOOL isAnonymous, shadows;
 @property(readwrite, assign) llvm::Value *alloca, *forwarding;
 
 + (TQNodeVariable *)node;
