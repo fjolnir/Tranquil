@@ -30,17 +30,17 @@ status = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/bin/tranquil"
                                  arguments: [$-aot, $-o, irPath, inPath];
                              waitUntilExit;
                          terminationStatus
-error if: status != 0
+`error("Compilation failed")` if: status != 0
 
 asmPath = "/tmp/#{uuid()}.s"
 status = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/llvm/bin/llc"
                                  arguments: [$-O0, $-disable-fp-elim, $-relocation-model=pic, $-o, asmPath, irPath];
                              waitUntilExit;
                          terminationStatus
-error if: status != 0
+`error("Assembly failed")` if: status != 0
 
 status = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/llvm/bin/clang"
                                  arguments: ldFlags + [$-o, outPath, asmPath];
                              waitUntilExit;
                          terminationStatus
-error if: status != 0
+`error("Linking failed")` if: status != 0
