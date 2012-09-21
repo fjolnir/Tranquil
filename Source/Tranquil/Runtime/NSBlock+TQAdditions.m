@@ -13,4 +13,8 @@
 {
     return cond ? nil : TQDispatchBlock0(self);
 }
+- (id)forever
+{
+    while(true) TQDispatchBlock0(self);
+}
 @end
