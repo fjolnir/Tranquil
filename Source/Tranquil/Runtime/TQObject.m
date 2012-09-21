@@ -29,11 +29,28 @@
     return [self addMethod:aSel withBlock:aBlock replaceExisting:TQValid];
 }
 
-+ (id)accessor:(NSString *)aPropName
++ (id)accessor:(NSString *)aPropName initialValue:(id<NSCopying>)aInitial
 {
-    [self addMethod:aPropName withBlock:^(id self_) { return NSMapGet(TQGetDynamicIvarTable(self_), aPropName); } replaceExisting:nil];
+    [self addMethod:aPropName withBlock:^(id self_) {
+        __block id ret = NSMapGet(TQGetDynamicIvarTable(self_), aPropName);
+        if(aInitial && !ret) {
+            static dispatch_once_t once;
+            static id sharedInstance;
+            dispatch_once(&once, ^{
+                ret = [[aInitial copyWithZone:nil] autorelease];
+                NSMapInsert(TQGetDynamicIvarTable(self_), aPropName, ret);
+            });
+        }
+        return ret;
+    } replaceExisting:nil];
     NSString *setterSel = [NSString stringWithFormat:@"set%@:", [aPropName capitalizedString]];
     [self addMethod:setterSel withBlock:^(id self_, id val) { NSMapInsert(TQGetDynamicIvarTable(self_), aPropName, val); } replaceExisting:nil];
+
     return TQValid;
+}
+
++ (id)accessor:(NSString *)aPropName
+{
+    return [self accessor:aPropName initialValue:nil];
 }
 @end
