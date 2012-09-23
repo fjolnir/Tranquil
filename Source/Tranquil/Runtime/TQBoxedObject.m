@@ -121,25 +121,25 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     if(boxingClass)
         return [boxingClass box:aPtr];
 
-    // Seems it hasn't. Let's.
-    if([self typeIsScalar:aType])
-        boxingClass = [self _prepareScalarWrapper:className withType:aType];
-    else if(*aType == _C_STRUCT_B || *aType == _C_UNION_B)
-        boxingClass = [self _prepareAggregateWrapper:className withType:aType];
-    else if(*aType == _TQ_C_LAMBDA_B)
-        boxingClass = [self _prepareLambdaWrapper:className withType:aType];
-    else if(strstr(aType, "^{__CF") == aType) // CF types accept messages, and many are toll free bridged
-        // TODO: actually generate a wrapper class that does this without going through the tests above
-        return [*(id*)aPtr autorelease];
-    else if(*aType == _C_PTR || *aType == _C_ARY_B) {
-        // TODO: actually generate a wrapper class that does this without going through the tests above
-        return [TQPointer box:aPtr withType:aType];
-    } else {
-        TQLog(@"Type %s cannot be boxed", aType);
-        return nil;
+    @synchronized(self) {
+        // Seems it hasn't. Let's.
+        if([self typeIsScalar:aType])
+            boxingClass = [self _prepareScalarWrapper:className withType:aType];
+        else if(*aType == _C_STRUCT_B || *aType == _C_UNION_B)
+            boxingClass = [self _prepareAggregateWrapper:className withType:aType];
+        else if(*aType == _TQ_C_LAMBDA_B)
+            boxingClass = [self _prepareLambdaWrapper:className withType:aType];
+        else if(strstr(aType, "^{__CF") == aType) // CF types accept messages, and many are toll free bridged
+            // TODO: actually generate a wrapper class that does this without going through the tests above
+            return [*(id*)aPtr autorelease];
+        else if(*aType == _C_PTR || *aType == _C_ARY_B) {
+            // TODO: actually generate a wrapper class that does this without going through the tests above
+            return [TQPointer box:aPtr withType:aType];
+        } else {
+            TQLog(@"Type %s cannot be boxed", aType);
+            return nil;
+        }
     }
-    objc_registerClassPair(boxingClass);
-
     return [boxingClass box:aPtr];
 }
 
@@ -360,7 +360,6 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     TQGetSizeAndAlignment(aType, &size, &alignment);
 
     IMP initImp      = nil;
-    Class superClass = self;
     switch(*aType) {
         case _C_ID:
         case _C_CLASS:    initImp = (IMP)_box_C_ID_imp;       break;
@@ -387,8 +386,12 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
             return nil;
     }
 
-    Class kls = objc_allocateClassPair(superClass, aClassName, 0);
+    Class kls;
+    kls = objc_allocateClassPair(self, aClassName, 0);
+    if(!kls)
+        return objc_getClass(aClassName);
     class_addMethod(kls->isa, @selector(box:), initImp, "@:^v");
+    objc_registerClassPair(kls);
 
     return kls;
 }
@@ -398,6 +401,8 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
 {
     BOOL isStruct = *aType == _C_STRUCT_B;
     Class kls = objc_allocateClassPair(self, aClassName, 0);
+    if(!kls)
+        return objc_getClass(aClassName);
 
     NSUInteger size, alignment;
     TQGetSizeAndAlignment(aType, &size, &alignment);
@@ -464,6 +469,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
         return self;
     });
     class_addMethod(kls, @selector(initWithPtr:), initImp, "@:^v");
+    objc_registerClassPair(kls);
 
     return kls;
 }
@@ -471,8 +477,11 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
 // Handles blocks&function pointers
 + (Class)_prepareLambdaWrapper:(const char *)aClassName withType:(const char *)aType
 {
-    BOOL isBlock = *(++aType) == _TQ_C_LAMBDA_BLOCK;
+    Class kls = objc_allocateClassPair(self, aClassName, 0);
+    if(!kls)
+        return objc_getClass(aClassName);
 
+    BOOL isBlock = *(++aType) == _TQ_C_LAMBDA_BLOCK;
     BOOL needsWrapping = NO;
     // If the value is a funptr, the return value or any argument is not an object, then the value needs to be wrapped up
     for(int i = 0; i < strlen(aType)-1; ++i) {
@@ -481,8 +490,6 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
             break;
         }
     }
-
-    Class kls = objc_allocateClassPair(self, aClassName, 0);
 
     IMP initImp;
     if(!needsWrapping) {
@@ -553,6 +560,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
         objc_setAssociatedObject(kls, &_TQFFIResourcesAssocKey, argTypeObjects, OBJC_ASSOCIATION_RETAIN);
     }
     class_addMethod(kls, @selector(initWithPtr:), initImp, "@:^v");
+    objc_registerClassPair(kls);
 
     return kls;
 }
@@ -651,8 +659,8 @@ id tq_boxedMsgSend(id self, SEL selector, ...)
     }
 
     const char *encoding = method_getTypeEncoding(method);
-    unsigned int nargs = method_getNumberOfArguments(method);
-    IMP imp = method_getImplementation(method);
+    unsigned int nargs   = method_getNumberOfArguments(method);
+    IMP imp              = method_getImplementation(method);
 
     ffi_type *retType;
     ffi_type *argTypes[nargs];
