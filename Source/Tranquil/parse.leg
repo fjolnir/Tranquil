@@ -116,9 +116,7 @@ Expression   = TernaryExpr
              | Equation
              | UnaryMsg
              | _OtherExpr
-             {
-                 //[$$ setLineNumber:CurrentLine];
-             }
+
 
 NoTernExpr   = Equation
              | _OtherExpr
@@ -156,7 +154,7 @@ KeywordMsg   = rcvr:KwdMsgRcvr -
                     SetLineNo(StackTop);
                }
                body:KwdMsgBody { $$ = PopStack(); }
-CascadedMsg  = ( (KeywordMsg|KwdMsgRcvr)
+CascadedMsg  =  (KeywordMsg|KwdMsgRcvr)
                  {
                      if(![$$ isKindOfClass:[TQNodeMessage class]]) {
                          $$ = [TQNodeMessage nodeWithReceiver:$$];
@@ -180,7 +178,6 @@ CascadedMsg  = ( (KeywordMsg|KwdMsgRcvr)
                  }
                | KeywordMsg
                | UnaryMsg
-               )
 
 UnaryMsgRcvr = Call
              | UnaryOp
@@ -239,7 +236,6 @@ MessageArg   = TernaryExpr
              | Equation
              | Call
              | UnaryMsg
-             | Block
              | UnaryOp
              | Nil
              | SubscriptExp
@@ -247,6 +243,7 @@ MessageArg   = TernaryExpr
              | RegExp
              | Self
              | Literal
+             | Block
              | Constant
              | Variable
              | ParenExpr
@@ -281,7 +278,8 @@ Call         = callee:Callee
                     $$ = PopStack();
                     [$$ setArguments:arguments];
                }
-Callee       = Block
+Callee       = Literal
+             | Block
              | Constant
              | SubscriptExp
              | Property
@@ -291,7 +289,7 @@ CallArg      = arg:Expression { [StackTop addObject:arg]; }
 
 
 # Block
-Block        = '{' --
+Block        = "{" --
                {
                     PushStack([TQNodeBlock node]);
                     SetLineNo(StackTop);
@@ -318,7 +316,7 @@ Block        = '{' --
                }
                ( (BlockArgDef - (',' -- BlockArgDef --)*)?
                (',' -- BlkVarArgDef --)? -- '|' -)? expr:Expression -
-               _backtick ~{ SyntaxError(@"Unterminated block"); }
+               _backtick ~{ SyntaxError(@"Unterminated expression block"); }
                {
                    NSMutableArray *arguments = PopStack();
                    $$ = [TQNodeBlock node];
@@ -346,8 +344,8 @@ Lock         = "lock"  { PushStack([TQNodeLock node]); SetLineNo(StackTop); }
                    [StackTop setCondition:cond];
                    PushStack([NSMutableArray array]);
                }
-               ('{' -- ( Statement --)*
-                '}' ~{ SyntaxError(@"Unterminated lock"); }
+               ("{" -- ( Statement --)*
+                "}" ~{ SyntaxError(@"Unterminated lock"); }
                | -- Statement)
                {
                    NSMutableArray *statements = PopStack();
@@ -361,8 +359,8 @@ Collect      = "collect" --
                    PushStack([TQNodeCollect node]); SetLineNo(StackTop);
                    PushStack([NSMutableArray array]);
                }
-               ('{' -- ( Statement --)*
-                '}' ~{ SyntaxError(@"Unterminated collection block"); }
+               ("{" -- ( Statement --)*
+                "}" ~{ SyntaxError(@"Unterminated collection block"); }
                | Statement)
                {
                    NSMutableArray *statements = PopStack();
@@ -379,7 +377,7 @@ Class        = '#' name:Constant --
                ( "<" --
                  SuperClsName ~{ SyntaxError(@"Expected Super class after '<'"); }
                  -- )?
-               '{' -- (OnLoadMsg ---)* (Method --)*
+               "{" -- (OnLoadMsg ---)* (Method --)*
                _rightBrace ~{ SyntaxError(@"Unterminated class"); }
                {
                    $$ = PopStack();
@@ -403,7 +401,7 @@ MethodImpl   = arguments:MethodArgs  --
                {
                    PushStack([NSMutableArray array]);
                }
-               ( '{' -- (Statement --)*
+               ( "{" -- (Statement --)*
                  _rightBrace ~{ SyntaxError(@"Unterminated method"); }
                {
                    NSMutableArray *statements = PopStack();
@@ -466,7 +464,7 @@ If           = ( "if"        {  PushStack([TQNodeIfBlock node]);     SetLineNo(S
                    [StackTop setCondition:cond];
                    PushStack([NSMutableArray array]);
                }
-               -- ('{' -- ( Statement --)*
+               -- ("{" -- ( Statement --)*
                 _rightBrace ~{ SyntaxError(@"Unterminated if/unless block"); }
                | -- Statement)
                ( -- "else" - elsif:If
@@ -580,13 +578,13 @@ AssgnLhs       = SubscriptExp
                | Property
                | Variable
 
-AssgnRhs       = -- (  "="  -- b:AssignValue  { PushStack(b);                                                                       }
-                    | "+="  -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorAdd left:StackTop right:b]);      }
-                    | "-="  -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorSubtract left:StackTop right:b]); }
-                    | "*="  -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorMultiply left:StackTop right:b]); }
-                    | "/="  -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorDivide left:StackTop right:b]);   }
-                    | "||=" -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorOr left:StackTop right:b]);       }
-                    )
+AssgnRhs       =  (  "="  -- b:AssignValue  { PushStack(b);                                                                       }
+                  | "+="  -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorAdd left:StackTop right:b]);      }
+                  | "-="  -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorSubtract left:StackTop right:b]); }
+                  | "*="  -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorMultiply left:StackTop right:b]); }
+                  | "/="  -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorDivide left:StackTop right:b]);   }
+                  | "||=" -- b:Expression   { PushStack([TQNodeOperator nodeWithType:kTQOperatorOr left:StackTop right:b]);       }
+                  )
                {
                    TQNodeOperator *assignVal = PopStack();
                    ReplaceStackTop([TQNodeOperator nodeWithType:kTQOperatorAssign left:StackTop right:assignVal]);
@@ -713,7 +711,7 @@ Dictionary   = "{" --
                {
                    PushStack([[NSMapTable new] autorelease]);
                }
-               (DictItem -- ("," -- DictItem)*)? --
+               (DictItem (-- "," -- DictItem)*)? --
                "}"
                {
                    $$ = [TQNodeDictionary node];
