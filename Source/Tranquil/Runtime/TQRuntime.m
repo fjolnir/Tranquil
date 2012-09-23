@@ -354,10 +354,10 @@ BOOL TQAugmentClassWithOperators(Class klass)
 
 
     // []
-    imp = imp_implementationWithBlock(^(id a, id key)         { return _objc_msgSend_hack2(a, @selector(valueForKey:), key); });
+    imp = imp_implementationWithBlock(^(id a, id key)         { return _objc_msgSend_hack2(a, @selector(objectForKeyedSubscript:), key); });
     class_addMethod(klass, TQGetterOpSel, imp, "@@:@");
     // []=
-    imp = imp_implementationWithBlock(^(id a, id key, id val) { return _objc_msgSend_hack3(a, @selector(setValue:forKey:), val, key); });
+    imp = imp_implementationWithBlock(^(id a, id key, id val) { return _objc_msgSend_hack3(a, @selector(setObject:forKeyedSubscript:), val, key); });
     class_addMethod(klass, TQSetterOpSel, imp, "@@:@@");
 
     return YES;
