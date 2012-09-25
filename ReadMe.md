@@ -76,6 +76,24 @@ fib = `n | n > 1 ? fib(n-1) + fib(n-2) ! n`
 fib(10) print
 ```
 
+### Make a database query (Using [DatabaseKit](http://github.com/fjolnir/DatabaseKit))
+
+    import "DatabaseKit"
+    db = DB withURL: "sqlite://data/database.sqlite"
+    query = db[@aTable] select: @field; where: { @anotherField => aValue }
+    val   = query[@field]
+    
+    \ We can write that more concisely as:
+    val   = table[{ @anotherField => aValue }][@field]
+    
+### Create a Web Server (Using [WebAppKit](http://github.com/fjolnir/WebAppKit))
+
+    import "WebAppKit"
+    WAApplication applicationOnPort: 8080;
+                          handleGET: "/"
+                               with: `request, response | "Hello world"`;
+                      waitAndListen
+    
 ### Evaluate a regular expression
 
 ```
@@ -128,8 +146,8 @@ nsapp = NSApplication sharedApplication
 
 \ Create the menubar
 quitMenuItem = NSMenuItem new; setTitle: "Quit #{NSProcessInfo processInfo processName}";
-                              setAction: $terminate:;
-                       setKeyEquivalent: $q;
+                              setAction: @terminate:;
+                       setKeyEquivalent: @q;
                                    self
 appMenu     = NSMenu new; addItem: quitMenuItem;   self
 appMenuItem = NSMenuItem new; setSubmenu: appMenu; self

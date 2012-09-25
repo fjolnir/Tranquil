@@ -12,7 +12,7 @@ import "clang-c/Index"
     - dealloc `Clang_disposeIndex(idx)`
 
     - parse: path withBlock: lambda {
-        clangArgs = TQPointer to: $-ObjC withType: $*
+        clangArgs = TQPointer to: @-ObjC withType: @*
         clangOpts = CXTranslationUnit_DetailedPreprocessingRecord bitOr: CXTranslationUnit_SkipFunctionBodies
         header    = Clang_parseTranslationUnit(self#idx, path, clangArgs, clangArgs count, nil, 0, clangOpts)
 

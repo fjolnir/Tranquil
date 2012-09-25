@@ -118,8 +118,8 @@
 	b = "A string with an embedded #{a}." \ Evaluates to "A string with an embedded expression."
 	
 	\ Unique strings
-	a = $string
-	b = $"constant string with spaces"
+	a = @string
+	b = @"constant string with spaces"
 	
 	\ Importing other files
 	import "..filename.."  \ Imports `filename`.

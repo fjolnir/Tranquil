@@ -2,14 +2,14 @@ import "unistd"
 
 async {
     "entered a" print
-    lock $uniq {
+    lock @uniq {
         Sleep(1)
     }
 }
 
 async {
     "entered b" print
-    lock $uniq {
+    lock @uniq {
         "lock released" print
     }
 }

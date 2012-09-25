@@ -820,12 +820,12 @@ StrEmbeddExpr= ("#{"-"}"
                )
 
 # Constant string
-ConstString  = "$" ( '"' < [^\"]* >
+ConstString  = "@" ( '"' < [^\"]* >
                      _dblQuot ~{ SyntaxError(@"Constant string literal left unclosed"); }
                    | "\'" < [^\']* >
                      _snglQuot ~{ SyntaxError(@"Constant string literal left unclosed"); }
                    | < [^\n ;,\]}.)]+ >
-                   ) ~{ SyntaxError(@"Expected string literal after '$'"); }
+                   ) ~{ SyntaxError(@"Expected string literal after '@'"); }
                    { $$ = [TQNodeConstString nodeWithString:YYNSSTR]; SetLineNo($$); }
 
 RegExp       = "/" { PushStack([TQNodeRegex nodeWithPattern:[NSMutableString stringWithString:@"/"]]); }
