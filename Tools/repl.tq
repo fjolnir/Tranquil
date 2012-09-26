@@ -4,15 +4,22 @@ import "stdlib"
 
 "welcome; this is tranquil." print
 
+historyPath   = "/tmp/tqrepl_history"
 nonReturnable = `str | (str hasPrefix: "import "      ) || (str hasPrefix: "if "    ) ||
                        (str hasPrefix: "unless "      ) || (str hasPrefix: "while " ) ||
                        (str hasPrefix: "until "       ) || (str hasPrefix: "async " ) ||
                        (str hasPrefix: "whenFinished ") || (str matches: /=\s*async /)`
 
+History_truncate_file(historyPath, 300) \ Just to make sure things don't get unmanageable
+Read_history(historyPath)
+
 getInput = { indent = 0 |
     ptr = Readline((" " * indent * 4).."> ")
     str = ptr toString
-   `Add_history(str)` if: str length > 0
+    if str length > 0 {
+        Add_history(str)
+        Write_history(historyPath)
+    }
     Free(ptr)
 
     indent += ((/\{/ matches: str) count) - ((/\}/ matches: str) count)
