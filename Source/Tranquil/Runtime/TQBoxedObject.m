@@ -634,7 +634,7 @@ id __wrapperBlock_invoke(struct TQBoxedBlockLiteral *__blk, ...)
 
 #pragma mark - Boxed msgSend
 
-extern CFMutableDictionaryRef _TQSelectorCache;
+extern NSMapTable *_TQSelectorCache;
 extern void _TQCacheSelector(id obj, SEL sel);
 
 id tq_boxedMsgSend(id self, SEL selector, ...)
@@ -644,10 +644,10 @@ id tq_boxedMsgSend(id self, SEL selector, ...)
 
     Class kls = object_getClass(self);
     void *cacheKey =  (void*)((uintptr_t)kls ^ (uintptr_t)selector << 32);
-    Method method = (Method)CFDictionaryGetValue(_TQSelectorCache, cacheKey);
+    Method method = (Method)NSMapGet(_TQSelectorCache, cacheKey);
     if(method == 0x0) {
         _TQCacheSelector(self, selector);
-        method = (Method)CFDictionaryGetValue(_TQSelectorCache, cacheKey);
+        method = (Method)NSMapGet(_TQSelectorCache, cacheKey);
     }
     if(method == 0x0) {
         [NSException raise:NSGenericException
