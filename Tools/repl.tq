@@ -22,5 +22,8 @@ getInput = { indent = 0 |
 while line = getInput() {
    `line = "^#{line}"` unless: nonReturnable(line)
     result = TQProgram sharedProgram executeScript: line error: nil
-   `" -> #{result} (#{result class})" print` if: result
+    if result
+        " -> #{result} (#{result class})" print
+    else if line != "^"
+        " -> nil" print
 }
