@@ -47,16 +47,18 @@ int main(int argc, char **argv)
         program.outputPath          = [NSString stringWithUTF8String:outputPath];
         program.shouldShowDebugInfo = showDebugOutput;
         NSString *script;
+        NSError *err = nil;
         if(inputPath)
-            [program executeScriptAtPath:[NSString stringWithUTF8String:inputPath] error:nil];
+            [program executeScriptAtPath:[NSString stringWithUTF8String:inputPath] error:&err];
         else {
             NSFileHandle *input = [NSFileHandle fileHandleWithStandardInput];
             NSData *inputData = [NSData dataWithData:[input readDataToEndOfFile]];
             script = [[[NSString alloc] initWithData:inputData encoding:NSUTF8StringEncoding] autorelease];
-            NSError *err = nil;
             [program executeScript:script error:&err];
-            if(err)
-                NSLog(@"Error: %@", err);
+        }
+        if(err) {
+            NSLog(@"Error: %@", err);
+            return 1;
         }
     }
     return 0;
