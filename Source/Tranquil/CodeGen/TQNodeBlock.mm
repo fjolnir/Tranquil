@@ -487,7 +487,7 @@ using namespace llvm;
     }
 
     // Load the rest of arguments
-    Value *sentinel = _builder->CreateLoad(mod->getOrInsertGlobal("TQSentinel", aProgram.llInt8PtrTy));
+    Value *sentinel = _builder->CreateLoad(mod->getOrInsertGlobal("TQNothing", aProgram.llInt8PtrTy));
     Value *argValue;
     for (unsigned i = 1; i < _arguments.count; ++i, ++argumentIterator)
     {

@@ -67,7 +67,7 @@ using namespace llvm;
         if(*aoErr)
             return NULL;
     }
-    args.push_back(aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQSentinel", aProgram.llInt8PtrTy)));
+    args.push_back(aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQNothing", aProgram.llInt8PtrTy)));
 
     Value *ret = aBlock.builder->CreateCall(aProgram.objc_msgSend, args);
     [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];

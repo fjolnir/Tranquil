@@ -84,7 +84,7 @@ using namespace llvm;
         args.push_back([key generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr]);
         if(*aoErr) return NULL;
     }
-    args.push_back(aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQSentinel", aProgram.llInt8PtrTy)));
+    args.push_back(aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQNothing", aProgram.llInt8PtrTy)));
 
     CallInst *call = aBlock.builder->CreateCall(aProgram.objc_msgSend, args);
     [self _attachDebugInformationToInstruction:call inProgram:aProgram block:aBlock root:aRoot];

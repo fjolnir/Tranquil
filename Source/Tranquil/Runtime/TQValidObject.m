@@ -3,7 +3,7 @@
 static TQValidObject *sharedInstance;
 
 @implementation TQValidObject
-+ (TQValidObject *)sharedInstance
++ (TQValidObject *)valid
 {
     static dispatch_once_t once;
     dispatch_once(&once, ^{

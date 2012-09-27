@@ -41,7 +41,7 @@
 
 - (id)reduce:(id (^)(id, id))aBlock
 {
-    id accum = TQSentinel; // Make the block use it's default accumulator on the first call
+    id accum = TQNothing; // Make the block use it's default accumulator on the first call
     for(int i = 0; i <= [_length intValue]; ++i) {
         accum = TQDispatchBlock2(aBlock, [TQNumber numberWithInt:i], accum);
     }
@@ -51,7 +51,7 @@
 - (id)map:(id (^)(id))aBlock
 {
     return [self reduce:^(id n, NSPointerArray *accum) {
-        if(accum == TQSentinel)
+        if(accum == TQNothing)
             accum = [[NSPointerArray new] autorelease];
         [accum addPointer:aBlock(n)];
         return accum;

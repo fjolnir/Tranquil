@@ -5,14 +5,16 @@
 #import <objc/runtime.h>
 #import <objc/message.h>
 #import "TQNumber.h"
+#import "TQValidObject.h"
+#import "TQNothingness.h"
 #import "NSObject+TQAdditions.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-id TQSentinel = @"3d2c9ac0bf3911e1afa70800200c9a66a";
-TQValidObject *TQValid = nil;
+id TQValid   = nil;
+id TQNothing = nil;
 
 // A map keyed with `Class xor (Selector << 32)` with values either being 0x1 (No boxing required for selector)
 // or a pointer the Method object of the method to be boxed. This is only used by tq_msgSend and tq_boxedMsgSend
@@ -290,7 +292,7 @@ NSPointerArray *TQVaargsToArray(va_list *items)
 {
     register id arg;
     NSPointerArray *arr = [NSPointerArray new];
-    while((arg = va_arg(*items, id)) != TQSentinel) {
+    while((arg = va_arg(*items, id)) != TQNothing) {
         [arr addPointer:arg];
     }
     return [arr autorelease];
@@ -371,7 +373,8 @@ void TQInitializeRuntime()
     _TQSelectorCache = NSCreateMapTable((NSMapTableKeyCallBacks){NULL,NULL,NULL},
                                         (NSMapTableValueCallBacks){NULL,NULL,NULL}, 1000);
 
-    TQValid = [TQValidObject sharedInstance];
+    TQValid   = [TQValidObject valid];
+    TQNothing = [TQNothingness nothing];
 
     TQEqOpSel                    = sel_registerName("==:");
     TQNeqOpSel                   = sel_registerName("!=:");

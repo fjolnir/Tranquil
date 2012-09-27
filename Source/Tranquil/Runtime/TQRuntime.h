@@ -17,8 +17,8 @@ extern "C" {
 #define _TQ_C_LAMBDA_BLOCK    '@'
 #define _TQ_C_LAMBDA_E        '>'
 
-extern id TQSentinel;
-extern TQValidObject *TQValid;
+extern id TQNothing;
+extern id TQValid;
 
 enum TQBlockFlag_t {
     // I chose a flag right in the middle of the unused space, so let's hope Apple doesn't decide to use it

@@ -504,7 +504,7 @@ static NSString *_prepareConstName(NSString *name)
     NSMutableIndexSet *byValArgIndices = [NSMutableIndexSet indexSet];
     std::vector<IRBuilder <>*> argCheckBuilders;
     if([_argTypes count] > 0) {
-        Value *sentinel = entryBuilder.CreateLoad(mod->getOrInsertGlobal("TQSentinel", aProgram.llInt8PtrTy));
+        Value *sentinel = entryBuilder.CreateLoad(mod->getOrInsertGlobal("TQNothing", aProgram.llInt8PtrTy));
         for(int i = 0; i < [_argTypes count]; ++i)
         {
             argTypeEncoding = [_argTypes objectAtIndex:i];

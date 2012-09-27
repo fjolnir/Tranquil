@@ -3,7 +3,7 @@
 
 
 @interface TQValidObject : TQObject
-+ (TQValidObject *)sharedInstance;
++ (TQValidObject *)valid;
 - (int)intValue;
 - (BOOL)boolValue;
 - (char)charValue;
