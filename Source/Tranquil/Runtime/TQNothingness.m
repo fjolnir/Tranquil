@@ -1,23 +1,17 @@
 #import "TQNothingness.h"
 #import <objc/runtime.h>
+#import "TQRuntime.h"
 
 static TQNothingness *sharedInstance;
 
 @implementation TQNothingness
 
-+ (void)load
++ (id)nothing
 {
-    if(self != [TQNothingness class])
-        return;
-
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         sharedInstance = class_createInstance(self, 0);
     });
-}
-
-+ (id)nothing
-{
     return sharedInstance;
 }
 
@@ -62,7 +56,7 @@ static TQNothingness *sharedInstance;
 
 - (BOOL)isEqual:(id)obj
 {
-    return NO;
+    return obj == self; // There's only one instance
 }
 
 - (NSString *)description

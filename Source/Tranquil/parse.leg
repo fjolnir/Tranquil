@@ -128,6 +128,7 @@ _OtherExpr   = UnaryMsg
              | Call
              | Valid
              | UnaryOp
+             | Nothing
              | Nil
              | SubscriptExp
              | Property
@@ -238,6 +239,7 @@ MessageArg   = TernaryExpr
              | Call
              | UnaryMsg
              | UnaryOp
+             | Nothing
              | Nil
              | SubscriptExp
              | Property
@@ -757,13 +759,14 @@ Literal      = Number
              | Dictionary
              | RegExp
 
-BreakStmt    = 'break'                     { $$ = [TQNodeBreak node]; SetLineNo($$); }
-SkipStmt     = 'skip'                      { $$ = [TQNodeSkip node];  SetLineNo($$); }
-Nil          = ('nil' | 'no' | '('--')')   { $$ = [TQNodeNil node];   SetLineNo($$); }
-Self         = 'self'                      { $$ = [TQNodeSelf node];  SetLineNo($$); }
-Super        = 'super'                     { $$ = [TQNodeSuper node]; SetLineNo($$); }
+BreakStmt    = 'break'                     { $$ = [TQNodeBreak node];   SetLineNo($$); }
+SkipStmt     = 'skip'                      { $$ = [TQNodeSkip node];    SetLineNo($$); }
+Nil          = ('nil' | 'no' | '('--')')   { $$ = [TQNodeNil node];     SetLineNo($$); }
+Nothing      = 'nothing'                   { $$ = [TQNodeNothing node]; SetLineNo($$); }
+Self         = 'self'                      { $$ = [TQNodeSelf node];    SetLineNo($$); }
+Super        = 'super'                     { $$ = [TQNodeSuper node];   SetLineNo($$); }
+Valid        = ('valid'|'yes')             { $$ = [TQNodeValid node];   SetLineNo($$); }
 Variadic     = '...'                       { $$ = [TQNodeVariable nodeWithName:@"..."]; SetLineNo($$); }
-Valid        = ('valid'|'yes')             { $$ = [TQNodeValid node]; SetLineNo($$); }
 
 Operator     = '=='  { $$ = @"=="; }
              | '!='  { $$ = @"!="; }

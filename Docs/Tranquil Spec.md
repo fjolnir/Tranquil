@@ -12,14 +12,15 @@
 	import
 	async
 	wait
-	break  \ Prematurely terminates a loop
-	skip   \ Skips to the end of the current iteration of a loop
-	nil    \ Represents 'nothing' ('no' is a synonym)
-	self   \ Available inside method blocks
-	super  \ Available inside method blocks as a message receiver
-	       \ that calls methods as defined by the current class's superclass
-	...    \ Array of passed variadic arguments
-	valid  \ Represents non-nilness, for use in cases where the actual object value is not of concern ('yes' is a synonym)
+	break   \ Prematurely terminates a loop
+	skip    \ Skips to the end of the current iteration of a loop
+	nil     \ Represents 'nothing' ('no' is a synonym)
+	self    \ Available inside method blocks
+	super   \ Available inside method blocks as a message receiver
+	        \ that calls methods as defined by the current class's superclass
+	...     \ Array of passed variadic arguments
+	valid   \ Represents non-nilness, for use in cases where the actual object value is not of concern ('yes' is a synonym)
+	nothing \ A constant representing 'nothingness' or 'absence of value'
 	
 	\ Built-in Operators
 	||  \ Or:  Evaluates to the first non-nil expression: (123 || nil) == 123      (Can be chained)
@@ -188,6 +189,9 @@ When a block is called as a result of a message to an object (object method: 123
 
 ### Super
 When a block is called as a result of a message to an object, the `super` keyword can be used as a message receiver to call the current object's superclass's implementation of a method (Even if the object's class has overridden it).
+
+### Nothing
+`nothing` represents the absence of value. Which is importantly not the same as `nil`. `nothing` is used for uses where you need there to be a difference between an empty value, and no value. For example if you call a block passing `nothing` as an argument, then the block will receive the default value for that parameter, not the `nothing` object you passed. Another use of `nothing` is for block iterators (such as `- each:`), where the convention is to return `nothing` if you want the iteration to stop.
 
 ### Operator methods
 

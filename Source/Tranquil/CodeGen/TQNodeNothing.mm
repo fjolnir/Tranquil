@@ -1,16 +1,17 @@
-#import "TQNodeValid.h"
-#import "TQNodeBlock.h"
+#import "TQNodeNothing.h"
 #import "TQProgram.h"
+#import "TQNodeBlock.h"
 
 using namespace llvm;
 
-@implementation TQNodeValid
-- (NSString *)description
+@implementation TQNodeNothing
+
++ (TQNodeNothing *)node
 {
-    return [NSString stringWithFormat:@"<valid>"];
+    return (TQNodeNothing *)[super node];
 }
 
-- (TQNode *)referencesNode:(TQNode *)aNode
+- (id)referencesNode:(TQNode *)aNode
 {
     return nil;
 }
@@ -20,11 +21,16 @@ using namespace llvm;
     // Nothing to iterate
 }
 
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<nothing>"];
+}
+
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
-    return aBlock.builder->CreateLoad(aProgram.llModule->getOrInsertGlobal("TQValid", aProgram.llInt8PtrTy));
+    return aBlock.builder->CreateLoad(aProgram.llModule->getOrInsertGlobal("TQNothing", aProgram.llInt8PtrTy));
 }
 @end

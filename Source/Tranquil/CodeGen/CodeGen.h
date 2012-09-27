@@ -16,6 +16,7 @@
 #import <Tranquil/CodeGen/TQNodeVariable.h>
 #import <Tranquil/CodeGen/TQNodeConstant.h>
 #import <Tranquil/CodeGen/TQNodeNil.h>
+#import <Tranquil/CodeGen/TQNodeNothing.h>
 #import <Tranquil/CodeGen/TQNodeArray.h>
 #import <Tranquil/CodeGen/TQNodeDictionary.h>
 #import <Tranquil/CodeGen/TQNodeRegex.h>
