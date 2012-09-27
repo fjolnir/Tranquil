@@ -2,6 +2,8 @@
 #import "../../../Build/TQStubs.h"
 #import "TQNumber.h"
 #import <objc/runtime.h>
+#import "NSObject+TQAdditions.h"
+#import "TQEnumerable.h"
 
 @interface TQPointerArrayEnumerator : NSEnumerator {
     NSPointerArray *_array;
@@ -9,7 +11,6 @@
 }
 + (TQPointerArrayEnumerator *)enumeratorWithArray:(NSPointerArray *)aArray;
 @end
-
 
 @implementation NSMapTable (Tranquil)
 + (NSMapTable *)tq_mapTableWithObjectsAndKeys:(id)firstObject, ...
@@ -21,7 +22,7 @@
     id key, val, head;
     int i = 0;
     IMP setImp = class_getMethodImplementation(object_getClass(ret), @selector(setObject:forKey:));
-    for(head = firstObject; head != TQSentinel; head = va_arg(args, id))
+    for(head = firstObject; head != TQNothing; head = va_arg(args, id))
     {
         if(++i % 2 == 0) {
             key = head;
@@ -43,9 +44,25 @@
 {
     [self setObject:TQObjectIsStackBlock(aObj) ? [[aObj copy] autorelease] : aObj forKey:aKey];
 }
+
+- (id)each:(id (^)(id))aBlock
+{
+    id res;
+    for(id key in self) {
+        res = TQDispatchBlock1(aBlock, [NSPointerArray tq_pointerArrayWithObjects:key, [self objectForKey:key]]);
+        if(res == TQNothing)
+            break;
+    }
+    return nil;
+}
 @end
 
 @implementation NSPointerArray (Tranquil)
++ (void)load
+{
+    [self include:[TQEnumerable class]];
+}
+
 + (NSPointerArray *)tq_pointerArrayWithObjects:(id)firstObject , ...
 {
     NSPointerArray *ret = [NSPointerArray new];
@@ -53,7 +70,7 @@
     va_list args;
     va_start(args, firstObject);
     IMP addImp = class_getMethodImplementation(object_getClass(ret), @selector(addPointer:));
-    for(id item = firstObject; item != TQSentinel; item = va_arg(args, id))
+    for(id item = firstObject; item != TQNothing; item = va_arg(args, id))
     {
         addImp(ret, @selector(addPointer:), item);
     }
@@ -116,6 +133,18 @@
         [self removeObjectAtIndex:count-1];
 }
 
+- (id)each:(id (^)(id))aBlock
+{
+    id res;
+    for(id obj in self) {
+        res = TQDispatchBlock1(aBlock, obj);
+        if(res == TQNothing)
+            break;
+    }
+    return nil;
+}
+
+
 #pragma mark - Helpers
 
 - (TQNumber *)size
@@ -163,41 +192,10 @@
     return [TQPointerArrayEnumerator enumeratorWithArray:self];
 }
 
-- (id)each:(id (^)(id))aBlock
-{
-    for(id obj in self) {
-        TQDispatchBlock1(aBlock, obj);
-    }
-    return nil;
-}
-
-- (id)map:(id (^)(id))aBlock
-{
-    id ret = [[self class] new];
-    for(id obj in self) {
-        [ret push:TQDispatchBlock1(aBlock, obj)];
-    }
-    return [ret autorelease];
-}
-
-- (id)reduce:(id (^)(id, id))aBlock
-{
-    id accum = TQSentinel; // Make the block use it's default accumulator on the first call
-    for(id obj in self) {
-        accum = TQDispatchBlock2(aBlock, obj, accum);
-    }
-    return accum;
-}
-
-- (id)map:(id (^)(id))mapBlock reduce:(id (^)(id, id))reduceBlock
-{
-    return [[self map:mapBlock] reduce:reduceBlock];
-}
-
 - (id)concat
 {
-    return [self reduce:^(id subArray, id accum) {
-        if(accum == TQSentinel)
+    return [(id)self reduce:^(id subArray, id accum) {
+        if(accum == TQNothing)
             accum = [[[self class] new] autorelease];
         return [subArray reduce:^(id obj, id _) {
              return [accum push:obj];
@@ -229,8 +227,38 @@
 @end
 
 @implementation NSArray (Tranquil)
++ (void)load
+{
+    [self include:[TQEnumerable class]];
+}
+- (id)each:(id (^)(id))aBlock
+{
+    id res;
+    for(id obj in self) {
+        res = TQDispatchBlock1(aBlock, obj);
+        if(res == TQNothing)
+            break;
+    }
+    return nil;
+}
 @end
 
+@implementation NSDictionary (Tranquil)
++ (void)load
+{
+    [self include:[TQEnumerable class]];
+}
+- (id)each:(id (^)(id))aBlock
+{
+    id res;
+    for(id key in self) {
+        res = TQDispatchBlock1(aBlock, [NSPointerArray tq_pointerArrayWithObjects:key, [self objectForKey:key]]);
+        if(res == TQNothing)
+            break;
+    }
+    return nil;
+}
+@end
 
 @implementation NSUserDefaults (Tranquil)
 - (void)setObject:(id)obj forKeyedSubscript:(id <NSObject,NSCopying>)key

@@ -1,6 +1,7 @@
 #import "NSObject+TQAdditions.h"
 #import "TQNumber.h"
 #import "TQRuntime.h"
+#import "TQModule.h"
 #import <objc/runtime.h>
 
 @implementation NSObject (Tranquil)
@@ -42,6 +43,10 @@
 + (id)include:(Class)aClass recursive:(id)aRecursive
 {
     TQAssert(aClass, @"Tried to include nil class");
+
+    if([aClass isKindOfClass:[TQModule class]])
+        TQAssert([aClass canBeIncludedInto:self],
+                 @"%@ cannot be included into %@", aClass, self);
 
     do {
         CopyMethods(object_getClass(aClass), object_getClass(self));
