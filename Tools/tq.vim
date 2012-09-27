@@ -41,7 +41,7 @@ syn region tqInterpolation matchgroup=tqInterpolated start="#{" end="}" containe
 syn case ignore
 
 " Symbols
-syn match  tqSymbol    "@\(\w\|[-*/\\:=!+<>]\)\+[ ,;\]\n]\@="
+syn match  tqSymbol    "@\(\w\|[-*/\\:=!+<>@]\)\+[ ,;\]}`\n)]\@="
 syn match  tqSymbol    "@\"[^\"]*\""
 syn match  tqSymbol    "@'[^']*'"
 
