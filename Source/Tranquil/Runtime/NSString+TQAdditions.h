@@ -8,6 +8,7 @@
 - (NSMutableString *)multiply:(TQNumber *)aTimes;
 - (NSMutableString *)add:(id)aObj;
 - (char)charValue;
+- (NSString *)trimmed;
 @end
 
 @interface NSMutableString (Tranquil)

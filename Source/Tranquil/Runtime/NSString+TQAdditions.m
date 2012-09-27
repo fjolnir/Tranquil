@@ -43,21 +43,17 @@
 {
     return [[self mutableCopy] autorelease];
 }
+
+- (NSString *)trimmed
+{
+    return [self stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+}
 @end
 
 @implementation NSMutableString (Tranquil)
 - (NSMutableString *)trim
 {
-    const char *chars = [self UTF8String];
-    NSUInteger len    = [self length];
-    NSUInteger startLen, endLen;
-    for(startLen = 0; chars[startLen]         == ' ' && startLen < len; ++startLen);
-    for(endLen   = 0; chars[len - endLen - 1] == ' ' && endLen < len;   ++endLen);
-    if(startLen > 0)
-        [self deleteCharactersInRange:(NSRange){ 0, startLen }];
-    if(endLen > 0 && startLen != len)
-        [self deleteCharactersInRange:(NSRange){ [self length] - endLen, endLen }];
-
+    [self setString:[self stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]];
     return self;
 }
 
