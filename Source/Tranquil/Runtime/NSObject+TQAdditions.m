@@ -25,6 +25,11 @@
     return [self isKindOfClass:aClass] ? TQValid : nil;
 }
 
+- (id)isIdenticalTo:(id)obj
+{
+    return self == obj ? TQValid : nil;
+}
+
 #define CopyMethods(kls, dst) do { \
     unsigned methodCount = 0; \
     Method *methods = class_copyMethodList(kls, &methodCount); \
@@ -34,16 +39,14 @@
     free(methods); \
 } while(0);
 
-+ (id)include:(Class)aClass recursive:(TQNumber *)aRecursive
++ (id)include:(Class)aClass recursive:(id)aRecursive
 {
-    if([aClass isKindOfClass:[NSString class]])
-        aClass = NSClassFromString((NSString *)aClass);
     TQAssert(aClass, @"Tried to include nil class");
 
     do {
         CopyMethods(object_getClass(aClass), object_getClass(self));
         CopyMethods(aClass, self);
-    } while([aRecursive boolValue] && (aClass = class_getSuperclass(aClass)));
+    } while(aRecursive && (aClass = class_getSuperclass(aClass)));
     return TQValid;
 }
 #undef CopyMethods
