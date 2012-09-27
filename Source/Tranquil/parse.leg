@@ -106,7 +106,8 @@ Statement    = (
 InvalidStmt  = Expression            { SyntaxError(@"Unexpected Expression"); }
              | ("=" -- b:Expression) { SyntaxError(@"Unexpected Assignment"); }
 
-Return       = "^" retVal:Expression { $$ = [TQNodeReturn nodeWithValue:retVal]; }
+Return       = "^" retVal:ReturnVal { $$ = [TQNodeReturn nodeWithValue:retVal]; }
+ReturnVal    = CascadedMsg | Expression
 
 
 # Expression
@@ -312,20 +313,23 @@ Block        = "{" --
                _rightBrace ~{ SyntaxError(@"Unterminated block"); }
              | '`' -
                {
+                   PushStack([TQNodeBlock node]);
                    PushStack([NSMutableArray array]);
                }
-               ( (BlockArgDef - (',' -- BlockArgDef --)*)?
-               (',' -- BlkVarArgDef --)? -- '|' -)? expr:Expression -
+               ( ( (BlockArgDef - (',' -- BlockArgDef --)* (',' -- BlkVarArgDef --)?) | ( BlkVarArgDef --) )? '|' --)?
+               expr:ExprBlkVal -
                _backtick ~{ SyntaxError(@"Unterminated expression block"); }
                {
                    NSMutableArray *arguments = PopStack();
-                   $$ = [TQNodeBlock node];
+                   $$ = PopStack();
                    [$$ setIsCompactBlock:YES];
                    for(TQNodeArgumentDef *arg in arguments) {
                        [$$ addArgument:arg error:nil];
                    }
                    [$$ setStatements:[NSMutableArray arrayWithObject:[TQNodeReturn nodeWithValue:expr]]];
                }
+ExprBlkVal   = CascadedMsg | Expression
+
 BlockArgDef  = name:Identifier { [StackTop addObject:[TQNodeArgumentDef nodeWithName:name]]; }
                 (- "=" !"=" --
                   default:Expression ~{ SyntaxError(@"Expected default argument expression after '='"); }
@@ -409,7 +413,7 @@ MethodImpl   = arguments:MethodArgs  --
                    SetLineNo($$);
                    [$$ setStatements:statements];
                }
-               | '`' - expr:Expression -
+               | '`' - expr:ExprBlkVal -
                  _backtick ~{ SyntaxError(@"Unterminated method"); }
                {
                    PopStack(); // Ignore
