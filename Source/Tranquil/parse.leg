@@ -36,7 +36,8 @@ typedef struct _TQParserState TQParserState;
         --G->data->currentLine; \
 }
 
-#define SyntaxError(msg) do { \
+#define SyntaxError(...) do { \
+    NSString *msg = [NSString stringWithFormat:__VA_ARGS__]; \
     RewindWhitespace(); \
     [NSException raise:kTQSyntaxErrorException format:@"Line %ld: Syntax error! %@", G->data->currentLine, (msg)]; \
 } while(0)
