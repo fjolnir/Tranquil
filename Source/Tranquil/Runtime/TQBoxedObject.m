@@ -244,13 +244,16 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
         case _C_PTR: {
             if(!aValue)
                 *(void **)aDest = NULL;
-            else if(strstr(aType, "^{__CF") == aType)
+            else if(strstr(aType, "^{__CF") == aType || strstr(aType, "^{__AX") == aType)
                 *(id *)aDest = aValue;
             else if(![aValue isKindOfClass:[TQPointer class]]) {
-                TQAssert([aValue isKindOfClass:[TQBoxedObject class]] || *(aType+1) != 'v', @"Tried to unbox non-boxed object to a void pointer");
-                TQPointer *ptr = [[TQPointer alloc] initWithType:aType+1 count:1];
-                [ptr setObject:aValue atIndexedSubscript:0];
-                *(void **)aDest = ptr->_addr;
+                if(*(aType+1) == _C_VOID)
+                    *(void **)aDest = aValue;
+                else {
+                    TQPointer *ptr = [[TQPointer alloc] initWithType:aType+1 count:1];
+                    [ptr setObject:aValue atIndexedSubscript:0];
+                    *(void **)aDest = ptr->_addr;
+                }
             } else
                 *(void **)aDest = ((TQPointer *)aValue)->_addr;
             break;
