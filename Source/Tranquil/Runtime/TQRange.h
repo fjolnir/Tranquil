@@ -6,5 +6,4 @@
 + (TQRange *)from:(TQNumber *)aStart to:(TQNumber *)aEnd;
 + (TQRange *)withNSRange:(NSRange)aRange;
 - (id)each:(id (^)())aBlock;
-- (NSPointerArray *)toArray;
 @end

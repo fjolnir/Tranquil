@@ -1,9 +1,14 @@
 #import "TQRange.h"
 #import "TQRuntime.h"
 #import "../../../Build/TQStubs.h"
+#import "TQEnumerable.h"
 
 @implementation TQRange
 @synthesize start=_start, length=_length;
++ (void)load
+{
+    [self include:[TQEnumerable class]];
+}
 + (TQRange *)withLocation:(TQNumber *)aStart length:(TQNumber *)aLength
 {
     TQRange *ret = [self new];
@@ -27,46 +32,21 @@
 
 - (id)each:(id (^)())aBlock
 {
-    if(TQBlockGetNumberOfArguments(aBlock) == 1) {
-        for(int i = 0; i <= [_length intValue]; ++i) {
-            TQDispatchBlock1(aBlock, [TQNumber numberWithInt:i]);
+    NSInteger start = [_start intValue];
+    NSInteger end   = start + [_length intValue];
+    if(end >= start) {
+        for(int i = start; i <= end; ++i) {
+            if(TQDispatchBlock1(aBlock, [TQNumber numberWithInt:i]) == TQNothing)
+                break;
         }
     } else {
-        for(int i = 0; i <= [_length intValue]; ++i) {
-            TQDispatchBlock0(aBlock);
+        for(int i = start; i >= end; --i) {
+            if(TQDispatchBlock1(aBlock, [TQNumber numberWithInt:i]) == TQNothing)
+                break;
+
         }
     }
     return nil;
-}
-
-- (id)reduce:(id (^)(id, id))aBlock
-{
-    id accum = TQNothing; // Make the block use it's default accumulator on the first call
-    for(int i = 0; i <= [_length intValue]; ++i) {
-        accum = TQDispatchBlock2(aBlock, [TQNumber numberWithInt:i], accum);
-    }
-    return accum;
-}
-
-- (id)map:(id (^)(id))aBlock
-{
-    return [self reduce:^(id n, NSPointerArray *accum) {
-        if(accum == TQNothing)
-            accum = [[NSPointerArray new] autorelease];
-        [accum addPointer:aBlock(n)];
-        return accum;
-    }];
-}
-
-- (NSPointerArray *)toArray
-{
-    NSPointerArray *result = [NSPointerArray new];
-    NSUInteger len = [_length unsignedIntegerValue];
-    result.count = len;
-    for(NSUInteger i = 0; i < len; ++i) {
-        [result replacePointerAtIndex:i withPointer:[TQNumber numberWithUnsignedInteger:i]];
-    }
-    return [result autorelease];
 }
 
 - (NSString *)description
