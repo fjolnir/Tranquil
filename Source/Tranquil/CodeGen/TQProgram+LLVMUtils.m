@@ -421,6 +421,7 @@ FunAccessor(objc_sync_exit, ft_int__i8Ptr)
         case _C_SHT:
             return self.llInt16Ty;
         case _C_CHR:
+        case _C_UCHR:
             return self.llInt8Ty;
         case _C_BOOL:
             return self.llInt8Ty;
