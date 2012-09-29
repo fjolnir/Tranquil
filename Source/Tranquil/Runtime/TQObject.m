@@ -1,6 +1,7 @@
 #import "TQObject.h"
 #import "TQNumber.h"
 #import "TQRuntime.h"
+#import "NSString+TQAdditions.h"
 #import <objc/runtime.h>
 
 @implementation TQObject
@@ -43,7 +44,7 @@
         }
         return ret;
     } replaceExisting:nil];
-    NSString *setterSel = [NSString stringWithFormat:@"set%@:", [aPropName capitalizedString]];
+    NSString *setterSel = [NSString stringWithFormat:@"set%@:", [aPropName stringByCapitalizingFirstLetter]];
     [self addMethod:setterSel withBlock:^(id self_, id val) { NSMapInsert(TQGetDynamicIvarTable(self_), aPropName, val); } replaceExisting:nil];
 
     return TQValid;
