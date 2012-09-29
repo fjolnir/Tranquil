@@ -575,7 +575,7 @@ static NSString *_prepareConstName(NSString *name)
     }];
     if([_retType hasPrefix:@"v"])
         callBuilder.CreateRet(ConstantPointerNull::get(aProgram.llInt8PtrTy));
-    else if([_retType hasPrefix:@"@"])
+    else if([_retType hasPrefix:@"@"] || [_retType hasPrefix:@"^{__CF"] || [_retType hasPrefix:@"^{__AX"])
         callBuilder.CreateRet(call);
     else {
         if(!returningOnStack)
