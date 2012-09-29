@@ -13,6 +13,10 @@
 @end
 
 @implementation NSMapTable (Tranquil)
++ (void)load
+{
+    [self include:[TQEnumerable class]];
+}
 + (NSMapTable *)tq_mapTableWithObjectsAndKeys:(id)firstObject, ...
 {
     NSMapTable *ret = [NSMapTable new];
@@ -49,7 +53,7 @@
 {
     id res;
     for(id key in self) {
-        res = TQDispatchBlock1(aBlock, [NSPointerArray tq_pointerArrayWithObjects:key, [self objectForKey:key]]);
+        res = TQDispatchBlock1(aBlock, [TQPair with:key and:[self objectForKey:key]]);
         if(res == TQNothing)
             break;
     }
@@ -135,10 +139,8 @@
 
 - (id)each:(id (^)(id))aBlock
 {
-    id res;
     for(id obj in self) {
-        res = TQDispatchBlock1(aBlock, obj);
-        if(res == TQNothing)
+        if(TQDispatchBlock1(aBlock, obj) == TQNothing)
             break;
     }
     return nil;
@@ -233,10 +235,8 @@
 }
 - (id)each:(id (^)(id))aBlock
 {
-    id res;
     for(id obj in self) {
-        res = TQDispatchBlock1(aBlock, obj);
-        if(res == TQNothing)
+        if(TQDispatchBlock1(aBlock, obj) == TQNothing)
             break;
     }
     return nil;
@@ -252,7 +252,7 @@
 {
     id res;
     for(id key in self) {
-        res = TQDispatchBlock1(aBlock, [NSPointerArray tq_pointerArrayWithObjects:key, [self objectForKey:key]]);
+        res = TQDispatchBlock1(aBlock, [TQPair with:key and:[self objectForKey:key]]);
         if(res == TQNothing)
             break;
     }
@@ -308,6 +308,48 @@
 - (NSArray *)allObjects
 {
     return [_array allObjects];
+}
+@end
+
+@implementation TQPair
++ (void)load
+{
+    [self include:[TQEnumerable class]];
+}
++ (TQPair *)with:(id)left and:(id)right
+{
+    TQPair *ret = [self new];
+    ret.left = left;
+    ret.right = right;
+    return [ret autorelease];
+}
+- (id)objectAtIndexedSubscript:(NSUInteger)idx
+{
+    switch(idx) {
+        case 0:
+            return _left;
+        case 1:
+            return _right;
+        default:
+            return nil;
+    }
+}
+- (id)each:(id (^)(id))aBlock
+{
+    if(TQDispatchBlock1(aBlock, _left) == TQNothing)
+        return nil;
+    TQDispatchBlock1(aBlock, _right);
+    return nil;
+}
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<pair: %@, %@>", _left, _right];
+}
+#pragma mark - Batch allocation code
+TQ_BATCH_IMPL(TQPair)
+- (void)dealloc
+{
+    TQ_BATCH_DEALLOC
 }
 @end
 

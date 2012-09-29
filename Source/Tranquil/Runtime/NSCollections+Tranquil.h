@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <Tranquil/Runtime/TQRuntime.h>
+#import <Tranquil/Shared/TQBatching.h>
 
 @class TQNumber;
 
@@ -52,3 +53,13 @@ KEYED_SUBSCRIPT_DEFS
 @interface NSCache (Tranquil)
 KEYED_SUBSCRIPT_DEFS
 @end
+
+@interface TQPair : TQObject {
+    TQ_BATCH_IVARS
+}
+@property(readwrite, strong) id left, right;
++ (TQPair *)with:(id)left and:(id)right;
+- (id)objectAtIndexedSubscript:(NSUInteger)idx;
+- (id)each:(id (^)(id))aBlock;
+@end
+
