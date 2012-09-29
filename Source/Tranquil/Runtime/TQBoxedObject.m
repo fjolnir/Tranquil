@@ -152,6 +152,18 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
 {
     aType = [self _skipQualifiers:aType];
 
+    if([aValue isKindOfClass:[NSValue class]]) {
+        NSValue *value = aValue;
+        const char *valType = [value objCType];
+        if(strncmp(valType, aType, strlen(valType)) != 0) {
+            [NSException raise:@"Invalid value"
+                        format:@"You tried to unbox NSValue with type %s to %s, but the types are not compatible.", valType, aType];
+            return;
+        }
+        [value getValue:aDest];
+        return;
+    }
+
     switch(*aType) {
         case _C_ID:
         case _C_CLASS:    *(id*)aDest                  = aValue;                          break;
