@@ -117,6 +117,7 @@
 	\ String interpolation
 	a = "expression"
 	b = "A string with an embedded #{a}." \ Evaluates to "A string with an embedded expression."
+	b = "A string with an embedded «a»."  \ Equivalent but a lot nicer.
 	
 	\ Unique strings
 	a = @string

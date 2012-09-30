@@ -510,6 +510,15 @@ static NSString *_prepareConstName(NSString *name)
             argTypeEncoding = [_argTypes objectAtIndex:i];
             TQGetSizeAndAlignment([argTypeEncoding UTF8String], &typeSize, NULL);
             argType = [aProgram llvmTypeFromEncoding:[argTypeEncoding UTF8String]];
+            SmallVector<llvm::Value*, 8> values;
+            SmallVector<llvm::Type*, 8> types;
+            //BOOL expandable = [aProgram expandLLVMValue:NULL // TODO
+                                                 //ofType:argType
+                                                     //to:&values
+                                                //ofTypes:&types
+                                            //forFunction:_function
+                                           //usingBuilder:currBuilder];
+            //NSLog(@"%@ Expandable? %d", argTypeEncoding, expandable);
             // Larger structs should be passed as pointers to their location on the stack
             if(TQStructSizeRequiresStret(typeSize)) {
                 argTypes.push_back(PointerType::getUnqual(argType));

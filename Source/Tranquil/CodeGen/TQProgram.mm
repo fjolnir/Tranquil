@@ -377,11 +377,11 @@ static TQProgram *sharedInstance;
     }
 
     TQParserState parserState = {0};
-    parserState.currentLine = 1;
-    parserState.stack = [NSMutableArray array];
-    parserState.script = [aScript UTF8String];
-    parserState.length = [aScript length];
-    parserState.root   = [TQNodeRootBlock node];
+    parserState.currentLine   = 1;
+    parserState.stack         = [NSMutableArray array];
+    parserState.script        = [aScript UTF8String];
+    parserState.length        = strlen(parserState.script);
+    parserState.root          = [TQNodeRootBlock node];
     greg.data = &parserState;
 
     [parserState.stack addObject:[NSMutableArray array]];

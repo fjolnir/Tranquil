@@ -815,17 +815,22 @@ MutableStr   = '"' { PushStack([TQNodeString nodeWithString:[NSMutableString str
 DQuotStrIn   = ( "#" !"{"  { [(TQNodeString *)StackTop append:@"#"]; }
                |  <[^\\]> '\\' esc:Escape   { [[(TQNodeString *)StackTop value] appendFormat:@"%@%@", YYNSSTR, esc]; }
                |  <'\\' esc:Escape>   { [(TQNodeString *)StackTop append:[[(TQNodeString *)StackTop value] length] == 0 ? esc : YYNSSTR]; }
-               | <[^\"#]> { [(TQNodeString *)StackTop append:YYNSSTR]; }
+               | <[^\"#«]> { [(TQNodeString *)StackTop append:YYNSSTR]; }
                )+
-SQuotStrIn   = <("#" !"{" | [^\'#])+ >                { [(TQNodeString *)StackTop append:YYNSSTR]; }
+SQuotStrIn   = <("#" !"{" | [^\'#«])+ >                { [(TQNodeString *)StackTop append:YYNSSTR]; }
 
-StrEmbeddExpr= ("#{"-"}"
-               | "#{" - expr:Expression - "}"
-                 {
-                     [(TQNodeString *)StackTop append:@"%@"];
-                     [[StackTop embeddedValues] addObject:expr];
-                 }
-               )
+StrEmbeddExpr= "#{"-"}"
+             | "#{" - expr:Expression - "}"
+               {
+                   [(TQNodeString *)StackTop append:@"%@"];
+                   [[StackTop embeddedValues] addObject:expr];
+               }
+             | "«"-"»"
+             | "«" - expr:Expression - "»"
+               {
+                   [(TQNodeString *)StackTop append:@"%@"];
+                   [[StackTop embeddedValues] addObject:expr];
+               }
 
 # Constant string
 ConstString  = "@" ( '"' < [^\"]* >
