@@ -175,7 +175,7 @@ static NSString *_prepareConstName(NSString *name)
             } break;
             case CXCursor_EnumConstantDecl: {
                 [_literalConstants setObject:[TQNodeNumber nodeWithDouble:clang_getEnumConstantDeclValue(cursor)]
-                                      forKey:nsName];
+                                      forKey:_prepareConstName(nsName)];
             } break;
             // Ignored
             case CXCursor_StructDecl:
@@ -287,27 +287,41 @@ static NSString *_prepareConstName(NSString *name)
     char *vanillaEncoding = (char*)clang_getCString(cxvanillaEncoding);
     CXCursorKind kind = cursor.kind;
     if(strstr(vanillaEncoding, "@?") || strstr(vanillaEncoding, "^?")) {
-        clang_disposeString(cxvanillaEncoding);
-        // Contains a block argument so we need to manually create the encoding for it
-        NSMutableString *realEncoding = [NSMutableString string];
-        __block BOOL isFirstChild = YES;
+        // Contains  block argument(s) so we need to manually create the encodings for them
+        NSMutableArray *typeComponents = [NSMutableArray array];
+        TQIterateTypesInEncoding(vanillaEncoding, ^(const char *type, NSUInteger size, NSUInteger align, BOOL *stop) {
+            const char *nextTy = TQGetSizeAndAlignment(type, NULL, NULL);
+            if(nextTy)
+                [typeComponents addObject:[[[NSString alloc] initWithBytes:(void*)type length:nextTy - type encoding:NSUTF8StringEncoding] autorelease]];
+            else
+                [typeComponents addObject:[NSString stringWithUTF8String:type]];
+        });
+
+        __block int i = 0, j = 0;
         clang_visitChildrenWithBlock(cursor, ^(CXCursor child, CXCursor parent) {
-            if(child.kind == CXCursor_UnexposedAttr)
-                return CXChildVisit_Continue;
-            if(isFirstChild && child.kind == CXCursor_ParmDecl && (kind == CXCursor_FunctionDecl || kind == CXCursor_ObjCForCollectionStmt
-                                                                   || kind == CXIdxEntity_ObjCClassMethod || kind == CXIdxEntity_ObjCInstanceMethod)) {
-                [realEncoding appendString:@"v"];
-            }
-            isFirstChild = NO;
             CXString childEnc_  = clang_getDeclObjCTypeEncoding(child);
             const char *childEnc = clang_getCString(childEnc_);
-            if(strstr(childEnc, "@?") == childEnc || strstr(childEnc, "^?") == childEnc) {
-                [realEncoding appendFormat:@"%s", [[self class] _encodingForFunPtrCursor:child]];
-            } else
-                [realEncoding appendFormat:@"%s", childEnc];
+            BOOL isBlock = strstr(childEnc, "@?") == childEnc;
+            if(isBlock || strstr(childEnc, "^?") == childEnc) {
+                NSUInteger idx;
+                if(isBlock) {
+                    idx = [typeComponents indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop) {
+                        return [obj hasPrefix:@"@?"];
+                    }];
+                } else {
+                    idx = [typeComponents indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop) {
+                        return [obj hasPrefix:@"^?"];
+                    }];
+                }
+                NSAssert(idx != NSNotFound, @"Panic in header parser");
+                const char *encoding = [[self class] _encodingForFunPtrCursor:child];
+                [typeComponents replaceObjectAtIndex:idx withObject:[NSString stringWithUTF8String:encoding]];
+            }
             clang_disposeString(childEnc_);
             return CXChildVisit_Continue;
         });
+        NSString *realEncoding = [typeComponents componentsJoinedByString:@""];
+        clang_disposeString(cxvanillaEncoding);
         return strdup([realEncoding UTF8String]);
     }
     vanillaEncoding = strdup(vanillaEncoding);
