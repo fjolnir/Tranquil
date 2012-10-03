@@ -6,6 +6,7 @@
 #import "TQNodeMessage.h"
 #import "TQNodeCall.h"
 #import "TQNodeArgument.h"
+#import "TQNodeArgumentDef.h"
 
 using namespace llvm;
 
@@ -86,7 +87,10 @@ using namespace llvm;
 
     // Release variables created in this block up to this point (captured variables do not need to be released as they will be in the dispose helper)
     for(NSString *varName in aBlock.locals.allKeys) {
-        if([aBlock.capturedVariables objectForKey:varName])
+        NSUInteger argIdx = [aBlock.arguments indexOfObjectPassingTest:^(TQNodeArgumentDef *obj, NSUInteger idx, BOOL *stop) {
+            return [obj.name isEqualToString:varName];
+        }];
+        if([aBlock.capturedVariables objectForKey:varName] || (argIdx != NSNotFound && [[aBlock.arguments objectAtIndex:argIdx] unretained]))
             continue;
         [[aBlock.locals objectForKey:varName] generateReleaseInProgram:aProgram block:aBlock root:aRoot];
     }
