@@ -65,9 +65,28 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
 - (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
 {
     aBlock(_callee);
-    for(TQNode *node in _arguments) {
+    for(TQNode *node in [[_arguments copy] autorelease]) {
         aBlock(node);
     }
+}
+
+- (BOOL)replaceChildNodesIdenticalTo:(TQNode *)aNodeToReplace with:(TQNode *)aNodeToInsert
+{
+    BOOL success = NO;
+    if(_callee == aNodeToReplace) {
+        self.callee = aNodeToInsert;
+        success |= YES;
+    } else
+        success |= [_callee replaceChildNodesIdenticalTo:aNodeToReplace with:aNodeToInsert];
+
+    NSIndexSet *indices = [_arguments indexesOfObjectsPassingTest:^(id obj, NSUInteger idx, BOOL *stop) {
+        return (BOOL)(obj == aNodeToReplace);
+    }];
+    success |= [indices count] > 0;
+    [indices enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
+        [_arguments replaceObjectAtIndex:idx withObject:aNodeToInsert];
+    }];
+    return success;
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock root:(TQNodeRootBlock *)aRoot
