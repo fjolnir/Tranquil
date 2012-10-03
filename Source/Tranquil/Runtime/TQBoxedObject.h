@@ -10,6 +10,8 @@ extern "C" {
 #define TQBoxedObject_PREFIX "TQBoxedObject_"
 #define BlockImp imp_implementationWithBlock
 
+#define TYPE_IS_TOLLFREE(t) ((*(t) == _C_PTR) && (strstr(t, "^{__CF") == (t) || strstr((t), "^{__AX") == (t) || strstr((t), "^{__TIS") == (t)))
+
 #define TQBox(val) [TQBoxedObject box:&(val) withType:@encode(__typeof(val))]
 
 @interface TQBoxedObject : TQObject {

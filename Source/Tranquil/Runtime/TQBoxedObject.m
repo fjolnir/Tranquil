@@ -129,9 +129,9 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
             boxingClass = [self _prepareAggregateWrapper:className withType:aType];
         else if(*aType == _TQ_C_LAMBDA_B)
             boxingClass = [self _prepareLambdaWrapper:className withType:aType];
-        else if(strstr(aType, "^{__CF") == aType) // CF types accept messages, and many are toll free bridged
+        else if(TYPE_IS_TOLLFREE(aType)) // CF types accept messages, and many are toll free bridged
             // TODO: actually generate a wrapper class that does this without going through the tests above
-            return [*(id*)aPtr autorelease];
+            return *(id*)aPtr;
         else if(*aType == _C_PTR || *aType == _C_ARY_B) {
             // TODO: actually generate a wrapper class that does this without going through the tests above
             return [TQPointer box:aPtr withType:aType];
@@ -244,7 +244,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
         case _C_PTR: {
             if(!aValue)
                 *(void **)aDest = NULL;
-            else if(strstr(aType, "^{__CF") == aType || strstr(aType, "^{__AX") == aType)
+            else if(TYPE_IS_TOLLFREE(aType))
                 *(id *)aDest = aValue;
             else if(![aValue isKindOfClass:[TQPointer class]]) {
                 if(*(aType+1) == _C_VOID)
@@ -642,7 +642,7 @@ id __wrapperBlock_invoke(struct TQBoxedBlockLiteral *__blk, ...)
     ffi_call(__blk->cif, FFI_FN(funPtr), ffiRet, ffiArgPtrs);
 
     // retain/autorelease to move the pointer onto the heap
-    if(*retType == _C_ID)
+    if(*retType == _C_ID || TYPE_IS_TOLLFREE(retType))
         return *(id *)ffiRet;
     return [[[TQBoxedObject box:ffiRet withType:retType] retain] autorelease];
 }
@@ -753,7 +753,7 @@ id tq_boxedMsgSend(id self, SEL selector, ...)
     }
     ffi_call(&cif, FFI_FN(imp), retPtr, argPtrs);
 
-    if(*encoding == _C_ID)
+    if(*encoding == _C_ID || TYPE_IS_TOLLFREE(encoding))
         return *(id*)retPtr;
     else if(*encoding == _C_VOID)
         return nil;

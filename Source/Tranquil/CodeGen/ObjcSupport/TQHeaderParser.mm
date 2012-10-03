@@ -597,9 +597,10 @@ static NSString *_prepareConstName(NSString *name)
     [byValArgIndices enumerateIndexesWithOptions:0 usingBlock:^(NSUInteger idx, BOOL *stop) {
         call->addAttribute(returningOnStack ? idx+1 : idx, Attribute::ByVal);
     }];
+    const char *retTypeCStr = [_retType UTF8String];
     if([_retType hasPrefix:@"v"])
         callBuilder.CreateRet(ConstantPointerNull::get(aProgram.llInt8PtrTy));
-    else if([_retType hasPrefix:@"@"] || [_retType hasPrefix:@"^{__CF"] || [_retType hasPrefix:@"^{__AX"])
+    else if([_retType hasPrefix:@"@"] || TYPE_IS_TOLLFREE(retTypeCStr))
         callBuilder.CreateRet(call);
     else {
         if(!returningOnStack)
