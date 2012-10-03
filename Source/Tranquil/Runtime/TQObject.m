@@ -34,13 +34,11 @@
 {
     [self addMethod:aPropName withBlock:^(id self_) {
         __block id ret = NSMapGet(TQGetDynamicIvarTable(self_), aPropName);
-        if(aInitial && !ret) {
-            static dispatch_once_t once;
-            static id sharedInstance;
-            dispatch_once(&once, ^{
+        if(!ret && aInitial) {
+            @synchronized(self) {
                 ret = [[aInitial copyWithZone:nil] autorelease];
                 NSMapInsert(TQGetDynamicIvarTable(self_), aPropName, ret);
-            });
+            }
         }
         return ret;
     } replaceExisting:nil];
