@@ -572,7 +572,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
             argSize,
             cif
         };
-        return [[(id)&blk copy] autorelease];
+        return [(id)&blk copy];
     });
 
     class_addMethod(kls, @selector(initWithPtr:), initImp, "@:^v");
