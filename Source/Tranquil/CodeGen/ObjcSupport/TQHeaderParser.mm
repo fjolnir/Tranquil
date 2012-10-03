@@ -643,12 +643,14 @@ static NSString *_prepareConstName(NSString *name)
     return aBlock.builder->CreateLoad(global);
 
     // Disabled until native calling conventions are a 100% (begrudgingly using libffi fallback for now)
+#if 0
     if(![self _generateInvokeInProgram:aProgram root:aRoot block:aBlock error:aoErr])
         return NULL;
 
     Value *literal = (Value*)[self _generateBlockLiteralInProgram:aProgram parentBlock:aBlock root:aRoot];
 
     return literal;
+#endif
 }
 
 - (NSString *)description
