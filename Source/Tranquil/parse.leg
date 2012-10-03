@@ -194,7 +194,7 @@ UnaryMsgRcvr = Call
              | Variable
              | Weak
              | ParenExpr
-UnaryMsgBody =  name:Identifier - !":"
+UnaryMsgBody =  name:UnarySelIdent - !":"
                {
                    [(NSMutableArray*)[StackTop arguments] addObject:[TQNodeArgument nodeWithPassedNode:nil
                                                                                            selectorPart:name]];
@@ -760,14 +760,14 @@ Literal      = Number
              | Dictionary
              | RegExp
 
-BreakStmt    = 'break'                     { $$ = [TQNodeBreak node];   SetLineNo($$); }
-SkipStmt     = 'skip'                      { $$ = [TQNodeSkip node];    SetLineNo($$); }
-Nil          = ('nil' | 'no' | '('--')')   { $$ = [TQNodeNil node];     SetLineNo($$); }
-Nothing      = 'nothing'                   { $$ = [TQNodeNothing node]; SetLineNo($$); }
-Self         = 'self'                      { $$ = [TQNodeSelf node];    SetLineNo($$); }
-Super        = 'super'                     { $$ = [TQNodeSuper node];   SetLineNo($$); }
-Valid        = ('valid'|'yes')             { $$ = [TQNodeValid node];   SetLineNo($$); }
-Variadic     = '...'                       { $$ = [TQNodeVariable nodeWithName:@"..."]; SetLineNo($$); }
+BreakStmt    = 'break'                   !Character { $$ = [TQNodeBreak node];   SetLineNo($$); }
+SkipStmt     = 'skip'                    !Character { $$ = [TQNodeSkip node];    SetLineNo($$); }
+Nil          = ('nil' | 'no' | '('--')') !Character { $$ = [TQNodeNil node];     SetLineNo($$); }
+Nothing      = 'nothing'                 !Character { $$ = [TQNodeNothing node]; SetLineNo($$); }
+Self         = 'self'                    !Character { $$ = [TQNodeSelf node];    SetLineNo($$); }
+Super        = 'super'                   !Character { $$ = [TQNodeSuper node];   SetLineNo($$); }
+Valid        = ('valid'|'yes')           !Character { $$ = [TQNodeValid node];   SetLineNo($$); }
+Variadic     = '...'                                { $$ = [TQNodeVariable nodeWithName:@"..."]; SetLineNo($$); }
 
 Operator     = '=='  { $$ = @"=="; }
              | '!='  { $$ = @"!="; }
@@ -791,13 +791,14 @@ Operator     = '=='  { $$ = @"=="; }
 Escape       = 'n' { $$ = @"\n"; }
              | 't' { $$ = @"\t"; }
 
-SelIdent     = Operator
-             | Identifier
+UnarySelIdent= Identifier
              | const:Constant { $$ = [(TQNodeConstant *)const value]; }
+SelIdent     = Operator
+             | UnarySelIdent
 
 Number       = (< '-'? [0-9]+ ('.' [0-9]+)? ('e'[0-9]+)? >
              | < '-'? '.' [0-9]+ ('e'[0-9]+)? > )          { $$ = [TQNodeNumber nodeWithDouble:YYNUM];     SetLineNo($$); }
-Identifier   = < [_a-z] Character* >                   { $$ = YYNSSTR;                                                }
+Identifier   = < [_a-z] Character* >                       { $$ = YYNSSTR;                                                }
 Constant     = < "_"* [A-Z] Character* >                   { $$ = [TQNodeConstant nodeWithString:YYNSSTR]; SetLineNo($$); }
 Character    = ([A-Za-z0-9_?!])
 
