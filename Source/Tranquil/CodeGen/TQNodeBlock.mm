@@ -474,7 +474,8 @@ using namespace llvm;
     if(thisBlock) {
         int i = TQ_CAPTURE_IDX;
         TQNodeVariable *varToLoad;
-        for(TQNodeVariable *parentVar in [_capturedVariables allValues]) {//NSString *name in [_capturedVariables allKeys]) {
+        for(TQNodeVariable *parentVar in [_capturedVariables allValues])
+        {
             varToLoad = [parentVar copy];//[TQNodeVariable nodeWithName:name];
             Value *valueToLoad = _builder->CreateLoad(_builder->CreateStructGEP(thisBlock, i++), [varToLoad.name UTF8String]);
             if(![varToLoad isAnonymous])
@@ -489,7 +490,7 @@ using namespace llvm;
     // Load the rest of arguments
     Value *sentinel = _builder->CreateLoad(mod->getOrInsertGlobal("TQNothing", aProgram.llInt8PtrTy));
     Value *argValue;
-    for (unsigned i = 1; i < _arguments.count; ++i, ++argumentIterator)
+    for(unsigned i = 1; i < _arguments.count; ++i, ++argumentIterator)
     {
         TQNodeArgumentDef *argDef = [_arguments objectAtIndex:i];
         if(![argDef name])
@@ -526,7 +527,12 @@ using namespace llvm;
         }
         TQNodeVariable *local = [TQNodeVariable nodeWithName:[argDef name]];
         local.shadows = YES;
-        [local store:argValue inProgram:aProgram block:self root:aRoot error:aoErr];
+        [local store:argValue
+            retained:!argDef.unretained
+           inProgram:aProgram
+               block:self
+                root:aRoot
+               error:aoErr];
     }
     if(_isVariadic) {
         // Create an array and loop through the va_list till we reach the sentinel

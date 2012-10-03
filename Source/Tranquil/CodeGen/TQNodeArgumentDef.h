@@ -6,6 +6,7 @@
 }
 @property(readwrite, retain) NSString *name;
 @property(readwrite, retain) TQNode *defaultArgument;
+@property(readwrite, assign) BOOL unretained;
 
 + (TQNodeArgumentDef *)nodeWithName:(NSString *)aName;
 @end

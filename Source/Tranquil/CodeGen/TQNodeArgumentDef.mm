@@ -4,7 +4,7 @@
 using namespace llvm;
 
 @implementation TQNodeArgumentDef
-@synthesize name=_name, defaultArgument=_defaultArgument;
+@synthesize name=_name, defaultArgument=_defaultArgument, unretained=_unretained;
 
 + (TQNodeArgumentDef *)nodeWithName:(NSString *)aName
 {
