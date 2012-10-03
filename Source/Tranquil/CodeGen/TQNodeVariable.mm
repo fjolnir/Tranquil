@@ -194,6 +194,16 @@ using namespace llvm;
                   root:(TQNodeRootBlock *)aRoot
                  error:(NSError **)aoErr
 {
+    return [self store:aValue retained:YES inProgram:aProgram block:aBlock root:aRoot error:aoErr];
+}
+
+- (llvm::Value *)store:(llvm::Value *)aValue
+              retained:(BOOL)aRetain
+             inProgram:(TQProgram *)aProgram
+                 block:(TQNodeBlock *)aBlock
+                  root:(TQNodeRootBlock *)aRoot
+                 error:(NSError **)aoErr
+{
     TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock program:aProgram];
     if(existingVar)
         return [existingVar store:aValue inProgram:aProgram block:aBlock root:aRoot error:aoErr];
@@ -203,18 +213,22 @@ using namespace llvm;
         return NULL;
     }
 
-    if(!_alloca) {
-        if(![self createStorageInProgram:aProgram block:aBlock root:aRoot error:aoErr])
-            return NULL;
+    if(!_alloca && ![self createStorageInProgram:aProgram block:aBlock root:aRoot error:aoErr]) {
+        return NULL;
+    }
+
+    Value *forwarding = aBlock.builder->CreateLoad(aBlock.builder->CreateStructGEP(_alloca, 1), [self _llvmRegisterName:@"forwarding"]);
+    forwarding = aBlock.builder->CreateBitCast(forwarding, PointerType::getUnqual([[self class] captureStructTypeInProgram:aProgram]));
+
+    if(!aRetain) {
+        aBlock.builder->CreateStore(aValue, aBlock.builder->CreateStructGEP(forwarding, 4));
+        return NULL;
     }
     Function *storeFun = aProgram.objc_storeStrong;
     // If the variable is a capture, or a global we need to use TQStoreStrong because if the assigned value is a
     // stack block it would escape and cause a crash
     if(_isGlobal || [aBlock.capturedVariables objectForKey:_name])
         storeFun = aProgram.TQStoreStrong;
-
-    Value *forwarding = aBlock.builder->CreateLoad(aBlock.builder->CreateStructGEP(_alloca, 1), [self _llvmRegisterName:@"forwarding"]);
-    forwarding = aBlock.builder->CreateBitCast(forwarding, PointerType::getUnqual([[self class] captureStructTypeInProgram:aProgram]));
 
     CallInst *storeCall = aBlock.builder->CreateCall2(storeFun, aBlock.builder->CreateStructGEP(forwarding, 4), aValue);
     storeCall->addAttribute(~0, Attribute::NoUnwind);

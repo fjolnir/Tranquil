@@ -19,6 +19,13 @@
                                    error:(NSError **)aoErr;
 + (llvm::Type *)captureStructTypeInProgram:(TQProgram *)aProgram;
 
+- (llvm::Value *)store:(llvm::Value *)aValue
+              retained:(BOOL)aRetain
+             inProgram:(TQProgram *)aProgram
+                 block:(TQNodeBlock *)aBlock
+                  root:(TQNodeRootBlock *)aRoot
+                 error:(NSError **)aoErr;
+
 - (void)generateRetainInProgram:(TQProgram *)aProgram
                           block:(TQNodeBlock *)aBlock
                            root:(TQNodeRootBlock *)aRoot;
