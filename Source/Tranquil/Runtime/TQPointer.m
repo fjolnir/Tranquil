@@ -217,3 +217,110 @@ NSString * const TQTypeString    = @"*";
     [super dealloc];
 }
 @end
+
+@implementation TQPointer (ConvenienceConstructors)
++ (TQPointer *)toObjects:(TQNumber *)aCount
+{
+    return [[[self alloc] initWithType:@encode(id) count:[aCount unsignedIntegerValue]] autorelease];
+}
++ (TQPointer *)toVoids:(TQNumber *)aCount
+{
+    return [[[self alloc] initWithType:@encode(void) count:[aCount unsignedIntegerValue]] autorelease];
+}
++ (TQPointer *)toChars:(TQNumber *)aCount
+{
+    return [[[self alloc] initWithType:@encode(char) count:[aCount unsignedIntegerValue]] autorelease];
+}
++ (TQPointer *)toBOOLs:(TQNumber *)aCount
+{
+    return [[[self alloc] initWithType:@encode(BOOL) count:[aCount unsignedIntegerValue]] autorelease];
+}
++ (TQPointer *)toShorts:(TQNumber *)aCount
+{
+    return [[[self alloc] initWithType:@encode(short) count:[aCount unsignedIntegerValue]] autorelease];
+}
++ (TQPointer *)toInts:(TQNumber *)aCount
+{
+    return [[[self alloc] initWithType:@encode(int) count:[aCount unsignedIntegerValue]] autorelease];
+}
++ (TQPointer *)toLongs:(TQNumber *)aCount
+{
+    return [[[self alloc] initWithType:@encode(long) count:[aCount unsignedIntegerValue]] autorelease];
+}
++ (TQPointer *)toLongLongs:(TQNumber *)aCount
+{
+    return [[[self alloc] initWithType:@encode(long long) count:[aCount unsignedIntegerValue]] autorelease];
+}
++ (TQPointer *)toFloats:(TQNumber *)aCount
+{
+    return [[[self alloc] initWithType:@encode(float) count:[aCount unsignedIntegerValue]] autorelease];
+}
++ (TQPointer *)toDoubles:(TQNumber *)aCount
+{
+    return [[[self alloc] initWithType:@encode(double) count:[aCount unsignedIntegerValue]] autorelease];
+}
++ (TQPointer *)toNSPoints:(TQNumber *)aCount
+{
+    return [[[self alloc] initWithType:@encode(NSPoint) count:[aCount unsignedIntegerValue]] autorelease];
+}
++ (TQPointer *)toNSSizes:(TQNumber *)aCount
+{
+    return [[[self alloc] initWithType:@encode(NSSize) count:[aCount unsignedIntegerValue]] autorelease];
+}
++ (TQPointer *)toNSRects:(TQNumber *)aCount
+{
+    return [[[self alloc] initWithType:@encode(NSRect) count:[aCount unsignedIntegerValue]] autorelease];
+}
++ (TQPointer *)toObject
+{
+    return [self toObjects:[TQNumber numberWithInt:1]];
+}
++ (TQPointer *)toChar
+{
+    return [self toChars:[TQNumber numberWithInt:1]];
+}
++ (TQPointer *)toVoid
+{
+    return [self toVoids:[TQNumber numberWithInt:1]];
+}
++ (TQPointer *)toBOOL
+{
+    return [self toBOOLs:[TQNumber numberWithInt:1]];
+}
++ (TQPointer *)toShort
+{
+    return [self toShorts:[TQNumber numberWithInt:1]];
+}
++ (TQPointer *)toInt
+{
+    return [self toInts:[TQNumber numberWithInt:1]];
+}
++ (TQPointer *)toLong
+{
+    return [self toLongs:[TQNumber numberWithInt:1]];
+}
++ (TQPointer *)toLongLong
+{
+    return [self toLongLongs:[TQNumber numberWithInt:1]];
+}
++ (TQPointer *)toFloat
+{
+    return [self toFloats:[TQNumber numberWithInt:1]];
+}
++ (TQPointer *)toDouble
+{
+    return [self toDoubles:[TQNumber numberWithInt:1]];
+}
++ (TQPointer *)toNSPoint
+{
+    return [self toNSPoints:[TQNumber numberWithInt:1]];
+}
++ (TQPointer *)toNSSize
+{
+    return [self toNSSizes:[TQNumber numberWithInt:1]];
+}
++ (TQPointer *)toNSRect
+{
+    return [self toNSRects:[TQNumber numberWithInt:1]];
+}
+@end

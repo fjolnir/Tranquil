@@ -46,3 +46,30 @@ extern NSString * const TQTypeString;
 - (TQNumber *)count;
 - (id)value; // Returns the first item
 @end
+
+@interface TQPointer (ConvenienceConstructors)
++ (TQPointer *)toObject;
++ (TQPointer *)toChar;
++ (TQPointer *)toBOOL;
++ (TQPointer *)toShort;
++ (TQPointer *)toInt;
++ (TQPointer *)toLong;
++ (TQPointer *)toLongLong;
++ (TQPointer *)toFloat;
++ (TQPointer *)toDouble;
++ (TQPointer *)toNSPoint;
++ (TQPointer *)toNSSize;
++ (TQPointer *)toNSRect;
++ (TQPointer *)toObjects:(TQNumber *)aCount;
++ (TQPointer *)toChars:(TQNumber *)aCount;
++ (TQPointer *)toBOOLs:(TQNumber *)aCount;
++ (TQPointer *)toShorts:(TQNumber *)aCount;
++ (TQPointer *)toInts:(TQNumber *)aCount;
++ (TQPointer *)toLongs:(TQNumber *)aCount;
++ (TQPointer *)toLongLongs:(TQNumber *)aCount;
++ (TQPointer *)toFloats:(TQNumber *)aCount;
++ (TQPointer *)toDoubles:(TQNumber *)aCount;
++ (TQPointer *)toNSPoints:(TQNumber *)aCount;
++ (TQPointer *)toNSSizes:(TQNumber *)aCount;
++ (TQPointer *)toNSRects:(TQNumber *)aCount;
+@end
