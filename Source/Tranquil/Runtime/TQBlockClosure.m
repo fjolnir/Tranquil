@@ -1,6 +1,7 @@
 #import "TQBlockClosure.h"
 #import "TQFFIType.h"
 #import "TQBoxedObject.h"
+#import "../../../Build/TQStubs.h"
 #import <sys/mman.h>
 
 static ffi_closure *_AllocateClosure(void **codePtr);
@@ -109,7 +110,8 @@ void _closureFunction(ffi_cif *closureCif, void *ret, void *args[], TQBlockClosu
         exit(1);
     }
     id retPtr;
-    ffi_call(&callCif, FFI_FN(block->invoke), &retPtr, argPtrs);
+    void *dispatcher = TQBlockDispatchers[closureCif->nargs];
+    ffi_call(&callCif, FFI_FN(dispatcher), &retPtr, argPtrs);
 
     if(*returnType == _C_ID)
         *(id*)ret = retPtr;
@@ -147,7 +149,8 @@ void _blockClosureFunction(ffi_cif *closureCif, void *ret, void *args[], TQBlock
         exit(1);
     }
     id retPtr;
-    ffi_call(&callCif, FFI_FN(block->invoke), &retPtr, argPtrs);
+    void *dispatcher = TQBlockDispatchers[closureCif->nargs-1];
+    ffi_call(&callCif, FFI_FN(dispatcher), &retPtr, argPtrs);
 
     if(*returnType == _C_ID)
         *(id*)ret = retPtr;
