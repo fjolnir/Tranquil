@@ -212,6 +212,7 @@ static inline NSMapTable *_TQGetDynamicIvarTable(id obj)
     if(!ivarTable) {
         ivarTable = NSCreateMapTable(NSNonOwnedPointerMapKeyCallBacks, NSObjectMapValueCallBacks, 0);
         objc_setAssociatedObject(obj, _TQDynamicIvarTableKey, ivarTable, OBJC_ASSOCIATION_RETAIN);
+        [ivarTable release];
     }
     return ivarTable;
 }
