@@ -1,7 +1,30 @@
 #import "NSNumber+TQOperators.h"
+#import "TQNumber.h"
 #import "TQRuntime.h"
+#import <objc/runtime.h>
 
 @implementation NSNumber (TQOperators)
++ (void)load
+{
+    IMP imp;
+    Class NSNumberClass = [NSNumber class];
+    Class TQNumberClass = [TQNumber class];
+    // ==
+    imp = imp_implementationWithBlock(^(TQNumber *a, id b) {
+        if([b isKindOfClass:TQNumberClass])
+            return [b isEqual:a] ? (id)TQValid : nil;
+        return [a isEqual:b] ? (id)TQValid : nil;
+    });
+    class_replaceMethod(NSNumberClass, TQEqOpSel, imp, "@@:@");
+    // !=
+    imp = imp_implementationWithBlock(^(TQNumber *a, id b) {
+        if([b isKindOfClass:TQNumberClass])
+            return [b isEqual:a] ? nil : TQValid;
+        return [a isEqual:b] ? nil : TQValid;
+    });
+    class_replaceMethod(NSNumberClass, TQNeqOpSel, imp, "@@:@");
+}
+
 - (NSNumber *)add:(id)b
 {
     return [NSNumber numberWithDouble:self.doubleValue + [b doubleValue]];
