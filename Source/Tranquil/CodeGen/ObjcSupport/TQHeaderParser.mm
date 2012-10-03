@@ -1,4 +1,5 @@
 #import "TQHeaderParser.h"
+#import "../../Runtime/TQBoxedObject.h"
 #import "../CodeGen.h"
 #import "../../Runtime/NSString+TQAdditions.h"
 #import <objc/runtime.h>
@@ -622,6 +623,25 @@ static NSString *_prepareConstName(NSString *name)
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
+    Module *mod = aProgram.llModule;
+    NSString *globalName = [NSString stringWithFormat:@"__boxed_%@", _name];
+    Value *global = mod->getGlobalVariable([globalName UTF8String], true);
+    if(!global) {
+        global = new GlobalVariable(*mod, aProgram.llInt8PtrTy, false, GlobalVariable::InternalLinkage,
+                                    ConstantPointerNull::get(aProgram.llInt8PtrTy), [globalName UTF8String]);
+        Value *fun = mod->getOrInsertGlobal([_name UTF8String], aProgram.llInt8Ty);
+
+        Function *rootFunction = aRoot.function;
+        IRBuilder<> rootBuilder(&rootFunction->getEntryBlock(), rootFunction->getEntryBlock().begin());
+
+        Value *boxed = rootBuilder.CreateCall2(aProgram.TQBoxValue, fun,
+                        [aProgram getGlobalStringPtr:[NSString stringWithFormat:@"<^%s>", _encoding] withBuilder:&rootBuilder]);
+        boxed = rootBuilder.CreateCall(aProgram.objc_retain, boxed);
+        rootBuilder.CreateStore(boxed, global);
+    }
+    return aBlock.builder->CreateLoad(global);
+
+    // Disabled until native calling conventions are a 100% (begrudgingly using libffi fallback for now)
     if(![self _generateInvokeInProgram:aProgram root:aRoot block:aBlock error:aoErr])
         return NULL;
 
