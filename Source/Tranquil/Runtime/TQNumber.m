@@ -5,6 +5,9 @@
 #import "TQBigNumber.h"
 #import "../../../Build/TQStubs.h"
 
+@interface TQTaggedNumber : TQNumber
+@end
+
 static id (*numberWithDoubleImp)(id, SEL, double);
 static id (*numberWithLongImp)(id, SEL, long);
 static id (*allocImp)(id,SEL,NSZone*);
@@ -34,24 +37,28 @@ static __inline__ BOOL _isTaggedPointer(id ptr)
 static __inline__ BOOL _fitsInTaggedPointer(double aValue)
 {
 #ifdef __LP64__
-    return (aValue > -FLT_MAX) && (aValue < FLT_MAX);
+    const float limit = 1.0f/FLT_EPSILON;
+    return (aValue >= -limit) && (aValue <= limit);
 #else
     return NO; // TODO: Figure out a way to do tagging on 32bit
 #endif
 }
 
+static __inline__ float _TQTaggedNumberValue(TQTaggedNumber *ptr)
+{
+    ptr = (void *)((*(uintptr_t *)&ptr) >> 4);
+    return *(float*)&ptr;
+}
 static __inline__ double _TQNumberValue(TQNumber *ptr)
 {
-    if(_isTaggedPointer(ptr)) {
-        ptr = (void *)((*(uintptr_t *)&ptr) >> 4);
-        return (double)*(float*)&ptr;
-    }
-    return ptr->_value;
+    return _isTaggedPointer(ptr) ? _TQTaggedNumberValue((TQTaggedNumber *)ptr) : ptr->_value;
 }
 
+BOOL TQFloatFitsInTaggedPointer(float aValue)
+{
+    return _fitsInTaggedPointer(aValue);
+}
 
-@interface TQTaggedNumber : TQNumber
-@end
 @implementation TQTaggedNumber
 - (id)retain { return self;}
 - (oneway void)release {}
@@ -114,6 +121,11 @@ static __inline__ double _TQNumberValue(TQNumber *ptr)
     allocImp = (typeof(allocImp))method_getImplementation(class_getClassMethod(self, @selector(allocWithZone:)));
     initImp = (typeof(initImp))class_getMethodImplementation(self, @selector(initWithDouble:));
     autoreleaseImp = (typeof(autoreleaseImp))class_getMethodImplementation(self, @selector(autorelease));
+}
+
++ (id)fitsInTaggedPointer:(double)aValue
+{
+    return _fitsInTaggedPointer(aValue) ? TQValid : nil;
 }
 
 + (TQNumber *)numberWithBool:(BOOL)aValue
@@ -535,6 +547,8 @@ static __inline__ double _TQNumberValue(TQNumber *ptr)
 {
     if(object_getClass(self) == object_getClass(aObj))
         return _TQNumberValue(self) == _TQNumberValue(aObj);
+    else if([aObj respondsToSelector:@selector(doubleValue)])
+        return _TQNumberValue(self) == [aObj doubleValue];
     return NO;
 }
 
@@ -564,7 +578,7 @@ static __inline__ double _TQNumberValue(TQNumber *ptr)
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"%0.7g", _TQNumberValue(self)];
+    return [NSString stringWithFormat:@"%0.20g", _TQNumberValue(self)];
 }
 
 - (id)times:(id (^)())block

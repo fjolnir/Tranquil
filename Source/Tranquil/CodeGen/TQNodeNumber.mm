@@ -50,20 +50,42 @@ using namespace llvm;
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
-#ifndef __LP64__
-#error "numbers not implemented for 32bit"
-#endif
-    float value = [_value floatValue];
-    Value *numTag = ConstantInt::get(aProgram.llIntPtrTy, kTQNumberTag);
+    double value = [_value doubleValue];
+    if([TQNumber fitsInTaggedPointer:value]) {
+        Value *numTag = ConstantInt::get(aProgram.llIntPtrTy, kTQNumberTag);
 
-    Value *val;
-    if(value == INFINITY || value == -INFINITY)
-        val = ConstantFP::getInfinity(aProgram.llFloatTy, value == -INFINITY);
-    else
-        val = ConstantFP::get(aProgram.llFloatTy, value);
-    val = B->CreateZExt(B->CreateBitCast(val, aProgram.llIntTy), aProgram.llIntPtrTy);
-    val = B->CreateOr(B->CreateShl(val, 4), numTag);
+        Value *val;
+        if(value == INFINITY || value == -INFINITY)
+            val = ConstantFP::getInfinity(aProgram.llFloatTy, value == -INFINITY);
+        else
+            val = ConstantFP::get(aProgram.llFloatTy, value);
+        val = B->CreateZExt(B->CreateBitCast(val, aProgram.llIntTy), aProgram.llIntPtrTy);
+        val = B->CreateOr(B->CreateShl(val, 4), numTag);
 
-    return B->CreateIntToPtr(val, aProgram.llInt8PtrTy);
+        return B->CreateIntToPtr(val, aProgram.llInt8PtrTy);
+    } else {
+       Module *mod = aProgram.llModule;
+
+        // Returns [TQNumber numberWithDouble:_value]
+        NSString *globalName = [NSString stringWithFormat:@"TQConstNum_%f", value];
+        Value *num =  mod->getGlobalVariable([globalName UTF8String], true);
+        if(!num) {
+            Function *rootFunction = aRoot.function;
+            IRBuilder<> rootBuilder(&rootFunction->getEntryBlock(), rootFunction->getEntryBlock().begin());
+
+            Value *selector = rootBuilder.CreateLoad(mod->getOrInsertGlobal("TQNumberWithDoubleSel", aProgram.llInt8PtrTy));
+            Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_TQNumber", aProgram.llInt8Ty);
+            ConstantFP *doubleValue = ConstantFP::get(aProgram.llModule->getContext(), APFloat(value));
+
+            Value *result = rootBuilder.CreateCall3(aProgram.objc_msgSend, klass, selector, doubleValue, "");
+            result = rootBuilder.CreateCall(aProgram.objc_retain, result);
+
+            num = new GlobalVariable(*mod, aProgram.llInt8PtrTy, false, GlobalVariable::InternalLinkage,
+                                     ConstantPointerNull::get(aProgram.llInt8PtrTy), [globalName UTF8String]);
+
+            rootBuilder.CreateStore(result, num);
+        }
+        return B->CreateLoad(num);
+    }
 }
 @end
