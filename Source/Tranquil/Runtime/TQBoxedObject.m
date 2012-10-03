@@ -5,6 +5,7 @@
 #import "NSCollections+Tranquil.h"
 #import "TQPointer.h"
 #import "TQBlockClosure.h"
+#import "../../../Build/TQStubs.h"
 #import <objc/runtime.h>
 #import <objc/message.h>
 
@@ -186,11 +187,14 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
 
         case _TQ_C_LAMBDA_B: {
             TQAssert(!aValue || [aValue isKindOfClass:NSClassFromString(@"NSBlock")], @"Tried to unbox a non block to a block/function pointer type (%@ -> %s)", aValue, aType);
-            struct TQBoxedBlockLiteral *wrapperBlock = (struct TQBoxedBlockLiteral *)aValue;
             if(!aValue)
                 *(void **)aDest = NULL;
             else  {
-                TQBlockClosure *closure = [[[TQBlockClosure alloc] initWithBlock:[[aValue copy] autorelease] type:aType] autorelease];
+                // If the receiver expects a function pointer we need to give an immortal copy of the block
+                // since we cannot know when it should be released (For blocks, it's the receivers responsibility to copy it)
+                if(*(aType+1) == _C_PTR)
+                    aValue = [aValue copy];
+                TQBlockClosure *closure = [[[TQBlockClosure alloc] initWithBlock:aValue type:aType] autorelease];
                 *(void **)aDest = closure.pointer;
             }
         } break;
@@ -233,7 +237,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
 
             } else {
                [NSException raise:@"Invalid value"
-                           format:@"You tried to unbox %@ to a struct, but it can not.", aValue];
+                           format:@"You tried to unbox %@ to a struct(%s), but it can not.", aValue, aType];
             }
         } break;
         case _C_UNION_B: {
@@ -435,22 +439,27 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     ofs = 0;
     TQIterateTypesInEncoding(fieldType, ^(const char *type, NSUInteger size, NSUInteger align, BOOL *stop) {
         NSString *name = [self _getFieldName:&type];
+
+        // This is only to make sure that the type string survives for the lifetime of the class (Since the lifetime of the type param is not defined)
+        NSString *nsType = [NSString stringWithUTF8String:type];
+        objc_setAssociatedObject(kls, nsType, nsType, OBJC_ASSOCIATION_RETAIN);
+
         NSUInteger currOfs = ofs;
         if(*type == _C_ARY_B) {
             // For an array we must box a pointer to the address of the array (the location within the struct is a pointer
             // to it's first element, not to the array itself)
             fieldGetter = ^(TQBoxedObject *self) {
                 void *tmp = self->_ptr+currOfs;
-                return [TQBoxedObject box:&tmp withType:type];
+                return [TQBoxedObject box:&tmp withType:[nsType UTF8String]];
             };
         } else {
             fieldGetter = ^(TQBoxedObject *self) {
-                return [TQBoxedObject box:self->_ptr+currOfs withType:type];
+                return [TQBoxedObject box:self->_ptr+currOfs withType:[nsType UTF8String]];
             };
         }
         fieldGetter = [[fieldGetter copy] autorelease];
         fieldSetter = [[^(TQBoxedObject *self, id value) {
-            [TQBoxedObject unbox:value to:self->_ptr+currOfs usingType:type];
+            [TQBoxedObject unbox:value to:self->_ptr+currOfs usingType:[nsType UTF8String]];
         } copy] autorelease];
 
         if(name) {
@@ -512,7 +521,11 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     } else {
         const char *argTypes;
         // Figure out the return type
-        TQFFIType *retType = [TQFFIType typeWithEncoding:aType+1 nextType:&argTypes];
+        argTypes = aType+1;
+        if(*argTypes == _C_CONST)
+            ++argTypes;
+
+        TQFFIType *retType = [TQFFIType typeWithEncoding:argTypes nextType:&argTypes];
 
         // And now the argument types
         __block NSUInteger numArgs = isBlock;
@@ -626,7 +639,7 @@ id __wrapperBlock_invoke(struct TQBoxedBlockLiteral *__blk, ...)
     void **ffiArgPtrs = (void**)alloca(sizeof(void*) * __blk->cif->nargs);
     if(isBlock) {
         ffiArgPtrs[0] = funPtr;
-        funPtr = ((struct TQBoxedBlockLiteral *)funPtr)->invoke;
+        funPtr = TQBlockDispatchers[__blk->cif->nargs-1];
     }
 
     id arg;
@@ -769,8 +782,8 @@ id _box_C_DBL_imp(TQBoxedObject *self, SEL _cmd, double *aPtr)                  
 id _box_C_FLT_imp(TQBoxedObject *self, SEL _cmd, float *aPtr)                   { return [TQNumber numberWithFloat:*aPtr];                }
 id _box_C_INT_imp(TQBoxedObject *self, SEL _cmd, int *aPtr)                     { return [TQNumber numberWithInt:*aPtr];                  }
 id _box_C_SHT_imp(TQBoxedObject *self, SEL _cmd, short *aPtr)                   { return [TQNumber numberWithShort:*aPtr];                }
-id _box_C_CHR_imp(TQBoxedObject *self, SEL _cmd, char *aPtr)                    { return *aPtr == '\0' ? nil : [NSMutableString stringWithFormat:@"%c", *aPtr]; }
-id _box_C_UCHR_imp(TQBoxedObject *self, SEL _cmd, char *aPtr)                   { return *aPtr == '\0' ? nil : [NSMutableString stringWithFormat:@"%c", *aPtr]; }
+id _box_C_CHR_imp(TQBoxedObject *self, SEL _cmd, char *aPtr)                    { return [TQNumber numberWithChar:*aPtr];                 }
+id _box_C_UCHR_imp(TQBoxedObject *self, SEL _cmd, char *aPtr)                   { return [TQNumber numberWithUnsignedChar:*aPtr];         }
 id _box_C_BOOL_imp(TQBoxedObject *self, SEL _cmd, _Bool *aPtr)                  { return *aPtr ? TQValid : nil;                           }
 id _box_C_LNG_imp(TQBoxedObject *self, SEL _cmd, long *aPtr)                    { return [TQNumber numberWithLong:*aPtr];                 }
 id _box_C_LNG_LNG_imp(TQBoxedObject *self, SEL _cmd, long long *aPtr)           { return [TQNumber numberWithLongLong:*aPtr];             }
