@@ -21,7 +21,7 @@ extern NSString * const TQTypeBool;
 extern NSString * const TQTypeString;
 
 // A class to enable use of (Obj-)C APIs that utilize pointers
-@interface TQPointer : TQObject {
+@interface TQPointer : TQObject <NSCopying> {
     char *_itemType;
     NSUInteger _itemSize, _count;
     BOOL _freeOnDealloc;
@@ -36,6 +36,9 @@ extern NSString * const TQTypeString;
 
 - (id)initWithType:(const char *)aType count:(NSUInteger)aCount;
 - (id)initWithType:(const char *)aType address:(void *)aAddr count:(NSUInteger)aCount;
+
+- (TQPointer *)castTo:(NSString *)type;
+- (id)addressAsObject;
 
 - (id)objectAtIndexedSubscript:(NSUInteger)aIdx;
 - (void)setObject:(id)aObj atIndexedSubscript:(NSUInteger)aIdx;

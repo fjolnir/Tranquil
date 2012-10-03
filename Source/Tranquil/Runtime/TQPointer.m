@@ -119,6 +119,40 @@ NSString * const TQTypeString    = @"*";
     [NSException raise:@"Illegal Method" format:@"TQPointer can not be initialized without a type"];
     return nil;
 }
+- (id)_init
+{
+    return [super init];
+}
+
+- (id)copyWithZone:(NSZone *)zone
+{
+    TQPointer *ret = [[[self class] alloc] _init];
+    ret->_itemType = _itemType;
+    ret->_itemSize = _itemSize;
+    ret->_count    = _count;
+    ret->_freeOnDealloc = _freeOnDealloc;
+    if(ret->_freeOnDealloc) {
+        ret->_addr = malloc(_count*_itemSize);
+        memcpy(ret->_addr, _addr, _count*_itemSize);
+    } else
+        ret->_addr = ret->_addr;
+    return ret;
+}
+
+- (id)castTo:(NSString *)type
+{
+    NSUInteger size;
+    TQGetSizeAndAlignment([type UTF8String], &size, NULL);
+    TQAssert(size == _itemSize, @"Tried to cast pointer to a type of a different size");
+    TQPointer *ret = [self copy];
+    ret->_itemType = strdup([type UTF8String]);
+    return [ret autorelease];
+}
+
+- (id)addressAsObject
+{
+    return (id)_addr;
+}
 
 - (TQNumber *)count
 {
