@@ -37,7 +37,7 @@ But here're a couple of examples:
 
 ```
 alternatives = ["Objective-C", "Ruby", "Nu", "Perl", "Python"]
-alternatives each: `alternative | "Tranquil is nicer than #{alternative}" print`
+alternatives each: `alternative | "Tranquil is nicer than «alternative»" print`
 "Or so I hope at least." print
 ```
 
@@ -53,7 +53,7 @@ sum = (0 to: 1000000) reduce: `obj, accum=0 | obj+accum`
 a = async foo()
 b = bar()
 whenFinished {
-    "a is #{a} and b is: #{b}" print
+    "a is «a» and b is: «b»" print
 }
 ```
 
@@ -145,7 +145,7 @@ import "AppKit"
 nsapp = NSApplication sharedApplication
 
 \ Create the menubar
-quitMenuItem = NSMenuItem new; setTitle: "Quit #{NSProcessInfo processInfo processName}";
+quitMenuItem = NSMenuItem new; setTitle: "Quit «NSProcessInfo processInfo processName»";
                               setAction: @terminate:;
                        setKeyEquivalent: @q;
                                    self

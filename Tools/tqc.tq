@@ -2,7 +2,7 @@
 import "stdlib"
 
 error = { reason |
-    "Error! #{reason}" print
+    "Error! «reason»" print
     Exit(1)
 }
 
@@ -25,14 +25,14 @@ while arg = args nextObject {
 
 uuid = `NSProcessInfo processInfo globallyUniqueString`
 
-irPath = "/tmp/#{uuid()}.bc"
+irPath = "/tmp/uuid()}.bc"
 status = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/bin/tranquil"
                                  arguments: [@-aot, @-o, irPath, inPath];
                              waitUntilExit;
                          terminationStatus
 `error("Compilation failed")` if: status != 0
 
-asmPath = "/tmp/#{uuid()}.s"
+asmPath = "/tmp/«uuid()».s"
 status = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/llvm/bin/llc"
                                  arguments: [@-O3, @-disable-fp-elim, @-relocation-model=pic, @-o, asmPath, irPath];
                              waitUntilExit;
