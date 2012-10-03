@@ -46,7 +46,8 @@
     *TQVaargsToArray, *TQUnboxObject, *TQBoxValue, *tq_msgSend, *tq_msgSend_noBoxing, *objc_retainAutoreleasedReturnValue,
     *TQInitializeRuntime, *TQCliArgsToArray,
     *dispatch_get_global_queue, *dispatch_group_create, *dispatch_release, *dispatch_group_wait,
-    *dispatch_group_notify, *dispatch_group_async, *objc_sync_enter, *objc_sync_exit;
+    *dispatch_group_notify, *dispatch_group_async, *objc_sync_enter, *objc_sync_exit,
+    *TQFloatFitsInTaggedPointer;
 
 - (llvm::Type *)llvmTypeFromEncoding:(const char *)aEncoding;
 @end

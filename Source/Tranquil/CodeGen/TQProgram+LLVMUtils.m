@@ -62,7 +62,7 @@ using namespace llvm;
     dispatch_get_global_queue, dispatch_group_create,
     dispatch_release, dispatch_group_wait,
     dispatch_group_notify, dispatch_group_async,
-    objc_sync_enter, objc_sync_exit;
+    objc_sync_enter, objc_sync_exit, TQFloatFitsInTaggedPointer;
 
 
 
@@ -351,6 +351,13 @@ using namespace llvm;
     args_i8Ptr_i64.push_back(self.llInt64Ty);
     return FunctionType::get(self.llInt64Ty, args_i8Ptr_i64, false);
 }
+- (llvm::FunctionType *)_ft_i8__float
+{
+    // BOOL(float)
+    std::vector<Type*> args_float;
+    args_float.push_back(self.llFloatTy);
+    return FunctionType::get(self.llInt8Ty, args_float, false);
+}
 
 
 FunAccessor(objc_allocateClassPair, ft_i8Ptr__i8Ptr_i8Ptr_sizeT)
@@ -398,6 +405,7 @@ FunAccessor(dispatch_group_notify, ft_void__i8Ptr_i8Ptr_i8Ptr)
 FunAccessor(dispatch_group_async, ft_void__i8Ptr_i8Ptr_i8Ptr)
 FunAccessor(objc_sync_enter, ft_int__i8Ptr)
 FunAccessor(objc_sync_exit, ft_int__i8Ptr)
+FunAccessor(TQFloatFitsInTaggedPointer, ft_i8__float);
 
 #pragma mark -
 
