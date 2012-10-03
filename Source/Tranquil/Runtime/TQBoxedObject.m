@@ -516,79 +516,78 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     }
 
     IMP initImp;
-    if(!needsWrapping) {
+    if(!needsWrapping)
         initImp = (IMP)_box_C_ID_imp;
-    } else {
-        const char *argTypes;
-        // Figure out the return type
-        argTypes = aType+1;
-        if(*argTypes == _C_CONST)
-            ++argTypes;
+    const char *argTypes;
+    // Figure out the return type
+    argTypes = aType+1;
+    if(*argTypes == _C_CONST)
+        ++argTypes;
 
-        TQFFIType *retType = [TQFFIType typeWithEncoding:argTypes nextType:&argTypes];
+    TQFFIType *retType = [TQFFIType typeWithEncoding:argTypes nextType:&argTypes];
 
-        // And now the argument types
-        __block NSUInteger numArgs = isBlock;
-        __block NSUInteger argSize = 0;
-        if(*argTypes != _TQ_C_LAMBDA_E) {
-            TQIterateTypesInEncoding(argTypes, ^(const char *argType, NSUInteger size, NSUInteger align, BOOL *stop) {
-                ++numArgs;
-                argSize += size;
-            });
-        }
-
-        ffi_cif *cif = (ffi_cif*)malloc(sizeof(ffi_cif));
-        ffi_type **args = (ffi_type**)malloc(sizeof(ffi_type*)*numArgs);
-        NSMutableArray *argTypeObjects = [NSMutableArray arrayWithCapacity:numArgs];
-
-        int argIdx = 0;
-        if(isBlock) {
-            args[argIdx++] = &ffi_type_pointer;
-            argSize += sizeof(void*);
-        }
-
-        TQFFIType *currTypeObj;
-        for(int i = isBlock; i < numArgs; ++i) {
-            currTypeObj = [TQFFIType typeWithEncoding:argTypes nextType:&argTypes];
-            args[argIdx++] = [currTypeObj ffiType];
-
-            [argTypeObjects addObject:currTypeObj];
-        }
-
-        if(ffi_prep_cif(cif, FFI_DEFAULT_ABI, numArgs, retType.ffiType, args) != FFI_OK) {
-            // TODO: be more graceful
-            TQLog(@"unable to wrap block");
-            exit(1);
-        }
-
-        initImp = BlockImp(^(TQBoxedObject *self, id *aPtr) {
-            // Create and return the wrapper block
-            struct TQBoxedBlockLiteral blk = {
-                &_NSConcreteStackBlock,
-                TQ_BLOCK_IS_WRAPPER_BLOCK, 0,
-                (void*)&__wrapperBlock_invoke,
-                &boxedBlockDescriptor,
-                isBlock ? (id)*aPtr : (id)aPtr,
-                aType,
-                argSize,
-                cif
-            };
-            return [[(id)&blk copy] autorelease];
+    // And now the argument types
+    __block NSUInteger numArgs = isBlock;
+    __block NSUInteger argSize = 0;
+    if(*argTypes != _TQ_C_LAMBDA_E) {
+        TQIterateTypesInEncoding(argTypes, ^(const char *argType, NSUInteger size, NSUInteger align, BOOL *stop) {
+            ++numArgs;
+            argSize += size;
         });
-
-        // Hold on to these guys for the life of the class:
-        objc_setAssociatedObject(kls, &_TQRetTypeAssocKey, retType, OBJC_ASSOCIATION_RETAIN);
-        objc_setAssociatedObject(kls, &_TQArgTypesAssocKey, argTypeObjects, OBJC_ASSOCIATION_RETAIN);
-        NSPointerFunctions *pointerFuns = [NSPointerFunctions pointerFunctionsWithOptions:NSPointerFunctionsOpaqueMemory|NSPointerFunctionsOpaquePersonality];
-        pointerFuns.relinquishFunction = &_freeRelinquishFunction;
-
-        NSPointerArray *ffiResArr = [NSPointerArray  pointerArrayWithPointerFunctions:pointerFuns];
-        [ffiResArr addPointer:cif];
-        [ffiResArr addPointer:args];
-        objc_setAssociatedObject(kls, &_TQFFIResourcesAssocKey, argTypeObjects, OBJC_ASSOCIATION_RETAIN);
     }
+
+    ffi_cif *cif = (ffi_cif*)malloc(sizeof(ffi_cif));
+    ffi_type **args = (ffi_type**)malloc(sizeof(ffi_type*)*numArgs);
+    NSMutableArray *argTypeObjects = [NSMutableArray arrayWithCapacity:numArgs];
+
+    int argIdx = 0;
+    if(isBlock) {
+        args[argIdx++] = &ffi_type_pointer;
+        argSize += sizeof(void*);
+    }
+
+    TQFFIType *currTypeObj;
+    for(int i = isBlock; i < numArgs; ++i) {
+        currTypeObj = [TQFFIType typeWithEncoding:argTypes nextType:&argTypes];
+        args[argIdx++] = [currTypeObj ffiType];
+
+        [argTypeObjects addObject:currTypeObj];
+    }
+
+    if(ffi_prep_cif(cif, FFI_DEFAULT_ABI, numArgs, retType.ffiType, args) != FFI_OK) {
+        // TODO: be more graceful
+        TQLog(@"unable to wrap block");
+        exit(1);
+    }
+
+    initImp = BlockImp(^(TQBoxedObject *self, id *aPtr) {
+        // Create and return the wrapper block
+        struct TQBoxedBlockLiteral blk = {
+            &_NSConcreteStackBlock,
+            TQ_BLOCK_IS_WRAPPER_BLOCK, 0,
+            (void*)&__wrapperBlock_invoke,
+            &boxedBlockDescriptor,
+            isBlock ? (id)*aPtr : (id)aPtr,
+            aType,
+            argSize,
+            cif
+        };
+        return [[(id)&blk copy] autorelease];
+    });
+
     class_addMethod(kls, @selector(initWithPtr:), initImp, "@:^v");
     objc_registerClassPair(kls);
+
+    // Hold on to these guys for the life of the class:
+    objc_setAssociatedObject(kls, &_TQRetTypeAssocKey, retType, OBJC_ASSOCIATION_RETAIN);
+    objc_setAssociatedObject(kls, &_TQArgTypesAssocKey, argTypeObjects, OBJC_ASSOCIATION_RETAIN);
+    NSPointerFunctions *pointerFuns = [NSPointerFunctions pointerFunctionsWithOptions:NSPointerFunctionsOpaqueMemory|NSPointerFunctionsOpaquePersonality];
+    pointerFuns.relinquishFunction = &_freeRelinquishFunction;
+
+    NSPointerArray *ffiResArr = [NSPointerArray pointerArrayWithPointerFunctions:pointerFuns];
+    [ffiResArr addPointer:cif];
+    [ffiResArr addPointer:args];
+    objc_setAssociatedObject(kls, &_TQFFIResourcesAssocKey, ffiResArr, OBJC_ASSOCIATION_RETAIN);
 
     return kls;
 }
