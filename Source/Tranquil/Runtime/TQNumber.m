@@ -351,6 +351,8 @@ BOOL TQFloatFitsInTaggedPointer(float aValue)
 - (unsigned long long)unsignedLongLongValue { return _TQNumberValue(self); }
 - (NSUInteger)unsignedIntegerValue { return _TQNumberValue(self); }
 
+- (const char *)objCType { return "d"; }
+
 #pragma mark - Operators
 
 - (id)add:(id)b
@@ -398,9 +400,16 @@ BOOL TQFloatFitsInTaggedPointer(float aValue)
 }
 - (id)divideBy:(id)b
 {
+    double aVal, bVal;
+    aVal = _TQNumberValue(self);
     if(object_getClass(self) != object_getClass(b))
-        return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _TQNumberValue(self) / [b doubleValue]);
-    double result = _TQNumberValue(self) / _TQNumberValue(b);
+        bVal = [b doubleValue];
+    else
+        bVal = _TQNumberValue(b);
+    if(bVal == 0.0)
+        [NSException raise:@"Arithmetic Exception" format:@"Divide by zero error"];
+
+    double result = aVal / bVal;
     if(isinf(result))
         return [[TQBigNumber withNumber:self] divide:b];
     return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), result);
