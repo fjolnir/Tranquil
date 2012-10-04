@@ -1,4 +1,5 @@
 #import "NSCollections+Tranquil.h"
+#import "TQRuntime.h"
 #import "../../../Build/TQStubs.h"
 #import "TQNumber.h"
 #import <objc/runtime.h>
@@ -154,10 +155,54 @@
     return [TQNumber numberWithDouble:(double)[self count]];
 }
 
+- (BOOL)containsObject:(id)aObj
+{
+    for(id obj in self) {
+        if([obj isEqual:aObj])
+            return YES;
+    }
+    return NO;
+}
+
+- (id)contains:(id)aObj
+{
+    return [self containsObject:aObj] ? TQValid : nil;
+}
+
+- (TQNumber *)indexOf:(id)aObj
+{
+    NSUInteger idx = 0;
+    for(id obj in self) {
+        if(tq_msgSend_noBoxing(aObj, TQEqOpSel, obj))
+            return [TQNumber numberWithUnsignedInteger:idx];
+        ++idx;
+    }
+    return [TQNumber numberWithInteger:-1];
+}
+
 - (id)push:(id)aObj
 {
     [self addObject:aObj];
     return self;
+}
+
+- (id)pop
+{
+    id val = [self last];
+    [self removePointerAtIndex:[self count]-1];
+    return val;
+}
+
+- (id)insert:(id)aObj at:(TQNumber *)aIdx
+{
+    [self insertPointer:aObj atIndex:[aIdx unsignedIntegerValue]];
+    return nil;
+}
+
+- (id)remove:(TQNumber *)aIdx
+{
+    [self removePointerAtIndex:[aIdx unsignedIntegerValue]];
+    return nil;
 }
 
 - (id)last
@@ -170,13 +215,6 @@
     return (id)[self pointerAtIndex:0];
 }
 
-- (id)pop
-{
-    id val = [self last];
-    [self removePointerAtIndex:[self count]-1];
-    return val;
-}
-
 - (id)add:(NSPointerArray *)aArray // add: as in +
 {
     NSPointerArray *result = [NSPointerArray new];
@@ -184,6 +222,16 @@
         [result push:obj];
     for(id obj in aArray)
         [result push:obj];
+    return [result autorelease];
+}
+
+- (id)subtract:(NSPointerArray *)aArray
+{
+    NSPointerArray *result = [NSPointerArray new];
+    for(id obj in self) {
+        if(![aArray containsObject:obj])
+            [result push:obj];
+    }
     return [result autorelease];
 }
 

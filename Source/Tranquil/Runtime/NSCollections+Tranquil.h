@@ -17,11 +17,13 @@
 - (void)setObject:(id)aPtr atIndexedSubscript:(NSUInteger)aIdx;
 - (id)objectAtIndexedSubscript:(NSUInteger)aIdx;
 - (TQNumber *)size;
+- (TQNumber *)indexOf:(id)aObj;
 
 - (id)push:(id)aObj;
+- (id)pop;
+- (id)insert:(id)aObj at:(TQNumber *)aIdx;
 - (id)last;
 - (id)first;
-- (id)pop;
 
 - (id)each:(id (^)(id))aBlock;
 @end
