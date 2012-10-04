@@ -53,7 +53,8 @@ static TQProgram *sharedInstance;
 @implementation TQProgram
 @synthesize name=_name, llModule=_llModule, cliArgGlobal=_cliArgGlobal, shouldShowDebugInfo=_shouldShowDebugInfo,
             objcParser=_objcParser, searchPaths=_searchPaths, allowedFileExtensions=_allowedFileExtensions,
-            useAOTCompilation=_useAOTCompilation, outputPath=_outputPath, arguments=_arguments, globals=_globals;
+            useAOTCompilation=_useAOTCompilation, outputPath=_outputPath, arguments=_arguments, globals=_globals,
+            evaluatedPaths=_evaluatedPaths;
 @synthesize globalQueue=_globalQueue, debugBuilder=_debugBuilder;
 
 + (void)initialize
@@ -133,6 +134,10 @@ static TQProgram *sharedInstance;
     if(!aNode)
         return nil;
 
+    BOOL shouldResetEvalPaths = !_evaluatedPaths;
+    if(shouldResetEvalPaths)
+        _evaluatedPaths = [NSMutableArray array];
+
     GlobalVariable *argGlobal = NULL;
     if(!_useAOTCompilation) {
         TQNodeVariable *varArgVar = [TQNodeVariable nodeWithName:@"..."];
@@ -167,6 +172,8 @@ static TQProgram *sharedInstance;
     [aNode generateCodeInProgram:self block:nil root:aNode error:&err];
     if(err) {
         TQLog(@"Error: %@", err);
+        if(shouldResetEvalPaths)
+            _evaluatedPaths = nil;
         return NO;
     }
 
@@ -333,6 +340,9 @@ static TQProgram *sharedInstance;
 #ifdef TQ_PROFILE
     ProfilerStop();
 #endif
+
+    if(shouldResetEvalPaths)
+        _evaluatedPaths = nil;
 
     uint64_t ns = mach_absolute_time() - startTime;
     struct mach_timebase_info timebase;

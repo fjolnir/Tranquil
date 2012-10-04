@@ -17,6 +17,8 @@
 @interface TQProgram () {
     llvm::ExecutionEngine *_executionEngine;
 }
+@property(readonly) NSMutableArray *evaluatedPaths; // Reset after root finishes
+
 @property(readonly) llvm::Module *llModule;
 @property(readonly) llvm::Value *cliArgGlobal;
 

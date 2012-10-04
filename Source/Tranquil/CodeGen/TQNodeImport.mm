@@ -46,8 +46,10 @@ using namespace llvm;
                                  error:(NSError **)aoErr
 {
     NSString *path = [aProgram _resolveImportPath:_path];
-    if(!path)
+    if(!path || [aProgram.evaluatedPaths containsObject:path])
         return NULL;
+
+    [aProgram.evaluatedPaths addObject:path];
     if([[path pathExtension] isEqualToString:@"h"]) {
         // If it's a framework and we are not in AOT mode, we should load it
         if(!aProgram.useAOTCompilation && [path rangeOfString:@".framework"].location != NSNotFound) {
