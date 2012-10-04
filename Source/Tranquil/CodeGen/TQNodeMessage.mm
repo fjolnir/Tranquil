@@ -59,6 +59,8 @@ using namespace llvm;
         return ref;
     else if((ref = [_arguments tq_referencesNode:aNode]))
         return ref;
+    else if((ref = [_cascadedMessages tq_referencesNode:aNode]))
+        return ref;
     return nil;
 }
 
