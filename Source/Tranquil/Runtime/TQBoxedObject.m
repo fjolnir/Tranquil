@@ -51,7 +51,7 @@ static struct TQBoxedBlockDescriptor boxedBlockDescriptor = {
 static id _box_C_ID_imp(TQBoxedObject *self, SEL _cmd, id *aPtr);
 static id _box_C_SEL_imp(TQBoxedObject *self, SEL _cmd, SEL *aPtr);
 static id _box_C_VOID_imp(TQBoxedObject *self, SEL _cmd, id *aPtr);
-static id _box_C_CHARPTR_imp(TQBoxedObject *self, SEL _cmd, const char **aPtr);
+static id _box_C_CHARPTR_imp(TQBoxedObject *self, SEL _cmd, char **aPtr);
 static id _box_C_DBL_imp(TQBoxedObject *self, SEL _cmd, double *aPtr);
 static id _box_C_FLT_imp(TQBoxedObject *self, SEL _cmd, float *aPtr);
 static id _box_C_INT_imp(TQBoxedObject *self, SEL _cmd, int *aPtr);
@@ -156,13 +156,10 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     if([aValue isKindOfClass:[NSValue class]]) {
         NSValue *value = aValue;
         const char *valType = [value objCType];
-        if(strncmp(valType, aType, strlen(valType)) != 0) {
-            [NSException raise:@"Invalid value"
-                        format:@"You tried to unbox NSValue with type %s to %s, but the types are not compatible.", valType, aType];
+        if(strncmp(valType, aType, strlen(valType)) == 0) {
+            [value getValue:aDest];
             return;
         }
-        [value getValue:aDest];
-        return;
     }
 
     switch(*aType) {
@@ -787,7 +784,7 @@ id _box_C_UINT_imp(TQBoxedObject *self, SEL _cmd, unsigned int *aPtr)           
 id _box_C_USHT_imp(TQBoxedObject *self, SEL _cmd, unsigned short *aPtr)         { return [TQNumber numberWithUnsignedShort:*aPtr];        }
 id _box_C_ULNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long *aPtr)          { return [TQNumber numberWithUnsignedLong:*aPtr];         }
 id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long *aPtr) { return [TQNumber numberWithUnsignedLongLong:*aPtr];     }
-id _box_C_CHARPTR_imp(TQBoxedObject *self, SEL _cmd, const char **aPtr)         { return *aPtr == NULL ? nil : [TQPointer box:aPtr withType:"^*"];      }
+id _box_C_CHARPTR_imp(TQBoxedObject *self, SEL _cmd, char **aPtr)               { return *aPtr == NULL ? nil : [TQPointer box:aPtr withType:"^c"];      }
 id _box_C_CHR_imp(TQBoxedObject *self, SEL _cmd, char *aPtr)                    { return *aPtr == 0    ? nil : [TQNumber numberWithChar:*aPtr];         }
 id _box_C_UCHR_imp(TQBoxedObject *self, SEL _cmd, char *aPtr)                   { return *aPtr == 0    ? nil : [TQNumber numberWithUnsignedChar:*aPtr]; }
 

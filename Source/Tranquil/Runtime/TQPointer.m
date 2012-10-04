@@ -188,7 +188,7 @@ NSString * const TQTypeString    = @"*";
 - (id)print
 {
     if(*_itemType == _C_CHARPTR)
-        printf("%s", _addr);
+        printf("%s", *(char **)_addr);
     else if(*_itemType == _C_CHR)
         fwrite(_addr, sizeof(char), _count, stdout);
     else
@@ -206,7 +206,11 @@ NSString * const TQTypeString    = @"*";
 
 - (const char *)UTF8String
 {
-    return *_itemType == _C_CHARPTR ? _addr : NULL;
+    if(*_itemType == _C_CHARPTR)
+        return *(char **)_addr;
+    if(*_itemType == _C_CHR)
+        return _addr;
+    return NULL;
 }
 
 - (void)dealloc
