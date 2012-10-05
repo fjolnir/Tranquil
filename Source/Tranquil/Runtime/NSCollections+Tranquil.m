@@ -199,9 +199,18 @@
     return nil;
 }
 
-- (id)remove:(TQNumber *)aIdx
+- (id)removeObject:(id)aObj
 {
-    [self removePointerAtIndex:[aIdx unsignedIntegerValue]];
+    NSMutableIndexSet *indices = [NSMutableIndexSet indexSet];
+    NSUInteger i = 0;
+    for(id obj in self) {
+        if(tq_msgSend_noBoxing(aObj, TQEqOpSel, obj))
+            [indices addIndex:i];
+        ++i;
+    }
+    [indices enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
+        [self removePointerAtIndex:idx];
+    }];
     return nil;
 }
 

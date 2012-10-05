@@ -15,6 +15,8 @@
 @interface NSPointerArray (Tranquil)
 + (NSPointerArray *)tq_pointerArrayWithObjects:(id)firstObject , ...;  // Arguments terminated by TQNothing
 - (void)setObject:(id)aPtr atIndexedSubscript:(NSUInteger)aIdx;
+- (void)removeObjectAtIndex:(NSUInteger)aIdx;
+- (id)removeObject:(id)aObj;
 - (id)objectAtIndexedSubscript:(NSUInteger)aIdx;
 - (TQNumber *)size;
 - (TQNumber *)indexOf:(id)aObj;
