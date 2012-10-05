@@ -417,8 +417,11 @@ using namespace llvm;
 {
     // We must first evaluate the values in order for cases like a,b = b,a to work
     std::vector<Value*> values;
+    Value *curr;
     for(int i = 0; i < MIN([self.right count], [self.left count]); ++i) {
-        values.push_back([[self.right objectAtIndex:i] generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr]);
+        curr = [[self.right objectAtIndex:i] generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        curr = aBlock.builder->CreateCall(aProgram.objc_retain, curr);
+        values.push_back(curr);
     }
 
     // Then store the values
@@ -445,6 +448,10 @@ using namespace llvm;
                                      block:aBlock
                                       root:aRoot
                                      error:aoErr];
+    }
+
+    for(int i = 0; i < values.size(); ++i) {
+        aBlock.builder->CreateCall(aProgram.objc_release, values[i]);
     }
 
     return NULL;
