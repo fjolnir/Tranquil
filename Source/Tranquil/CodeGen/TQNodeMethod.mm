@@ -75,7 +75,7 @@ using namespace llvm;
     return out;
 }
 
-- (NSString *)_invokeName
+- (NSString *)invokeName
 {
     return [NSString stringWithFormat:@"%@[%@ %@]", _type==kTQClassMethod ? @"+" : @"-", _class.name, [self selector]];
 }

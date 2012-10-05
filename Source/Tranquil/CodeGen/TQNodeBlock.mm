@@ -427,7 +427,7 @@ using namespace llvm;
 
     Module *mod = aProgram.llModule;
 
-    _function = Function::Create(funType, GlobalValue::ExternalLinkage, [_invokeName UTF8String], mod);
+    _function = Function::Create(funType, GlobalValue::ExternalLinkage, [[self invokeName] UTF8String], mod);
     if(returningOnStack)
         _function->addAttribute(1, Attribute::StructRet);
     for(NSNumber *idx in byValArgIndices) {
@@ -444,7 +444,7 @@ using namespace llvm;
 
     llvm::DIArray diTypeArr = aProgram.debugBuilder->getOrCreateArray(ArrayRef<Value*>());
     _debugInfo = aProgram.debugBuilder->createFunction(aRoot.debugUnit,
-                                                       [_invokeName UTF8String],
+                                                       [[self invokeName] UTF8String],
                                                        "", //[_invokeName UTF8String],
                                                        DIFile(), //cast<DIFile>(aRoot.debugUnit),
                                                        self.lineNumber,
