@@ -35,9 +35,10 @@
     [self addMethod:aPropName withBlock:^(id self_) {
         __block id ret = NSMapGet(TQGetDynamicIvarTable(self_), aPropName);
         if(!ret && aInitial) {
-            @synchronized(self) {
-                ret = [[aInitial copyWithZone:nil] autorelease];
+            @synchronized(self_) {
+                ret = [aInitial copyWithZone:nil];
                 NSMapInsert(TQGetDynamicIvarTable(self_), aPropName, ret);
+                [ret release];
             }
         }
         return ret;
