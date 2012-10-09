@@ -23,12 +23,12 @@
 @property(readwrite, copy, nonatomic) NSMutableArray *statements, *cleanupStatements;
 @property(readwrite, retain) NSMutableDictionary *locals, *capturedVariables;
 @property(readwrite, assign) BOOL isVariadic;
-@property(readwrite, assign) llvm::BasicBlock *basicBlock;
-@property(readwrite, assign) llvm::Function *function;
-@property(readwrite, assign) llvm::IRBuilder<> *builder;
-@property(readwrite, assign) llvm::Value *dispatchGroup;
-@property(readwrite, assign) llvm::DISubprogram debugInfo;
-@property(readwrite, assign) llvm::DIScope scope;
+@property(readwrite, assign, nonatomic) llvm::BasicBlock *basicBlock;
+@property(readwrite, assign, nonatomic) llvm::Function *function;
+@property(readwrite, assign, nonatomic) llvm::IRBuilder<> *builder;
+@property(readwrite, assign, nonatomic) llvm::Value *dispatchGroup;
+@property(readwrite, assign, nonatomic) llvm::DISubprogram debugInfo;
+@property(readwrite, assign, nonatomic) llvm::DIScope scope;
 
 // This property is only valid when called from a block's subnode within it's generateCode: method
 @property(readwrite, assign) llvm::Value *autoreleasePool;
@@ -42,6 +42,6 @@
 @end
 
 @interface TQNodeRootBlock : TQNodeBlock
-@property llvm::DICompileUnit debugUnit;
+@property(readwrite, assign, nonatomic) llvm::DICompileUnit debugUnit;
 + (TQNodeRootBlock *)node;
 @end

@@ -17,7 +17,7 @@ PEGFLAGS = [
 
 CXXFLAGS = {
     :release => [
-        '-mmacosx-version-min=10.8',
+        '-mmacosx-version-min=10.7',
         '-I`pwd`/Source',
         '-I`pwd`/Build',
         '-I/usr/include/libxml2',
@@ -28,7 +28,7 @@ CXXFLAGS = {
     ].join(' '),
     :development => [
         '-DDEBUG',
-        '-mmacosx-version-min=10.8',
+        '-mmacosx-version-min=10.7',
         '-I`pwd`/Source',
         '-I`pwd`/Build',
         '-I/usr/include/libxml2',
