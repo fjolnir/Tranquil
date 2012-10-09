@@ -195,7 +195,11 @@
 
 - (id)insert:(id)aObj at:(TQNumber *)aIdx
 {
-    [self insertPointer:aObj atIndex:[aIdx unsignedIntegerValue]];
+    NSUInteger idx = [aIdx unsignedIntegerValue];
+    if(idx == [self count])
+        [self addPointer:aObj];
+    else
+        [self insertPointer:aObj atIndex:[aIdx unsignedIntegerValue]];
     return nil;
 }
 
@@ -298,6 +302,19 @@
     }
     return nil;
 }
+
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_7
+- (id)objectAtIndexedSubscript:(NSUInteger)idx
+{
+    return [self objectAtIndex:idx];
+}
+- (void)setObject:(id)obj atIndexedSubscript:(NSUInteger)idx
+{
+    [(NSMutableArray *)self replaceObjectAtIndex:idx withObject:obj];
+}
+#endif
+
 @end
 
 @implementation NSDictionary (Tranquil)
@@ -315,6 +332,17 @@
     }
     return nil;
 }
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_7
+- (void)setObject:(id)obj forKeyedSubscript:(id <NSCopying>)key
+{
+    [(NSMutableDictionary *)self setObject:obj forKey:key];
+}
+- (id)objectForKeyedSubscript:(id)key
+{
+    return [self objectForKey:key];
+}
+#endif
 @end
 
 @implementation NSUserDefaults (Tranquil)

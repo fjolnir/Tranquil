@@ -39,13 +39,13 @@
     - (id)objectForKeyedSubscript:(id)key NS_AVAILABLE(10_7, 5_0);
 
 @interface NSArray (Tranquil)
-#if MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_8
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_7
 INDEXED_SUBSCRIPT_DEFS
 #endif
 @end
 
 @interface NSDictionary (Tranquil)
-#if MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_8
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_7
 KEYED_SUBSCRIPT_DEFS
 #endif
 @end
