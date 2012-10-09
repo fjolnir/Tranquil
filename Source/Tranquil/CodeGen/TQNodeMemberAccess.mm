@@ -51,6 +51,10 @@ using namespace llvm;
 {
     return [NSString stringWithFormat:@"<acc@ %@#%@>", _receiver, _property];
 }
+- (NSString *)toString
+{
+    return [NSString stringWithFormat:@"%@#%@>", [_receiver toString], _property];
+}
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock

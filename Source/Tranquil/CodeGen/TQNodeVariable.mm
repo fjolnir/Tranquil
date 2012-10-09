@@ -47,6 +47,11 @@ using namespace llvm;
     return [NSString stringWithFormat:@"<var(%@)@ %@>", _isGlobal ? @"global" : @"local", _name ? _name : @"unnamed"];
 }
 
+- (NSString *)toString
+{
+    return _name;
+}
+
 - (NSUInteger)hash
 {
     return [_name hash];

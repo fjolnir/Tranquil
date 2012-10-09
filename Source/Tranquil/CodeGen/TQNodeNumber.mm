@@ -33,6 +33,10 @@ using namespace llvm;
 {
     return [NSString stringWithFormat:@"<num@ %f>", _value.doubleValue];
 }
+- (NSString *)toString
+{
+    return [_value description];
+}
 
 - (TQNode *)referencesNode:(TQNode *)aNode
 {

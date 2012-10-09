@@ -95,6 +95,11 @@ using namespace llvm;
         aChild.lineNumber = aLineNo;
     }];
 }
+
+- (NSString *)toString
+{
+    return [self description];
+}
 @end
 
 @implementation NSArray (TQReferencesNode)

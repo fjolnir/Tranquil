@@ -39,7 +39,7 @@ using namespace llvm;
     _function          = NULL;
     _basicBlock        = NULL;
     _isTranquilBlock   = YES;
-    _invokeName        = @"__tq_block_invoke";
+    _invokeName        = @"__tq_block";
 
     // Block invocations are always passed the block itself as the first argument
     [self addArgument:[TQNodeArgumentDef nodeWithName:@"__blk"] error:nil];
@@ -83,6 +83,11 @@ using namespace llvm;
     }
     [out appendString:@"}>"];
     return out;
+}
+
+- (NSString *)toString
+{
+    return @"block";
 }
 
 - (NSString *)signatureInProgram:(TQProgram *)aProgram
@@ -283,7 +288,7 @@ using namespace llvm;
 
     llvm::Module *mod = aProgram.llModule;
 
-    const char *functionName = [[NSString stringWithFormat:@"__tq_block_copy"] UTF8String];
+    const char *functionName = [[NSString stringWithFormat:@"%@_copy", [self invokeName]] UTF8String];
     Function *function;
     function = Function::Create(funType, GlobalValue::ExternalLinkage, functionName, mod);
     function->setCallingConv(CallingConv::C);
@@ -348,7 +353,7 @@ using namespace llvm;
 
     llvm::Module *mod = aProgram.llModule;
 
-    const char *functionName = [[NSString stringWithFormat:@"__tq_block_dispose"] UTF8String];
+    const char *functionName = [[NSString stringWithFormat:@"%@_dispose", [self invokeName]] UTF8String];
     Function *function;
     function = Function::Create(funType, GlobalValue::ExternalLinkage, functionName, mod);
     function->setCallingConv(CallingConv::C);
@@ -443,9 +448,10 @@ using namespace llvm;
     lexicalBlock.Verify();
 
     llvm::DIArray diTypeArr = aProgram.debugBuilder->getOrCreateArray(ArrayRef<Value*>());
+    const char *functionName = [[NSString stringWithFormat:@"%@_invoke", [self invokeName]] UTF8String];
     _debugInfo = aProgram.debugBuilder->createFunction(aRoot.debugUnit,
-                                                       [[self invokeName] UTF8String],
-                                                       "", //[_invokeName UTF8String],
+                                                       functionName,
+                                                       "",
                                                        DIFile(), //cast<DIFile>(aRoot.debugUnit),
                                                        self.lineNumber,
                                                        aProgram.debugBuilder->createSubroutineType(DIFile(), diTypeArr),

@@ -55,6 +55,10 @@ using namespace llvm;
 {
     return [NSString stringWithFormat:@"<arg@ %@: %@>", _selectorPart, _passedNode];
 }
+- (NSString *)toString
+{
+    return [NSString stringWithFormat:@"%@: %@", _selectorPart, [_passedNode toString]];
+}
 
 - (void)dealloc
 {

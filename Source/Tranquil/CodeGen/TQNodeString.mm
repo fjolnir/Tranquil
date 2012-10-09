@@ -34,6 +34,10 @@ using namespace llvm;
 {
     return [NSString stringWithFormat:@"<str@ \"%@\">", _value];
 }
+- (NSString *)toString
+{
+    return _value;
+}
 
 - (TQNode *)referencesNode:(TQNode *)aNode
 {

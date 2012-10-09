@@ -326,12 +326,12 @@ using namespace llvm;
     }
 }
 
-- (NSString *)description
+- (NSString *)_descriptionFormat
 {
     if(_type == kTQOperatorSubscript)
-        return [NSString stringWithFormat:@"<op@ %@[%@]>", _left, _right];
+        return @"%@[%@]";
     else if(_type == kTQOperatorUnaryMinus)
-        return [NSString stringWithFormat:@"<op@ -%@>", _right];
+        return @"-%@";
     else {
         NSString *opStr = nil;
         switch(_type) {
@@ -372,8 +372,16 @@ using namespace llvm;
 
             default: opStr = @"<unknown>";
         }
-        return [NSString stringWithFormat:@"<op@ %@ %@ %@>", _left, opStr, _right];
+        return [NSString stringWithFormat:@"%@ %@ %@", @"%@", opStr, @"%@"];
     }
+}
+- (NSString *)toString
+{
+    return [NSString stringWithFormat:[self _descriptionFormat], _left ? [_left toString] : @"", _right ? [_right toString] : @""];
+}
+- (NSString *)description
+{
+    return [NSString stringWithFormat:[self _descriptionFormat], _left ? _left : @"", _right ? _right : @""];
 }
 
 - (llvm::Value *)store:(llvm::Value *)aValue

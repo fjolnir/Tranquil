@@ -91,12 +91,21 @@ using namespace llvm;
 {
     NSMutableString *out = [NSMutableString stringWithString:@"<msg@ "];
     [out appendFormat:@"%@ ", _receiver];
-
     for(TQNodeArgument *arg in _arguments) {
         [out appendFormat:@"%@ ", arg];
     }
-
     [out appendString:@".>"];
+    return out;
+}
+
+- (NSString *)toString
+{
+    NSMutableString *out = [NSMutableString stringWithString:@"["];
+    [out appendFormat:@"%@ ", [_receiver toString]];
+    for(TQNodeArgument *arg in _arguments) {
+        [out appendFormat:@"%@ ", [arg toString]];
+    }
+    [out appendString:@"]"];
     return out;
 }
 

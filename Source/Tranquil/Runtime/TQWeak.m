@@ -56,4 +56,5 @@ extern BOOL TQObjectIsStackBlock(id aBlock); // We can't #import Runtime.h becau
 {
     return __obj;
 }
+
 @end

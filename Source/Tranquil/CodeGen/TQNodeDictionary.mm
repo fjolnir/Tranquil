@@ -25,12 +25,19 @@ using namespace llvm;
 - (NSString *)description
 {
     NSMutableString *out = [NSMutableString stringWithString:@"<dict@["];
-
     for(TQNode *key in _items) {
         [out appendFormat:@"%@ => %@, ", key, [_items objectForKey:key]];
     }
-
     [out appendString:@"]>"];
+    return out;
+}
+- (NSString *)toString
+{
+    NSMutableString *out = [NSMutableString stringWithString:@"["];
+    for(TQNode *key in _items) {
+        [out appendFormat:@"%@ => %@, ", [key toString], [[_items objectForKey:key] toString]];
+    }
+    [out appendString:@"]"];
     return out;
 }
 

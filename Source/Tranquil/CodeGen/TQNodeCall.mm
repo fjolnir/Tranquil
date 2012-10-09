@@ -46,6 +46,10 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
     [out appendString:@")>"];
     return out;
 }
+- (NSString *)toString
+{
+    return [NSString stringWithFormat:@"%@()", [_callee toString]];
+}
 
 - (TQNode *)referencesNode:(TQNode *)aNode
 {
