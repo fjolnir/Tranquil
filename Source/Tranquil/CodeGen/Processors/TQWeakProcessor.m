@@ -48,7 +48,7 @@
     // the containing block of the weak, with a reference to said variable
     TQNode *lastRefInTrace         = [aTrace objectAtIndex:[aTrace indexOfObject:parentBlock]+1];
     TQNode *possibleExistingAssign = [parentBlock.statements objectAtIndex:MAX(0, [parentBlock.statements indexOfObject:lastRefInTrace] - 1)];
-    TQNodeVariable *var = [TQNodeVariable nodeWithName:[@" TQ_weak_" stringByAppendingString:[referencedVar name]]];
+    TQNodeVariable *var = [TQNodeVariable tempVar];
 
     TQNodeOperator *assignment = [TQNodeOperator nodeWithType:kTQOperatorAssign
                                                          left:var
