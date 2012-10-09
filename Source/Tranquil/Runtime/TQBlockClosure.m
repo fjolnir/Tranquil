@@ -27,7 +27,7 @@ struct TQClosureBlockDescriptor _BlockDescriptor = { 0, sizeof(struct TQBlockLit
     aType += 2;
     _type = aType;
 
-    _block = aBlock;
+    _block = [aBlock copy];
 
     ffi_closure *closure = _AllocateClosure(&_functionPointer);
     if(closure) {
@@ -75,6 +75,7 @@ struct TQClosureBlockDescriptor _BlockDescriptor = { 0, sizeof(struct TQBlockLit
     free(_cif);
     free(_argTypes);
     [_ffiTypeObjects release];
+    [_block release];
 
     [super dealloc];
 }
