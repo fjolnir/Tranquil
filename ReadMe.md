@@ -25,7 +25,7 @@ The following will install Tranquil into /usr/local/tranquil (Along with a few d
     > curl -fsSkL https://raw.github.com/fjolnir/Tranquil/master/Tools/install.sh | /bin/zsh
     > /usr/local/tranquil/bin/tqrepl
 
-**Note:** OS X 10.8 is required. (10.7 & iOS ≥ 5 will be supported later)
+**Note:** OS X 10.7 is required. (iOS ≥ 5 will be supported later)
 
 ## Learning the language
 
@@ -115,7 +115,7 @@ GlutCreateWindow("Tranquil is cool as beans!")
 GlClearColor(0, 0, 0, 0)
 GlScalef(0.4, 0.4, 0.4)
 
-GlutDisplayFunc({
+GlutDisplayFunc {
     GlRotatef(0.1, 0, 1, 0)
     GlClear(GL_COLOR_BUFFER_BIT)
     GlColor3f(0, 1, 0)
@@ -123,15 +123,15 @@ GlutDisplayFunc({
     GlColor3f(1, 1, 1)
         GlutWireTeapot(0.7)
     GlutSwapBuffers()
-})
+}
 
 lastX, lastY = 0
-GlutMotionFunc({ x, y |
+GlutMotionFunc { x, y |
     dx, dy = lastX - x, lastY - y
     GlRotatef(dx, 0, 1, 0)
     GlRotatef(dy, 1, 0, 0)
     lastX, lastY = x, y
-})
+}
 
 GlutIdleFunc(GlutPostRedisplay)
 GlutMainLoop()
