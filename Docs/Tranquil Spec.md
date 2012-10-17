@@ -105,21 +105,21 @@
 	instance aMethod: 123; anotherMethod: 456 \ A semicolon can be used to separate multiple messages to the same receiver
 	                                          \ This is referred to as "cascading"
 	
-	\ Accessing member variables
+	\ Accessing properties
 	obj#member = 123
 	a = obj#member
-	#member = 123 \ If no is provided, it's assumed to be 'self'
+	#member = 123 \ If no receiver is provided, it's assumed to be 'self'
 	
 	\ Regular expressions
-	regexp = /[.]*/  \ Regular expressions are delimited by forward slashes
-	/[foo...]/ matches: "foobar"
+	regexp = /[.]*/              \ Regular expressions are delimited by forward slashes
+	/[foo...]/ matches: "foobar" \ Checks an expression against a string by sending it `matches:`
 	
 	\ String interpolation
 	a = "expression"
-	b = "A string with an embedded #{a}." \ Evaluates to "A string with an embedded expression."
-	b = "A string with an embedded «a»."  \ Equivalent but a lot nicer.
+	b = "A string with an embedded «a»."  \ Evaluates to "A string with an embedded expression."
+	b = "A string with an embedded #{a}." \ Equivalent (Fallback for those with unfortunate keyboard layouts)
 	
-	\ Unique strings
+	\ Immutable strings / Symbols
 	a = @string
 	b = @"constant string with spaces"
 	
@@ -184,6 +184,9 @@ Classes are named objects that can be instantiated.
 	\ Defines a useless subclass of SuperKlass
 	#Klass < SuperKlass {
 	}
+
+### Methods
+Methods are blocks that are executed in response to a message.
 
 ### Self
 When a block is called as a result of a message to an object (object method: 123.) the `self` variable is implicitly set to that object. (Assigning to `self` is discouraged)
