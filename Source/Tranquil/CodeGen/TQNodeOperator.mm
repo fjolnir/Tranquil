@@ -291,7 +291,7 @@ using namespace llvm;
 
             Value *resultCheck;
             if(fastpathResultIsNumber) {
-                resultCheck = B->CreateCall(aProgram.TQFloatFitsInTaggedPointer, fastVal);
+                resultCheck = B->CreateCall(aProgram.TQFloatFitsInTaggedNumber, fastVal);
                 resultCheck = B->CreateICmpEQ(resultCheck, ConstantInt::get(aProgram.llInt8Ty, 0));
                 fastVal = GET_TQNUM(fastVal);
             }

@@ -24,39 +24,52 @@ extern void _objc_insert_tagged_isa(unsigned char slotNumber, Class isa);
 const unsigned char kTQNumberTagSlot  = 5; // Free slot
 const uintptr_t     kTQNumberTag      = (kTQNumberTagSlot << 1) | 1;
 
-static __inline__ id _createTaggedPointer(float value)
-{
-    return (void *)(((*(uintptr_t *)&value) << 4) | kTQNumberTag);
-}
+#define IS_TAGGED(ptr) ((uintptr_t)(ptr) & 1)
 
-static __inline__ BOOL _isTaggedPointer(id ptr)
-{
-    return (uintptr_t)ptr & 1;
-}
+#ifdef __LP64__
+// Largest integer accurately representable
+static const double TQTaggedNumberLimit = 1.0f/FLT_EPSILON;
+#endif
 
-static __inline__ BOOL _fitsInTaggedPointer(double aValue)
+union CoercedValue {
+    void *ptr;
+    uintptr_t addr;
+    float floatValue;
+    double doubleValue;
+};
+
+static __inline__ BOOL _TQTaggedNumberCanHold(double aValue)
 {
 #ifdef __LP64__
-    const float limit = 1.0f/FLT_EPSILON;
-    return (aValue >= -limit) && (aValue <= limit);
+    union CoercedValue val = { .doubleValue = aValue };
+    val.addr &= 0x7fffffffffffffffL; // Unset the sign bit
+    return val.doubleValue <= TQTaggedNumberLimit;
 #else
     return NO; // TODO: Figure out a way to do tagging on 32bit
 #endif
 }
 
+static __inline__ id _TQTaggedNumberCreate(float value)
+{
+    union CoercedValue val = { .floatValue = value };
+    val.addr = (val.addr << 4) | kTQNumberTag;
+    return val.ptr;
+}
+
 static __inline__ float _TQTaggedNumberValue(TQTaggedNumber *ptr)
 {
-    ptr = (void *)((*(uintptr_t *)&ptr) >> 4);
-    return *(float*)&ptr;
+    union CoercedValue val = { .ptr = ptr };
+    val.addr >>= 4;
+    return val.floatValue;
 }
 static __inline__ double _TQNumberValue(TQNumber *ptr)
 {
-    return _isTaggedPointer(ptr) ? _TQTaggedNumberValue((TQTaggedNumber *)ptr) : ptr->_value;
+    return IS_TAGGED(ptr) ? _TQTaggedNumberValue((TQTaggedNumber *)ptr) : ptr->_value;
 }
 
-BOOL TQFloatFitsInTaggedPointer(float aValue)
+BOOL TQFloatFitsInTaggedNumber(float aValue)
 {
-    return _fitsInTaggedPointer(aValue);
+    return _TQTaggedNumberCanHold(aValue);
 }
 
 @implementation TQTaggedNumber
@@ -125,77 +138,65 @@ BOOL TQFloatFitsInTaggedPointer(float aValue)
 
 + (id)fitsInTaggedPointer:(double)aValue
 {
-    return _fitsInTaggedPointer(aValue) ? TQValid : nil;
+    return _TQTaggedNumberCanHold(aValue) ? TQValid : nil;
 }
 
 + (TQNumber *)numberWithBool:(BOOL)aValue
 {
-    if(_fitsInTaggedPointer(aValue))
-        return _createTaggedPointer(aValue);
-
-    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithBool:), aValue);
-    return autoreleaseImp(ret, @selector(autorelease));
+    return _TQTaggedNumberCreate(aValue);
 }
 + (TQNumber *)numberWithChar:(char)aValue
 {
-    if(_fitsInTaggedPointer(aValue))
-        return _createTaggedPointer(aValue);
-
-    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithDouble:), aValue);
-    return autoreleaseImp(ret, @selector(autorelease));
+    return _TQTaggedNumberCreate(aValue);
 }
 + (TQNumber *)numberWithShort:(short)aValue
 {
-    if(_fitsInTaggedPointer(aValue))
-        return _createTaggedPointer(aValue);
-
-    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithShort:), aValue);
-    return autoreleaseImp(ret, @selector(autorelease));
+    return _TQTaggedNumberCreate(aValue);
 }
 + (TQNumber *)numberWithInt:(int)aValue
 {
-    if(_fitsInTaggedPointer(aValue))
-        return _createTaggedPointer(aValue);
+    if(_TQTaggedNumberCanHold(aValue))
+        return _TQTaggedNumberCreate(aValue);
 
     TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithInt:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 + (TQNumber *)numberWithLong:(long)aValue
 {
-    if(_fitsInTaggedPointer(aValue))
-        return _createTaggedPointer(aValue);
+    if(_TQTaggedNumberCanHold(aValue))
+        return _TQTaggedNumberCreate(aValue);
 
     TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithLong:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 + (TQNumber *)numberWithLongLong:(long long)aValue
 {
-    if(_fitsInTaggedPointer(aValue))
-        return _createTaggedPointer(aValue);
+    if(_TQTaggedNumberCanHold(aValue))
+        return _TQTaggedNumberCreate(aValue);
 
     TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithLongLong:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 + (TQNumber *)numberWithFloat:(float)aValue
 {
-    if(_fitsInTaggedPointer(aValue))
-        return _createTaggedPointer(aValue);
+    if(_TQTaggedNumberCanHold(aValue))
+        return _TQTaggedNumberCreate(aValue);
 
     TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithFloat:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 + (TQNumber *)numberWithDouble:(double)aValue
 {
-    if(_fitsInTaggedPointer(aValue))
-        return _createTaggedPointer(aValue);
+    if(_TQTaggedNumberCanHold(aValue))
+        return _TQTaggedNumberCreate(aValue);
 
     TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithDouble:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 + (TQNumber *)numberWithInteger:(NSInteger)aValue
 {
-    if(_fitsInTaggedPointer(aValue))
-        return _createTaggedPointer(aValue);
+    if(_TQTaggedNumberCanHold(aValue))
+        return _TQTaggedNumberCreate(aValue);
 
     TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithInteger:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
@@ -203,26 +204,17 @@ BOOL TQFloatFitsInTaggedPointer(float aValue)
 
 + (NSNumber *)numberWithUnsignedChar:(unsigned char)aValue
 {
-    if(_fitsInTaggedPointer(aValue))
-        return _createTaggedPointer(aValue);
-
-    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithUnsignedChar:), aValue);
-    return autoreleaseImp(ret, @selector(autorelease));
+    return _TQTaggedNumberCreate(aValue);
 }
-
 + (NSNumber *)numberWithUnsignedShort:(unsigned short)aValue
 {
-    if(_fitsInTaggedPointer(aValue))
-        return _createTaggedPointer(aValue);
-
-    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithUnsignedShort:), aValue);
-    return autoreleaseImp(ret, @selector(autorelease));
+    return _TQTaggedNumberCreate(aValue);
 }
 
 + (NSNumber *)numberWithUnsignedInt:(unsigned int)aValue
 {
-    if(_fitsInTaggedPointer(aValue))
-        return _createTaggedPointer(aValue);
+    if(_TQTaggedNumberCanHold(aValue))
+        return _TQTaggedNumberCreate(aValue);
 
     TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithUnsignedInt:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
@@ -230,8 +222,8 @@ BOOL TQFloatFitsInTaggedPointer(float aValue)
 
 + (NSNumber *)numberWithUnsignedLong:(unsigned long)aValue
 {
-    if(_fitsInTaggedPointer(aValue))
-        return _createTaggedPointer(aValue);
+    if(_TQTaggedNumberCanHold(aValue))
+        return _TQTaggedNumberCreate(aValue);
 
     TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithUnsignedLong:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
@@ -239,8 +231,8 @@ BOOL TQFloatFitsInTaggedPointer(float aValue)
 
 + (NSNumber *)numberWithUnsignedLongLong:(unsigned long long)aValue
 {
-    if(_fitsInTaggedPointer(aValue))
-        return _createTaggedPointer(aValue);
+    if(_TQTaggedNumberCanHold(aValue))
+        return _TQTaggedNumberCreate(aValue);
 
     TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithUnsignedLongLong:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
@@ -248,8 +240,8 @@ BOOL TQFloatFitsInTaggedPointer(float aValue)
 
 + (NSNumber *)numberWithUnsignedInteger:(NSUInteger)aValue
 {
-    if(_fitsInTaggedPointer(aValue))
-        return _createTaggedPointer(aValue);
+    if(_TQTaggedNumberCanHold(aValue))
+        return _TQTaggedNumberCreate(aValue);
 
     TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithUnsignedInteger:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
@@ -352,6 +344,7 @@ BOOL TQFloatFitsInTaggedPointer(float aValue)
 - (NSUInteger)unsignedIntegerValue { return _TQNumberValue(self); }
 
 - (const char *)objCType { return "d"; }
+- (void)getValue:(void *)buffer { *(double *)buffer = _TQNumberValue(self); }
 
 #pragma mark - Operators
 

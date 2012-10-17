@@ -62,7 +62,7 @@ using namespace llvm;
     dispatch_get_global_queue, dispatch_group_create,
     dispatch_release, dispatch_group_wait,
     dispatch_group_notify, dispatch_group_async,
-    objc_sync_enter, objc_sync_exit, TQFloatFitsInTaggedPointer;
+    objc_sync_enter, objc_sync_exit, TQFloatFitsInTaggedNumber;
 
 
 
@@ -405,7 +405,7 @@ FunAccessor(dispatch_group_notify, ft_void__i8Ptr_i8Ptr_i8Ptr)
 FunAccessor(dispatch_group_async, ft_void__i8Ptr_i8Ptr_i8Ptr)
 FunAccessor(objc_sync_enter, ft_int__i8Ptr)
 FunAccessor(objc_sync_exit, ft_int__i8Ptr)
-FunAccessor(TQFloatFitsInTaggedPointer, ft_i8__float);
+FunAccessor(TQFloatFitsInTaggedNumber, ft_i8__float);
 
 #pragma mark -
 
