@@ -269,7 +269,7 @@ void TQSetValueForKey(id obj, NSString *key, id value)
 
 BOOL TQObjectIsStackBlock(id obj)
 {
-    return obj != nil && object_getClass(obj) == (Class)_NSConcreteStackBlock;
+    return object_getClass(obj) == (Class)_NSConcreteStackBlock;
 }
 
 id TQPrepareObjectForReturn(id obj)
