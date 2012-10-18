@@ -1,19 +1,16 @@
-CC  = '/usr/local/tranquil/llvm/bin/clang'
-CXX = '/usr/local/tranquil/llvm/bin/clang++'
-LD  = CC
-PEG = '/usr/local/tranquil/greg/bin/greg'
+CC    = '/usr/local/tranquil/llvm/bin/clang'
+CXX   = '/usr/local/tranquil/llvm/bin/clang++'
+LD    = CC
+RAGEL = '/usr/local/bin/ragel'
+LEMON = '/usr/local/bin/lemon'
 
 MAXARGS = 32 # The number of block dispatchers to compile
 
 BUILD_DIR = 'Build'
 
-PARSER_OUTPATH = "#{BUILD_DIR}/parse.mm"
-
-PEGFLAGS = [
-    "-o #{PARSER_OUTPATH}",
-    #"-v"
-].join(' ')
-
+LEXER_OUTPATH    = "#{BUILD_DIR}/lex.mm"
+PARSER_H_OUTPATH = "#{BUILD_DIR}/parse.h"
+PARSER_OUTPATH   = "#{BUILD_DIR}/parse.mm"
 
 CXXFLAGS = {
     :release => [
@@ -76,14 +73,15 @@ RUNTIME_SOURCES = FileList['Source/Tranquil/BridgeSupport/*.m*'].add('Source/Tra
 RUNTIME_O_FILES = RUNTIME_SOURCES.pathmap(PATHMAP)
 RUNTIME_O_FILES << MSGSEND_OUT
 
-CODEGEN_SOURCES = FileList['Source/Tranquil/CodeGen/**/*.m*']
+CODEGEN_SOURCES = FileList['Source/Tranquil/CodeGen/**/*.m*'] + [LEXER_OUTPATH]
 CODEGEN_O_FILES = CODEGEN_SOURCES.pathmap(PATHMAP)
 
 HEADERS         = FileList['Source/Tranquil/BridgeSupport/*.h'].add('Source/Tranquil/Dispatch/*.h').add('Source/Tranquil/Runtime/*.h').add('Source/Tranquil/Shared/*.h').add('Source/Tranquil/CodeGen/**/*.h')
 HEADER_PATHMAP  = '/usr/local/tranquil/include/Tranquil/%-1d/%f'
 HEADERS_OUT     = [STUB_H_OUTPATH] + HEADERS.pathmap(HEADER_PATHMAP)
 
-PEG_SOURCE      = FileList['Source/Tranquil/*.leg'].first
+LEXER_SOURCE    = "Source/lex.rl"
+PARSER_SOURCE   = "Source/parse.y"
 
 ARC_FILES = ['Source/Tranquil/Runtime/TQWeak.m']
 
@@ -110,9 +108,13 @@ HEADERS.each { |header|
 }
 
 
-file PARSER_OUTPATH => PEG_SOURCE do |f|
-    sh "#{PEG} #{PEGFLAGS} #{PEG_SOURCE}"
-    compile :in => ['Source/Tranquil/CodeGen/TQProgram.mm'], :out => 'Build/TQProgram.o'
+file LEXER_OUTPATH => LEXER_SOURCE do |f|
+    sh "#{RAGEL} #{LEXER_SOURCE} -o #{LEXER_OUTPATH}"
+end
+file PARSER_OUTPATH => PARSER_SOURCE do |f|
+    sh "#{LEMON} #{PARSER_SOURCE}"
+    sh "mv Source/parse.c #{PARSER_OUTPATH}"
+    sh "mv Source/parse.h #{PARSER_H_OUTPATH}"
 end
 
 file STUB_OUTPATH => STUB_SCRIPT do |f|
@@ -199,7 +201,7 @@ def _install
     sh "cp Build/tranquil /usr/local/tranquil/bin"
     sh "cp Tools/repl.tq /usr/local/tranquil/bin/tqrepl"
     sh "cp Tools/tqlive.tq /usr/local/tranquil/bin/tqlive"
-    sh "/usr/local/tranquil/bin/tranquil Tools/tqc.tq Tools/tqc.tq -o /usr/local/tranquil/bin/tqc"
+#    sh "/usr/local/tranquil/bin/tranquil Tools/tqc.tq Tools/tqc.tq -o /usr/local/tranquil/bin/tqc"
 end
 
 task :default => [:build_dir, :tranquil] do |t|

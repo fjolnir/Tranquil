@@ -1,7 +1,10 @@
 #import "TQProgram.h"
 #import "TQProgram+Internal.h"
 #import "TQNode.h"
+#import "TQNodeVariable.h"
+#import "TQNodeCustom.h"
 #import "Processors/TQProcessor.h"
+#import "ObjcSupport/TQHeaderParser.h"
 #import "../Runtime/TQRuntime.h"
 #import "../Runtime/TQBoxedObject.h"
 #import "../Shared/TQDebug.h"
@@ -15,7 +18,7 @@
 #import <google/profiler.h>
 #endif
 
-#import "parse.mm" // Includes the parser source
+//#import "parse.mm" // Includes the parser source
 
 #include <llvm/Module.h>
 #include <llvm/DerivedTypes.h>
@@ -375,6 +378,7 @@ static TQProgram *sharedInstance;
 
 - (TQNodeRootBlock *)_parseScript:(NSString *)aScript error:(NSError **)aoErr
 {
+#if 0
     GREG greg;
     yyinit(&greg);
 
@@ -396,14 +400,14 @@ static TQProgram *sharedInstance;
 
     [parserState.stack addObject:[NSMutableArray array]];
 
-    @try {
+    //@try {
         while(yyparse(&greg));
-    } @catch(NSException *e) {
-        TQLog(@"%@", [e reason]);
-        return nil;
-    } @finally {
+    //} @catch(NSException *e) {
+        //TQLog(@"%@", [e reason]);
+        //return nil;
+    //} @finally {
         yydeinit(&greg);
-    }
+    //}
 
     if(!parserState.root)
         return nil;
@@ -419,6 +423,8 @@ static TQProgram *sharedInstance;
     if(_shouldShowDebugInfo)
         TQLog(@"%@", parserState.root);
     return parserState.root;
+#endif
+    return nil;
 }
 - (id)executeScript:(NSString *)aScript error:(NSError **)aoErr
 {

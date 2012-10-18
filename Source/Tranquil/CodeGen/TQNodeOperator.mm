@@ -372,7 +372,7 @@ using namespace llvm;
 
             default: opStr = @"<unknown>";
         }
-        return [NSString stringWithFormat:@"%@ %@ %@", @"%@", opStr, @"%@"];
+        return [NSString stringWithFormat:@"(%@ %@ %@)", @"%@", opStr, @"%@"];
     }
 }
 - (NSString *)toString

@@ -1,4 +1,5 @@
 #import <Tranquil/CodeGen/TQProgram.h>
+#import "TQParse.h"
 
 void printHelpAndExit(int status)
 {
@@ -40,7 +41,12 @@ int main(int argc, char **argv)
             } else
                 inputPath = arg;
         }
+        NSFileHandle *input = [NSFileHandle fileHandleWithStandardInput];
+        NSData *inputData = [NSData dataWithData:[input readDataToEndOfFile]];
+        NSString *script = [[[NSString alloc] initWithData:inputData encoding:NSUTF8StringEncoding] autorelease];
+        NSLog(@"%@", TQParseString(script));
 
+#if 0
         TQProgram *program          = [TQProgram programWithName:@"Root"];
         program.arguments           = scriptArgs;
         program.useAOTCompilation   = compileToFile;
@@ -60,6 +66,7 @@ int main(int argc, char **argv)
             NSLog(@"Error: %@", err);
             return 1;
         }
+#endif
     }
     return 0;
 }
