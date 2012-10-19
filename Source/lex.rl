@@ -80,7 +80,6 @@ main := |*
 #    "`" newline        => { EmitToken(BACKTICKNL); };
 #    "`"                => { EmitToken(BACKTICK);   };
     ";"                => { };
-    "'"                => { };
     "="                => { EmitToken(ASSIGN);                };
     "+"                => { EmitToken(PLUS);                  };
     "-"                => { EmitToken(MINUS);                 };
@@ -90,14 +89,14 @@ main := |*
     "++" newline       => { EmitToken(INCRNL);                };
     "*"                => { EmitToken(ASTERISK);              };
     "/"                => { EmitToken(FSLASH);                };
-    "~"                => { };
-    "#"                => { EmitToken(HASH); };
+    "~"                => { EmitToken(TILDE);                 };
+    "#"                => { EmitToken(HASH);                  };
     "|"                => { };
     "&"                => { };
-    "^"                => { };
+    "^"                => { EmitToken(CARET);                 };
     "="                => { EmitToken(ASSIGN);                };
-    "=="               => { };
-    "~="               => { };
+    "=="               => { EmitToken(EQUAL);                 };
+    "~="               => { EmitToken(INEQUAL);               };
     "<"                => { EmitToken(LESSER);                };
     ">"                => { EmitToken(GREATER);               };
     "<="               => { EmitToken(LEQUAL);                };
@@ -107,7 +106,7 @@ main := |*
     "=>"               => { EmitToken(DICTSEP);               };
 
 # Message selectors
-    selector           => { EmitStringToken(SELPART, 0, 1); printf("SELPART %s\n", CopyCStr()); };
+    selector           => { EmitStringToken(SELPART, 0, 1);   };
 
 # Keywords
 #    "if"               => { EmitStringToken(IF);              };

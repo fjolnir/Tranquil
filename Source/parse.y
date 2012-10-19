@@ -17,9 +17,6 @@ statements ::= statements statement.
 statements ::= .
 
 statement(S) ::= exprNl(E). { S = E; NSLog(@"stmt: %@", S); }
-//statement ::= unaryMsgNl(E).                            { NSLog(@"e: %@", E);                                                         }
-//statement ::= kwdMsgNl(E).                              { NSLog(@"e: %@", E);                                                         }
-//statement ::= assignNl(E).                              { NSLog(@"e: %@", E);                                                         }
 
 
 //
@@ -34,15 +31,12 @@ exprNoNl(E) ::= assignNoNl(O).                          { E = O;                
 exprNoNl(E) ::= opNoNl(O).                              { E = O;                                                                      }
 exprNoNl(E) ::= simpleExprNoNl(T).                      { E = T;                                                                      }
 exprNl(E) ::= kwdMsgNl(M).                              { E = M;                                                                      }
-exprNl(E) ::= simpleExprNl(T).                          { E = T;                                                                      }
 exprNl(E) ::= assignNl(O).                              { E = O;                                                                      }
 exprNl(E) ::= opNl(O).                                  { E = O;                                                                      }
+exprNl(E) ::= simpleExprNl(T).                          { E = T;                                                                      }
 
 parenExprNoNl(PE) ::= LPAREN expr(E) RPAREN.            { PE = E;                                                                     }
 parenExprNl(PE)   ::= LPAREN expr(E) RPARENNL.          { PE = E;                                                                     }
-
-simpleExpr(E) ::= simpleExprNl(T).                      { E = T;                                                                      }
-simpleExpr(E) ::= simpleExprNoNl(T).                    { E = T;                                                                      }
 
 simpleExprNoNl(E) ::= parenExprNoNl(PE).                { E = PE;                                                                     }
 simpleExprNoNl(E) ::= variableNoNl(V).                  { E = V;                                                                      }
@@ -50,12 +44,15 @@ simpleExprNoNl(E) ::= literalNoNl(L).                   { E = L;                
 simpleExprNoNl(E) ::= unaryMsgNoNl(M).                  { E = M;                                                                      }
 simpleExprNoNl(E) ::= subscriptNoNL(M).                 { E = M;                                                                      }
 simpleExprNoNl(E) ::= propertyNoNl(M).                  { E = M;                                                                      }
+simpleExprNoNl(E) ::= unaryOpNoNl(M).                   { E = M;                                                                      }
 simpleExprNl(E) ::= parenExprNl(PE).                    { E = PE;                                                                     }
 simpleExprNl(E) ::= variableNl(V).                      { E = V;                                                                      }
 simpleExprNl(E) ::= literalNl(L).                       { E = L;                                                                      }
 simpleExprNl(E) ::= unaryMsgNl(M).                      { E = M;                                                                      }
 simpleExprNl(E) ::= subscriptNL(M).                     { E = M;                                                                      }
 simpleExprNl(E) ::= propertyNl(M).                      { E = M;                                                                      }
+simpleExprNl(E) ::= unaryOpNl(M).                       { E = M;                                                                      }
+
 
 //
 // Messages ---------------------------------------------------------------------------------------------------------------------------
@@ -102,68 +99,85 @@ msgArgNl(A) ::= opNl(E). { A = E; }
 // Precedence
 %right ASSIGN.
 %left  AND OR.
-%left  EQUAL NEQUAL GREATER LESSER GEQUAL LEQUAL.
+%left  EQUAL INEQUAL GREATER LESSER GEQUAL LEQUAL.
 %left  PLUS MINUS.
 %left  ASTERISK FSLASH PERCENT.
-%left  INCR DECR RUNARY.
-%right CARET LUNARY.
+%left  INCR DECR LUNARY .
+%right CARET RUNARY.
 
-opLhs(R) ::= simpleExprNoNl(E). { R = E; }
-opLhs(R) ::= opNoNl(E). { R = E; }
-opLhs(R) ::= opNl(E). { R = E; }
+// bOp: binary operator (arithmetic & logic; not comparisons or assignments)
+opNoNl(O) ::= bOpNoNl(UO).                            { O = UO;                                                                     }
+opNl(O)   ::= bOpNl(UO).                              { O = UO;                                                                     }
+
+opLhs(R) ::= opLhsNoNl(T). { R = T; }
+opLhs(R) ::= opLhsNl(T). { R = T; }
+
+opLhsNoNl(R) ::= simpleExprNoNl(E).                   { R = E;                                                                      }
+opLhsNoNl(R) ::= bOpNoNl(E).                           { R = E;                                                                      }
+opLhsNl(R)   ::= simpleExprNl(E). { R = E; }
+opLhsNl(R)   ::= bOpNl(E). { R = E; }
 
 //Assignment
-assignNoNl(E) ::= assignable(A) ASSIGN exprNoNl(B).     { E = [TQNodeOperator nodeWithType:kTQOperatorAssign left:A right:B];         }
-assignNl(E)   ::= assignable(A) ASSIGN exprNl(B).       { E = [TQNodeOperator nodeWithType:kTQOperatorAssign left:A right:B];         }
+assignNoNl(E) ::= assignable(A) ASSIGN exprNoNl(B).   { E = [TQNodeOperator nodeWithType:kTQOperatorAssign left:A right:B];         }
+assignNl(E)   ::= assignable(A) ASSIGN exprNl(B).     { E = [TQNodeOperator nodeWithType:kTQOperatorAssign left:A right:B];         }
 
 
 // Logic
-opNoNl(O)  ::= simpleExpr(A) AND simpleExprNoNl(B).     { O = [TQNodeOperator nodeWithType:kTQOperatorAnd left:A right:B];            }
-opNoNl(O)  ::= simpleExpr(A) OR  simpleExprNoNl(B).     { O = [TQNodeOperator nodeWithType:kTQOperatorOr  left:A right:B];            }
+opNoNl(O)  ::= opLhs(A) AND simpleExprNoNl(B).  { O = [TQNodeOperator nodeWithType:kTQOperatorAnd left:A right:B];            }
+opNoNl(O)  ::= opLhs(A) OR  simpleExprNoNl(B).  { O = [TQNodeOperator nodeWithType:kTQOperatorOr  left:A right:B];            }
+opNl(O)    ::= opLhs(A) AND simpleExprNl(B).    { O = [TQNodeOperator nodeWithType:kTQOperatorAnd left:A right:B];            }
+opNl(O)    ::= opLhs(A) OR  simpleExprNl(B).    { O = [TQNodeOperator nodeWithType:kTQOperatorOr  left:A right:B];            }
 
 // Arithmetic
-opNoNl(O) ::= opLhs(A) PLUS     simpleExprNoNl(B).      { O = [TQNodeOperator nodeWithType:kTQOperatorAdd        left:A   right:B];   }
-//opNoNl(O) ::= opLhs(A) MINUS    simpleExprNoNl(B).      { O = [TQNodeOperator nodeWithType:kTQOperatorSubtract   left:A   right:B];   }
-opNoNl(O) ::= opLhs(A) ASTERISK simpleExprNoNl(B).      { O = [TQNodeOperator nodeWithType:kTQOperatorMultiply   left:A   right:B];   }
-opNoNl(O) ::= opLhs(A) FSLASH   simpleExprNoNl(B).      { O = [TQNodeOperator nodeWithType:kTQOperatorDivide     left:A   right:B];   }
-opNoNl(O) ::= opLhs(A) PERCENT  simpleExprNoNl(B).      { O = [TQNodeOperator nodeWithType:kTQOperatorModulo     left:A   right:B];   }
-opNoNl(O) ::= opLhs(A) CARET    simpleExprNoNl(B).      { O = [TQNodeOperator nodeWithType:kTQOperatorExponent   left:A   right:B];   }
+bOpNoNl(O) ::= opLhsNoNl(A) PLUS     simpleExprNoNl(B).{ O = [TQNodeOperator nodeWithType:kTQOperatorAdd        left:A   right:B];   }
+bOpNoNl(O) ::= opLhsNoNl(A) MINUS    simpleExprNoNl(B).{ O = [TQNodeOperator nodeWithType:kTQOperatorSubtract   left:A   right:B];   }
+bOpNoNl(O) ::= opLhsNoNl(A) ASTERISK simpleExprNoNl(B).{ O = [TQNodeOperator nodeWithType:kTQOperatorMultiply   left:A   right:B];   }
+bOpNoNl(O) ::= opLhsNoNl(A) FSLASH   simpleExprNoNl(B).{ O = [TQNodeOperator nodeWithType:kTQOperatorDivide     left:A   right:B];   }
+bOpNoNl(O) ::= opLhsNoNl(A) PERCENT  simpleExprNoNl(B).{ O = [TQNodeOperator nodeWithType:kTQOperatorModulo     left:A   right:B];   }
+bOpNoNl(O) ::= opLhsNoNl(A) CARET    simpleExprNoNl(B).{ O = [TQNodeOperator nodeWithType:kTQOperatorExponent   left:A   right:B];   }
 
-opNl(O) ::= opLhs(A) PLUS     simpleExprNl(B).          { O = [TQNodeOperator nodeWithType:kTQOperatorAdd        left:A   right:B];   }
-opNl(O) ::= opLhs(A) MINUS    simpleExprNl(B).          { O = [TQNodeOperator nodeWithType:kTQOperatorSubtract   left:A   right:B];   }
-opNl(O) ::= opLhs(A) ASTERISK simpleExprNl(B).          { O = [TQNodeOperator nodeWithType:kTQOperatorMultiply   left:A   right:B];   }
-opNl(O) ::= opLhs(A) FSLASH   simpleExprNl(B).          { O = [TQNodeOperator nodeWithType:kTQOperatorDivide     left:A   right:B];   }
-opNl(O) ::= opLhs(A) PERCENT  simpleExprNl(B).          { O = [TQNodeOperator nodeWithType:kTQOperatorModulo     left:A   right:B];   }
-opNl(O) ::= opLhs(A) CARET    simpleExprNl(B).          { O = [TQNodeOperator nodeWithType:kTQOperatorExponent   left:A   right:B];   }
+bOpNl(O) ::= opLhsNoNl(A) PLUS     simpleExprNl(B).    { O = [TQNodeOperator nodeWithType:kTQOperatorAdd        left:A   right:B];   }
+bOpNl(O) ::= opLhsNoNl(A) MINUS    simpleExprNl(B).    { O = [TQNodeOperator nodeWithType:kTQOperatorSubtract   left:A   right:B];   }
+bOpNl(O) ::= opLhsNoNl(A) ASTERISK simpleExprNl(B).    { O = [TQNodeOperator nodeWithType:kTQOperatorMultiply   left:A   right:B];   }
+bOpNl(O) ::= opLhsNoNl(A) FSLASH   simpleExprNl(B).    { O = [TQNodeOperator nodeWithType:kTQOperatorDivide     left:A   right:B];   }
+bOpNl(O) ::= opLhsNoNl(A) PERCENT  simpleExprNl(B).    { O = [TQNodeOperator nodeWithType:kTQOperatorModulo     left:A   right:B];   }
+bOpNl(O) ::= opLhsNoNl(A) CARET    simpleExprNl(B).    { O = [TQNodeOperator nodeWithType:kTQOperatorExponent   left:A   right:B];   }
 
 // Unary operators
-opNoNl(O) ::= MINUS simpleExprNoNl(A). [LUNARY]         { O = [TQNodeOperator nodeWithType:kTQOperatorUnaryMinus left:nil right:A];   }
-opNoNl(O) ::= INCR  simpleExprNoNl(A). [LUNARY]         { O = [TQNodeOperator nodeWithType:kTQOperatorIncrement  left:nil right:A];   }
-opNoNl(O) ::= simpleExprNoNl(A) INCR.  [RUNARY]         { O = [TQNodeOperator nodeWithType:kTQOperatorIncrement  left:A   right:nil]; }
-opNoNl(O) ::= DECR simpleExprNoNl(A).  [LUNARY]         { O = [TQNodeOperator nodeWithType:kTQOperatorDecrement  left:nil right:A];   }
-opNoNl(O) ::= simpleExprNoNl(A) DECR.  [RUNARY]         { O = [TQNodeOperator nodeWithType:kTQOperatorDecrement  left:A   right:nil]; }
+unaryOpNoNl(O) ::= MINUS simpleExprNoNl(A). [LUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorUnaryMinus left:nil right:A];   }
+//unaryOpNoNl(O) ::= INCR  simpleExprNoNl(A). [LUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorIncrement  left:nil right:A];   }
+//unaryOpNoNl(O) ::= simpleExprNoNl(A) INCR.  [RUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorIncrement  left:A   right:nil]; }
+//unaryOpNoNl(O) ::= DECR simpleExprNoNl(A).  [LUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorDecrement  left:nil right:A];   }
+//unaryOpNoNl(O) ::= simpleExprNoNl(A) DECR.  [RUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorDecrement  left:A   right:nil]; }
+//unaryOpNoNl(O) ::= TILDE simpleExprNoNl(E). [LUNARY]    { O = [TQNodeWeak nodeWithValue:E];                                           }
 
-opNl(O) ::= MINUS simpleExprNl(A).     [LUNARY]         { O = [TQNodeOperator nodeWithType:kTQOperatorUnaryMinus left:nil right:A];   }
-opNl(O) ::= INCR  simpleExprNl(A).     [LUNARY]         { O = [TQNodeOperator nodeWithType:kTQOperatorIncrement  left:nil right:A];   }
-opNl(O) ::= simpleExprNoNl(A) INCRNL.  [RUNARY]         { O = [TQNodeOperator nodeWithType:kTQOperatorIncrement  left:A   right:nil]; }
-opNl(O) ::= DECR simpleExprNl(A).      [LUNARY]         { O = [TQNodeOperator nodeWithType:kTQOperatorDecrement  left:nil right:A];   }
-opNl(O) ::= simpleExprNoNl(A) DECRNL.  [RUNARY]         { O = [TQNodeOperator nodeWithType:kTQOperatorDecrement  left:A   right:nil]; }
+///unaryOpNl(O) ::= MINUS simpleExprNl(A).     [LUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorUnaryMinus left:nil right:A];   }
+unaryOpNl(O) ::= INCR  simpleExprNl(A).     [LUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorIncrement  left:nil right:A];   }
+unaryOpNl(O) ::= simpleExprNoNl(A) INCRNL.  [RUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorIncrement  left:A   right:nil]; }
+unaryOpNl(O) ::= DECR simpleExprNl(A).      [LUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorDecrement  left:nil right:A];   }
+unaryOpNl(O) ::= simpleExprNoNl(A) DECRNL.  [RUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorDecrement  left:A   right:nil]; }
+unaryOpNl(O) ::= TILDE simpleExprNl(E).     [LUNARY]    { O = [TQNodeWeak nodeWithValue:E];                                           }
 
 // Comparisons
-opNoNl(O) ::= simpleExpr(A) EQUAL   simpleExprNoNl(B).  { O = [TQNodeOperator nodeWithType:kTQOperatorEqual          left:A right:B]; }
-opNoNl(O) ::= simpleExpr(A) NEQUAL  simpleExprNoNl(B).  { O = [TQNodeOperator nodeWithType:kTQOperatorInequal        left:A right:B]; }
-opNoNl(O) ::= simpleExpr(A) GREATER simpleExprNoNl(B).  { O = [TQNodeOperator nodeWithType:kTQOperatorGreater        left:A right:B]; }
-opNoNl(O) ::= simpleExpr(A) LESSER  simpleExprNoNl(B).  { O = [TQNodeOperator nodeWithType:kTQOperatorLesser         left:A right:B]; }
-opNoNl(O) ::= simpleExpr(A) GEQUAL  simpleExprNoNl(B).  { O = [TQNodeOperator nodeWithType:kTQOperatorGreaterOrEqual left:A right:B]; }
-opNoNl(O) ::= simpleExpr(A) LEQUAL  simpleExprNoNl(B).  { O = [TQNodeOperator nodeWithType:kTQOperatorLesserOrEqual  left:A right:B]; }
+opNoNl(O) ::= opLhs(A) EQUAL   compRhsNoNl(B).       { O = [TQNodeOperator nodeWithType:kTQOperatorEqual          left:A right:B]; }
+opNoNl(O) ::= opLhs(A) INEQUAL compRhsNoNl(B).       { O = [TQNodeOperator nodeWithType:kTQOperatorInequal        left:A right:B]; }
+opNoNl(O) ::= opLhs(A) GREATER compRhsNoNl(B).       { O = [TQNodeOperator nodeWithType:kTQOperatorGreater        left:A right:B]; }
+opNoNl(O) ::= opLhs(A) LESSER  compRhsNoNl(B).       { O = [TQNodeOperator nodeWithType:kTQOperatorLesser         left:A right:B]; }
+opNoNl(O) ::= opLhs(A) GEQUAL  compRhsNoNl(B).       { O = [TQNodeOperator nodeWithType:kTQOperatorGreaterOrEqual left:A right:B]; }
+opNoNl(O) ::= opLhs(A) LEQUAL  compRhsNoNl(B).       { O = [TQNodeOperator nodeWithType:kTQOperatorLesserOrEqual  left:A right:B]; }
 
-opNl(O) ::= simpleExpr(A) EQUAL   simpleExprNl(B).      { O = [TQNodeOperator nodeWithType:kTQOperatorEqual          left:A right:B]; }
-opNl(O) ::= simpleExpr(A) NEQUAL  simpleExprNl(B).      { O = [TQNodeOperator nodeWithType:kTQOperatorInequal        left:A right:B]; }
-opNl(O) ::= simpleExpr(A) GREATER simpleExprNl(B).      { O = [TQNodeOperator nodeWithType:kTQOperatorGreater        left:A right:B]; }
-opNl(O) ::= simpleExpr(A) LESSER  simpleExprNl(B).      { O = [TQNodeOperator nodeWithType:kTQOperatorLesser         left:A right:B]; }
-opNl(O) ::= simpleExpr(A) GEQUAL  simpleExprNl(B).      { O = [TQNodeOperator nodeWithType:kTQOperatorGreaterOrEqual left:A right:B]; }
-opNl(O) ::= simpleExpr(A) LEQUAL  simpleExprNl(B).      { O = [TQNodeOperator nodeWithType:kTQOperatorLesserOrEqual  left:A right:B]; }
+opNl(O) ::= opLhs(A) EQUAL   compRhsNl(B).           { O = [TQNodeOperator nodeWithType:kTQOperatorEqual          left:A right:B]; }
+opNl(O) ::= opLhs(A) INEQUAL compRhsNl(B).           { O = [TQNodeOperator nodeWithType:kTQOperatorInequal        left:A right:B]; }
+opNl(O) ::= opLhs(A) GREATER compRhsNl(B).           { O = [TQNodeOperator nodeWithType:kTQOperatorGreater        left:A right:B]; }
+opNl(O) ::= opLhs(A) LESSER  compRhsNl(B).           { O = [TQNodeOperator nodeWithType:kTQOperatorLesser         left:A right:B]; }
+opNl(O) ::= opLhs(A) GEQUAL  compRhsNl(B).           { O = [TQNodeOperator nodeWithType:kTQOperatorGreaterOrEqual left:A right:B]; }
+opNl(O) ::= opLhs(A) LEQUAL  compRhsNl(B).           { O = [TQNodeOperator nodeWithType:kTQOperatorLesserOrEqual  left:A right:B]; }
 
+compRhsNoNl(R) ::= simpleExprNoNl(B). { R = B; }
+compRhsNoNl(R) ::= bOpNoNl(B). { R = B; }
+
+compRhsNl(R) ::= simpleExprNl(B). { R = B; }
+compRhsNl(R) ::= bOpNl(B). { R = B; }
 
 //
 // Literals ---------------------------------------------------------------------------------------------------------------------------
