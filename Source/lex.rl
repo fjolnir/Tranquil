@@ -11,7 +11,6 @@ typedef struct {
     int lastTokenId;
 } TQParserState;
 
-// You need to free
 #define NSStr(lTrim, rTrim) [[[NSMutableString alloc] initWithBytes:ts+(lTrim) length:te-ts-(lTrim)-(rTrim) encoding:NSUTF8StringEncoding] autorelease]
 
 #define CopyCStr() ((unsigned char *)strndup((char *)ts, te-ts))
@@ -68,57 +67,59 @@ typedef struct {
 
 main := |*
 # Symbols
-    "{"                => { EmitToken(LBRACE); };
-    "}" newline        => { EmitToken(RBRACENL); };
-    "}"                => { EmitToken(RBRACE); };
-    "["                => { EmitToken(LBRACKET); };
-    "]" newline        => { EmitToken(RBRACKETNL); };
-    "]"                => { EmitToken(RBRACKET); };
-    "("                => { EmitToken(LPAREN); };
-    ")" newline        => { EmitToken(RPARENNL); };
-    ")"                => { EmitToken(RPAREN); };
-    ","                => { EmitToken(COMMA);  };
-    "`" newline        => { EmitToken(BACKTICKNL); };
-    "`"                => { EmitToken(BACKTICK); };
-    ";"                => {  };
-    "'"                => {  };
-    "="                => { EmitToken(ASSIGN); };
-    "+"                => { EmitToken(PLUS); };
-    "-"                => { EmitToken(MINUS); };
-    "--"               => { EmitToken(DECR); };
-    "++"               => { EmitToken(INCR); };
-    "*"                => { EmitToken(ASTERISK); };
-    "/"                => { EmitToken(FSLASH); };
-    "~"                => { printf("~\n");  };
-    "#"                => { printf("#\n");  };
-    "|"                => { printf("|\n");  };
-    "&"                => { printf("&\n");  };
-    "^"                => { printf("^\n");  };
-    "="                => { EmitToken(ASSIGN); };
-    "=="               => { printf("==\n"); };
-    "~="               => { printf("~=\n"); };
-    "<"                => { EmitToken(LESSER); };
-    ">"                => { EmitToken(GREATER); };
-    "<="               => { EmitToken(LEQUAL); };
-    ">="               => { EmitToken(GEQUAL); };
-    "<<"               => { printf("<<\n"); };
-    ">>"               => { printf(">>\n"); };
-    "=>"               => { EmitToken(DICTSEP); };
+    "{"                => { EmitToken(LBRACE);                };
+    "}" newline        => { EmitToken(RBRACENL);              };
+    "}"                => { EmitToken(RBRACE);                };
+    "["                => { EmitToken(LBRACKET);              };
+    "]" newline        => { EmitToken(RBRACKETNL);            };
+    "]"                => { EmitToken(RBRACKET);              };
+    "("                => { EmitToken(LPAREN);                };
+    ")" newline        => { EmitToken(RPARENNL);              };
+    ")"                => { EmitToken(RPAREN);                };
+    ","                => { EmitToken(COMMA);                 };
+#    "`" newline        => { EmitToken(BACKTICKNL); };
+#    "`"                => { EmitToken(BACKTICK);   };
+    ";"                => { };
+    "'"                => { };
+    "="                => { EmitToken(ASSIGN);                };
+    "+"                => { EmitToken(PLUS);                  };
+    "-"                => { EmitToken(MINUS);                 };
+    "--"               => { EmitToken(DECR);                  };
+    "--" newline       => { EmitToken(DECRNL);                };
+    "++"               => { EmitToken(INCR);                  };
+    "++" newline       => { EmitToken(INCRNL);                };
+    "*"                => { EmitToken(ASTERISK);              };
+    "/"                => { EmitToken(FSLASH);                };
+    "~"                => { };
+    "#"                => { EmitToken(HASH); };
+    "|"                => { };
+    "&"                => { };
+    "^"                => { };
+    "="                => { EmitToken(ASSIGN);                };
+    "=="               => { };
+    "~="               => { };
+    "<"                => { EmitToken(LESSER);                };
+    ">"                => { EmitToken(GREATER);               };
+    "<="               => { EmitToken(LEQUAL);                };
+    ">="               => { EmitToken(GEQUAL);                };
+    "<<"               => { };
+    ">>"               => { };
+    "=>"               => { EmitToken(DICTSEP);               };
 
 # Message selectors
     selector           => { EmitStringToken(SELPART, 0, 1); printf("SELPART %s\n", CopyCStr()); };
 
 # Keywords
-#    "if"               => { EmitStringToken(IF, 0, 0); };
-#    "else"             => { EmitStringToken(ELSE, 0, 0); };
-    "and"|"||"         => { EmitToken(AND); };
-    "or"|"&&"          => { EmitToken(OR); };
-#    "while"            => { EmitStringToken(WHILE, 0, 0); };
-#    "until"            => { EmitStringToken(UNTIL, 0, 0); };
-#    "import"           => { EmitStringToken(IMPORT, 0, 0); };
-#    "async"            => { EmitStringToken(ASYNC, 0, 0); };
-#    "break"            => { EmitStringToken(BREAK, 0, 0); };
-#    "skip"             => { EmitStringToken(SKIP, 0, 0); };
+#    "if"               => { EmitStringToken(IF);              };
+#    "else"             => { EmitStringToken(ELSE);            };
+    "and"|"||"         => { EmitToken(AND);                   };
+    "or"|"&&"          => { EmitToken(OR);                    };
+#    "while"            => { EmitToken(WHILE);                 };
+#    "until"            => { EmitToken(UNTIL);                 };
+#    "import"           => { EmitToken(IMPORT);                };
+#    "async"            => { EmitToken(ASYNC);                 };
+#    "break"            => { EmitToken(BREAK);                 };
+#    "skip"             => { EmitToken(SKIP);                  };
     # These are identifier keywords used as expressions => need a *NL variant as well
     "self"    newline  => { EmitStringToken(SELFNL,    0, 0); };
     "super"   newline  => { EmitStringToken(SUPERNL,   0, 0); };
@@ -139,31 +140,31 @@ main := |*
 
 
 # Identifiers
-    identifier newline => { EmitStringToken(IDENTNL, 0, 1); };
-    identifier         => { EmitStringToken(IDENT,   0, 0); };
+    identifier newline => { EmitStringToken(IDENTNL, 0, 2);   };
+    identifier         => { EmitStringToken(IDENT,   0, 0);   };
 
-    constant newline   => { EmitStringToken(CONSTNL, 0, 1); };
-    constant           => { EmitStringToken(CONST,   0, 0); };
+    constant newline   => { EmitStringToken(CONSTNL, 0, 2);   };
+    constant           => { EmitStringToken(CONST,   0, 0);   };
 
 # Literals
-    int   newline      => { EmitIntToken(NUMBERNL, 10, 0); };
-    float newline      => { EmitFloatToken(NUMBERNL);      };
-    bin   newline      => { EmitIntToken(NUMBERNL, 2,  2); };
-    oct   newline      => { EmitIntToken(NUMBERNL, 8,  2); };
-    hex   newline      => { EmitIntToken(NUMBERNL, 16, 2); };
+    int   newline      => { EmitIntToken(NUMBERNL, 10, 0);    };
+    float newline      => { EmitFloatToken(NUMBERNL);         };
+    bin   newline      => { EmitIntToken(NUMBERNL, 2,  2);    };
+    oct   newline      => { EmitIntToken(NUMBERNL, 8,  2);    };
+    hex   newline      => { EmitIntToken(NUMBERNL, 16, 2);    };
 
-    int                => { EmitIntToken(NUMBER, 10, 0); };
-    float              => { EmitFloatToken(NUMBER);      };
-    bin                => { EmitIntToken(NUMBER, 2,  2); };
-    oct                => { EmitIntToken(NUMBER, 8,  2); };
-    hex                => { EmitIntToken(NUMBER, 16, 2); };
+    int                => { EmitIntToken(NUMBER, 10, 0);      };
+    float              => { EmitFloatToken(NUMBER);           };
+    bin                => { EmitIntToken(NUMBER, 2,  2);      };
+    oct                => { EmitIntToken(NUMBER, 8,  2);      };
+    hex                => { EmitIntToken(NUMBER, 16, 2);      };
 
-    lStr               => { EmitStringToken(LSTR,   1, 2); };
-    mStr               => { EmitStringToken(MSTR,   2, 2); };
-    rStr               => { EmitStringToken(RSTR,   2, 1); };
-    rStr newline       => { EmitStringToken(RSTRNL, 2, 1); };
-    string             => { EmitStringToken(STR,    1, 2); };
-    string newline     => { EmitStringToken(STRNL,  1, 2); };
+    lStr               => { EmitStringToken(LSTR,   1, 2);    };
+    mStr               => { EmitStringToken(MSTR,   2, 2);    };
+    rStr               => { EmitStringToken(RSTR,   2, 1);    };
+    rStr newline       => { EmitStringToken(RSTRNL, 2, 1);    };
+    string             => { EmitStringToken(STR,    1, 2);    };
+    string newline     => { EmitStringToken(STRNL,  1, 2);    };
 
     newline;
     space;
@@ -174,7 +175,6 @@ main := |*
 %% write data nofinal;
 
 #include "parse.mm"
-
 TQNode *TQParseString(NSString *str)
 {
     if(![str hasSuffix:@"\n"])
@@ -189,6 +189,7 @@ TQNode *TQParseString(NSString *str)
     unsigned char *eof = pe;
 
     // Parser setup
+//    ParseTrace(stderr, "   > ");
     void *parser = ParseAlloc(malloc);
     TQParserState parserState = {
         0, [TQNodeRootBlock new]
