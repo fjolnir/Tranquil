@@ -8,7 +8,6 @@
 typedef struct {
     int currentLine;
     TQNodeRootBlock *root;
-    int lastTokenId;
 } TQParserState;
 
 #define NSStr(lTrim, rTrim) (ts ? [[[NSMutableString alloc] initWithBytes:ts+(lTrim) length:te-ts-(lTrim)-(rTrim) encoding:NSUTF8StringEncoding] autorelease] : nil)
@@ -17,7 +16,6 @@ typedef struct {
 
 #define _EmitToken(tokenId, val) do { \
     Parse(parser, tokenId, val, &parserState); \
-    parserState.lastTokenId = tokenId; \
 } while(0);
 
 #define EmitToken(tokenId) EmitStringToken(tokenId, 0, 0)
@@ -37,7 +35,6 @@ typedef struct {
     free(str); \
 } while(0)
 
-#define LastToken() (parserState.lastTokenId)
 
 %%{
     machine Tranquil;
@@ -73,102 +70,102 @@ main := |*
     "`" whitespace* %{ temp1 = p; } identifier %{ temp2 = p; } whitespace* "=" [^>] %{ EmitStringToken(BACKTICKDEFARG, 0, 0); };
 
 # Symbols
-    "{"                => { EmitToken(LBRACE);                };
-    "}" newline        => { EmitToken(RBRACENL);              };
-    "}"                => { EmitToken(RBRACE);                };
-    "["                => { EmitToken(LBRACKET);              };
-    "]" newline        => { EmitToken(RBRACKETNL);            };
-    "]"                => { EmitToken(RBRACKET);              };
-    "("                => { EmitToken(LPAREN);                };
-    ")" newline        => { EmitToken(RPARENNL);              };
-    ")"                => { EmitToken(RPAREN);                };
-    ","                => { EmitToken(COMMA);                 };
-    "`" newline        => { EmitToken(BACKTICKNL); printf("nl\n");};
-    "`"                => { EmitToken(BACKTICK);   };
-    ";"                => { };
-    "="                => { EmitToken(ASSIGN);                };
-    "+"                => { EmitToken(PLUS);                  };
-    "-"                => { EmitToken(MINUS);                 };
-    "--"               => { EmitToken(DECR);                  };
-    "--" newline       => { EmitToken(DECRNL);                };
-    "++"               => { EmitToken(INCR);                  };
-    "++" newline       => { EmitToken(INCRNL);                };
-    "*"                => { EmitToken(ASTERISK);              };
-    "/"                => { EmitToken(FSLASH);                };
-    "~"                => { EmitToken(TILDE);                 };
-    "#"                => { EmitToken(HASH);                  };
-    "|"                => { EmitToken(PIPE);                  };
-    "^"                => { EmitToken(CARET);                 };
-    "="                => { EmitToken(ASSIGN);                };
-    "=="               => { EmitToken(EQUAL);                 };
-    "~="               => { EmitToken(INEQUAL);               };
-    "<"                => { EmitToken(LESSER);                };
-    ">"                => { EmitToken(GREATER);               };
-    "<="               => { EmitToken(LEQUAL);                };
-    ">="               => { EmitToken(GEQUAL);                };
-    "<<"               => { };
-    ">>"               => { };
-    "=>"               => { EmitToken(DICTSEP);               };
+    "{"                              => { EmitToken(LBRACE);                            };
+    "}" newline                      => { EmitToken(RBRACENL);                          };
+    "}"                              => { EmitToken(RBRACE);                            };
+    "["                              => { EmitToken(LBRACKET);                          };
+    "]" newline                      => { EmitToken(RBRACKETNL);                        };
+    "]"                              => { EmitToken(RBRACKET);                          };
+    "("                              => { EmitToken(LPAREN);                            };
+    ")" newline                      => { EmitToken(RPARENNL);                          };
+    ")"                              => { EmitToken(RPAREN);                            };
+    ","                              => { EmitToken(COMMA);                             };
+    "`" newline                      => { EmitToken(BACKTICKNL);                        };
+    "`"                              => { EmitToken(BACKTICK);                          };
+    ";"                              => { };
+    "="                              => { EmitToken(ASSIGN);                            };
+    "+"                              => { EmitToken(PLUS);                              };
+    "-"                              => { EmitToken(MINUS);                             };
+    "--"                             => { EmitToken(DECR);                              };
+    "--" newline                     => { EmitToken(DECRNL);                            };
+    "++"                             => { EmitToken(INCR);                              };
+    "++" newline                     => { EmitToken(INCRNL);                            };
+    "*"                              => { EmitToken(ASTERISK);                          };
+    "/"                              => { EmitToken(FSLASH);                            };
+    "~"                              => { EmitToken(TILDE);                             };
+    "#"                              => { EmitToken(HASH);                              };
+    "|"                              => { EmitToken(PIPE);                              };
+    "^"                              => { EmitToken(CARET);                             };
+    "="                              => { EmitToken(ASSIGN);                            };
+    "=="                             => { EmitToken(EQUAL);                             };
+    "~="                             => { EmitToken(INEQUAL);                           };
+    "<"                              => { EmitToken(LESSER);                            };
+    ">"                              => { EmitToken(GREATER);                           };
+    "<="                             => { EmitToken(LEQUAL);                            };
+    ">="                             => { EmitToken(GEQUAL);                            };
+    "<<"                             => { };
+    ">>"                             => { };
+    "=>"                             => { EmitToken(DICTSEP);                           };
 
 # Message selectors
-    selector           => { EmitStringToken(SELPART, 0, 1);   };
+    selector                         => { EmitStringToken(SELPART, 0, 1);               };
 
 # Keywords
-#    "if"               => { EmitStringToken(IF);              };
-#    "else"             => { EmitStringToken(ELSE);            };
-    "and"|"||"         => { EmitToken(AND);                   };
-    "or"|"&&"          => { EmitToken(OR);                    };
-#    "while"            => { EmitToken(WHILE);                 };
-#    "until"            => { EmitToken(UNTIL);                 };
-#    "import"           => { EmitToken(IMPORT);                };
-#    "async"            => { EmitToken(ASYNC);                 };
-#    "break"            => { EmitToken(BREAK);                 };
-#    "skip"             => { EmitToken(SKIP);                  };
+#    "if"                             => { EmitStringToken(IF);                          };
+#    "else"                           => { EmitStringToken(ELSE);                        };
+    "and"|"||"                       => { EmitToken(AND);                               };
+    "or"|"&&"                        => { EmitToken(OR);                                };
+#    "while"                          => { EmitToken(WHILE);                             };
+#    "until"                          => { EmitToken(UNTIL);                             };
+#    "import"                         => { EmitToken(IMPORT);                            };
+#    "async"                          => { EmitToken(ASYNC);                             };
+#    "break"                          => { EmitToken(BREAK);                             };
+#    "skip"                           => { EmitToken(SKIP);                              };
     # These are identifier keywords used as expressions => need a *NL variant as well
-    "self"    newline  => { EmitStringToken(SELFNL,    0, 0); };
-    "super"   newline  => { EmitStringToken(SUPERNL,   0, 0); };
-    "..."     newline  => { EmitStringToken(VAARGNL,   0, 0); };
-    "nil"     newline  => { EmitStringToken(NILNL,     0, 0); };
-    "valid"   newline  => { EmitStringToken(VALIDNL,   0, 0); };
-    "yes"     newline  => { EmitStringToken(YESNL,     0, 0); };
-    "no"      newline  => { EmitStringToken(NONL,      0, 0); };
-    "nothing" newline  => { EmitStringToken(NOTHINGNL, 0, 0); };
-    "self"             => { EmitStringToken(SELF,      0, 0); };
-    "super"            => { EmitStringToken(SUPER,     0, 0); };
-    "..."              => { EmitStringToken(VAARG,     0, 0); };
-    "nil"              => { EmitStringToken(NIL,       0, 0); };
-    "valid"            => { EmitStringToken(VALID,     0, 0); };
-    "yes"              => { EmitStringToken(YES,       0, 0); };
-    "no"               => { EmitStringToken(NO,        0, 0); };
-    "nothing"          => { EmitStringToken(NOTHING,   0, 0); };
+    "self"    newline                => { EmitStringToken(SELFNL,    0, 0);             };
+    "super"   newline                => { EmitStringToken(SUPERNL,   0, 0);             };
+    "..."     newline                => { EmitStringToken(VAARGNL,   0, 0);             };
+    "nil"     newline                => { EmitStringToken(NILNL,     0, 0);             };
+    "valid"   newline                => { EmitStringToken(VALIDNL,   0, 0);             };
+    "yes"     newline                => { EmitStringToken(YESNL,     0, 0);             };
+    "no"      newline                => { EmitStringToken(NONL,      0, 0);             };
+    "nothing" newline                => { EmitStringToken(NOTHINGNL, 0, 0);             };
+    "self"                           => { EmitStringToken(SELF,      0, 0);             };
+    "super"                          => { EmitStringToken(SUPER,     0, 0);             };
+    "..."                            => { EmitStringToken(VAARG,     0, 0);             };
+    "nil"                            => { EmitStringToken(NIL,       0, 0);             };
+    "valid"                          => { EmitStringToken(VALID,     0, 0);             };
+    "yes"                            => { EmitStringToken(YES,       0, 0);             };
+    "no"                             => { EmitStringToken(NO,        0, 0);             };
+    "nothing"                        => { EmitStringToken(NOTHING,   0, 0);             };
 
 
 # Identifiers
-    identifier newline => { EmitStringToken(IDENTNL, 0, 1);   };
-    identifier         => { EmitStringToken(IDENT,   0, 0);   };
+    identifier %{temp1 = p;} newline => { te = temp1; EmitStringToken(IDENTNL, 0, 1);   };
+    identifier                       => { EmitStringToken(IDENT,   0, 0);               };
 
-    constant newline   => { EmitStringToken(CONSTNL, 0, 1);   };
-    constant           => { EmitStringToken(CONST,   0, 0);   };
+    constant   %{temp1 = p;} newline => { te = temp1; EmitStringToken(CONSTNL, 0, 1);   };
+    constant                         => { EmitStringToken(CONST,   0, 0);               };
 
 # Literals
-    int   newline      => { EmitIntToken(NUMBERNL, 10, 0);    };
-    float newline      => { EmitFloatToken(NUMBERNL);         };
-    bin   newline      => { EmitIntToken(NUMBERNL, 2,  2);    };
-    oct   newline      => { EmitIntToken(NUMBERNL, 8,  2);    };
-    hex   newline      => { EmitIntToken(NUMBERNL, 16, 2);    };
+    int   newline                    => { EmitIntToken(NUMBERNL, 10, 0);                };
+    float newline                    => { EmitFloatToken(NUMBERNL);                     };
+    bin   newline                    => { EmitIntToken(NUMBERNL, 2,  2);                };
+    oct   newline                    => { EmitIntToken(NUMBERNL, 8,  2);                };
+    hex   newline                    => { EmitIntToken(NUMBERNL, 16, 2);                };
 
-    int                => { EmitIntToken(NUMBER, 10, 0);      };
-    float              => { EmitFloatToken(NUMBER);           };
-    bin                => { EmitIntToken(NUMBER, 2,  2);      };
-    oct                => { EmitIntToken(NUMBER, 8,  2);      };
-    hex                => { EmitIntToken(NUMBER, 16, 2);      };
+    int                              => { EmitIntToken(NUMBER, 10, 0);                  };
+    float                            => { EmitFloatToken(NUMBER);                       };
+    bin                              => { EmitIntToken(NUMBER, 2,  2);                  };
+    oct                              => { EmitIntToken(NUMBER, 8,  2);                  };
+    hex                              => { EmitIntToken(NUMBER, 16, 2);                  };
 
-    lStr               => { EmitStringToken(LSTR,   1, 2);    };
-    mStr               => { EmitStringToken(MSTR,   2, 2);    };
-    rStr               => { EmitStringToken(RSTR,   2, 1);    };
-    rStr newline       => { EmitStringToken(RSTRNL, 2, 1);    };
-    string             => { EmitStringToken(STR,    1, 2);    };
-    string newline     => { EmitStringToken(STRNL,  1, 2);    };
+    lStr                             => { EmitStringToken(LSTR,   1, 2);                };
+    mStr                             => { EmitStringToken(MSTR,   2, 2);                };
+    rStr                             => { EmitStringToken(RSTR,   2, 1);                };
+    rStr   %{temp1 = p;} newline     => { te = temp1; EmitStringToken(RSTRNL, 2, 1);    };
+    string                           => { EmitStringToken(STR,    1, 2);                };
+    string %{temp1 = p;} newline     => { te = temp1; EmitStringToken(STRNL,  1, 2);    };
 
     newline;
     space;
