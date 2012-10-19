@@ -11,7 +11,7 @@ typedef struct {
     int lastTokenId;
 } TQParserState;
 
-#define NSStr(lTrim, rTrim) [[[NSMutableString alloc] initWithBytes:ts+(lTrim) length:te-ts-(lTrim)-(rTrim) encoding:NSUTF8StringEncoding] autorelease]
+#define NSStr(lTrim, rTrim) (ts ? [[[NSMutableString alloc] initWithBytes:ts+(lTrim) length:te-ts-(lTrim)-(rTrim) encoding:NSUTF8StringEncoding] autorelease] : nil)
 
 #define CopyCStr() ((unsigned char *)strndup((char *)ts, te-ts))
 
@@ -20,7 +20,7 @@ typedef struct {
     parserState.lastTokenId = tokenId; \
 } while(0);
 
-#define EmitToken(tokenId) _EmitToken(tokenId, nil)
+#define EmitToken(tokenId) EmitStringToken(tokenId, 0, 0)
 
 #define EmitStringToken(tokenId, lTrim, rTrim) _EmitToken(tokenId, NSStr(lTrim, rTrim))
 
@@ -55,6 +55,7 @@ typedef struct {
     identifier  = ulower char*;
     comment     = '\\' [^\n]*;
     newline     = (comment? '\n' space?)+;
+    whitespace  = (newline|space|comment);
 
     lGuillmt    = 0xC2 0xAB; # «
     rGuillmt    = 0xC2 0xBB; # »
@@ -65,7 +66,12 @@ typedef struct {
     rStr        = rGuillmt strCont* '"';
     selector    = (constant | identifier)? ':';
 
+
 main := |*
+# Hacks
+    "{" whitespace* %{ temp1 = p; } identifier %{ temp2 = p; } whitespace* "=" [^>] %{ EmitStringToken(LBRACEDEFARG, 0, 0);   };
+    "`" whitespace* %{ temp1 = p; } identifier %{ temp2 = p; } whitespace* "=" [^>] %{ EmitStringToken(BACKTICKDEFARG, 0, 0); };
+
 # Symbols
     "{"                => { EmitToken(LBRACE);                };
     "}" newline        => { EmitToken(RBRACENL);              };
@@ -77,8 +83,8 @@ main := |*
     ")" newline        => { EmitToken(RPARENNL);              };
     ")"                => { EmitToken(RPAREN);                };
     ","                => { EmitToken(COMMA);                 };
-#    "`" newline        => { EmitToken(BACKTICKNL); };
-#    "`"                => { EmitToken(BACKTICK);   };
+    "`" newline        => { EmitToken(BACKTICKNL); printf("nl\n");};
+    "`"                => { EmitToken(BACKTICK);   };
     ";"                => { };
     "="                => { EmitToken(ASSIGN);                };
     "+"                => { EmitToken(PLUS);                  };
@@ -91,8 +97,7 @@ main := |*
     "/"                => { EmitToken(FSLASH);                };
     "~"                => { EmitToken(TILDE);                 };
     "#"                => { EmitToken(HASH);                  };
-    "|"                => { };
-    "&"                => { };
+    "|"                => { EmitToken(PIPE);                  };
     "^"                => { EmitToken(CARET);                 };
     "="                => { EmitToken(ASSIGN);                };
     "=="               => { EmitToken(EQUAL);                 };
@@ -139,10 +144,10 @@ main := |*
 
 
 # Identifiers
-    identifier newline => { EmitStringToken(IDENTNL, 0, 2);   };
+    identifier newline => { EmitStringToken(IDENTNL, 0, 1);   };
     identifier         => { EmitStringToken(IDENT,   0, 0);   };
 
-    constant newline   => { EmitStringToken(CONSTNL, 0, 2);   };
+    constant newline   => { EmitStringToken(CONSTNL, 0, 1);   };
     constant           => { EmitStringToken(CONST,   0, 0);   };
 
 # Literals
@@ -174,6 +179,7 @@ main := |*
 %% write data nofinal;
 
 #include "parse.mm"
+
 TQNode *TQParseString(NSString *str)
 {
     if(![str hasSuffix:@"\n"])
@@ -187,8 +193,9 @@ TQNode *TQParseString(NSString *str)
     unsigned char *pe = p + strlen((char*)p);
     unsigned char *eof = pe;
 
+    unsigned char *temp1, *temp2;
+
     // Parser setup
-//    ParseTrace(stderr, "   > ");
     void *parser = ParseAlloc(malloc);
     TQParserState parserState = {
         0, [TQNodeRootBlock new]
