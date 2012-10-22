@@ -61,41 +61,47 @@ simpleExprNl(E) ::= unaryOpNl(M).                       { E = M;                
 //
 
 // Unary messages
-unaryMsgNoNl(M) ::= msgRcvr(R) unarySelNoNl(S). [INCR]  { M = [TQNodeMessage unaryMessageWithReceiver:R selector:S];                  }
-unarySelNoNl(U) ::= IDENT(T).                           { U = T;                                                                      }
-unarySelNoNl(U) ::= CONST(T).                           { U = T;                                                                      }
+unaryMsgNoNl(M) ::= unaryRcvr(R) unarySelNoNl(S).       { M = [TQNodeMessage unaryMessageWithReceiver:R selector:S];                  }
+unarySelNoNl(U) ::= IDENT(T).                           { U = [T value];                                                                      }
+unarySelNoNl(U) ::= CONST(T).                           { U = [T value];                                                                      }
 
-unaryMsgNl(M)   ::= msgRcvr(R) unarySelNl(S).           { M = [TQNodeMessage unaryMessageWithReceiver:R selector:S];                  }
-unarySelNl(U)   ::= IDENTNL(T).                         { U = T;                                                                      }
-unarySelNl(U)   ::= CONSTNL(T).                         { U = T;                                                                      }
+unaryMsgNl(M)   ::= unaryRcvr(R) unarySelNl(S).         { M = [TQNodeMessage unaryMessageWithReceiver:R selector:S];                  }
+unarySelNl(U)   ::= IDENTNL(T).                         { U = [T value];                                                              }
+unarySelNl(U)   ::= CONSTNL(T).                         { U = [T value];                                                              }
 
 
 // Keyword messages
-kwdMsgNoNl(M) ::= msgRcvr(R) selPartsNoNl(SP).          { M = [TQNodeMessage nodeWithReceiver:R arguments:SP];                        }
-kwdMsgNl(M)   ::= msgRcvr(R) selPartsNl(SP).            { M = [TQNodeMessage nodeWithReceiver:R arguments:SP];                        }
+kwdMsgNoNl(M) ::= kwdRcvr(R) selPartsNoNl(SP).          { M = [TQNodeMessage nodeWithReceiver:R arguments:SP];                        }
+kwdMsgNl(M)   ::= kwdRcvr(R) selPartsNl(SP).            { M = [TQNodeMessage nodeWithReceiver:R arguments:SP];                        }
 
 selParts(ARR)     ::= .                                 { ARR = [NSMutableArray array];                                               }
 selParts(ARR)     ::= selParts(T) selPart(SP).          { ARR = T; [ARR addObject:SP];                                                }
 selPartsNl(ARR)   ::= selParts(T) selPartNl(SP).        { ARR = T; [ARR addObject:SP];                                                }
 selPartsNoNl(ARR) ::= selParts(T) selPartNoNl(SP).      { ARR = T; [ARR addObject:SP];                                                }
 
-selPart(SP)     ::= SELPART(T) msgArg(A).               { SP = [TQNodeArgument nodeWithPassedNode:A selectorPart:T];                  }
-selPartNoNl(SP) ::= SELPART(T) msgArgNoNl(A).           { SP = [TQNodeArgument nodeWithPassedNode:A selectorPart:T];                  }
-selPartNl(SP)   ::= SELPART(T) msgArgNl(A).             { SP = [TQNodeArgument nodeWithPassedNode:A selectorPart:T];                  }
+selPart(SP)     ::= SELPART(T) msgArg(A).               { SP = [TQNodeArgument nodeWithPassedNode:A selectorPart:[T value]];          }
+selPartNoNl(SP) ::= SELPART(T) msgArgNoNl(A).           { SP = [TQNodeArgument nodeWithPassedNode:A selectorPart:[T value]];          }
+selPartNl(SP)   ::= SELPART(T) msgArgNl(A).             { SP = [TQNodeArgument nodeWithPassedNode:A selectorPart:[T value]];          }
 
-msgRcvr(R) ::= simpleExprNoNl(L).                       { R = L;                                                                      }
+unaryRcvr(R) ::= simpleExprNoNl(L).                     { R = L;                                                                      }
+
+kwdRcvr(R)   ::= simpleExprNoNl(T).                     { R = T;                                                                      }
+kwdRcvr(A)   ::= opNoNl(O).                             { A = O;                                                                      }
 
 msgArg(A) ::= msgArgNoNl(T).                            { A = T;                                                                      }
 msgArg(A) ::= msgArgNl(T).                              { A = T;                                                                      }
 
-msgArgNoNl(A) ::= simpleExprNoNl(E). { A = E; }
-msgArgNoNl(A) ::= opNoNl(E). { A = E; }
-msgArgNl(A) ::= simpleExprNl(E). { A = E; }
-msgArgNl(A) ::= opNl(E). { A = E; }
+msgArgNoNl(A) ::= simpleExprNoNl(E).                    { A = E;                                                                      }
+msgArgNoNl(A) ::= opNoNl(E).                            { A = E;                                                                      }
+msgArgNl(A) ::= simpleExprNl(E).                        { A = E;                                                                      }
+msgArgNl(A) ::= opNl(E).                                { A = E;                                                                      }
+
+// Cascaded messages
+//cascade ::= unaryMsgNoNl SEMICOLON
 
 
 //
-// Blocks Definitions -----------------------------------------------------------------------------------------------------------------
+// Block Definitions ------------------------------------------------------------------------------------------------------------------
 //
 
 simpleExprNl(E)   ::= blockNl(B).                      { E = B;                                                                       }
@@ -116,11 +122,11 @@ blockNl(B) ::= BACKTICKDEFARG(I) expr(D) blockArgs(A) PIPE expr(E) BACKTICKNL. {
     B = [TQNodeBlock nodeWithFirstArg:I defaultVal:D arguments:A statement:[TQNodeReturn nodeWithValue:E]];
 }
 
-blockArgs(L) ::= .                                     { L = [NSMutableArray array];                                                  }
-blockArgs(L) ::= blockArgs(O) COMMA blockArg(E).       { L = O; [L addObject:E];                                                      }
+blockArgs(L) ::= .                                      { L = [NSMutableArray array];                                                  }
+blockArgs(L) ::= blockArgs(O) COMMA blockArg(E).        { L = O; [L addObject:E];                                                      }
 
-blockArg(A) ::= identifier(N).                         { A = [TQNodeArgumentDef nodeWithName:N];                                      }
-blockArg(A) ::= identifier(N) ASSIGN noAsgnExpr(E).    { A = [TQNodeArgumentDef nodeWithName:N]; [A setDefaultArgument:E];            }
+blockArg(A) ::= identifier(N).                          { A = [TQNodeArgumentDef nodeWithName:N];                                      }
+blockArg(A) ::= identifier(N) ASSIGN noAsgnExpr(E).     { A = [TQNodeArgumentDef nodeWithName:N]; [A setDefaultArgument:E];            }
 
 //
 // Block Calls ------------------------------------------------------------------------------------------------------------------------
@@ -143,24 +149,20 @@ callArgs(L)    ::= callArgs(O) COMMA expr(E).           { L = O; [L addObject:E]
 
 // Precedence
 %right ASSIGN.
-%left  AND OR.
+%left  OR.
+%left  AND.
 %left  EQUAL INEQUAL GREATER LESSER GEQUAL LEQUAL.
 %left  PLUS MINUS.
 %left  ASTERISK FSLASH PERCENT.
-%left  INCR DECR LUNARY .
+%left  INCR DECR LUNARY.
 %right CARET RUNARY.
+%right LBRACKET RBRACKET.
 
-// bOp: binary operator (arithmetic & logic; not comparisons or assignments)
-opNoNl(O) ::= bOpNoNl(UO).                              { O = UO;                                                                     }
-opNl(O)   ::= bOpNl(UO).                                { O = UO;                                                                     }
+operandNoNl(O) ::= opNoNl(T).                           { O = T;                                                                      }
+operandNoNl(O) ::= simpleExprNoNl(E).                   { O = E;                                                                      }
+operandNl(O)   ::= opNl(T).                             { O = T;                                                                      }
+operandNl(O)   ::= simpleExprNl(E).                     { O = E;                                                                      }
 
-opLhs(R) ::= opLhsNoNl(T). { R = T; }
-opLhs(R) ::= opLhsNl(T). { R = T; }
-
-opLhsNoNl(R) ::= simpleExprNoNl(E).                     { R = E;                                                                      }
-opLhsNoNl(R) ::= bOpNoNl(E).                            { R = E;                                                                      }
-opLhsNl(R)   ::= simpleExprNl(E).                       { R = E;                                                                      }
-opLhsNl(R)   ::= bOpNl(E).                              { R = E;                                                                      }
 
 //Assignment
 assignNoNl(E) ::= assignable(A) ASSIGN exprNoNl(B).     { E = [TQNodeOperator nodeWithType:kTQOperatorAssign left:A right:B];         }
@@ -168,25 +170,23 @@ assignNl(E)   ::= assignable(A) ASSIGN exprNl(B).       { E = [TQNodeOperator no
 
 
 // Logic
-opNoNl(O)  ::= opLhs(A) AND simpleExprNoNl(B).          { O = [TQNodeOperator nodeWithType:kTQOperatorAnd left:A right:B];            }
-opNoNl(O)  ::= opLhs(A) OR  simpleExprNoNl(B).          { O = [TQNodeOperator nodeWithType:kTQOperatorOr  left:A right:B];            }
-opNl(O)    ::= opLhs(A) AND simpleExprNl(B).            { O = [TQNodeOperator nodeWithType:kTQOperatorAnd left:A right:B];            }
-opNl(O)    ::= opLhs(A) OR  simpleExprNl(B).            { O = [TQNodeOperator nodeWithType:kTQOperatorOr  left:A right:B];            }
+opNoNl(O) ::= operandNoNl(A) AND|OR(OP) operandNoNl(B). { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B];              }
+opNl(O)   ::= operandNoNl(A) AND|OR(OP) operandNl(B).   { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B];              }
 
 // Arithmetic
-bOpNoNl(O) ::= opLhsNoNl(A) PLUS     simpleExprNoNl(B). { O = [TQNodeOperator nodeWithType:kTQOperatorAdd        left:A   right:B];   }
-bOpNoNl(O) ::= opLhsNoNl(A) MINUS    simpleExprNoNl(B). { O = [TQNodeOperator nodeWithType:kTQOperatorSubtract   left:A   right:B];   }
-bOpNoNl(O) ::= opLhsNoNl(A) ASTERISK simpleExprNoNl(B). { O = [TQNodeOperator nodeWithType:kTQOperatorMultiply   left:A   right:B];   }
-bOpNoNl(O) ::= opLhsNoNl(A) FSLASH   simpleExprNoNl(B). { O = [TQNodeOperator nodeWithType:kTQOperatorDivide     left:A   right:B];   }
-bOpNoNl(O) ::= opLhsNoNl(A) PERCENT  simpleExprNoNl(B). { O = [TQNodeOperator nodeWithType:kTQOperatorModulo     left:A   right:B];   }
-bOpNoNl(O) ::= opLhsNoNl(A) CARET    simpleExprNoNl(B). { O = [TQNodeOperator nodeWithType:kTQOperatorExponent   left:A   right:B];   }
+opNoNl(O) ::= operandNoNl(A)
+              PLUS|MINUS(OP)
+              operandNoNl(B).                           { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B];              }
+opNoNl(O) ::= operandNoNl(A)
+              ASTERISK|FSLASH|PERCENT(OP)
+              operandNoNl(B).                           { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B];              }
+opNoNl(O) ::= operandNoNl(A) CARET(OP) operandNoNl(B).  { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B];              }
 
-bOpNl(O) ::= opLhsNoNl(A) PLUS     simpleExprNl(B).     { O = [TQNodeOperator nodeWithType:kTQOperatorAdd        left:A   right:B];   }
-bOpNl(O) ::= opLhsNoNl(A) MINUS    simpleExprNl(B).     { O = [TQNodeOperator nodeWithType:kTQOperatorSubtract   left:A   right:B];   }
-bOpNl(O) ::= opLhsNoNl(A) ASTERISK simpleExprNl(B).     { O = [TQNodeOperator nodeWithType:kTQOperatorMultiply   left:A   right:B];   }
-bOpNl(O) ::= opLhsNoNl(A) FSLASH   simpleExprNl(B).     { O = [TQNodeOperator nodeWithType:kTQOperatorDivide     left:A   right:B];   }
-bOpNl(O) ::= opLhsNoNl(A) PERCENT  simpleExprNl(B).     { O = [TQNodeOperator nodeWithType:kTQOperatorModulo     left:A   right:B];   }
-bOpNl(O) ::= opLhsNoNl(A) CARET    simpleExprNl(B).     { O = [TQNodeOperator nodeWithType:kTQOperatorExponent   left:A   right:B];   }
+opNl(O) ::= operandNoNl(A) PLUS|MINUS(OP) operandNl(B). { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B];              }
+opNl(O) ::= operandNoNl(A)
+            ASTERISK|FSLASH|PERCENT(OP)
+            operandNl(B).                               { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B];              }
+opNl(O) ::= operandNoNl(A) CARET(OP) operandNl(B).      { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B];              }
 
 // Unary operators
 unaryOpNoNl(O) ::= MINUS accessableNoNl(A). [LUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorUnaryMinus left:nil right:A];   }
@@ -204,36 +204,25 @@ unaryOpNl(O) ::= accessableNoNl(A) DECRNL.  [RUNARY]    { O = [TQNodeOperator no
 unaryOpNl(O) ::= TILDE accessableNl(E).     [LUNARY]    { O = [TQNodeWeak nodeWithValue:E];                                           }
 
 // Comparisons
-opNoNl(O) ::= opLhs(A) EQUAL   compRhsNoNl(B).          { O = [TQNodeOperator nodeWithType:kTQOperatorEqual          left:A right:B]; }
-opNoNl(O) ::= opLhs(A) INEQUAL compRhsNoNl(B).          { O = [TQNodeOperator nodeWithType:kTQOperatorInequal        left:A right:B]; }
-opNoNl(O) ::= opLhs(A) GREATER compRhsNoNl(B).          { O = [TQNodeOperator nodeWithType:kTQOperatorGreater        left:A right:B]; }
-opNoNl(O) ::= opLhs(A) LESSER  compRhsNoNl(B).          { O = [TQNodeOperator nodeWithType:kTQOperatorLesser         left:A right:B]; }
-opNoNl(O) ::= opLhs(A) GEQUAL  compRhsNoNl(B).          { O = [TQNodeOperator nodeWithType:kTQOperatorGreaterOrEqual left:A right:B]; }
-opNoNl(O) ::= opLhs(A) LEQUAL  compRhsNoNl(B).          { O = [TQNodeOperator nodeWithType:kTQOperatorLesserOrEqual  left:A right:B]; }
+opNoNl(O) ::= operandNoNl(A)
+              EQUAL|INEQUAL|GREATER|LESSER|GEQUAL|LEQUAL(OP)
+              operandNoNl(B).                           { O = [TQNodeOperator nodeWithType:[OP id] left:A right:B];                   }
 
-opNl(O) ::= opLhs(A) EQUAL   compRhsNl(B).              { O = [TQNodeOperator nodeWithType:kTQOperatorEqual          left:A right:B]; }
-opNl(O) ::= opLhs(A) INEQUAL compRhsNl(B).              { O = [TQNodeOperator nodeWithType:kTQOperatorInequal        left:A right:B]; }
-opNl(O) ::= opLhs(A) GREATER compRhsNl(B).              { O = [TQNodeOperator nodeWithType:kTQOperatorGreater        left:A right:B]; }
-opNl(O) ::= opLhs(A) LESSER  compRhsNl(B).              { O = [TQNodeOperator nodeWithType:kTQOperatorLesser         left:A right:B]; }
-opNl(O) ::= opLhs(A) GEQUAL  compRhsNl(B).              { O = [TQNodeOperator nodeWithType:kTQOperatorGreaterOrEqual left:A right:B]; }
-opNl(O) ::= opLhs(A) LEQUAL  compRhsNl(B).              { O = [TQNodeOperator nodeWithType:kTQOperatorLesserOrEqual  left:A right:B]; }
+opNl(O) ::= operandNoNl(A)
+            EQUAL|INEQUAL|GREATER|LESSER|GEQUAL|LEQUAL(OP)
+            operandNl(B).                               { O = [TQNodeOperator nodeWithType:[OP id] left:A right:B];                   }
 
-compRhsNoNl(R) ::= simpleExprNoNl(B). { R = B; }
-compRhsNoNl(R) ::= bOpNoNl(B). { R = B; }
-
-compRhsNl(R) ::= simpleExprNl(B). { R = B; }
-compRhsNl(R) ::= bOpNl(B). { R = B; }
 
 //
 // Literals ---------------------------------------------------------------------------------------------------------------------------
 //
 
-literalNoNl(L) ::= NUMBER(T).                           { L = [TQNodeNumber nodeWithDouble:[T doubleValue]];                          }
+literalNoNl(L) ::= NUMBER(T).                           { L = [TQNodeNumber nodeWithDouble:[[T value] doubleValue]];                          }
 literalNoNl(L) ::= stringNoNl(S).                       { L = S;                                                                      }
 literalNoNl(L) ::= arrayNoNl(A).                        { L = A;                                                                      }
 literalNoNl(L) ::= dictNoNl(D).                         { L = D;                                                                      }
 
-literalNl(L)   ::= NUMBERNL(T).                         { L = [TQNodeNumber nodeWithDouble:[T doubleValue]];                          }
+literalNl(L)   ::= NUMBERNL(T).                         { L = [TQNodeNumber nodeWithDouble:[[T value] doubleValue]];                          }
 literalNl(L)   ::= stringNl(S).                         { L = S;                                                                      }
 literalNl(L)   ::= arrayNl(A).                          { L = A;                                                                      }
 literalNl(L)   ::= dictNl(D).                           { L = D;                                                                      }
@@ -260,13 +249,13 @@ dictEls(ELS) ::= dictEl(EL).                            { ELS = EL;             
 dictEl(EL)  ::= noAsgnExpr(K) DICTSEP noAsgnExpr(V).    { EL = [NSMutableDictionary dictionaryWithObject:V forKey:K];                 }
 
 // Strings
-stringNoNl(S) ::= STR(V).                               { S = [TQNodeString nodeWithString:V];                                        }
-stringNoNl(S) ::= LSTR(L) inStr(M) RSTR(R).             { S = [TQNodeString nodeWithLeft:L embeds:M right:R];                         }
+stringNoNl(S) ::= STR(V).                               { S = [TQNodeString nodeWithString:(NSMutableString *)[V value]];             }
+stringNoNl(S) ::= LSTR(L) inStr(M) RSTR(R).             { S = [TQNodeString nodeWithLeft:[L value] embeds:M right:[R value]];         }
 
-stringNl(S)   ::= STRNL(V).                             { S = [TQNodeString nodeWithString:V];                                        }
-stringNl(S)   ::= LSTR(L) inStr(M) RSTRNL(R).           { S = [TQNodeString nodeWithLeft:L embeds:M right:R];                         }
+stringNl(S)   ::= STRNL(V).                             { S = [TQNodeString nodeWithString:(NSMutableString *)[V value]];             }
+stringNl(S)   ::= LSTR(L) inStr(M) RSTRNL(R).           { S = [TQNodeString nodeWithLeft:[L value] embeds:M right:[R value]];         }
 
-inStr(M) ::= inStr(OLD) MSTR(S) expr(E).                { M = OLD; [M addObject:S]; [M addObject:E];                                  }
+inStr(M) ::= inStr(OLD) MSTR(S) expr(E).                { M = OLD; [M addObject:[S value]]; [M addObject:E];                          }
 inStr(M) ::= expr(E).                                   { M = [NSMutableArray arrayWithObject:E];                                     }
 
 
@@ -274,10 +263,10 @@ inStr(M) ::= expr(E).                                   { M = [NSMutableArray ar
 // Variables, Identifiers & Built-in Constants
 //
 
-identifier(I)   ::= IDENT(T).                           { I = T;                                                                      }
-identifier(I)   ::= IDENTNL(T).                         { I = T;                                                                      }
+identifier(I)   ::= IDENT(T).                           { I = [T value];                                                              }
+identifier(I)   ::= IDENTNL(T).                         { I = [T value];                                                              }
 
-variableNoNl(V) ::= IDENT(T).                           { V = [TQNodeVariable nodeWithName:T];                                        }
+variableNoNl(V) ::= IDENT(T).                           { V = [TQNodeVariable nodeWithName:[T value]];                                        }
 variableNoNl(V) ::= SELF.                               { V = [TQNodeSelf node];                                                      }
 variableNoNl(V) ::= SUPER.                              { V = [TQNodeSuper node];                                                     }
 variableNoNl(V) ::= VALID.                              { V = [TQNodeValid node];                                                     }
@@ -288,7 +277,7 @@ variableNoNl(V) ::= NOTHING.                            { V = [TQNodeNothing nod
 variableNoNl(V) ::= vaargNoNl(T).                       { V = T;                                                                      }
 vaargNoNl(V)    ::= VAARG.                              { V = [TQNodeVariable nodeWithName:@"..."];                                   }
 
-variableNl(V)   ::= IDENTNL(T).                         { V = [TQNodeVariable nodeWithName:T];                                        }
+variableNl(V)   ::= IDENTNL(T).                         { V = [TQNodeVariable nodeWithName:[T value]];                                        }
 variableNl(V)   ::= SELFNL.                             { V = [TQNodeSelf node];                                                      }
 variableNl(V)   ::= SUPERNL.                            { V = [TQNodeSuper node];                                                     }
 variableNl(V)   ::= VALIDNL.                            { V = [TQNodeValid node];                                                     }
@@ -328,10 +317,10 @@ subscriptNL(S)   ::= accessableNoNl(L)
                      LBRACKET expr(E) RBRACKETNL.       { S = [TQNodeOperator nodeWithType:kTQOperatorSubscript left:L right:E];      }
 
 // Properties
-propertyNoNl(P) ::= accessableNoNl(R) HASH IDENT(I).    { P = [TQNodeMemberAccess nodeWithReceiver:R property:I];                     }
-propertyNl(P)   ::= accessableNoNl(R) HASH IDENTNL(I).  { P = [TQNodeMemberAccess nodeWithReceiver:R property:I];                     }
-propertyNoNl(P) ::=                   HASH IDENT(I).    { P = [TQNodeMemberAccess nodeWithReceiver:[TQNodeSelf node] property:I];     }
-propertyNl(P)   ::=                   HASH IDENTNL(I).  { P = [TQNodeMemberAccess nodeWithReceiver:[TQNodeSelf node] property:I];     }
+propertyNoNl(P) ::= accessableNoNl(R) HASH IDENT(I).    { P = [TQNodeMemberAccess nodeWithReceiver:R property:[I value]];             }
+propertyNl(P)   ::= accessableNoNl(R) HASH IDENTNL(I).  { P = [TQNodeMemberAccess nodeWithReceiver:R property:[I value]];             }
+propertyNoNl(P) ::=                   HASH IDENT(I).    { P = [TQNodeMemberAccess nodeWithReceiver:[TQNodeSelf node] property:[I value]]; }
+propertyNl(P)   ::=                   HASH IDENTNL(I).  { P = [TQNodeMemberAccess nodeWithReceiver:[TQNodeSelf node] property:[I value]]; }
 
 
 //
@@ -339,7 +328,7 @@ propertyNl(P)   ::=                   HASH IDENTNL(I).  { P = [TQNodeMemberAcces
 //
 
 %syntax_error {
-    NSLog(@"SYNTAX ERROR '%@'", TOKEN);
+    NSLog(@"SYNTAX ERROR '%@'", [TOKEN value]);
     exit(1);
 }
 %parse_failure {
@@ -353,6 +342,34 @@ propertyNl(P)   ::=                   HASH IDENTNL(I).  { P = [TQNodeMemberAcces
 #import <Tranquil/CodeGen/CodeGen.h>
 
 // TQNode* methods to keep grammar actions to a single line
+@interface TQNodeOperator (TQParserAdditions)
++ (TQNodeOperator *)nodeWithTypeToken:(int)token left:(TQNode *)left right:(TQNode *)right;
+@end
+@implementation TQNodeOperator (TQParserAdditions)
++ (TQNodeOperator *)nodeWithTypeToken:(int)token left:(TQNode *)left right:(TQNode *)right
+{
+    int op;
+    switch(token) {
+        case PLUS:     op = kTQOperatorAdd;            break;
+        case MINUS:    op = kTQOperatorSubtract;       break;
+        case ASTERISK: op = kTQOperatorMultiply;       break;
+        case FSLASH:   op = kTQOperatorDivide;         break;
+        case PERCENT:  op = kTQOperatorModulo;         break;
+        case CARET:    op = kTQOperatorExponent;       break;
+        case EQUAL:    op = kTQOperatorEqual;          break;
+        case INEQUAL:  op = kTQOperatorInequal;        break;
+        case GREATER:  op = kTQOperatorGreater;        break;
+        case LESSER:   op = kTQOperatorLesser;         break;
+        case LEQUAL:   op = kTQOperatorLesserOrEqual;  break;
+        case GEQUAL:   op = kTQOperatorGreaterOrEqual; break;
+        case AND:      op = kTQOperatorAnd;            break;
+        case OR:       op = kTQOperatorOr;             break;
+        default:       TQAssert(NO, @"Unknown operator");
+    }
+    return [self nodeWithType:op left:left right:right];
+}
+@end
+
 @interface TQNodeBlock (TQParserAdditions)
 + (TQNodeBlock *)nodeWithFirstArg:(NSString *)argName defaultVal:(TQNode *)defVal arguments:(NSMutableArray *)args statement:(TQNode *)stmt;
 + (TQNodeBlock *)nodeWithFirstArg:(NSString *)argName defaultVal:(TQNode *)defVal arguments:(NSMutableArray *)args statements:(NSMutableArray *)statements;

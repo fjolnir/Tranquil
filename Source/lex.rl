@@ -15,7 +15,7 @@ typedef struct {
 #define CopyCStr() ((unsigned char *)strndup((char *)ts, te-ts))
 
 #define _EmitToken(tokenId, val) do { \
-    Parse(parser, tokenId, val, &parserState); \
+    Parse(parser, tokenId, [TQToken withId:tokenId value:val], &parserState); \
 } while(0);
 
 #define EmitToken(tokenId) EmitStringToken(tokenId, 0, 0)
@@ -35,6 +35,20 @@ typedef struct {
     free(str); \
 } while(0)
 
+@interface TQToken : NSObject
+@property(readwrite, assign) int id;
+@property(readwrite, strong) id value;
++ (TQToken *)withId:(int)id value:(id)value;
+@end
+@implementation TQToken
++ (TQToken *)withId:(int)id value:(id)value
+{
+    TQToken *ret = [self new];
+    ret.id = id;
+    ret.value = value;
+    return [ret autorelease];
+}
+@end
 
 %%{
     machine Tranquil;
