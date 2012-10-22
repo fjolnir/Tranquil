@@ -1,5 +1,6 @@
 #import "TQProgram.h"
 #import "TQProgram+Internal.h"
+#import "TQParse.h"
 #import "TQNode.h"
 #import "TQNodeVariable.h"
 #import "TQNodeCustom.h"
@@ -378,54 +379,31 @@ static TQProgram *sharedInstance;
 
 - (TQNodeRootBlock *)_parseScript:(NSString *)aScript error:(NSError **)aoErr
 {
-#if 0
-    GREG greg;
-    yyinit(&greg);
-
     // Remove shebang
     if([aScript hasPrefix:@"#!"]) {
+        // TODO Make this handle multibytes
         int lineEnd = 0;
         const char *cStr = [aScript UTF8String];
         for(lineEnd = 0; lineEnd < [aScript length] && cStr[lineEnd] != '\n'; ++lineEnd);
         aScript = [aScript substringFromIndex:lineEnd];
     }
 
-    TQParserState parserState = {0};
-    parserState.currentLine   = 1;
-    parserState.stack         = [NSMutableArray array];
-    parserState.script        = [aScript UTF8String];
-    parserState.length        = strlen(parserState.script);
-    parserState.root          = [TQNodeRootBlock node];
-    greg.data = &parserState;
-
-    [parserState.stack addObject:[NSMutableArray array]];
-
-    //@try {
-        while(yyparse(&greg));
-    //} @catch(NSException *e) {
-        //TQLog(@"%@", [e reason]);
-        //return nil;
-    //} @finally {
-        yydeinit(&greg);
-    //}
-
-    if(!parserState.root)
+    TQNodeRootBlock *root = TQParseString(aScript, aoErr);
+    if(!root)
         return nil;
 
     // Initialize the debug unit on the root
     const char *filename = "<none>";
     const char *dir      = "<none>";
     _debugBuilder->createCompileUnit(dwarf::DW_LANG_ObjC, filename, dir, TRANQUIL_DEBUG_DESCR, true, "", 1); // Use DW_LANG_Tranquil ?
-    parserState.root.debugUnit = DICompileUnit(_debugBuilder->getCU());
+    root.debugUnit = DICompileUnit(_debugBuilder->getCU());
 
-
-    [self _preprocessNode:parserState.root withTrace:[NSMutableArray array]];
+    [self _preprocessNode:root withTrace:[NSMutableArray array]];
     if(_shouldShowDebugInfo)
-        TQLog(@"%@", parserState.root);
-    return parserState.root;
-#endif
-    return nil;
+        TQLog(@"%@", root);
+    return root;
 }
+
 - (id)executeScript:(NSString *)aScript error:(NSError **)aoErr
 {
     TQNodeRootBlock *root = [self _parseScript:aScript error:aoErr];

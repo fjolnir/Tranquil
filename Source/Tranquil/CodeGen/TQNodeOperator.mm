@@ -331,7 +331,7 @@ using namespace llvm;
     if(_type == kTQOperatorSubscript)
         return @"%@[%@]";
     else if(_type == kTQOperatorUnaryMinus)
-        return @"-%@";
+        return @"%@-%@";
     else {
         NSString *opStr = nil;
         switch(_type) {

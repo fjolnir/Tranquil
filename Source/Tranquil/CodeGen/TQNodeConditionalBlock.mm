@@ -175,9 +175,10 @@ using namespace llvm;
     return (TQNodeTernaryOperator *)[super node];
 }
 
-+ (TQNodeTernaryOperator *)nodeWithIfExpr:(TQNode *)aIfExpr else:(TQNode *)aElseExpr
++ (TQNodeTernaryOperator *)nodeWithCondition:(TQNode *)aCond ifExpr:(TQNode *)aIfExpr else:(TQNode *)aElseExpr;
 {
     TQNodeTernaryOperator *ret = [self node];
+    ret.condition = aCond;
     ret.ifExpr = aIfExpr;
     ret.elseExpr = aElseExpr;
     return ret;

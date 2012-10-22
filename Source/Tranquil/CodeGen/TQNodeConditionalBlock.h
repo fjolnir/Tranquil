@@ -21,5 +21,5 @@
 @interface TQNodeTernaryOperator : TQNodeIfBlock
 @property(readwrite, retain) TQNode *ifExpr, *elseExpr;
 + (TQNodeTernaryOperator *)node;
-+ (TQNodeTernaryOperator *)nodeWithIfExpr:(TQNode *)aIfExpr else:(TQNode *)aElseExpr;
++ (TQNodeTernaryOperator *)nodeWithCondition:(TQNode *)aCond ifExpr:(TQNode *)aIfExpr else:(TQNode *)aElseExpr;
 @end

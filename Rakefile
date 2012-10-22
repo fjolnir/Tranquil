@@ -80,8 +80,8 @@ HEADERS         = FileList['Source/Tranquil/BridgeSupport/*.h'].add('Source/Tran
 HEADER_PATHMAP  = '/usr/local/tranquil/include/Tranquil/%-1d/%f'
 HEADERS_OUT     = [STUB_H_OUTPATH] + HEADERS.pathmap(HEADER_PATHMAP)
 
-LEXER_SOURCE    = "Source/lex.rl"
-PARSER_SOURCE   = "Source/parse.y"
+LEXER_SOURCE    = "Source/Tranquil/lex.rl"
+PARSER_SOURCE   = "Source/Tranquil/parse.y"
 
 ARC_FILES = ['Source/Tranquil/Runtime/TQWeak.m']
 
@@ -113,8 +113,8 @@ file LEXER_OUTPATH => LEXER_SOURCE do |f|
 end
 file PARSER_OUTPATH => PARSER_SOURCE do |f|
     sh "#{LEMON} #{PARSER_SOURCE}"
-    sh "mv Source/parse.c #{PARSER_OUTPATH}"
-    sh "mv Source/parse.h #{PARSER_H_OUTPATH}"
+    sh "mv Source/Tranquil/parse.c #{PARSER_OUTPATH}"
+    sh "mv Source/Tranquil/parse.h #{PARSER_H_OUTPATH}"
 end
 
 file STUB_OUTPATH => STUB_SCRIPT do |f|

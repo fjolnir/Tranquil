@@ -96,7 +96,7 @@ main := |*
     ","                              => { EmitToken(COMMA);                             };
     "`" newline                      => { EmitToken(BACKTICKNL);                        };
     "`"                              => { EmitToken(BACKTICK);                          };
-    ";"                              => { };
+    ";"                              => { EmitToken(SEMICOLON);                         };
     "="                              => { EmitToken(ASSIGN);                            };
     "+"                              => { EmitToken(PLUS);                              };
     "-"                              => { EmitToken(MINUS);                             };
@@ -110,6 +110,8 @@ main := |*
     "#"                              => { EmitToken(HASH);                              };
     "|"                              => { EmitToken(PIPE);                              };
     "^"                              => { EmitToken(CARET);                             };
+    "?"                              => { EmitToken(TERNIF);                            };
+    "!"                              => { EmitToken(TERNELSE);                          };
     "="                              => { EmitToken(ASSIGN);                            };
     "=="                             => { EmitToken(EQUAL);                             };
     "~="                             => { EmitToken(INEQUAL);                           };
@@ -155,10 +157,10 @@ main := |*
 
 
 # Identifiers
-    identifier %{temp1 = p;} newline => { te = temp1; EmitStringToken(IDENTNL, 0, 1);   };
+    identifier %{temp1 = p;} newline => { te = temp1; EmitStringToken(IDENTNL, 0, 0);   };
     identifier                       => { EmitStringToken(IDENT,   0, 0);               };
 
-    constant   %{temp1 = p;} newline => { te = temp1; EmitStringToken(CONSTNL, 0, 1);   };
+    constant   %{temp1 = p;} newline => { te = temp1; EmitStringToken(CONSTNL, 0, 0);   };
     constant                         => { EmitStringToken(CONST,   0, 0);               };
 
 # Literals
@@ -191,7 +193,7 @@ main := |*
 
 #include "parse.mm"
 
-TQNode *TQParseString(NSString *str)
+extern "C" TQNode *TQParseString(NSString *str)
 {
     if(![str hasSuffix:@"\n"])
         str = [str stringByAppendingString:@"\n"];
@@ -220,6 +222,5 @@ TQNode *TQParseString(NSString *str)
 
     EmitToken(0); // EOF
     ParseFree(parser, free);
-    [parserState.root release];
-    return 0;
+    return [parserState.root autorelease];
 }
