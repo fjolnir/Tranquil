@@ -54,7 +54,16 @@ static NSString *_prepareConstName(NSString *name)
     if(frameworkRange.location != NSNotFound)
         frameworksPath = [[aPath substringToIndex:NSMaxRange(frameworkRange)] stringByDeletingLastPathComponent];
 
-    const char *args[] = { "-x", "objective-c", frameworksPath ? [[@"-F" stringByAppendingString:frameworksPath] UTF8String] : nil  };
+    // We create a temp PCH header so that future compiles go faster (TODO: Make the generated tree NSCoding compliant so we can just serialize the ready made hierarchy)
+    if(![aPath isAbsolutePath])
+        aPath = [[[NSFileManager defaultManager] currentDirectoryPath] stringByAppendingPathComponent:aPath];
+    NSString *tempPath = [NSString stringWithFormat:@"/tmp/tranquil_pch/%@.pch", [aPath stringByDeletingPathExtension]];
+    if([[NSFileManager defaultManager] fileExistsAtPath:tempPath])
+        return [self parsePCH:tempPath];
+    [[NSFileManager defaultManager] createDirectoryAtPath:[tempPath stringByDeletingLastPathComponent]
+    withIntermediateDirectories:YES attributes:nil error:nil];
+    const char *args[] = { "-x", "objective-c", frameworksPath ? [[@"-F" stringByAppendingString:frameworksPath] UTF8String] : nil };
+
     CXTranslationUnit translationUnit = clang_parseTranslationUnit(_index, [aPath fileSystemRepresentation], args, frameworksPath ? 3 : 2, NULL, 0,
                                                                    CXTranslationUnit_DetailedPreprocessingRecord|CXTranslationUnit_SkipFunctionBodies);
     if (!translationUnit) {
@@ -62,6 +71,10 @@ static NSString *_prepareConstName(NSString *name)
         return nil;
     }
     [self _parseTranslationUnit:translationUnit];
+
+    // Cache to disk
+    clang_saveTranslationUnit(translationUnit, [tempPath fileSystemRepresentation], CXSaveTranslationUnit_None);
+
     clang_disposeTranslationUnit(translationUnit);
     return TQValid;
 }
