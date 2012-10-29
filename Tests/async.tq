@@ -4,15 +4,17 @@ shouldStop = no
 a = async {
     until shouldStop {
         (NSDate date timeIntervalSince1970 % 10000000) print
-        Usleep(50000)
+        Sleep(1)
     }
     ^123
 }
 
+"a is: «a description»" print
 whenFinished {
     "a is: «a»" print
 }
 
-Usleep(500000)
+Sleep(3)
 shouldStop = yes
 wait
+Sleep(1) \ Allow the whenFinished block to execute

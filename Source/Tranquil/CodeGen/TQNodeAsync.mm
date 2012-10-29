@@ -7,6 +7,7 @@
 #import "TQNodeCustom.h"
 #import "TQNodeArgument.h"
 #import "TQNodeVariable.h"
+#import "TQNodeMessage.h"
 
 using namespace llvm;
 
@@ -49,36 +50,21 @@ using namespace llvm;
     return [NSString stringWithFormat:@"<async: %@>", _expression];
 }
 
-- (llvm::Value *)_generateDispatchBlockInProgram:(TQProgram *)aProgram
-                                           block:(TQNodeBlock *)aBlock
-                                            root:(TQNodeRootBlock *)aRoot
-                                           error:(NSError **)aoErr
+- (llvm::Value *)_generateDispatchBlockWithPromise:(llvm::Value *)aPromise
+                                         inProgram:(TQProgram *)aProgram
+                                             block:(TQNodeBlock *)aBlock
+                                              root:(TQNodeRootBlock *)aRoot
+                                             error:(NSError **)aoErr
 {
+    TQNodeVariable *promiseVar = [TQNodeVariable tempVar];
+    [promiseVar store:aPromise inProgram:aProgram block:aBlock root:aRoot error:aoErr];
+
     [aBlock createDispatchGroupInProgram:aProgram];
 
-    TQNodeBlock *block = (TQNodeBlock *)_expression;
-    TQNodeCall *callToPrepare = NULL;
-    // In case of an assignment to a subscript, we need to evaluate the subscript synchronously
-    if([_expression isKindOfClass:[TQNodeOperator class]]) {
-        TQNodeOperator *op = (TQNodeOperator *)_expression;
-        if(op.type == kTQOperatorAssign) {
-            if([op.left isKindOfClass:[TQNodeOperator class]] && [(TQNodeOperator *)op.left type] == kTQOperatorSubscript) {
-                TQNodeOperator *subscr = (TQNodeOperator *)op.left;
-                Value *subscriptVal = [subscr.right generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-                TQNodeVariable *tempVar = [TQNodeVariable tempVar];
-                [tempVar store:subscriptVal inProgram:aProgram block:aBlock root:aRoot error:aoErr];
-                subscr.right = tempVar;
-            }
-            if([op.right isKindOfClass:[TQNodeCall class]])
-                callToPrepare = (TQNodeCall *)op.right;
-        }
-    }
-    if([_expression isKindOfClass:[TQNodeCall class]])
-        callToPrepare = (TQNodeCall *)_expression;
-
-    if(callToPrepare) {
+    if([_expression isKindOfClass:[TQNodeCall class]]) {
+        TQNodeCall *callToPrepare = (TQNodeCall *)_expression;
         // In the case of a block call we must synchronously evaluate the parameters before
-        // asynchronously dispatching the block itself
+        // asynchronously dispatching the call itself
         NSMutableArray *origArgs = [callToPrepare.arguments copy];
         callToPrepare.arguments = [NSMutableArray array];
         for(TQNodeArgument *arg in origArgs) {
@@ -93,30 +79,42 @@ using namespace llvm;
         [origArgs release];
     }
 
-    if(![_expression isKindOfClass:[TQNodeBlock class]]) {
-        block = [TQNodeBlock node];
-        block.lineNumber = self.lineNumber;
-        [block.statements addObject:_expression];
-    } else if([block.arguments count] != 1) {
-        // Ensure the block is called with nil args
-        block = [TQNodeBlock node];
-        block.lineNumber = self.lineNumber;
-        [block.statements addObject:[TQNodeCall nodeWithCallee:_expression]];
-    }
+    if([_expression isKindOfClass:[TQNodeBlock class]])
+        _expression = [TQNodeCall nodeWithCallee:_expression];
+
+    TQNodeBlock *block = [TQNodeBlock node];
     block.retType = @"v";
+    block.lineNumber = self.lineNumber;
+    TQNodeMessage *resolver = [TQNodeMessage nodeWithReceiver:promiseVar];
+    [[resolver arguments] addObject:[TQNodeArgument nodeWithPassedNode:_expression selectorPart:@"fulfillWith"]];
+    [block.statements addObject:resolver];
+
     return [block generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
 }
 
+- (llvm::Function *)_dispatchFunctionWithProgram:(TQProgram *)aProgram
+{
+    return aProgram.dispatch_group_async;
+}
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
-    Value *compiledBlock = [self _generateDispatchBlockInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-    Value *call = aBlock.builder->CreateCall3(aProgram.dispatch_group_async, aBlock.dispatchGroup,
+    Module *mod = aProgram.llModule;
+    Value *pKls = mod->getOrInsertGlobal("OBJC_CLASS_$_TQPromise", aProgram.llInt8Ty);
+    Value *pSel = aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQPromiseSel", aProgram.llInt8PtrTy));
+
+    Value *promise = aBlock.builder->CreateCall2(aProgram.objc_msgSend, pKls, pSel);
+    Value *compiledBlock = [self _generateDispatchBlockWithPromise:promise
+                                                         inProgram:aProgram
+                                                             block:aBlock
+                                                              root:aRoot
+                                                             error:aoErr];
+    Value *call = aBlock.builder->CreateCall3([self _dispatchFunctionWithProgram:aProgram], aBlock.dispatchGroup,
                                               aBlock.builder->CreateLoad(aProgram.globalQueue), compiledBlock);
     [self _attachDebugInformationToInstruction:call inProgram:aProgram block:aBlock root:aRoot];
-    return NULL;
+    return promise;
 }
 @end
 
@@ -170,15 +168,20 @@ using namespace llvm;
     return [NSString stringWithFormat:@"<whenFinished: %@>", self.expression];
 }
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
-                                 block:(TQNodeBlock *)aBlock
-                                  root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+- (llvm::Function *)_dispatchFunctionWithProgram:(TQProgram *)aProgram
 {
-    Value *compiledBlock = [self _generateDispatchBlockInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-    Value *call = aBlock.builder->CreateCall3(aProgram.dispatch_group_notify, aBlock.dispatchGroup,
-                                              aBlock.builder->CreateLoad(aProgram.globalQueue), compiledBlock);
-    [self _attachDebugInformationToInstruction:call inProgram:aProgram block:aBlock root:aRoot];
-    return NULL;
+    return aProgram.dispatch_group_notify;
 }
+
+//- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+//                                 block:(TQNodeBlock *)aBlock
+//                                  root:(TQNodeRootBlock *)aRoot
+//                                 error:(NSError **)aoErr
+//{
+//    Value *compiledBlock = [self _generateDispatchBlockInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+//    Value *call = aBlock.builder->CreateCall3(aProgram.dispatch_group_notify, aBlock.dispatchGroup,
+//                                              aBlock.builder->CreateLoad(aProgram.globalQueue), compiledBlock);
+//    [self _attachDebugInformationToInstruction:call inProgram:aProgram block:aBlock root:aRoot];
+//    return NULL;
+//}
 @end

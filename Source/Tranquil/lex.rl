@@ -152,7 +152,6 @@ main := |*
     "<="                             => { EmitToken(LEQUAL);     ExprBeg();                               };
     ">="                             => { EmitToken(GEQUAL);     ExprBeg();                               };
     "=>"                             => { EmitToken(DICTSEP);    ExprBeg();                               };
-    
 
 # Message selectors
     selector                         => { EmitStringToken(SELPART, 0, 1); ExprBeg();                      };

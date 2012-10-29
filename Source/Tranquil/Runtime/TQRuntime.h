@@ -147,6 +147,7 @@ extern SEL TQMapWithObjectsAndKeysSel;
 extern SEL TQRegexWithPatSel;
 extern SEL TQMoveToHeapSel;
 extern SEL TQWeakSel;
+extern SEL TQPromiseSel;
 
 extern Class TQNumberClass;
 

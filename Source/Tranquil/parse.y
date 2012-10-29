@@ -21,7 +21,6 @@ statements(SS) ::= statement(S).                        { SS = [NSMutableArray a
 statement(S) ::= exprNl(E).                             { S = E;                                                                      }
 statement(S) ::= cond(C).                               { S = C;                                                                      }
 statement(S) ::= loop(L).                               { S = L;                                                                      }
-statement(S) ::= async(A).                              { S = A;                                                                      }
 statement(S) ::= waitNl(W).                             { S = W;                                                                      }
 statement(S) ::= whenFinished(W).                       { S = W;                                                                      }
 statement(S) ::= lock(L).                               { S = L;                                                                      }
@@ -53,11 +52,13 @@ noAsgnExprNoNl(E) ::= opNoNl(O).                        { E = O;                
 noAsgnExprNoNl(E) ::= cascadeNoNl(C).                   { E = C;                                                                      }
 noAsgnExprNoNl(E) ::= ternOpNoNl(O).                    { E = O;                                                                      }
 noAsgnExprNoNl(E) ::= simpleExprNoNl(T).                { E = T;                                                                      }
+noAsgnExprNoNl(E) ::= asyncNoNl(O).                     { E = O;                                                                      }
 noAsgnExprNl(E) ::= kwdMsgNl(M).                        { E = M;                                                                      }
 noAsgnExprNl(E) ::= opNl(O).                            { E = O;                                                                      }
 noAsgnExprNl(E) ::= cascadeNl(C).                       { E = C;                                                                      }
 noAsgnExprNl(E) ::= ternOpNl(O).                        { E = O;                                                                      }
 noAsgnExprNl(E) ::= simpleExprNl(T).                    { E = T;                                                                      }
+noAsgnExprNl(E) ::= asyncNl(O).                         { E = O;                                                                      }
 
 parenExprNoNl(PE) ::= LPAREN expr(E) RPAREN.            { PE = E;                                                                     }
 parenExprNl(PE)   ::= LPAREN expr(E) RPARENNL.          { PE = E;                                                                     }
@@ -216,7 +217,9 @@ skipNl(S)    ::= SKIPNL.                                { S = [TQNodeSkip node];
 // Concurrency Primitives -------------------------------------------------------------------------------------------------------------
 //
 
-async(A) ::= ASYNC simpleExprNl(B).                     { A = [TQNodeAsync nodeWithExpression:B];                                     }
+asyncNoNl(A) ::= ASYNC simpleExprNoNl(B).               { A = [TQNodeAsync nodeWithExpression:B];                                     }
+asyncNl(A) ::= ASYNC simpleExprNl(B).                   { A = [TQNodeAsync nodeWithExpression:B];                                     }
+
 waitNoNl(A) ::= WAIT.                                   { A = [TQNodeWait node];                                                      }
 waitNl(A)   ::= WAITNL.                                 { A = [TQNodeWait node];                                                      }
 whenFinished(A) ::= WHENFINISHED simpleExprNl(B).       { A = [TQNodeWhenFinished nodeWithExpression:B];                              }

@@ -141,7 +141,7 @@
 	                       
     \ Concurrency
     async ..expression..        \ Executes `expression` asynchronously
-    var = async ..expression..  \ Assigns the result of `expression` to `var` when the operation is complete    
+    var = async ..expression..  \ Assigns the `var` to a "promise" which will point to the result of `expression` when it has finished running.
     wait                        \ Waits for any asynchronous operations created in the current block to finish
     whenFinished ..block..      \ Executes `block` when all asynchronous operations created in the current block are finished, without blocking. (`block` is executed on the program's main thread)
     lock ..expression.. { \ Acquires a lock on the result of `expression`. If one has already been taken, it waits.
@@ -337,6 +337,21 @@ The following example shows a block that spawns a few operations and returns imm
 
     var = nil \ If the variable already exists in this scope, it's value is unchanged 
     async { var = ..expression.. }()
+
+### Promises
+
+A promise is an object that forwards all messages to the object that it is resolved to; and throws an exception if one attempts to send a message to it before it is resolved.
+
+    myPromise = async {
+        usleep(500)
+        ^123
+    }
+    myPromise method \ myPromise still has not been resolved => crash
+    Usleep(1000)
+    myPromise method \ The block has finished executing at this point => message sent successfully
+    
+    \ (The correct way of doing the above would be to either send `isFulfilled` or `waitTillFulfilled` to the promise before attempting to use it)
+
 
 ## Examples
 
