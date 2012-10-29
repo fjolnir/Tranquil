@@ -484,11 +484,13 @@ literalNoNl(L) ::= NUMBER(T).                           { L = [TQNodeNumber node
 literalNoNl(L) ::= stringNoNl(S).                       { L = S;                                                                      }
 literalNoNl(L) ::= arrayNoNl(A).                        { L = A;                                                                      }
 literalNoNl(L) ::= dictNoNl(D).                         { L = D;                                                                      }
+literalNoNl(L) ::= regexNoNl(D).                        { L = D;                                                                      }
 
 literalNl(L)   ::= NUMBERNL(T).                         { L = [TQNodeNumber nodeWithDouble:[[T value] doubleValue]];                  }
 literalNl(L)   ::= stringNl(S).                         { L = S;                                                                      }
 literalNl(L)   ::= arrayNl(A).                          { L = A;                                                                      }
 literalNl(L)   ::= dictNl(D).                           { L = D;                                                                      }
+literalNl(L)   ::= regexNl(D).                          { L = D;                                                                      }
 
 
 // Arrays
@@ -523,6 +525,9 @@ stringNl(S)   ::= LSTR(L) inStr(M) RSTRNL(R).           { S = [TQNodeString node
 inStr(M) ::= inStr(O) MSTR(S) expr(E).                  { M = O; [M addObject:[S value]]; [M addObject:E];                            }
 inStr(M) ::= expr(E).                                   { M = [NSMutableArray arrayWithObject:E];                                     }
 
+// Regular expressions
+regexNoNl(R) ::= REGEX(T).                             { R = [TQNodeRegex nodeWithPattern:[T value]];                                }
+regexNl(R)   ::= REGEXNL(T).                           { R = [TQNodeRegex nodeWithPattern:[T value]];                                }
 
 //
 // Variables, Identifiers & Built-in Constants

@@ -7,6 +7,7 @@
 
 typedef struct {
     int currentLine;
+    BOOL atBeginningOfExpr;
     TQNodeRootBlock *root;
 } TQParserState;
 
@@ -17,9 +18,10 @@ typedef struct {
 #define _EmitToken(tokenId, val) do { \
     /*NSLog(@"emitting %d = %@", tokenId, val);*/ \
     Parse(parser, tokenId, [TQToken withId:tokenId value:val], &parserState); \
+    parserState.atBeginningOfExpr = NO; \
 } while(0);
 
-#define EmitToken(tokenId) EmitStringToken(tokenId, 0, 0)
+#define EmitToken(tokenId) EmitStringToken((tokenId), 0, 0)
 
 #define EmitStringToken(tokenId, lTrim, rTrim) _EmitToken(tokenId, NSStr(lTrim, rTrim))
 
@@ -40,6 +42,7 @@ typedef struct {
     if(*p == '}') --p; \
 } while(0)
 
+#define ExprBeg() parserState.atBeginningOfExpr = YES
 
 @interface TQToken : NSObject
 @property(readwrite, assign) int id;
@@ -86,84 +89,102 @@ typedef struct {
     mStr        = rGuillmt strCont* lGuillmt;
     rStr        = rGuillmt strCont* '"';
     selector    = (ualnum | "+" | "-" | "*" | "/" | "^" | "=" | "~" | "<" | ">" | "[" | "]" | "_")+ ":";
-    #(constant | identifier | "+" | "-" | "*" | "/" | "^" | "==" | "~=" | "<=" | ">=" | "=" | "[" | "]")? ':';
 
+    regexCont   = (ualnum | ascii) - '/';
+
+regex := |*
+    regexCont* "/" [im]* term        => { --ts; EmitToken(REGEXNL); BacktrackTerm(); fret;               };
+    regexCont* "/" [im]*             => { --ts; EmitToken(REGEX);                    fret;               };
+*|;
 
 main := |*
 # Symbols
-    "{"                              => { EmitToken(LBRACE);                                              };
-    "}" term                         => { EmitToken(RBRACENL);   BacktrackTerm();                         };
+ # Forward slash is context sensitive, at the beginning of an expression it means the start of a regular expression
+    "/"                              => {
+        if(!parserState.atBeginningOfExpr) {
+            if(p != eof && *(p+1) == '=') {
+                EmitToken(ASSIGNDIV);
+                p += 2;
+            } else
+                EmitToken(FSLASH);
+            ExprBeg();
+        } else
+            fcall regex;
+    };
+    "{"                              => { EmitToken(LBRACE);     ExprBeg();                               };
+    "}" term                         => { EmitToken(RBRACENL);   ExprBeg(); BacktrackTerm();              };
     "}"                              => { EmitToken(RBRACE);                                              };
-    "["                              => { EmitToken(LBRACKET);                                            };
-    "]" term                         => { EmitToken(RBRACKETNL); BacktrackTerm();                         };
+    "["                              => { EmitToken(LBRACKET);   ExprBeg();                               };
+    "]" term                         => { EmitToken(RBRACKETNL); ExprBeg(); BacktrackTerm();              };
     "]"                              => { EmitToken(RBRACKET);                                            };
-    "("                              => { EmitToken(LPAREN);                                              };
-    ")" term                         => { EmitToken(RPARENNL);   BacktrackTerm();                         };
+    "("                              => { EmitToken(LPAREN);     ExprBeg();                               };
+    ")" term                         => { EmitToken(RPARENNL);   ExprBeg(); BacktrackTerm();              };
     ")"                              => { EmitToken(RPAREN);                                              };
-    ","                              => { EmitToken(COMMA);                                               };
+    ","                              => { EmitToken(COMMA);      ExprBeg();                               };
     "`" term                         => { EmitToken(BACKTICKNL); BacktrackTerm();                         };
     "`"                              => { EmitToken(BACKTICK);                                            };
     ";"                              => { EmitToken(SEMICOLON);                                           };
-    "="                              => { EmitToken(ASSIGN);                                              };
-    "+="                             => { EmitToken(ASSIGNADD);                                           };
-    "-="                             => { EmitToken(ASSIGNSUB);                                           };
-    "*="                             => { EmitToken(ASSIGNMUL);                                           };
-    "/="                             => { EmitToken(ASSIGNDIV);                                           };
-    "||="                            => { EmitToken(ASSIGNOR);                                            };
-    "+"                              => { EmitToken(PLUS);                                                };
-    "-"                              => { EmitToken(MINUS);                                               };
+    "="                              => { EmitToken(ASSIGN);     ExprBeg();                               };
+    "+="                             => { EmitToken(ASSIGNADD);  ExprBeg();                               };
+    "-="                             => { EmitToken(ASSIGNSUB);  ExprBeg();                               };
+    "*="                             => { EmitToken(ASSIGNMUL);  ExprBeg();                               };
+#    "/="                             => { EmitToken(ASSIGNDIV);  ExprBeg();                               };
+    "||="                            => { EmitToken(ASSIGNOR);   ExprBeg();                               };
+    "+"                              => { EmitToken(PLUS);       ExprBeg();                               };
+    "-"                              => { EmitToken(MINUS);      ExprBeg();                               };
     "--"                             => { EmitToken(DECR);                                                };
-    "--" term                        => { EmitToken(DECRNL);     BacktrackTerm();                         };
+    "--" term                        => { EmitToken(DECRNL);     ExprBeg();BacktrackTerm();               };
     "++"                             => { EmitToken(INCR);                                                };
-    "++" term                        => { EmitToken(INCRNL);     BacktrackTerm();                         };
-    "*"                              => { EmitToken(ASTERISK);                                            };
-    "/"                              => { EmitToken(FSLASH);                                              };
-    "%"                              => { EmitToken(PERCENT);                                             };
-    "~"                              => { EmitToken(TILDE);                                               };
+    "++" term                        => { EmitToken(INCRNL);     ExprBeg();BacktrackTerm();               };
+    "*"                              => { EmitToken(ASTERISK);   ExprBeg();                               };
+    "%"                              => { EmitToken(PERCENT);    ExprBeg();                               };
+    "~"                              => { EmitToken(TILDE);      ExprBeg();                               };
     "#"                              => { EmitToken(HASH);                                                };
-    "|"                              => { EmitToken(PIPE);                                                };
-    "^"                              => { EmitToken(CARET);                                               };
-    "?"                              => { EmitToken(TERNIF);                                              };
-    "!"                              => { EmitToken(TERNELSE);                                            };
-    "=="                             => { EmitToken(EQUAL);                                               };
-    "~="                             => { EmitToken(INEQUAL);                                             };
-    "<"                              => { EmitToken(LESSER);                                              };
-    ">"                              => { EmitToken(GREATER);                                             };
-    "<="                             => { EmitToken(LEQUAL);                                              };
-    ">="                             => { EmitToken(GEQUAL);                                              };
-    "=>"                             => { EmitToken(DICTSEP);                                             };
+    "|"                              => { EmitToken(PIPE);       ExprBeg();                               };
+    "^"                              => { EmitToken(CARET);      ExprBeg();                               };
+    "?"                              => { EmitToken(TERNIF);     ExprBeg();                               };
+    "!"                              => { EmitToken(TERNELSE);   ExprBeg();                               };
+    "=="                             => { EmitToken(EQUAL);      ExprBeg();                               };
+    "!="                             => { EmitToken(INEQUAL);    ExprBeg();                               };
+    "~="                             => { EmitToken(INEQUAL);    ExprBeg();                               };
+    "<"                              => { EmitToken(LESSER);     ExprBeg();                               };
+    ">"                              => { EmitToken(GREATER);    ExprBeg();                               };
+    "<="                             => { EmitToken(LEQUAL);     ExprBeg();                               };
+    ">="                             => { EmitToken(GEQUAL);     ExprBeg();                               };
+    "=>"                             => { EmitToken(DICTSEP);    ExprBeg();                               };
+    
 
 # Message selectors
-    selector                         => { EmitStringToken(SELPART, 0, 1);                                 };
+    selector                         => { EmitStringToken(SELPART, 0, 1); ExprBeg();                      };
 
 # Keywords
-    "if"      term?                  => { EmitToken(IF); BacktrackTerm();                                 };
-    "unless"  term?                  => { EmitToken(UNLESS); BacktrackTerm();                             };
-    "then"    term?                  => { EmitToken(THEN); BacktrackTerm();                               };
-    "else"    term?                  => { EmitToken(ELSE); BacktrackTerm();                               };
-    "and"|"&&"term?                  => { EmitToken(AND); BacktrackTerm();                                };
-    "or"|"||" term?                  => { EmitToken(OR); BacktrackTerm();                                 };
-    "while"   term?                  => { EmitToken(WHILE); BacktrackTerm();                              };
-    "until"   term?                  => { EmitToken(UNTIL); BacktrackTerm();                              };
-    "import"  term?                  => { EmitToken(IMPORT); BacktrackTerm();                             };
-    "async"   term?                  => { EmitToken(ASYNC); BacktrackTerm();                              };
-    "wait"    term                   => { EmitToken(WAITNL); BacktrackTerm();                             };
+    "if"      term?                  => { EmitToken(IF);        ExprBeg(); BacktrackTerm();               };
+    "unless"  term?                  => { EmitToken(UNLESS);    ExprBeg(); BacktrackTerm();               };
+    "then"    term?                  => { EmitToken(THEN);      ExprBeg(); BacktrackTerm();               };
+    "else"    term?                  => { EmitToken(ELSE);      ExprBeg(); BacktrackTerm();               };
+    "and"|"&&"term?                  => { EmitToken(AND);       ExprBeg(); BacktrackTerm();               };
+    "or"|"||" term?                  => { EmitToken(OR);        ExprBeg(); BacktrackTerm();               };
+    "while"   term?                  => { EmitToken(WHILE);     ExprBeg(); BacktrackTerm();               };
+    "until"   term?                  => { EmitToken(UNTIL);     ExprBeg(); BacktrackTerm();               };
+    "import"  term?                  => { EmitToken(IMPORT);    ExprBeg(); BacktrackTerm();               };
+    "async"   term?                  => { EmitToken(ASYNC);     ExprBeg(); BacktrackTerm();               };
+    "wait"    term                   => { EmitToken(WAITNL);    ExprBeg(); BacktrackTerm();               };
     "wait"                           => { EmitToken(WAIT);                                                };
     "lock"                           => { EmitToken(LOCK);                                                };
     "whenFinished"                   => { EmitToken(WHENFINISHED);                                        };
     "collect"                        => { EmitToken(COLLECT);                                             };
-    "break"   term                   => { EmitToken(BREAKNL); BacktrackTerm();                            };
+    "break"   term                   => { EmitToken(BREAKNL);   ExprBeg(); BacktrackTerm();               };
     "break"                          => { EmitToken(BREAK);                                               };
-    "skip"    term                   => { EmitToken(SKIPNL);  BacktrackTerm();                            };
+    "skip"    term                   => { EmitToken(SKIPNL);    ExprBeg(); BacktrackTerm();               };
     "skip"                           => { EmitToken(SKIP);                                                };
-    "self"    term                   => { EmitToken(SELFNL); BacktrackTerm();                             };
-    "super"   term                   => { EmitToken(SUPERNL); BacktrackTerm();                            };
-    "..."     term                   => { EmitToken(VAARGNL); BacktrackTerm();                            };
-    "nil"     term                   => { EmitToken(NILNL); BacktrackTerm();                              };
-    "valid"   term                   => { EmitToken(VALIDNL); BacktrackTerm();                            };
-    "yes"     term                   => { EmitToken(YESTOKNL); BacktrackTerm();                           };
-    "no"      term                   => { EmitToken(NOTOKNL); BacktrackTerm();                            };
-    "nothing" term                   => { EmitToken(NOTHINGNL); BacktrackTerm();                          };
+    "self"    term                   => { EmitToken(SELFNL);    ExprBeg(); BacktrackTerm();               };
+    "super"   term                   => { EmitToken(SUPERNL);   ExprBeg(); BacktrackTerm();               };
+    "..."     term                   => { EmitToken(VAARGNL);   ExprBeg(); BacktrackTerm();               };
+    "nil"     term                   => { EmitToken(NILNL);     ExprBeg(); BacktrackTerm();               };
+    "valid"   term                   => { EmitToken(VALIDNL);   ExprBeg(); BacktrackTerm();               };
+    "yes"     term                   => { EmitToken(YESTOKNL);  ExprBeg(); BacktrackTerm();               };
+    "no"      term                   => { EmitToken(NOTOKNL);   ExprBeg(); BacktrackTerm();               };
+    "nothing" term                   => { EmitToken(NOTHINGNL); ExprBeg(); BacktrackTerm();               };
     "self"                           => { EmitToken(SELF);                                                };
     "super"                          => { EmitToken(SUPER);                                               };
     "..."                            => { EmitToken(VAARG);                                               };
@@ -175,18 +196,18 @@ main := |*
 
 
 # Identifiers
-    identifier %{temp1 = p;} term    => { te = temp1; EmitStringToken(IDENTNL, 0, 0); BacktrackTerm();    };
+    identifier %{temp1 = p;} term    => { te = temp1; EmitStringToken(IDENTNL, 0, 0); ExprBeg(); BacktrackTerm(); };
     identifier                       => { EmitStringToken(IDENT,   0, 0);                                 };
 
-    constant   %{temp1 = p;} term    => { te = temp1; EmitStringToken(CONSTNL, 0, 0); BacktrackTerm();    };
+    constant   %{temp1 = p;} term    => { te = temp1; EmitStringToken(CONSTNL, 0, 0); ExprBeg(); BacktrackTerm(); };
     constant                         => { EmitStringToken(CONST,   0, 0);                                 };
 
 # Literals
-    int   term                       => { EmitIntToken(NUMBERNL, 10, 0); BacktrackTerm();                 };
-    float term                       => { EmitFloatToken(NUMBERNL);      BacktrackTerm();                 };
-    bin   term                       => { EmitIntToken(NUMBERNL, 2,  2); BacktrackTerm();                 };
-    oct   term                       => { EmitIntToken(NUMBERNL, 8,  2); BacktrackTerm();                 };
-    hex   term                       => { EmitIntToken(NUMBERNL, 16, 2); BacktrackTerm();                 };
+    int   term                       => { EmitIntToken(NUMBERNL, 10, 0); ExprBeg(); BacktrackTerm();      };
+    float term                       => { EmitFloatToken(NUMBERNL);      ExprBeg(); BacktrackTerm();      };
+    bin   term                       => { EmitIntToken(NUMBERNL, 2,  2); ExprBeg(); BacktrackTerm();      };
+    oct   term                       => { EmitIntToken(NUMBERNL, 8,  2); ExprBeg(); BacktrackTerm();      };
+    hex   term                       => { EmitIntToken(NUMBERNL, 16, 2); ExprBeg(); BacktrackTerm();      };
 
     int                              => { EmitIntToken(NUMBER, 10, 0);                                    };
     float                            => { EmitFloatToken(NUMBER);                                         };
@@ -194,14 +215,14 @@ main := |*
     oct                              => { EmitIntToken(NUMBER, 8,  2);                                    };
     hex                              => { EmitIntToken(NUMBER, 16, 2);                                    };
 
-    constStr %{temp1 = p;} term      => { te = temp1; EmitStringToken(CONSTSTRNL,  1, 0); BacktrackTerm();};
+    constStr %{temp1 = p;} term      => { te = temp1; EmitStringToken(CONSTSTRNL,  1, 0); ExprBeg(); BacktrackTerm(); };
     constStr                         => { EmitStringToken(CONSTSTR,    1, 0);                             };
 
-    lStr                             => { EmitStringToken(LSTR,   1, 2);                                  };
-    mStr                             => { EmitStringToken(MSTR,   2, 2);                                  };
-    rStr   %{temp1 = p;} term        => { te = temp1; EmitStringToken(RSTRNL, 2, 1); BacktrackTerm();     };
+    lStr                             => { EmitStringToken(LSTR,   1, 2); ExprBeg();                       };
+    mStr                             => { EmitStringToken(MSTR,   2, 2); ExprBeg();                       };
+    rStr   %{temp1 = p;} term        => { te = temp1; EmitStringToken(RSTRNL, 2, 1); ExprBeg(); BacktrackTerm(); };
     rStr                             => { EmitStringToken(RSTR,   2, 1);                                  };
-    string %{temp1 = p;} term        => { te = temp1; EmitStringToken(STRNL,  1, 1); BacktrackTerm();     };
+    string %{temp1 = p;} term        => { te = temp1; EmitStringToken(STRNL,  1, 1); ExprBeg(); BacktrackTerm(); };
     string                           => { EmitStringToken(STR,    1, 1);                                  };
 
     nl;
@@ -226,13 +247,15 @@ extern "C" TQNode *TQParseString(NSString *str)
     unsigned char *p = (unsigned char *)[str UTF8String];
     unsigned char *pe = p + strlen((char*)p);
     unsigned char *eof = pe;
+    int top;
+    int stack[1024];
 
     unsigned char *temp1, *temp2;
 
     // Parser setup
     void *parser = ParseAlloc(malloc);
     TQParserState parserState = {
-        0, [TQNodeRootBlock new]
+        0, YES, [TQNodeRootBlock new]
     };
 
     %% write init;

@@ -1,10 +1,8 @@
-if /(foo|bar)/ matches:"foobar" {
-    "Matches!" print
-}
+str = "foobar"
 
-"foobar" match: /(foo|bar)/  usingBlock: { str, range |
-    "«str» -- «range»" print
-    range each: { i |
-        str[i] print
-    }
+"Matches!" print if /(foo|bar)/ matches: str
+
+str match: /(foo|bar)/ usingBlock: { match, range |
+    "«match» -- «range»" print
+    range each: `i| str[i] print`
 }
