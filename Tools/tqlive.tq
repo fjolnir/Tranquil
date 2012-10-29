@@ -7,7 +7,7 @@ error = { msg |
     Exit(1)
 }
 
-`error("No input provided")` if: ... count == 0
+error("No input provided") if ... count == 0
 scriptPath   = ...[0]
 task         = nil
 lastModified = nil
@@ -16,8 +16,8 @@ modificationDate = `(NSFileManager defaultManager attributesOfItemAtPath:scriptP
 doesExist        = `NSFileManager defaultManager fileExistsAtPath:scriptPath`
 
 execute = {
-   `error(scriptPath.." does not exist!")` unless: doesExist()
-   `"Reloading..." print`                  unless: task == nil
+   error(scriptPath + " does not exist!") unless doesExist()
+   "Reloading..." print                   unless task == nil
 
     lastModified = modificationDate()
     task terminate
@@ -32,6 +32,6 @@ execute = {
 }
 
 until forever {
-    execute if: (modificationDate() > lastModified) || lastModified == nil
+    execute() if (modificationDate() > lastModified) || lastModified == nil
     Usleep(500000)
 }

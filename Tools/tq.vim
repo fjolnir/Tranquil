@@ -1,6 +1,6 @@
 " Vim syntax file
 " Language:    Tranquil
-" Maintainer:  Fjölnir Ásgeirsson <fjolnir@asgeirsson.is
+" Maintainer:  Fjölnir Ásgeirsson <fjolnir@asgeirsson.is>
 
 " For version 5.x: Clear all syntax items
 " For version 6.x: Quit when a syntax file was already loaded
@@ -14,7 +14,7 @@ let s:cpo_save = &cpo
 set cpo&vim
 
 " some keywords and standard methods
-syn keyword tqKeyword if else unless while until import async wait whenFinished lock
+syn keyword tqKeyword if then else unless while until import async wait whenFinished lock
 syn keyword tqKeywordLiteral super self yes no nil
 
 " Constants
@@ -28,7 +28,7 @@ syn match stInstMethod    "^\s*-\s*"
 syn match stClassMethod   "^\s*+\s*"
 
 " Selector colon
-syn match tqMessageColon ":" 
+syn match tqMessageColon ":"
 
 syn match tqComment "\\.*"
 
