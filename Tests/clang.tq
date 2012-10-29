@@ -17,7 +17,7 @@ import "clang-c/Index"
         header    = Clang_parseTranslationUnit(self#idx, path, clangArgs, clangArgs count, nil, 0, clangOpts)
 
         if header == nil {
-            "Unable to parse #{headerPath}" print
+            "Unable to parse «headerPath»" print
             ^nil
         }
 
@@ -36,9 +36,8 @@ HeaderIndex parse: "/System/Library/Frameworks/Foundation.framework/Headers/Foun
     Clang_disposeString(name_)
     Clang_disposeString(kind_)
 
-    if name length == 0
-        ^CXChildVisit_Continue
-    "#{kind}: #{name}" print
+    ^CXChildVisit_Continue if name length == 0
+    "«kind»: «name»" print
 
     ^CXChildVisit_Continue
 }

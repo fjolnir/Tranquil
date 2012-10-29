@@ -1,3 +1,0 @@
-sum = (0 to: 1000000) reduce: `obj, accum=0 | obj+accum`
-
-"Sum: #{sum}" print

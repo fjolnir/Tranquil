@@ -1,3 +1,3 @@
 a = 123
 import "Tests/import2"
-"b: #{b}" print
+"b: «b»" print

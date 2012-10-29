@@ -3,7 +3,7 @@ import "AppKit"
 nsapp = NSApplication sharedApplication
 
 \ Create the menubar
-quitMenuItem = NSMenuItem new; setTitle: "Quit #{NSProcessInfo processInfo processName}";
+quitMenuItem = NSMenuItem new; setTitle: "Quit «NSProcessInfo processInfo processName»";
                               setAction: "terminate:";
                        setKeyEquivalent: "q";
                                    self

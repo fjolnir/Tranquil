@@ -1,10 +1,7 @@
 #!/usr/local/tranquil/bin/tranquil
 fib = { index, curr=0, succ=1 |
     num = curr + succ
-    if index > 2
-        ^fib(index - 1, succ, num)
-    else
-        ^num
+    ^index > 2 ? fib(index - 1, succ, num) ! num
 }
 
 fib(35) print

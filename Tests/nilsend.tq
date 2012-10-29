@@ -5,8 +5,7 @@
     }
 }
 
-"test: #{nil test} asdf" print
-"bar:  #{nil foobar}" print
+"test: «nil test» asdf" print
+"bar:  «nil foobar»" print
 
-if nil isNil
-    "Nil is Nil" print
+"Nil is Nil" print if nil isNil

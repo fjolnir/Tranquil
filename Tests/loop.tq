@@ -1,11 +1,8 @@
 a = 0
 until a > 100 {
-    if a++ == 1
-        skip
+    skip if a++ == 1
 
     a print
-    if a > 3
-        break
-    else
-        "Lesser than 4" print
+    break unless a < 4
+    "Lesser than 4" print
 }

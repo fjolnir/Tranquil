@@ -1,12 +1,11 @@
-max = `a, b | (a > b) ? a : b`
-min = `a, b | (a < b) ? a : b`
+max = `a, b | (a > b) ? a ! b`
+min = `a, b | (a < b) ? a ! b`
 
 #NSPointerArray {
     - fold: lambda {
         i = 0
         accum = lambda(self[i++])
-        until i >= self size
-            accum = lambda(self[i++], accum)
+        accum = lambda(self[i++], accum) until i >= self size
         ^accum
     }
 
@@ -40,16 +39,14 @@ min = `a, b | (a < b) ? a : b`
     - reverse {
         result = []
         i = self size
-        until --i == 0
-            result push: self[i]
+        result push: self[i] until --i == 0
         ^result
     }
 
     - filter:lambda {
         result = []
         self each: { elem |
-            if lambda(elem)
-                result push: elem
+            result push: elem if lambda(elem)
         }
         ^result
     }
@@ -57,8 +54,7 @@ min = `a, b | (a < b) ? a : b`
     - any:lambda {
         i = 0
         until i >= self size {
-            if lambda(self[i])
-                ^self[i]
+            ^self[i] if lambda(self[i])
         }
     }
 
@@ -66,18 +62,14 @@ min = `a, b | (a < b) ? a : b`
         a = []
         b = []
         self each: { elem |
-            if lambda(elem)
-                a push:elem
-            else
-                b push:elem
+            if lambda(elem) then a push:elem
+            else                 b push:elem
         }
         ^[a,b]
     }
 
     - zip:otherArray {
-        length = self size
-        if (otherArray size) > (self size)
-            length = otherArray size
+        length = max(self size, otherArray size)
         result = []
         i = -1
         until ++i >= length {

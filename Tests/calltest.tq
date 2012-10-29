@@ -1,5 +1,5 @@
 captureMePlease = "hey I was defined in the root block!"
-a = { arg | ^`"#{arg} — #{captureMePlease}"`() } \ Excuse this madness, it's not representative of code that should actually be written
+a = { arg | ^`"«arg» — «captureMePlease»"`() } \ Excuse this madness, it's not representative of code that should actually be written
 
 myBlock = a
 numAsStr = "Three Two One"

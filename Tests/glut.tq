@@ -23,7 +23,7 @@ GlutIdleFunc({
 })
 
 GlutKeyboardFunc({ key, x, y |
-   "#{key} pushed (Mouse at #{x}, #{y})" print
+   "«key» pushed (Mouse at «x», «y»)" print
 })
 
 lastPos = [0,0]
@@ -35,14 +35,10 @@ GlutMotionFunc({ x, y |
 })
 
 GlutSpecialFunc({ key, x, y |
-    if key == GLUT_KEY_RIGHT
-        GlRotatef(0.6, 0, 1, 0)
-    else if key == GLUT_KEY_LEFT
-        GlRotatef(-0.6, 0, 1, 0)
-    else if key == GLUT_KEY_UP
-        GlRotatef(0.6, 1, 0, 0)
-    else if key == GLUT_KEY_DOWN
-        GlRotatef(-0.6, 1, 0, 0)
+    if key == GLUT_KEY_RIGHT     then GlRotatef(0.6, 0, 1, 0)
+    else if key == GLUT_KEY_LEFT then GlRotatef(-0.6, 0, 1, 0)
+    else if key == GLUT_KEY_UP   then GlRotatef(0.6, 1, 0, 0)
+    else if key == GLUT_KEY_DOWN then GlRotatef(-0.6, 1, 0, 0)
 })
 
 GlutMainLoop()

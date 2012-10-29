@@ -3,7 +3,7 @@
         "foo" print
     }
     - bar: arg {
-        "bar #{arg}" print
+        "bar «arg»" print
     }
     - baz {
         "baz" print

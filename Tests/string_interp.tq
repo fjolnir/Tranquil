@@ -1,1 +1,1 @@
-"one #{1} is less than two? #{1 < 2}" print
+"one «1» is less than two? «1 < 2»" print

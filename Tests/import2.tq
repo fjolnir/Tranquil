@@ -1,2 +1,2 @@
-"a: #{a}" print
+"a: «a»" print
 b = "foo"

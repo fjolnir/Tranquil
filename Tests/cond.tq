@@ -1,20 +1,17 @@
 if 1 {
-    if foo {
+    if foo then
         "foo" print
-    } else {
+    else {
         i = 0
         while i++ <= 5 {
             lock i {
                 "bar" print
-                if i == 2
-                    break
+                break if i == 2
             }
         }
         "baz" print
     }
 } else {
-    if 1 {
-        "bar" print
-    }
+    "bar" print if 1
 }
 "foo" print

@@ -2,16 +2,16 @@ a = 1
 b = 2
 c = -1
 d = nil
-"1  ==  1   ? #{a == a}" print
-"1  ==  2   ? #{a == b}" print
-"2  ==  1   ? #{b == a}" print
-"1  == -1   ? #{a == c}" print
-"-1 ==  1   ? #{c == a}" print
-"1  !=  1   ? #{a != a}" print
-"1  !=  2   ? #{a != b}" print
-"2  !=  1   ? #{b != a}" print
-"1  != -1   ? #{a != c}" print
-"-1 !=  1   ? #{c != a}" print
-"nil == nil ? #{d == d}" print
-"1   == nil ? #{a == d}" print
-"nil == 1   ? #{d == a}" print
+"1  ==  1   ? «a == a»" print
+"1  ==  2   ? «a == b»" print
+"2  ==  1   ? «b == a»" print
+"1  == -1   ? «a == c»" print
+"-1 ==  1   ? «c == a»" print
+"1  ~=  1   ? «a ~= a»" print
+"1  ~=  2   ? «a ~= b»" print
+"2  ~=  1   ? «b ~= a»" print
+"1  ~= -1   ? «a ~= c»" print
+"-1 ~=  1   ? «c ~= a»" print
+"nil == nil ? «d == d»" print
+"1   == nil ? «a == d»" print
+"nil == 1   ? «d == a»" print

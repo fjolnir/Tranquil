@@ -12,9 +12,9 @@ nsapp = NSApplication sharedApplication
     - reshape {
         pixelSize = (self convertRectToBase: #bounds)[1]
         GlViewport(0, 0, pixelSize[0], pixelSize[1])
-        GlMatrixMode(GL_PROJECTION)   GlLoadIdentity()
+        GlMatrixMode(GL_PROJECTION).  GlLoadIdentity()
         GluPerspective(25, pixelSize[0] / pixelSize[1], 1, 100)
-        GlMatrixMode(GL_MODELVIEW)    GlLoadIdentity()
+        GlMatrixMode(GL_MODELVIEW).   GlLoadIdentity()
         GlTranslatef(0,0,-10)
     }
 
@@ -26,7 +26,7 @@ nsapp = NSApplication sharedApplication
         GlClear(GL_COLOR_BUFFER_BIT bitOr: GL_DEPTH_BUFFER_BIT)
         GlColor3f(1,1,1)
         GlutWireTeapot(1)
-
+"draw" print
         #openGLContext flushBuffer
     }
 }
@@ -38,10 +38,11 @@ win = NSWindow alloc initWithContentRect: [[400, 400], [300, 200]]
                                    defer: no
 
 view = TestView   new;
-             setFrame: (win contentView bounds);
+             setFrame: win contentView bounds;
   setAutoresizingMask: (NSViewWidthSizable bitOr: NSViewHeightSizable);
                  self
-
+wat = TestView new; setFrame: win contentView bounds; self
+"v: «view»        «wat»" print
 win#contentView addSubview: view
 win#movableByWindowBackground = yes
 

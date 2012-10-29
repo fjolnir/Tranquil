@@ -8,8 +8,8 @@ foo = "captured"
     accessor: $prop
 
     + test: arg {
-        "#{~foo}" print
-        "init: #{arg}" print
+        "«~foo»" print
+        "init: «arg»" print
     }
 }
 #Sub < Klass {
@@ -19,7 +19,7 @@ foo = "captured"
 inst = Klass new
 "setting" print
 inst setProp: "hay"
-"prop: #{inst prop} #{inst#prop}" print
+"prop: «inst prop» «inst#prop»" print
 
 Sub new print
 

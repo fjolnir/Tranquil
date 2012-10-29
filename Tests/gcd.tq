@@ -2,7 +2,7 @@ app = NSApplication sharedApplication
 queue = TQDispatchQueue queue
 
 foo = "123"
-queue dispatch: { "I was delayed more #{foo}" print } afterDelay: 2
+queue dispatch: { "I was delayed more «foo»" print } afterDelay: 2
 queue dispatch: { "I was delayed" print } afterDelay: 1.3
 
 app run

@@ -10,7 +10,7 @@ a = async {
 }
 
 whenFinished {
-    "a is: #{a}" print
+    "a is: «a»" print
 }
 
 Usleep(500000)
