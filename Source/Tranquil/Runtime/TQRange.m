@@ -21,7 +21,7 @@
 {
     TQRange *ret = [self new];
     ret.start  = aStart;
-    ret.length = [aEnd subtract:aStart];
+    ret.length = [TQNumber numberWithInt:[aEnd intValue] - [aStart intValue] + 1];
     return [ret autorelease];
 }
 + (TQRange *)withNSRange:(NSRange)aRange
@@ -35,12 +35,12 @@
     NSInteger start = [_start intValue];
     NSInteger end   = start + [_length intValue];
     if(end >= start) {
-        for(int i = start; i <= end; ++i) {
+        for(int i = start; i < end; ++i) {
             if(TQDispatchBlock1(aBlock, [TQNumber numberWithInt:i]) == TQNothing)
                 break;
         }
     } else {
-        for(int i = start; i >= end; --i) {
+        for(int i = start; i > end; --i) {
             if(TQDispatchBlock1(aBlock, [TQNumber numberWithInt:i]) == TQNothing)
                 break;
 
