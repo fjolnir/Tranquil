@@ -558,6 +558,8 @@ using namespace llvm;
 
     Value *val;
     for(TQNode *stmt in _statements) {
+        if(_isCompactBlock)
+            stmt = [TQNodeReturn nodeWithValue:stmt];
         [stmt generateCodeInProgram:aProgram block:self root:aRoot error:aoErr];
         if(*aoErr) {
             TQLog(@"Error: %@", *aoErr);

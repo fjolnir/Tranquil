@@ -10,6 +10,7 @@ extern void * const TQCurrLoopKey;
 @property(readwrite, assign) llvm::BasicBlock *loopStartBlock, *loopEndBlock;
 
 + (TQNodeWhileBlock *)node;
++ (TQNodeWhileBlock *)nodeWithCondition:(TQNode *)aCond statements:(NSMutableArray *)aStmt;
 - (llvm::Value *)generateTestExpressionInProgram:(TQProgram *)aProgram
                                      withBuilder:(llvm::IRBuilder<> *)aBuilder
                                            value:(llvm::Value *)aValue;

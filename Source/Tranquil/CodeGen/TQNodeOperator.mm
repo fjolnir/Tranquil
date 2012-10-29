@@ -20,6 +20,10 @@ using namespace llvm;
 
 + (TQNodeOperator *)nodeWithType:(TQOperatorType)aType left:(TQNode *)aLeft right:(TQNode *)aRight
 {
+    if(aType == kTQOperatorAssign)
+        return [TQNodeAssignOperator nodeWithType:aType
+                                             left:[NSMutableArray arrayWithObject:aLeft]
+                                            right:[NSMutableArray arrayWithObject:aRight]];
     return [[[self alloc] initWithType:aType left:aLeft right:aRight] autorelease];
 }
 
@@ -90,20 +94,8 @@ using namespace llvm;
                                  error:(NSError **)aoErr
 {
     if(_type == kTQOperatorAssign) {
-        BOOL isVar = [_left isKindOfClass:[TQNodeVariable class]];
-        BOOL isProperty = [_left isMemberOfClass:[TQNodeMemberAccess class]];
-        BOOL isSubscriptOp = [_left isMemberOfClass:[self class]] && [(TQNodeOperator*)_left type] == kTQOperatorSubscript;
-        TQAssertSoft(isVar || isProperty || isSubscriptOp, kTQSyntaxErrorDomain, kTQInvalidAssignee, NO, @"Only variables and object properties can be assigned to (Tried %@)", _left);
-
-        // We must make sure the storage exists before evaluating the right side, so that if the assigned value is a
-        // block, it can reference itself
-        if(isVar)
-            [(TQNodeVariable *)_left createStorageInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-        Value *right = [_right generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-        [(TQNodeVariable *)_left store:right inProgram:aProgram block:aBlock root:aRoot error:aoErr];
-        if(*aoErr)
-            return NULL;
-        return right;
+        TQAssert(NO, @"Use TQNodeAssignOperator to implement assignments");
+        return NULL;
     } else if(_type == kTQOperatorUnaryMinus) {
         Value *right = [_right generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         Value *selector  = aProgram.llModule->getOrInsertGlobal("TQUnaryMinusOpSel", aProgram.llInt8PtrTy);
@@ -137,9 +129,9 @@ using namespace llvm;
         // We need to ensure the left side is only executed once
         Value *leftVal = [_left generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         TQNodeCustom *leftWrapper = [TQNodeCustom nodeReturningValue:leftVal];
-        TQNodeTernaryOperator *tern = [TQNodeTernaryOperator nodeWithIfExpr:(_type == kTQOperatorAnd) ? _right : leftWrapper
-                                                                       else:(_type == kTQOperatorAnd) ? leftWrapper  : _right];
-        tern.condition = leftWrapper;
+        TQNodeTernaryOperator *tern = [TQNodeTernaryOperator nodeWithCondition:leftWrapper
+                                                                        ifExpr:(_type == kTQOperatorAnd) ? _right : leftWrapper
+                                                                          else:(_type == kTQOperatorAnd) ? leftWrapper  : _right];
         tern.lineNumber = self.lineNumber;
         return [tern generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     } else {
@@ -329,9 +321,9 @@ using namespace llvm;
 - (NSString *)_descriptionFormat
 {
     if(_type == kTQOperatorSubscript)
-        return @"%@[%@]";
+        return @"(%@[%@])";
     else if(_type == kTQOperatorUnaryMinus)
-        return @"%@-%@";
+        return @"%@(-%@)";
     else {
         NSString *opStr = nil;
         switch(_type) {
@@ -404,16 +396,26 @@ using namespace llvm;
 }
 @end
 
-@implementation TQNodeMultiAssignOperator
-@synthesize left=_left, right=_right, type=_type;
+@implementation TQNodeAssignOperator
+//@synthesize left=_left, right=_right, type=_type;
+
++ (TQNodeAssignOperator *)nodeWithType:(int)aType left:(NSMutableArray *)aLeft right:(NSMutableArray *)aRight
+{
+    TQNodeAssignOperator *ret = [self new];
+    ret.type = aType;
+    ret.left = aLeft;
+    ret.right = aRight;
+    return [ret autorelease];
+}
+
 - (id)init
 {
     if(!(self = [super init]))
         return nil;
 
-    _type = kTQOperatorAssign;
-    _left  = [NSMutableArray array];
-    _right = [NSMutableArray array];
+    self.type  = kTQOperatorAssign;
+    self.left  = [NSMutableArray array];
+    self.right = [NSMutableArray array];
 
     return self;
 }
@@ -427,6 +429,8 @@ using namespace llvm;
     std::vector<Value*> values;
     Value *curr;
     for(int i = 0; i < MIN([self.right count], [self.left count]); ++i) {
+        if([[self.left objectAtIndex:i] respondsToSelector:@selector(createStorageInProgram:block:root:error:)])
+            [[self.left objectAtIndex:i] createStorageInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         curr = [[self.right objectAtIndex:i] generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         curr = aBlock.builder->CreateCall(aProgram.objc_retain, curr);
         values.push_back(curr);
@@ -437,12 +441,13 @@ using namespace llvm;
     Value *val;
     for(int i = 0; i < [self.left count]; ++i) {
         val = values[MIN(i, maxIdx)];
-        switch(_type) {
+        switch(self.type) {
             case kTQOperatorAdd:
             case kTQOperatorSubtract:
             case kTQOperatorMultiply:
+            case kTQOperatorOr:
             case kTQOperatorDivide: {
-                TQNodeOperator *op = [TQNodeOperator nodeWithType:_type left:[self.left objectAtIndex:i] right:[TQNodeCustom nodeReturningValue:val]];
+                TQNodeOperator *op = [TQNodeOperator nodeWithType:self.type left:[self.left objectAtIndex:i] right:[TQNodeCustom nodeReturningValue:val]];
                 val = [op generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
             } break;
             case kTQOperatorAssign:
@@ -461,7 +466,9 @@ using namespace llvm;
     for(int i = 0; i < values.size(); ++i) {
         aBlock.builder->CreateCall(aProgram.objc_release, values[i]);
     }
-
+    // TODO: Add some way of detecting whether the return value actually gets referenced; and if so return an array containing the right hand sides if n>1
+    if([self.left count] == 1 && [self.right count] == 1)
+        return values[0];
     return NULL;
 }
 

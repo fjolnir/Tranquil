@@ -24,8 +24,8 @@
     TQNodeBlock *blk = (TQNodeBlock *)aNode;
     TQNode *parent = [aTrace lastObject];
     NSString *name = nil;
-    if([parent isKindOfClass:[TQNodeOperator class]] && [(TQNodeOperator *)parent type] == kTQOperatorAssign)
-        name = [[(TQNodeOperator *)parent left] toString];
+    if([parent isKindOfClass:[TQNodeAssignOperator class]])
+        name = [[[(TQNodeAssignOperator *)parent left] objectAtIndex:0] toString];
     else if([parent isKindOfClass:[TQNodeCall class]])
         name = [NSString stringWithFormat:@"%@_blkArg", [parent toString]];
     else if([parent isKindOfClass:[TQNodeArgument class]]) {

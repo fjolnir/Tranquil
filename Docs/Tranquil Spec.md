@@ -6,9 +6,12 @@
 	
 	\ Reserved Keywords
 	if
+	then
 	else
 	while
 	until
+	and
+	or
 	import
 	async
 	wait
@@ -63,7 +66,8 @@
 	} else {
 		..statements..
 	}
-	
+	if ..expression.. then ..statement.. \ If you infix the expression & action with `then` you can type a single statement without wrapping in a block.
+
 	unless ..expression.. {  \ Executes the passed literal block if the expression is nil
 		..statements..
 	} else {
@@ -78,6 +82,11 @@
 		..statements..      \ skip&continue work like in while
 	}
 	
+	
+	\ Postfix form of the operators above is also supported(With the obvious exception of `else`); for example:
+	done = yes if percentage >= 100
+	done = tryAgain() until done
+
 	\ Ternary operator
 	..condition.. ? ..expression.. ! ..expression..
 	
@@ -205,7 +214,7 @@ Operator methods are methods for which the colon after the method name is option
 Meaning          |  Operator  | Resulting message    Notes
 ---------------- | ---------- | ------------------ | -----
 Equality         |  ==        | ==:                |
-Inequality       |  !=        | !=:                |
+Inequality       |  ~=        | ~=:                |
 Addition         |  +         | +:                 | 
 Subtraction      |  -         | -:                 |
 Negation         |  -         | -                  | Prefix operator
@@ -216,13 +225,12 @@ Less than        |  <         | <:                 |
 Greater than     |  >         | >:                 |
 Lesser or equal  |  <=        | <=:                |
 Greater or equal |  >=        | >=:                |
-Left shift       |  <<        | <<:                |
-Right shift      |  >>        | >>:                |
 Concatenation    |  ..        | ..:                |
 Exponent         |  ^         | ^:                 |
 Index            |  []        | []:                | Postfix operator (a[b])
 Index assign     |  []=       | []:=:              | Postfix operator (a[b] = c)
 ```
+
 
 #### Example
 

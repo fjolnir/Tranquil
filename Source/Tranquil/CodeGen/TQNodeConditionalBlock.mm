@@ -14,6 +14,17 @@ using namespace llvm;
 
 + (TQNodeIfBlock *)node { return (TQNodeIfBlock *)[super node]; }
 
++ (TQNodeIfBlock *)nodeWithCondition:(TQNode *)aCond
+                        ifStatements:(NSMutableArray *)ifStmt
+                      elseStatements:(NSMutableArray *)elseStmt
+{
+    TQNodeIfBlock *ret = [self node];
+    ret.condition = aCond;
+    ret.ifStatements = ifStmt;
+    ret.elseStatements = elseStmt;
+    return ret;
+}
+
 - (void)dealloc
 {
     [_condition release];

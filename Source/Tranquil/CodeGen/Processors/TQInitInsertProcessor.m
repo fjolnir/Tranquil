@@ -24,10 +24,10 @@
     if(method.type == kTQInstanceMethod && [[method selector] isEqualToString:@"init"]) {
         TQNodeMessage *superInit = [TQNodeMessage nodeWithReceiver:[TQNodeSuper node]];
         [superInit.arguments addObject:[TQNodeArgument nodeWithPassedNode:nil selectorPart:@"init"]];
-        TQNodeOperator *selfAsgn = [TQNodeOperator nodeWithType:kTQOperatorAssign
-                                                           left:[TQNodeSelf node]
-                                                          right:superInit];
-        if(![method referencesNode:selfAsgn]) {
+        if(![method referencesNode:superInit]) {
+            TQNodeOperator *selfAsgn = [TQNodeOperator nodeWithType:kTQOperatorAssign
+                                                               left:[TQNodeSelf node]
+                                                              right:superInit];
             TQNodeUnlessBlock *nilTest = [TQNodeUnlessBlock node];
             nilTest.condition = [TQNodeSelf node];
             [nilTest.ifStatements addObject:[TQNodeReturn node]];

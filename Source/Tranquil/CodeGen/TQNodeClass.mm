@@ -8,7 +8,7 @@ using namespace llvm;
 
 @implementation TQNodeClass
 @synthesize name=_name, superClassName=_superClassName, classMethods=_classMethods, instanceMethods=_instanceMethods,
-    classPtr=_classPtr, onLoadMessages=_onloadMessages;
+    classPtr=_classPtr, onloadMessages=_onloadMessages;
 
 + (TQNodeClass *)nodeWithName:(NSString *)aName
 {

@@ -15,6 +15,13 @@ void * const TQCurrLoopKey = (void*)&TQCurrLoopKey;
 
 
 + (TQNodeWhileBlock *)node { return (TQNodeWhileBlock *)[super node]; }
++ (TQNodeWhileBlock *)nodeWithCondition:(TQNode *)aCond statements:(NSMutableArray *)aStmt
+{
+    TQNodeWhileBlock *ret = [self node];
+    ret.condition = aCond;
+    ret.statements = aStmt;
+    return ret;
+}
 
 - (id)init
 {
@@ -195,5 +202,10 @@ void * const TQCurrLoopKey = (void*)&TQCurrLoopKey;
 - (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
 {
     // Nothing to iterate
+}
+
+- (TQNode *)referencesNode:(TQNode *)aNode
+{
+    return [self isEqual:aNode] ? self : nil;
 }
 @end
