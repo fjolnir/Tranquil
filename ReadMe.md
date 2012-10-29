@@ -31,7 +31,9 @@ The following will install Tranquil into /usr/local/tranquil (Along with a few d
 
 To learn more about Tranquil you should read the [specification](https://github.com/fjolnir/Tranquil/blob/master/Docs/Tranquil%20Spec.md) and check out the [tests](https://github.com/fjolnir/Tranquil/blob/master/Tests).
 
-But here're a couple of examples:
+You can also talk to me directly by visiting [#tranquil](irc://irc.freenode.net/tranquil) on irc.freenode.net.
+
+And here're a couple of examples:
 
 ### Array iteration
 
