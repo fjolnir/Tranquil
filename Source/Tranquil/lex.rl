@@ -74,7 +74,7 @@ typedef struct {
     nl          = ((space|comment)* '\n' space*);
     whitespace  = (nl|space|comment);
     whitespaceNoNl  = (" "|"\t"|comment);
-    term        = whitespace* (nl|"}"|".");
+    term        = whitespace* (nl|"}");
 
     lGuillmt    = 0xC2 0xAB; # «
     rGuillmt    = 0xC2 0xBB; # »
