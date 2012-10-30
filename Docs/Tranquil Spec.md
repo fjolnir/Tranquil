@@ -225,7 +225,6 @@ Less than        |  <         | <:                 |
 Greater than     |  >         | >:                 |
 Lesser or equal  |  <=        | <=:                |
 Greater or equal |  >=        | >=:                |
-Concatenation    |  ..        | ..:                |
 Exponent         |  ^         | ^:                 |
 Index            |  []        | []:                | Postfix operator (a[b])
 Index assign     |  []=       | []:=:              | Postfix operator (a[b] = c)
@@ -246,15 +245,17 @@ Index assign     |  []=       | []:=:              | Postfix operator (a[b] = c)
 	var = instanceOfKlass - something \ Equivalent to: var = instanceOfKlass subtract:something
 	
 	#NSString {
-		- ..: b `self stringByAppendingString: b`
+		- +: b `self stringByAppendingString: b`
 	}
 	#TQNumber {
-		- ..: b {
-			multiplier = 10^(b log ceil)
-			^self*multiplier + b
-		}
-	}
-	print("%@ %@", "foo".."bar", 1..2) \ outputs 'foobar 12'
+        - []: i {
+            max = self log floor
+            t = (self / 10^(max-i)) floor
+            ^t - (t/10) floor * 10
+        }
+    }
+	a = "foo"+"bar" \ == "foobar"
+	b = 1234.5[4]   \ == 5
 	
 
 ### Operator assignments
@@ -308,11 +309,12 @@ Using the `async` keyword, an expression can be executed asynchronously. If one 
 
 `async` is a statement and can not be used for example as a message parameter (`obj foo: async block()` **is not ok**). With one exception: assignment. `var = async ..expression..` is valid, and simply sets `var` to the result of `expression` once it has finished executing.
 
+    \ This example is rather contrived; the cost of an async is higher than of the fib call. But in a perfect world this is how you'd write a recursive parallel fibonacci finder.
     fib = { n |
         if n > 1 {
             a = async fib(n-1)
             b = fib(n-2)
-            wait
+            wait            
             ^a + b
         }
         ^n
@@ -322,21 +324,13 @@ The following example shows a block that spawns a few operations and returns imm
     
     #Array {
         - mapInParallel: lambda {
-            i = 0
-            until i >= self count
-				self[i] = async lambda(self[i])
-		    wait
+			self[i] = async lambda(self[i]) until i++ == self count - 1
 		}
 	}
     executeOperations = {
         async [1,2,3,4] mapInParallel: `i | expensiveOp(i)`
         whenFinished { updateUI() }
     }
-
-`var = async ..expression..` is roughly equal to:
-
-    var = nil \ If the variable already exists in this scope, it's value is unchanged 
-    async { var = ..expression.. }()
 
 ### Promises
 
@@ -359,10 +353,8 @@ A promise is an object that forwards all messages to the object that it is resol
 
     fibonacci = { index, curr=0, succ=1 |
         num = curr + succ 
-        if index > 2
-            ^fibonacci(index - 1, succ, num)
-        else
-	        ^num
+        ^fibonacci(index - 1, succ, num) if index > 2
+        ^num
     }
     fib = fibonacci(50) \ Calculate the 50th number in the fibonacci sequence
 
@@ -378,18 +370,17 @@ A promise is an object that forwards all messages to the object that it is resol
 	
 		- reduce: lambda {
 			accum = lambda(self next)
-			until self isEmpty?
-				accum = lambda(self next, accum)
+			accum = lambda(self next, accum) until self isEmpty?
 			^accum
 		}
 	
 		- map: mapLambda reduce: reduceLambda {
-			(self map: mapLambda) reduce: reduceLambda
+			self map: mapLambda; reduce: reduceLambda
 		}
 	
 		- next     `nil`   \ Implemented in subclasses
 		- isEmpty? `valid` \ Implemented in subclasses
 	}
 	
-	sum = [1,2,3] reduce:`n, sum=0| sum + n`
+	sum = [1,2,3] reduce: `n, sum=0| sum + n`
 	\ Sum now equals 0+1+2+3 = 6
