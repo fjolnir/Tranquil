@@ -30,6 +30,9 @@ syn match stClassMethod   "^\s*+\s*"
 " Selector colon
 syn match tqMessageColon ":"
 
+" Ternary symbols
+syn match tqTernary "[?!]"
+
 syn match tqComment "\\.*"
 
 syn region tqString start='"' skip='\\"' end='"' contains=tqInterpolation
@@ -86,6 +89,7 @@ if version >= 508 || !exists("did_st_syntax_inits")
     HiLink tqString          Constant
     "HiLink tqRegexp          Special
     HiLink tqSymbol          Special
+    HiLink tqTernary         Special
     HiLink tqMessageColon    Special
     HiLink tqNumber          Type
     HiLink tqFloat           Type
