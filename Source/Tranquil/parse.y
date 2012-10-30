@@ -164,8 +164,8 @@ cascadeNl(C) ::= noAsgnExprNoNl(E) SEMICOLON selPartsNl(SP). {
 // Flow Control -----------------------------------------------------------------------------------------------------------------------
 //
 
-body(B) ::= bodyNl(T).                                  { B = T;                                                                      }
-body(B) ::= bodyNoNl(T).                                { B = T;                                                                      }
+body(B) ::= bodyNl(T).             { B = T;                                                                                           }
+body(B) ::= bodyNoNl(T).           { B = T;                                                                                           }
 
 bodyNoNl(B) ::= exprNoNl(S).       { B = [S isKindOfClass:[TQNodeBlock class]] ? [S statements] : [NSMutableArray arrayWithObject:S]; }
 bodyNoNl(B) ::= breakNoNl(S).      { B = [NSMutableArray arrayWithObject:S];                                                          }
@@ -230,7 +230,7 @@ lock(A) ::= LOCK expr(C) blockNl(ST).                   { A = [TQNodeLock nodeWi
 // Memory Management Primitives -------------------------------------------------------------------------------------------------------
 //
 
-collect(C) ::= COLLECT bodyNl(B).                           { C = [TQNodeCollect node]; [C setStatements:B];                          }
+collect(C) ::= COLLECT bodyNl(B).                       { C = [TQNodeCollect node]; [C setStatements:B];                              }
 
 
 //

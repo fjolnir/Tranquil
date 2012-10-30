@@ -5,11 +5,11 @@ import "stdlib"
 "welcome; this is tranquil." print
 
 historyPath   = "/tmp/tqrepl_history"
+\ Very naive heuristic to know whether to prepend a return operator to the line.
 nonReturnable = `str | (str hasPrefix: "import "      ) || (str hasPrefix: "if "     ) ||
                        (str hasPrefix: "unless "      ) || (str hasPrefix: "while "  ) ||
                        (str hasPrefix: "until "       ) || (str hasPrefix: "async "  ) ||
                        (str hasPrefix: "whenFinished ") || (str matches: /=\s*async /) ||
-                       (str hasPrefix: "-"            ) || (str hasPrefix:"+"        ) ||
                        ((str hasPrefix: "#")   &&  (str[0] == str[0] uppercaseString))`
 
 History_truncate_file(historyPath, 300) \ Just to make sure things don't get unmanageable
