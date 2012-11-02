@@ -66,7 +66,7 @@ using namespace llvm;
     if(idx == NSNotFound)
         return NO;
     [_embeddedValues replaceObjectAtIndex:idx withObject:aNodeToInsert];
-    return NO;
+    return YES;
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
