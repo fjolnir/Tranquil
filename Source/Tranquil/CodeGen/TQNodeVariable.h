@@ -18,6 +18,8 @@
                                     root:(TQNodeRootBlock *)aRoot
                                    error:(NSError **)aoErr;
 + (llvm::Type *)captureStructTypeInProgram:(TQProgram *)aProgram;
++ (llvm::Type *)valueTypeInProgram:(TQProgram *)aProgram;
++ (BOOL)valueIsObject; // Necessary because an i8Ptr is not necessarily an object
 
 - (llvm::Value *)store:(llvm::Value *)aValue
               retained:(BOOL)aRetain
@@ -40,4 +42,19 @@
 @interface TQNodeSuper : TQNodeVariable {
    llvm::Type *_structType;
 }
+@end
+
+@interface TQNodeIntVariable : TQNodeVariable
++ (TQNodeIntVariable *)tempVar;
++ (TQNodeIntVariable *)node;
+@end
+
+@interface TQNodeLongVariable : TQNodeIntVariable
++ (TQNodeLongVariable *)tempVar;
++ (TQNodeLongVariable *)node;
+@end
+
+@interface TQNodePointerVariable : TQNodeIntVariable
++ (TQNodePointerVariable *)tempVar;
++ (TQNodePointerVariable *)node;
 @end

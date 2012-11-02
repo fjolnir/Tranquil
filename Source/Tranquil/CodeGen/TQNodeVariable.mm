@@ -32,6 +32,16 @@ using namespace llvm;
     return [[[self alloc] initWithName:aName] autorelease];
 }
 
++ (llvm::Type *)valueTypeInProgram:(TQProgram *)aProgram
+{
+    return aProgram.llInt8PtrTy;
+}
+
++ (BOOL)valueIsObject
+{
+    return YES;
+}
+
 - (id)initWithName:(NSString *)aName
 {
     if(!(self = [super init]))
@@ -93,10 +103,11 @@ using namespace llvm;
     TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock program:aProgram];
     if(existingVar)
         return [existingVar _getForwardingInProgram:aProgram block:aBlock root:aRoot];
-    if(_isAnonymous)
-        return _alloca;
-
     IRBuilder<> *builder = aBlock.builder;
+    assert(_alloca);
+    if(_isAnonymous)
+        return builder->CreateLoad(_alloca);
+
     Value *forwarding;
     forwarding = builder->CreateLoad(builder->CreateStructGEP(_alloca, 1), [self _llvmRegisterName:@"forwardingPtr"]);
     forwarding = builder->CreateBitCast(forwarding, PointerType::getUnqual([[self class] captureStructTypeInProgram:aProgram]), [self _llvmRegisterName:@"forwarding"]);
@@ -153,7 +164,11 @@ using namespace llvm;
     Type *intTy   = aProgram.llIntTy;
     Type *i8PtrTy = aProgram.llInt8PtrTy;
 
-    Type *byRefType = [[self class] captureStructTypeInProgram:aProgram];
+    Type *allocaType;
+    if(_isAnonymous)
+        allocaType = [[self class] valueTypeInProgram:aProgram];
+    else
+        allocaType = [[self class] captureStructTypeInProgram:aProgram];
     IRBuilder<> entryBuilder(&aBlock.function->getEntryBlock(), aBlock.function->getEntryBlock().begin());
 
     if(aBlock == aRoot) {
@@ -162,20 +177,23 @@ using namespace llvm;
         const char *globalName = [[NSString stringWithFormat:@"TQGlobalVar_%@", _name] UTF8String];
         _alloca = aProgram.llModule->getGlobalVariable(globalName, true);
         if(!_alloca)
-            _alloca = new GlobalVariable(*aProgram.llModule, byRefType, false, GlobalVariable::InternalLinkage, ConstantAggregateZero::get(byRefType), globalName);
-    } else
-        _alloca = entryBuilder.CreateAlloca(byRefType, 0, [self _llvmRegisterName:@"alloca"]);
+            _alloca = new GlobalVariable(*aProgram.llModule, allocaType, false, GlobalVariable::InternalLinkage, ConstantAggregateZero::get(allocaType), globalName);
+    } else {
+        _alloca = entryBuilder.CreateAlloca(allocaType, 0, [self _llvmRegisterName:@"alloca"]);
+    }
 
-    // Initialize the variable to nil
-    entryBuilder.CreateStore(entryBuilder.CreateBitCast(_alloca, i8PtrTy),
-                             entryBuilder.CreateStructGEP(_alloca, 1, [self _llvmRegisterName:@"forwardingAssign"]));
-    entryBuilder.CreateStore(ConstantInt::get(intTy, 0), entryBuilder.CreateStructGEP(_alloca, 2, [self _llvmRegisterName:@"flags"]));
-    Constant *size = ConstantExpr::getTruncOrBitCast(ConstantExpr::getSizeOf(byRefType), intTy);
-    entryBuilder.CreateStore(size, entryBuilder.CreateStructGEP(_alloca, 3, [self _llvmRegisterName:@"size"]));
+    // Initialize the byref structure
+    if(!_isAnonymous) {
+        entryBuilder.CreateStore(entryBuilder.CreateBitCast(_alloca, i8PtrTy),
+                                 entryBuilder.CreateStructGEP(_alloca, 1, [self _llvmRegisterName:@"forwardingAssign"]));
+        entryBuilder.CreateStore(ConstantInt::get(intTy, 0), entryBuilder.CreateStructGEP(_alloca, 2, [self _llvmRegisterName:@"flags"]));
+        Constant *size = ConstantExpr::getTruncOrBitCast(ConstantExpr::getSizeOf(allocaType), intTy);
+        entryBuilder.CreateStore(size, entryBuilder.CreateStructGEP(_alloca, 3, [self _llvmRegisterName:@"size"]));
 
-    if(!_isGlobal) // Globals are pre initialized
-        entryBuilder.CreateStore(ConstantPointerNull::get(aProgram.llInt8PtrTy),
-                                 entryBuilder.CreateStructGEP(_alloca, 4, [self _llvmRegisterName:@"marked_variable"]));
+        if(!_isGlobal) // Globals are pre initialized
+            entryBuilder.CreateStore(ConstantPointerNull::get(aProgram.llInt8PtrTy),
+                                     entryBuilder.CreateStructGEP(_alloca, 4, [self _llvmRegisterName:@"marked_variable"]));
+    }
 
     return _alloca;
 }
@@ -213,12 +231,12 @@ using namespace llvm;
     if(existingVar)
         return [existingVar store:aValue inProgram:aProgram block:aBlock root:aRoot error:aoErr];
 
-    if(_isAnonymous) {
-        _alloca = aValue;
+    if(!_alloca && ![self createStorageInProgram:aProgram block:aBlock root:aRoot error:aoErr]) {
         return NULL;
     }
 
-    if(!_alloca && ![self createStorageInProgram:aProgram block:aBlock root:aRoot error:aoErr]) {
+    if(_isAnonymous) {
+        aBlock.builder->CreateStore(aValue, _alloca);
         return NULL;
     }
 
@@ -377,4 +395,77 @@ using namespace llvm;
     return nil;
 }
 
+@end
+
+@implementation TQNodeIntVariable
++ (TQNodeIntVariable *)node
+{
+    return (TQNodeIntVariable *)[super node];
+}
++ (TQNodeIntVariable *)tempVar
+{
+    return (TQNodeIntVariable *)[super tempVar];
+}
+
+- (id)init
+{
+    if(!(self = [super init]))
+        return nil;
+    self.isAnonymous = YES; // Obviously the tranquil program must not be able to access an int
+    return self;
+}
+
++ (llvm::Type *)valueTypeInProgram:(TQProgram *)aProgram
+{
+    return aProgram.llIntTy;
+}
++ (BOOL)valueIsObject
+{
+    return NO;
+}
++ (llvm::Type *)captureStructTypeInProgram:(TQProgram *)aProgram
+{
+    assert(0);
+    return NULL; // There's no capture type
+}
+- (llvm::Value *)store:(llvm::Value *)aValue
+             inProgram:(TQProgram *)aProgram
+                 block:(TQNodeBlock *)aBlock
+                  root:(TQNodeRootBlock *)aRoot
+                 error:(NSError **)aoErr
+{
+    return [self store:aValue retained:NO inProgram:aProgram block:aBlock root:aRoot error:aoErr];
+}
+@end
+
+@implementation TQNodeLongVariable
++ (TQNodeLongVariable *)node
+{
+    return (TQNodeLongVariable *)[super node];
+}
++ (TQNodeLongVariable *)tempVar
+{
+    return (TQNodeLongVariable *)[super tempVar];
+}
+
++ (llvm::Type *)valueTypeInProgram:(TQProgram *)aProgram
+{
+    return aProgram.llLongTy;
+}
+@end
+
+@implementation TQNodePointerVariable
++ (TQNodePointerVariable *)node
+{
+    return (TQNodePointerVariable *)[super node];
+}
++ (TQNodePointerVariable *)tempVar
+{
+    return (TQNodePointerVariable *)[super tempVar];
+}
+
++ (llvm::Type *)valueTypeInProgram:(TQProgram *)aProgram
+{
+    return aProgram.llInt8PtrTy;
+}
 @end
