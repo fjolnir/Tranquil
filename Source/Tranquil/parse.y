@@ -29,7 +29,9 @@ statement(S) ::= import(I).                             { S = I;                
 statement(S) ::= retNl(I).                              { S = I;                                                                      }
 
 retNl(R)   ::= CARET exprNl(E).                         { R = [TQNodeReturn nodeWithValue:E];                                         }
+retNl(R)   ::= CARET retNl(O).                          { R = O; [O setDepth:[O depth] + 1];                                          }
 retNoNl(R) ::= CARET exprNoNl(E).                       { R = [TQNodeReturn nodeWithValue:E];                                         }
+retNoNl(R) ::= CARET retNoNl(O).                        { R = O; [O setDepth:[O depth] + 1];                                          }
 
 
 //

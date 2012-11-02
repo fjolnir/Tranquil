@@ -17,7 +17,7 @@
 	wait
 	break   \ Prematurely terminates a loop
 	skip    \ Skips to the end of the current iteration of a loop
-	nil     \ Represents 'nothing' ('no' is a synonym)
+	nil     \ Represents an empty value ('no' is a synonym)
 	self    \ Available inside method blocks
 	super   \ Available inside method blocks as a message receiver
 	        \ that calls methods as defined by the current class's superclass
@@ -48,9 +48,11 @@
 	aBlock = { ..body.. } \ A block. Defines scope (Empty braces: `{}` constitute an empty dictionary, not an empty block)
 	aBlockWith = { arg0, arg1 | ^arg0 } \ A block that takes two arguments
 	                                    \ and returns its first argument as-is
-	aBlock = { arg=123 |  ..statements.. } \ Assignment in the argument list indicates a default value
-	                                       \ for that argument
-	`expression` \ Equivalent to { ^expression }
+	aBlock = { arg=123 |  ..statements.. } \ Assignment in the argument list indicates a default value for that argument
+	`..expression..` \ Equivalent to { ^expression }
+	
+	^..expression.. \ Returns the value of `expression`
+	^^..expression.. \ Same as above but, returns from the lexical parent of the block. (Explained in "Non-local returns")
 	
 	
 	\ Block calls
@@ -101,8 +103,9 @@
 			^instance             \ Returns the instance
 		}
 		
-		- aMethodTaking: a and: b {     \ Instance method taking two arguments ('self' refers to an instance of Klass)
-			^#ivar = a + b          \ Returns the value of self#ivar after setting it to a+b
+		- aMethodTaking: a and: b {  \ Instance method taking two arguments ('self' refers to an instance of Klass)
+			^#ivar = a + b           \ Returns the value of self#ivar after setting it to a+b
+		}
 		}
 	}
 	
@@ -152,13 +155,12 @@
     collect { ..statements.. } \ Releases all memory used by the statements within the
                                \ literal block, as soon as it's over. (Usually  memory is released when the containing block returns)
 
+
 ## Blocks
 
 A block is ..a block of code. It is either used as a function or a method. (A method is simply a block that is executed in response to a message)
 
 By default a block returns `nil`. To return a value the `^` symbol is prefixed to the expression to return.
-
-**Planned for the future:** Non-local returns: to return from a parent block one can use the number of carets corresponding to the current block's depth relative to it, so for example: `^^1` would return 1 from caller of the current block. (I don't know if this is possible yet)
 
 All arguments are optional and if no default value is specified, `nil` is used.
 
@@ -175,6 +177,61 @@ If in a block one wishes to accept an arbitrary number of argument, he can use t
 	\ bar
 	\ baz
 
+### Non-local returns
+Non-local are a very powerful feature that allow blocks to not only return from themselves, but also from the block that created them.
+This is best illustrated by an example:
+
+    a = {
+        b = {                
+            ^123
+        }
+        b()
+        ^456
+    }
+    a() print \ This prints 456
+    
+    a = {
+        b = {
+            ^^123
+        }
+        b()
+        ^456
+    }
+    a() print \ This prints 123
+    
+A common use case is for error handlers, or for returning inside looping blocks (such as arguments to each:).
+
+    find = `needle| haystack each: { obj | ^^obj if obj == needle }`
+    
+    ^HTTP connectTo: "example.com" onError: { err |
+        "Couldn't connect! (Error was: «err»)" print
+        ^^nil
+    }
+
+## Macros
+
+A macro can be thought of as an inline block; it gets expanded to it's contents at compile time.
+This means that a macro usage incurs no runtime cost, does not evaluate it's arguments until they're
+actually used and that they can not capture values from their lexical scope (since that would make no sense)
+They can (and do) however reference variables in their expansion scope; this is both useful and dangerous.
+Arg
+    
+    *Choice `cond, a, b | cond ? a ! b`  \ A contrived example
+    var = Choice(var == something, foo(), bar()) \ Expanded to `var == something ? foo() ! bar()` at
+                                                 \ compile time; meaning that foo() & bar() will not be
+                                                 \ evaluated unless the condition indicates they should
+                                                 \ Had you used a block, both would have been evaluated
+                                                 \ before it was called, which is obviously not correct
+                                                 \ in this case.
+
+                                                     
+    *CaptureDemo(foo) `baz = [foo, bar]`
+    foo = 123
+    bar = 456
+    CaptureDemo(0)
+    baz == [0, 456] \ At the expansion point, variables called both `foo`&`bar` exist, however
+                    \ the argument of the same name shadows `foo` => 0 is used rather than 123
+                    \ The variable `baz` is then declared directly in the expansion scope.
 
 ## Flow Control
 
@@ -204,7 +261,7 @@ When a block is called as a result of a message to an object (object method: 123
 When a block is called as a result of a message to an object, the `super` keyword can be used as a message receiver to call the current object's superclass's implementation of a method (Even if the object's class has overridden it).
 
 ### Nothing
-`nothing` represents the absence of value. Which is importantly not the same as `nil`. `nothing` is used for uses where you need there to be a difference between an empty value, and no value. For example if you call a block passing `nothing` as an argument, then the block will receive the default value for that parameter, not the `nothing` object you passed. Another use of `nothing` is for block iterators (such as `- each:`), where the convention is to return `nothing` if you want the iteration to stop.
+`nothing` represents the absence of value. Which is importantly not the same as `nil`. `nothing` is used for uses where you need there to be a difference between an empty value, and no value. For example if you call a block passing `nothing` as an argument, then the block will receive the default value for that parameter, not the `nothing` object you passed.
 
 ### Operator methods
 
@@ -334,7 +391,7 @@ The following example shows a block that spawns a few operations and returns imm
 
 ### Promises
 
-A promise is an object that forwards all messages to the object that it is resolved to; and throws an exception if one attempts to send a message to it before it is resolved.
+A promise is an object that forwards all messages to the object that it is resolved to; and errors out if one attempts to send a message to it before it is resolved.
 
     myPromise = async {
         usleep(500)
@@ -349,12 +406,20 @@ A promise is an object that forwards all messages to the object that it is resol
 
 ## Examples
 
+### Error handling
+
+    #MyClass {
+        + doSomethingWith: obj [onError: errorHandler] { \ The error handler should be optional in case the caller does not care to handle it
+            errorHandler call unless doIt(obj)
+        }
+    }
+    MyClass doSomethingWith: 123 onError: { "An error occurred while processing 123!" print }
+
 ### Fibonacci
 
     fibonacci = { index, curr=0, succ=1 |
         num = curr + succ 
-        ^fibonacci(index - 1, succ, num) if index > 2
-        ^num
+        if index > 2 then ^fibonacci(index - 1, succ, num) else ^num
     }
     fib = fibonacci(50) \ Calculate the 50th number in the fibonacci sequence
 

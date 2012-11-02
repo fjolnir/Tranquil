@@ -71,6 +71,19 @@ var = Character new; setName: "Deckard"; setOccupation: "Blade Runner"; self
 a, b = b, a  \ Swap b&a
 ```
 
+### Non-local returns
+
+```
+a = {
+    b = {
+        ^^123
+    }
+    b()
+    ^321
+}
+a() print \ This prints '123'
+```
+
 ### Calculate fibonacci numbers (In a not-so-performant manner)
 
 ```

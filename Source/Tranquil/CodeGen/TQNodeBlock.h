@@ -4,7 +4,7 @@
 #include <llvm/Support/IRBuilder.h>
 #include <llvm/Analysis/DebugInfo.h>
 
-@class TQNodeArgumentDef;
+@class TQNodeArgumentDef, TQNodeVariable, TQNodeIntVariable, TQNodeLongVariable;
 
 // A block definition ({ :arg | body })
 @interface TQNodeBlock : TQNode {
@@ -22,6 +22,9 @@
 @property(readwrite, copy) NSMutableArray *arguments, *argTypes;
 @property(readwrite, copy, nonatomic) NSMutableArray *statements, *cleanupStatements;
 @property(readwrite, retain) NSMutableDictionary *locals, *capturedVariables;
+@property(readwrite, retain) TQNodeIntVariable *nonLocalReturnTarget;
+@property(readwrite, retain) TQNodeLongVariable *nonLocalReturnThread;
+@property(readwrite, retain) TQNodeVariable *literalPtr; // Anonymous variable containing the address of the block
 @property(readwrite, assign) BOOL isVariadic;
 @property(readwrite, assign, nonatomic) llvm::BasicBlock *basicBlock;
 @property(readwrite, assign, nonatomic) llvm::Function *function;

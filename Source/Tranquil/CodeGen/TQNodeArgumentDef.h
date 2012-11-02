@@ -14,5 +14,5 @@
 @interface TQNodeMethodArgumentDef : TQNodeArgumentDef
 @property(readwrite, retain) NSString *selectorPart;
 
-+ (TQNodeArgumentDef *)nodeWithName:(NSString *)aName selectorPart:(NSString *)aSelectorPart;
++ (TQNodeMethodArgumentDef *)nodeWithName:(NSString *)aName selectorPart:(NSString *)aSelectorPart;
 @end

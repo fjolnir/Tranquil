@@ -8,6 +8,7 @@
 #import "TQValidObject.h"
 #import "TQNothingness.h"
 #import "NSObject+TQAdditions.h"
+#import <pthread.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,6 +22,16 @@ id TQNothing = nil;
 NSMapTable *_TQSelectorCache = NULL;
 
 static const NSString *_TQDynamicIvarTableKey = @"TQDynamicIvarTableKey";
+
+static pthread_key_t _TQNonLocalReturnStackKey;
+
+struct _TQNonLocalReturnStack {
+    int height, capacity;
+    struct _TQNonLocalReturnStackFrame { jmp_buf jumpBuf; id block; } *items;
+    int propagateTo;
+    id  value;
+    pthread_t thread;
+};
 
 SEL TQEqOpSel;
 SEL TQNeqOpSel;
@@ -204,6 +215,94 @@ NSInteger TQBlockGetNumberOfArguments(id block)
     return -1;
 }
 
+#pragma mark - Non-local returns
+
+static void _destroyNonLocalReturnStack(struct _TQNonLocalReturnStack *stack)
+{
+    if(stack) {
+        free(stack->items);
+        free(stack);
+    }
+}
+
+static __inline__ struct _TQNonLocalReturnStack *_getNonLocalReturnStack()
+{
+    struct _TQNonLocalReturnStack *stack = pthread_getspecific(_TQNonLocalReturnStackKey);
+    if(!stack) {
+        stack = calloc(1, sizeof(struct _TQNonLocalReturnStack));
+        stack->capacity = 128;
+        stack->thread   = pthread_self();
+        stack->items    = malloc(stack->capacity * sizeof(struct _TQNonLocalReturnStackFrame));
+        pthread_setspecific(_TQNonLocalReturnStackKey, stack);
+    }
+    return stack;
+}
+
+// Pops the stack and returns whether the caller should propagate or not
+int TQShouldPropagateNonLocalReturn(id block)
+{
+    struct _TQNonLocalReturnStack *stack = _getNonLocalReturnStack();
+    TQAssert(stack->height > 0, @"PANIC: Tried to propagate non-local return but stack was empty");
+    if(stack->height-- != stack->propagateTo) {
+        assert(block == stack->items[stack->height].block);
+        return YES;
+    }
+    return NO;
+}
+
+// Returns a pointer to pass to longjmp, and sets the destination block to propagate up to
+void *TQGetNonLocalReturnJumpTarget(pthread_t thread, id destBlock, int dest, id retVal)
+{
+    struct _TQNonLocalReturnStack *stack = _getNonLocalReturnStack();
+    TQAssert(pthread_equal(thread, stack->thread) != 0, @"Tried to perform non-local return from a different thread");
+    TQAssert(stack->height >= dest && stack->height > 0, @"Tried to perform non-local return outside parent scope");
+    TQAssert(stack->items[dest-1].block == destBlock, @"Tried to perform non-local return outside parent scope");
+
+    stack->propagateTo = dest;
+    stack->value = retVal;
+    return stack->items[stack->height-1].jumpBuf;
+}
+
+// Returns a pointer to pass to longjmp
+void *TQGetNonLocalReturnPropagationJumpTarget()
+{
+    struct _TQNonLocalReturnStack *stack = _getNonLocalReturnStack();
+    TQAssert(stack->height > 0, @"PANIC: Tried to propagate non-local return but stack was empty");
+    return stack->items[stack->height-1].jumpBuf;
+}
+
+
+// Returns a pointer to pass to setjmp
+void *TQPushNonLocalReturnStack(id block)
+{
+    struct _TQNonLocalReturnStack *stack = _getNonLocalReturnStack();
+    int idx = stack->height;
+    if(++stack->height > stack->capacity) {
+        stack->capacity <<= 1;
+        stack->items = realloc(stack->items, stack->capacity * sizeof(struct _TQNonLocalReturnStackFrame));
+        assert(stack->items);
+    }
+    stack->items[idx].block = block;
+    return stack->items[idx].jumpBuf;
+}
+// Just pops the stack (for use when the block returns normally)
+void TQPopNonLocalReturnStack()
+{
+    struct _TQNonLocalReturnStack *stack = _getNonLocalReturnStack();
+    TQAssert(stack->height > 0, @"PANIC: Tried to pop non-local return but stack was empty");
+    --stack->height;
+}
+
+int TQNonLocalReturnStackHeight()
+{
+    return _getNonLocalReturnStack()->height;
+}
+
+id TQGetNonLocalReturnValue()
+{
+    return _getNonLocalReturnStack()->value;
+}
+
 
 #pragma mark - Dynamic instance variables
 
@@ -374,6 +473,8 @@ void TQInitializeRuntime()
 
     _TQSelectorCache = NSCreateMapTable((NSMapTableKeyCallBacks){NULL,NULL,NULL},
                                         (NSMapTableValueCallBacks){NULL,NULL,NULL}, 1000);
+
+    pthread_key_create(&_TQNonLocalReturnStackKey, (void (*)(void *))&_destroyNonLocalReturnStack);
 
     TQValid   = [TQValidObject valid];
     TQNothing = [TQNothingness nothing];

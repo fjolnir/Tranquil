@@ -11,7 +11,7 @@
 using namespace llvm;
 
 @implementation TQNodeReturn
-@synthesize value=_value;
+@synthesize value=_value, depth=_depth;
 + (TQNodeReturn *)nodeWithValue:(TQNode *)aValue
 {
     return [[[self alloc] initWithValue:aValue] autorelease];
@@ -76,7 +76,23 @@ using namespace llvm;
         retVal = aBlock.builder->CreateCall(aProgram.TQPrepareObjectForReturn, retVal);
         ((CallInst *)retVal)->addAttribute(~0, Attribute::NoUnwind);
         [self _attachDebugInformationToInstruction:retVal inProgram:aProgram block:aBlock root:aRoot];
-        [aBlock generateCleanupInProgram:aProgram];
+        if(_depth == 0)
+            [aBlock generateCleanupInProgram:aProgram];
+        else {
+            // Non-local return
+            TQNodeBlock *destBlock = aBlock.parent;
+            for(int i = 1; i < _depth; ++i) {
+                destBlock = destBlock.parent;
+            }
+            TQAssert(destBlock, @"Tried to return too far up!");
+
+            Value *target    = [destBlock.nonLocalReturnTarget generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+            Value *targetPtr = [destBlock.literalPtr generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+            Value *thread    = [destBlock.nonLocalReturnThread generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+            Value *jmpBuf = aBlock.builder->CreateCall4(aProgram.TQGetNonLocalReturnJumpTarget, thread, targetPtr, target, retVal);
+            aBlock.builder->CreateCall2(aProgram.longjmp, jmpBuf, ConstantInt::get(aProgram.llInt32Ty, 0));
+        }
+
         retVal = aBlock.builder->CreateCall(aProgram.objc_autoreleaseReturnValue, retVal);
         ((CallInst *)retVal)->addAttribute(~0, Attribute::NoUnwind);
         [self _attachDebugInformationToInstruction:retVal inProgram:aProgram block:aBlock root:aRoot];

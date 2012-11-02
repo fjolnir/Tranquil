@@ -7,6 +7,7 @@
 #import "TQNodeCustom.h"
 #import "TQNode+Private.h"
 #import <llvm/Intrinsics.h>
+#import <llvm/InstrTypes.h>
 #include <iostream>
 
 // The struct index where captured variables begin
@@ -23,7 +24,8 @@ using namespace llvm;
 @synthesize arguments=_arguments, statements=_statements, cleanupStatements=_cleanupStatements, locals=_locals, capturedVariables=_capturedVariables,
     basicBlock=_basicBlock, function=_function, builder=_builder, autoreleasePool=_autoreleasePool,
     isCompactBlock=_isCompactBlock, parent=_parent, isVariadic=_isVariadic, isTranquilBlock=_isTranquilBlock,
-    invokeName=_invokeName, argTypes=_argTypes, retType=_retType, dispatchGroup=_dispatchGroup;
+    invokeName=_invokeName, argTypes=_argTypes, retType=_retType, dispatchGroup=_dispatchGroup,
+    nonLocalReturnTarget=_nonLocalReturnTarget, nonLocalReturnThread=_nonLocalReturnThread, literalPtr=_literalPtr;
 
 + (TQNodeBlock *)node { return (TQNodeBlock *)[super node]; }
 
@@ -36,10 +38,13 @@ using namespace llvm;
     _statements        = [NSMutableArray new];
     _cleanupStatements = [NSMutableArray new];
     _locals            = [NSMutableDictionary new];
+    _capturedVariables = [NSMutableDictionary new];
     _function          = NULL;
     _basicBlock        = NULL;
     _isTranquilBlock   = YES;
     _invokeName        = @"__tq_block";
+    _literalPtr        = [TQNodePointerVariable tempVar];
+    [self.locals setObject:_literalPtr forKey:_literalPtr.name];
 
     // Block invocations are always passed the block itself as the first argument
     [self addArgument:[TQNodeArgumentDef nodeWithName:@"__blk"] error:nil];
@@ -129,7 +134,7 @@ using namespace llvm;
     Type *i8PtrTy = aProgram.llInt8PtrTy;
     Type *i8Ty = aProgram.llInt8Ty;
     Type *int32Ty = aProgram.llInt32Ty;
-    Type *longTy  = aProgram.llInt64Ty; // Should be unsigned
+    Type *longTy  = aProgram.llLongTy; // Should be unsigned
 
     descriptorType = StructType::create("struct.__block_descriptor",
                                         longTy,  // reserved
@@ -164,7 +169,10 @@ using namespace llvm;
 
     // Fields for captured vars
     for(TQNodeVariable *var in [_capturedVariables allValues]) {
-        fields.push_back(i8PtrTy);
+        if(var.isAnonymous)
+            fields.push_back([[var class] valueTypeInProgram:aProgram]);
+        else
+            fields.push_back(PointerType::getUnqual([[var class] captureStructTypeInProgram:aProgram]));
     }
 
     _literalType = StructType::get(aProgram.llModule->getContext(), fields, true);
@@ -267,7 +275,13 @@ using namespace llvm;
             TQNodeVariable *varToCapture = [_capturedVariables objectForKey:name];
             [varToCapture createStorageInProgram:aProgram block:aParentBlock root:aRoot error:nil];
             NSString *fieldName = [NSString stringWithFormat:@"block.%@", name];
-            pBuilder->CreateStore(pBuilder->CreateBitCast(varToCapture.alloca, i8PtrTy), pBuilder->CreateStructGEP(alloca, i++, [fieldName UTF8String]));
+
+            Value *valToStore = varToCapture.alloca;
+            if(varToCapture.isAnonymous)
+                valToStore = pBuilder->CreateLoad(varToCapture.alloca);
+            else
+                valToStore = pBuilder->CreateBitCast(valToStore, i8PtrTy);
+            pBuilder->CreateStore(valToStore, pBuilder->CreateStructGEP(alloca, i++, [fieldName UTF8String]));
         }
     }
 
@@ -315,6 +329,8 @@ using namespace llvm;
     Value *varToCopy, *destAddr, *valueToRetain;
     Type *captureStructTy;
     for(TQNodeVariable *var in [_capturedVariables allValues]) {
+        if(![[var class] valueIsObject])
+            continue;
         Value *flags = var.isAnonymous ? constFlags : byrefFlags;
 
         NSString *dstName = [NSString stringWithFormat:@"dstBlk.%@Addr", var.name];
@@ -324,7 +340,7 @@ using namespace llvm;
         varToCopy = builder->CreateLoad(builder->CreateStructGEP(srcBlock, i++), [srcName UTF8String]);
 
         if(!var.isAnonymous) {
-            captureStructTy = PointerType::getUnqual([TQNodeVariable captureStructTypeInProgram:aProgram]);
+            captureStructTy = PointerType::getUnqual([[var class] captureStructTypeInProgram:aProgram]);
             valueToRetain = builder->CreateBitCast(varToCopy, captureStructTy);
             valueToRetain = builder->CreateLoad(builder->CreateStructGEP(valueToRetain, 1)); // var->forwarding
             valueToRetain = builder->CreateBitCast(valueToRetain, captureStructTy);
@@ -369,13 +385,15 @@ using namespace llvm;
     Value *varToDisposeOf, *valueToRelease;
     Type *captureStructTy;
     for(TQNodeVariable *var in [_capturedVariables allValues]) {
+        if(![[var class] valueIsObject])
+            continue;
         Value *flags = var.isAnonymous ? constFlags : byrefFlags;
 
         NSString *name = [NSString stringWithFormat:@"block.%@", var.name];
         varToDisposeOf =  builder->CreateLoad(builder->CreateStructGEP(block, i++), [name UTF8String]);
 
         if(!var.isAnonymous) {
-            captureStructTy = PointerType::getUnqual([TQNodeVariable captureStructTypeInProgram:aProgram]);
+            captureStructTy = PointerType::getUnqual([[var class] captureStructTypeInProgram:aProgram]);
             valueToRelease = builder->CreateBitCast(varToDisposeOf, captureStructTy);
             valueToRelease = builder->CreateLoad(builder->CreateStructGEP(valueToRelease, 1)); // var->forwarding
             valueToRelease = builder->CreateBitCast(valueToRelease, captureStructTy);
@@ -471,8 +489,11 @@ using namespace llvm;
     // Load the block pointer argument (must do this before captures, which must be done before arguments in case a default value references a capture)
     llvm::Function::arg_iterator argumentIterator = _function->arg_begin();
     Value *thisBlock = NULL;
+    Value *thisBlockPtr = NULL;
     if([_arguments count] > 0) {
-        thisBlock = _builder->CreateBitCast(argumentIterator, PointerType::getUnqual([self _blockLiteralTypeInProgram:aProgram]));
+        thisBlockPtr = argumentIterator;
+        [_literalPtr store:thisBlockPtr inProgram:aProgram block:self root:aRoot error:aoErr];
+        thisBlock = _builder->CreateBitCast(thisBlockPtr, PointerType::getUnqual([self _blockLiteralTypeInProgram:aProgram]));
         argumentIterator++;
     }
 
@@ -483,9 +504,9 @@ using namespace llvm;
         for(TQNodeVariable *parentVar in [_capturedVariables allValues])
         {
             varToLoad = [parentVar copy];//[TQNodeVariable nodeWithName:name];
-            Value *valueToLoad = _builder->CreateLoad(_builder->CreateStructGEP(thisBlock, i++), [varToLoad.name UTF8String]);
+            Value *valueToLoad = _builder->CreateStructGEP(thisBlock, i++, [varToLoad.name UTF8String]);
             if(![varToLoad isAnonymous])
-                valueToLoad = _builder->CreateBitCast(valueToLoad, PointerType::getUnqual([TQNodeVariable captureStructTypeInProgram:aProgram]));
+                valueToLoad = _builder->CreateBitCast(_builder->CreateLoad(valueToLoad), PointerType::getUnqual([[varToLoad class] captureStructTypeInProgram:aProgram]));
             varToLoad.alloca = (AllocaInst *)valueToLoad;
 
             [_locals setObject:varToLoad forKey:varToLoad.name];
@@ -556,6 +577,42 @@ using namespace llvm;
         [dotDotDot store:vaargArray inProgram:aProgram block:self root:aRoot error:aoErr];
     }
 
+    // Set up the non-local return jump point if required
+    if(_nonLocalReturnTarget) {
+        BasicBlock *nonLocalReturnBlock = BasicBlock::Create(mod->getContext(), "nonLocalRet", _function, 0);
+        BasicBlock *nonLocalReturnPerfBlock = BasicBlock::Create(mod->getContext(), "nonLocalRetPerf", _function, 0);
+        BasicBlock *nonLocalReturnPropBlock = BasicBlock::Create(mod->getContext(), "nonLocalRetProp", _function, 0);
+        BasicBlock *bodyBlock = BasicBlock::Create(mod->getContext(), "body", _function, 0);
+
+        Value *jmpBuf  = _builder->CreateCall(aProgram.TQPushNonLocalReturnStack, thisBlockPtr);
+        Value *jmpRes  = _builder->CreateCall(aProgram.setjmp, jmpBuf);
+        Value *jmpTest = _builder->CreateICmpEQ(jmpRes, ConstantInt::get(aProgram.llIntTy, 0));
+        _builder->CreateCondBr(jmpTest, bodyBlock, nonLocalReturnBlock);
+
+        IRBuilder<> nlrBuilder(nonLocalReturnBlock);
+        Value *shouldProp = nlrBuilder.CreateCall(aProgram.TQShouldPropagateNonLocalReturn, thisBlockPtr);
+        shouldProp = nlrBuilder.CreateICmpEQ(shouldProp, ConstantInt::get(aProgram.llIntTy, 1));
+        nlrBuilder.CreateCondBr(shouldProp, nonLocalReturnPropBlock, nonLocalReturnPerfBlock);
+
+        IRBuilder<> nlrPerfBuilder(nonLocalReturnPerfBlock);
+        Value *nonLocalRetVal = nlrPerfBuilder.CreateCall(aProgram.TQGetNonLocalReturnValue);
+        nlrPerfBuilder.CreateRet(nonLocalRetVal);
+
+        IRBuilder<> nlrPropBuilder(nonLocalReturnPropBlock);
+        nlrPropBuilder.CreateCall2(aProgram.longjmp, nlrPropBuilder.CreateCall(aProgram.TQGetNonLocalReturnPropagationJumpTarget), ConstantInt::get(aProgram.llIntTy, 0));
+        nlrPropBuilder.CreateRet(ConstantPointerNull::get(aProgram.llInt8PtrTy));
+
+        _basicBlock = bodyBlock;
+        delete _builder;
+        _builder = new IRBuilder<>(bodyBlock);
+
+        [_nonLocalReturnTarget store:_builder->CreateCall(aProgram.TQNonLocalReturnStackHeight)
+                           inProgram:aProgram block:self root:aRoot error:aoErr];
+        [_nonLocalReturnThread store:_builder->CreateCall(aProgram.pthread_self)
+                           inProgram:aProgram block:self root:aRoot error:aoErr];
+    }
+
+    // Evaluate the statements
     Value *val;
     for(TQNode *stmt in _statements) {
         if(_isCompactBlock)
@@ -580,6 +637,7 @@ using namespace llvm;
                                  error:(NSError **)aoErr
 {
     TQAssert(!_basicBlock && !_function, @"Tried to regenerate code for block");
+    _parent = aBlock;
 
     if(!_retType)
         _retType = @"@";
@@ -590,10 +648,42 @@ using namespace llvm;
         }
     }
 
+    // Check if there are any child blocks that contain a non-local return targeted at us
+    __block void (^nonLocalRetChecker)(TQNode*, int);
+    nonLocalRetChecker = ^(TQNode *n, int depth) {
+        if([n isKindOfClass:[TQNodeReturn class]]) {
+            int destDepth = [(TQNodeReturn *)n depth];
+            if(!_nonLocalReturnTarget && depth > 0 && destDepth == depth) {
+                _nonLocalReturnTarget = [TQNodeIntVariable tempVar];
+                _nonLocalReturnThread = [TQNodeLongVariable tempVar];
+            } else if(destDepth > depth) {
+                // If there is a return that passes us, we need to capture the jump stack index of that parent
+                TQNodeBlock *dest = self;
+                for(int i = depth; i < destDepth; ++i) {
+                    dest = dest.parent;
+                }
+                TQAssert(dest && ![dest isKindOfClass:[TQNodeRootBlock class]], @"Tried to jump to high");
+                TQNodeIntVariable *target = dest.nonLocalReturnTarget;
+                TQNodeVariable *targetPtr = dest.literalPtr;
+                TQNodeIntVariable *thread = dest.nonLocalReturnThread;
+                // If the target is not our immediate parent, we need to capture the var that our immediate parent captured.
+                if(dest != _parent) {
+                    target    = [_parent.locals objectForKey:target.name];
+                    thread    = [_parent.locals objectForKey:thread.name];
+                    targetPtr = [_parent.locals objectForKey:targetPtr.name];
+                }
+                [_capturedVariables setObject:target    forKey:target.name];
+                [_capturedVariables setObject:thread    forKey:thread.name];
+                [_capturedVariables setObject:targetPtr forKey:targetPtr.name];
+            }
+        } else if([n isKindOfClass:[TQNodeBlock class]])
+            ++depth;
+        [n iterateChildNodes:^(TQNode *child) { nonLocalRetChecker(child, depth); }];
+    };
+    nonLocalRetChecker(self, -1);
+
     // Generate a list of variables to capture
     if(aBlock) {
-        [_capturedVariables release];
-        _capturedVariables = [NSMutableDictionary new];
         // Load actual captured variables
         for(NSString *name in [aBlock.locals allKeys]) {
             if([_locals objectForKey:name]) // Only arguments are contained in _locals at this point
@@ -621,6 +711,8 @@ using namespace llvm;
     }
     if(_autoreleasePool)
         _builder->CreateCall(aProgram.objc_autoreleasePoolPop, _autoreleasePool);
+    if(_nonLocalReturnTarget)
+        _builder->CreateCall(aProgram.TQPopNonLocalReturnStack);
 }
 
 - (void)createDispatchGroupInProgram:(TQProgram *)aProgram

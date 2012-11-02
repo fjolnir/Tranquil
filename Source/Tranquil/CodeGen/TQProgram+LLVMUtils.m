@@ -39,15 +39,15 @@ using namespace llvm;
 
 @implementation TQProgram (LLVMUtils)
 @dynamic llVoidTy, llInt8Ty, llInt16Ty, llInt32Ty, llInt64Ty,
-    llFloatTy, llDoubleTy, llFPTy, llIntTy, llIntPtrTy, llSizeTy,
+    llFloatTy, llDoubleTy, llFPTy, llIntTy, llLongTy, llIntPtrTy, llSizeTy,
     llPtrDiffTy, llVoidPtrTy, llInt8PtrTy, llVoidPtrPtrTy,
-    llInt8PtrPtrTy, llVaListTy, llPointerWidthInBits, llPointerAlignInBytes,
+    llInt8PtrPtrTy, llInt32PtrTy,  llVaListTy, llPointerWidthInBits, llPointerAlignInBytes,
     llPointerSizeInBytes;
 @dynamic objc_msgSend, objc_msgSend_fixup, objc_msgSendSuper,
     objc_storeWeak, objc_loadWeak, objc_allocateClassPair,
     objc_registerClassPair, objc_destroyWeak,
     class_replaceMethod, sel_registerName,
-    objc_getClass, objc_retain, objc_release,
+    objc_getClass, objc_retain, objc_release, objc_exception_throw,
     _Block_copy, _Block_object_assign,
     _Block_object_dispose, imp_implementationWithBlock,
     object_getClass, TQPrepareObjectForReturn,
@@ -62,8 +62,10 @@ using namespace llvm;
     dispatch_get_global_queue, dispatch_group_create,
     dispatch_release, dispatch_group_wait,
     dispatch_group_notify, dispatch_group_async,
-    objc_sync_enter, objc_sync_exit, TQFloatFitsInTaggedNumber;
-
+    objc_sync_enter, objc_sync_exit, TQFloatFitsInTaggedNumber,
+    setjmp, longjmp, TQShouldPropagateNonLocalReturn, TQGetNonLocalReturnJumpTarget,
+    TQGetNonLocalReturnPropagationJumpTarget, TQPushNonLocalReturnStack, TQPopNonLocalReturnStack,
+    TQNonLocalReturnStackHeight, TQGetNonLocalReturnValue, pthread_self;
 
 
 #pragma mark - Types
@@ -121,7 +123,12 @@ using namespace llvm;
 - (llvm::Type *)llIntTy
 {
     llvm::LLVMContext &ctx = self.llModule->getContext();
-    return TypeBuilder<int, false>::get(ctx); //llvm::IntegerType::get(ctx, 32);
+    return TypeBuilder<int, false>::get(ctx);
+}
+- (llvm::Type *)llLongTy
+{
+    llvm::LLVMContext &ctx = self.llModule->getContext();
+    return TypeBuilder<long, false>::get(ctx);
 }
 - (llvm::Type *)llIntPtrTy
 {
@@ -131,11 +138,16 @@ using namespace llvm;
 - (llvm::PointerType *)llInt8PtrTy
 {
     llvm::LLVMContext &ctx = self.llModule->getContext();
-    return TypeBuilder<char*, false>::get(ctx); //self.llInt8Ty->getPointerTo(0);
+    return TypeBuilder<char*, false>::get(ctx);
 }
 - (llvm::PointerType *)llInt8PtrPtrTy
 {
     return self.llInt8PtrTy->getPointerTo(0);
+}
+- (llvm::PointerType *)llInt32PtrTy
+{
+    llvm::LLVMContext &ctx = self.llModule->getContext();
+    return TypeBuilder<int*, false>::get(ctx);
 }
 - (llvm::StructType *)llVaListTy
 {
@@ -202,6 +214,15 @@ using namespace llvm;
     args_i8Ptr_int.push_back(self.llInt8PtrTy);
     args_i8Ptr_int.push_back(self.llIntTy);
     return FunctionType::get(self.llVoidTy, args_i8Ptr_int, false);
+
+}
+- (llvm::FunctionType *)_ft_void__i32Ptr_int
+{
+    // void(id, int)
+    std::vector<Type*> args_i32Ptr_int;
+    args_i32Ptr_int.push_back(self.llInt32PtrTy);
+    args_i32Ptr_int.push_back(self.llIntTy);
+    return FunctionType::get(self.llVoidTy, args_i32Ptr_int, false);
 
 }
 - (llvm::FunctionType *)_ft_void__i8Ptr_i8Ptr_int
@@ -327,6 +348,13 @@ using namespace llvm;
     args_i8Ptr.push_back(self.llInt8PtrTy);
     return FunctionType::get(self.llIntTy, args_i8Ptr, false);
 }
+- (llvm::FunctionType *)_ft_int__i32Ptr
+{
+    // int(int*)
+    std::vector<Type*> args_i32Ptr;
+    args_i32Ptr.push_back(self.llInt32PtrTy);
+    return FunctionType::get(self.llIntTy, args_i32Ptr, false);
+}
 - (llvm::FunctionType *)_ft_i8Ptr__i32_i8PtrPtr
 {
     // id(int, void**)
@@ -335,21 +363,21 @@ using namespace llvm;
     args_int_i8PtrPtr.push_back(self.llInt8PtrPtrTy);
     return FunctionType::get(self.llInt8PtrTy, args_int_i8PtrPtr, false);
 }
-- (llvm::FunctionType *)_ft_i8Ptr__i64_i64
+- (llvm::FunctionType *)_ft_i8Ptr__long_long
 {
     // void*(long, long)
-    std::vector<Type*> args_i64_i64;
-    args_i64_i64.push_back(self.llInt64Ty);
-    args_i64_i64.push_back(self.llInt64Ty);
-    return FunctionType::get(self.llInt8PtrTy, args_i64_i64, false);
+    std::vector<Type*> args_long_long;
+    args_long_long.push_back(self.llInt64Ty);
+    args_long_long.push_back(self.llInt64Ty);
+    return FunctionType::get(self.llInt8PtrTy, args_long_long, false);
 }
-- (llvm::FunctionType *)_ft_i64__i8Ptr_i64
+- (llvm::FunctionType *)_ft_long__i8Ptr_long
 {
     // long(void*, long)
-    std::vector<Type*> args_i8Ptr_i64;
-    args_i8Ptr_i64.push_back(self.llInt8PtrTy);
-    args_i8Ptr_i64.push_back(self.llInt64Ty);
-    return FunctionType::get(self.llInt64Ty, args_i8Ptr_i64, false);
+    std::vector<Type*> args_i8Ptr_long;
+    args_i8Ptr_long.push_back(self.llInt8PtrTy);
+    args_i8Ptr_long.push_back(self.llInt64Ty);
+    return FunctionType::get(self.llLongTy, args_i8Ptr_long, false);
 }
 - (llvm::FunctionType *)_ft_i8__float
 {
@@ -358,7 +386,41 @@ using namespace llvm;
     args_float.push_back(self.llFloatTy);
     return FunctionType::get(self.llInt8Ty, args_float, false);
 }
-
+- (llvm::FunctionType *)_ft_int__void
+{
+    // int()
+    std::vector<Type*> args_void;
+    return FunctionType::get(self.llIntTy, args_void, false);
+}
+- (llvm::FunctionType *)_ft_long_void
+{
+    // int()
+    std::vector<Type*> args_void;
+    return FunctionType::get(self.llLongTy, args_void, false);
+}
+- (llvm::FunctionType *)_ft_i32Ptr__i8Ptr
+{
+    // int*(id)
+    std::vector<Type*> args_i8Ptr;
+    args_i8Ptr.push_back(self.llInt8PtrTy);
+    return FunctionType::get(self.llInt32PtrTy, args_i8Ptr, false);
+}
+- (llvm::FunctionType *)_ft_i32Ptr__void
+{
+    // int*()
+    std::vector<Type*> args_void;
+    return FunctionType::get(self.llInt32PtrTy, args_void, false);
+}
+- (llvm::FunctionType *)_ft_i32Ptr__long_i8Ptr_int_i8Ptr
+{
+    // int*(int, id)
+    std::vector<Type*> args_long_i8Ptr_int_i8Ptr;
+    args_long_i8Ptr_int_i8Ptr.push_back(self.llLongTy);
+    args_long_i8Ptr_int_i8Ptr.push_back(self.llInt8PtrTy);
+    args_long_i8Ptr_int_i8Ptr.push_back(self.llIntTy);
+    args_long_i8Ptr_int_i8Ptr.push_back(self.llInt8PtrTy);
+    return FunctionType::get(self.llInt32PtrTy, args_long_i8Ptr_int_i8Ptr, false);
+}
 
 FunAccessor(objc_allocateClassPair, ft_i8Ptr__i8Ptr_i8Ptr_sizeT)
 FunAccessor(objc_registerClassPair, ft_void__i8Ptr)
@@ -397,15 +459,53 @@ FunAccessor(tq_msgSend, ft_i8ptr__i8ptr_i8ptr_variadic)
 FunAccessor(tq_msgSend_noBoxing, ft_i8ptr__i8ptr_i8ptr_variadic)
 FunAccessor(TQInitializeRuntime, ft_void__void)
 FunAccessor(TQCliArgsToArray, ft_i8Ptr__i32_i8PtrPtr)
-FunAccessor(dispatch_get_global_queue, ft_i8Ptr__i64_i64)
+FunAccessor(dispatch_get_global_queue, ft_i8Ptr__long_long)
 FunAccessor(dispatch_group_create, ft_i8Ptr__void)
 FunAccessor(dispatch_release, ft_void__i8Ptr)
-FunAccessor(dispatch_group_wait, ft_i64__i8Ptr_i64)
+FunAccessor(dispatch_group_wait, ft_long__i8Ptr_long)
 FunAccessor(dispatch_group_notify, ft_void__i8Ptr_i8Ptr_i8Ptr)
 FunAccessor(dispatch_group_async, ft_void__i8Ptr_i8Ptr_i8Ptr)
 FunAccessor(objc_sync_enter, ft_int__i8Ptr)
 FunAccessor(objc_sync_exit, ft_int__i8Ptr)
 FunAccessor(TQFloatFitsInTaggedNumber, ft_i8__float);
+FunAccessor(objc_exception_throw, ft_void__i8Ptr);
+FunAccessor(TQShouldPropagateNonLocalReturn, ft_int__i8Ptr);
+FunAccessor(TQGetNonLocalReturnJumpTarget, ft_i32Ptr__long_i8Ptr_int_i8Ptr);
+FunAccessor(TQGetNonLocalReturnPropagationJumpTarget, ft_i32Ptr__void);
+FunAccessor(TQPushNonLocalReturnStack, ft_i32Ptr__i8Ptr);
+FunAccessor(TQPopNonLocalReturnStack, ft_void__void);
+FunAccessor(TQNonLocalReturnStackHeight, ft_int__void);
+FunAccessor(TQGetNonLocalReturnValue, ft_i8Ptr__void);
+FunAccessor(pthread_self, ft_long_void);
+
+- (llvm::Function *)setjmp
+{
+    Function *func_setjmp = self.llModule->getFunction("_setjmp");
+    if(!func_setjmp) {
+        func_setjmp = Function::Create([self _ft_int__i32Ptr], GlobalValue::ExternalLinkage, "_setjmp", self.llModule);
+        func_setjmp->setCallingConv(CallingConv::C);
+        func_setjmp->addAttribute(~0, Attribute::ReturnsTwice);
+    }
+    return func_setjmp;
+}
+
+- (llvm::Function *)longjmp
+{
+    Function *func_longjmp = self.llModule->getFunction("_longjmp");
+    if(!func_longjmp) {
+        func_longjmp = Function::Create([self _ft_void__i32Ptr_int], GlobalValue::ExternalLinkage, "_longjmp", self.llModule);
+        func_longjmp->setCallingConv(CallingConv::C);
+        func_longjmp->addAttribute(~0, Attribute::NoReturn);
+    }
+    return func_longjmp;
+}
+
+- (llvm::Value *)jmpBufWithBuilder:(llvm::IRBuilder<> *)aBuilder
+{
+    ArrayType *jmpBufTy = ArrayType::get(self.llInt32Ty, 37);
+    Value *jmpBuf = aBuilder->CreateAlloca(jmpBufTy, 0);
+    return aBuilder->CreateStructGEP(jmpBuf, 0);
+}
 
 #pragma mark -
 
