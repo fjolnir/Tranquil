@@ -60,6 +60,8 @@ using namespace llvm;
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
+    Module *mod = aProgram.llModule;
+
     Value *condVal = [_condition generateCodeInProgram:aProgram
                                                  block:aBlock
                                                   root:aRoot
@@ -76,6 +78,27 @@ using namespace llvm;
     // If we're inside a loop, the loop needs to know to release the lock before skipping or breaking
     TQNodeWhileBlock *loop = objc_getAssociatedObject(aBlock, TQCurrLoopKey);
     [loop.cleanupStatements insertObject:exitNode atIndex:0];
+
+    // We also need to add a non-local return propagation point where we release the lock
+    BasicBlock *lockReleaseBlock = BasicBlock::Create(mod->getContext(), "releaseLockAndPropagate", aBlock.function, 0);
+    IRBuilder<> lockReleaseBuilder(lockReleaseBlock);
+    BasicBlock *lockBodyBlock = BasicBlock::Create(mod->getContext(), "lockBody", aBlock.function, 0);
+    Value *jmpBuf  = aBlock.builder->CreateCall(aProgram.TQPushNonLocalReturnStack, [aBlock.literalPtr generateCodeInProgram:aProgram
+                                                                                                                       block:aBlock
+                                                                                                                        root:aRoot
+                                                                                                                       error:aoErr]);
+    Value *jmpRes  = aBlock.builder->CreateCall(aProgram.setjmp, jmpBuf);
+    Value *jmpTest = aBlock.builder->CreateICmpEQ(jmpRes, ConstantInt::get(aProgram.llIntTy, 0));
+    aBlock.builder->CreateCondBr(jmpTest, lockBodyBlock, lockReleaseBlock);
+
+    lockReleaseBuilder.CreateCall(aProgram.objc_sync_exit, condVal);
+    Value *propBuf = lockReleaseBuilder.CreateCall(aProgram.TQPopNonLocalReturnStackAndGetPropagationJumpTarget);
+    lockReleaseBuilder.CreateCall2(aProgram.longjmp, propBuf, ConstantInt::get(aProgram.llIntTy, 0));
+    lockReleaseBuilder.CreateRet(ConstantPointerNull::get(aProgram.llInt8PtrTy));
+
+    aBlock.basicBlock = lockBodyBlock;
+    delete aBlock.builder;
+    aBlock.builder = new IRBuilder<>(lockBodyBlock);
 
     for(TQNode *stmt in _statements) {
         [stmt generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];

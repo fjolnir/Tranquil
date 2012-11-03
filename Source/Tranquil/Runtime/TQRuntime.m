@@ -270,7 +270,14 @@ void *TQGetNonLocalReturnPropagationJumpTarget()
     TQAssert(stack->height > 0, @"PANIC: Tried to propagate non-local return but stack was empty");
     return stack->items[stack->height-1].jumpBuf;
 }
-
+// Pops the stack and returns the non local return target left on the top to pass to longjmp
+void *TQPopNonLocalReturnStackAndGetPropagationJumpTarget()
+{
+    struct _TQNonLocalReturnStack *stack = _getNonLocalReturnStack();
+    --stack->height;
+    TQAssert(stack->height > 0, @"PANIC: Tried to propagate non-local return but stack was empty");
+    return stack->items[stack->height-1].jumpBuf;
+}
 
 // Returns a pointer to pass to setjmp
 void *TQPushNonLocalReturnStack(id block)

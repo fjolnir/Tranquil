@@ -116,17 +116,12 @@ void TQIterateTypesInEncoding(const char *typePtr, TQTypeIterationBlock blk);
 NSInteger TQBlockGetNumberOfArguments(id block);
 
 // These functions manage the non-local return propagation stack
-
-// Pops the stack and returns whether the caller should propagate or not
 int TQShouldPropagateNonLocalReturn(id block);
-// Returns a pointer to pass to longjmp, and sets the destination block to propagate up to
 void *TQGetNonLocalReturnJumpTarget(pthread_t thread, id destBlock, int dest, id retVal);
-// Returns a pointer to pass to longjmp
 void *TQGetNonLocalReturnPropagationJumpTarget();
-// Returns a pointer to pass to setjmp
 void *TQPushNonLocalReturnStack(id block);
-// Just pops the stack (for use when the block returns normally)
 void TQPopNonLocalReturnStack();
+void *TQPopNonLocalReturnStackAndGetPropagationJumpTarget();
 int TQNonLocalReturnStackHeight();
 id TQGetNonLocalReturnValue();
 
