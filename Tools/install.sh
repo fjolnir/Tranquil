@@ -24,16 +24,33 @@ else
     popd
 fi
 
-echo "\n\033[0;34mInstalling Greg the parser generator...\033[0m"
-if [ -d /usr/local/tranquil/greg ]
+echo "\n\033[0;34mInstalling Ragel\033[0m"
+if [ -d /usr/local/tranquil/ragel ]
 then
-  echo "\033[0;32mYou already have greg installed.\033[0m"
+  echo "\033[0;32mYou already have ragel installed.\033[0m"
 else
-    git clone https://github.com/nddrylliog/greg.git /tmp/greg-git
-    pushd /tmp/greg-git
+    pushd /tmp
+    curl http://www.complang.org/ragel/ragel-6.7.tar.gz -o ragel-6.7.tgz
+    tar -xzf ragel-6.7.tgz
+    cd ragel-6.7
+    ./configure --prefix=/usr/local/tranquil/ragel
     make
-    mkdir -p /usr/local/tranquil/greg/bin
-    cp greg /usr/local/tranquil/greg/bin
+    make install
+    popd
+fi
+
+echo "\n\033[0;34mInstalling Lemon\033[0m"
+if [ -d /usr/local/tranquil/lemon ]
+then
+  echo "\033[0;32mYou already have lemon installed.\033[0m"
+else
+    pushd /tmp
+    curl http://tx97.net/pub/distfiles/lemon-1.69.tar.bz2 -o lemon-1.69.tbz
+    tar -xzf lemon-1.69.tbz
+    cd lemon-1.69
+    mkdir -p /usr/local/tranquil/lemon/bin
+    /usr/local/tranquil/llvm/bin/clang lemon.c -o /usr/local/tranquil/lemon/bin/lemon
+    cp lempar.c /usr/local/tranquil/lemon/bin
     popd
 fi
 
@@ -54,18 +71,29 @@ else
     popd
 fi
 
-echo "\n\033[0;34mCloning Tranquil from GitHub...\033[0m"
 
-hash git >/dev/null && /usr/bin/env git clone git://github.com/fjolnir/Tranquil.git /usr/local/tranquil/src || {
-  echo "\033[0;31mgit not installed\033[0m"
-  exit
-}
+if [ -d /usr/local/tranquil/src ]
+then
+    echo "\n\033[0;34mUpdating Tranquil...\033[0m"
+    pushd /usr/local/tranquil/src
+    git pull
+    popd
+else
+    echo "\n\033[0;34mCloning Tranquil from GitHub...\033[0m"
+    hash git >/dev/null && /usr/bin/env git clone git://github.com/fjolnir/Tranquil.git /usr/local/tranquil/src || {
+      echo "\033[0;31mgit not installed\033[0m"
+      exit
+    }
+fi
 
 echo "\033[0;34mCompiling...\033[0m"
 pushd /usr/local/tranquil/src/
-rake
+rake || {
+  echo "\033[0;31mError building tranquil!\033[0m"
+  exit
+}
 popd
 
 echo "\n\033[0;32mCongratulations!\n\033[0;33mYou can now find the Tranquil binary at '\033[0m/usr/local/tranquil/bin/tranquil\033[0;33m'\033[0m"
-
+echo "\n\033[0;33m(You'll probably want to add /usr/local/tranquil/bin to your \033[0mPATH\033[0;33m)\033[0m"
 
