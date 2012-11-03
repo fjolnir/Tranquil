@@ -1,8 +1,8 @@
 CC    = '/usr/local/tranquil/llvm/bin/clang'
 CXX   = '/usr/local/tranquil/llvm/bin/clang++'
 LD    = CC
-RAGEL = '/usr/local/bin/ragel'
-LEMON = '/usr/local/bin/lemon'
+RAGEL = '/usr/local/tranquil/ragel/bin/ragel'
+LEMON = '/usr/local/tranquil/lemon/bin/lemon'
 
 MAXARGS = 32 # The number of block dispatchers to compile
 
