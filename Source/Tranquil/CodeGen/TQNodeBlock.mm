@@ -172,7 +172,7 @@ using namespace llvm;
         if(var.isAnonymous)
             fields.push_back([[var class] valueTypeInProgram:aProgram]);
         else
-            fields.push_back(PointerType::getUnqual([[var class] captureStructTypeInProgram:aProgram]));
+            fields.push_back(i8PtrTy);
     }
 
     _literalType = StructType::get(aProgram.llModule->getContext(), fields, true);
@@ -338,7 +338,6 @@ using namespace llvm;
 
         destAddr  = builder->CreateBitCast(builder->CreateStructGEP(dstBlock, i), int8PtrTy, [dstName UTF8String]);
         varToCopy = builder->CreateLoad(builder->CreateStructGEP(srcBlock, i++), [srcName UTF8String]);
-
         if(!var.isAnonymous) {
             captureStructTy = PointerType::getUnqual([[var class] captureStructTypeInProgram:aProgram]);
             valueToRetain = builder->CreateBitCast(varToCopy, captureStructTy);
@@ -347,8 +346,10 @@ using namespace llvm;
             valueToRetain = builder->CreateLoad(builder->CreateStructGEP(valueToRetain, 4)); // forwarding->capture
 
             builder->CreateCall(aProgram.objc_retain, valueToRetain);
+        } else if([[var class] valueIsObject]) {
+            varToCopy = builder->CreateCall(aProgram.objc_retain, varToCopy);
         }
-        builder->CreateCall3(aProgram._Block_object_assign, destAddr, varToCopy, flags);
+        builder->CreateCall3(aProgram._Block_object_assign, destAddr, builder->CreateBitCast(varToCopy, int8PtrTy), flags);
     }
 
     builder->CreateRetVoid();
@@ -400,8 +401,9 @@ using namespace llvm;
             valueToRelease = builder->CreateStructGEP(valueToRelease, 4); // forwarding->capture
 
             builder->CreateCall(aProgram.objc_release, builder->CreateLoad(valueToRelease));
-        }
-        builder->CreateCall2(aProgram._Block_object_dispose, varToDisposeOf, flags);
+        } else if([[var class] valueIsObject])
+            builder->CreateCall(aProgram.objc_release, varToDisposeOf);
+        builder->CreateCall2(aProgram._Block_object_dispose, builder->CreateBitCast(varToDisposeOf, int8PtrTy), flags);
     }
 
     builder->CreateRetVoid();
@@ -503,7 +505,7 @@ using namespace llvm;
         TQNodeVariable *varToLoad;
         for(TQNodeVariable *parentVar in [_capturedVariables allValues])
         {
-            varToLoad = [parentVar copy];//[TQNodeVariable nodeWithName:name];
+            varToLoad = [parentVar copy];
             Value *valueToLoad = _builder->CreateStructGEP(thisBlock, i++, [varToLoad.name UTF8String]);
             if(![varToLoad isAnonymous])
                 valueToLoad = _builder->CreateBitCast(_builder->CreateLoad(valueToLoad), PointerType::getUnqual([[varToLoad class] captureStructTypeInProgram:aProgram]));

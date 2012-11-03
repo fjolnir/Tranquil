@@ -56,7 +56,7 @@ using namespace llvm;
     TQValueForKey, TQGetOrCreateClass,
     TQObjectsAreEqual, TQObjectsAreNotEqual, TQObjectGetSuperClass,
     TQVaargsToArray, TQUnboxObject,
-    TQBoxValue, tq_msgSend, tq_msgSend_noBoxing, objc_retainAutoreleaseReturnValue,
+    TQBoxValue, tq_msgSend, tq_msgSend_noBoxing, objc_retainAutorelease, objc_retainAutoreleaseReturnValue,
     objc_autoreleaseReturnValue, objc_retainAutoreleasedReturnValue,
     objc_storeStrong, TQStoreStrong, TQInitializeRuntime, TQCliArgsToArray,
     dispatch_get_global_queue, dispatch_group_create,
@@ -431,6 +431,7 @@ FunAccessor(objc_msgSend, ft_i8ptr__i8ptr_i8ptr_variadic)
 FunAccessor(objc_msgSend_fixup, ft_i8ptr__i8ptr_i8ptr_variadic)
 FunAccessor(objc_msgSendSuper, ft_i8ptr__i8ptr_i8ptr_variadic)
 FunAccessor(objc_retain, ft_i8Ptr__i8Ptr)
+FunAccessor(objc_retainAutorelease, ft_i8Ptr__i8Ptr)
 FunAccessor(objc_retainAutoreleaseReturnValue, ft_i8Ptr__i8Ptr)
 FunAccessor(objc_retainAutoreleasedReturnValue, ft_i8Ptr__i8Ptr)
 FunAccessor(objc_autoreleaseReturnValue, ft_i8Ptr__i8Ptr)

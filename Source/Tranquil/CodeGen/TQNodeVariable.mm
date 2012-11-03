@@ -171,7 +171,7 @@ using namespace llvm;
         allocaType = [[self class] captureStructTypeInProgram:aProgram];
     IRBuilder<> entryBuilder(&aBlock.function->getEntryBlock(), aBlock.function->getEntryBlock().begin());
 
-    if(aBlock == aRoot) {
+    if(aBlock == aRoot && !_isAnonymous) {
         _isGlobal = YES;
         [[aProgram globals] setObject:self forKey:_name];
         const char *globalName = [[NSString stringWithFormat:@"TQGlobalVar_%@", _name] UTF8String];
