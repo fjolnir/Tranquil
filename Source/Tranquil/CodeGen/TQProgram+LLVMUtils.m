@@ -65,7 +65,7 @@ using namespace llvm;
     objc_sync_enter, objc_sync_exit, TQFloatFitsInTaggedNumber,
     setjmp, longjmp, TQShouldPropagateNonLocalReturn, TQGetNonLocalReturnJumpTarget,
     TQGetNonLocalReturnPropagationJumpTarget, TQPushNonLocalReturnStack, TQPopNonLocalReturnStack,
-    TQNonLocalReturnStackHeight, TQGetNonLocalReturnValue, pthread_self;
+    TQPopNonLocalReturnStackAndGetPropagationJumpTarget, TQNonLocalReturnStackHeight, TQGetNonLocalReturnValue, pthread_self;
 
 
 #pragma mark - Types
@@ -475,6 +475,7 @@ FunAccessor(TQGetNonLocalReturnJumpTarget, ft_i32Ptr__long_i8Ptr_int_i8Ptr);
 FunAccessor(TQGetNonLocalReturnPropagationJumpTarget, ft_i32Ptr__void);
 FunAccessor(TQPushNonLocalReturnStack, ft_i32Ptr__i8Ptr);
 FunAccessor(TQPopNonLocalReturnStack, ft_void__void);
+FunAccessor(TQPopNonLocalReturnStackAndGetPropagationJumpTarget, ft_i32Ptr__void);
 FunAccessor(TQNonLocalReturnStackHeight, ft_int__void);
 FunAccessor(TQGetNonLocalReturnValue, ft_i8Ptr__void);
 FunAccessor(pthread_self, ft_long_void);

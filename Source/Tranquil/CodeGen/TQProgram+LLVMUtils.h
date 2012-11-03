@@ -51,8 +51,8 @@
     *dispatch_group_notify, *dispatch_group_async, *objc_sync_enter, *objc_sync_exit,
     *TQFloatFitsInTaggedNumber, *setjmp, *longjmp,
     *TQShouldPropagateNonLocalReturn, *TQGetNonLocalReturnJumpTarget, *TQGetNonLocalReturnPropagationJumpTarget,
-    *TQPushNonLocalReturnStack, *TQPopNonLocalReturnStack, *TQNonLocalReturnStackHeight,
-    *TQGetNonLocalReturnValue, *pthread_self;
+    *TQPushNonLocalReturnStack, *TQPopNonLocalReturnStack, *TQPopNonLocalReturnStackAndGetPropagationJumpTarget,
+    *TQNonLocalReturnStackHeight, *TQGetNonLocalReturnValue, *pthread_self;
 
 - (llvm::Type *)llvmTypeFromEncoding:(const char *)aEncoding;
 - (llvm::Value *)jmpBufWithBuilder:(llvm::IRBuilder<> *)aBuilder;
