@@ -71,6 +71,7 @@ using namespace llvm;
 
     TQNode *exitNode = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *b, TQNodeRootBlock *r) {
         aBlock.builder->CreateCall(aProgram.objc_sync_exit, condVal);
+        aBlock.builder->CreateCall(aProgram.TQPopNonLocalReturnStack);
         return (Value *)NULL;
     }];
     // Let the block know it needs to release the lock before returning
