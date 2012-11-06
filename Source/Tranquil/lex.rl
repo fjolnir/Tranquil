@@ -69,6 +69,7 @@ typedef struct {
     hex         = "0x"i xdigit+;
     bin         = "0b"i [0-1]+;
     oct         = "0o"i [0-7]+;
+    anybase     = udigit+ "r"i ([0-9]|[a-zA-Z])+;
 
     char        = ualnum | '?' | '!' | '_';
     constant    = '_'* uupper char*;
@@ -207,6 +208,12 @@ main := |*
     bin   term                       => { EmitIntToken(NUMBERNL, 2,  2); ExprBeg(); BacktrackTerm();      };
     oct   term                       => { EmitIntToken(NUMBERNL, 8,  2); ExprBeg(); BacktrackTerm();      };
     hex   term                       => { EmitIntToken(NUMBERNL, 16, 2); ExprBeg(); BacktrackTerm();      };
+    anybase term                     => {
+        // Find the base
+        NSString *str = NSStr(0,0);
+        NSString *baseStr = [str substringToIndex:[str rangeOfString:@"r"].location];
+        EmitIntToken(NUMBERNL, atoi([baseStr UTF8String]), [baseStr length]+1); ExprBeg(); BacktrackTerm();
+    };
 
     int                              => { EmitIntToken(NUMBER, 10, 0);                                    };
     float                            => { EmitFloatToken(NUMBER);                                         };
