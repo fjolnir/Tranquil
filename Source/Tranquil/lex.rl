@@ -88,7 +88,7 @@ typedef struct {
     lStr        = '"' strCont* lGuillmt;
     mStr        = rGuillmt strCont* lGuillmt;
     rStr        = rGuillmt strCont* '"';
-    selector    = (ualnum | "+" | "-" | "*" | "/" | "^" | "=" | "~" | "<" | ">" | "[" | "]" | "_")+ ":";
+    selector    = (ualnum | "+" | "-" | "*" | "/" | "^" | "=" | "~" | "<" | ">" | "[" "]" | "_")+ ":";
 
     regexCont   = (ualnum | ascii) - '/';
 

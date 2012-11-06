@@ -1,0 +1,11 @@
+#Foo {
+    + a: a [b: b = 123 c: c = 321] {
+        a print
+        b print
+        c print
+    }
+}
+
+Foo a: 1
+Foo a: 1 b: 2
+Foo a: 1 b: 2 c: 3

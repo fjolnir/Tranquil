@@ -7,6 +7,7 @@
 #import "TQNodeArgumentDef.h"
 #import "TQNodeOperator.h"
 #import "TQNodeVariable.h"
+#import "TQNodeNothing.h"
 #import "ObjCSupport/TQHeaderParser.h"
 #import <objc/runtime.h>
 
@@ -156,6 +157,33 @@ using namespace llvm;
     if(_type == kTQClassMethod)
         classPtr = builder->CreateCall(aProgram.object_getClass, classPtr);
     builder->CreateCall4(aProgram.class_replaceMethod, classPtr, selector, imp, signature);
+
+    // If we have parameters with a default argument then we need to create dummy methods to handle that
+    NSUInteger firstDefArgParamIdx = [self.arguments indexOfObjectPassingTest:^(TQNodeMethodArgumentDef *arg, NSUInteger _, BOOL *__) {
+        return (BOOL)(arg.defaultArgument != nil);
+    }];
+    if(firstDefArgParamIdx != NSNotFound) {
+        NSArray *argDefs = [self.arguments subarrayWithRange:(NSRange){0, firstDefArgParamIdx}];
+        for(int i = firstDefArgParamIdx; i < [self.arguments count]; ++i) {
+            TQNodeMethod *method = [[self class] nodeWithType:_type];
+            method.isCompactBlock = YES;
+            method.arguments = [[argDefs mutableCopy] autorelease];
+
+            // Construct a call to the actual method passing nothings
+            NSMutableArray *args = [NSMutableArray arrayWithCapacity:[argDefs count]];
+            for(int j = 2; j < [self.arguments count]; ++j) {
+                TQNodeMethodArgumentDef *def = [self.arguments objectAtIndex:j];
+                TQNode *passedNode = (j >= i) ? [TQNodeNothing node] : [TQNodeVariable nodeWithName:def.name];
+                [args addObject:[TQNodeArgument nodeWithPassedNode:passedNode selectorPart:def.selectorPart]];
+            }
+            TQNodeMessage *msg = [TQNodeMessage nodeWithReceiver:[TQNodeSelf node]];
+            msg.arguments = args;
+            [method.statements addObject:msg];
+            [method generateCodeInProgram:aProgram block:aBlock class:aClass root:aRoot error:aoErr];
+
+            argDefs = [argDefs arrayByAddingObject:[self.arguments objectAtIndex:i]];
+        }
+    }
 
     _class = nil;
     return NULL;

@@ -60,6 +60,9 @@
 	aBlock(something, somethingElse) \ Calls a block with a two arguments
 	aBlock { ..statements.. }        \ A valid callee followed by a literal block, is equivalent to a call with a single block argument
 	
+    \ Macros (Called the same way as a block would)
+    *Choice { cond, a, b | cond ? a ! b }  \ A contrived example
+	
 	\ Flow control
 	if ..expression.. {      \ Executes the passed literal block if the expression is non-nil
 		..statements..       \ (The braces can be omitted if the block contains only one statement)
@@ -106,6 +109,9 @@
 		- aMethodTaking: a and: b {  \ Instance method taking two arguments ('self' refers to an instance of Klass)
 			^#ivar = a + b           \ Returns the value of self#ivar after setting it to a+b
 		}
+		
+		- aMethodWith: arg1 [andOptionalArgument: arg2 = "default value"] { \ Wrapping trailing selector/argument pairs in brackets
+		    "2 arguments were passed" print if arg2                         \ indicates that they're optional.
 		}
 	}
 	

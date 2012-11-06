@@ -376,13 +376,25 @@ method(M)   ::= MINUS|PLUS(TY) selDef(SEL) blockNl(B). { M = [TQNodeMethod nodeW
                                                          [M setIsCompactBlock:[B isCompactBlock]];
                                                          [M setStatements:[B statements]];                                            }
 
-selDef(SD) ::= uSelDef(T). { SD = [NSMutableArray arrayWithObject:T]; }
-selDef(SD) ::= kSelDef(T). { SD = T; }
+selDef(SD) ::= uSelDef(T).                             { SD = [NSMutableArray arrayWithObject:T];                                     }
+selDef(SD) ::= kSelDef(T).                             { SD = T;                                                                      }
 
 uSelDef(SD) ::= IDENT|IDENTNL|CONST|CONSTNL(S).        { SD = [TQNodeMethodArgumentDef nodeWithName:nil selectorPart:[S value]];      }
-kSelDef(SD) ::= kSelPart(P).                           { SD = [NSMutableArray arrayWithObject:P];                                     }
-kSelDef(SD) ::= kSelDef(O) kSelPart(P).                { SD = O; [SD addObject:P];                                                    }
+
+kSelDef(SD) ::= rSelDef(T).                            { SD = T;                                                                      }
+kSelDef(SD) ::= rSelDef(T) oSelDef(TT).                { SD = T; [SD addObjectsFromArray:TT];                                         }
+
+// Required keyword selector parts
+rSelDef(SD) ::= kSelPart(P).                           { SD = [NSMutableArray arrayWithObject:P];                                     }
+rSelDef(SD) ::= kSelDef(O) kSelPart(P).                { SD = O; [SD addObject:P];                                                    }
+// Optional keyword selector parts
+oSelDef(SD) ::= LBRACKET oSelParts(T) RBRACKET|RBRACKETNL. { SD = T;                                                                  }
+oSelParts(SD) ::= oSelPart(P).                         { SD = [NSMutableArray arrayWithObject:P];                                     }
+oSelParts(SD) ::= oSelParts(O) oSelPart(P).              { SD = O; [SD addObject:P];                                                    }
+
 kSelPart(SD) ::= SELPART(S) IDENT|IDENTNL(N).          { SD = [TQNodeMethodArgumentDef nodeWithName:[N value] selectorPart:[S value]];}
+oSelPart(SD) ::= kSelPart(T).                          { SD = T; [SD setDefaultArgument:[TQNodeNil node]];                            }
+oSelPart(SD) ::= kSelPart(T) ASSIGN msgArg(E).           { SD = T; [SD setDefaultArgument:E];                                           }
 
 onloadMessages(MS) ::= .                               { MS = [NSMutableArray array];                                                 }
 onloadMessages(MS) ::= onloadMessages(O) onloadMessage(M). { MS = O;  [MS addObject:M];                                               }
