@@ -25,6 +25,11 @@ typedef struct {
 
 #define EmitStringToken(tokenId, lTrim, rTrim) _EmitToken(tokenId, NSStr(lTrim, rTrim))
 
+#define EmitConstStringToken(tokenId) do { \
+    BOOL hasQuotes = *(ts+1) == '"'; \
+    EmitStringToken((tokenId), 1+hasQuotes, hasQuotes); \
+} while(0)
+
 #define EmitIntToken(tokenId, base, prefixLen) do { \
     unsigned char *str = CopyCStr(); \
     long long numVal = strtoll((char *)str + (prefixLen), NULL, (base)); \
@@ -221,8 +226,8 @@ main := |*
     oct                              => { EmitIntToken(NUMBER, 8,  2);                                    };
     hex                              => { EmitIntToken(NUMBER, 16, 2);                                    };
 
-    constStr %{temp1 = p;} term      => { te = temp1; EmitStringToken(CONSTSTRNL,  1, 0); ExprBeg(); BacktrackTerm(); };
-    constStr                         => { EmitStringToken(CONSTSTR,    1, 0);                             };
+    constStr %{temp1 = p;} term      => { te = temp1; EmitConstStringToken(CONSTSTRNL); ExprBeg(); BacktrackTerm(); };
+    constStr                         => { EmitConstStringToken(CONSTSTR);                                 };
 
     lStr                             => { EmitStringToken(LSTR,   1, 2); ExprBeg();                       };
     mStr                             => { EmitStringToken(MSTR,   2, 2); ExprBeg();                       };
