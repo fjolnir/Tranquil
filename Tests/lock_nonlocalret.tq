@@ -1,0 +1,16 @@
+obj = @123
+a = {
+    lock obj {
+        "took lock" print
+        {
+            ^^123
+        }()
+    }
+    ^321
+}
+
+async a()
+wait
+lock obj {
+    "released lock!" print
+}

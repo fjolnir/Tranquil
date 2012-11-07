@@ -1,0 +1,16 @@
+a = {
+    b = {
+        [1,2,3,4] each: { i |
+            ^^^123 if i > 2
+            i print
+        }
+    }
+    ^b
+}
+b = a()
+b print
+{
+    foo = { ^^123 } \ Force the block to generate a landing pad
+    "crash please" print
+    b() print       \ This should crash!
+}() print
