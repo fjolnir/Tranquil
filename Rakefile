@@ -24,8 +24,8 @@ CXXFLAGS = {
         '-O3',
     ].join(' '),
     :development => [
-        '-DDEBUG',
         '-mmacosx-version-min=10.7',
+        '-DDEBUG',
         '-I`pwd`/Source',
         '-I`pwd`/Build',
         '-I/usr/include/libxml2',
@@ -201,7 +201,7 @@ def _install
     sh "cp Build/tranquil /usr/local/tranquil/bin"
     sh "cp Tools/repl.tq /usr/local/tranquil/bin/tqrepl"
     sh "cp Tools/tqlive.tq /usr/local/tranquil/bin/tqlive"
-#    sh "/usr/local/tranquil/bin/tranquil Tools/tqc.tq Tools/tqc.tq -o /usr/local/tranquil/bin/tqc"
+    sh "/usr/local/tranquil/bin/tranquil Tools/tqc.tq Tools/tqc.tq -o /usr/local/tranquil/bin/tqc"
 end
 
 task :default => [:build_dir, :tranquil] do |t|
