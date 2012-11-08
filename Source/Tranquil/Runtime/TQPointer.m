@@ -263,6 +263,7 @@ NSString * const TQTypeString    = @"*";
 {
     return [[[self alloc] initWithType:@encode(double) count:[aCount unsignedIntegerValue]] autorelease];
 }
+#if 0
 + (TQPointer *)toNSPoints:(TQNumber *)aCount
 {
     return [[[self alloc] initWithType:@encode(NSPoint) count:[aCount unsignedIntegerValue]] autorelease];
@@ -275,6 +276,7 @@ NSString * const TQTypeString    = @"*";
 {
     return [[[self alloc] initWithType:@encode(NSRect) count:[aCount unsignedIntegerValue]] autorelease];
 }
+#endif
 + (TQPointer *)toObject
 {
     return [self toObjects:[TQNumber numberWithInt:1]];
@@ -315,6 +317,7 @@ NSString * const TQTypeString    = @"*";
 {
     return [self toDoubles:[TQNumber numberWithInt:1]];
 }
+#if 0
 + (TQPointer *)toNSPoint
 {
     return [self toNSPoints:[TQNumber numberWithInt:1]];
@@ -327,4 +330,5 @@ NSString * const TQTypeString    = @"*";
 {
     return [self toNSRects:[TQNumber numberWithInt:1]];
 }
+#endif
 @end

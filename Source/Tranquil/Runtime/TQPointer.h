@@ -57,9 +57,11 @@ extern NSString * const TQTypeString;
 + (TQPointer *)toLongLong;
 + (TQPointer *)toFloat;
 + (TQPointer *)toDouble;
+#if 0
 + (TQPointer *)toNSPoint;
 + (TQPointer *)toNSSize;
 + (TQPointer *)toNSRect;
+#endif
 + (TQPointer *)toObjects:(TQNumber *)aCount;
 + (TQPointer *)toChars:(TQNumber *)aCount;
 + (TQPointer *)toBOOLs:(TQNumber *)aCount;
@@ -69,7 +71,9 @@ extern NSString * const TQTypeString;
 + (TQPointer *)toLongLongs:(TQNumber *)aCount;
 + (TQPointer *)toFloats:(TQNumber *)aCount;
 + (TQPointer *)toDoubles:(TQNumber *)aCount;
+#if 0
 + (TQPointer *)toNSPoints:(TQNumber *)aCount;
 + (TQPointer *)toNSSizes:(TQNumber *)aCount;
 + (TQPointer *)toNSRects:(TQNumber *)aCount;
+#endif
 @end

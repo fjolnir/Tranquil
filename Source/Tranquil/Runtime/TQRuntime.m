@@ -19,7 +19,7 @@ id TQNothing = nil;
 
 // A map keyed with `Class xor (Selector << 32)` with values either being 0x1 (No boxing required for selector)
 // or a pointer the Method object of the method to be boxed. This is only used by tq_msgSend and tq_boxedMsgSend
-NSMapTable *_TQSelectorCache = NULL;
+CFMutableDictionaryRef _TQSelectorCache = NULL;
 
 static const NSString *_TQDynamicIvarTableKey = @"TQDynamicIvarTableKey";
 
@@ -121,21 +121,25 @@ void _TQCacheSelector(id obj, SEL sel)
     @synchronized((NSDictionary *)_TQSelectorCache) {
         Class kls = object_getClass(obj);
         // See msgsend.s for an explanation of the key
+#ifdef __LP64__
         void *cacheKey = (void*)((uintptr_t)kls ^ ((uintptr_t)sel << 32));
+#else
+        void *cacheKey = (void*)((uintptr_t)kls ^ ((uintptr_t)sel << 16)); // TODO: verify if this works
+#endif
 
         Method method = class_getInstanceMethod(kls, sel);
         // Methods that do not have a registered implementation are assumed to take&return only objects
         uintptr_t unboxedVal = 0x1L;
         if(!method) {
-            NSMapInsert(_TQSelectorCache, cacheKey, (void*)0x1L);
+            CFDictionarySetValue(_TQSelectorCache, cacheKey, (void*)0x1L);
             return;
         }
 
         const char *enc = method_getTypeEncoding(method);
         if(TQMethodTypeRequiresBoxing(enc))
-            NSMapInsert(_TQSelectorCache, cacheKey, (void*)method);
+            CFDictionarySetValue(_TQSelectorCache, cacheKey, (void*)method);
         else
-            NSMapInsert(_TQSelectorCache, cacheKey, (void*)0x1L);
+            CFDictionarySetValue(_TQSelectorCache, cacheKey, (void*)0x1L);
     }
  }
 
@@ -317,7 +321,10 @@ static inline NSMapTable *_TQGetDynamicIvarTable(id obj)
 {
     NSMapTable *ivarTable = objc_getAssociatedObject(obj, _TQDynamicIvarTableKey);
     if(!ivarTable) {
-        ivarTable = NSCreateMapTable(NSNonOwnedPointerMapKeyCallBacks, NSObjectMapValueCallBacks, 0);
+//        ivarTable = NSCreateMapTable(NSNonOwnedPointerMapKeyCallBacks, NSObjectMapValueCallBacks, 0);
+        ivarTable = [[NSMapTable alloc] initWithKeyOptions:NSPointerFunctionsOpaqueMemory
+                                              valueOptions:NSPointerFunctionsStrongMemory
+                                                  capacity:0];
         objc_setAssociatedObject(obj, _TQDynamicIvarTableKey, ivarTable, OBJC_ASSOCIATION_RETAIN);
         [ivarTable release];
     }
@@ -472,14 +479,19 @@ BOOL TQAugmentClassWithOperators(Class klass)
 
     return YES;
 }
-
+#if TARGET_OS_EMBEDDED
+#error "YEAH"
+#endif
 void TQInitializeRuntime()
 {
     if(_TQSelectorCache)
         return;
 
-    _TQSelectorCache = NSCreateMapTable((NSMapTableKeyCallBacks){NULL,NULL,NULL},
-                                        (NSMapTableValueCallBacks){NULL,NULL,NULL}, 1000);
+    _TQSelectorCache = CFDictionaryCreateMutable(NULL, 1000, NULL, NULL);
+//                                        (NSMapTableValueCallBacks){NULL,NULL,NULL}, 1000);
+//    _TQSelectorCache = [[NSMapTable alloc] initWithKeyOptions:NSPointerFunctionsOpaqueMemory
+//                                                 valueOptions:NSPointerFunctionsOpaqueMemory
+//                                                     capacity:1000];
 
     pthread_key_create(&_TQNonLocalReturnStackKey, (void (*)(void *))&_destroyNonLocalReturnStack);
 

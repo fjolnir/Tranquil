@@ -54,6 +54,27 @@ else
     popd
 fi
 
+echo "\n\033[0;34mInstalling libffi\033[0m"
+if [ -d /usr/local/tranquil/libffi ]
+then
+  echo "\033[0;32mYou already have libffi installed.\033[0m"
+else
+    pushd /tmp
+    git clone https://github.com/pandamonia/libffi-iOS.git
+    cd libffi-iOS
+    xcodebuild -target "libffi iOS" -sdk iphoneos
+    mkdir -p /usr/local/tranquil/libffi-ios/lib
+    cp build/Release-iphoneos/libffi.a /usr/local/tranquil/libffi-ios/lib
+    cp -R build/Release-iphoneos/usr/local/include /usr/local/tranquil/libffi-ios/include
+
+    xcodebuild -target "libffi OSX"
+    mkdir -p /usr/local/tranquil/libffi/lib
+    cp build/Release/libffi.a /usr/local/tranquil/libffi/lib
+    cp -R build/Release/usr/local/include /usr/local/tranquil/libffi/include
+
+    popd
+fi
+
 echo "\n\033[0;34mInstalling GNU MP...\033[0m"
 if [ -d /usr/local/tranquil/gmp ]
 then

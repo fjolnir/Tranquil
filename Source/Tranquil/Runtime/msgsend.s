@@ -72,12 +72,16 @@ _tq_msgSend:
     SaveRegisters _tq_msgSend
 
     call _object_getClass
+#ifdef __LP64__
     shl $32, %a2 // Shift the selector left by 32 bits (Selectors never have useful bits beyond that point)
+#else
+    shl $16, %a2
+#endif
     xor  %rax, %a2 // klass xor selector -> second param slot
-    // Load the global NSMapTable _TQSelectorCache to first param slot
+    // Load the global CFDict _TQSelectorCache to first param slot
     mov  __TQSelectorCache@GOTPCREL(%rip), %a1
     mov  (%a1), %a1
-    call _NSMapGet
+    call _CFDictionaryGetValue
 
     cmp $1, %rax  // Value 0x1 means it's a safe method and we can simply objc_msgSend
     je  normalSend

@@ -14,6 +14,13 @@
 
 TQ_EXTERN_C NSString * const kTQSyntaxErrorException;
 
+typedef enum {
+    kTQArchitectureHost,
+    kTQArchitectureI386,
+    kTQArchitectureX86_64,
+    kTQArchitectureARMv7
+} TQArchitecture;
+
 @interface TQProgram : NSObject {
     BOOL _initializedTQRuntime;
 
@@ -33,6 +40,7 @@ TQ_EXTERN_C NSString * const kTQSyntaxErrorException;
 // AOT compilation related
 @property(readwrite, retain) NSString *outputPath;
 @property(readwrite) BOOL useAOTCompilation;
+@property(readwrite) TQArchitecture targetArch;
 
 #pragma mark - Methods
 

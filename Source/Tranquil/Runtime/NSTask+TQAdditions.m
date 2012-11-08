@@ -1,5 +1,6 @@
 #import "NSTask+TQAdditions.h"
 
+#ifndef TARGET_OS_IPHONE
 @implementation NSTask (Tranquil)
 + (NSString *)execute:(NSString *)aPath with:(NSArray *)aArguments;
 {
@@ -22,3 +23,4 @@
     return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 }
 @end
+#endif

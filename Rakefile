@@ -4,6 +4,7 @@ LD    = CC
 RAGEL = '/usr/local/tranquil/ragel/bin/ragel'
 LEMON = '/usr/local/tranquil/lemon/bin/lemon'
 
+
 MAXARGS = 32 # The number of block dispatchers to compile
 
 BUILD_DIR = 'Build'
@@ -14,7 +15,6 @@ PARSER_OUTPATH   = "#{BUILD_DIR}/parse.mm"
 
 CXXFLAGS = {
     :release => [
-        '-mmacosx-version-min=10.7',
         '-I`pwd`/Source',
         '-I`pwd`/Build',
         '-I/usr/include/libxml2',
@@ -24,7 +24,6 @@ CXXFLAGS = {
         '-O3',
     ].join(' '),
     :development => [
-        '-mmacosx-version-min=10.7',
         '-DDEBUG',
         '-I`pwd`/Source',
         '-I`pwd`/Build',
@@ -91,11 +90,20 @@ MAIN_OUTPATH = 'Build/main.o'
 
 @buildMode = :development
 
-def compile(file, flags=CXXFLAGS, cc=CXX)
-    cmd = "#{cc} #{file[:in].join(' ')} #{flags[@buildMode]} -c -o #{file[:out]}"
+def compile(file, flags=CXXFLAGS[@buildMode], cc=CXX, ios=false)
+    if ios then
+        flags = flags + ' -mios-simulator-version-min=6.0'
+        flags << ' -arch i386 -fobjc-abi-version=2 -fobjc-legacy-dispatch'
+        flags << ' -I/usr/local/tranquil/libffi-ios/include'
+        flags << ' -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk'
+    else
+        flags = flags + ' -arch x86_64 -mmacosx-version-min=10.7'
+        flags << ' -I/usr/local/tranquil/libffi/include'
+    end
+    cmd = "#{cc} #{file[:in].join(' ')} #{flags} -c -o #{file[:out]}"
     cmd << " -fobjc-arc" if ARC_FILES.member? file[:in].first
-    cmd << " -ObjC++"     if cc == CXX
-    cmd << " -ObjC"       if cc == CC
+    cmd << " -ObjC++"    if cc == CXX
+    cmd << " -ObjC"      if cc == CC
     sh cmd
 end
 
@@ -135,7 +143,9 @@ end
 
 RUNTIME_SOURCES.each { |src|
     file src.pathmap(PATHMAP) => src do |f|
-        compile({:in => f.prerequisites, :out => f.name}, CXXFLAGS, CC)
+        compile({:in => f.prerequisites, :out => f.name + ".x64"}, CXXFLAGS[@buildMode], CC)
+        compile({:in => f.prerequisites, :out => f.name + ".i386"}, CXXFLAGS[@buildMode], CC, true)
+        sh "lipo -create -output #{f.name} #{f.name}.x64 #{f.name}.i386"
     end
 }
 CODEGEN_SOURCES.each { |src|
