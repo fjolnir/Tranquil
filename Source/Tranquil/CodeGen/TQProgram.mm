@@ -269,7 +269,7 @@ static TQProgram *sharedInstance;
             llvm::Function::arg_iterator argumentIterator = aBlock.function->arg_begin();
 
             // Create the app wide dispatch queue
-            Value *queue = aBlock.builder->CreateCall2(self.dispatch_get_global_queue, ConstantInt::get(self.llInt64Ty, DISPATCH_QUEUE_PRIORITY_DEFAULT), ConstantInt::get(self.llInt64Ty, 0));
+            Value *queue = aBlock.builder->CreateCall2(self.dispatch_get_global_queue, ConstantInt::get(self.llLongTy, DISPATCH_QUEUE_PRIORITY_DEFAULT), ConstantInt::get(self.llLongTy, 0));
             aBlock.builder->CreateStore(queue, _globalQueue);
 
             [cliArgVar store:aBlock.builder->CreateCall2(self.TQCliArgsToArray, argumentIterator, ++argumentIterator)
@@ -291,7 +291,7 @@ static TQProgram *sharedInstance;
         // Output
         Opts.JITEmitDebugInfo = false;
         std::string err;
-        const std::string targetTriple = sys::getDefaultTargetTriple();
+        const std::string targetTriple = sys::getDefaultTargetTriple(); //"x86_64-apple-darwin11.0.0";
         const std::string featureStr   = "";
         const std::string cpuName      = sys::getHostCPUName();
 

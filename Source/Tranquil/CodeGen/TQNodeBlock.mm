@@ -200,7 +200,7 @@ using namespace llvm;
     SmallVector<llvm::Constant*, 6> elements;
 
     // reserved
-    elements.push_back(llvm::ConstantInt::get( aProgram.llInt64Ty, 0));  // TODO: Use 32bit on x86
+    elements.push_back(llvm::ConstantInt::get( aProgram.llLongTy, 0));
 
     // Size
     elements.push_back(ConstantExpr::getSizeOf([self _blockLiteralTypeInProgram:aProgram]));
