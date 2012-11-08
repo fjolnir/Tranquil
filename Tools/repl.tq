@@ -30,11 +30,16 @@ getInput = { indent = 0 |
     }
 }
 
-while line = getInput() {
-    line = "^«line»" unless nonReturnable(line)
-    result = TQProgram sharedProgram executeScript: line error: nil
-    if result then
-        " -> «result» («result class»)" print
-    else if line != "^" then
-        " -> nil" print
+#NSString {
+    - trimmed `self stringByTrimmingCharactersInSet: NSCharacterSet whitespaceAndNewlineCharacterSet`
+}
+while line = getInput() trimmed {
+    if line length > 0 {
+        line = "^«line»" unless nonReturnable(line)
+        result = TQProgram sharedProgram executeScript: line error: nil
+        if result then
+            " -> «result» («result class»)" print
+        else if line != "^" then
+            " -> nil" print
+    }
 }

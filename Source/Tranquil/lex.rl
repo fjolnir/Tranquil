@@ -254,7 +254,7 @@ main := |*
 
 #include "parse.mm"
 
-extern "C" TQNode *TQParseString(NSString *str)
+extern "C" TQNode *TQParseString(NSString *str, NSError **aoErr)
 {
     if(![str hasSuffix:@"\n"])
         str = [str stringByAppendingString:@"\n"];
@@ -277,13 +277,23 @@ extern "C" TQNode *TQParseString(NSString *str)
         1, YES, [TQNodeRootBlock new]
     };
 
-    %% write init;
-    %% write exec;
+    @try {
+        %% write init;
+        %% write exec;
 
-    if(p != pe)
-        fprintf(stderr, "invalid character '%c'\n", p[0]);
+        if(p != pe)
+            fprintf(stderr, "invalid character '%c'\n", p[0]);
 
-    EmitToken(0); // EOF
-    ParseFree(parser, free);
-    return [parserState.root autorelease];
+        EmitToken(0); // EOF
+        return [parserState.root autorelease];
+    } @catch(NSException *e) {
+        if(aoErr)
+            *aoErr = [NSError errorWithDomain:kTQSyntaxErrorDomain
+                                         code:kTQGenericError
+                                     userInfo:[NSDictionary dictionaryWithObject:[e reason] forKey:@"reason"]];
+         return nil;
+    } @finally {
+        ParseFree(parser, free);
+    }
+    return nil;
 }

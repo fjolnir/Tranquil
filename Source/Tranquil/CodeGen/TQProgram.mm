@@ -19,8 +19,6 @@
 #import <google/profiler.h>
 #endif
 
-//#import "parse.mm" // Includes the parser source
-
 #include <llvm/Module.h>
 #include <llvm/DerivedTypes.h>
 #include <llvm/Constants.h>
