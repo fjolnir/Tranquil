@@ -16,8 +16,8 @@ typedef struct {
 #define CopyCStr() ((unsigned char *)strndup((char *)ts, te-ts))
 
 #define _EmitToken(tokenId, val) do { \
-    /*NSLog(@"emitting %d = %@", tokenId, val);*/ \
-    Parse(parser, tokenId, [TQToken withId:tokenId value:val], &parserState); \
+    /*NSLog(@"emitting %d = %@ on line: %d", tokenId, val, parserState.currentLine);*/ \
+    Parse(parser, tokenId, [TQToken withId:tokenId value:val line:parserState.currentLine], &parserState); \
     parserState.atBeginningOfExpr = NO; \
 } while(0);
 
@@ -25,9 +25,9 @@ typedef struct {
 
 #define EmitStringToken(tokenId, lTrim, rTrim) _EmitToken(tokenId, NSStr(lTrim, rTrim))
 
-#define EmitConstStringToken(tokenId) do { \
+#define EmitConstStringToken(tokenId, lTrim, rTrim) do { \
     BOOL hasQuotes = *(ts+1) == '"'; \
-    EmitStringToken((tokenId), 1+hasQuotes, hasQuotes); \
+    EmitStringToken((tokenId), lTrim+1+hasQuotes, rTrim+hasQuotes); \
 } while(0)
 
 #define EmitIntToken(tokenId, base, prefixLen) do { \
@@ -43,23 +43,31 @@ typedef struct {
     free(str); \
 } while(0)
 
+#define IncrementLine() (++parserState.currentLine)
+
 #define BacktrackTerm() do { \
-    if(*p == '}') --p; \
+    if(*p == '}') \
+        --p; \
+    for(unsigned char *cursor = ts; cursor != te; ++cursor) { \
+        if(*cursor == '\n') \
+            IncrementLine(); \
+    } \
 } while(0)
 
 #define ExprBeg() parserState.atBeginningOfExpr = YES
 
 @interface TQToken : NSObject
-@property(readwrite, assign) int id;
+@property(readwrite, assign) int id, line;
 @property(readwrite, strong) id value;
-+ (TQToken *)withId:(int)id value:(id)value;
++ (TQToken *)withId:(int)id value:(id)value line:(int)line;
 @end
 @implementation TQToken
-+ (TQToken *)withId:(int)id value:(id)value
++ (TQToken *)withId:(int)id value:(id)value line:(int)line
 {
     TQToken *ret = [self new];
     ret.id = id;
     ret.value = value;
+    ret.line = line;
     return [ret autorelease];
 }
 @end
@@ -201,10 +209,10 @@ main := |*
 
 
 # Identifiers
-    identifier %{temp1 = p;} term    => { te = temp1; EmitStringToken(IDENTNL, 0, 0); ExprBeg(); BacktrackTerm(); };
+    identifier %{temp1 = p;} term    => { EmitStringToken(IDENTNL, 0, te-temp1); ExprBeg(); BacktrackTerm(); };
     identifier                       => { EmitStringToken(IDENT,   0, 0);                                 };
 
-    constant   %{temp1 = p;} term    => { te = temp1; EmitStringToken(CONSTNL, 0, 0); ExprBeg(); BacktrackTerm(); };
+    constant   %{temp1 = p;} term    => { EmitStringToken(CONSTNL, 0, te-temp1); ExprBeg(); BacktrackTerm(); };
     constant                         => { EmitStringToken(CONST,   0, 0);                                 };
 
 # Literals
@@ -226,17 +234,17 @@ main := |*
     oct                              => { EmitIntToken(NUMBER, 8,  2);                                    };
     hex                              => { EmitIntToken(NUMBER, 16, 2);                                    };
 
-    constStr %{temp1 = p;} term      => { te = temp1; EmitConstStringToken(CONSTSTRNL); ExprBeg(); BacktrackTerm(); };
-    constStr                         => { EmitConstStringToken(CONSTSTR);                                 };
+    constStr %{temp1 = p;} term      => { EmitConstStringToken(CONSTSTRNL, 0, te-temp1); ExprBeg(); BacktrackTerm(); };
+    constStr                         => { EmitConstStringToken(CONSTSTR, 0, 0);                           };
 
     lStr                             => { EmitStringToken(LSTR,   1, 2); ExprBeg();                       };
     mStr                             => { EmitStringToken(MSTR,   2, 2); ExprBeg();                       };
-    rStr   %{temp1 = p;} term        => { te = temp1; EmitStringToken(RSTRNL, 2, 1); ExprBeg(); BacktrackTerm(); };
+    rStr   %{temp1 = p;} term        => { EmitStringToken(RSTRNL, 2, 1+(te-temp1)); ExprBeg(); BacktrackTerm(); };
     rStr                             => { EmitStringToken(RSTR,   2, 1);                                  };
-    string %{temp1 = p;} term        => { te = temp1; EmitStringToken(STRNL,  1, 1); ExprBeg(); BacktrackTerm(); };
+    string %{temp1 = p;} term        => { EmitStringToken(STRNL,  1, 1+(te-temp1)); ExprBeg(); BacktrackTerm(); };
     string                           => { EmitStringToken(STR,    1, 1);                                  };
 
-    nl;
+    nl                               => { IncrementLine();                                                };
     space;
 *|;
 
@@ -266,7 +274,7 @@ extern "C" TQNode *TQParseString(NSString *str)
     // Parser setup
     void *parser = ParseAlloc(malloc);
     TQParserState parserState = {
-        0, YES, [TQNodeRootBlock new]
+        1, YES, [TQNodeRootBlock new]
     };
 
     %% write init;

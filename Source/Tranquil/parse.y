@@ -631,7 +631,7 @@ backtick        ::= BACKTICK|BACKTICKNL.
 //
 
 %syntax_error {
-    TQAssert(NO, @"Syntax error near '%@'", [TOKEN value]);
+    TQAssert(NO, @"Syntax error near '%@' on line %d", [TOKEN value], [TOKEN line]);
 }
 
 
