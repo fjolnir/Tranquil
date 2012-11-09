@@ -47,9 +47,10 @@
 	\ Blocks
 	aBlock = { ..body.. } \ A block. Defines scope (Empty braces: `{}` constitute an empty dictionary, not an empty block)
 	aBlockWith = { arg0, arg1 | ^arg0 } \ A block that takes two arguments
-	                                    \ and returns its first argument as-is
+	                                    \ and returns its first argument as-is (The last statement in a block is implicitly
+	                                      returned so the `^` is optional in this case)
 	aBlock = { arg=123 |  ..statements.. } \ Assignment in the argument list indicates a default value for that argument
-	`..expression..` \ Equivalent to { ^expression }
+	`..expression..` \ A single expression block; recommended when embedding short blocks in other expressions.
 	
 	^..expression.. \ Returns the value of `expression`
 	^^..expression.. \ Same as above but, returns from the lexical parent of the block. (Explained in "Non-local returns")
