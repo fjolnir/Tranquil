@@ -19,14 +19,17 @@ statements(SS) ::= statements(O) statement(S).          { SS = O; [SS addObject:
 statements(SS) ::= statement(S).                        { SS = [NSMutableArray arrayWithObject:S];                                    }
 
 statement(S) ::= exprNl(E).                             { S = E;                                                                      }
+statement(S) ::= exprNoNl(E) PERIOD.                    { S = E;                                                                      }
 statement(S) ::= cond(C).                               { S = C;                                                                      }
 statement(S) ::= loop(L).                               { S = L;                                                                      }
 statement(S) ::= waitNl(W).                             { S = W;                                                                      }
+statement(S) ::= waitNoNl(W) PERIOD.                    { S = W;                                                                      }
 statement(S) ::= whenFinished(W).                       { S = W;                                                                      }
 statement(S) ::= lock(L).                               { S = L;                                                                      }
 statement(S) ::= collect(C).                            { S = C;                                                                      }
 statement(S) ::= import(I).                             { S = I;                                                                      }
 statement(S) ::= retNl(I).                              { S = I;                                                                      }
+statement(S) ::= retNoNl(I) PERIOD.                     { S = I;                                                                      }
 
 retNl(R)   ::= CARET exprNl(E).                         { R = [TQNodeReturn nodeWithValue:E];                                         }
 retNl(R)   ::= CARET retNl(O).                          { R = O; [O setDepth:[O depth] + 1];                                          }
@@ -240,6 +243,7 @@ collect(C) ::= COLLECT bodyNl(B).                       { C = [TQNodeCollect nod
 //
 
 import(I) ::= IMPORT STRNL(P).                          { I = [TQNodeImport nodeWithPath:[P value]];                                  }
+import(I) ::= IMPORT STR(P) PERIOD.                     { I = [TQNodeImport nodeWithPath:[P value]];                                  }
 
 
 //

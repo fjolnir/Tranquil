@@ -256,6 +256,7 @@ main := |*
     '"'                              => { temp3 = 1; strBuf = [NSMutableString string]; fcall string;     };
     rGuillmt                         => { temp3 = 2; strBuf = [NSMutableString string]; fcall string;     };
 
+    "."                              => { EmitToken(PERIOD);                                              };
     nl                               => { IncrementLine();                                                };
     space;
 *|;
