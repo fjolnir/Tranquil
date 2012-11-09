@@ -109,7 +109,7 @@ string := |*
     '\\r'                            => { [strBuf appendString:@"\r"];                                    };
     '\\"'                            => { [strBuf appendString:@"\""];                                    };
     "\\'"                            => { [strBuf appendString:@"'"];                                     };
-    "\\"                             => { [strBuf appendString:@"\\"];                                    };
+    "\\\\"                           => { [strBuf appendString:@"\\"];                                    };
     '\\x' %{ temp1 = p; } [0-9a-zA-Z]* => {
         long long code = strtoll((char*)temp1, NULL, 16);
         [strBuf appendFormat:@"%c", (int)code];
