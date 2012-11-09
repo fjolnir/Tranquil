@@ -97,14 +97,30 @@ typedef struct {
     rGuillmt    = 0xC2 0xBB; # »
 
     strCont     = (ualnum | ascii) - '"';
-    string      = '"' strCont* '"';
-    constStr    = "@" (string | [^\n ;,\]}.)`]+);
-    lStr        = '"' strCont* lGuillmt;
-    mStr        = rGuillmt strCont* lGuillmt;
-    rStr        = rGuillmt strCont* '"';
+    simpleStr   = '"' strCont* '"';
+    constStr    = "@" (simpleStr | [^\n ;,\]}.)`]+);
     selector    = (ualnum | "+" | "-" | "*" | "/" | "^" | "=" | "~" | "<" | ">" | "[" "]" | "_")+ ":";
 
     regexCont   = (ualnum | ascii) - '/';
+
+string := |*
+    '\\n'                            => { [strBuf appendString:@"\n"];                                    };
+    '\\t'                            => { [strBuf appendString:@"\t"];                                    };
+    '\\r'                            => { [strBuf appendString:@"\r"];                                    };
+    '\\"'                            => { [strBuf appendString:@"\""];                                    };
+    "\\'"                            => { [strBuf appendString:@"'"];                                     };
+    "\\"                             => { [strBuf appendString:@"\\"];                                    };
+    '\\x' %{ temp1 = p; } [0-9a-zA-Z]* => {
+        long long code = strtoll((char*)temp1, NULL, 16);
+        [strBuf appendFormat:@"%c", (int)code];
+    };
+    "\\" ualnum+                     => { TQAssert(NO, @"Invalid escape %@", NSStr(0,0));                 };
+    strCont                          => { [strBuf appendString:NSStr(0, 0)];                              };
+
+    lGuillmt                         => { _EmitToken(temp3 == 1 ? LSTR  : MSTR, strBuf); fret;            };
+    '"' term                         => { _EmitToken(temp3 == 1 ? STRNL : RSTRNL, strBuf); fret;          };
+    '"'                              => { _EmitToken(temp3 == 1 ? STR   : RSTR, strBuf); fret;            };
+*|;
 
 regex := |*
     regexCont* "/" [im]* term        => { --ts; EmitToken(REGEXNL); BacktrackTerm(); fret;               };
@@ -237,17 +253,12 @@ main := |*
     constStr %{temp1 = p;} term      => { EmitConstStringToken(CONSTSTRNL, 0, te-temp1); ExprBeg(); BacktrackTerm(); };
     constStr                         => { EmitConstStringToken(CONSTSTR, 0, 0);                           };
 
-    lStr                             => { EmitStringToken(LSTR,   1, 2); ExprBeg();                       };
-    mStr                             => { EmitStringToken(MSTR,   2, 2); ExprBeg();                       };
-    rStr   %{temp1 = p;} term        => { EmitStringToken(RSTRNL, 2, 1+(te-temp1)); ExprBeg(); BacktrackTerm(); };
-    rStr                             => { EmitStringToken(RSTR,   2, 1);                                  };
-    string %{temp1 = p;} term        => { EmitStringToken(STRNL,  1, 1+(te-temp1)); ExprBeg(); BacktrackTerm(); };
-    string                           => { EmitStringToken(STR,    1, 1);                                  };
+    '"'                              => { temp3 = 1; strBuf = [NSMutableString string]; fcall string;     };
+    rGuillmt                         => { temp3 = 2; strBuf = [NSMutableString string]; fcall string;     };
 
     nl                               => { IncrementLine();                                                };
     space;
 *|;
-
 }%%
 
 %% write data nofinal;
@@ -268,8 +279,10 @@ extern "C" TQNode *TQParseString(NSString *str, NSError **aoErr)
     unsigned char *eof = pe;
     int top;
     int stack[1024];
+    NSMutableString *strBuf;
 
     unsigned char *temp1, *temp2;
+    int temp3 = 0;
 
     // Parser setup
     void *parser = ParseAlloc(malloc);
