@@ -112,8 +112,7 @@ fib(10) print
 ### Evaluate a regular expression
 
 ```
-if /foo[a-z]+/i matches: "Foobar"
-    "Foobar starts with foo." print
+"Foobar starts with foo." print if /foo[a-z]+/i matches: "Foobar"
 ```
 
 ### Using the OpenGL & GLUT APIs
