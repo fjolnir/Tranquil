@@ -18,6 +18,9 @@
 @end
 
 @interface TQNodeUnlessBlock : TQNodeIfBlock
++ (TQNodeUnlessBlock *)nodeWithCondition:(TQNode *)aCond
+                            ifStatements:(NSMutableArray *)ifStmt
+                          elseStatements:(NSMutableArray *)elseStmt;
 + (TQNodeUnlessBlock *)node;
 @end
 

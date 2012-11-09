@@ -189,6 +189,12 @@ using namespace llvm;
 @end
 
 @implementation TQNodeUnlessBlock
++ (TQNodeUnlessBlock *)nodeWithCondition:(TQNode *)aCond
+                            ifStatements:(NSMutableArray *)ifStmt
+                          elseStatements:(NSMutableArray *)elseStmt
+{
+    return (TQNodeUnlessBlock *)[super nodeWithCondition:aCond ifStatements:ifStmt elseStatements:elseStmt];
+}
 + (TQNodeUnlessBlock *)node
 {
     return (TQNodeUnlessBlock *)[super node];

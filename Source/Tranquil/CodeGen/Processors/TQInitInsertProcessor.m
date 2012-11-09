@@ -28,12 +28,11 @@
             TQNodeOperator *selfAsgn = [TQNodeOperator nodeWithType:kTQOperatorAssign
                                                                left:[TQNodeSelf node]
                                                               right:superInit];
-            TQNodeUnlessBlock *nilTest = [TQNodeUnlessBlock node];
-            nilTest.condition = [TQNodeSelf node];
-            [nilTest.ifStatements addObject:[TQNodeReturn node]];
+            TQNodeUnlessBlock *nilTest = [TQNodeUnlessBlock nodeWithCondition:selfAsgn
+                                                                 ifStatements:[NSMutableArray arrayWithObject:[TQNodeReturn node]]
+                                                               elseStatements:nil];
 
-            [method.statements insertObject:selfAsgn atIndex:0];
-            [method.statements insertObject:nilTest atIndex:1];
+            [method.statements insertObject:nilTest atIndex:0];
         }
     }
 
