@@ -133,6 +133,7 @@ using namespace llvm;
     aBlock.basicBlock = thenBB;
     aBlock.builder = thenBuilder;
     Value *thenVal = NULL;
+    BOOL thenBlockWasTerminated = NO;
     for(TQNode *stmt in _ifStatements) {
         thenVal = [stmt generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         thenBB = aBlock.basicBlock; // May have changed
@@ -143,9 +144,12 @@ using namespace llvm;
     }
     if(!aBlock.basicBlock->getTerminator())
         aBlock.builder->CreateBr(endifBB);
+    else
+        thenBlockWasTerminated = YES;
     delete thenBuilder;
 
-    Value *elseVal = NULL;
+    Value *elseVal = ConstantPointerNull::get(aProgram.llInt8PtrTy);
+    BOOL elseBlockWasTerminated = NO;
     if(hasElse) {
         aBlock.basicBlock = elseBB;
         aBlock.builder    = elseBuilder;
@@ -160,21 +164,22 @@ using namespace llvm;
         }
         if(!aBlock.basicBlock->getTerminator())
             aBlock.builder->CreateBr(endifBB);
+        else
+            elseBlockWasTerminated = YES;
         delete elseBuilder;
     }
 
-
-    Value *ret;
-    if(thenVal) {
-        PHINode *phi = endifBuilder->CreatePHI(aProgram.llInt8PtrTy, 2);
-        phi->addIncoming(thenVal, thenBB);
-        if(elseVal)
+    Value *ret = ConstantPointerNull::get(aProgram.llInt8PtrTy);
+    if(!thenBlockWasTerminated || (hasElse && !elseBlockWasTerminated)) {
+        PHINode *phi = endifBuilder->CreatePHI(aProgram.llInt8PtrTy, !thenBlockWasTerminated + 1);
+        if(!thenBlockWasTerminated)
+            phi->addIncoming(thenVal, thenBB);
+        if(hasElse && !elseBlockWasTerminated)
             phi->addIncoming(elseVal, elseBB);
         else
             phi->addIncoming(ConstantPointerNull::get(aProgram.llInt8PtrTy), startBlock);
         ret = phi;
-    } else
-        ret = ConstantPointerNull::get(aProgram.llInt8PtrTy);
+    }
 
     // Make the parent block continue from the end of the statement
     aBlock.basicBlock = endifBB;

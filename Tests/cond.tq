@@ -1,17 +1,20 @@
-if 1 {
-    if foo then
-        "foo" print
-    else {
-        i = 0
-        while i++ <= 5 {
-            lock i {
-                "bar" print
-                break if i == 2
+blk = {
+    if 1 {
+        if foo then
+            "foo" print
+        else {
+            i = 0
+            while i++ <= 5 {
+                lock i {
+                    "bar" print
+                    break if i == 2
+                }
             }
+            "baz" print
         }
-        "baz" print
+    } else {
+        "bar" print if 1
     }
-} else {
-    "bar" print if 1
 }
+"implicit: «blk()»" print
 "foo" print
