@@ -9,7 +9,7 @@ historyPath   = "/tmp/tqrepl_history"
 History_truncate_file(historyPath, 300) \ Just to make sure things don't get unmanageable
 Read_history(historyPath)
 
-getInput = { indent = 0 |
+getInput = { indent = 0, shouldDecrement = no |
     ptr = Readline((" " * indent * 4) + "> ")
     str = ptr toString
     if str length > 0 {
@@ -19,8 +19,16 @@ getInput = { indent = 0 |
     Free(ptr)
 
     if str {
+        if shouldDecrement {
+            shouldDecrement = no
+            --indent
+        }
+        if /then\s*$/ matches: str {
+            ++indent
+            shouldDecrement = yes
+        }
         indent += ((/\{/ matches: str) count) - ((/\}/ matches: str) count)
-        ^(indent > 0) ? (str + "\n" + getInput(indent)) ! str
+        ^(indent > 0) ? (str + "\n" + getInput(indent, shouldDecrement)) ! str
     }
 }
 

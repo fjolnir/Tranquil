@@ -112,7 +112,7 @@ using namespace llvm;
             incrementee = _left;
             beforeVal = [incrementee generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         }
-        TQNodeOperator *op = [TQNodeOperator nodeWithType:kTQOperatorIncrement ? kTQOperatorAdd : kTQOperatorSubtract
+        TQNodeOperator *op = [TQNodeOperator nodeWithType:_type == kTQOperatorIncrement ? kTQOperatorAdd : kTQOperatorSubtract
                                                      left:incrementee
                                                     right:[TQNodeNumber nodeWithDouble:1.0]];
 
