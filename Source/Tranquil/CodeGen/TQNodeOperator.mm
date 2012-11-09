@@ -469,7 +469,7 @@ using namespace llvm;
     // TODO: Add some way of detecting whether the return value actually gets referenced; and if so return an array containing the right hand sides if n>1
     if([self.left count] == 1 && [self.right count] == 1)
         return values[0];
-    return NULL;
+    return ConstantPointerNull::get(aProgram.llInt8PtrTy);
 }
 
 - (NSString *)description
