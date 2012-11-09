@@ -109,6 +109,7 @@ using namespace llvm;
     if(*aoErr)
         return NULL;
     Value *testResult = [self generateTestExpressionInProgram:aProgram withBuilder:aBlock.builder value:testExpr];
+    BasicBlock *startBlock = aBlock.basicBlock;
     IRBuilder<> *startBuilder = aBlock.builder;
 
     BOOL hasElse = (_elseStatements.count > 0);
@@ -124,11 +125,17 @@ using namespace llvm;
 
     BasicBlock *endifBB = BasicBlock::Create(mod->getContext(), [[NSString stringWithFormat:@"end%@", [self _name]] UTF8String], aBlock.function);
     IRBuilder<> *endifBuilder = new IRBuilder<>(endifBB);
+    if(hasElse)
+        startBuilder->CreateCondBr(testResult, thenBB, elseBB);
+    else
+        startBuilder->CreateCondBr(testResult, thenBB, endifBB);
 
     aBlock.basicBlock = thenBB;
     aBlock.builder = thenBuilder;
+    Value *thenVal = NULL;
     for(TQNode *stmt in _ifStatements) {
-        [stmt generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        thenVal = [stmt generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        thenBB = aBlock.basicBlock; // May have changed
         if(*aoErr)
             return NULL;
         if([stmt isKindOfClass:[TQNodeReturn class]])
@@ -138,25 +145,41 @@ using namespace llvm;
         aBlock.builder->CreateBr(endifBB);
     delete thenBuilder;
 
+    Value *elseVal = NULL;
     if(hasElse) {
         aBlock.basicBlock = elseBB;
         aBlock.builder    = elseBuilder;
+
         for(TQNode *stmt in _elseStatements) {
-            [stmt generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+            elseVal = [stmt generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+            elseBB = aBlock.basicBlock; // May have changed
             if(*aoErr)
                 return NULL;
+            if([stmt isKindOfClass:[TQNodeReturn class]])
+                break;
         }
         if(!aBlock.basicBlock->getTerminator())
             aBlock.builder->CreateBr(endifBB);
         delete elseBuilder;
     }
-    startBuilder->CreateCondBr(testResult, thenBB, elseBB ? elseBB : endifBB);
+
+
+    Value *ret;
+    if(thenVal) {
+        PHINode *phi = endifBuilder->CreatePHI(aProgram.llInt8PtrTy, 2);
+        phi->addIncoming(thenVal, thenBB);
+        if(elseVal)
+            phi->addIncoming(elseVal, elseBB);
+        else
+            phi->addIncoming(ConstantPointerNull::get(aProgram.llInt8PtrTy), startBlock);
+        ret = phi;
+    } else
+        ret = ConstantPointerNull::get(aProgram.llInt8PtrTy);
 
     // Make the parent block continue from the end of the statement
     aBlock.basicBlock = endifBB;
     aBlock.builder = endifBuilder;
-
-    return NULL;
+    return ret;
 }
 @end
 
@@ -195,6 +218,7 @@ using namespace llvm;
     return ret;
 }
 
+// TODO: Merge this with IfBlock, now that it also returns a value?
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot

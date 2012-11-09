@@ -616,8 +616,10 @@ using namespace llvm;
 
     // Evaluate the statements
     Value *val;
-    for(TQNode *stmt in _statements) {
-        if(_isCompactBlock)
+    NSUInteger stmtCount = [_statements count];
+    for(int i = 0; i < stmtCount; ++i) {
+        TQNode *stmt = [_statements objectAtIndex:i];
+        if([_retType isEqualToString:@"@"] && ((i == (stmtCount-1) && ![stmt isKindOfClass:[TQNodeReturn class]])))
             stmt = [TQNodeReturn nodeWithValue:stmt];
         [stmt generateCodeInProgram:aProgram block:self root:aRoot error:aoErr];
         if(*aoErr) {

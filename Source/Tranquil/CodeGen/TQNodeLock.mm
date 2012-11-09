@@ -101,8 +101,9 @@ using namespace llvm;
     delete aBlock.builder;
     aBlock.builder = new IRBuilder<>(lockBodyBlock);
 
+    Value *ret = ConstantPointerNull::get(aProgram.llInt8PtrTy);
     for(TQNode *stmt in _statements) {
-        [stmt generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        ret = [stmt generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         if([stmt isKindOfClass:[TQNodeReturn class]])
             break;
     }
@@ -113,7 +114,7 @@ using namespace llvm;
     [aBlock.cleanupStatements removeObjectIdenticalTo:exitNode];
     [loop.cleanupStatements removeObjectIdenticalTo:exitNode];
 
-    return NULL;
+    return ret;
 }
 @end
 

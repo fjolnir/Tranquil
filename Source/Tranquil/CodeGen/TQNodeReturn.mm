@@ -113,6 +113,7 @@ using namespace llvm;
 
     if([aBlock.retType isEqualToString:@"v"])
         return aBlock.builder->CreateRetVoid();
-    return aBlock.builder->CreateRet(retVal);
+    aBlock.builder->CreateRet(retVal);
+    return retVal;
 }
 @end

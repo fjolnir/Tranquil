@@ -140,7 +140,7 @@ void * const TQCurrLoopKey = (void*)&TQCurrLoopKey;
     aBlock.basicBlock = endloopBB;
     aBlock.builder = endloopBuilder;
 
-    return NULL;
+    return ConstantPointerNull::get(aProgram.llInt8PtrTy);
 }
 
 @end

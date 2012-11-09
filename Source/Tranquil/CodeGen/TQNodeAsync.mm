@@ -148,7 +148,7 @@ using namespace llvm;
         Value *call = aBlock.builder->CreateCall2(aProgram.dispatch_group_wait, aBlock.dispatchGroup, ConstantInt::get(aProgram.llInt64Ty, DISPATCH_TIME_FOREVER));
         [self _attachDebugInformationToInstruction:call inProgram:aProgram block:aBlock root:aRoot];
     }
-    return NULL;
+    return ConstantPointerNull::get(aProgram.llInt8PtrTy);
 }
 
 - (NSString *)description
@@ -173,15 +173,4 @@ using namespace llvm;
     return aProgram.dispatch_group_notify;
 }
 
-//- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
-//                                 block:(TQNodeBlock *)aBlock
-//                                  root:(TQNodeRootBlock *)aRoot
-//                                 error:(NSError **)aoErr
-//{
-//    Value *compiledBlock = [self _generateDispatchBlockInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-//    Value *call = aBlock.builder->CreateCall3(aProgram.dispatch_group_notify, aBlock.dispatchGroup,
-//                                              aBlock.builder->CreateLoad(aProgram.globalQueue), compiledBlock);
-//    [self _attachDebugInformationToInstruction:call inProgram:aProgram block:aBlock root:aRoot];
-//    return NULL;
-//}
 @end
