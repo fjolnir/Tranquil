@@ -10,7 +10,7 @@ mkdir -p /usr/local/tranquil
 # Just for install count stats for me; completely anonymous.
 curl -fsSkL "http://d.asgeirsson.is/JX9I" > /dev/null
 
-echo "\033[0;32mI'm about to retrieve and compile Tranquil for you. This shouldn't take more than a few minutes,\ndepending on your connection & hardware.\n"
+echo "\033[0;32mI'm about to retrieve and compile tranquil for you. This shouldn't take more than a few minutes,\ndepending on your connection & hardware.\n"
 
 echo "\033[0;34mInstalling LLVM...\033[0m"
 if [ -d /usr/local/tranquil/llvm ]
@@ -74,12 +74,12 @@ fi
 
 if [ -d /usr/local/tranquil/src ]
 then
-    echo "\n\033[0;34mUpdating Tranquil...\033[0m"
+    echo "\n\033[0;34mUpdating tranquil...\033[0m"
     pushd /usr/local/tranquil/src
     git pull
     popd
 else
-    echo "\n\033[0;34mCloning Tranquil from GitHub...\033[0m"
+    echo "\n\033[0;34mCloning tranquil from GitHub...\033[0m"
     hash git >/dev/null && /usr/bin/env git clone git://github.com/fjolnir/Tranquil.git /usr/local/tranquil/src || {
       echo "\033[0;31mgit not installed\033[0m"
       exit
@@ -94,6 +94,6 @@ rake || {
 }
 popd
 
-echo "\n\033[0;32mCongratulations!\n\033[0;33mYou can now find the Tranquil binary at '\033[0m/usr/local/tranquil/bin/tranquil\033[0;33m'\033[0m"
+echo "\n\033[0;32mCongratulations!\n\033[0;33mYou can now find the tranquil repl at '\033[0m/usr/local/tranquil/bin/tqrepl\033[0;33m'\033[0m"
 echo "\n\033[0;33m(You'll probably want to add /usr/local/tranquil/bin to your \033[0mPATH\033[0;33m)\033[0m"
 
