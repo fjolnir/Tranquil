@@ -47,7 +47,7 @@ using namespace llvm;
 {
     NSString *path = [aProgram _resolveImportPath:_path];
     if(!path || [aProgram.evaluatedPaths containsObject:path])
-        return NULL;
+        return ConstantPointerNull::get(aProgram.llInt8PtrTy);
 
     [aProgram.evaluatedPaths addObject:path];
     if([[path pathExtension] isEqualToString:@"h"]) {
@@ -64,7 +64,7 @@ using namespace llvm;
             dlopen([frameworkPath fileSystemRepresentation], RTLD_GLOBAL);
         }
         [aProgram.objcParser parseHeader:path];
-        return NULL;
+        return ConstantPointerNull::get(aProgram.llInt8PtrTy);
     } else {
         TQNodeRootBlock *importedRoot = [aProgram _rootFromFile:path error:aoErr];
         if(!importedRoot || *aoErr)
