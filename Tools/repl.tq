@@ -23,7 +23,7 @@ getInput = { indent = 0, shouldDecrement = no |
             shouldDecrement = no
             --indent
         }
-        if /(then|else)\s*$/ matches: str {
+        if /(then|else|\+|\*|\/|-|\^)\s*$/ matches: str {
             ++indent
             shouldDecrement = yes
         }
