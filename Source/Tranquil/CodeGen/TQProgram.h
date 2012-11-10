@@ -13,6 +13,7 @@
 @class TQHeaderParser, TQNodeBlock;
 
 TQ_EXTERN_C NSString * const kTQSyntaxErrorException;
+typedef id (^TQErrorHandlingBlock)(id err);
 
 @interface TQProgram : NSObject {
     BOOL _initializedTQRuntime;
@@ -40,6 +41,8 @@ TQ_EXTERN_C NSString * const kTQSyntaxErrorException;
 + (TQProgram *)programWithName:(NSString *)aName;
 - (id)initWithName:(NSString *)aName;
 - (id)executeScriptAtPath:(NSString *)aPath error:(NSError **)aoErr;
+- (id)executeScriptAtPath:(NSString *)aScript onError:(TQErrorHandlingBlock)aHandler;
 - (id)executeScript:(NSString *)aScript error:(NSError **)aoErr;
+- (id)executeScript:(NSString *)aScript onError:(TQErrorHandlingBlock)aHandler;
 @end
 #endif

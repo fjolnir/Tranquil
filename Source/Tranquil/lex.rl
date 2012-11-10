@@ -9,6 +9,7 @@ typedef struct {
     int currentLine;
     BOOL atBeginningOfExpr;
     TQNodeRootBlock *root;
+    NSError *syntaxError;
 } TQParserState;
 
 #define NSStr(lTrim, rTrim) (ts ? [[[NSMutableString alloc] initWithBytes:ts+(lTrim) length:te-ts-(lTrim)-(rTrim) encoding:NSUTF8StringEncoding] autorelease] : nil)
@@ -190,6 +191,7 @@ main := |*
     "if"      term?                  => { EmitToken(IF);        ExprBeg(); BacktrackTerm();               };
     "unless"  term?                  => { EmitToken(UNLESS);    ExprBeg(); BacktrackTerm();               };
     "then"    term?                  => { EmitToken(THEN);      ExprBeg(); BacktrackTerm();               };
+    "do"    term?                    => { EmitToken(DO);        ExprBeg(); BacktrackTerm();               };
     "else"    term?                  => { EmitToken(ELSE);      ExprBeg(); BacktrackTerm();               };
     "and"|"&&"term?                  => { EmitToken(AND);       ExprBeg(); BacktrackTerm();               };
     "or"|"||" term?                  => { EmitToken(OR);        ExprBeg(); BacktrackTerm();               };
@@ -288,7 +290,7 @@ extern "C" TQNode *TQParseString(NSString *str, NSError **aoErr)
     // Parser setup
     void *parser = ParseAlloc(malloc);
     TQParserState parserState = {
-        1, YES, [TQNodeRootBlock new]
+        1, YES, [TQNodeRootBlock new], nil
     };
 
     @try {
@@ -302,10 +304,8 @@ extern "C" TQNode *TQParseString(NSString *str, NSError **aoErr)
         return [parserState.root autorelease];
     } @catch(NSException *e) {
         if(aoErr)
-            *aoErr = [NSError errorWithDomain:kTQSyntaxErrorDomain
-                                         code:kTQGenericError
-                                     userInfo:[NSDictionary dictionaryWithObject:[e reason] forKey:@"reason"]];
-         return nil;
+            *aoErr = parserState.syntaxError;
+        return nil;
     } @finally {
         ParseFree(parser, free);
     }

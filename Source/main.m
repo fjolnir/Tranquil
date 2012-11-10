@@ -57,7 +57,7 @@ int main(int argc, char **argv)
             [program executeScript:script error:&err];
         }
         if(err) {
-            NSLog(@"Error: %@", err);
+            fprintf(stderr, "%s\n", [[err localizedDescription] UTF8String]);
             return 1;
         }
     }

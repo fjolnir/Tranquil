@@ -209,6 +209,8 @@ ternOpNl(O) ::= operandNoNl(C)
 
 loop(I) ::= WHILE|UNTIL(T) expr(C) blockNl(ST).         { I = [LOOPKLS(T) nodeWithCondition:C statements:[ST statements]];            }
 loop(I) ::= bodyNoNl(ST) WHILE|UNTIL(T) exprNl(C).      { I = [LOOPKLS(T) nodeWithCondition:C statements:ST];                         }
+loop(I) ::= WHILE|UNTIL(T) expr(C) DO bodyNl(ST).      { I = [LOOPKLS(T) nodeWithCondition:C statements:ST];   }
+
 statement(S) ::= breakNl(B).                            { S = B;                                                                      }
 statement(S) ::= skipNl(SK).                            { S = SK;                                                                     }
 
@@ -635,7 +637,7 @@ backtick        ::= BACKTICK|BACKTICKNL.
 //
 
 %syntax_error {
-    TQAssert(NO, @"Syntax error near '%@' on line %d", [TOKEN value], [TOKEN line]);
+    SyntaxError(kTQGenericError);
 }
 
 
@@ -644,6 +646,15 @@ backtick        ::= BACKTICK|BACKTICKNL.
 %include {
 #import <Tranquil/CodeGen/CodeGen.h>
 #import <Tranquil/Shared/TQDebug.h>
+
+#define SyntaxError(aCode) do { \
+    NSString *reason = [NSString stringWithFormat:@"Syntax error: near '%@' on line %d", [TOKEN value], [TOKEN line]]; \
+    NSDictionary *info = [NSDictionary dictionaryWithObject:reason forKey:NSLocalizedDescriptionKey]; \
+    state->syntaxError = [NSError errorWithDomain:kTQSyntaxErrorDomain \
+                                             code:aCode \
+                                         userInfo:info]; \
+   [NSException raise:@"Syntax Error" format:nil]; \
+} while(0)
 
 #define CONDKLS(T) ([T id] == IF    ? [TQNodeIfBlock class]    : [TQNodeUnlessBlock class])
 #define LOOPKLS(T) ([T id] == WHILE ? [TQNodeWhileBlock class] : [TQNodeUntilBlock class])

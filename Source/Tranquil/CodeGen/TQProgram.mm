@@ -374,6 +374,16 @@ static TQProgram *sharedInstance;
         return nil;
     return [self _executeRoot:root error:aoErr];
 }
+- (id)executeScriptAtPath:(NSString *)aPath onError:(TQErrorHandlingBlock)aHandler;
+{
+    NSError *err = nil;
+    id result = [self executeScriptAtPath:aPath error:&err];
+    if(err) {
+        if(aHandler) aHandler(err);
+        return nil;
+    }
+    return result;
+}
 
 - (TQNodeRootBlock *)_parseScript:(NSString *)aScript error:(NSError **)aoErr
 {
@@ -410,6 +420,16 @@ static TQProgram *sharedInstance;
     return [self _executeRoot:root error:aoErr];
 }
 
+- (id)executeScript:(NSString *)aScript onError:(TQErrorHandlingBlock)aHandler
+{
+    NSError *err = nil;
+    id result = [self executeScript:aScript error:&err];
+    if(err) {
+        if(aHandler) aHandler(err);
+        return nil;
+    }
+    return result;
+}
 
 #pragma mark - Utilities
 
