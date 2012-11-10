@@ -102,7 +102,7 @@ typedef struct {
     constStr    = "@" (simpleStr | [^\n ;,\]}.)`]+);
     selector    = (ualnum | "+" | "-" | "*" | "/" | "^" | "=" | "~" | "<" | ">" | "[" "]" | "_")* ":";
 
-    regexCont   = (ualnum | ascii) - '/';
+    regexCont   = (ualnum | ascii) - '/' - '\\';
 
 string := |*
     '\\n'                            => { [strBuf appendString:@"\n"];                                    };
@@ -111,6 +111,7 @@ string := |*
     '\\"'                            => { [strBuf appendString:@"\""];                                    };
     "\\'"                            => { [strBuf appendString:@"'"];                                     };
     "\\\\"                           => { [strBuf appendString:@"\\"];                                    };
+    "\\" lGuillmt                    => { [strBuf appendString:@"«"];                                     };
     '\\x' %{ temp1 = p; } [0-9a-zA-Z]* => {
         long long code = strtoll((char*)temp1, NULL, 16);
         [strBuf appendFormat:@"%c", (int)code];
@@ -124,8 +125,11 @@ string := |*
 *|;
 
 regex := |*
-    regexCont* "/" [im]* term        => { --ts; EmitToken(REGEXNL); BacktrackTerm(); fret;               };
-    regexCont* "/" [im]*             => { --ts; EmitToken(REGEX);                    fret;               };
+    "\\/"                            => { [strBuf appendString:@"\\/"];                                   };
+    "\\"                             => { [strBuf appendString:@"\\"];                                    };
+    regexCont                        => { [strBuf appendString:NSStr(0, 0)];                              };
+    "/" [im]* term                   => { [strBuf appendString:@"/"]; _EmitToken(REGEXNL, strBuf); fret;  };
+    "/" [im]*                        => { [strBuf appendString:@"/"]; _EmitToken(REGEX, strBuf);   fret;  };
 *|;
 
 main := |*
@@ -139,8 +143,10 @@ main := |*
             } else
                 EmitToken(FSLASH);
             ExprBeg();
-        } else
+        } else {
+            strBuf = [NSMutableString stringWithString:@"/"];
             fcall regex;
+        }
     };
     "{"                              => { EmitToken(LBRACE);     ExprBeg();                               };
     "}" term                         => { EmitToken(RBRACENL);   ExprBeg(); BacktrackTerm();              };
@@ -300,7 +306,7 @@ extern "C" TQNode *TQParseString(NSString *str, NSError **aoErr)
         if(p != pe)
             fprintf(stderr, "invalid character '%c'\n", p[0]);
 
-        EmitToken(0); // EOF
+        _EmitToken(0, @"EOF");
         return [parserState.root autorelease];
     } @catch(NSException *e) {
         if(aoErr)
