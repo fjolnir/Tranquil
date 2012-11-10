@@ -120,7 +120,8 @@ string := |*
     strCont                          => { [strBuf appendString:NSStr(0, 0)];                              };
 
     lGuillmt                         => { _EmitToken(temp3 == 1 ? LSTR  : MSTR, strBuf); fret;            };
-    '"' term                         => { _EmitToken(temp3 == 1 ? STRNL : RSTRNL, strBuf); fret;          };
+    '"' term                         => { _EmitToken(temp3 == 1 ? STRNL : RSTRNL, strBuf);
+                                          BacktrackTerm(); fret;                                          };
     '"'                              => { _EmitToken(temp3 == 1 ? STR   : RSTR, strBuf); fret;            };
 *|;
 
@@ -128,7 +129,8 @@ regex := |*
     "\\/"                            => { [strBuf appendString:@"\\/"];                                   };
     "\\"                             => { [strBuf appendString:@"\\"];                                    };
     regexCont                        => { [strBuf appendString:NSStr(0, 0)];                              };
-    "/" [im]* term                   => { [strBuf appendString:@"/"]; _EmitToken(REGEXNL, strBuf); fret;  };
+    "/" [im]* term                   => { [strBuf appendString:@"/"]; _EmitToken(REGEXNL, strBuf);
+                                          BacktrackTerm(); fret;                                          };
     "/" [im]*                        => { [strBuf appendString:@"/"]; _EmitToken(REGEX, strBuf);   fret;  };
 *|;
 
