@@ -13,6 +13,7 @@ It's features include:
 * String interpolation.
 * Multiple assignment.
 * Message cascading.
+* Unlimited number range.
 * Good performance, even at this extremely early stage.
 * And more..
 
