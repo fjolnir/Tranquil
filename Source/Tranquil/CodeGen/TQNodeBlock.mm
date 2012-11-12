@@ -34,11 +34,11 @@ using namespace llvm;
     if(!(self = [super init]))
         return nil;
 
-    _arguments         = [NSMutableArray new];
-    _statements        = [NSMutableArray new];
-    _cleanupStatements = [NSMutableArray new];
-    _locals            = [NSMutableDictionary new];
-    _capturedVariables = [NSMutableDictionary new];
+    _arguments         = [OFMutableArray new];
+    _statements        = [OFMutableArray new];
+    _cleanupStatements = [OFMutableArray new];
+    _locals            = [OFMutableDictionary new];
+    _capturedVariables = [OFMutableDictionary new];
     _function          = NULL;
     _basicBlock        = NULL;
     _isTranquilBlock   = YES;
@@ -63,9 +63,9 @@ using namespace llvm;
     [super dealloc];
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    NSMutableString *out = [NSMutableString stringWithString:@"<blk@ {"];
+    OFMutableString *out = [OFMutableString stringWithString:@"<blk@ {"];
     if(_arguments.count > 0 || _isVariadic) {
         int i = 1;
         for(TQNodeArgumentDef *arg in _arguments) {
@@ -90,23 +90,23 @@ using namespace llvm;
     return out;
 }
 
-- (NSString *)toString
+- (OFString *)toString
 {
     return @"block";
 }
 
-- (NSString *)signatureInProgram:(TQProgram *)aProgram
+- (OFString *)signatureInProgram:(TQProgram *)aProgram
 {
     return [_argTypes componentsJoinedByString:@""];
     // Return type
-    NSMutableString *sig = [NSMutableString stringWithString:@"@"];
+    OFMutableString *sig = [OFMutableString stringWithString:@"@"];
     // Argument types
     for(int i = 0; i < _arguments.count; ++i)
         [sig appendString:@"@"];
     return sig;
 }
 
-- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoErr
+- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(TQError **)aoErr
 {
     TQAssertSoft(![_arguments containsObject:aArgument],
                  kTQSyntaxErrorDomain, kTQUnexpectedIdentifier, NO,
@@ -117,9 +117,9 @@ using namespace llvm;
     return YES;
 }
 
-- (void)setStatements:(NSMutableArray *)aStatements
+- (void)setStatements:(OFMutableArray *)aStatements
 {
-    NSArray *old = _statements;
+    OFArray *old = _statements;
     _statements = [aStatements mutableCopy];
     [old release];
 }
@@ -168,7 +168,7 @@ using namespace llvm;
     fields.push_back([self _blockDescriptorTypeInProgram:aProgram]);
 
     // Fields for captured vars
-    for(TQNodeVariable *var in [_capturedVariables allValues]) {
+    for(TQNodeVariable *var in [_capturedVariables allObjects]) {
         if(var.isAnonymous)
             fields.push_back([[var class] valueTypeInProgram:aProgram]);
         else
@@ -182,7 +182,7 @@ using namespace llvm;
 
 #pragma mark - Code generation
 
-- (NSUInteger)argumentCount
+- (unsigned long)argumentCount
 {
     return [_arguments count] - 1;
 }
@@ -271,10 +271,10 @@ using namespace llvm;
     // Now that we've initialized the basic block info, we need to capture the variables in the parent block scope
     if(_capturedVariables) {
         int i = TQ_CAPTURE_IDX;
-        for(NSString *name in _capturedVariables) {
+        for(OFString *name in _capturedVariables) {
             TQNodeVariable *varToCapture = [_capturedVariables objectForKey:name];
             [varToCapture createStorageInProgram:aProgram block:aParentBlock root:aRoot error:nil];
-            NSString *fieldName = [NSString stringWithFormat:@"block.%@", name];
+            OFString *fieldName = [OFString stringWithFormat:@"block.%@", name];
 
             Value *valToStore = varToCapture.alloca;
             if(varToCapture.isAnonymous)
@@ -302,7 +302,7 @@ using namespace llvm;
 
     llvm::Module *mod = aProgram.llModule;
 
-    const char *functionName = [[NSString stringWithFormat:@"%@_copy", [self invokeName]] UTF8String];
+    const char *functionName = [[OFString stringWithFormat:@"%@_copy", [self invokeName]] UTF8String];
     Function *function;
     function = Function::Create(funType, GlobalValue::ExternalLinkage, functionName, mod);
     function->setCallingConv(CallingConv::C);
@@ -328,13 +328,13 @@ using namespace llvm;
     int i = TQ_CAPTURE_IDX;
     Value *varToCopy, *destAddr, *valueToRetain;
     Type *captureStructTy;
-    for(TQNodeVariable *var in [_capturedVariables allValues]) {
+    for(TQNodeVariable *var in [_capturedVariables allObjects]) {
         if(![[var class] valueIsObject])
             continue;
         Value *flags = var.isAnonymous ? constFlags : byrefFlags;
 
-        NSString *dstName = [NSString stringWithFormat:@"dstBlk.%@Addr", var.name];
-        NSString *srcName = [NSString stringWithFormat:@"srcBlk.%@", var.name];
+        OFString *dstName = [OFString stringWithFormat:@"dstBlk.%@Addr", var.name];
+        OFString *srcName = [OFString stringWithFormat:@"srcBlk.%@", var.name];
 
         destAddr  = builder->CreateBitCast(builder->CreateStructGEP(dstBlock, i), int8PtrTy, [dstName UTF8String]);
         varToCopy = builder->CreateLoad(builder->CreateStructGEP(srcBlock, i++), [srcName UTF8String]);
@@ -370,7 +370,7 @@ using namespace llvm;
 
     llvm::Module *mod = aProgram.llModule;
 
-    const char *functionName = [[NSString stringWithFormat:@"%@_dispose", [self invokeName]] UTF8String];
+    const char *functionName = [[OFString stringWithFormat:@"%@_dispose", [self invokeName]] UTF8String];
     Function *function;
     function = Function::Create(funType, GlobalValue::ExternalLinkage, functionName, mod);
     function->setCallingConv(CallingConv::C);
@@ -385,12 +385,12 @@ using namespace llvm;
     int i = TQ_CAPTURE_IDX;
     Value *varToDisposeOf, *valueToRelease;
     Type *captureStructTy;
-    for(TQNodeVariable *var in [_capturedVariables allValues]) {
+    for(TQNodeVariable *var in [_capturedVariables allObjects]) {
         if(![[var class] valueIsObject])
             continue;
         Value *flags = var.isAnonymous ? constFlags : byrefFlags;
 
-        NSString *name = [NSString stringWithFormat:@"block.%@", var.name];
+        OFString *name = [OFString stringWithFormat:@"block.%@", var.name];
         varToDisposeOf =  builder->CreateLoad(builder->CreateStructGEP(block, i++), [name UTF8String]);
 
         if(!var.isAnonymous) {
@@ -412,7 +412,7 @@ using namespace llvm;
 }
 
 // Invokes the body of this block
-- (llvm::Function *)_generateInvokeInProgram:(TQProgram *)aProgram root:(TQNodeRootBlock *)aRoot block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
+- (llvm::Function *)_generateInvokeInProgram:(TQProgram *)aProgram root:(TQNodeRootBlock *)aRoot block:(TQNodeBlock *)aBlock error:(TQError **)aoErr
 {
     if(_function)
         return _function;
@@ -424,8 +424,8 @@ using namespace llvm;
 
     Type *retType = [aProgram llvmTypeFromEncoding:[_retType UTF8String]];
 
-    NSUInteger retTypeSize;
-    NSGetSizeAndAlignment([_retType UTF8String], &retTypeSize, NULL);
+    unsigned long retTypeSize;
+    TQGetSizeAndAlignment([_retType UTF8String], &retTypeSize, NULL);
     // Return doesn't fit in a register so we must pass an alloca before the function arguments
     // TODO: Make this cross platform
     BOOL returningOnStack = TQStructSizeRequiresStret(retTypeSize);
@@ -434,17 +434,17 @@ using namespace llvm;
         retType = aProgram.llVoidTy;
     }
 
-    NSString *argTypeEncoding;
-    NSUInteger argTypeSize;
-    NSMutableArray *byValArgIndices = [NSMutableArray array];
+    OFString *argTypeEncoding;
+    unsigned long argTypeSize;
+    OFMutableArray *byValArgIndices = [OFMutableArray array];
     const char *currEncoding;
     for(int i = 0; i < [_argTypes count]; ++i) {
         currEncoding = [[_argTypes objectAtIndex:i] UTF8String];
-        NSGetSizeAndAlignment(currEncoding, &argTypeSize, NULL);
+        TQGetSizeAndAlignment(currEncoding, &argTypeSize, NULL);
         Type *llType = [aProgram llvmTypeFromEncoding:currEncoding];
         if(TQStructSizeRequiresStret(argTypeSize)) {
             llType = PointerType::getUnqual(llType);
-            [byValArgIndices addObject:[NSNumber numberWithInt:i+1]]; // Add one to jump over retval
+            [byValArgIndices addObject:[OFNumber numberWithInt:i+1]]; // Add one to jump over retval
         }
         paramTypes.push_back(llType);
     }
@@ -455,7 +455,7 @@ using namespace llvm;
     _function = Function::Create(funType, GlobalValue::ExternalLinkage, [[self invokeName] UTF8String], mod);
     if(returningOnStack)
         _function->addAttribute(1, Attribute::StructRet);
-    for(NSNumber *idx in byValArgIndices) {
+    for(OFNumber *idx in byValArgIndices) {
         _function->addAttribute([idx intValue], Attribute::ByVal);
     }
 
@@ -468,7 +468,7 @@ using namespace llvm;
     lexicalBlock.Verify();
 
     llvm::DIArray diTypeArr = aProgram.debugBuilder->getOrCreateArray(ArrayRef<Value*>());
-    const char *functionName = [[NSString stringWithFormat:@"%@_invoke", [self invokeName]] UTF8String];
+    const char *functionName = [[OFString stringWithFormat:@"%@_invoke", [self invokeName]] UTF8String];
     _debugInfo = aProgram.debugBuilder->createFunction(aRoot.debugUnit,
                                                        functionName,
                                                        "",
@@ -503,7 +503,7 @@ using namespace llvm;
     if(thisBlock) {
         int i = TQ_CAPTURE_IDX;
         TQNodeVariable *varToLoad;
-        for(TQNodeVariable *parentVar in [_capturedVariables allValues])
+        for(TQNodeVariable *parentVar in [_capturedVariables allObjects])
         {
             varToLoad = [parentVar copy];
             Value *valueToLoad = _builder->CreateStructGEP(thisBlock, i++, [varToLoad.name UTF8String]);
@@ -526,10 +526,10 @@ using namespace llvm;
             continue;
 
         argTypeEncoding = [_argTypes objectAtIndex:i];
-        NSGetSizeAndAlignment([argTypeEncoding UTF8String], &argTypeSize, NULL);
+        TQGetSizeAndAlignment([argTypeEncoding UTF8String], &argTypeSize, NULL);
 
         // If the value is an object type we treat it the normal way
-        if([argTypeEncoding isEqualToString:@"@"]) {
+        if([argTypeEncoding isEqual:@"@"]) {
             Value *defaultValue, *isMissingCond;
             // Load the default argument if the argument was not passed
             if(![argDef defaultArgument])
@@ -636,7 +636,7 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     TQAssert(!_basicBlock && !_function, @"Tried to regenerate code for block");
     _parent = aBlock;
@@ -644,7 +644,7 @@ using namespace llvm;
     if(!_retType)
         _retType = @"@";
     if(!_argTypes) {
-        _argTypes = [[NSMutableArray alloc] initWithCapacity:_arguments.count];
+        _argTypes = [[OFMutableArray alloc] initWithCapacity:_arguments.count];
         for(TQNodeArgumentDef *arg in _arguments) {
             [_argTypes addObject:@"@"];
         }
@@ -687,7 +687,7 @@ using namespace llvm;
     // Generate a list of variables to capture
     if(aBlock) {
         // Load actual captured variables
-        for(NSString *name in [aBlock.locals allKeys]) {
+        for(OFString *name in [aBlock.locals allKeys]) {
             if([_locals objectForKey:name]) // Only arguments are contained in _locals at this point
                 continue; // Arguments to this block override locals in the parent (Not that  you should write code like that)
             TQNodeVariable *parentVar = [aBlock.locals objectForKey:name];
@@ -743,7 +743,7 @@ using namespace llvm;
 
 - (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
 {
-    NSMutableArray *statements = [_statements copy];
+    OFMutableArray *statements = [_statements copy];
     for(TQNode *node in statements) {
         aBlock(node);
     }
@@ -752,8 +752,8 @@ using namespace llvm;
 
 - (BOOL)insertChildNode:(TQNode *)aNodeToInsert before:(TQNode *)aNodeToShift
 {
-    NSUInteger idx = [_statements indexOfObject:aNodeToShift];
-    if(idx == NSNotFound)
+    unsigned long idx = [_statements indexOfObject:aNodeToShift];
+    if(idx == OF_NOT_FOUND)
         return NO;
     [_statements insertObject:aNodeToInsert atIndex:idx];
     return YES;
@@ -761,8 +761,8 @@ using namespace llvm;
 
 - (BOOL)insertChildNode:(TQNode *)aNodeToInsert after:(TQNode *)aExistingNode
 {
-    NSUInteger idx = [_statements indexOfObject:aExistingNode];
-    if(idx == NSNotFound)
+    unsigned long idx = [_statements indexOfObject:aExistingNode];
+    if(idx == OF_NOT_FOUND)
         return NO;
     [_statements insertObject:aNodeToInsert atIndex:idx+1];
     return YES;
@@ -770,8 +770,8 @@ using namespace llvm;
 
 - (BOOL)replaceChildNodesIdenticalTo:(TQNode *)aNodeToReplace with:(TQNode *)aNodeToInsert
 {
-    NSUInteger idx = [_statements indexOfObject:aNodeToReplace];
-    if(idx == NSNotFound)
+    unsigned long idx = [_statements indexOfObject:aNodeToReplace];
+    if(idx == OF_NOT_FOUND)
         return NO;
     [_statements replaceObjectAtIndex:idx withObject:aNodeToInsert];
     return NO;
@@ -798,7 +798,7 @@ using namespace llvm;
     // No arguments for the root block ([super init] adds the block itself as an arg)
     [self.arguments removeAllObjects];
     _retType = @"@";
-    _argTypes = [NSMutableArray new];
+    _argTypes = [OFMutableArray new];
     _invokeName = @"root";
 
     return self;
@@ -807,7 +807,7 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     // The root block is just a function that executes the body of the program
     // so we only need to create&return it's invocation function

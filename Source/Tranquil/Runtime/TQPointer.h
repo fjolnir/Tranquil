@@ -2,46 +2,46 @@
 
 @class TQNumber;
 
-extern NSString * const TQTypeObj;
-extern NSString * const TQTypeClass;
-extern NSString * const TQTypeSel;
-extern NSString * const TQTypeChar;
-extern NSString * const TQTypeUChar;
-extern NSString * const TQTypeShort;
-extern NSString * const TQTypeUShort;
-extern NSString * const TQTypeInt;
-extern NSString * const TQTypeUInt;
-extern NSString * const TQTypeLong;
-extern NSString * const TQTypeULong;
-extern NSString * const TQTypeLongLong;
-extern NSString * const TQTypeULongLong;
-extern NSString * const TQTypeFloat;
-extern NSString * const TQTypeDouble;
-extern NSString * const TQTypeBool;
-extern NSString * const TQTypeString;
+extern OFString * const TQTypeObj;
+extern OFString * const TQTypeClass;
+extern OFString * const TQTypeSel;
+extern OFString * const TQTypeChar;
+extern OFString * const TQTypeUChar;
+extern OFString * const TQTypeShort;
+extern OFString * const TQTypeUShort;
+extern OFString * const TQTypeInt;
+extern OFString * const TQTypeUInt;
+extern OFString * const TQTypeLong;
+extern OFString * const TQTypeULong;
+extern OFString * const TQTypeLongLong;
+extern OFString * const TQTypeULongLong;
+extern OFString * const TQTypeFloat;
+extern OFString * const TQTypeDouble;
+extern OFString * const TQTypeBool;
+extern OFString * const TQTypeString;
 
 // A class to enable use of (Obj-)C APIs that utilize pointers
-@interface TQPointer : TQObject <NSCopying> {
+@interface TQPointer : TQObject <OFCopying> {
     char *_itemType;
-    NSUInteger _itemSize, _count;
+    unsigned long _itemSize, _count;
     BOOL _freeOnDealloc;
     @public
     char *_addr; // Only ever meant to be accessed by TQBoxedObject
 }
 + (TQPointer *)box:(void *)aPtr withType:(const char *)aType;
-+ (TQPointer *)withObjects:(NSArray *)aObjs type:(NSString *)aType;
-+ (TQPointer *)to:(id)aObj withType:(NSString *)aType;
-+ (TQPointer *)withType:(NSString *)aType count:(NSNumber *)aCount;
-+ (TQPointer *)withType:(NSString *)aType;
++ (TQPointer *)withObjects:(OFArray *)aObjs type:(OFString *)aType;
++ (TQPointer *)to:(id)aObj withType:(OFString *)aType;
++ (TQPointer *)withType:(OFString *)aType count:(TQNumber *)aCount;
++ (TQPointer *)withType:(OFString *)aType;
 
-- (id)initWithType:(const char *)aType count:(NSUInteger)aCount;
-- (id)initWithType:(const char *)aType address:(void *)aAddr count:(NSUInteger)aCount;
+- (id)initWithType:(const char *)aType count:(unsigned long)aCount;
+- (id)initWithType:(const char *)aType address:(void *)aAddr count:(unsigned long)aCount;
 
-- (TQPointer *)castTo:(NSString *)type;
+- (TQPointer *)castTo:(OFString *)type;
 - (id)addressAsObject;
 
-- (id)objectAtIndexedSubscript:(NSUInteger)aIdx;
-- (void)setObject:(id)aObj atIndexedSubscript:(NSUInteger)aIdx;
+- (id)objectAtIndexedSubscript:(unsigned long)aIdx;
+- (void)setObject:(id)aObj atIndexedSubscript:(unsigned long)aIdx;
 
 - (TQNumber *)count;
 - (id)value; // Returns the first item
@@ -57,11 +57,6 @@ extern NSString * const TQTypeString;
 + (TQPointer *)toLongLong;
 + (TQPointer *)toFloat;
 + (TQPointer *)toDouble;
-#if 0
-+ (TQPointer *)toNSPoint;
-+ (TQPointer *)toNSSize;
-+ (TQPointer *)toNSRect;
-#endif
 + (TQPointer *)toObjects:(TQNumber *)aCount;
 + (TQPointer *)toChars:(TQNumber *)aCount;
 + (TQPointer *)toBOOLs:(TQNumber *)aCount;
@@ -71,9 +66,4 @@ extern NSString * const TQTypeString;
 + (TQPointer *)toLongLongs:(TQNumber *)aCount;
 + (TQPointer *)toFloats:(TQNumber *)aCount;
 + (TQPointer *)toDoubles:(TQNumber *)aCount;
-#if 0
-+ (TQPointer *)toNSPoints:(TQNumber *)aCount;
-+ (TQPointer *)toNSSizes:(TQNumber *)aCount;
-+ (TQPointer *)toNSRects:(TQNumber *)aCount;
-#endif
 @end

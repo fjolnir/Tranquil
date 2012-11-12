@@ -1,11 +1,12 @@
-#import <Foundation/Foundation.h>
+#import <ObjFW/ObjFW.h>
+#import <Tranquil/Runtime/TQObject.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
 #import <gmp.h>
 
 @class TQNumber;
 
-@interface TQBigNumber : NSObject {
+@interface TQBigNumber : TQObject {
     @protected
     mpf_t _value;
 }

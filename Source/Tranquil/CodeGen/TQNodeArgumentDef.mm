@@ -6,7 +6,7 @@ using namespace llvm;
 @implementation TQNodeArgumentDef
 @synthesize name=_name, defaultArgument=_defaultArgument, unretained=_unretained;
 
-+ (TQNodeArgumentDef *)nodeWithName:(NSString *)aName
++ (TQNodeArgumentDef *)nodeWithName:(OFString *)aName
 {
     TQNodeArgumentDef *ret = [self new];
     ret.name = aName;
@@ -14,14 +14,14 @@ using namespace llvm;
     return [ret autorelease];
 }
 
-- (NSUInteger)hash
+- (uint32_t)hash
 {
     return [_name hash];
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    return [NSString stringWithFormat:@"<argdef@ %@>", _name];
+    return [OFString stringWithFormat:@"<argdef@ %@>", _name];
 }
 
 - (void)dealloc
@@ -33,7 +33,7 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     TQAssert(NO, @"Argument definitions do not generate code");
     return NULL;
@@ -60,7 +60,7 @@ using namespace llvm;
 @implementation TQNodeMethodArgumentDef
 @synthesize selectorPart=_selectorPart;
 
-+ (TQNodeMethodArgumentDef *)nodeWithName:(NSString *)aName selectorPart:(NSString *)aSelectorPart
++ (TQNodeMethodArgumentDef *)nodeWithName:(OFString *)aName selectorPart:(OFString *)aSelectorPart
 {
     TQNodeMethodArgumentDef *ret = (TQNodeMethodArgumentDef*)[super nodeWithName:aName];;
     ret.selectorPart = aSelectorPart;
@@ -74,9 +74,9 @@ using namespace llvm;
     [super dealloc];
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    return [NSString stringWithFormat:@"<argdef@ %@: %@>", _selectorPart, _name];
+    return [OFString stringWithFormat:@"<argdef@ %@: %@>", _selectorPart, _name];
 }
 
 @end

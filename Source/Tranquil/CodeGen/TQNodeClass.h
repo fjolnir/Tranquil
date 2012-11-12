@@ -2,12 +2,12 @@
 
 // A class definition (class Name < SuperClass\n methods\n end)
 @interface TQNodeClass : TQNode
-@property(readwrite, retain) NSString *name;
-@property(readwrite, retain) NSString *superClassName;
-@property(readwrite, copy) NSMutableArray *classMethods;
-@property(readwrite, copy) NSMutableArray *instanceMethods;
-@property(readwrite, copy) NSMutableArray *onloadMessages;
+@property(readwrite, retain) OFString *name;
+@property(readwrite, retain) OFString *superClassName;
+@property(readwrite, copy) OFMutableArray *classMethods;
+@property(readwrite, copy) OFMutableArray *instanceMethods;
+@property(readwrite, copy) OFMutableArray *onloadMessages;
 @property(readwrite, assign) llvm::Value *classPtr;
-+ (TQNodeClass *)nodeWithName:(NSString *)aName;
-- (id)initWithName:(NSString *)aName;
++ (TQNodeClass *)nodeWithName:(OFString *)aName;
+- (id)initWithName:(OFString *)aName;
 @end

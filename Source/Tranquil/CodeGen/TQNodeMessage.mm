@@ -20,8 +20,8 @@ using namespace llvm;
     if(!(self = [super init]))
         return nil;
 
-    _arguments = [NSMutableArray new];
-    _cascadedMessages = [NSMutableArray new];
+    _arguments = [OFMutableArray new];
+    _cascadedMessages = [OFMutableArray new];
 
     return self;
 }
@@ -87,9 +87,9 @@ using namespace llvm;
 }
 
 
-- (NSString *)description
+- (OFString *)description
 {
-    NSMutableString *out = [NSMutableString stringWithString:@"<msg@ "];
+    OFMutableString *out = [OFMutableString stringWithString:@"<msg@ "];
     [out appendFormat:@"%@ ", _receiver];
     for(TQNodeArgument *arg in _arguments) {
         [out appendFormat:@"%@ ", arg];
@@ -98,9 +98,9 @@ using namespace llvm;
     return out;
 }
 
-- (NSString *)toString
+- (OFString *)toString
 {
-    NSMutableString *out = [NSMutableString stringWithString:@"["];
+    OFMutableString *out = [OFMutableString stringWithString:@"["];
     [out appendFormat:@"%@ ", [_receiver toString]];
     for(TQNodeArgument *arg in _arguments) {
         [out appendFormat:@"%@ ", [arg toString]];
@@ -109,9 +109,9 @@ using namespace llvm;
     return out;
 }
 
-- (NSString *)selector
+- (OFString *)selector
 {
-    NSMutableString *selStr = [NSMutableString string];
+    OFMutableString *selStr = [OFMutableString string];
     if(_arguments.count == 1 && ![[_arguments objectAtIndex:0] passedNode])
         [selStr appendString:[[_arguments objectAtIndex:0] selectorPart]];
     else {
@@ -124,15 +124,15 @@ using namespace llvm;
 
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock root:(TQNodeRootBlock *)aRoot
-                         withArguments:(std::vector<llvm::Value*>)aArgs error:(NSError **)aoErr
+                         withArguments:(std::vector<llvm::Value*>)aArgs error:(TQError **)aoErr
 {
-    NSString *selStr = [self selector];
+    OFString *selStr = [self selector];
     BOOL needsAutorelease = NO;
     if([selStr hasPrefix:@"alloc"])
         needsAutorelease = YES;
     else if([selStr hasSuffix:@"copy"])
         needsAutorelease = YES;
-    else if([selStr isEqualToString:@"new"])
+    else if([selStr isEqual:@"new"])
         needsAutorelease = YES;
 
     // Cache the selector into a global
@@ -180,7 +180,7 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     Module *mod = aProgram.llModule;
     std::vector<Value*> args;

@@ -27,7 +27,7 @@ int main(int argc, char **argv)
 
             // Args after the script path are considered to be args to the script itself
             if(inputPath)
-                [scriptArgs addPointer:[NSString stringWithUTF8String:arg]];
+                [scriptArgs addPointer:[OFString stringWithUTF8String:arg]];
             else if(arg[0] == '-') {
                 if(strcmp(arg, "-d") == 0) showDebugOutput = YES;
                 else if(strcmp(arg, "-h") == 0) printHelpAndExit(0);
@@ -63,20 +63,20 @@ int main(int argc, char **argv)
         program.arguments           = scriptArgs;
         program.useAOTCompilation   = compileToFile;
         program.targetArch          = arch;
-        program.outputPath          = [NSString stringWithUTF8String:outputPath];
+        program.outputPath          = [OFString stringWithUTF8String:outputPath];
         program.shouldShowDebugInfo = showDebugOutput;
-        NSString *script;
-        NSError *err = nil;
+        OFString *script;
+        TQError *err = nil;
         if(inputPath)
-            [program executeScriptAtPath:[NSString stringWithUTF8String:inputPath] error:&err];
+            [program executeScriptAtPath:[OFString stringWithUTF8String:inputPath] error:&err];
         else {
             NSFileHandle *input = [NSFileHandle fileHandleWithStandardInput];
             NSData *inputData = [NSData dataWithData:[input readDataToEndOfFile]];
-            script = [[[NSString alloc] initWithData:inputData encoding:NSUTF8StringEncoding] autorelease];
+            script = [[[OFString alloc] initWithData:inputData encoding:NSUTF8StringEncoding] autorelease];
             [program executeScript:script error:&err];
         }
         if(err) {
-            NSLog(@"Error: %@", err);
+            fprintf(stderr, "Error: %s", [[[err info] description] UTF8String]; );
             return 1;
         }
     }

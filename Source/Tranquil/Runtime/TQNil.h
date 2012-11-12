@@ -1,10 +1,10 @@
-#import <Foundation/Foundation.h>
+#import <Tranquil/Runtime/TQObject.h>
 
 @class TQNil;
 
 extern const TQNil * TQGlobalNil;
 
-@interface TQNil : NSProxy
+@interface TQNil : TQObject
 + (id)_nil;
 - (id)isNil;
 @end

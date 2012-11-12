@@ -19,7 +19,7 @@ struct TQClosureBlockLiteral {
     TQBlockClosure *closure;
 };
 
-@interface TQBlockClosure : NSObject {
+@interface TQBlockClosure : TQObject {
     @public
     const char *_type;
     ffi_cif *_cif;
@@ -27,7 +27,7 @@ struct TQClosureBlockLiteral {
     ffi_type **_argTypes;
     void *_functionPointer, *_pointer;
     struct TQClosureBlockLiteral _boxedBlock;
-    NSMutableArray *_ffiTypeObjects;
+    OFMutableArray *_ffiTypeObjects;
     id _block;
 }
 @property(readonly) void *pointer; // Points to a function pointer for <^..> and to a block for <@..>

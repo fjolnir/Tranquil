@@ -1,7 +1,8 @@
-#import <Foundation/Foundation.h>
+#import <ObjFW/ObjFW.h>
 #import <Tranquil/Shared/TQDebug.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
+#import <assert.h>
 
 // the size needed for the batch, with proper alignment for objects
 #define ALIGNMENT           8
@@ -19,7 +20,7 @@ typedef struct
 
 typedef struct
 {
-    NSUInteger poolSize;
+    unsigned long poolSize;
     uintptr_t low, high;
     TQBatch   *currentBatch;
     TQBatch   **batches;
@@ -27,7 +28,7 @@ typedef struct
 
 static inline TQBatch *TQNewObjectBatch(TQBatchPool *pool, long batchInstanceSize)
 {
-    NSUInteger     len;
+    unsigned long     len;
     unsigned long  size;
     TQBatch        *batch;
 
@@ -81,7 +82,7 @@ static inline BOOL TQBatchIsExhausted(TQBatch *p)
     /* The batch the object is in */\
     TQBatch *_batch; \
     /* It's minus one so we don't have to initialize it to 1 */\
-    NSInteger _retainCountMinusOne;
+    long _retainCountMinusOne;
 
 #define TQ_BATCH_IMPL(Klass) \
 static TQBatchPool _BatchPool; \
@@ -106,7 +107,7 @@ static inline Klass *TQBatchAlloc##Klass(Class self) \
     { \
         /* Grab an object from the current batch */\
         /* and place isa pointer there */\
-        NSUInteger offset; \
+        unsigned long offset; \
 \
         offset      = BatchSize + batch->_instance_size * batch->_allocated; \
         obj         = (id)((char *)batch + offset); \
@@ -125,7 +126,6 @@ static inline Klass *TQBatchAlloc##Klass(Class self) \
     return obj; \
 } \
 \
-+ (id)allocWithZone:(NSZone *)zone { return TQBatchAlloc##Klass(self); } \
 + (id)alloc                        { return TQBatchAlloc##Klass(self); } \
 \
 - (id)retain \
@@ -133,7 +133,7 @@ static inline Klass *TQBatchAlloc##Klass(Class self) \
     __sync_add_and_fetch(&_retainCountMinusOne, 1); \
     return self; \
 } \
-- (oneway void)release \
+- (void)release \
 { \
     if(__sync_sub_and_fetch(&_retainCountMinusOne, 1) < 0) \
         [self dealloc]; \

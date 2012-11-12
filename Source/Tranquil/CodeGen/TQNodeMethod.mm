@@ -45,15 +45,15 @@ using namespace llvm;
     return [self initWithType:kTQInstanceMethod];
 }
 
-- (BOOL)addArgument:(TQNodeMethodArgumentDef *)aArgument error:(NSError **)aoErr
+- (BOOL)addArgument:(TQNodeMethodArgumentDef *)aArgument error:(TQError **)aoErr
 {
     [self.arguments addObject:aArgument];
     return YES;
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    NSMutableString *out = [NSMutableString stringWithString:@"<meth@ "];
+    OFMutableString *out = [OFMutableString stringWithString:@"<meth@ "];
     switch(_type) {
         case kTQClassMethod:
             [out appendString:@"+ "];
@@ -76,16 +76,16 @@ using namespace llvm;
     return out;
 }
 
-- (NSString *)invokeName
+- (OFString *)invokeName
 {
-    return [NSString stringWithFormat:@"%@[%@ %@]", _type==kTQClassMethod ? @"+" : @"-", _class.name, [self selector]];
+    return [OFString stringWithFormat:@"%@[%@ %@]", _type==kTQClassMethod ? @"+" : @"-", _class.name, [self selector]];
 }
 
-- (NSString *)selector
+- (OFString *)selector
 {
-    NSMutableString *selector = [NSMutableString string];
+    OFMutableString *selector = [OFMutableString string];
     for(TQNodeMethodArgumentDef *arg in self.arguments) {
-        if([arg.name isEqualToString:@"__blk"] || [arg.name isEqualToString:@"self"])
+        if([arg.name isEqual:@"__blk"] || [arg.name isEqual:@"self"])
             continue;
         if(arg.selectorPart)
             [selector appendString:arg.selectorPart];
@@ -98,7 +98,7 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     TQAssertSoft(NO, kTQGenericErrorDomain, kTQGenericError, NULL, @"Methods require their class to be passed to generate code.");
     return NULL;
@@ -108,11 +108,11 @@ using namespace llvm;
                                  block:(TQNodeBlock *)aBlock
                                  class:(TQNodeClass *)aClass
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     _class = aClass;
     // If a matching bridged method is found, use the types from there
-    NSString *bridgedEncoding;
+    OFString *bridgedEncoding;
     if(_type == kTQInstanceMethod)
         bridgedEncoding = [[aProgram.objcParser classNamed:aClass.superClassName] typeForInstanceMethod:[self selector]];
     else
@@ -122,25 +122,25 @@ using namespace llvm;
         _retType = @"@";
     else
         _retType = bridgedEncoding;
-    _argTypes = [[NSMutableArray arrayWithCapacity:self.arguments.count] retain];
-    NSString *methodSignature;
+    _argTypes = [OFMutableArray new];
+    OFString *methodSignature;
     if(bridgedEncoding) {
         methodSignature = bridgedEncoding;
         [_argTypes addObject:@"@"]; // __blk
         [_argTypes addObject:@"@"]; // self
         __block int i = 0;
-        TQIterateTypesInEncoding([bridgedEncoding UTF8String], ^(const char *type, NSUInteger size, NSUInteger align, BOOL *stop) {
+        TQIterateTypesInEncoding([bridgedEncoding UTF8String], ^(const char *type, unsigned long size, unsigned long align, BOOL *stop) {
             if(i++ <= 2) // Skip over the return, self & selector types
                 return;
-            [_argTypes addObject:[NSString stringWithUTF8String:type]];
+            [_argTypes addObject:[OFString stringWithUTF8String:type]];
         });
     } else {
-        methodSignature = [NSMutableString stringWithString:@"@@:"];
+        methodSignature = [OFMutableString stringWithString:@"@@:"];
         for(TQNodeMethodArgumentDef *argDef in self.arguments) {
             [_argTypes addObject:@"@"];
-            if(!argDef.name || [argDef.name isEqualToString:@"__blk"] || [argDef.name isEqualToString:@"self"])
+            if(!argDef.name || [argDef.name isEqual:@"__blk"] || [argDef.name isEqual:@"self"])
                 continue;
-            [(NSMutableString*)methodSignature appendString:@"@"];
+            [(OFMutableString*)methodSignature appendString:@"@"];
         }
     }
 
@@ -159,18 +159,22 @@ using namespace llvm;
     builder->CreateCall4(aProgram.class_replaceMethod, classPtr, selector, imp, signature);
 
     // If we have parameters with a default argument then we need to create dummy methods to handle that
-    NSUInteger firstDefArgParamIdx = [self.arguments indexOfObjectPassingTest:^(TQNodeMethodArgumentDef *arg, NSUInteger _, BOOL *__) {
-        return (BOOL)(arg.defaultArgument != nil);
-    }];
-    if(firstDefArgParamIdx != NSNotFound) {
-        NSArray *argDefs = [self.arguments subarrayWithRange:(NSRange){0, firstDefArgParamIdx}];
+    unsigned long firstDefArgParamIdx = OF_NOT_FOUND;
+    for(int i = 0; i < [self.arguments count]; ++i) {
+        if([[self.arguments  objectAtIndex:i] defaultArgument] != nil) {
+            firstDefArgParamIdx = i;
+            break;
+        }
+    }
+    if(firstDefArgParamIdx != OF_NOT_FOUND) {
+        OFArray *argDefs = [self.arguments objectsInRange:(of_range_t){0, firstDefArgParamIdx}];
         for(int i = firstDefArgParamIdx; i < [self.arguments count]; ++i) {
             TQNodeMethod *method = [[self class] nodeWithType:_type];
             method.isCompactBlock = YES;
             method.arguments = [[argDefs mutableCopy] autorelease];
 
             // Construct a call to the actual method passing nothings
-            NSMutableArray *args = [NSMutableArray arrayWithCapacity:[argDefs count]];
+            OFMutableArray *args = [OFMutableArray array];
             for(int j = 2; j < [self.arguments count]; ++j) {
                 TQNodeMethodArgumentDef *def = [self.arguments objectAtIndex:j];
                 TQNode *passedNode = (j >= i) ? [TQNodeNothing node] : [TQNodeVariable nodeWithName:def.name];

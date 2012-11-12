@@ -1,10 +1,10 @@
-#import <Foundation/Foundation.h>
+#import <Tranquil/Runtime/TQObject.h>
 
 @class TQNode;
 
-@interface TQProcessor : NSObject
-+ (NSArray *)allProcessors;
+@interface TQProcessor : TQObject
++ (OFArray *)allProcessors;
 + (void)registerProcessor:(TQProcessor *)aProcessor;
 
-+ (TQNode *)processNode:(TQNode *)aNode withTrace:(NSArray *)aTrace;
++ (TQNode *)processNode:(TQNode *)aNode withTrace:(OFArray *)aTrace;
 @end

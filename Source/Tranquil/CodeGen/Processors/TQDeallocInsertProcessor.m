@@ -12,13 +12,13 @@
     [TQProcessor registerProcessor:self];
 }
 
-+ (TQNode *)processNode:(TQNode *)aNode withTrace:(NSArray *)aTrace
++ (TQNode *)processNode:(TQNode *)aNode withTrace:(OFArray *)aTrace
 {
     if(![aNode isKindOfClass:[TQNodeMethod class]])
         return aNode;
     TQNodeMethod *method = (TQNodeMethod *)aNode;
 
-    if(method.type == kTQInstanceMethod && [[method selector] isEqualToString:@"dealloc"]) {
+    if(method.type == kTQInstanceMethod && [[method selector] isEqual:@"dealloc"]) {
         TQNodeMessage *superDealloc = [TQNodeMessage nodeWithReceiver:[TQNodeSuper node]];
         [superDealloc.arguments addObject:[TQNodeArgument nodeWithPassedNode:nil selectorPart:@"dealloc"]];
         if(![method referencesNode:superDealloc])

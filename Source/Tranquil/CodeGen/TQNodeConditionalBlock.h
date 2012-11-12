@@ -3,15 +3,15 @@
 
 @interface TQNodeIfBlock : TQNode {
     @protected
-     NSMutableArray *_ifStatements, *_elseStatements;
+     OFMutableArray *_ifStatements, *_elseStatements;
 }
 @property(readwrite, retain) TQNode *condition;
-@property(readwrite, copy) NSMutableArray *ifStatements, *elseStatements;
+@property(readwrite, copy) OFMutableArray *ifStatements, *elseStatements;
 
 + (TQNodeIfBlock *)node;
 + (TQNodeIfBlock *)nodeWithCondition:(TQNode *)aCond
-                        ifStatements:(NSMutableArray *)ifStmt
-                      elseStatements:(NSMutableArray *)elseStmt;
+                        ifStatements:(OFMutableArray *)ifStmt
+                      elseStatements:(OFMutableArray *)elseStmt;
 - (llvm::Value *)generateTestExpressionInProgram:(TQProgram *)aProgram
                                      withBuilder:(llvm::IRBuilder<> *)aBuilder
                                            value:(llvm::Value *)aValue;

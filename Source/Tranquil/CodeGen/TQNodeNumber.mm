@@ -29,11 +29,11 @@ using namespace llvm;
     [super dealloc];
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    return [NSString stringWithFormat:@"<num@ %f>", _value.doubleValue];
+    return [OFString stringWithFormat:@"<num@ %f>", _value.doubleValue];
 }
-- (NSString *)toString
+- (OFString *)toString
 {
     return [_value description];
 }
@@ -52,7 +52,7 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     double value = [_value doubleValue];
     if([TQNumber fitsInTaggedPointer:value]) {
@@ -71,7 +71,7 @@ using namespace llvm;
        Module *mod = aProgram.llModule;
 
         // Returns [TQNumber numberWithDouble:_value]
-        NSString *globalName = [NSString stringWithFormat:@"TQConstNum_%f", value];
+        OFString *globalName = [OFString stringWithFormat:@"TQConstNum_%f", value];
         Value *num =  mod->getGlobalVariable([globalName UTF8String], true);
         if(!num) {
             Function *rootFunction = aRoot.function;

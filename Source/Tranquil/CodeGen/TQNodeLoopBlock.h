@@ -6,11 +6,11 @@ extern void * const TQCurrLoopKey;
 
 @interface TQNodeWhileBlock : TQNode
 @property(readwrite, retain) TQNode *condition;
-@property(readwrite, copy, nonatomic) NSMutableArray *statements, *cleanupStatements;
+@property(readwrite, copy, nonatomic) OFMutableArray *statements, *cleanupStatements;
 @property(readwrite, assign) llvm::BasicBlock *loopStartBlock, *loopEndBlock;
 
 + (TQNodeWhileBlock *)node;
-+ (TQNodeWhileBlock *)nodeWithCondition:(TQNode *)aCond statements:(NSMutableArray *)aStmt;
++ (TQNodeWhileBlock *)nodeWithCondition:(TQNode *)aCond statements:(OFMutableArray *)aStmt;
 - (llvm::Value *)generateTestExpressionInProgram:(TQProgram *)aProgram
                                      withBuilder:(llvm::IRBuilder<> *)aBuilder
                                            value:(llvm::Value *)aValue;

@@ -21,18 +21,18 @@ using namespace llvm;
     [super dealloc];
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    NSMutableString *out = [NSMutableString stringWithString:@"<array@["];
+    OFMutableString *out = [OFMutableString stringWithString:@"<array@["];
     for(TQNode *item in _items) {
         [out appendFormat:@"%@, ", item];
     }
     [out appendString:@"]>"];
     return out;
 }
-- (NSString *)toString
+- (OFString *)toString
 {
-    NSMutableString *out = [NSMutableString stringWithString:@"["];
+    OFMutableString *out = [OFMutableString stringWithString:@"["];
     for(TQNode *item in _items) {
         [out appendFormat:@"%@, ", [item toString]];
     }
@@ -62,7 +62,7 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     Module *mod = aProgram.llModule;
 

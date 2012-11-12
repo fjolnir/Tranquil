@@ -1,15 +1,18 @@
-#import <Foundation/Foundation.h>
+#import <ObjFW/ObjFW.h>
+#import <Tranquil/Runtime/TQObject.h>
 
 #ifdef DEBUG
-    #define TQLog(fmt, ...) NSLog(@"%s:%u (%s): " fmt "\n", __FILE__, __LINE__, __func__, ## __VA_ARGS__)
-    #define TQLog_min(fmt, ...)  NSLog(fmt "\n", ## __VA_ARGS__)
+    #define TQLog(fmt, ...) fputs([[OFString stringWithFormat:(OFConstantString *)[@"%@:%u (%s): " stringByAppendingFormat:@"%@\n", fmt], \
+                              [[OFString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, \
+                              __func__, ## __VA_ARGS__] UTF8String], stderr)
 
+    #define TQLog_min(fmt, ...) fputs([[OFString stringWithFormat:fmt, __VA_ARGS__] UTF8String], stderr)
 
 #define TQAssert(cond, fmt, ...) \
     do { \
         if(!(cond)) { \
             TQLog(@"Assertion failed: " fmt, ##__VA_ARGS__); \
-            [NSException raise:@"TQAssertFailed" format:fmt, ##__VA_ARGS__]; \
+            @throw [TQAssertException withReason:[OFString stringWithFormat:fmt, ##__VA_ARGS__]]; \
         } \
     } while(0)
 
@@ -17,10 +20,8 @@
     do { \
         if(!(cond)) { \
             if(aoErr) { \
-                NSString *errorDesc = [NSString stringWithFormat:fmt, ##__VA_ARGS__]; \
-                NSDictionary *userInfo = [NSDictionary dictionaryWithObject:errorDesc \
-                                                                     forKey:NSLocalizedDescriptionKey]; \
-                *aoErr = [NSError errorWithDomain:(errDomain) code:(errCode) userInfo:userInfo]; \
+                OFString *desc = [OFString stringWithFormat:fmt, ##__VA_ARGS__]; \
+                *aoErr = [TQError withDomain:(errDomain) code:(errCode) info:desc]; \
             } \
             TQLog(fmt, ##__VA_ARGS__); \
             return retVal; \
@@ -33,9 +34,9 @@
     #define TQAssertSoft(cond, errDomain, errCode, retVal, fmt, ...) cond
 #endif
 
-extern NSString * const kTQSyntaxErrorDomain;
-extern NSString * const kTQGenericErrorDomain;
-extern NSString * const kTQRuntimeErrorDomain;
+extern OFString * const kTQSyntaxErrorDomain;
+extern OFString * const kTQGenericErrorDomain;
+extern OFString * const kTQRuntimeErrorDomain;
 
 
 typedef enum {
@@ -47,4 +48,17 @@ typedef enum {
     kTQObjCException,
     kTQGenericError
 } TQSyntaxErrorCode;
+
+@interface TQAssertException : OFException
+@property(readonly, retain) OFString *reason;
++ (TQAssertException *)withReason:(OFString *)aReason;
+@end
+
+@interface TQError : TQObject
+@property(readonly, retain) OFString *domain;
+@property(readonly, retain) id info;
+@property(readonly) long code;
+
++ (TQError *)withDomain:(OFString *)aDomain code:(long)aCode info:(id)aInfo;
+@end
 

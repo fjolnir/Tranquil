@@ -43,15 +43,15 @@ using namespace llvm;
     aBlock(_value);
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    return [NSString stringWithFormat:@"<weak: ~%@>", _value];
+    return [OFString stringWithFormat:@"<weak: ~%@>", _value];
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     Module *mod     = aProgram.llModule;
     Value *selector = aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQWeakSel", aProgram.llInt8PtrTy), "weakSel");

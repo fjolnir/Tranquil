@@ -15,7 +15,7 @@ using namespace llvm;
 {
     TQNodeLock *ret  = (TQNodeLock *)[super node];
     ret->_condition  = [aCond retain];
-    ret->_statements = [NSMutableArray new];
+    ret->_statements = [OFMutableArray new];
     return ret;
 }
 - (void)dealloc
@@ -50,15 +50,15 @@ using namespace llvm;
     }
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    return [NSString stringWithFormat:@"<lock: %@>", _condition];
+    return [OFString stringWithFormat:@"<lock: %@>", _condition];
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     Module *mod = aProgram.llModule;
 

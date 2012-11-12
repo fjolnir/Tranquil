@@ -1,7 +1,7 @@
 #import <Tranquil/CodeGen/TQNode.h>
 
-@interface TQNodeVariable : TQNode
-@property(readwrite, retain) NSString *name;
+@interface TQNodeVariable : TQNode <OFCopying>
+@property(readwrite, retain) OFString *name;
 @property(readonly) BOOL isGlobal;
 // Anonymous variables are invisible from tranquil, and are captured by value when their
 // capturing block is copied
@@ -10,13 +10,13 @@
 
 + (TQNodeVariable *)node;
 + (TQNodeVariable *)tempVar;
-+ (TQNodeVariable *)nodeWithName:(NSString *)aName;
-- (id)initWithName:(NSString *)aName;
++ (TQNodeVariable *)nodeWithName:(OFString *)aName;
+- (id)initWithName:(OFString *)aName;
 
  - (llvm::Value *)createStorageInProgram:(TQProgram *)aProgram
                                    block:(TQNodeBlock *)aBlock
                                     root:(TQNodeRootBlock *)aRoot
-                                   error:(NSError **)aoErr;
+                                   error:(TQError **)aoErr;
 + (llvm::Type *)captureStructTypeInProgram:(TQProgram *)aProgram;
 + (llvm::Type *)valueTypeInProgram:(TQProgram *)aProgram;
 + (BOOL)valueIsObject; // Necessary because an i8Ptr is not necessarily an object
@@ -26,7 +26,7 @@
              inProgram:(TQProgram *)aProgram
                  block:(TQNodeBlock *)aBlock
                   root:(TQNodeRootBlock *)aRoot
-                 error:(NSError **)aoErr;
+                 error:(TQError **)aoErr;
 
 - (void)generateRetainInProgram:(TQProgram *)aProgram
                           block:(TQNodeBlock *)aBlock

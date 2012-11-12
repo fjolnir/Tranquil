@@ -12,6 +12,7 @@
 #import "TQNodeValid.h"
 #import "../Runtime/TQNumber.h"
 #import <llvm/Intrinsics.h>
+#import <sys/param.h>
 
 using namespace llvm;
 
@@ -22,8 +23,8 @@ using namespace llvm;
 {
     if(aType == kTQOperatorAssign)
         return [TQNodeAssignOperator nodeWithType:aType
-                                             left:[NSMutableArray arrayWithObject:aLeft]
-                                            right:[NSMutableArray arrayWithObject:aRight]];
+                                             left:[OFMutableArray arrayWithObject:aLeft]
+                                            right:[OFMutableArray arrayWithObject:aRight]];
     return [[[self alloc] initWithType:aType left:aLeft right:aRight] autorelease];
 }
 
@@ -91,7 +92,7 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     if(_type == kTQOperatorAssign) {
         TQAssert(NO, @"Use TQNodeAssignOperator to implement assignments");
@@ -318,14 +319,14 @@ using namespace llvm;
     }
 }
 
-- (NSString *)_descriptionFormat
+- (OFString *)_descriptionFormat
 {
     if(_type == kTQOperatorSubscript)
         return @"(%@[%@])";
     else if(_type == kTQOperatorUnaryMinus)
         return @"%@(-%@)";
     else {
-        NSString *opStr = nil;
+        OFString *opStr = nil;
         switch(_type) {
             case kTQOperatorMultiply: opStr = @"*";
             break;
@@ -364,23 +365,23 @@ using namespace llvm;
 
             default: opStr = @"<unknown>";
         }
-        return [NSString stringWithFormat:@"(%@ %@ %@)", @"%@", opStr, @"%@"];
+        return [OFString stringWithFormat:@"(%@ %@ %@)", @"%@", opStr, @"%@"];
     }
 }
-- (NSString *)toString
+- (OFString *)toString
 {
-    return [NSString stringWithFormat:[self _descriptionFormat], _left ? [_left toString] : @"", _right ? [_right toString] : @""];
+    return [OFString stringWithFormat:(OFConstantString *)[self _descriptionFormat], _left ? [_left toString] : @"", _right ? [_right toString] : @""];
 }
-- (NSString *)description
+- (OFString *)description
 {
-    return [NSString stringWithFormat:[self _descriptionFormat], _left ? _left : @"", _right ? _right : @""];
+    return [OFString stringWithFormat:(OFConstantString *)[self _descriptionFormat], _left ? _left : @"", _right ? _right : @""];
 }
 
 - (llvm::Value *)store:(llvm::Value *)aValue
              inProgram:(TQProgram *)aProgram
                  block:(TQNodeBlock *)aBlock
                   root:(TQNodeRootBlock *)aRoot
-                 error:(NSError **)aoErr
+                 error:(TQError **)aoErr
 {
     assert(_type == kTQOperatorSubscript);
 
@@ -399,7 +400,7 @@ using namespace llvm;
 @implementation TQNodeAssignOperator
 //@synthesize left=_left, right=_right, type=_type;
 
-+ (TQNodeAssignOperator *)nodeWithType:(int)aType left:(NSMutableArray *)aLeft right:(NSMutableArray *)aRight
++ (TQNodeAssignOperator *)nodeWithType:(int)aType left:(OFMutableArray *)aLeft right:(OFMutableArray *)aRight
 {
     TQNodeAssignOperator *ret = [self new];
     ret.type = aType;
@@ -414,8 +415,8 @@ using namespace llvm;
         return nil;
 
     self.type  = kTQOperatorAssign;
-    self.left  = [NSMutableArray array];
-    self.right = [NSMutableArray array];
+    self.left  = [OFMutableArray array];
+    self.right = [OFMutableArray array];
 
     return self;
 }
@@ -423,7 +424,7 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     // We must first evaluate the values in order for cases like a,b = b,a to work
     std::vector<Value*> values;
@@ -472,9 +473,9 @@ using namespace llvm;
     return NULL;
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    NSMutableString *str = [NSMutableString stringWithString:@"<multiassgn@"];
+    OFMutableString *str = [OFMutableString stringWithString:@"<multiassgn@"];
     for(TQNode *assignee in self.left) {
         [str appendFormat:@"%@, ", assignee];
     }

@@ -3,24 +3,25 @@
 #import "TQRuntime.h"
 #import "TQNumber.h"
 #import <objc/runtime.h>
+#import <ctype.h>
 
-NSString * const TQTypeObj       = @"@";
-NSString * const TQTypeClass     = @"#";
-NSString * const TQTypeSel       = @":";
-NSString * const TQTypeChar      = @"c";
-NSString * const TQTypeUChar     = @"C";
-NSString * const TQTypeShort     = @"s";
-NSString * const TQTypeUShort    = @"S";
-NSString * const TQTypeInt       = @"i";
-NSString * const TQTypeUInt      = @"I";
-NSString * const TQTypeLong      = @"l";
-NSString * const TQTypeULong     = @"L";
-NSString * const TQTypeLongLong  = @"q";
-NSString * const TQTypeULongLong = @"Q";
-NSString * const TQTypeFloat     = @"f";
-NSString * const TQTypeDouble    = @"d";
-NSString * const TQTypeBool      = @"B";
-NSString * const TQTypeString    = @"*";
+OFString * const TQTypeObj       = @"@";
+OFString * const TQTypeClass     = @"#";
+OFString * const TQTypeSel       = @":";
+OFString * const TQTypeChar      = @"c";
+OFString * const TQTypeUChar     = @"C";
+OFString * const TQTypeShort     = @"s";
+OFString * const TQTypeUShort    = @"S";
+OFString * const TQTypeInt       = @"i";
+OFString * const TQTypeUInt      = @"I";
+OFString * const TQTypeLong      = @"l";
+OFString * const TQTypeULong     = @"L";
+OFString * const TQTypeLongLong  = @"q";
+OFString * const TQTypeULongLong = @"Q";
+OFString * const TQTypeFloat     = @"f";
+OFString * const TQTypeDouble    = @"d";
+OFString * const TQTypeBool      = @"B";
+OFString * const TQTypeString    = @"*";
 
 @implementation TQPointer
 
@@ -45,7 +46,7 @@ NSString * const TQTypeString    = @"*";
     if(!aPtr)
         return nil;
     TQAssert(*aType == _C_PTR || *aType == _C_ARY_B, @"Tried to create a pointer using a non-pointer type");
-    NSUInteger count = 1;
+    unsigned long count = 1;
 
     if(*aType++ == _C_ARY_B) {
         assert(isdigit(*aType));
@@ -56,32 +57,32 @@ NSString * const TQTypeString    = @"*";
     return [[[self alloc] initWithType:aType address:*(void**)aPtr count:count] autorelease];
 }
 
-+ (TQPointer *)withObjects:(NSArray *)aObjs type:(NSString *)aType
++ (TQPointer *)withObjects:(OFArray *)aObjs type:(OFString *)aType
 {
-    NSUInteger count = [aObjs count];
-    TQPointer *ptr = [self withType:aType count:[NSNumber numberWithUnsignedInteger:count]];
+    unsigned long count = [aObjs count];
+    TQPointer *ptr = [self withType:aType count:[TQNumber numberWithUnsignedInteger:count]];
     for(int i = 0; i < count; ++i) {
         [ptr setObject:[aObjs objectAtIndex:i] atIndexedSubscript:i];
     }
     return ptr;
 }
 
-+ (TQPointer *)to:(id)aObj withType:(NSString *)aType
++ (TQPointer *)to:(id)aObj withType:(OFString *)aType
 {
-    TQPointer *ptr = [self withType:aType count:[NSNumber numberWithUnsignedInteger:1]];
+    TQPointer *ptr = [self withType:aType count:[TQNumber numberWithUnsignedInteger:1]];
     [ptr setObject:aObj atIndexedSubscript:0];
     return ptr;
 }
-+ (TQPointer *)withType:(NSString *)aType count:(NSNumber *)aCount
++ (TQPointer *)withType:(OFString *)aType count:(TQNumber *)aCount
 {
     return [[[self alloc] initWithType:[aType UTF8String] count:[aCount unsignedIntegerValue]] autorelease];
 }
-+ (TQPointer *)withType:(NSString *)aType
++ (TQPointer *)withType:(OFString *)aType
 {
-    return [self withType:aType count:[NSNumber numberWithUnsignedInteger:1]];
+    return [self withType:aType count:[TQNumber numberWithUnsignedInteger:1]];
 }
 
-- (id)initWithType:(const char *)aType count:(NSUInteger)aCount
+- (id)initWithType:(const char *)aType count:(unsigned long)aCount
 {
     if(!(self = [self initWithType:aType address:NULL count:aCount]))
         return nil;
@@ -92,7 +93,7 @@ NSString * const TQTypeString    = @"*";
     return self;
 }
 
-- (id)initWithType:(const char *)aType address:(void *)aAddr count:(NSUInteger)aCount
+- (id)initWithType:(const char *)aType address:(void *)aAddr count:(unsigned long)aCount
 {
     if(!(self = [super init]))
         return nil;
@@ -116,7 +117,7 @@ NSString * const TQTypeString    = @"*";
 
 - (id)init
 {
-    [NSException raise:@"Illegal Method" format:@"TQPointer can not be initialized without a type"];
+    TQAssert(NO, @"TQPointer can not be initialized without a type");
     return nil;
 }
 - (id)_init
@@ -124,7 +125,7 @@ NSString * const TQTypeString    = @"*";
     return [super init];
 }
 
-- (id)copyWithZone:(NSZone *)zone
+- (id)copy
 {
     TQPointer *ret = [[[self class] alloc] _init];
     ret->_itemType = _itemType;
@@ -139,9 +140,9 @@ NSString * const TQTypeString    = @"*";
     return ret;
 }
 
-- (id)castTo:(NSString *)type
+- (id)castTo:(OFString *)type
 {
-    NSUInteger size;
+    unsigned long size;
     TQGetSizeAndAlignment([type UTF8String], &size, NULL);
     TQAssert(size == _itemSize, @"Tried to cast pointer to a type of a different size");
     TQPointer *ret = [self copy];
@@ -159,18 +160,17 @@ NSString * const TQTypeString    = @"*";
     return [TQNumber numberWithInt:_count];
 }
 
-- (void *)_addrForIndex:(NSUInteger)aIdx
+- (void *)_addrForIndex:(unsigned long)aIdx
 {
-   if(aIdx >= _count)
-        [NSException raise:NSRangeException format:@"Index %ld is out of bounds (%ld)", aIdx, _count];
+    TQAssert(aIdx < _count, @"Index %ld is out of bounds (%ld)", aIdx, _count);
     return _addr + (aIdx * _itemSize);
 }
 
-- (id)objectAtIndexedSubscript:(NSUInteger)aIdx {
+- (id)objectAtIndexedSubscript:(unsigned long)aIdx {
     return [TQBoxedObject box:[self _addrForIndex:aIdx] withType:_itemType];
 }
 
-- (void)setObject:(id)aObj atIndexedSubscript:(NSUInteger)aIdx
+- (void)setObject:(id)aObj atIndexedSubscript:(unsigned long)aIdx
 {
     [TQBoxedObject unbox:aObj to:[self _addrForIndex:aIdx] usingType:_itemType];
 }
@@ -180,9 +180,9 @@ NSString * const TQTypeString    = @"*";
     return [self objectAtIndexedSubscript:0];
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    return [NSString stringWithFormat:@"<%@:%p to: %p type: %s>", [self class], self, _addr, _itemType];
+    return [OFString stringWithFormat:@"<%@:%p to: %p type: %s>", [self class], self, _addr, _itemType];
 }
 
 - (id)print
@@ -196,11 +196,11 @@ NSString * const TQTypeString    = @"*";
     return nil;
 }
 
-- (NSMutableString *)toString
+- (OFMutableString *)toString
 {
     const char *cStr = [self UTF8String];
     if(cStr)
-        return [NSMutableString stringWithUTF8String:cStr];
+        return [OFMutableString stringWithUTF8String:cStr];
     return nil;
 }
 
@@ -263,20 +263,7 @@ NSString * const TQTypeString    = @"*";
 {
     return [[[self alloc] initWithType:@encode(double) count:[aCount unsignedIntegerValue]] autorelease];
 }
-#if 0
-+ (TQPointer *)toNSPoints:(TQNumber *)aCount
-{
-    return [[[self alloc] initWithType:@encode(NSPoint) count:[aCount unsignedIntegerValue]] autorelease];
-}
-+ (TQPointer *)toNSSizes:(TQNumber *)aCount
-{
-    return [[[self alloc] initWithType:@encode(NSSize) count:[aCount unsignedIntegerValue]] autorelease];
-}
-+ (TQPointer *)toNSRects:(TQNumber *)aCount
-{
-    return [[[self alloc] initWithType:@encode(NSRect) count:[aCount unsignedIntegerValue]] autorelease];
-}
-#endif
+
 + (TQPointer *)toObject
 {
     return [self toObjects:[TQNumber numberWithInt:1]];
@@ -317,18 +304,4 @@ NSString * const TQTypeString    = @"*";
 {
     return [self toDoubles:[TQNumber numberWithInt:1]];
 }
-#if 0
-+ (TQPointer *)toNSPoint
-{
-    return [self toNSPoints:[TQNumber numberWithInt:1]];
-}
-+ (TQPointer *)toNSSize
-{
-    return [self toNSSizes:[TQNumber numberWithInt:1]];
-}
-+ (TQPointer *)toNSRect
-{
-    return [self toNSRects:[TQNumber numberWithInt:1]];
-}
-#endif
 @end

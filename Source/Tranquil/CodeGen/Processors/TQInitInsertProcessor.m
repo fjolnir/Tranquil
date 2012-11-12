@@ -15,13 +15,13 @@
     [TQProcessor registerProcessor:self];
 }
 
-+ (TQNode *)processNode:(TQNode *)aNode withTrace:(NSArray *)aTrace
++ (TQNode *)processNode:(TQNode *)aNode withTrace:(OFArray *)aTrace
 {
     if(![aNode isKindOfClass:[TQNodeMethod class]])
         return aNode;
     TQNodeMethod *method = (TQNodeMethod *)aNode;
 
-    if(method.type == kTQInstanceMethod && [[method selector] isEqualToString:@"init"]) {
+    if(method.type == kTQInstanceMethod && [[method selector] isEqual:@"init"]) {
         TQNodeMessage *superInit = [TQNodeMessage nodeWithReceiver:[TQNodeSuper node]];
         [superInit.arguments addObject:[TQNodeArgument nodeWithPassedNode:nil selectorPart:@"init"]];
         if(![method referencesNode:superInit]) {

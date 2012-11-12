@@ -5,9 +5,9 @@
 using namespace llvm;
 
 @implementation TQNodeValid
-- (NSString *)description
+- (OFString *)description
 {
-    return [NSString stringWithFormat:@"<valid>"];
+    return [OFString stringWithFormat:@"<valid>"];
 }
 
 - (TQNode *)referencesNode:(TQNode *)aNode
@@ -23,7 +23,7 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     return aBlock.builder->CreateLoad(aProgram.llModule->getOrInsertGlobal("TQValid", aProgram.llInt8PtrTy));
 }

@@ -9,7 +9,7 @@ using namespace llvm;
 
 @interface TQNodeVariable (Private)
 - (TQNodeVariable *)_getExistingIdenticalInBlock:(TQNodeBlock *)aBlock program:(TQProgram *)aProgram;
-- (const char *)_llvmRegisterName:(NSString *)subname;
+- (const char *)_llvmRegisterName:(OFString *)subname;
 @end
 
 @implementation TQNodeVariable
@@ -27,7 +27,7 @@ using namespace llvm;
     return ret;
 }
 
-+ (TQNodeVariable *)nodeWithName:(NSString *)aName
++ (TQNodeVariable *)nodeWithName:(OFString *)aName
 {
     return [[[self alloc] initWithName:aName] autorelease];
 }
@@ -42,7 +42,7 @@ using namespace llvm;
     return YES;
 }
 
-- (id)initWithName:(NSString *)aName
+- (id)initWithName:(OFString *)aName
 {
     if(!(self = [super init]))
         return nil;
@@ -52,17 +52,17 @@ using namespace llvm;
     return self;
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    return [NSString stringWithFormat:@"<var(%@)@ %@>", _isGlobal ? @"global" : @"local", _name ? _name : @"unnamed"];
+    return [OFString stringWithFormat:@"<var(%@)@ %@>", _isGlobal ? @"global" : @"local", _name ? _name : @"unnamed"];
 }
 
-- (NSString *)toString
+- (OFString *)toString
 {
     return _name;
 }
 
-- (NSUInteger)hash
+- (unsigned long)hash
 {
     return [_name hash];
 }
@@ -77,7 +77,7 @@ using namespace llvm;
 
 - (BOOL)isEqual:(id)aObj
 {
-    if([aObj isKindOfClass:[TQNodeVariable class]] && [[(TQNodeVariable *)aObj name] isEqualToString:_name])
+    if([aObj isKindOfClass:[TQNodeVariable class]] && [[(TQNodeVariable *)aObj name] isEqual:_name])
         return YES;
     else
         return NO;
@@ -137,15 +137,15 @@ using namespace llvm;
     return captureType;
 }
 
-- (const char *)_llvmRegisterName:(NSString *)subname
+- (const char *)_llvmRegisterName:(OFString *)subname
 {
-    return (_name && !_isAnonymous) ? [[NSString stringWithFormat:@"%@.%@", _name, subname] UTF8String] : "";
+    return (_name && !_isAnonymous) ? [[OFString stringWithFormat:@"%@.%@", _name, subname] UTF8String] : "";
 }
 
 - (llvm::Value *)createStorageInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock program:aProgram];
     if(existingVar) {
@@ -174,7 +174,7 @@ using namespace llvm;
     if(aBlock == aRoot && !_isAnonymous) {
         _isGlobal = YES;
         [[aProgram globals] setObject:self forKey:_name];
-        const char *globalName = [[NSString stringWithFormat:@"TQGlobalVar_%@", _name] UTF8String];
+        const char *globalName = [[OFString stringWithFormat:@"TQGlobalVar_%@", _name] UTF8String];
         _alloca = aProgram.llModule->getGlobalVariable(globalName, true);
         if(!_alloca)
             _alloca = new GlobalVariable(*aProgram.llModule, allocaType, false, GlobalVariable::InternalLinkage, ConstantAggregateZero::get(allocaType), globalName);
@@ -200,7 +200,7 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     if(_alloca)
         return [self _getForwardingInProgram:aProgram block:aBlock root:aRoot];
@@ -215,7 +215,7 @@ using namespace llvm;
              inProgram:(TQProgram *)aProgram
                  block:(TQNodeBlock *)aBlock
                   root:(TQNodeRootBlock *)aRoot
-                 error:(NSError **)aoErr
+                 error:(TQError **)aoErr
 {
     return [self store:aValue retained:YES inProgram:aProgram block:aBlock root:aRoot error:aoErr];
 }
@@ -225,7 +225,7 @@ using namespace llvm;
              inProgram:(TQProgram *)aProgram
                  block:(TQNodeBlock *)aBlock
                   root:(TQNodeRootBlock *)aRoot
-                 error:(NSError **)aoErr
+                 error:(TQError **)aoErr
 {
     TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock program:aProgram];
     if(existingVar)
@@ -305,7 +305,7 @@ using namespace llvm;
     return nil;
 }
 
-- (id)copyWithZone:(NSZone *)zone
+- (id)copy
 {
     TQNodeVariable *copy = [[[self class] alloc] init];
     copy.isAnonymous = _isAnonymous;
@@ -356,7 +356,7 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     IRBuilder<> *builder = aBlock.builder;
     IRBuilder<> entryBuilder(&aBlock.function->getEntryBlock(), aBlock.function->getEntryBlock().begin());
@@ -380,7 +380,7 @@ using namespace llvm;
              inProgram:(TQProgram *)aProgram
                  block:(TQNodeBlock *)aBlock
                   root:(TQNode *)aRoot
-                 error:(NSError **)aoErr
+                 error:(TQError **)aoErr
 {
     TQAssertSoft(NO, kTQSyntaxErrorDomain, kTQInvalidAssignee, NO, @"Tried to assign to super! on line %ld", self.lineNumber);
     return NULL;
@@ -432,7 +432,7 @@ using namespace llvm;
              inProgram:(TQProgram *)aProgram
                  block:(TQNodeBlock *)aBlock
                   root:(TQNodeRootBlock *)aRoot
-                 error:(NSError **)aoErr
+                 error:(TQError **)aoErr
 {
     return [self store:aValue retained:NO inProgram:aProgram block:aBlock root:aRoot error:aoErr];
 }

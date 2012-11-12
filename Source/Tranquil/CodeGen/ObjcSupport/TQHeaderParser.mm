@@ -1,15 +1,16 @@
 #import "TQHeaderParser.h"
 #import "../../Runtime/TQBoxedObject.h"
 #import "../CodeGen.h"
-#import "../../Runtime/NSString+TQAdditions.h"
+#import "../../Runtime/TQNumber.h"
+#import "../../Runtime/OFString+TQAdditions.h"
 #import <objc/runtime.h>
 
 using namespace llvm;
 
-static NSString *_prepareConstName(NSString *name)
+static OFString *_prepareConstName(OFString *name)
 {
     if([name hasPrefix:@"_"])
-        return [NSString stringWithFormat:@"_%@", [[name substringFromIndex:1] stringByCapitalizingFirstLetter]];
+        return [OFString stringWithFormat:@"_%@", [[name substringFromIndex:1] stringByCapitalizingFirstLetter]];
     return [name stringByCapitalizingFirstLetter];
 }
 
@@ -25,11 +26,11 @@ static NSString *_prepareConstName(NSString *name)
     if(!(self = [super init]))
         return nil;
 
-    _functions        = [NSMutableDictionary new];
-    _literalConstants = [NSMutableDictionary new];
-    _constants        = [NSMutableDictionary new];
-    _classes          = [NSMutableDictionary new];
-    _protocols        = [NSMutableDictionary new];
+    _functions        = [OFMutableDictionary new];
+    _literalConstants = [OFMutableDictionary new];
+    _constants        = [OFMutableDictionary new];
+    _classes          = [OFMutableDictionary new];
+    _protocols        = [OFMutableDictionary new];
     _index            = clang_createIndex(0, 1);
 
     return self;
@@ -47,24 +48,23 @@ static NSString *_prepareConstName(NSString *name)
     [super dealloc];
 }
 
-- (id)parseHeader:(NSString *)aPath
+- (id)parseHeader:(OFString *)aPath
 {
-    NSRange frameworkRange = [aPath rangeOfString:@".framework/"];
-    NSString *frameworksPath = nil;
-    if(frameworkRange.location != NSNotFound)
-        frameworksPath = [[aPath substringToIndex:NSMaxRange(frameworkRange)] stringByDeletingLastPathComponent];
+    of_range_t frameworkRange = [aPath rangeOfString:@".framework/"];
+    OFString *frameworksPath = nil;
+    if(frameworkRange.location != OF_NOT_FOUND)
+        frameworksPath = [[aPath substringToIndex:frameworkRange.location+frameworkRange.length] stringByDeletingLastPathComponent];
 
-    // We create a temp PCH header so that future compiles go faster (TODO: Make the generated tree NSCoding compliant so we can just serialize the ready made hierarchy)
-    if(![aPath isAbsolutePath])
-        aPath = [[[NSFileManager defaultManager] currentDirectoryPath] stringByAppendingPathComponent:aPath];
-    NSString *tempPath = [NSString stringWithFormat:@"/tmp/tranquil_pch/%@.pch", [aPath stringByDeletingPathExtension]];
-    if([[NSFileManager defaultManager] fileExistsAtPath:tempPath])
+    // We create a temp PCH header so that future compiles go faster (TODO: Make the generated tree Coding compliant so we can just serialize the ready made hierarchy)
+    if(![aPath hasPrefix:@"/"])
+        aPath = [[OFFile currentDirectoryPath] stringByAppendingPathComponent:aPath];
+    OFString *tempPath = [OFString stringWithFormat:@"/tmp/tranquil_pch/%@.pch", [aPath stringByDeletingPathExtension]];
+    if([OFFile fileExistsAtPath:tempPath])
         return [self parsePCH:tempPath];
-    [[NSFileManager defaultManager] createDirectoryAtPath:[tempPath stringByDeletingLastPathComponent]
-    withIntermediateDirectories:YES attributes:nil error:nil];
+    [OFFile createDirectoryAtPath:[tempPath stringByDeletingLastPathComponent] createParents:YES];
     const char *args[] = { "-x", "objective-c", frameworksPath ? [[@"-F" stringByAppendingString:frameworksPath] UTF8String] : nil };
 
-    CXTranslationUnit translationUnit = clang_parseTranslationUnit(_index, [aPath fileSystemRepresentation], args, frameworksPath ? 3 : 2, NULL, 0,
+    CXTranslationUnit translationUnit = clang_parseTranslationUnit(_index, [aPath UTF8String], args, frameworksPath ? 3 : 2, NULL, 0,
                                                                    CXTranslationUnit_DetailedPreprocessingRecord|CXTranslationUnit_SkipFunctionBodies);
     if (!translationUnit) {
         TQLog(@"Couldn't parse header %@\n", aPath);
@@ -73,15 +73,15 @@ static NSString *_prepareConstName(NSString *name)
     [self _parseTranslationUnit:translationUnit];
 
     // Cache to disk
-    clang_saveTranslationUnit(translationUnit, [tempPath fileSystemRepresentation], CXSaveTranslationUnit_None);
+    clang_saveTranslationUnit(translationUnit, [tempPath UTF8String], CXSaveTranslationUnit_None);
 
     clang_disposeTranslationUnit(translationUnit);
     return TQValid;
 }
 
-- (id)parsePCH:(NSString *)aPath
+- (id)parsePCH:(OFString *)aPath
 {
-    CXTranslationUnit translationUnit = clang_createTranslationUnit(_index, [aPath fileSystemRepresentation]);
+    CXTranslationUnit translationUnit = clang_createTranslationUnit(_index, [aPath UTF8String]);
     if (!translationUnit) {
         TQLog(@"Couldn't parse pch %@\n", aPath);
         return nil;
@@ -98,7 +98,7 @@ static NSString *_prepareConstName(NSString *name)
         const char *name = clang_getCString(spelling);
         if(!name)
             return CXChildVisit_Continue;
-        NSString *nsName = [NSString stringWithUTF8String:name];
+        OFString *nsName = [OFString stringWithUTF8String:name];
         @try {
         switch(cursor.kind) {
             case CXCursor_ObjCInterfaceDecl: {
@@ -139,9 +139,9 @@ static NSString *_prepareConstName(NSString *name)
             case CXCursor_ObjCClassMethodDecl:
             case CXCursor_ObjCInstanceMethodDecl: {
                 BOOL isClassMethod    = cursor.kind == CXCursor_ObjCClassMethodDecl;
-                NSString *selector    = nsName;
+                OFString *selector    = nsName;
                 char *encoding_       = [[self class] _encodingForCursor:cursor];
-                NSString *encoding    = [NSString stringWithUTF8String:encoding_];
+                OFString *encoding    = [OFString stringWithUTF8String:encoding_];
                 if(isClassMethod)
                     [_currentClass.classMethods    setObject:encoding forKey:selector];
                 else
@@ -170,7 +170,7 @@ static NSString *_prepareConstName(NSString *name)
                     if(tokenKind == CXToken_Literal) {
                         [_literalConstants setObject:[TQNodeNumber nodeWithDouble:atof(value)] forKey:nsName];
                     } else if(tokenKind == CXToken_Identifier) { // Treat as alias
-                        id existing = [_literalConstants objectForKey:[NSString stringWithUTF8String:value]];
+                        id existing = [_literalConstants objectForKey:[OFString stringWithUTF8String:value]];
                         if(existing)
                             [_literalConstants setObject:existing forKey:nsName];
                     }
@@ -213,14 +213,14 @@ static NSString *_prepareConstName(NSString *name)
         recurse:
             clang_disposeString(spelling);
             return CXChildVisit_Recurse;
-        } @catch(NSException *e) {
-            NSLog(@"Error parsing entity %s! %@", name, e);
+        } @catch(TQAssertException *e) {
+            fprintf(stderr, "Error parsing entity %s! %s", name, [[e reason] UTF8String]);
     }
 
     });
 }
 
-- (TQNode *)entityNamed:(NSString *)aName
+- (TQNode *)entityNamed:(OFString *)aName
 {
     id ret = [self functionNamed:aName];
     if(ret)
@@ -228,12 +228,12 @@ static NSString *_prepareConstName(NSString *name)
     return [self constantNamed:aName];
 }
 
-- (TQBridgedFunction *)functionNamed:(NSString *)aName
+- (TQBridgedFunction *)functionNamed:(OFString *)aName
 {
     return [_functions objectForKey:aName];
 }
 
-- (TQBridgedConstant *)constantNamed:(NSString *)aName
+- (TQBridgedConstant *)constantNamed:(OFString *)aName
 {
     id literal = [_literalConstants objectForKey:aName];
     if(literal)
@@ -241,7 +241,7 @@ static NSString *_prepareConstName(NSString *name)
     return [_constants objectForKey:aName];
 }
 
-- (TQBridgedClassInfo *)classNamed:(NSString *)aName
+- (TQBridgedClassInfo *)classNamed:(OFString *)aName
 {
     return [_classes objectForKey:aName];
 }
@@ -253,7 +253,7 @@ static NSString *_prepareConstName(NSString *name)
 + (const char *)_encodingForFunPtrCursor:(CXCursor)cursor
 {
     CXType type = clang_getCursorType(cursor);
-    NSMutableString *realEncoding = [NSMutableString stringWithString:@"<"];
+    OFMutableString *realEncoding = [OFMutableString stringWithString:@"<"];
     // Resolve any typedef to it's original type
     while(type.kind == CXType_Typedef) {
         cursor = clang_getTypeDeclaration(type);
@@ -302,13 +302,13 @@ static NSString *_prepareConstName(NSString *name)
     CXCursorKind kind = cursor.kind;
     if(strstr(vanillaEncoding, "@?") || strstr(vanillaEncoding, "^?")) {
         // Contains  block argument(s) so we need to manually create the encodings for them
-        NSMutableArray *typeComponents = [NSMutableArray array];
-        TQIterateTypesInEncoding(vanillaEncoding, ^(const char *type, NSUInteger size, NSUInteger align, BOOL *stop) {
+        OFMutableArray *typeComponents = [OFMutableArray array];
+        TQIterateTypesInEncoding(vanillaEncoding, ^(const char *type, unsigned long size, unsigned long align, BOOL *stop) {
             const char *nextTy = TQGetSizeAndAlignment(type, NULL, NULL);
             if(nextTy)
-                [typeComponents addObject:[[[NSString alloc] initWithBytes:(void*)type length:nextTy - type encoding:NSUTF8StringEncoding] autorelease]];
+                [typeComponents addObject:[[[OFString alloc] initWithUTF8String:type length:nextTy - type] autorelease]];
             else
-                [typeComponents addObject:[NSString stringWithUTF8String:type]];
+                [typeComponents addObject:[OFString stringWithUTF8String:type]];
         });
 
         __block int i = 0, j = 0;
@@ -317,24 +317,30 @@ static NSString *_prepareConstName(NSString *name)
             const char *childEnc = clang_getCString(childEnc_);
             BOOL isBlock = strstr(childEnc, "@?") == childEnc;
             if(isBlock || strstr(childEnc, "^?") == childEnc) {
-                NSUInteger idx;
+                unsigned long idx = OF_NOT_FOUND;
                 if(isBlock) {
-                    idx = [typeComponents indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop) {
-                        return [obj hasPrefix:@"@?"];
-                    }];
+                    for(int i = 0; i < [typeComponents count]; ++i) {
+                        if([[typeComponents objectAtIndex:i] hasPrefix:@"@?"]) {
+                            idx = i;
+                            break;
+                        }
+                    }
                 } else {
-                    idx = [typeComponents indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop) {
-                        return [obj hasPrefix:@"^?"];
-                    }];
+                    for(int i = 0; i < [typeComponents count]; ++i) {
+                        if([[typeComponents objectAtIndex:i] hasPrefix:@"^?"]) {
+                            idx = i;
+                            break;
+                        }
+                    }
                 }
-                NSAssert(idx != NSNotFound, @"Panic in header parser");
+                TQAssert(idx != OF_NOT_FOUND, @"Panic in header parser");
                 const char *encoding = [[self class] _encodingForFunPtrCursor:child];
-                [typeComponents replaceObjectAtIndex:idx withObject:[NSString stringWithUTF8String:encoding]];
+                [typeComponents replaceObjectAtIndex:idx withObject:[OFString stringWithUTF8String:encoding]];
             }
             clang_disposeString(childEnc_);
             return CXChildVisit_Continue;
         });
-        NSString *realEncoding = [typeComponents componentsJoinedByString:@""];
+        OFString *realEncoding = [typeComponents componentsJoinedByString:@""];
         clang_disposeString(cxvanillaEncoding);
         return strdup([realEncoding UTF8String]);
     }
@@ -350,22 +356,22 @@ static NSString *_prepareConstName(NSString *name)
 {
     if(!(self = [super init]))
         return nil;
-    _instanceMethods = [NSMutableDictionary new];
-    _classMethods    = [NSMutableDictionary new];
+    _instanceMethods = [OFMutableDictionary new];
+    _classMethods    = [OFMutableDictionary new];
     return self;
 }
 
-- (NSString *)typeForInstanceMethod:(NSString *)aSelector
+- (OFString *)typeForInstanceMethod:(OFString *)aSelector
 {
-    NSString *enc = [_instanceMethods objectForKey:aSelector];
+    OFString *enc = [_instanceMethods objectForKey:aSelector];
     if(enc)
         return enc;
     return [_superclass typeForInstanceMethod:aSelector];
 }
 
-- (NSString *)typeForClassMethod:(NSString *)aSelector
+- (OFString *)typeForClassMethod:(OFString *)aSelector
 {
-    NSString *enc = [_classMethods objectForKey:aSelector];
+    OFString *enc = [_classMethods objectForKey:aSelector];
     if(enc)
         return enc;
     return [_superclass typeForClassMethod:aSelector];
@@ -387,7 +393,7 @@ static NSString *_prepareConstName(NSString *name)
 @implementation TQBridgedConstant
 @synthesize name=_name, encoding=_encoding;
 
-+ (TQBridgedConstant *)constantWithName:(NSString *)aName encoding:(const char *)aEncoding;
++ (TQBridgedConstant *)constantWithName:(OFString *)aName encoding:(const char *)aEncoding;
 {
     TQBridgedConstant *cnst = (TQBridgedConstant *)[self node];
     cnst.name = aName;
@@ -406,7 +412,7 @@ static NSString *_prepareConstName(NSString *name)
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     if(_global)
         return aBlock.builder->CreateLoad(_global);
@@ -417,7 +423,7 @@ static NSString *_prepareConstName(NSString *name)
     IRBuilder<> rootBuilder(&rootFunction->getEntryBlock(), rootFunction->getEntryBlock().begin());
     Value *constant = mod->getOrInsertGlobal([_name UTF8String], [aProgram llvmTypeFromEncoding:_encoding]);
     constant = rootBuilder.CreateBitCast(constant, aProgram.llInt8PtrTy);
-    Value *boxed = rootBuilder.CreateCall2(aProgram.TQBoxValue, constant, [aProgram getGlobalStringPtr:[NSString stringWithUTF8String:_encoding]
+    Value *boxed = rootBuilder.CreateCall2(aProgram.TQBoxValue, constant, [aProgram getGlobalStringPtr:[OFString stringWithUTF8String:_encoding]
                                                                                            withBuilder:&rootBuilder]);
     _global = new GlobalVariable(*mod, aProgram.llInt8PtrTy, false, GlobalVariable::InternalLinkage,
                                  ConstantPointerNull::get(aProgram.llInt8PtrTy), [[@"TQBridgedConst_" stringByAppendingString:_name] UTF8String]);
@@ -433,23 +439,23 @@ static NSString *_prepareConstName(NSString *name)
 @implementation TQBridgedFunction
 @synthesize name=_name, encoding=_encoding;
 
-+ (TQBridgedFunction *)functionWithName:(NSString *)aName encoding:(const char *)aEncoding
++ (TQBridgedFunction *)functionWithName:(OFString *)aName encoding:(const char *)aEncoding
 {
     return [[[self alloc] initWithName:aName encoding:aEncoding] autorelease];
 }
 
-- (id)initWithName:(NSString *)aName encoding:(const char *)aEncoding
+- (id)initWithName:(OFString *)aName encoding:(const char *)aEncoding
 {
     if(!(self = [super init]))
         return nil;
     _name     = [aName retain];
     _encoding = strdup(aEncoding);
-    _argTypes = [NSMutableArray new];
-    TQIterateTypesInEncoding(_encoding, ^(const char *type, NSUInteger size, NSUInteger align, BOOL *stop) {
+    _argTypes = [OFMutableArray new];
+    TQIterateTypesInEncoding(_encoding, ^(const char *type, unsigned long size, unsigned long align, BOOL *stop) {
         if(!_retType)
-            _retType = [[NSString stringWithUTF8String:type] retain];
+            _retType = [[OFString stringWithUTF8String:type] retain];
         else
-            [_argTypes addObject:[NSString stringWithUTF8String:type]];
+            [_argTypes addObject:[OFString stringWithUTF8String:type]];
     });
 
     return self;
@@ -463,7 +469,7 @@ static NSString *_prepareConstName(NSString *name)
     [super dealloc];
 }
 
-- (NSUInteger)argumentCount
+- (unsigned long)argumentCount
 {
     return [_argTypes count];
 }
@@ -471,7 +477,7 @@ static NSString *_prepareConstName(NSString *name)
 // Compiles a a wrapper block for the function
 // The reason we don't use TQBoxedObject is that when the function is known at compile time
 // we can generate a far more efficient wrapper that doesn't rely on libffi
-- (llvm::Function *)_generateInvokeInProgram:(TQProgram *)aProgram root:(TQNodeRootBlock *)aRoot block:(TQNodeBlock *)aBlock error:(NSError **)aoErr
+- (llvm::Function *)_generateInvokeInProgram:(TQProgram *)aProgram root:(TQNodeRootBlock *)aRoot block:(TQNodeBlock *)aBlock error:(TQError **)aoErr
 {
     if(_function)
         return _function;
@@ -484,7 +490,7 @@ static NSString *_prepareConstName(NSString *name)
 
     Module *mod = aProgram.llModule;
 
-    const char *wrapperFunctionName = [[NSString stringWithFormat:@"__tq_wrapper_%@", _name] UTF8String];
+    const char *wrapperFunctionName = [[OFString stringWithFormat:@"__tq_wrapper_%@", _name] UTF8String];
 
     _function = Function::Create(wrapperFunType, GlobalValue::ExternalLinkage, wrapperFunctionName, mod);
 
@@ -504,11 +510,11 @@ static NSString *_prepareConstName(NSString *name)
 
 
     // Load the arguments
-    NSString *argTypeEncoding;
+    OFString *argTypeEncoding;
     Type *argType;
     std::vector<Type *> argTypes;
     std::vector<Value *> args;
-    NSUInteger typeSize;
+    unsigned long typeSize;
     BasicBlock  *nextBlock;
     IRBuilder<> *currBuilder, *nextBuilder;
     currBuilder = &entryBuilder;
@@ -529,7 +535,7 @@ static NSString *_prepareConstName(NSString *name)
         retType = aProgram.llVoidTy;
     }
 
-    NSMutableIndexSet *byValArgIndices = [NSMutableIndexSet indexSet];
+    OFMutableSet *byValArgIndices = [OFMutableSet set];
     std::vector<IRBuilder <>*> argCheckBuilders;
     if([_argTypes count] > 0) {
         Value *sentinel = entryBuilder.CreateLoad(mod->getOrInsertGlobal("TQNothing", aProgram.llInt8PtrTy));
@@ -550,12 +556,12 @@ static NSString *_prepareConstName(NSString *name)
             // Larger structs should be passed as pointers to their location on the stack
             if(TQStructSizeRequiresStret(typeSize)) {
                 argTypes.push_back(PointerType::getUnqual(argType));
-                [byValArgIndices addIndex:i+1]; // Add one to jump over retval
+                [byValArgIndices addObject:[TQNumber numberWithInt:i+1]]; // Add one to jump over retval
             } else
                 argTypes.push_back(argType);
 
             IRBuilder<> startBuilder(&_function->getEntryBlock(), _function->getEntryBlock().begin());
-            Value *unboxedArgAlloca = startBuilder.CreateAlloca(argType, NULL, [[NSString stringWithFormat:@"arg%d", i] UTF8String]);
+            Value *unboxedArgAlloca = startBuilder.CreateAlloca(argType, NULL, [[OFString stringWithFormat:@"arg%d", i] UTF8String]);
 
             // If the value is a sentinel we've not been passed enough arguments => jump to error
             Value *notPassedCond = currBuilder->CreateICmpEQ(argumentIterator, sentinel);
@@ -565,7 +571,7 @@ static NSString *_prepareConstName(NSString *name)
                 nextBlock = callBlock;
                 nextBuilder = &callBuilder;
             } else {
-                nextBlock = BasicBlock::Create(mod->getContext(), [[NSString stringWithFormat:@"check%d", i] UTF8String], _function, callBlock);
+                nextBlock = BasicBlock::Create(mod->getContext(), [[OFString stringWithFormat:@"check%d", i] UTF8String], _function, callBlock);
                 nextBuilder = new IRBuilder<>(nextBlock);
                 argCheckBuilders.push_back(nextBuilder);
             }
@@ -601,15 +607,15 @@ static NSString *_prepareConstName(NSString *name)
         function->setCallingConv(CallingConv::C);
         if(returningOnStack)
             function->addAttribute(1, Attribute::StructRet);
-        [byValArgIndices enumerateIndexesWithOptions:0 usingBlock:^(NSUInteger idx, BOOL *stop) {
-            function->addAttribute(returningOnStack ? idx+1 : idx, Attribute::ByVal);
-        }];
+        for(TQNumber *idx in byValArgIndices) {
+            function->addAttribute(returningOnStack ? [idx intValue]+1 : [idx intValue], Attribute::ByVal);
+        }
     }
 
     CallInst *call = callBuilder.CreateCall(function, args);
-    [byValArgIndices enumerateIndexesWithOptions:0 usingBlock:^(NSUInteger idx, BOOL *stop) {
-        call->addAttribute(returningOnStack ? idx+1 : idx, Attribute::ByVal);
-    }];
+    for(TQNumber *idx in byValArgIndices) {
+        call->addAttribute(returningOnStack ? [idx intValue]+1 : [idx intValue], Attribute::ByVal);
+    }
     const char *retTypeCStr = [_retType UTF8String];
     if([_retType hasPrefix:@"v"])
         callBuilder.CreateRet(ConstantPointerNull::get(aProgram.llInt8PtrTy));
@@ -635,10 +641,10 @@ static NSString *_prepareConstName(NSString *name)
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     Module *mod = aProgram.llModule;
-    NSString *globalName = [NSString stringWithFormat:@"__boxed_%@", _name];
+    OFString *globalName = [OFString stringWithFormat:@"__boxed_%@", _name];
     Value *global = mod->getGlobalVariable([globalName UTF8String], true);
     if(!global) {
         global = new GlobalVariable(*mod, aProgram.llInt8PtrTy, false, GlobalVariable::InternalLinkage,
@@ -649,7 +655,7 @@ static NSString *_prepareConstName(NSString *name)
         IRBuilder<> rootBuilder(&rootFunction->getEntryBlock(), rootFunction->getEntryBlock().begin());
 
         Value *boxed = rootBuilder.CreateCall2(aProgram.TQBoxValue, fun,
-                        [aProgram getGlobalStringPtr:[NSString stringWithFormat:@"<^%s>", _encoding] withBuilder:&rootBuilder]);
+                        [aProgram getGlobalStringPtr:[OFString stringWithFormat:@"<^%s>", _encoding] withBuilder:&rootBuilder]);
         boxed = rootBuilder.CreateCall(aProgram.objc_retain, boxed);
         rootBuilder.CreateStore(boxed, global);
     }
@@ -666,8 +672,8 @@ static NSString *_prepareConstName(NSString *name)
 #endif
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    return [NSString stringWithFormat:@"<bridged function@ %@>", _name];
+    return [OFString stringWithFormat:@"<bridged function@ %@>", _name];
 }
 @end

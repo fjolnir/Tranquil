@@ -1,11 +1,10 @@
-#import "NSObject+TQAdditions.h"
-#import "TQNumber.h"
+#import "OFObject+TQAdditions.h"
 #import "TQRuntime.h"
 #import "TQModule.h"
 #import <objc/runtime.h>
 
-@implementation NSObject (Tranquil)
-- (NSMutableString *)toString
+@implementation OFObject (Tranquil)
+- (OFMutableString *)toString
 {
     return [[[self description] mutableCopy] autorelease];
 }

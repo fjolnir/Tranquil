@@ -9,12 +9,12 @@ using namespace llvm;
 @implementation TQNodeMemberAccess
 @synthesize receiver=_receiver, property=_property;
 
-+ (TQNodeMemberAccess *)nodeWithReceiver:(TQNode *)aReceiver property:(NSString *)aProperty
++ (TQNodeMemberAccess *)nodeWithReceiver:(TQNode *)aReceiver property:(OFString *)aProperty
 {
     return [[[self alloc] initWithReceiver:aReceiver property:aProperty] autorelease];
 }
 
-- (id)initWithReceiver:(TQNode *)aReceiver property:(NSString *)aProperty
+- (id)initWithReceiver:(TQNode *)aReceiver property:(OFString *)aProperty
 {
     if(!(self = [super init]))
         return nil;
@@ -47,19 +47,19 @@ using namespace llvm;
     aBlock(_receiver);
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    return [NSString stringWithFormat:@"<acc@ %@#%@>", _receiver, _property];
+    return [OFString stringWithFormat:@"<acc@ %@#%@>", _receiver, _property];
 }
-- (NSString *)toString
+- (OFString *)toString
 {
-    return [NSString stringWithFormat:@"%@#%@>", [_receiver toString], _property];
+    return [OFString stringWithFormat:@"%@#%@>", [_receiver toString], _property];
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     IRBuilder<> *builder = aBlock.builder;
     Value *key = [[TQNodeConstString nodeWithString:_property] generateCodeInProgram:aProgram
@@ -76,7 +76,7 @@ using namespace llvm;
              inProgram:(TQProgram *)aProgram
                  block:(TQNodeBlock *)aBlock
                   root:(TQNodeRootBlock *)aRoot
-                 error:(NSError **)aoErr
+                 error:(TQError **)aoErr
 {
     IRBuilder<> *builder = aBlock.builder;
 

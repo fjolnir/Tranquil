@@ -10,7 +10,7 @@ using namespace llvm;
 @implementation TQNodeImport
 @synthesize path=_path;
 
-+ (TQNodeImport *)nodeWithPath:(NSString *)aPath
++ (TQNodeImport *)nodeWithPath:(OFString *)aPath
 {
     TQNodeImport *ret = (TQNodeImport *)[self node];
     ret->_path = [aPath retain];
@@ -35,33 +35,33 @@ using namespace llvm;
     // No subnodes
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    return [NSString stringWithFormat:@"<import: %@>", _path];
+    return [OFString stringWithFormat:@"<import: %@>", _path];
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
-    NSString *path = [aProgram _resolveImportPath:_path];
+    OFString *path = [aProgram _resolveImportPath:_path];
     if(!path || [aProgram.evaluatedPaths containsObject:path])
         return NULL;
 
     [aProgram.evaluatedPaths addObject:path];
-    if([[path pathExtension] isEqualToString:@"h"]) {
+    if([[path pathExtension] isEqual:@"h"]) {
         // If it's a framework and we are not in AOT mode, we should load it
-        if(!aProgram.useAOTCompilation && [path rangeOfString:@".framework"].location != NSNotFound) {
-            NSArray *components = [path pathComponents];
-            NSString *frameworkPath;
+        if(!aProgram.useAOTCompilation && [path rangeOfString:@".framework"].location != OF_NOT_FOUND) {
+            OFArray *components = [path pathComponents];
+            OFString *frameworkPath;
             for(int i = [components count] - 1; i >= 0; --i) {
                 if([[components objectAtIndex:i] hasSuffix:@".framework"]) {
-                    frameworkPath = [[components subarrayWithRange:(NSRange) { 0, i+1 }] componentsJoinedByString:@"/"];
+                    frameworkPath = [[components objectsInRange:(of_range_t) { 0, i+1 }] componentsJoinedByString:@"/"];
                     frameworkPath = [frameworkPath stringByAppendingFormat:@"/%@", [[components objectAtIndex:i] stringByDeletingPathExtension]];
                 }
             }
-            dlopen([frameworkPath fileSystemRepresentation], RTLD_GLOBAL);
+            dlopen([frameworkPath UTF8String], RTLD_GLOBAL);
         }
         [aProgram.objcParser parseHeader:path];
         return NULL;

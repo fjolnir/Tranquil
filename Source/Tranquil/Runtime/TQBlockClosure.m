@@ -4,6 +4,9 @@
 #import "../../../Build/TQStubs.h"
 #import <sys/mman.h>
 
+extern void _Block_object_assign(void *dst, const void *src, const int flags);
+extern void _Block_object_dispose(const void *obj, const int flags);
+
 static ffi_closure *_AllocateClosure(void **codePtr);
 static void _DeallocateClosure(void *closure);
 static ffi_status _PrepareClosure(ffi_closure *closure, ffi_cif *cif, void (*fun)(ffi_cif*,void*,void**,void*), void *user_data, void *codeloc);
@@ -22,7 +25,7 @@ struct TQClosureBlockDescriptor _BlockDescriptor = { 0, sizeof(struct TQBlockLit
 
 - (id)initWithBlock:(id)aBlock type:(const char *)aType
 {
-    assert(*aType == _TQ_C_LAMBDA_B);
+    TQAssert(*aType == _TQ_C_LAMBDA_B, @"Tried to close over a non-lambda");
     BOOL isBlock = *(aType+1) == _TQ_C_LAMBDA_BLOCK;
     aType += 2;
     _type = aType;
@@ -32,7 +35,7 @@ struct TQClosureBlockDescriptor _BlockDescriptor = { 0, sizeof(struct TQBlockLit
     ffi_closure *closure = _AllocateClosure(&_functionPointer);
     if(closure) {
         const char *typeIterator = _type;
-        _ffiTypeObjects = [NSMutableArray new];
+        _ffiTypeObjects = [OFMutableArray new];
         TQFFIType *retTypeObj = [TQFFIType typeWithEncoding:typeIterator nextType:&typeIterator];
         [_ffiTypeObjects addObject:retTypeObj];
         while(typeIterator && *typeIterator != _TQ_C_LAMBDA_E) {

@@ -26,9 +26,9 @@ using namespace llvm;
     [super dealloc];
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    return [NSString stringWithFormat:@"<custom>"];
+    return [OFString stringWithFormat:@"<custom>"];
 }
 
 - (TQNode *)referencesNode:(TQNode *)aNode
@@ -50,7 +50,7 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     return _block(aProgram, aBlock, aRoot);
 }

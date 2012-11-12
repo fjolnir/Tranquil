@@ -1,5 +1,8 @@
 #import "TQBigNumber.h"
 #import "TQNumber.h"
+#import <math.h>
+#import <string.h>
+#import <sys/param.h>
 
 #define DBL_OP(out, op, dbl) {\
     mpf_t tmp; \
@@ -57,12 +60,12 @@ static const int _TQBigNumberMaxDigits;
     return [TQNumber numberWithDouble:mpf_get_d(_value)];
 }
 
-- (NSMutableString *)toString
+- (OFMutableString *)toString
 {
     mp_exp_t exp;
     char *str = mpf_get_str(NULL, &exp, 10, 0, _value);
     long len = strlen(str);
-    NSMutableString *ret = [NSMutableString stringWithUTF8String:len == 0 ? "0" : str];
+    OFMutableString *ret = [OFMutableString stringWithUTF8String:len == 0 ? "0" : str];
     if(len < exp) {
         for(int i = exp; i > len; --i)
             [ret appendString:@"0"];
@@ -72,7 +75,7 @@ static const int _TQBigNumberMaxDigits;
     return ret;
 }
 
-- (NSString *)description
+- (OFString *)description
 {
     return [self toString];
 }
@@ -89,14 +92,14 @@ static const int _TQBigNumberMaxDigits;
     return result == 0;
 }
 
-- (NSComparisonResult)compare:(id)b
+- (of_comparison_result_t)compare:(id)b
 {
     int result;
     if(object_getClass(self) != object_getClass(b))
         result = mpf_cmp_d(_value, [b doubleValue]);
     else
         result = mpf_cmp(_value, ((TQBigNumber *)b)->_value);
-    return (NSComparisonResult)MAX(-1, MIN(result, 1));
+    return (of_comparison_result_t)MAX(-1, MIN(result, 1));
 }
 
 - (TQBigNumber *)add:(id)b

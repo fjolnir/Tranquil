@@ -20,15 +20,15 @@ using namespace llvm;
     // Nothing to iterate
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    return [NSString stringWithFormat:@"<nil>"];
+    return [OFString stringWithFormat:@"<nil>"];
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     return ConstantPointerNull::get(aProgram.llInt8PtrTy);
 }

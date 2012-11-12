@@ -5,35 +5,37 @@
 static TQNothingness *sharedInstance;
 
 @implementation TQNothingness
++ (void)load
+{
+    if(self != [TQNothingness class])
+        return;
+    sharedInstance = class_createInstance(self, 0);
+}
 
 + (id)nothing
 {
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        sharedInstance = class_createInstance(self, 0);
-    });
     return sharedInstance;
 }
 
 + (id)include:(Class)aClass recursive:(id)aRecursive
 {
-    NSAssert(NO, @"Extending nothing is not allowed");
+    TQAssert(NO, @"Extending nothing is not allowed");
     return nil;
 }
 
-+ (id)allocWithZone:(NSZone *)aZone
++ (id)alloc
 {
-    NSAssert(NO, @"You're trying to create nothing. You make no sense.");
+    TQAssert(NO, @"You're trying to create nothing. You make no sense.");
     return nil;
 }
 
-- (id)copyWithZone:(NSZone *)zone
+- (id)copy
 {
-    NSAssert(NO, @"You're trying to copy nothing. You make no sense.");
+    TQAssert(NO, @"You're trying to copy nothing. You make no sense.");
     return nil;
 }
 
-- (oneway void)release {}
+- (void)release {}
 - (id)retain
 {
     return self;
@@ -49,7 +51,7 @@ static TQNothingness *sharedInstance;
     return NO;
 }
 
-- (NSUInteger)hash
+- (uint32_t)hash
 {
     return 0;
 }
@@ -59,7 +61,7 @@ static TQNothingness *sharedInstance;
     return obj == self; // There's only one instance
 }
 
-- (NSString *)description
+- (OFString *)description
 {
     return @"(nothing)";
 }

@@ -2,6 +2,7 @@
 #import "TQRuntime.h"
 #import "TQNumber.h"
 #import <objc/runtime.h>
+#import <string.h>
 
 const TQNil *TQGlobalNil;
 
@@ -17,12 +18,9 @@ static id nilReturner(id self, SEL sel, ...)
     if(self != [TQNil class])
         return;
 
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        TQGlobalNil = [class_createInstance(self, 0) init];
-        class_replaceMethod(self, TQAddOpSel, class_getMethodImplementation(self, @selector(add:)),      "@@:@");
-        class_replaceMethod(self, TQSubOpSel, class_getMethodImplementation(self, @selector(subtract:)), "@@:@");
-    });
+    TQGlobalNil = [class_createInstance(self, 0) init];
+    class_replaceMethod(self, TQAddOpSel, class_getMethodImplementation(self, @selector(add:)),      "@@:@");
+    class_replaceMethod(self, TQSubOpSel, class_getMethodImplementation(self, @selector(subtract:)), "@@:@");
 }
 
 + (id)_nil
@@ -30,7 +28,7 @@ static id nilReturner(id self, SEL sel, ...)
     return TQGlobalNil;
 }
 
-+ (id)allocWithZone:(NSZone *)aZone
++ (id)alloc
 {
     return (TQNil*)TQGlobalNil;
 }
@@ -40,12 +38,12 @@ static id nilReturner(id self, SEL sel, ...)
     return self;
 }
 
-- (id)copyWithZone:(NSZone *)zone
+- (id)copy
 {
     return self;
 }
 
-- (oneway void)release {}
+- (void)release {}
 - (id)retain
 {
     return self;
@@ -58,7 +56,7 @@ static id nilReturner(id self, SEL sel, ...)
 
 + (BOOL)resolveInstanceMethod:(SEL)aSel
 {
-    NSMutableString *sig = [@"@:" mutableCopy];
+    OFMutableString *sig = [@"@:" mutableCopy];
     const char *selStr = sel_getName(aSel);
     for(int i = 0; i < strlen(selStr); ++i) {
         if(selStr[i] == ':')
@@ -79,32 +77,27 @@ static id nilReturner(id self, SEL sel, ...)
     return NO;
 }
 
-- (NSUInteger)hash
+- (uint32_t)hash
 {
     return 0;
 }
 
 - (BOOL)isEqual:(id)obj
 {
-    return !obj || obj == self || [obj isEqual:[NSNull null]];
+    return !obj || obj == self;
 }
 
 - (BOOL)isKindOfClass:(Class)class
 {
-    return [class isEqual:[TQNil class]] || [class isEqual:[NSNull class]];
+    return [class isEqual:[TQNil class]];
 }
 
 - (BOOL)isMemberOfClass:(Class)class
 {
-    return [class isEqual:[TQNil class]] || [class isEqual:[NSNull class]];
+    return [class isEqual:[TQNil class]];
 }
 
-- (BOOL)isProxy
-{
-    return NO;
-}
-
-- (NSString *)description
+- (OFString *)description
 {
     return nil;
 }

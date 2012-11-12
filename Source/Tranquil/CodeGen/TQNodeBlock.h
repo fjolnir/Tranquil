@@ -12,16 +12,16 @@
     llvm::Function *_function;
     llvm::Constant *_blockDescriptor;
     llvm::Type *_literalType;
-    NSString *_retType, *_invokeName;
-    NSMutableArray *_argTypes;
+    OFString *_retType, *_invokeName;
+    OFMutableArray *_argTypes;
 }
-@property(readwrite, retain) NSString *invokeName, *retType;
+@property(readwrite, retain) OFString *invokeName, *retType;
 @property(readwrite, assign) BOOL isCompactBlock; // Was the block written in the form of `expr` ?
 @property(readwrite, assign) BOOL isTranquilBlock; // Should the block be treated as a tranquil block? (arg count check etc)
 @property(readwrite, retain) TQNodeBlock *parent;
-@property(readwrite, copy) NSMutableArray *arguments, *argTypes;
-@property(readwrite, copy, nonatomic) NSMutableArray *statements, *cleanupStatements;
-@property(readwrite, retain) NSMutableDictionary *locals, *capturedVariables;
+@property(readwrite, copy) OFMutableArray *arguments, *argTypes;
+@property(readwrite, copy, nonatomic) OFMutableArray *statements, *cleanupStatements;
+@property(readwrite, retain) OFMutableDictionary *locals, *capturedVariables;
 @property(readwrite, retain) TQNodeIntVariable *nonLocalReturnTarget;
 @property(readwrite, retain) TQNodeLongVariable *nonLocalReturnThread;
 @property(readwrite, retain) TQNodeVariable *literalPtr; // Anonymous variable containing the address of the block
@@ -37,9 +37,9 @@
 @property(readwrite, assign) llvm::Value *autoreleasePool;
 
 + (TQNodeBlock *)node;
-- (NSString *)signatureInProgram:(TQProgram *)aProgram;
-- (NSUInteger)argumentCount;
-- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoErr;
+- (OFString *)signatureInProgram:(TQProgram *)aProgram;
+- (unsigned long)argumentCount;
+- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(TQError **)aoErr;
 - (void)generateCleanupInProgram:(TQProgram *)aProgram;
 - (void)createDispatchGroupInProgram:(TQProgram *)aProgram;
 @end

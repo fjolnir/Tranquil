@@ -15,7 +15,7 @@ void * const TQCurrLoopKey = (void*)&TQCurrLoopKey;
 
 
 + (TQNodeWhileBlock *)node { return (TQNodeWhileBlock *)[super node]; }
-+ (TQNodeWhileBlock *)nodeWithCondition:(TQNode *)aCond statements:(NSMutableArray *)aStmt
++ (TQNodeWhileBlock *)nodeWithCondition:(TQNode *)aCond statements:(OFMutableArray *)aStmt
 {
     TQNodeWhileBlock *ret = [self node];
     ret.condition = aCond;
@@ -27,8 +27,8 @@ void * const TQCurrLoopKey = (void*)&TQCurrLoopKey;
 {
     if(!(self = [super init]))
         return nil;
-    _cleanupStatements = [NSMutableArray new];
-    _statements = [NSMutableArray new];
+    _cleanupStatements = [OFMutableArray new];
+    _statements = [OFMutableArray new];
     return self;
 }
 
@@ -40,9 +40,9 @@ void * const TQCurrLoopKey = (void*)&TQCurrLoopKey;
     [super dealloc];
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    NSMutableString *out = [NSMutableString stringWithString:@"<while@ "];
+    OFMutableString *out = [OFMutableString stringWithString:@"<while@ "];
     [out appendFormat:@"(%@)", _condition];
     [out appendString:@" {\n"];
 
@@ -71,7 +71,7 @@ void * const TQCurrLoopKey = (void*)&TQCurrLoopKey;
 - (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
 {
     aBlock(_condition);
-    NSMutableArray *statements = [_statements copy];
+    OFMutableArray *statements = [_statements copy];
     for(TQNode *node in statements) {
         aBlock(node);
     }
@@ -90,7 +90,7 @@ void * const TQCurrLoopKey = (void*)&TQCurrLoopKey;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     Module *mod = aProgram.llModule;
 
@@ -160,7 +160,7 @@ void * const TQCurrLoopKey = (void*)&TQCurrLoopKey;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     TQNodeWhileBlock *loop = objc_getAssociatedObject(aBlock, TQCurrLoopKey);
     TQAssertSoft(loop != nil, kTQSyntaxErrorDomain, kTQUnexpectedStatement, NULL, @"break statements can only be used within loops");
@@ -187,7 +187,7 @@ void * const TQCurrLoopKey = (void*)&TQCurrLoopKey;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     TQNodeWhileBlock *loop = objc_getAssociatedObject(aBlock, TQCurrLoopKey);
     TQAssertSoft(loop != nil, kTQSyntaxErrorDomain, kTQUnexpectedStatement, NULL, @"skip statements can only be used within loops");

@@ -14,14 +14,14 @@
     [TQProcessor registerProcessor:self];
 }
 
-+ (TQNode *)processNode:(TQNode *)aNode withTrace:(NSArray *)aTrace
++ (TQNode *)processNode:(TQNode *)aNode withTrace:(OFArray *)aTrace
 {
     if(![aNode isKindOfClass:[TQNodeOperator class]])
         return aNode;
 
     TQNodeOperator *op = (TQNodeOperator *)aNode;
 
-    NSMutableArray *subTrace = [aTrace mutableCopy];
+    OFMutableArray *subTrace = [aTrace mutableCopy];
     [subTrace addObject:op];
     if([op.left isKindOfClass:[TQNodeOperator class]])
         [self processNode:op.left withTrace:subTrace];
@@ -45,12 +45,12 @@
         TQNode *left = op.left;
         TQNodeCustom *num = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *b, TQNodeRootBlock *r) {
             // little bit of a hack to make sure we only evaluate the left side once
-            NSValue *val = objc_getAssociatedObject(left, @"ExponentExpansionTemp");
+            OFNumber *val = objc_getAssociatedObject(left, @"ExponentExpansionTemp");
             if(!val) {
-                val = [NSValue valueWithPointer:[left generateCodeInProgram:p block:b root:r error:nil]];
+                val = [OFNumber numberWithUIntPtr:(uintptr_t)[left generateCodeInProgram:p block:b root:r error:nil]];
                 objc_setAssociatedObject(op.left, @"ExponentExpansionTemp", val, OBJC_ASSOCIATION_RETAIN);
             }
-            return (llvm::Value *)[val pointerValue];
+            return (llvm::Value *)[val uIntPtrValue];
         }];
         TQNode *replacement = num;
         for(int i = 1; i < exp; ++i) {

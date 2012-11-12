@@ -1,10 +1,9 @@
-#import <Foundation/Foundation.h>
-@class TQNumber;
+#import <ObjFW/ObjFW.h>
 
-@interface NSObject (Tranquil)
+@interface OFObject (Tranquil)
 - (id)isa:(Class)aClass;
 - (id)isIdenticalTo:(id)obj;
-- (NSMutableString *)toString;
+- (OFMutableString *)toString;
 - (id)print;
 + (id)include:(Class)aClass recursive:(id)aRecursive;
 + (id)include:(Class)aClass;

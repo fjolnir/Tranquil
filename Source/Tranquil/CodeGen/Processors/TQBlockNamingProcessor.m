@@ -17,25 +17,25 @@
     [TQProcessor registerProcessor:self];
 }
 
-+ (TQNode *)processNode:(TQNode *)aNode withTrace:(NSArray *)aTrace
++ (TQNode *)processNode:(TQNode *)aNode withTrace:(OFArray *)aTrace
 {
     if(![aNode isKindOfClass:[TQNodeBlock class]] || [aNode isKindOfClass:[TQNodeMethod class]])
         return aNode;
     TQNodeBlock *blk = (TQNodeBlock *)aNode;
     TQNode *parent = [aTrace lastObject];
-    NSString *name = nil;
+    OFString *name = nil;
     if([parent isKindOfClass:[TQNodeAssignOperator class]])
         name = [[[(TQNodeAssignOperator *)parent left] objectAtIndex:0] toString];
     else if([parent isKindOfClass:[TQNodeCall class]])
-        name = [NSString stringWithFormat:@"%@_blkArg", [parent toString]];
+        name = [OFString stringWithFormat:@"%@_blkArg", [parent toString]];
     else if([parent isKindOfClass:[TQNodeArgument class]]) {
         TQNode *grandParent = [aTrace objectAtIndex:[aTrace count] - 2];
         if([grandParent isKindOfClass:[TQNodeMessage class]])
-            name = [NSString stringWithFormat:@"%@_blkArg", [grandParent toString]];
+            name = [OFString stringWithFormat:@"%@_blkArg", [grandParent toString]];
     }
 
     if(name)
-        blk.invokeName = [NSString stringWithFormat:@"__tq_%@", name];
+        blk.invokeName = [OFString stringWithFormat:@"__tq_%@", name];
     return aNode;
 }
 @end

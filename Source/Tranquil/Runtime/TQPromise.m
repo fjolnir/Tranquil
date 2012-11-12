@@ -1,8 +1,10 @@
+// TODO: Find a way to forward messages with ObjFW!!
 #import "TQPromise.h"
 #import "TQValidObject.h"
-#import "NSObject+TQAdditions.h"
-
+#import "../Shared/TQDebug.h"
+#import "OFObject+TQAdditions.h"
 #import <objc/runtime.h>
+#import <unistd.h>
 
 @interface TQPromise ()  {
     @public
@@ -10,16 +12,12 @@
 }
 @end
 
-static NSString *const _TQPromiseNotResolvedSentinel = @"550e8400e29b41d4a716446655440000";
+static OFString *const _TQPromiseNotResolvedSentinel = @"550e8400e29b41d4a716446655440000";
 
 static __inline__ id TQPromiseGetResult(TQPromise *p)
 {
-    if(p->_result != _TQPromiseNotResolvedSentinel)
-        return p->_result;
-    [[NSException exceptionWithName:NSInvalidArgumentException
-                             reason:@"Sent a message to an unfulfilled promise."
-                           userInfo:nil] raise];
-    return nil;
+    TQAssert(p->_result != _TQPromiseNotResolvedSentinel, @"Sent a message to an unfulfilled promise.");
+    return p->_result;
 }
 
 @implementation TQPromise
@@ -39,12 +37,8 @@ static __inline__ id TQPromiseGetResult(TQPromise *p)
 
 - (void)fulfillWith:(id)aResult
 {
-    if(!__sync_bool_compare_and_swap(&_result, _TQPromiseNotResolvedSentinel, aResult)) {
-        @throw [NSException exceptionWithName:NSInvalidArgumentException
-                                       reason:@"A promise can only be fulfilled once."
-                                     userInfo:nil];
-    } else
-        [_result retain];
+    TQAssert(__sync_bool_compare_and_swap(&_result, _TQPromiseNotResolvedSentinel, aResult), @"A promise can only be fulfilled once.");
+    [_result retain];
 }
 
 - (id)fulfilled
@@ -58,17 +52,6 @@ static __inline__ id TQPromiseGetResult(TQPromise *p)
     return _result;
 }
 
-- (void)forwardInvocation:(NSInvocation *)anInvocation
-{
-    [anInvocation setTarget:TQPromiseGetResult(self)];
-    [anInvocation invoke];
-}
-
-- (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector
-{
-    return [TQPromiseGetResult(self) methodSignatureForSelector:aSelector];
-}
-
 - (id)print
 {
     if(_result != _TQPromiseNotResolvedSentinel)
@@ -76,17 +59,17 @@ static __inline__ id TQPromiseGetResult(TQPromise *p)
     return [[self description] print];
 }
 
-- (NSString *)description
+- (OFString *)description
 {
     if(_result != _TQPromiseNotResolvedSentinel)
         return [_result description];
-    return [NSString stringWithFormat:@"<%@: %p (Unresolved)>", NSStringFromClass([super class]), self];
+    return [OFString stringWithFormat:@"<%s: %p (Unresolved)>", class_getName([super class]), self];
 }
 - (Class)class
 {
     return [TQPromiseGetResult(self) class];
 }
-- (NSUInteger)hash
+- (uint32_t)hash
 {
     return [TQPromiseGetResult(self) hash];
 }

@@ -1,8 +1,9 @@
 #ifndef _TQ_PROGRAM_H_
 #define _TQ_PROGRAM_H_
 
-#import <Foundation/Foundation.h>
+#import <ObjFW/ObjFW.h>
 #import <Tranquil/Runtime/TQRuntime.h>
+#import <dispatch/dispatch.h>
 
 #ifdef __cplusplus
 #define TQ_EXTERN_C extern "C"
@@ -12,7 +13,7 @@
 
 @class TQHeaderParser, TQNodeBlock;
 
-TQ_EXTERN_C NSString * const kTQSyntaxErrorException;
+TQ_EXTERN_C OFString * const kTQSyntaxErrorException;
 
 typedef enum {
     kTQArchitectureHost,
@@ -21,7 +22,7 @@ typedef enum {
     kTQArchitectureARMv7
 } TQArchitecture;
 
-@interface TQProgram : NSObject {
+@interface TQProgram : TQObject {
     BOOL _initializedTQRuntime;
 
     // Values used for globals under JIT compilation
@@ -29,25 +30,25 @@ typedef enum {
     dispatch_queue_t _globalQueueForJIT;
 }
 
-@property(readwrite, retain) NSString *name;
-@property(readwrite, retain) NSPointerArray *arguments;
-@property(readonly) NSMutableDictionary *globals;
+@property(readwrite, retain) OFString *name;
+@property(readwrite, retain) OFMutableArray *arguments;
+@property(readonly) OFMutableDictionary *globals;
 @property(readonly) TQHeaderParser *objcParser;
 @property(readwrite) BOOL shouldShowDebugInfo;
 
 // Search path related
-@property(readwrite, retain) NSMutableArray *searchPaths, *allowedFileExtensions;
+@property(readwrite, retain) OFMutableArray *searchPaths, *allowedFileExtensions;
 // AOT compilation related
-@property(readwrite, retain) NSString *outputPath;
+@property(readwrite, retain) OFString *outputPath;
 @property(readwrite) BOOL useAOTCompilation;
 @property(readwrite) TQArchitecture targetArch;
 
 #pragma mark - Methods
 
 + (TQProgram *)sharedProgram;
-+ (TQProgram *)programWithName:(NSString *)aName;
-- (id)initWithName:(NSString *)aName;
-- (id)executeScriptAtPath:(NSString *)aPath error:(NSError **)aoErr;
-- (id)executeScript:(NSString *)aScript error:(NSError **)aoErr;
++ (TQProgram *)programWithName:(OFString *)aName;
+- (id)initWithName:(OFString *)aName;
+- (id)executeScriptAtPath:(OFString *)aPath error:(TQError **)aoErr;
+- (id)executeScript:(OFString *)aScript error:(TQError **)aoErr;
 @end
 #endif

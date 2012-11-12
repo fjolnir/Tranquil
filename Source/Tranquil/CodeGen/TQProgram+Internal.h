@@ -12,12 +12,12 @@
 #define DW_LANG_Tranquil 0x9c40
 #define TRANQUIL_DEBUG_DESCR "Tranquil α"
 
-@class TQNodeRootBlock, NSString, NSError;
+@class TQNodeRootBlock, OFString, TQError;
 
 @interface TQProgram () {
     llvm::ExecutionEngine *_executionEngine;
 }
-@property(readonly) NSMutableArray *evaluatedPaths; // Reset after root finishes
+@property(readonly) OFMutableArray *evaluatedPaths; // Reset after root finishes
 
 @property(readonly) llvm::Module *llModule;
 @property(readonly) llvm::Value *cliArgGlobal;
@@ -28,12 +28,12 @@
 #pragma mark - Debug info related
 @property(readonly) llvm::DIBuilder *debugBuilder;
 
-- (TQNodeRootBlock *)_rootFromFile:(NSString *)aPath error:(NSError **)aoErr;
-- (TQNodeRootBlock *)_parseScript:(NSString *)aScript error:(NSError **)aoErr;
-- (NSString *)_resolveImportPath:(NSString *)aPath;
+- (TQNodeRootBlock *)_rootFromFile:(OFString *)aPath error:(TQError **)aoErr;
+- (TQNodeRootBlock *)_parseScript:(OFString *)aScript error:(TQError **)aoErr;
+- (OFString *)_resolveImportPath:(OFString *)aPath;
 
-- (void)insertLogUsingBuilder:(llvm::IRBuilder<> *)aBuilder withStr:(NSString *)txt;
-- (llvm::Value *)getGlobalStringPtr:(NSString *)aStr withBuilder:(llvm::IRBuilder<> *)aBuilder;
-- (llvm::Value *)getGlobalStringPtr:(NSString *)aStr inBlock:(TQNodeBlock *)aBlock;
+- (void)insertLogUsingBuilder:(llvm::IRBuilder<> *)aBuilder withStr:(OFString *)txt;
+- (llvm::Value *)getGlobalStringPtr:(OFString *)aStr withBuilder:(llvm::IRBuilder<> *)aBuilder;
+- (llvm::Value *)getGlobalStringPtr:(OFString *)aStr inBlock:(TQNodeBlock *)aBlock;
 @end
 

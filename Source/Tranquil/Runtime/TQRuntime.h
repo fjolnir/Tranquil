@@ -1,6 +1,6 @@
 // Tranquil runtime functions
 
-#import <Foundation/Foundation.h>
+#import <ObjFW/ObjFW.h>
 #import <stdarg.h>
 #import <Tranquil/Runtime/TQValidObject.h>
 #import <Tranquil/Shared/TQDebug.h>
@@ -68,7 +68,7 @@ struct TQBlockByRef {
     id value;
 };
 
-typedef void (^TQTypeIterationBlock)(const char *type, NSUInteger size, NSUInteger align, BOOL *stop);
+typedef void (^TQTypeIterationBlock)(const char *type, unsigned long size, unsigned long align, BOOL *stop);
 
 // The tranquil message dispatcher. Automatically performs any (un)boxing required for a message
 // to be dispatched.
@@ -83,16 +83,16 @@ id tq_msgSend_noBoxing(id self, SEL selector, ...);
 id tq_boxedMsgSend(id self, SEL selector, ...);
 
 // These implement support for dynamic instance variables (But use existing properties if available)
-NSMapTable *TQGetDynamicIvarTable(id obj);
-void TQSetValueForKey(id obj, NSString *key, id value);
-id TQValueForKey(id obj, NSString *key);
+OFMutableDictionary *TQGetDynamicIvarTable(id obj);
+void TQSetValueForKey(id obj, OFString *key, id value);
+id TQValueForKey(id obj, OFString *key);
 
 BOOL TQObjectIsStackBlock(id obj);
 id TQPrepareObjectForReturn(id obj);
 // Variant of objc_storeStrong that moves stack blocks to the heap
 void TQStoreStrong(id *location, id obj);
-NSPointerArray *TQVaargsToArray(va_list *items);
-NSPointerArray *TQCliArgsToArray(int argc, char **argv);
+OFArray *TQVaargsToArray(va_list *items);
+OFArray *TQCliArgsToArray(int argc, char **argv);
 
 // Looks up a class if it exists, otherwise registers it
 Class TQGetOrCreateClass(const char *name, const char *superName);
@@ -108,12 +108,12 @@ id TQBoxValue(void *value, const char *type);
 // as opposed to returning it by value in a register
 BOOL TQStructSizeRequiresStret(int size);
 // NSGetSizeAndAlignment augmented to handle extended lambda notation <@>
-const char *TQGetSizeAndAlignment(const char *typePtr, NSUInteger *sizep, NSUInteger *alignp);
+const char *TQGetSizeAndAlignment(const char *typePtr, unsigned long *sizep, unsigned long *alignp);
 // Iterates the types in an encoding string by calling the passed block with each
 void TQIterateTypesInEncoding(const char *typePtr, TQTypeIterationBlock blk);
 
 // Returns the number of arguments a tranquil block takes (If the object is not a block originating from tranquil, it returns -1)
-NSInteger TQBlockGetNumberOfArguments(id block);
+long TQBlockGetNumberOfArguments(id block);
 
 // These functions manage the non-local return propagation stack
 int TQShouldPropagateNonLocalReturn(id block);
@@ -180,6 +180,9 @@ id  objc_initWeak(id *addr, id val);
 void objc_destroyWeak(id *addr);
 void objc_copyWeak(id *to, id *from);
 void objc_moveWeak(id *to, id *from);
+
+// Blocks
+extern void *_NSConcreteStackBlock;
 
 #ifdef __cplusplus
 }

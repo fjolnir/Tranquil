@@ -5,12 +5,12 @@ using namespace llvm;
 @implementation TQNodeArgument
 @synthesize passedNode=_passedNode, selectorPart=_selectorPart;
 
-+ (TQNodeArgument *)nodeWithPassedNode:(TQNode *)aNode selectorPart:(NSString *)aIdentifier
++ (TQNodeArgument *)nodeWithPassedNode:(TQNode *)aNode selectorPart:(OFString *)aIdentifier
 {
     return [[[self alloc] initWithPassedNode:aNode selectorPart:aIdentifier] autorelease];
 }
 
-- (id)initWithPassedNode:(TQNode *)aNode selectorPart:(NSString *)aIdentifier
+- (id)initWithPassedNode:(TQNode *)aNode selectorPart:(OFString *)aIdentifier
 {
     if(!(self = [super init]))
         return nil;
@@ -51,13 +51,13 @@ using namespace llvm;
     return [_passedNode replaceChildNodesIdenticalTo:aNodeToReplace with:aNodeToInsert];
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    return [NSString stringWithFormat:@"<arg@ %@: %@>", _selectorPart, _passedNode];
+    return [OFString stringWithFormat:@"<arg@ %@: %@>", _selectorPart, _passedNode];
 }
-- (NSString *)toString
+- (OFString *)toString
 {
-    return [NSString stringWithFormat:@"%@: %@", _selectorPart, [_passedNode toString]];
+    return [OFString stringWithFormat:@"%@: %@", _selectorPart, [_passedNode toString]];
 }
 
 - (void)dealloc
@@ -70,7 +70,7 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     return [_passedNode generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
 }

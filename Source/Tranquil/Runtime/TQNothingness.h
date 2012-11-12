@@ -1,5 +1,5 @@
-#import <Foundation/Foundation.h>
+#import <Tranquil/Runtime/TQObject.h>
 
-@interface TQNothingness : NSObject
+@interface TQNothingness : TQObject
 + (id)nothing;
 @end

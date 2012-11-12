@@ -21,15 +21,15 @@ using namespace llvm;
     // Nothing to iterate
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    return [NSString stringWithFormat:@"<nothing>"];
+    return [OFString stringWithFormat:@"<nothing>"];
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     return aBlock.builder->CreateLoad(aProgram.llModule->getOrInsertGlobal("TQNothing", aProgram.llInt8PtrTy));
 }

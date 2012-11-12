@@ -22,18 +22,18 @@ using namespace llvm;
     [super dealloc];
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    NSMutableString *out = [NSMutableString stringWithString:@"<dict@["];
+    OFMutableString *out = [OFMutableString stringWithString:@"<dict@["];
     for(TQNode *key in _items) {
         [out appendFormat:@"%@ => %@, ", key, [_items objectForKey:key]];
     }
     [out appendString:@"]>"];
     return out;
 }
-- (NSString *)toString
+- (OFString *)toString
 {
-    NSMutableString *out = [NSMutableString stringWithString:@"["];
+    OFMutableString *out = [OFMutableString stringWithString:@"["];
     for(TQNode *key in _items) {
         [out appendFormat:@"%@ => %@, ", [key toString], [[_items objectForKey:key] toString]];
     }
@@ -47,7 +47,7 @@ using namespace llvm;
 
     if([self isEqual:aNode])
         return self;
-    NSEnumerator *keyEnum = [_items keyEnumerator];
+    OFEnumerator *keyEnum = [_items keyEnumerator];
     TQNode *key;
     while(key = [keyEnum nextObject]) {
         if((ref = [key referencesNode:aNode]))
@@ -61,7 +61,7 @@ using namespace llvm;
 
 - (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
 {
-    NSEnumerator *keyEnum = [_items keyEnumerator];
+    OFEnumerator *keyEnum = [_items keyEnumerator];
     TQNode *key;
     while(key = [keyEnum nextObject]) {
         aBlock(key);
@@ -72,7 +72,7 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     Module *mod = aProgram.llModule;
 

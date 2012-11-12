@@ -3,12 +3,13 @@
 static TQValidObject *sharedInstance;
 
 @implementation TQValidObject
++ (void)load
+{
+    sharedInstance = [self new];
+}
+
 + (TQValidObject *)valid
 {
-    static dispatch_once_t once;
-    dispatch_once(&once, ^{
-        sharedInstance = [self new];
-    });
     return sharedInstance;
 }
 
@@ -27,7 +28,7 @@ static TQValidObject *sharedInstance;
     return 1;
 }
 
-- (NSString *)description
+- (OFString *)description
 {
     return @"Valid";
 }

@@ -8,17 +8,17 @@ using namespace llvm;
 
 @implementation TQNodeConstant
 
-+ (TQNodeConstant *)nodeWithString:(NSMutableString *)aStr{ return (TQNodeConstant *)[super nodeWithString:aStr]; }
++ (TQNodeConstant *)nodeWithString:(OFMutableString *)aStr{ return (TQNodeConstant *)[super nodeWithString:aStr]; }
 
-- (NSString *)description
+- (OFString *)description
 {
-    return [NSString stringWithFormat:@"<const@ %@>", [self value]];
+    return [OFString stringWithFormat:@"<const@ %@>", [self value]];
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     TQNode *bridgedNode = [aProgram.objcParser entityNamed:self.value];
     if(bridgedNode)

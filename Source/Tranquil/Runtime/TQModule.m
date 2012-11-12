@@ -7,9 +7,9 @@
     return TQValid;
 }
 
-+ (id)allocWithZone:(NSZone *)aZone
++ (id)alloc
 {
-    NSAssert(NO, @"Modules cannot be instantiated");
+    TQAssert(NO, @"Modules cannot be instantiated");
     return nil;
 }
 @end

@@ -1,5 +1,5 @@
-#import "NSObject+TQAdditions.h"
+#import <Tranquil/Runtime/TQObject.h>
 
-@interface TQModule : NSObject
+@interface TQModule : TQObject
 + (id)canBeIncludedInto:(Class)aClass;
 @end

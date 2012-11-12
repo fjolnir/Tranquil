@@ -1,3 +1,4 @@
+#import <ObjFW/ObjFW.h>
 #include <llvm/LLVMContext.h>
 #include <llvm/DerivedTypes.h>
 #include <llvm/Constants.h>
@@ -21,7 +22,6 @@
 #include <llvm/ExecutionEngine/GenericValue.h>
 #include <llvm/ExecutionEngine/JIT.h>
 #include <llvm/Support/TargetSelect.h>
-#import <Foundation/Foundation.h>
 #import <Tranquil/CodeGen/TQProgram+Internal.h>
 
 
@@ -29,19 +29,19 @@
 
 typedef void (^TQNodeIteratorBlock)(TQNode *aNode);
 
-@interface TQNode : NSObject
-@property(readwrite, nonatomic) NSUInteger lineNumber; // Default: NSNotFound
+@interface TQNode : TQObject
+@property(readwrite, nonatomic) unsigned long lineNumber; // Default: OF_NOT_FOUND
 
 + (TQNode *)node;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr;
+                                 error:(TQError **)aoErr;
 - (llvm::Value *)store:(llvm::Value *)aValue
              inProgram:(TQProgram *)aProgram
                  block:(TQNodeBlock *)aBlock
                   root:(TQNodeRootBlock *)aRoot
-                 error:(NSError **)aoErr;
+                 error:(TQError **)aoErr;
 // Checks if this node references a node equal to aNode and returns it if it does
 - (TQNode *)referencesNode:(TQNode *)aNode;
 - (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock;
@@ -49,10 +49,10 @@ typedef void (^TQNodeIteratorBlock)(TQNode *aNode);
 - (BOOL)insertChildNode:(TQNode *)aNodeToInsert before:(TQNode *)aNodeToShift;
 - (BOOL)insertChildNode:(TQNode *)aNodeToInsert after:(TQNode *)aExistingNode;
 - (BOOL)replaceChildNodesIdenticalTo:(TQNode *)aNodeToReplace with:(TQNode *)aNodeToInsert;
-- (NSString *)toString;
+- (OFString *)toString;
 @end
 
-@interface NSArray (TQReferencesNode)
+@interface OFArray (TQReferencesNode)
 // Checks if any node in an array of nodes references aNode
 - (TQNode *)tq_referencesNode:(TQNode *)aNode;
 @end

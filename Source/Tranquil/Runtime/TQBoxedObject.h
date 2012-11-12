@@ -2,6 +2,7 @@
 #import <Tranquil/Runtime/TQObject.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
+#import <string.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,7 +18,7 @@ extern "C" {
 @interface TQBoxedObject : TQObject {
     @protected
     void *_ptr; // Points to the boxed value
-    NSUInteger _size;
+    unsigned long _size;
     BOOL _isOnHeap;
 }
 @property(readonly) void *valuePtr;
@@ -28,8 +29,8 @@ extern "C" {
 + (void)unbox:(id)aValue to:(void *)aDest usingType:(const char *)aType;
 + (BOOL)typeIsScalar:(const char *)aType;
 
-- (id)objectAtIndexedSubscript:(NSInteger)aIdx;
-- (void)setObject:(id)aValue atIndexedSubscript:(NSInteger)aIdx;
+- (id)objectAtIndexedSubscript:(long)aIdx;
+- (void)setObject:(id)aValue atIndexedSubscript:(long)aIdx;
 
 - (void)moveValueToHeap;
 @end

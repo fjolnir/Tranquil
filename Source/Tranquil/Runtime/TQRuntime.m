@@ -1,14 +1,17 @@
 #import "TQRuntime.h"
 #import "TQBoxedObject.h"
-#import "NSString+TQAdditions.h"
-#import <Foundation/Foundation.h>
+#import "OFString+TQAdditions.h"
+#import <ObjFW/ObjFW.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
 #import "TQNumber.h"
 #import "TQValidObject.h"
 #import "TQNothingness.h"
-#import "NSObject+TQAdditions.h"
+#import "OFObject+TQAdditions.h"
+#import "../Shared/khash.h"
 #import <pthread.h>
+#import <setjmp.h>
+#import <ctype.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,11 +20,21 @@ extern "C" {
 id TQValid   = nil;
 id TQNothing = nil;
 
-// A map keyed with `Class xor (Selector << 32)` with values either being 0x1 (No boxing required for selector)
+// A hash keyed with `Class xor (Selector << 32)` with values either being 0x1 (No boxing required for selector)
 // or a pointer the Method object of the method to be boxed. This is only used by tq_msgSend and tq_boxedMsgSend
-CFMutableDictionaryRef _TQSelectorCache = NULL;
+//CFMutableDictionaryRef _TQSelectorCache = NULL;
 
-static const NSString *_TQDynamicIvarTableKey = @"TQDynamicIvarTableKey";
+#ifdef __LP64__
+#define kh_uintptr_hash_func(key) kh_int64_hash_func(key)
+#else
+#define kh_uintptr_hash_func(key) kh_int_hash_func(key)
+#endif
+#define kh_uintptr_hash_equal(a, b) (a == b)
+
+KHASH_INIT(TQSelectorCache, uintptr_t, uintptr_t, 1, kh_uintptr_hash_func, kh_uintptr_hash_equal);
+khash_t(TQSelectorCache) *_TQSelectorCache = NULL;
+
+static const OFString *_TQDynamicIvarTableKey = @"TQDynamicIvarTableKey";
 
 static pthread_key_t _TQNonLocalReturnStackKey;
 
@@ -118,30 +131,36 @@ BOOL TQMethodTypeRequiresBoxing(const char *aEncoding)
 
 void _TQCacheSelector(id obj, SEL sel)
 {
-    @synchronized((NSDictionary *)_TQSelectorCache) {
+    @synchronized((id)_TQSelectorCache) {
         Class kls = object_getClass(obj);
         // See msgsend.s for an explanation of the key
 #ifdef __LP64__
-        void *cacheKey = (void*)((uintptr_t)kls ^ ((uintptr_t)sel << 32));
+        uintptr_t cacheKey = (uintptr_t)kls ^ ((uintptr_t)sel << 32);
 #else
-        void *cacheKey = (void*)((uintptr_t)kls ^ ((uintptr_t)sel << 16)); // TODO: verify if this works
+        uintptr_t cacheKey = (uintptr_t)kls ^ ((uintptr_t)sel << 16); // TODO: verify if this works
 #endif
 
         Method method = class_getInstanceMethod(kls, sel);
         // Methods that do not have a registered implementation are assumed to take&return only objects
-        uintptr_t unboxedVal = 0x1L;
-        if(!method) {
-            CFDictionarySetValue(_TQSelectorCache, cacheKey, (void*)0x1L);
-            return;
+        uintptr_t val = 0x1L; // 0x1L => unboxed
+        if(method && TQMethodTypeRequiresBoxing(method_getTypeEncoding(method))) {
+            val = (uintptr_t)method;
         }
 
-        const char *enc = method_getTypeEncoding(method);
-        if(TQMethodTypeRequiresBoxing(enc))
-            CFDictionarySetValue(_TQSelectorCache, cacheKey, (void*)method);
-        else
-            CFDictionarySetValue(_TQSelectorCache, cacheKey, (void*)0x1L);
+        int err;
+        khiter_t cur = kh_put(TQSelectorCache, _TQSelectorCache, cacheKey, &err);
+        if(err) {
+            kh_del(TQSelectorCache, _TQSelectorCache, cacheKey);
+            return;
+        }
+        kh_value(_TQSelectorCache, cur) = val;
     }
- }
+}
+
+uintptr_t _TQSelectorCacheLookup(uintptr_t key) {
+    khiter_t k = kh_get(TQSelectorCache, _TQSelectorCache, key);
+    return kh_exist(_TQSelectorCache, k) ? kh_value(_TQSelectorCache, k) : 0;
+}
 
 void TQUnboxObject(id object, const char *type, void *buffer)
 {
@@ -168,7 +187,9 @@ BOOL TQStructSizeRequiresStret(int size)
     #endif
 }
 
-const char *TQGetSizeAndAlignment(const char *typePtr, NSUInteger *sizep, NSUInteger *alignp)
+// TODO: Rewrite NSGetSizeAndAlignment!
+extern const char *NSGetSizeAndAlignment(const char *typePtr, unsigned long *sizep, unsigned long *alignp);
+const char *TQGetSizeAndAlignment(const char *typePtr, unsigned long *sizep, unsigned long *alignp)
 {
     if(*typePtr == _TQ_C_LAMBDA_B) {
         if(sizep)
@@ -198,7 +219,7 @@ void TQIterateTypesInEncoding(const char *typePtr, TQTypeIterationBlock blk)
     assert(blk);
     if(!typePtr || strlen(typePtr) == 0)
         return;
-    NSUInteger size, align;
+    unsigned long size, align;
     const char *nextPtr;
     BOOL shouldStop = NO;
     do {
@@ -211,7 +232,7 @@ void TQIterateTypesInEncoding(const char *typePtr, TQTypeIterationBlock blk)
             && *typePtr != _C_UNION_E && *typePtr != _C_ARY_E);
 }
 
-NSInteger TQBlockGetNumberOfArguments(id block)
+long TQBlockGetNumberOfArguments(id block)
 {
     struct TQBlockLiteral *blk = (struct TQBlockLiteral *)block;
     if(blk->flags & TQ_BLOCK_IS_TRANQUIL_BLOCK)
@@ -317,21 +338,18 @@ id TQGetNonLocalReturnValue()
 
 #pragma mark - Dynamic instance variables
 
-static inline NSMapTable *_TQGetDynamicIvarTable(id obj)
+static inline OFMutableDictionary *_TQGetDynamicIvarTable(id obj)
 {
-    NSMapTable *ivarTable = objc_getAssociatedObject(obj, _TQDynamicIvarTableKey);
+    OFMutableDictionary *ivarTable = objc_getAssociatedObject(obj, _TQDynamicIvarTableKey);
     if(!ivarTable) {
-//        ivarTable = NSCreateMapTable(NSNonOwnedPointerMapKeyCallBacks, NSObjectMapValueCallBacks, 0);
-        ivarTable = [[NSMapTable alloc] initWithKeyOptions:NSPointerFunctionsOpaqueMemory
-                                              valueOptions:NSPointerFunctionsStrongMemory
-                                                  capacity:0];
+        ivarTable = [OFMutableDictionary new];
         objc_setAssociatedObject(obj, _TQDynamicIvarTableKey, ivarTable, OBJC_ASSOCIATION_RETAIN);
         [ivarTable release];
     }
     return ivarTable;
 }
 
-NSMapTable *TQGetDynamicIvarTable(id obj)
+OFMutableDictionary *TQGetDynamicIvarTable(id obj)
 {
     return _TQGetDynamicIvarTable(obj);
 }
@@ -345,38 +363,39 @@ static inline size_t _accessorNameLen(const char *accessorNameLoc)
         return accessorNameEnd - accessorNameLoc;
 }
 
-id TQValueForKey(id obj, NSString *key)
+id TQValueForKey(id obj, OFString *key)
 {
+    assert(key);
     if(!obj)
         return nil;
 
     Class kls = object_getClass(obj);
-    SEL selector = NSSelectorFromString(key);
+    SEL selector = sel_registerName([key UTF8String]);
     if(class_respondsToSelector(kls, selector))
         return tq_msgSend(obj, selector);
 
-    NSMapTable *ivarTable = _TQGetDynamicIvarTable(obj);
-    return (id)NSMapGet(ivarTable, key);
+    return [_TQGetDynamicIvarTable(obj) objectForKey:key];
 }
 
-void TQSetValueForKey(id obj, NSString *key, id value)
+void TQSetValueForKey(id obj, OFString *key, id value)
 {
+    assert(key);
     if(!obj)
         return;
     if(TQObjectIsStackBlock(value))
         value = [[value copy] autorelease];
 
     Class kls = object_getClass(obj);
-    NSString *selStr = [NSString stringWithFormat:@"set%@:", [key stringByCapitalizingFirstLetter]];
-    SEL setterSel = NSSelectorFromString(selStr);
+    OFString *selStr = [OFString stringWithFormat:@"set%@:", [key stringByCapitalizingFirstLetter]];
+    SEL setterSel = sel_registerName([selStr UTF8String]);
     if(class_respondsToSelector(kls, setterSel))
         tq_msgSend(obj, setterSel, value);
 
-    NSMapTable *ivarTable = _TQGetDynamicIvarTable(obj);
+
     if(value)
-        NSMapInsert(ivarTable, key, value);
+        [_TQGetDynamicIvarTable(obj) setObject:value forKey:key];
     else
-        NSMapRemove(ivarTable, key);
+        [_TQGetDynamicIvarTable(obj) removeObjectForKey:key];
 }
 
 #pragma mark -
@@ -403,24 +422,26 @@ void TQStoreStrong(id *location, id obj)
         objc_storeStrong(location, obj);
 }
 
-NSPointerArray *TQVaargsToArray(va_list *items)
+OFArray *TQVaargsToArray(va_list *items)
 {
     register id arg;
-    NSPointerArray *arr = [NSPointerArray new];
+    OFMutableArray *arr = [OFMutableArray new];
     while((arg = va_arg(*items, id)) != TQNothing) {
-        [arr addPointer:arg];
+        [arr addObject:arg];
     }
+    [arr makeImmutable];
     return [arr autorelease];
 }
 
-NSPointerArray *TQCliArgsToArray(int argc, char **argv)
+OFArray *TQCliArgsToArray(int argc, char **argv)
 {
-    NSPointerArray *arr = [NSPointerArray new];
+    OFMutableArray *arr = [OFMutableArray new];
     if(argc <= 1)
         return arr;
     for(int i = 1; i < argc; ++i) {
-        [arr addPointer:(void *)[NSMutableString stringWithUTF8String:argv[i]]];
+        [arr addObject:(void *)[OFMutableString stringWithUTF8String:argv[i]]];
     }
+    [arr makeImmutable];
     return [arr autorelease];
 }
 
@@ -457,16 +478,16 @@ BOOL TQAugmentClassWithOperators(Class klass)
     class_addMethod(klass, TQExpOpSel, imp, "@@:@");
 
     // <
-    imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] == NSOrderedAscending) ? TQValid : nil; });
+    imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] == OF_ORDERED_ASCENDING) ? TQValid : nil; });
     class_addMethod(klass, TQLTOpSel, imp, "@@:@");
     // >
-    imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] == NSOrderedDescending) ? TQValid : nil; });
+    imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] == OF_ORDERED_DESCENDING) ? TQValid : nil; });
     class_addMethod(klass, TQGTOpSel, imp, "@@:@");
     // <=
-    imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] != NSOrderedDescending) ? TQValid : nil; });
+    imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] != OF_ORDERED_DESCENDING) ? TQValid : nil; });
     class_addMethod(klass, TQLTEOpSel, imp, "@@:@");
     // >=
-    imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] != NSOrderedAscending) ? TQValid : nil; });
+    imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] != OF_ORDERED_ASCENDING) ? TQValid : nil; });
     class_addMethod(klass, TQGTEOpSel, imp, "@@:@");
 
 
@@ -487,7 +508,8 @@ void TQInitializeRuntime()
     if(_TQSelectorCache)
         return;
 
-    _TQSelectorCache = CFDictionaryCreateMutable(NULL, 1000, NULL, NULL);
+    _TQSelectorCache = kh_init(TQSelectorCache);
+//    _TQSelectorCache = CFDictionaryCreateMutable(NULL, 1000, NULL, NULL);
 //                                        (NSMapTableValueCallBacks){NULL,NULL,NULL}, 1000);
 //    _TQSelectorCache = [[NSMapTable alloc] initWithKeyOptions:NSPointerFunctionsOpaqueMemory
 //                                                 valueOptions:NSPointerFunctionsOpaqueMemory
@@ -530,73 +552,72 @@ void TQInitializeRuntime()
     TQNumberClass     = [TQNumber class];
 
     // Add operators that cannot be added through standard categories (because the compiler won't allow methods containing symbols)
-    TQAugmentClassWithOperators([NSObject class]);
+    TQAugmentClassWithOperators([OFObject class]);
+	Class nsObjKls = objc_getClass("NSObject");
+	if(nsObjKls)
+		TQAugmentClassWithOperators(nsObjKls);
 
     IMP imp;
-    // Operators for NSString
+    // Operators for OFString
     imp = imp_implementationWithBlock(^(id a, TQNumber *idx)   {
-        return [a substringWithRange:(NSRange){[idx intValue], 1}];
+        return [a substringWithRange:(of_range_t){[idx intValue], 1}];
     });
-    class_addMethod([NSString class], TQGetterOpSel, imp, "@@:@");
+    class_addMethod([OFString class], TQGetterOpSel, imp, "@@:@");
 
-    imp = imp_implementationWithBlock(^(id a, TQNumber *idx, NSString *replacement)   {
+    imp = imp_implementationWithBlock(^(id a, TQNumber *idx, OFString *replacement)   {
         int loc = [idx intValue];
-        [a deleteCharactersInRange:(NSRange){loc, 1}];
+        [a deleteCharactersInRange:(of_range_t){loc, 1}];
         [a insertString:replacement atIndex:loc];
         return a;
     });
-    class_addMethod([NSMutableString class], TQSetterOpSel, imp, "@@:@");
+    class_addMethod([OFMutableString class], TQSetterOpSel, imp, "@@:@");
 
 
     // Operators for collections
     imp = imp_implementationWithBlock(^(id a, id key)         { return _objc_msgSend_hack2(a, @selector(objectForKeyedSubscript:), key); });
-    class_addMethod([NSDictionary class], TQGetterOpSel, imp, "@@:@");
-    class_addMethod([NSMapTable class], TQGetterOpSel, imp, "@@:@");
+    class_addMethod([OFDictionary class], TQGetterOpSel, imp, "@@:@");
 
     imp = imp_implementationWithBlock(^(id a, TQNumber *idx)   {
         return _objc_msgSend_hack2i(a, @selector(objectAtIndexedSubscript:), [idx unsignedIntegerValue]);
     });
-    class_addMethod([NSArray class], TQGetterOpSel, imp, "@@:@");
-    class_addMethod([NSPointerArray class], TQGetterOpSel, imp, "@@:@");
+    class_addMethod([OFArray class], TQGetterOpSel, imp, "@@:@");
 
     // []=
     imp = imp_implementationWithBlock(^(id a, id key, id val) {
         return _objc_msgSend_hack3(a, @selector(setObject:forKeyedSubscript:), val, key);
     });
-    class_addMethod([NSMutableDictionary class], TQSetterOpSel, imp, "@@:@@");
-    class_addMethod([NSMapTable class], TQSetterOpSel, imp, "@@:@@");
+    class_addMethod([OFMutableDictionary class], TQSetterOpSel, imp, "@@:@@");
 
     imp = imp_implementationWithBlock(^(id a, TQNumber *idx, id val)   {
         return _objc_msgSend_hack3i(a, @selector(setObject:atIndexedSubscript:), val, [idx unsignedIntegerValue]);
     });
-    class_addMethod([NSMutableArray class], TQSetterOpSel, imp, "@@:@");
-    class_addMethod([NSPointerArray class], TQSetterOpSel, imp, "@@:@");
+    class_addMethod([OFMutableArray class], TQSetterOpSel, imp, "@@:@");
 
     // <<&>>
-    imp = class_getMethodImplementation([NSPointerArray class], @selector(push:));
-    class_addMethod([NSPointerArray class], TQLShiftOpSel, imp, "@@:@");
+    imp = class_getMethodImplementation([OFMutableArray class], @selector(addObject:));
+    class_addMethod([OFMutableArray class], TQLShiftOpSel, imp, "@@:@");
     imp = imp_implementationWithBlock(^(id a, id b)   {
-        _objc_msgSend_hack3i(a, @selector(insertPointer:atIndex:), b, 0);
+        _objc_msgSend_hack3i(a, @selector(insertObject:atIndex:), b, 0);
         return a;
     });
-    class_addMethod([NSPointerArray class], TQRShiftOpSel, imp, "@@:@");
+    class_addMethod([OFMutableArray class], TQRShiftOpSel, imp, "@@:@");
 
-    // Operators for NS(Mutable)String
+    // Operators for OF(Mutable)String
     imp = imp_implementationWithBlock(^(id a, id b)   {
          id ret = _objc_msgSend_hack2(a, @selector(stringByAppendingString:), [b toString]);
-         return _objc_msgSend_hack2([NSMutableString class], @selector(stringWithString:), ret);
+         return _objc_msgSend_hack2([OFMutableString class], @selector(stringWithString:), ret);
     });
-    class_addMethod([NSString class], TQConcatOpSel, imp, "@@:@");
+    class_addMethod([OFString class], TQConcatOpSel, imp, "@@:@");
     imp = imp_implementationWithBlock(^(id a, id b)   {
          _objc_msgSend_hack2(a, @selector(appendString:), [b toString]);
          return a;
     });
-    class_addMethod([NSMutableString class], TQLShiftOpSel, imp, "@@:@");
+    class_addMethod([OFMutableString class], TQLShiftOpSel, imp, "@@:@");
     imp = imp_implementationWithBlock(^(id a, id b)   {
         _objc_msgSend_hack3i(a, @selector(insertString:atIndex:), [b toString], 0);
         return a;
     });
-    class_addMethod([NSMutableString class], TQRShiftOpSel, imp, "@@:@");
+    class_addMethod([OFMutableString class], TQRShiftOpSel, imp, "@@:@");
 }
 
 #ifdef __cplusplus

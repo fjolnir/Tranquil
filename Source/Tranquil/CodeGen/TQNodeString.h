@@ -1,12 +1,12 @@
 #import <Tranquil/CodeGen/TQNode.h>
 
 @interface TQNodeString : TQNode
-@property(readwrite, retain) NSMutableString *value;
-@property(readwrite, retain) NSMutableArray *embeddedValues;
-+ (TQNodeString *)nodeWithString:(NSMutableString *)aStr;
-- (void)append:(NSString *)aStr;
+@property(readwrite, retain) OFMutableString *value;
+@property(readwrite, retain) OFMutableArray *embeddedValues;
++ (TQNodeString *)nodeWithString:(OFMutableString *)aStr;
+- (void)append:(OFString *)aStr;
 @end
 
 @interface TQNodeConstString : TQNodeString
-+ (TQNodeConstString *)nodeWithString:(NSString *)aStr;
++ (TQNodeConstString *)nodeWithString:(OFString *)aStr;
 @end

@@ -1,10 +1,22 @@
-#import "NSString+TQAdditions.h"
+#import "OFString+TQAdditions.h"
 #import "TQNumber.h"
 
-@implementation NSString (Tranquil)
-- (NSString *)stringByCapitalizingFirstLetter
+@implementation OFString (Tranquil)
+
+- (OFString *)substringToIndex:(size_t)aIdx
 {
-    NSUInteger len = [self length];
+    of_range_t range = { 0, aIdx };
+    return [self substringWithRange:range];
+}
+- (OFString *)substringFromIndex:(size_t)aIdx
+{
+    of_range_t range = { aIdx, [self length] - aIdx };
+    return [self substringWithRange:range];
+}
+
+- (OFString *)stringByCapitalizingFirstLetter
+{
+    unsigned long len = [self length];
     if(len == 0)
         return self;
     else if(len == 1)
@@ -25,39 +37,29 @@
     return *str;
 }
 
-- (NSMutableString *)multiply:(TQNumber *)aTimes
+- (OFMutableString *)multiply:(TQNumber *)aTimes
 {
-    NSMutableString *ret = [NSMutableString string];
+    OFMutableString *ret = [OFMutableString string];
     for(int i = 0; i < [aTimes intValue]; ++i) {
         [ret appendString:self];
     }
     return ret;
 }
 
-- (NSMutableString *)add:(id)aObj
+- (OFMutableString *)add:(id)aObj
 {
     return [[[self stringByAppendingString:[aObj toString]] mutableCopy] autorelease];
 }
 
-- (NSMutableString *)toString
+- (OFMutableString *)toString
 {
     return [[self mutableCopy] autorelease];
 }
 
-- (NSString *)trimmed
-{
-    return [self stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-}
 @end
 
-@implementation NSMutableString (Tranquil)
-- (NSMutableString *)trim
-{
-    [self setString:[self stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]];
-    return self;
-}
-
-- (NSMutableString *)toString
+@implementation OFMutableString (Tranquil)
+- (OFMutableString *)toString
 {
     return self;
 }

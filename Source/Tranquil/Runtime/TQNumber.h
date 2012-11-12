@@ -1,7 +1,7 @@
 // Note: TQNumber is not safe to subclass. It makes certain assumptions for the sake of performance
 // Currently numbers are always stored in floating point, need to add handling of integers(long, int, short, char) that guarantees their data layout is not messed up
 
-#import <Foundation/Foundation.h>
+#import <ObjFW/ObjFW.h>
 #import <Tranquil/Runtime/TQObject.h>
 #import <Tranquil/Shared/TQBatching.h>
 
@@ -30,14 +30,14 @@ BOOL TQFloatFitsInTaggedNumber(float aValue);
 - (id)initWithLongLong:(long long)value;
 - (id)initWithFloat:(float)value;
 - (id)initWithDouble:(double)value;
-- (id)initWithInteger:(NSInteger)value;
+- (id)initWithInteger:(long)value;
 
 - (id)initWithUnsignedChar:(unsigned char)value;
 - (id)initWithUnsignedShort:(unsigned short)value;
 - (id)initWithUnsignedInt:(unsigned int)value;
 - (id)initWithUnsignedLong:(unsigned long)value;
 - (id)initWithUnsignedLongLong:(unsigned long long)value;
-- (id)initWithUnsignedInteger:(NSUInteger)value;
+- (id)initWithUnsignedInteger:(unsigned long)value;
 
 + (TQNumber *)numberWithBool:(BOOL)value;
 + (TQNumber *)numberWithChar:(char)value;
@@ -47,14 +47,14 @@ BOOL TQFloatFitsInTaggedNumber(float aValue);
 + (TQNumber *)numberWithLongLong:(long long)value;
 + (TQNumber *)numberWithFloat:(float)value;
 + (TQNumber *)numberWithDouble:(double)value;
-+ (TQNumber *)numberWithInteger:(NSInteger)value;
++ (TQNumber *)numberWithInteger:(long)value;
 
 + (TQNumber *)numberWithUnsignedChar:(unsigned char)value;
 + (TQNumber *)numberWithUnsignedShort:(unsigned short)value;
 + (TQNumber *)numberWithUnsignedInt:(unsigned int)value;
 + (TQNumber *)numberWithUnsignedLong:(unsigned long)value;
 + (TQNumber *)numberWithUnsignedLongLong:(unsigned long long)value;
-+ (TQNumber *)numberWithUnsignedInteger:(NSUInteger)value;
++ (TQNumber *)numberWithUnsignedInteger:(unsigned long)value;
 
 - (char)charValue;
 - (short)shortValue;
@@ -64,14 +64,14 @@ BOOL TQFloatFitsInTaggedNumber(float aValue);
 - (float)floatValue;
 - (double)doubleValue;
 - (BOOL)boolValue;
-- (NSInteger)integerValue;
+- (long)integerValue;
 
 - (unsigned char)unsignedCharValue;
 - (unsigned short)unsignedShortValue;
 - (unsigned int)unsignedIntValue;
 - (unsigned long)unsignedLongValue;
 - (unsigned long long)unsignedLongLongValue;
-- (NSUInteger)unsignedIntegerValue;
+- (unsigned long)unsignedIntegerValue;
 
 - (id)add:(id)b;
 - (id)subtract:(id)b;

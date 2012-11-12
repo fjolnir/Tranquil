@@ -33,9 +33,9 @@ using namespace llvm;
     [super dealloc];
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    return [NSString stringWithFormat:@"<ret@ %@>", _value];
+    return [OFString stringWithFormat:@"<ret@ %@>", _value];
 }
 
 - (TQNode *)referencesNode:(TQNode *)aNode
@@ -68,7 +68,7 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     Value *retVal;
     if(_value) {
@@ -102,16 +102,20 @@ using namespace llvm;
     }
 
     // Release variables created in this block up to this point (captured variables do not need to be released as they will be in the dispose helper)
-    for(NSString *varName in aBlock.locals.allKeys) {
-        NSUInteger argIdx = [aBlock.arguments indexOfObjectPassingTest:^(TQNodeArgumentDef *obj, NSUInteger idx, BOOL *stop) {
-            return [obj.name isEqualToString:varName];
-        }];
-        if([aBlock.capturedVariables objectForKey:varName] || (argIdx != NSNotFound && [[aBlock.arguments objectAtIndex:argIdx] unretained]))
+    for(OFString *varName in aBlock.locals.allKeys) {
+        unsigned long argIdx = OF_NOT_FOUND;
+        for(int i = 0; i < [aBlock.arguments count]; ++i) {
+            if([[[aBlock.arguments objectAtIndex:i] name] isEqual:varName]) {
+                argIdx = i;
+                break;
+            }
+        }
+        if([aBlock.capturedVariables objectForKey:varName] || (argIdx != OF_NOT_FOUND && [[aBlock.arguments objectAtIndex:argIdx] unretained]))
             continue;
         [[aBlock.locals objectForKey:varName] generateReleaseInProgram:aProgram block:aBlock root:aRoot];
     }
 
-    if([aBlock.retType isEqualToString:@"v"])
+    if([aBlock.retType isEqual:@"v"])
         return aBlock.builder->CreateRetVoid();
     return aBlock.builder->CreateRet(retVal);
 }

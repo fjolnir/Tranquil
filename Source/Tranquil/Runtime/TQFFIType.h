@@ -1,9 +1,9 @@
 #import <ffi.h>
-#import <Foundation/Foundation.h>
+#import <ObjFW/ObjFW.h>
 #import <Tranquil/Shared/TQBatching.h>
 
-@interface TQFFIType : NSObject {
-    NSMutableArray *_referencedTypes;
+@interface TQFFIType : TQObject {
+    OFMutableArray *_referencedTypes;
     TQ_BATCH_IVARS
 }
 @property(readonly) const char *encoding;

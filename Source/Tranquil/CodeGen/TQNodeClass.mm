@@ -10,21 +10,21 @@ using namespace llvm;
 @synthesize name=_name, superClassName=_superClassName, classMethods=_classMethods, instanceMethods=_instanceMethods,
     classPtr=_classPtr, onloadMessages=_onloadMessages;
 
-+ (TQNodeClass *)nodeWithName:(NSString *)aName
++ (TQNodeClass *)nodeWithName:(OFString *)aName
 {
     return [[[self alloc] initWithName:aName] autorelease];
 }
 
-- (id)initWithName:(NSString *)aName
+- (id)initWithName:(OFString *)aName
 {
     if(!(self = [super init]))
         return nil;
 
     _name = [aName retain];
 
-    _classMethods    = [NSMutableArray new];
-    _instanceMethods = [NSMutableArray new];
-    _onloadMessages  = [NSMutableArray new];
+    _classMethods    = [OFMutableArray new];
+    _instanceMethods = [OFMutableArray new];
+    _onloadMessages  = [OFMutableArray new];
 
     return self;
 }
@@ -39,9 +39,9 @@ using namespace llvm;
     [super dealloc];
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    NSMutableString *out = [NSMutableString stringWithFormat:@"<cls@ class %@", _name];
+    OFMutableString *out = [OFMutableString stringWithFormat:@"<cls@ class %@", _name];
     if(_superClassName)
         [out appendFormat:@" < %@", _superClassName];
     [out appendString:@"\n"];
@@ -62,7 +62,7 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     if(_classPtr) {
         Value *ret = aBlock.builder->CreateCall2(aProgram.TQGetOrCreateClass, [aProgram getGlobalStringPtr:_name inBlock:aBlock], ConstantPointerNull::get(aProgram.llInt8PtrTy));

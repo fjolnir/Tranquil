@@ -1,11 +1,16 @@
-#import <Foundation/Foundation.h>
+// TODO: Find a replacement regular expression library
+#import <ObjFW/ObjFW.h>
 #import <Tranquil/Runtime/TQRange.h>
 
-@interface TQRegularExpression : NSRegularExpression
-+ (NSRegularExpression *)tq_regularExpressionWithPattern:(NSString *)aPattern options:(NSRegularExpressionOptions)aOpts;
+@interface TQRegularExpression : OFObject //NSRegularExpression
+#if 0
++ (NSRegularExpression *)tq_regularExpressionWithPattern:(OFString *)aPattern options:(NSRegularExpressionOptions)aOpts;
+#endif
 @end
 
-@interface NSString (TQRegularExpression)
+@interface OFString (TQRegularExpression)
+#if 0
 - (id)matches:(TQRegularExpression *)aRegex;
-- (id)match:(TQRegularExpression *)aRegex usingBlock:(id (^)(NSString *text, TQRange *range))aBlock;
+- (id)match:(TQRegularExpression *)aRegex usingBlock:(id (^)(OFString *text, TQRange *range))aBlock;
+#endif
 @end

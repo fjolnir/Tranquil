@@ -1,6 +1,7 @@
 #import "TQFFIType.h"
 #import "TQBoxedObject.h"
 #import "../Runtime/TQRuntime.h"
+#import <ctype.h>
 
 @implementation TQFFIType
 + (ffi_type *)scalarTypeToFFIType:(const char *)aType
@@ -41,8 +42,7 @@
         case _C_VOID:
             return &ffi_type_void;
         default:
-            [NSException raise:NSGenericException
-                        format:@"Unsupported scalar type %c!", *aType];
+            TQAssert(NO, @"Unsupported scalar type %c!", *aType);
             return NULL;
     }
 }
@@ -75,7 +75,7 @@
     else if(*_encoding == _C_STRUCT_B || *_encoding ==_C_ARY_B) {
         BOOL isArray = *_encoding ==_C_ARY_B; // An array is essentially a struct containing fields all with the same type.
 
-        _referencedTypes = [NSMutableArray new];
+        _referencedTypes = [OFMutableArray new];
         ffi_type type;
         _ffiType = (ffi_type*)malloc(sizeof(ffi_type));
         _ffiType->type = FFI_TYPE_STRUCT;

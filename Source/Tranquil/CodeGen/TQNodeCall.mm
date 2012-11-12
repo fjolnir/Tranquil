@@ -21,7 +21,7 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
         return nil;
 
     _callee = [aCallee retain];
-    _arguments = [NSMutableArray new];
+    _arguments = [OFMutableArray new];
 
     return self;
 }
@@ -33,9 +33,9 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
     [super dealloc];
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    NSMutableString *out = [NSMutableString stringWithString:@"<call@ "];
+    OFMutableString *out = [OFMutableString stringWithString:@"<call@ "];
     if(_callee)
         [out appendFormat:@"%@(", _callee];
 
@@ -46,9 +46,9 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
     [out appendString:@")>"];
     return out;
 }
-- (NSString *)toString
+- (OFString *)toString
 {
-    return [NSString stringWithFormat:@"%@()", [_callee toString]];
+    return [OFString stringWithFormat:@"%@()", [_callee toString]];
 }
 
 - (TQNode *)referencesNode:(TQNode *)aNode
@@ -83,24 +83,24 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
     } else
         success |= [_callee replaceChildNodesIdenticalTo:aNodeToReplace with:aNodeToInsert];
 
-    NSIndexSet *indices = [_arguments indexesOfObjectsPassingTest:^(id obj, NSUInteger idx, BOOL *stop) {
-        return (BOOL)(obj == aNodeToReplace);
-    }];
-    success |= [indices count] > 0;
-    [indices enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
-        [_arguments replaceObjectAtIndex:idx withObject:aNodeToInsert];
-    }];
+    for(int i = 0; i < [_arguments count]; ++i) {
+        if([_arguments objectAtIndex:i] == aNodeToReplace) {
+            [_arguments replaceObjectAtIndex:i withObject:aNodeToInsert];
+            success |= YES;
+            break;
+        }
+    }
     return success;
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock root:(TQNodeRootBlock *)aRoot
-                         withArguments:(std::vector<llvm::Value*>)aArgs error:(NSError **)aoErr
+                         withArguments:(std::vector<llvm::Value*>)aArgs error:(TQError **)aoErr
 {
     Value *callee = [_callee generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     aArgs.insert(aArgs.begin(), callee);
 
     // Load&Call the dispatcher
-    NSString *dispatcherName = [NSString stringWithFormat:@"TQDispatchBlock%ld", aArgs.size() - 1];
+    OFString *dispatcherName = [OFString stringWithFormat:@"TQDispatchBlock%ld", aArgs.size() - 1];
     Function *dispatcher = aProgram.llModule->getFunction([dispatcherName UTF8String]);
     if(!dispatcher) {
         std::vector<Type*> argtypes(aArgs.size(), aProgram.llInt8PtrTy);
@@ -118,7 +118,7 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     IRBuilder<> *builder = aBlock.builder;
 

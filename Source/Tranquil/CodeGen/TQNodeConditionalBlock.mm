@@ -15,8 +15,8 @@ using namespace llvm;
 + (TQNodeIfBlock *)node { return (TQNodeIfBlock *)[super node]; }
 
 + (TQNodeIfBlock *)nodeWithCondition:(TQNode *)aCond
-                        ifStatements:(NSMutableArray *)ifStmt
-                      elseStatements:(NSMutableArray *)elseStmt
+                        ifStatements:(OFMutableArray *)ifStmt
+                      elseStatements:(OFMutableArray *)elseStmt
 {
     TQNodeIfBlock *ret = [self node];
     ret.condition = aCond;
@@ -33,14 +33,14 @@ using namespace llvm;
     [super dealloc];
 }
 
-- (NSString *)_name
+- (OFString *)_name
 {
     return @"if";
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    NSMutableString *out = [NSMutableString stringWithFormat:@"<%@@ ", [self _name]];
+    OFMutableString *out = [OFMutableString stringWithFormat:@"<%@@ ", [self _name]];
     [out appendFormat:@"(%@)", _condition];
     [out appendString:@" {\n"];
 
@@ -77,7 +77,7 @@ using namespace llvm;
 - (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
 {
     aBlock(_condition);
-    NSMutableArray *statements = [_ifStatements copy];
+    OFMutableArray *statements = [_ifStatements copy];
     for(TQNode *node in statements) {
         aBlock(node);
     }
@@ -101,7 +101,7 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     Module *mod = aProgram.llModule;
 
@@ -122,7 +122,7 @@ using namespace llvm;
         elseBuilder = new IRBuilder<>(elseBB);
     }
 
-    BasicBlock *endifBB = BasicBlock::Create(mod->getContext(), [[NSString stringWithFormat:@"end%@", [self _name]] UTF8String], aBlock.function);
+    BasicBlock *endifBB = BasicBlock::Create(mod->getContext(), [[OFString stringWithFormat:@"end%@", [self _name]] UTF8String], aBlock.function);
     IRBuilder<> *endifBuilder = new IRBuilder<>(endifBB);
 
     aBlock.basicBlock = thenBB;
@@ -172,7 +172,7 @@ using namespace llvm;
 {
     return aBuilder->CreateICmpEQ(aValue, ConstantPointerNull::get(aProgram.llInt8PtrTy), "unlessTest");
 }
-- (NSString *)_name
+- (OFString *)_name
 {
     return @"unless";
 }
@@ -198,7 +198,7 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     TQNode *elseExpr = _elseExpr ? _elseExpr : [TQNodeNil node];
 
@@ -245,8 +245,8 @@ using namespace llvm;
     return [_elseExpr referencesNode:aNode];
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    return [NSString stringWithFormat:@"<ternary@ (%@) ? %@ : %@>", self.condition, _ifExpr, _elseExpr];
+    return [OFString stringWithFormat:@"<ternary@ (%@) ? %@ : %@>", self.condition, _ifExpr, _elseExpr];
 }
 @end

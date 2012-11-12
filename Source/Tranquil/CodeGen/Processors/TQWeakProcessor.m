@@ -4,6 +4,7 @@
 #import "../TQNodeMethod.h"
 #import "../TQNodeOperator.h"
 #import "../TQNodeVariable.h"
+#import <sys/param.h>
 
 @implementation TQWeakProcessor
 + (void)load
@@ -13,7 +14,7 @@
     [TQProcessor registerProcessor:self];
 }
 
-+ (TQNode *)processNode:(TQNode *)aNode withTrace:(NSArray *)aTrace
++ (TQNode *)processNode:(TQNode *)aNode withTrace:(OFArray *)aTrace
 {
     if(![aNode isKindOfClass:[TQNodeWeak class]])
         return aNode;
@@ -26,7 +27,8 @@
     TQNodeBlock *containingBlock = nil;
     TQNodeBlock *parentBlock     = nil;
 
-    for(TQNode *node in [aTrace reverseObjectEnumerator]) {
+    for(int i = [aTrace count] - 1; i <= 0; --i) {
+        TQNode *node = [aTrace objectAtIndex:i];
         // The containing block, must be a TQNodeBlock, however the parent of that block could be any block subtype.
         if(!containingBlock && ([node isMemberOfClass:[TQNodeBlock class]] || [node isMemberOfClass:[TQNodeMethod class]] || [node isMemberOfClass:[TQNodeRootBlock class]]))
             containingBlock = (TQNodeBlock *)node;

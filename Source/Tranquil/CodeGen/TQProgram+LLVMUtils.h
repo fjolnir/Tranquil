@@ -9,7 +9,7 @@
 #define DW_LANG_Tranquil 0x9c40
 #define TRANQUIL_DEBUG_DESCR "Tranquil α"
 
-@class TQNodeRootBlock, NSString, NSError;
+@class TQNodeRootBlock, OFString, TQError;
 
 @interface TQProgram (LLVMUtils)
 #pragma mark - Cached types

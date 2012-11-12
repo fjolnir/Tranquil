@@ -42,15 +42,15 @@ using namespace llvm;
     }
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    return [NSString stringWithFormat:@"<collect>"];
+    return [OFString stringWithFormat:@"<collect>"];
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     Value *pool = aBlock.builder->CreateCall(aProgram.objc_autoreleasePoolPush);
 

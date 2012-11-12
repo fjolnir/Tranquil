@@ -50,7 +50,7 @@
 
 using namespace llvm;
 
-NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
+OFString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 
 static TQProgram *sharedInstance;
 
@@ -74,12 +74,12 @@ static TQProgram *sharedInstance;
     return sharedInstance;
 }
 
-+ (TQProgram *)programWithName:(NSString *)aName
++ (TQProgram *)programWithName:(OFString *)aName
 {
     return [[[self alloc] initWithName:aName] autorelease];
 }
 
-- (id)initWithName:(NSString *)aName
+- (id)initWithName:(OFString *)aName
 {
     if(!(self = [super init]))
         return nil;
@@ -95,12 +95,12 @@ static TQProgram *sharedInstance;
     InitializeNativeTarget();
     LLVMInitializeX86Target();
     
-    _globals     = [NSMutableDictionary new];
-    _searchPaths = [[NSMutableArray alloc] initWithObjects:@".",
+    _globals     = [OFMutableDictionary new];
+    _searchPaths = [[OFMutableArray alloc] initWithObjects:@".",
                         @"~/Library/Frameworks", @"/Library/Frameworks",
                         @"/System/Library/Frameworks/", @"/usr/include/", @"/usr/local/include/",
                         @"/usr/local/tranquil/llvm/include", nil];
-    _allowedFileExtensions = [[NSMutableArray alloc] initWithObjects:@"tq", @"h", nil];
+    _allowedFileExtensions = [[OFMutableArray alloc] initWithObjects:@"tq", @"h", nil];
 
     return self;
 }
@@ -119,7 +119,7 @@ static TQProgram *sharedInstance;
 #pragma mark - Execution
 
 // Prepares & optimizes the program tree before execution
-- (void)_preprocessNode:(TQNode *)aNodeToIterate withTrace:(NSMutableArray *)aTrace
+- (void)_preprocessNode:(TQNode *)aNodeToIterate withTrace:(OFMutableArray *)aTrace
 {
     if(!aNodeToIterate)
         return;
@@ -133,14 +133,14 @@ static TQProgram *sharedInstance;
    [aTrace removeLastObject];
 }
 
-- (id)_executeRoot:(TQNodeRootBlock *)aNode error:(NSError **)aoErr
+- (id)_executeRoot:(TQNodeRootBlock *)aNode error:(TQError **)aoErr
 {
     if(!aNode)
         return nil;
 
     BOOL shouldResetEvalPaths = !_evaluatedPaths;
     if(shouldResetEvalPaths)
-        _evaluatedPaths = [NSMutableArray array];
+        _evaluatedPaths = [OFMutableArray array];
 
     GlobalVariable *argGlobal = NULL;
     if(!_useAOTCompilation) {
@@ -172,7 +172,7 @@ static TQProgram *sharedInstance;
                                               ConstantPointerNull::get(self.llInt8PtrTy), "TQGlobalQueue");
     }
 
-    NSError *err = nil;
+    TQError *err = nil;
     [aNode generateCodeInProgram:self block:nil root:aNode error:&err];
     if(err) {
         TQLog(@"Error: %@", err);
@@ -260,7 +260,7 @@ static TQProgram *sharedInstance;
         TQNodeRootBlock *mainBlk = [TQNodeRootBlock node];
         mainBlk.invokeName = @"main";
         mainBlk.retType    = @"i";
-        mainBlk.argTypes   = [NSMutableArray arrayWithObjects:@"i", @"^*", nil];
+        mainBlk.argTypes   = [OFMutableArray arrayWithObjects:@"i", @"^*", nil];
 
         TQNodeVariable *cliArgVar = [TQNodeVariable nodeWithName:@"..."];
         [_globals setObject:cliArgVar forKey:@"..."];
@@ -354,11 +354,10 @@ static TQProgram *sharedInstance;
     id ret = nil;
     @try {
         ret = rootPtr();
-    } @catch (NSException *e) {
-        if(aoErr) *aoErr = [NSError errorWithDomain:kTQRuntimeErrorDomain
-                                               code:kTQObjCException
-                                           userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[e reason], @"reason",
-                                                                                               e, @"exception", nil]];
+    } @catch (TQAssertException *e) {
+        if(aoErr) *aoErr = [TQError withDomain:kTQRuntimeErrorDomain
+                                          code:kTQObjCException
+                                          info:[e reason]];
     }
 #ifdef TQ_PROFILE
     ProfilerStop();
@@ -381,14 +380,14 @@ static TQProgram *sharedInstance;
     return ret;
 }
 
-- (TQNodeRootBlock *)_rootFromFile:(NSString *)aPath error:(NSError **)aoErr
+- (TQNodeRootBlock *)_rootFromFile:(OFString *)aPath error:(TQError **)aoErr
 {
-    NSString *script = [NSString stringWithContentsOfFile:aPath usedEncoding:NULL error:nil];
+    OFString *script = [OFString stringWithContentsOfFile:aPath usedEncoding:NULL error:nil];
     if(!script)
         TQAssert(NO, @"Unable to load script from %@", aPath);
     return [self _parseScript:script error:aoErr];
 }
-- (id)executeScriptAtPath:(NSString *)aPath error:(NSError **)aoErr
+- (id)executeScriptAtPath:(OFString *)aPath error:(TQError **)aoErr
 {
     TQNodeRootBlock *root = [self _rootFromFile:aPath error:aoErr];
     if(!root)
@@ -396,7 +395,7 @@ static TQProgram *sharedInstance;
     return [self _executeRoot:root error:aoErr];
 }
 
-- (TQNodeRootBlock *)_parseScript:(NSString *)aScript error:(NSError **)aoErr
+- (TQNodeRootBlock *)_parseScript:(OFString *)aScript error:(TQError **)aoErr
 {
     // Remove shebang
     if([aScript hasPrefix:@"#!"]) {
@@ -417,13 +416,13 @@ static TQProgram *sharedInstance;
     _debugBuilder->createCompileUnit(dwarf::DW_LANG_ObjC, filename, dir, TRANQUIL_DEBUG_DESCR, true, "", 1); // Use DW_LANG_Tranquil ?
     root.debugUnit = DICompileUnit(_debugBuilder->getCU());
 
-    [self _preprocessNode:root withTrace:[NSMutableArray array]];
+    [self _preprocessNode:root withTrace:[OFMutableArray array]];
     if(_shouldShowDebugInfo)
         TQLog(@"%@", root);
     return root;
 }
 
-- (id)executeScript:(NSString *)aScript error:(NSError **)aoErr
+- (id)executeScript:(OFString *)aScript error:(TQError **)aoErr
 {
     TQNodeRootBlock *root = [self _parseScript:aScript error:aoErr];
     if(!root)
@@ -434,7 +433,7 @@ static TQProgram *sharedInstance;
 
 #pragma mark - Utilities
 
-- (NSString *)_resolveImportPath:(NSString *)aPath
+- (OFString *)_resolveImportPath:(OFString *)aPath
 {
 #define NOT_FOUND() do { TQLog(@"No file found for path '%@'", aPath); return nil; } while(0)
     BOOL isDir;
@@ -444,35 +443,35 @@ static TQProgram *sharedInstance;
             return aPath;
         NOT_FOUND();
     }
-    NSArray *testPathComponents = [aPath pathComponents];
+    OFArray *testPathComponents = [aPath pathComponents];
     if(![testPathComponents count])
         NOT_FOUND();
 
     BOOL hasExtension = [[aPath pathExtension] length] > 0;
     BOOL usesSubdir   = [testPathComponents count] > 1;
 
-    for(NSString *searchPath in _searchPaths) {
+    for(OFString *searchPath in _searchPaths) {
         if(![fm fileExistsAtPath:searchPath isDirectory:&isDir] || !isDir)
             continue;
 
-        for(NSString *candidate in [fm contentsOfDirectoryAtPath:searchPath error:nil]) {
-            if([[candidate pathExtension] isEqualToString:@"framework"]) {
-                NSString *frameworkDirName = usesSubdir ? [testPathComponents objectAtIndex:0] : [[aPath lastPathComponent] stringByDeletingPathExtension];
-                if(![[[candidate lastPathComponent] stringByDeletingPathExtension] isEqualToString:frameworkDirName])
+        for(OFString *candidate in [fm contentsOfDirectoryAtPath:searchPath error:nil]) {
+            if([[candidate pathExtension] isEqual:@"framework"]) {
+                OFString *frameworkDirName = usesSubdir ? [testPathComponents objectAtIndex:0] : [[aPath lastPathComponent] stringByDeletingPathExtension];
+                if(![[[candidate lastPathComponent] stringByDeletingPathExtension] isEqual:frameworkDirName])
                     continue;
                 if(usesSubdir)
-                    aPath = [[testPathComponents subarrayWithRange:(NSRange){ 1, [testPathComponents count] - 1 }] componentsJoinedByString:@"/"];
+                    aPath = [[testPathComponents subarrayWithRange:(of_range_t){ 1, [testPathComponents count] - 1 }] componentsJoinedByString:@"/"];
                 searchPath = [[searchPath stringByAppendingPathComponent:candidate] stringByAppendingPathComponent:@"Headers"];
                 break;
             }
         }
-        NSString *finalPath = [searchPath stringByAppendingPathComponent:aPath];
+        OFString *finalPath = [searchPath stringByAppendingPathComponent:aPath];
         if(hasExtension) {
             if([fm fileExistsAtPath:finalPath isDirectory:&isDir] && !isDir)
                 return finalPath;
         } else {
-            for(NSString *ext in _allowedFileExtensions) {
-                NSString *currPath = [finalPath stringByAppendingPathExtension:ext];
+            for(OFString *ext in _allowedFileExtensions) {
+                OFString *currPath = [finalPath stringByAppendingPathExtension:ext];
                 if([fm fileExistsAtPath:currPath isDirectory:&isDir] && !isDir)
                     return currPath;
             }
@@ -483,14 +482,14 @@ static TQProgram *sharedInstance;
 #undef NOT_FOUND
 }
 
-- (llvm::Value *)getGlobalStringPtr:(NSString *)aStr withBuilder:(llvm::IRBuilder<> *)aBuilder
+- (llvm::Value *)getGlobalStringPtr:(OFString *)aStr withBuilder:(llvm::IRBuilder<> *)aBuilder
 {
-    NSString *globalName;
+    OFString *globalName;
     // When compiling AOT certain symbols in the global name can cause llvm to generate invalid ASM => we use the hash in that case (which destroys the output's readbility)
     if(_useAOTCompilation)
-        globalName = [NSString stringWithFormat:@"TQConstCStr_%ld", [aStr hash]];
+        globalName = [OFString stringWithFormat:@"TQConstCStr_%ld", [aStr hash]];
     else
-        globalName = [NSString stringWithFormat:@"TQConstCStr_%@", aStr];
+        globalName = [OFString stringWithFormat:@"TQConstCStr_%@", aStr];
 
     GlobalVariable *global = _llModule->getGlobalVariable([globalName UTF8String], true);
     if(!global) {
@@ -505,12 +504,12 @@ static TQProgram *sharedInstance;
     return aBuilder->CreateInBoundsGEP(global, indices);
 }
 
-- (llvm::Value *)getGlobalStringPtr:(NSString *)aStr inBlock:(TQNodeBlock *)aBlock
+- (llvm::Value *)getGlobalStringPtr:(OFString *)aStr inBlock:(TQNodeBlock *)aBlock
 {
     return [self getGlobalStringPtr:aStr withBuilder:aBlock.builder];
 }
 
-- (void)insertLogUsingBuilder:(llvm::IRBuilder<> *)aBuilder withStr:(NSString *)txt
+- (void)insertLogUsingBuilder:(llvm::IRBuilder<> *)aBuilder withStr:(OFString *)txt
 {
     std::vector<Type*> nslog_args;
     nslog_args.push_back(self.llInt8PtrTy);

@@ -3,19 +3,20 @@
 #import <objc/runtime.h>
 
 @implementation TQRegularExpression
-+ (NSRegularExpression *)tq_regularExpressionWithPattern:(NSString *)aPattern options:(NSRegularExpressionOptions)aOpts
+#if 0
++ (NSRegularExpression *)tq_regularExpressionWithPattern:(OFString *)aPattern options:(NSRegularExpressionOptions)aOpts
 {
-    NSError *err = nil;
+    TQError *err = nil;
     NSRegularExpression *regex = [self regularExpressionWithPattern:aPattern options:aOpts error:&err];
     if(err)
         TQLog(@"%@", err);
     return regex;
 }
 
-- (id)matches:(NSString *)aString
+- (id)matches:(OFString *)aString
 {
-    NSArray *matches = [self matchesInString:aString options:0 range:(NSRange){0, [aString length]}];
-    NSMutableArray *result = [NSMutableArray arrayWithCapacity:[matches count]];
+    OFArray *matches = [self matchesInString:aString options:0 range:(NSRange){0, [aString length]}];
+    OFMutableArray *result = [OFMutableArray arrayWithCapacity:[matches count]];
     if([matches count] == 0)
         return nil;
     for(NSTextCheckingResult *match in matches) {
@@ -24,7 +25,7 @@
     return result;
 }
 
-- (id)match:(NSString *)aString usingBlock:(id (^)(NSString *text, TQRange *range))aBlock
+- (id)match:(OFString *)aString usingBlock:(id (^)(OFString *text, TQRange *range))aBlock
 {
     [self enumerateMatchesInString:aString
                            options:0
@@ -35,16 +36,19 @@
     }];
     return nil;
 }
+#endif
 @end
 
-@implementation NSString (TQRegularExpression)
+@implementation OFString (TQRegularExpression)
+#if 0
 - (id)matches:(TQRegularExpression *)aRegex
 {
     return [aRegex matches:self];
 }
 
-- (id)match:(TQRegularExpression *)aRegex usingBlock:(id (^)(NSString *text, TQRange *range))aBlock
+- (id)match:(TQRegularExpression *)aRegex usingBlock:(id (^)(OFString *text, TQRange *range))aBlock
 {
     return [aRegex match:self usingBlock:aBlock];
 }
+#endif
 @end

@@ -2,17 +2,17 @@
 
 @interface TQNodeArgumentDef : TQNode {
 	@protected
-		NSString *_name;
+		OFString *_name;
 }
-@property(readwrite, retain) NSString *name;
+@property(readwrite, retain) OFString *name;
 @property(readwrite, retain) TQNode *defaultArgument;
 @property(readwrite, assign) BOOL unretained;
 
-+ (TQNodeArgumentDef *)nodeWithName:(NSString *)aName;
++ (TQNodeArgumentDef *)nodeWithName:(OFString *)aName;
 @end
 
 @interface TQNodeMethodArgumentDef : TQNodeArgumentDef
-@property(readwrite, retain) NSString *selectorPart;
+@property(readwrite, retain) OFString *selectorPart;
 
-+ (TQNodeMethodArgumentDef *)nodeWithName:(NSString *)aName selectorPart:(NSString *)aSelectorPart;
++ (TQNodeMethodArgumentDef *)nodeWithName:(OFString *)aName selectorPart:(OFString *)aSelectorPart;
 @end

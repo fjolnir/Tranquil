@@ -3,6 +3,7 @@ CXX   = '/usr/local/tranquil/llvm/bin/clang++'
 LD    = CC
 RAGEL = '/usr/local/tranquil/ragel/bin/ragel'
 LEMON = '/usr/local/tranquil/lemon/bin/lemon'
+OBJFW = '/usr/local/tranquil/objfw/bin/objfw-config'
 
 
 MAXARGS = 32 # The number of block dispatchers to compile
@@ -31,6 +32,7 @@ CXXFLAGS = {
         '-I/usr/local/tranquil/gmp/include',
         '`/usr/local/tranquil/llvm/bin/llvm-config --cflags`',
         #'`/usr/local/llvm.dbg/bin/llvm-config --cflags`',
+        "`#{OBJFW} --objcflags --cppflags`",
         '-O0',
         '-g',
         #'-DTQ_PROFILE',
@@ -44,6 +46,7 @@ TOOL_LDFLAGS = [
     '`/usr/local/tranquil/llvm/bin/llvm-config --ldflags --libs core jit nativecodegen bitwriter ipo instrumentation`',
     #'`/usr/local/llvm.dbg/bin/llvm-config --ldflags --libs core jit nativecodegen bitwriter ipo instrumentation`',
     '-lclang',
+    '-lobjc',
     '-ltranquil',
     '-ltranquil_codegen',
     '/usr/local/tranquil/gmp/lib/libgmp.a',
@@ -52,13 +55,10 @@ TOOL_LDFLAGS = [
     '-lffi',
     '-lreadline',
     #'-lprofiler',
-    '-framework AppKit',
     '-all_load',
     '-g'
 ].join(' ')
 
-
-LIBS = ['-framework Foundation', '-framework GLUT'].join(' ')
 
 PATHMAP = 'build/%n.o'
 
@@ -68,7 +68,7 @@ STUB_H_OUTPATH  = 'Build/TQStubs.h'
 STUB_H_SCRIPT   = 'Source/Tranquil/gen_stubs_header.rb'
 MSGSEND_SOURCE  = 'Source/Tranquil/Runtime/msgsend.s'
 MSGSEND_OUT     = 'Build/msgsend.o'
-RUNTIME_SOURCES = FileList['Source/Tranquil/BridgeSupport/*.m*'].add('Source/Tranquil/Dispatch/*.m*').add('Source/Tranquil/Runtime/*.m*').add('Source/Tranquil/Shared/*.m*').add(STUB_OUTPATH)
+RUNTIME_SOURCES = FileList['Source/Tranquil/BridgeSupport/*.m*'].add('Source/Tranquil/Runtime/*.m*').add('Source/Tranquil/Shared/*.m*').add(STUB_OUTPATH)
 RUNTIME_O_FILES = RUNTIME_SOURCES.pathmap(PATHMAP)
 RUNTIME_O_FILES << MSGSEND_OUT
 
@@ -160,7 +160,7 @@ file :build_dir do
 end
 
 file :libtranquil => HEADERS_OUT + RUNTIME_O_FILES do |t|
-    sh "libtool -static -o #{BUILD_DIR}/libtranquil.a #{RUNTIME_O_FILES}"
+    sh "libtool -static -o #{BUILD_DIR}/libtranquil.a /usr/local/tranquil/objfw/lib/libobjfw.a #{RUNTIME_O_FILES}"
     sh "mkdir -p /usr/local/tranquil/lib"
     sh "cp Build/libtranquil.a /usr/local/tranquil/lib"
 end
@@ -179,7 +179,7 @@ end
 
 file :tranquil => [:libtranquil, :libtranquil_codegen, MAIN_OUTPATH] do |t|
     _buildMain
-    sh "#{LD} #{TOOL_LDFLAGS} #{LIBS} #{MAIN_OUTPATH} -ltranquil_codegen -o #{BUILD_DIR}/tranquil"
+    sh "#{LD} #{TOOL_LDFLAGS} #{MAIN_OUTPATH} -ltranquil_codegen -o #{BUILD_DIR}/tranquil"
 end
 
 task :setReleaseOpts do

@@ -1,5 +1,7 @@
 #import "TQNumber.h"
 #import <objc/runtime.h>
+#import <math.h>
+#import <float.h>
 #import "TQRuntime.h"
 #import "TQRange.h"
 #import "TQBigNumber.h"
@@ -10,7 +12,7 @@
 
 static id (*numberWithDoubleImp)(id, SEL, double);
 static id (*numberWithLongImp)(id, SEL, long);
-static id (*allocImp)(id,SEL,NSZone*);
+static id (*allocImp)(id,SEL);
 static id (*initImp)(id,SEL,double);
 static id (*autoreleaseImp)(id,SEL);
 
@@ -74,10 +76,10 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
 
 @implementation TQTaggedNumber
 - (id)retain { return self;}
-- (oneway void)release {}
+- (void)release {}
 - (id)autorelease { return self; }
 - (void)dealloc { if(NO) [super dealloc]; }
-- (id)copyWithZone:(NSZone *)aZone { return self; }
+- (id)copy { return self; }
 @end
 
 @implementation TQNumber
@@ -88,7 +90,7 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
     if(self != [TQNumber class]) {
         TQLog(@"Warning: Subclassing TQNumber is a bad idea!");
         // These cannot be overridden
-        assert((typeof(allocImp))method_getImplementation(class_getClassMethod(self, @selector(allocWithZone:))) == allocImp);
+        assert((typeof(allocImp))method_getImplementation(class_getClassMethod(self, @selector(alloc))) == allocImp);
         assert((typeof(initImp))class_getMethodImplementation(self, @selector(initWithDouble:)) == initImp);
         assert((typeof(autoreleaseImp))class_getMethodImplementation(self, @selector(autorelease)) == autoreleaseImp);
     } else {
@@ -131,7 +133,7 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
     numberWithDoubleImp = (id (*)(id, SEL, double))method_getImplementation(class_getClassMethod(self, @selector(numberWithDouble:)));
     numberWithLongImp   = (id (*)(id, SEL, long))method_getImplementation(class_getClassMethod(self, @selector(numberWithLong:)));
 
-    allocImp = (typeof(allocImp))method_getImplementation(class_getClassMethod(self, @selector(allocWithZone:)));
+    allocImp = (typeof(allocImp))method_getImplementation(class_getClassMethod(self, @selector(alloc)));
     initImp = (typeof(initImp))class_getMethodImplementation(self, @selector(initWithDouble:));
     autoreleaseImp = (typeof(autoreleaseImp))class_getMethodImplementation(self, @selector(autorelease));
 }
@@ -158,7 +160,7 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
     if(_TQTaggedNumberCanHold(aValue))
         return _TQTaggedNumberCreate(aValue);
 
-    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithInt:), aValue);
+    TQNumber *ret = initImp(allocImp(self, @selector(alloc)), @selector(initWithInt:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 + (TQNumber *)numberWithLong:(long)aValue
@@ -166,7 +168,7 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
     if(_TQTaggedNumberCanHold(aValue))
         return _TQTaggedNumberCreate(aValue);
 
-    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithLong:), aValue);
+    TQNumber *ret = initImp(allocImp(self, @selector(alloc)), @selector(initWithLong:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 + (TQNumber *)numberWithLongLong:(long long)aValue
@@ -174,7 +176,7 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
     if(_TQTaggedNumberCanHold(aValue))
         return _TQTaggedNumberCreate(aValue);
 
-    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithLongLong:), aValue);
+    TQNumber *ret = initImp(allocImp(self, @selector(alloc)), @selector(initWithLongLong:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 + (TQNumber *)numberWithFloat:(float)aValue
@@ -182,7 +184,7 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
     if(_TQTaggedNumberCanHold(aValue))
         return _TQTaggedNumberCreate(aValue);
 
-    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithFloat:), aValue);
+    TQNumber *ret = initImp(allocImp(self, @selector(alloc)), @selector(initWithFloat:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 + (TQNumber *)numberWithDouble:(double)aValue
@@ -190,60 +192,60 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
     if(_TQTaggedNumberCanHold(aValue))
         return _TQTaggedNumberCreate(aValue);
 
-    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithDouble:), aValue);
+    TQNumber *ret = initImp(allocImp(self, @selector(alloc)), @selector(initWithDouble:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
-+ (TQNumber *)numberWithInteger:(NSInteger)aValue
++ (TQNumber *)numberWithInteger:(long)aValue
 {
     if(_TQTaggedNumberCanHold(aValue))
         return _TQTaggedNumberCreate(aValue);
 
-    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithInteger:), aValue);
+    TQNumber *ret = initImp(allocImp(self, @selector(alloc)), @selector(initWithInteger:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 
-+ (NSNumber *)numberWithUnsignedChar:(unsigned char)aValue
++ (TQNumber *)numberWithUnsignedChar:(unsigned char)aValue
 {
     return _TQTaggedNumberCreate(aValue);
 }
-+ (NSNumber *)numberWithUnsignedShort:(unsigned short)aValue
++ (TQNumber *)numberWithUnsignedShort:(unsigned short)aValue
 {
     return _TQTaggedNumberCreate(aValue);
 }
 
-+ (NSNumber *)numberWithUnsignedInt:(unsigned int)aValue
++ (TQNumber *)numberWithUnsignedInt:(unsigned int)aValue
 {
     if(_TQTaggedNumberCanHold(aValue))
         return _TQTaggedNumberCreate(aValue);
 
-    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithUnsignedInt:), aValue);
+    TQNumber *ret = initImp(allocImp(self, @selector(alloc)), @selector(initWithUnsignedInt:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 
-+ (NSNumber *)numberWithUnsignedLong:(unsigned long)aValue
++ (TQNumber *)numberWithUnsignedLong:(unsigned long)aValue
 {
     if(_TQTaggedNumberCanHold(aValue))
         return _TQTaggedNumberCreate(aValue);
 
-    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithUnsignedLong:), aValue);
+    TQNumber *ret = initImp(allocImp(self, @selector(alloc)), @selector(initWithUnsignedLong:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 
-+ (NSNumber *)numberWithUnsignedLongLong:(unsigned long long)aValue
++ (TQNumber *)numberWithUnsignedLongLong:(unsigned long long)aValue
 {
     if(_TQTaggedNumberCanHold(aValue))
         return _TQTaggedNumberCreate(aValue);
 
-    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithUnsignedLongLong:), aValue);
+    TQNumber *ret = initImp(allocImp(self, @selector(alloc)), @selector(initWithUnsignedLongLong:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 
-+ (NSNumber *)numberWithUnsignedInteger:(NSUInteger)aValue
++ (TQNumber *)numberWithUnsignedInteger:(unsigned long)aValue
 {
     if(_TQTaggedNumberCanHold(aValue))
         return _TQTaggedNumberCreate(aValue);
 
-    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithUnsignedInteger:), aValue);
+    TQNumber *ret = initImp(allocImp(self, @selector(alloc)), @selector(initWithUnsignedInteger:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 
@@ -288,7 +290,7 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
     _value = aValue;
     return self;
 }
-- (id)initWithInteger:(NSInteger)aValue
+- (id)initWithInteger:(long)aValue
 {
     _value = aValue;
     return self;
@@ -319,7 +321,7 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
     _value = aValue;
     return self;
 }
-- (id)initWithUnsignedInteger:(NSUInteger)aValue
+- (id)initWithUnsignedInteger:(unsigned long)aValue
 {
     _value = aValue;
     return self;
@@ -334,14 +336,14 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
 - (float)floatValue { return _TQNumberValue(self); }
 - (double)doubleValue { return _TQNumberValue(self); }
 - (BOOL)boolValue { return _TQNumberValue(self); }
-- (NSInteger)integerValue { return _TQNumberValue(self); }
+- (long)integerValue { return _TQNumberValue(self); }
 
 - (unsigned char)unsignedCharValue { return _TQNumberValue(self); }
 - (unsigned short)unsignedShortValue { return _TQNumberValue(self); }
 - (unsigned int)unsignedIntValue { return _TQNumberValue(self); }
 - (unsigned long)unsignedLongValue { return _TQNumberValue(self); }
 - (unsigned long long)unsignedLongLongValue { return _TQNumberValue(self); }
-- (NSUInteger)unsignedIntegerValue { return _TQNumberValue(self); }
+- (unsigned long)unsignedIntegerValue { return _TQNumberValue(self); }
 
 - (const char *)objCType { return "d"; }
 - (void)getValue:(void *)buffer { *(double *)buffer = _TQNumberValue(self); }
@@ -399,8 +401,7 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
         bVal = [b doubleValue];
     else
         bVal = _TQNumberValue(b);
-    if(bVal == 0.0)
-        [NSException raise:@"Arithmetic Exception" format:@"Divide by zero error"];
+    TQAssert(bVal != 0.0, @"Divide by zero error");
 
     double result = aVal / bVal;
     if(isinf(result))
@@ -554,19 +555,19 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
     return NO;
 }
 
-- (NSComparisonResult)compare:(id)object
+- (of_comparison_result_t)compare:(id)object
 {
     if(object_getClass(object) != object_getClass(self))
-        return NSOrderedAscending;
+        return OF_ORDERED_ASCENDING;
     TQNumber *b = object;
     double value      = _TQNumberValue(self);
     double otherValue = _TQNumberValue(b);
     if(value > otherValue)
-        return NSOrderedDescending;
+        return OF_ORDERED_DESCENDING;
     else if(value < otherValue)
-        return NSOrderedAscending;
+        return OF_ORDERED_ASCENDING;
     else
-        return NSOrderedSame;
+        return OF_ORDERED_SAME;
 }
 
 #pragma mark -
@@ -578,9 +579,9 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
 
 #pragma mark -
 
-- (NSString *)description
+- (OFString *)description
 {
-    return [NSString stringWithFormat:@"%0.20g", _TQNumberValue(self)];
+    return [OFString stringWithFormat:@"%0.20g", _TQNumberValue(self)];
 }
 
 - (id)times:(id (^)())block
@@ -597,7 +598,7 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
     return nil;
 }
 
-- (id)copyWithZone:(NSZone *)aZone
+- (id)copy
 {
     return [[[self class] numberWithDouble:_value] retain];
 }

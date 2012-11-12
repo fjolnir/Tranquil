@@ -1,7 +1,7 @@
 #import <Tranquil/CodeGen/TQNode.h>
 
 @interface TQNodeArray : TQNode
-@property(readwrite, copy) NSMutableArray *items;
+@property(readwrite, copy) OFMutableArray *items;
 
 + (TQNodeArray *)node;
 @end

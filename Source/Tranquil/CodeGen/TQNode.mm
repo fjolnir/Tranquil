@@ -16,14 +16,14 @@ using namespace llvm;
 {
     if(!(self = [super init]))
         return nil;
-    _lineNumber = NSNotFound;
+    _lineNumber = OF_NOT_FOUND;
     return self;
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     TQLog(@"Code generation has not been implemented for %@.", [self class]);
     return NULL;
@@ -33,7 +33,7 @@ using namespace llvm;
              inProgram:(TQProgram *)aProgram
                  block:(TQNodeBlock *)aBlock
                   root:(TQNodeRootBlock *)aRoot
-                 error:(NSError **)aoErr
+                 error:(TQError **)aoErr
 {
     TQLog(@"Store has not been implemented for %@.", [self class]);
     return NULL;
@@ -71,7 +71,7 @@ using namespace llvm;
 - (void)_attachDebugInformationToInstruction:(llvm::Value *)aInst inProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock root:(TQNodeRootBlock *)aRoot
 {
     //NSLog(@"line: %ld %@", _lineNumber, self);
-    if(_lineNumber == NSNotFound)
+    if(_lineNumber == OF_NOT_FOUND)
         return;
 
     //aBlock.builder->SetCurrentDebugLocation(DebugLoc::get(self.lineNumber, 0, (MDNode*)aBlock.debugInfo, NULL)); <- Crashes llc
@@ -88,7 +88,7 @@ using namespace llvm;
     dyn_cast<Instruction>(aInst)->setMetadata(ctx->getMDKindID("dbg"), loc);
 }
 
-- (void)setLineNumber:(NSUInteger)aLineNo
+- (void)setLineNumber:(unsigned long)aLineNo
 {
     _lineNumber = aLineNo;
     [self iterateChildNodes:^(TQNode *aChild) {
@@ -96,13 +96,13 @@ using namespace llvm;
     }];
 }
 
-- (NSString *)toString
+- (OFString *)toString
 {
     return [self description];
 }
 @end
 
-@implementation NSArray (TQReferencesNode)
+@implementation OFArray (TQReferencesNode)
 - (TQNode *)tq_referencesNode:(TQNode *)aNode
 {
     TQNode *ref;

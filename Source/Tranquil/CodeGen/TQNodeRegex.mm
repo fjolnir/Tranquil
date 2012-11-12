@@ -8,7 +8,7 @@ using namespace llvm;
 @implementation TQNodeRegex
 @synthesize options=_opts, pattern=_pattern;
 
-+ (TQNodeRegex *)nodeWithPattern:(NSMutableString *)aPattern
++ (TQNodeRegex *)nodeWithPattern:(OFMutableString *)aPattern
 {
     TQNodeRegex *ret = (TQNodeRegex *)[super node];
     ret.pattern = aPattern;
@@ -21,12 +21,12 @@ using namespace llvm;
     [super dealloc];
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    return [NSString stringWithFormat:@"<regex@ %@>", self.value];
+    return [OFString stringWithFormat:@"<regex@ %@>", self.value];
 }
 
-- (void)append:(NSString *)aStr
+- (void)append:(OFString *)aStr
 {
     [_pattern appendString:aStr];
 }
@@ -34,18 +34,21 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
+    //TODO: Rewrite regex code
+    return ConstantPointerNull::get(aProgram.llInt8PtrTy);
+#if 0
     // Generate the regex string
     NSRegularExpression *splitRegex = [NSRegularExpression regularExpressionWithPattern:@"/(([\\/]|[^/])*)/([im]*)"
                                                                                 options:0
                                                                                   error:nil];
     NSTextCheckingResult *match = [splitRegex firstMatchInString:_pattern options:0 range:NSMakeRange(0, [_pattern length])];
     assert(match != nil);
-    NSRange patRange = [match rangeAtIndex:1];
-    NSRange optRange = [match rangeAtIndex:2];
+    of_range_t patRange = [match rangeAtIndex:1];
+    of_range_t optRange = [match rangeAtIndex:2];
 
-    NSString *pattern;
+    OFString *pattern;
     if(patRange.length > 0)
         pattern = [_pattern substringWithRange:patRange];
     else
@@ -53,10 +56,10 @@ using namespace llvm;
 
     _opts = 0;
     if(optRange.length > 0) {
-        NSString *optStr  = [_pattern substringWithRange:[match rangeAtIndex:3]];
-        if([optStr rangeOfString:@"i"].location != NSNotFound)
+        OFString *optStr  = [_pattern substringWithRange:[match rangeAtIndex:3]];
+        if([optStr rangeOfString:@"i"].location != OF_NOT_FOUND)
             _opts |= NSRegularExpressionCaseInsensitive;
-        if([optStr rangeOfString:@"m"].location != NSNotFound)
+        if([optStr rangeOfString:@"m"].location != OF_NOT_FOUND)
             _opts |= NSRegularExpressionAnchorsMatchLines;
     }
     [super setValue:[[pattern mutableCopy] autorelease]];
@@ -74,5 +77,6 @@ using namespace llvm;
     Value *ret = builder->CreateCall4(aProgram.objc_msgSend, klass, selector, patVal, optsVal);
     [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];
     return ret;
+#endif
 }
 @end

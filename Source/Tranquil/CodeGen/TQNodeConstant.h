@@ -2,5 +2,5 @@
 #import "TQNodeString.h"
 
 @interface TQNodeConstant : TQNodeString
-+ (TQNodeConstant *)nodeWithString:(NSMutableString *)aStr;
++ (TQNodeConstant *)nodeWithString:(OFMutableString *)aStr;
 @end

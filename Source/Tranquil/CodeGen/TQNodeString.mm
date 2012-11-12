@@ -8,7 +8,7 @@ using namespace llvm;
 @implementation TQNodeString
 @synthesize value=_value;
 
-+ (TQNodeString *)nodeWithString:(NSMutableString *)aStr
++ (TQNodeString *)nodeWithString:(OFMutableString *)aStr
 {
     TQNodeString *node = [self new];
     node.value = aStr;
@@ -19,7 +19,7 @@ using namespace llvm;
 {
     if(!(self = [super init]))
         return nil;
-    _embeddedValues = [NSMutableArray new];
+    _embeddedValues = [OFMutableArray new];
     return self;
 }
 
@@ -30,11 +30,11 @@ using namespace llvm;
     [super dealloc];
 }
 
-- (NSString *)description
+- (OFString *)description
 {
-    return [NSString stringWithFormat:@"<str@ \"%@\">", _value];
+    return [OFString stringWithFormat:@"<str@ \"%@\">", _value];
 }
-- (NSString *)toString
+- (OFString *)toString
 {
     return _value;
 }
@@ -55,15 +55,15 @@ using namespace llvm;
     }
 }
 
-- (void)append:(NSString *)aStr
+- (void)append:(OFString *)aStr
 {
     [_value appendString:aStr];
 }
 
 - (BOOL)replaceChildNodesIdenticalTo:(TQNode *)aNodeToReplace with:(TQNode *)aNodeToInsert
 {
-    NSUInteger idx = [_embeddedValues indexOfObject:aNodeToReplace];
-    if(idx == NSNotFound)
+    unsigned long idx = [_embeddedValues indexOfObject:aNodeToReplace];
+    if(idx == OF_NOT_FOUND)
         return NO;
     [_embeddedValues replaceObjectAtIndex:idx withObject:aNodeToInsert];
     return YES;
@@ -72,12 +72,12 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     Module *mod = aProgram.llModule;
 
-    // Returns [NSMutableString stringWithUTF8String:_value]
-    Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_NSMutableString", aProgram.llInt8Ty);
+    // Returns [OFMutableString stringWithUTF8String:_value]
+    Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_OFMutableString", aProgram.llInt8Ty);
     Value *selector = aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQStringWithUTF8StringSel", aProgram.llInt8PtrTy));
 
     Value *strValue = [aProgram getGlobalStringPtr:_value inBlock:aBlock];
@@ -101,7 +101,7 @@ using namespace llvm;
 @end
 
 @implementation TQNodeConstString
-+ (TQNodeConstString *)nodeWithString:(NSString *)aStr
++ (TQNodeConstString *)nodeWithString:(OFString *)aStr
 {
     return (TQNodeConstString *)[super nodeWithString:[[aStr mutableCopy] autorelease]];
 }
@@ -109,22 +109,22 @@ using namespace llvm;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+                                 error:(TQError **)aoErr
 {
     Module *mod = aProgram.llModule;
 
-    NSString *globalName;
+    OFString *globalName;
     if(aProgram.useAOTCompilation)
-        globalName = [NSString stringWithFormat:@"TQConstNSStr_%ld", [self.value hash]];
+        globalName = [OFString stringWithFormat:@"TQConstNSStr_%ld", [self.value hash]];
     else
-        globalName = [NSString stringWithFormat:@"TQConstNSStr_%@", self.value];
+        globalName = [OFString stringWithFormat:@"TQConstNSStr_%@", self.value];
 
     Value *str = mod->getGlobalVariable([globalName UTF8String], true);
     if(!str) {
          Function *rootFunction = aRoot.function;
         IRBuilder<> rootBuilder(&rootFunction->getEntryBlock(), rootFunction->getEntryBlock().begin());
 
-        Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_NSString", aProgram.llInt8Ty);
+        Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_OFString", aProgram.llInt8Ty);
         Value *selector = rootBuilder.CreateLoad(mod->getOrInsertGlobal("TQStringWithUTF8StringSel", aProgram.llInt8PtrTy));
 
         Value *result = rootBuilder.CreateCall3(aProgram.objc_msgSend, klass, selector, [aProgram getGlobalStringPtr:self.value withBuilder:&rootBuilder]);

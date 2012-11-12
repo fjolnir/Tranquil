@@ -1,6 +1,6 @@
 #import "TQEnumerable.h"
 #import "TQRuntime.h"
-#import "NSCollections+Tranquil.h"
+#import "OFCollections+Tranquil.h"
 #import "../../../Build/TQStubs.h"
 
 @interface TQEnumerable (NotImplementedHere)
@@ -15,10 +15,10 @@
 
 - (id)select:(id (^)(id))aBlock
 {
-    NSPointerArray *ret = [NSPointerArray new];
+    OFMutableArray *ret = [OFMutableArray new];
     [self each:^(id obj) {
         if(TQDispatchBlock1(aBlock, obj))
-            [ret push:obj];
+            [ret addObject:obj];
         return (id)nil;
     }];
     [ret autorelease];
@@ -27,10 +27,10 @@
 
 - (id)select:(id (^)(id))aSelectBlock map:(id (^)(id))aMapBlock
 {
-    NSPointerArray *ret = [NSPointerArray new];
+    OFMutableArray *ret = [OFMutableArray new];
     [self each:^(id obj) {
         if(TQDispatchBlock1(aSelectBlock, obj))
-            [ret push:TQDispatchBlock1(aMapBlock, obj)];
+            [ret addObject:TQDispatchBlock1(aMapBlock, obj)];
         return (id)nil;
     }];
     [ret autorelease];
@@ -52,9 +52,9 @@
 
 - (id)map:(id (^)(id))aBlock
 {
-    NSPointerArray *ret = [NSPointerArray new];
+    OFMutableArray *ret = [OFMutableArray new];
     [self each:^(id obj) {
-        [ret push:TQDispatchBlock1(aBlock, obj)];
+        [ret addObject:TQDispatchBlock1(aBlock, obj)];
         return (id)nil;
     }];
     return [ret autorelease];
@@ -81,11 +81,11 @@
     return accum;
 }
 
-- (NSPointerArray *)toArray
+- (OFMutableArray *)toArray
 {
-    NSPointerArray *ret = [NSPointerArray new];
+    OFMutableArray *ret = [OFMutableArray new];
     [self each:^(id obj) {
-        [ret push:obj];
+        [ret addObject:obj];
         return (id)nil;
     }];
     return [ret autorelease];

@@ -15,12 +15,12 @@ typedef enum {
 @property(readwrite, assign) TQMethodType type;
 + (TQNodeMethod *)node;
 + (TQNodeMethod *)nodeWithType:(TQMethodType)aType;
-- (NSString *)selector;
+- (OFString *)selector;
 - (id)initWithType:(TQMethodType)aType;
-- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(NSError **)aoErr;
+- (BOOL)addArgument:(TQNodeArgumentDef *)aArgument error:(TQError **)aoErr;
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                  class:(TQNodeClass *)aClass
                                   root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr;
+                                 error:(TQError **)aoErr;
 @end

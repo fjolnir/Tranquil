@@ -21,7 +21,7 @@ extern BOOL TQObjectIsStackBlock(id aBlock); // We can't #import Runtime.h becau
     ret.__obj = aObj;
     return ret;
 }
-
+#if 0
 - (void)forwardInvocation:(NSInvocation *)anInvocation
 {
     [anInvocation setTarget:__obj];
@@ -41,10 +41,11 @@ extern BOOL TQObjectIsStackBlock(id aBlock); // We can't #import Runtime.h becau
     }
     return [__obj methodSignatureForSelector:aSelector];
 }
+#endif
 
-- (NSString *)description    { return [__obj description]; }
+- (OFString *)description    { return [__obj description]; }
 - (Class)class               { return [__obj class];       }
-- (NSUInteger)hash           { return [__obj hash];        }
+- (uint32_t)hash           { return [__obj hash];        }
 
 - (BOOL)isEqual:(id)anObject {
     if(!__obj)

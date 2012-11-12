@@ -2,12 +2,14 @@
 #import "TQFFIType.h"
 #import "TQRuntime.h"
 #import "TQNumber.h"
-#import "NSCollections+Tranquil.h"
+#import "OFCollections+Tranquil.h"
 #import "TQPointer.h"
 #import "TQBlockClosure.h"
 #import "../../../Build/TQStubs.h"
 #import <objc/runtime.h>
 #import <objc/message.h>
+#import <assert.h>
+#import <ctype.h>
 
 #define TQBoxedObject_PREFIX "TQBoxedObject_"
 #define BlockImp imp_implementationWithBlock
@@ -18,7 +20,7 @@ static const int _TQBlockClosure_TypeEncAssocKey = 123;
 #define TQ_BLOCK_IS_WRAPPER_BLOCK (1 << 20)
 
 static int _TQRetTypeAssocKey, _TQArgTypesAssocKey, _TQFFIResourcesAssocKey;
-static void _freeRelinquishFunction(const void *item, NSUInteger (*size)(const void *item));
+static void _freeRelinquishFunction(const void *item, unsigned long (*size)(const void *item));
 
 // Used to wrap blocks that take or return non-objects
 struct TQBoxedBlockLiteral;
@@ -35,7 +37,7 @@ struct TQBoxedBlockLiteral {
     // The required data to call the boxed function
     void *funPtr;
     const char *type;
-    NSInteger argSize;
+    long argSize;
     ffi_cif *cif;
 };
 
@@ -67,11 +69,11 @@ static id _box_C_ULNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long *aPtr);
 static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long *aPtr);
 
 @interface TQBoxedObject ()
-+ (NSString *)_classNameForType:(const char *)aType;
++ (OFString *)_classNameForType:(const char *)aType;
 + (Class)_prepareAggregateWrapper:(const char *)aClassName withType:(const char *)aType;
 + (Class)_prepareScalarWrapper:(const char *)aClassName withType:(const char *)aType;
 + (Class)_prepareLambdaWrapper:(const char *)aClassName withType:(const char *)aType;
-+ (NSString *)_getFieldName:(const char **)aType;
++ (OFString *)_getFieldName:(const char **)aType;
 + (const char *)_findEndOfPair:(const char *)aStr start:(char)aStartChar end:(char)aEndChar;
 + (const char *)_skipQualifiers:(const char *)aType;
 @end
@@ -87,14 +89,15 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     TQInitializeRuntime();
 
     Class TQNumberClass = [TQNumber class];
-    Class TQTaggedNumberClass = NSClassFromString(@"TQTaggedNumber");
-    Class NSNumberClass = [NSNumber class];
+    Class TQTaggedNumberClass = objc_getClass("TQTaggedNumber");
+    Class OFNumberClass = objc_getClass("OFNumber");
+    Class NSNumberClass = objc_getClass("NSNumber");
 
     IMP imp;
     // []
     imp = imp_implementationWithBlock(^(id a, id key) {
         Class keyKls = object_getClass(key);
-        if(keyKls == TQTaggedNumberClass || keyKls == TQNumberClass  || keyKls == NSNumberClass)
+        if(keyKls == TQTaggedNumberClass || keyKls == TQNumberClass  || keyKls == NSNumberClass || keyKls == OFNumberClass)
             return [a objectAtIndexedSubscript:[(TQNumber *)key unsignedIntegerValue]];
         else
             return [a objectForKeyedSubscript:key];
@@ -104,7 +107,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     // []=
     imp = imp_implementationWithBlock(^(id a, id key, id val) {
         Class keyKls = object_getClass(key);
-        if(keyKls == TQNumberClass || keyKls == TQTaggedNumberClass || keyKls == NSNumberClass)
+        if(keyKls == TQNumberClass || keyKls == TQTaggedNumberClass || keyKls == NSNumberClass || keyKls == OFNumberClass)
             return [a setObject:val atIndexedSubscript:[(TQNumber *)key unsignedIntegerValue]];
         else
             return [a setObject:val forKeyedSubscript:key];
@@ -146,13 +149,14 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
 
 + (id)box:(void *)aPtr
 {
-    return [[[self allocWithZone:NULL] initWithPtr:aPtr] autorelease];
+    return [[[self alloc] initWithPtr:aPtr] autorelease];
 }
 
 + (void)unbox:(id)aValue to:(void *)aDest usingType:(const char *)aType
 {
     aType = [self _skipQualifiers:aType];
 
+#if 0 //__APPLE__
     if([aValue isKindOfClass:[NSValue class]]) {
         NSValue *value = aValue;
         const char *valType = [value objCType];
@@ -161,29 +165,30 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
             return;
         }
     }
+#endif
 
     switch(*aType) {
         case _C_ID:
-        case _C_CLASS:    *(id*)aDest                  = aValue;                          break;
-        case _C_SEL:      *(SEL*)aDest                 = NSSelectorFromString(aValue);    break;
-        case _C_CHARPTR:  *(const char **)aDest        = [aValue UTF8String];             break;
-        case _C_DBL:      *(double *)aDest             = [aValue doubleValue];            break;
-        case _C_FLT:      *(float *)aDest              = [aValue floatValue];             break;
-        case _C_INT:      *(int *)aDest                = [aValue intValue];               break;
-        case _C_CHR:      *(char *)aDest               = [aValue charValue];              break;
-        case _C_UCHR:     *(unsigned char *)aDest      = [aValue unsignedCharValue];      break;
-        case _C_SHT:      *(short *)aDest              = [aValue shortValue];             break;
-        case _C_BOOL:     *(_Bool *)aDest              = [aValue boolValue];              break;
-        case _C_LNG:      *(long *)aDest               = [aValue longValue];              break;
-        case _C_LNG_LNG:  *(long long *)aDest          = [aValue longLongValue];          break;
-        case _C_UINT:     *(unsigned int *)aDest       = [aValue unsignedIntValue];       break;
-        case _C_USHT:     *(unsigned short *)aDest     = [aValue unsignedShortValue];     break;
-        case _C_ULNG:     *(unsigned long *)aDest      = [aValue unsignedLongValue];      break;
-        case _C_ULNG_LNG: *(unsigned long long *)aDest = [aValue unsignedLongLongValue];  break;
-        case _C_VOID:     TQAssert(NO, @"You cannot unbox a value of type void");         break;
+        case _C_CLASS:    *(id*)aDest                  = aValue;                                break;
+        case _C_SEL:      *(SEL*)aDest                 = sel_registerName([aValue UTF8String]); break;
+        case _C_CHARPTR:  *(const char **)aDest        = [aValue UTF8String];                   break;
+        case _C_DBL:      *(double *)aDest             = [aValue doubleValue];                  break;
+        case _C_FLT:      *(float *)aDest              = [aValue floatValue];                   break;
+        case _C_INT:      *(int *)aDest                = [aValue intValue];                     break;
+        case _C_CHR:      *(char *)aDest               = [aValue charValue];                    break;
+        case _C_UCHR:     *(unsigned char *)aDest      = [aValue unsignedCharValue];            break;
+        case _C_SHT:      *(short *)aDest              = [aValue shortValue];                   break;
+        case _C_BOOL:     *(_Bool *)aDest              = [aValue boolValue];                    break;
+        case _C_LNG:      *(long *)aDest               = [aValue longValue];                    break;
+        case _C_LNG_LNG:  *(long long *)aDest          = [aValue longLongValue];                break;
+        case _C_UINT:     *(unsigned int *)aDest       = [aValue unsignedIntValue];             break;
+        case _C_USHT:     *(unsigned short *)aDest     = [aValue unsignedShortValue];           break;
+        case _C_ULNG:     *(unsigned long *)aDest      = [aValue unsignedLongValue];            break;
+        case _C_ULNG_LNG: *(unsigned long long *)aDest = [aValue unsignedLongLongValue];        break;
+        case _C_VOID:     TQAssert(NO, @"You cannot unbox a value of type void");               break;
 
         case _TQ_C_LAMBDA_B: {
-            TQAssert(!aValue || [aValue isKindOfClass:NSClassFromString(@"NSBlock")], @"Tried to unbox a non block to a block/function pointer type (%@ -> %s)", aValue, aType);
+            TQAssert(!aValue || [aValue isKindOfClass:objc_getClass("NSBlock")], @"Tried to unbox a non block to a block/function pointer type (%@ -> %s)", aValue, aType);
             if(!aValue)
                 *(void **)aDest = NULL;
             else  {
@@ -197,7 +202,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
         } break;
 
         case _C_STRUCT_B: {
-            NSUInteger size;
+            unsigned long size;
             TQGetSizeAndAlignment(aType, &size, NULL);
 
             // If it's a boxed object we just make sure the sizes match and then copy the bits
@@ -207,10 +212,10 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
                 memmove(aDest, value->_ptr, size);
             }
             // If it's an array  we unbox based on indices
-            else if([aValue isKindOfClass:[NSArray class]] || [aValue isKindOfClass:[NSPointerArray class]]) {
-                NSArray *arr = aValue;
-                NSUInteger size;
-                NSUInteger ofs = 0;
+            else if([aValue isKindOfClass:[OFArray class]]) {
+                OFArray *arr = aValue;
+                unsigned long size;
+                unsigned long ofs = 0;
                 const char *fieldType = strstr(aType, "=") + 1;
                 assert((uintptr_t)fieldType > 1);
                 const char *next;
@@ -228,19 +233,14 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
                 memset(aDest, 0, size);
             }
             // If it's a dictionary we can unbox based on it's keys
-            else if([aValue isKindOfClass:[NSDictionary class]] || [aValue isKindOfClass:[NSMapTable class]]) {
-                  [NSException raise:@"Unimplemented"
-                           format:@"Dictionary unboxing has not been implemented yet."];
+            else if([aValue isKindOfClass:[OFDictionary class]]) {
+                TQAssert(NO, @"Dictionary unboxing has not been implemented yet.");
 
-            } else {
-               [NSException raise:@"Invalid value"
-                           format:@"You tried to unbox %@ to a struct(%s), but it can not.", aValue, aType];
-            }
+            } else
+                TQAssert(NO, @"You tried to unbox %@ to a struct(%s), but it can not.", aValue, aType);
         } break;
         case _C_UNION_B: {
-            [NSException raise:@"Unimplemented"
-                        format:@"Unboxing to a union has not been implemented yet."];
-
+            TQAssert(NO, @"Unboxing to a union has not been implemented yet");
         }
         case _C_PTR: {
             if(!aValue)
@@ -266,7 +266,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
 
 - (id)initWithPtr:(void *)aPtr
 {
-    [NSException raise:@"Invalid Receiver" format:@"TQBoxedObject is an abstract class. Do not try to instantiate it directly."];
+    TQAssert(NO, @"TQBoxedObject is an abstract class. Do not try to instantiate it directly.");
     // Implemented by subclasses
     return nil;
 }
@@ -296,16 +296,16 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     return ret;
 }
 
-- (id)copyWithZone:(NSZone *)aZone
+- (id)copy
 {
-    TQBoxedObject *ret = [[[self class] allocWithZone:aZone] initWithPtr:_ptr];
+    TQBoxedObject *ret = [[[self class] alloc] initWithPtr:_ptr];
     [ret moveValueToHeap];
     return ret;
 }
 
 #pragma mark -
 
-+ (NSString *)_getFieldName:(const char **)aType
++ (OFString *)_getFieldName:(const char **)aType
 {
     if(*(*aType) != '"')
         return NULL;
@@ -313,7 +313,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     const char *nameEnd = strstr(*aType, "\"");
     int len = nameEnd - *aType;
 
-    NSString *ret = [[NSString alloc] initWithBytes:*aType length:len encoding:NSUTF8StringEncoding];
+    OFString *ret = [[OFString alloc] initWithUTF8String:*aType length:len];
     (*aType) += len+1;
     return [ret autorelease];
 }
@@ -346,9 +346,9 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     return aType;
 }
 
-+ (NSString *)_classNameForType:(const char *)aType
++ (OFString *)_classNameForType:(const char *)aType
 {
-    NSUInteger len;
+    unsigned long len;
     if(*aType == _C_STRUCT_B)
         len = [self _findEndOfPair:aType start:_C_STRUCT_B end:_C_STRUCT_E] - aType + 1;
     else if(*aType == _C_UNION_B)
@@ -367,12 +367,12 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     char className[len+1];
     snprintf(className, len, "%s%s", TQBoxedObject_PREFIX, aType);
 
-    return [NSString stringWithUTF8String:className];
+    return [OFString stringWithUTF8String:className];
 }
 
 + (Class)_prepareScalarWrapper:(const char *)aClassName withType:(const char *)aType
 {
-    NSUInteger size, alignment;
+    unsigned long size, alignment;
     TQGetSizeAndAlignment(aType, &size, &alignment);
 
     IMP initImp      = nil;
@@ -397,8 +397,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
         case _C_ULNG_LNG: initImp = (IMP)_box_C_ULNG_LNG_imp; break;
 
         default:
-            [NSException raise:NSGenericException
-                        format:@"Unsupported scalar type %c!", *aType];
+            TQAssert(NO, @"Unsupported scalar type %c!", *aType);
             return nil;
     }
 
@@ -420,28 +419,28 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     if(!kls)
         return objc_getClass(aClassName);
 
-    NSUInteger size, alignment;
+    unsigned long size, alignment;
     TQGetSizeAndAlignment(aType, &size, &alignment);
 
     // Store the accessors sequentially in order to allow indexed access (necessary for structs without field name information)
-    NSMutableArray *fieldGetters = [NSMutableArray array];
-    NSMutableArray *fieldSetters = [NSMutableArray array];
+    OFMutableArray *fieldGetters = [OFMutableArray array];
+    OFMutableArray *fieldSetters = [OFMutableArray array];
 
     __block id fieldGetter, fieldSetter;
-    __block NSUInteger ofs;
+    __block unsigned long ofs;
     const char *fieldType = strstr(aType, "=")+1;
     assert((uintptr_t)fieldType > 1);
 
     // Add properties for each field
     ofs = 0;
-    TQIterateTypesInEncoding(fieldType, ^(const char *type, NSUInteger size, NSUInteger align, BOOL *stop) {
-        NSString *name = [self _getFieldName:&type];
+    TQIterateTypesInEncoding(fieldType, ^(const char *type, unsigned long size, unsigned long align, BOOL *stop) {
+        OFString *name = [self _getFieldName:&type];
 
         // This is only to make sure that the type string survives for the lifetime of the class (Since the lifetime of the type param is not defined)
-        NSString *nsType = [NSString stringWithUTF8String:type];
+        OFString *nsType = [OFString stringWithUTF8String:type];
         objc_setAssociatedObject(kls, nsType, nsType, OBJC_ASSOCIATION_RETAIN);
 
-        NSUInteger currOfs = ofs;
+        unsigned long currOfs = ofs;
         if(*type == _C_ARY_B) {
             // For an array we must box a pointer to the address of the array (the location within the struct is a pointer
             // to it's first element, not to the array itself)
@@ -460,8 +459,8 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
         } copy] autorelease];
 
         if(name) {
-            class_addMethod(kls, NSSelectorFromString(name), BlockImp(fieldGetter), "@:");
-            class_addMethod(kls, NSSelectorFromString([NSString stringWithFormat:@"set%@:", [name capitalizedString]]), BlockImp(fieldSetter), "@:@");
+            class_addMethod(kls, sel_registerName([name UTF8String]), BlockImp(fieldGetter), "@:");
+            class_addMethod(kls, sel_registerName([[OFString stringWithFormat:@"set%@:", [name capitalizedString]] UTF8String]), BlockImp(fieldSetter), "@:@");
         }
         [fieldGetters addObject:fieldGetter];
         [fieldSetters addObject:fieldSetter];
@@ -471,17 +470,17 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
             ofs += size;
     });
 
-    IMP subscriptGetterImp = BlockImp(^(id self, NSInteger idx) {
+    IMP subscriptGetterImp = BlockImp(^(id self, long idx) {
         id (^getter)(id) = [fieldGetters objectAtIndex:idx];
         return getter(self);
     });
-    const char *subscrGetterType = [[NSString stringWithFormat:@"@:%s", @encode(NSInteger)] UTF8String];
+    const char *subscrGetterType = [[OFString stringWithFormat:@"@:%s", @encode(long)] UTF8String];
     class_addMethod(kls, @selector(objectAtIndexedSubscript:), subscriptGetterImp, subscrGetterType);
-    IMP subscriptSetterImp = BlockImp(^(id self, id value, NSInteger idx) {
+    IMP subscriptSetterImp = BlockImp(^(id self, id value, long idx) {
         id (^setter)(id, id) = [fieldSetters objectAtIndex:idx];
         return setter(self, value);
     });
-    const char *subscrSetterType = [[NSString stringWithFormat:@"@:@%s", @encode(NSInteger)] UTF8String];
+    const char *subscrSetterType = [[OFString stringWithFormat:@"@:@%s", @encode(long)] UTF8String];
     class_addMethod(kls, @selector(setObject:atIndexedSubscript:), subscriptSetterImp, subscrSetterType);
 
     IMP initImp = BlockImp(^(TQBoxedObject *self, void *aPtr) {
@@ -524,10 +523,10 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     TQFFIType *retType = [TQFFIType typeWithEncoding:argTypes nextType:&argTypes];
 
     // And now the argument types
-    __block NSUInteger numArgs = isBlock;
-    __block NSUInteger argSize = 0;
+    __block unsigned long numArgs = isBlock;
+    __block unsigned long argSize = 0;
     if(*argTypes != _TQ_C_LAMBDA_E) {
-        TQIterateTypesInEncoding(argTypes, ^(const char *argType, NSUInteger size, NSUInteger align, BOOL *stop) {
+        TQIterateTypesInEncoding(argTypes, ^(const char *argType, unsigned long size, unsigned long align, BOOL *stop) {
             ++numArgs;
             argSize += size;
         });
@@ -535,7 +534,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
 
     ffi_cif *cif = (ffi_cif*)malloc(sizeof(ffi_cif));
     ffi_type **args = (ffi_type**)malloc(sizeof(ffi_type*)*numArgs);
-    NSMutableArray *argTypeObjects = [NSMutableArray arrayWithCapacity:numArgs];
+    OFMutableArray *argTypeObjects = [OFMutableArray array];
 
     int argIdx = 0;
     if(isBlock) {
@@ -578,6 +577,9 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     // Hold on to these guys for the life of the class:
     objc_setAssociatedObject(kls, &_TQRetTypeAssocKey, retType, OBJC_ASSOCIATION_RETAIN);
     objc_setAssociatedObject(kls, &_TQArgTypesAssocKey, argTypeObjects, OBJC_ASSOCIATION_RETAIN);
+
+    // TODO: Rewrite this without nspointerarray
+#if 0
     NSPointerFunctions *pointerFuns = [NSPointerFunctions pointerFunctionsWithOptions:NSPointerFunctionsOpaqueMemory|NSPointerFunctionsOpaquePersonality];
     pointerFuns.relinquishFunction = &_freeRelinquishFunction;
 
@@ -585,29 +587,30 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     [ffiResArr addPointer:cif];
     [ffiResArr addPointer:args];
     objc_setAssociatedObject(kls, &_TQFFIResourcesAssocKey, ffiResArr, OBJC_ASSOCIATION_RETAIN);
+#endif
 
     return kls;
 }
 
-- (id)objectAtIndexedSubscript:(NSInteger)aIdx
+- (id)objectAtIndexedSubscript:(long)aIdx
 {
     return nil;
 }
-- (void)setObject:(id)aValue atIndexedSubscript:(NSInteger)aIdx
+- (void)setObject:(id)aValue atIndexedSubscript:(long)aIdx
 {
     // Implemented by subclasses
 }
 
-+ (void)addFieldNames:(NSArray *)aNames
++ (void)addFieldNames:(OFArray *)aNames
 {
-    NSString *sel;
+    OFString *sel;
     for(int i = 0; i < [aNames count]; ++i) {
         sel = [aNames objectAtIndex:i];
-        class_addMethod(self, NSSelectorFromString(sel), imp_implementationWithBlock(^(id self_) {
+        class_addMethod(self, sel_registerName([sel UTF8String]), imp_implementationWithBlock(^(id self_) {
             return [self_ objectAtIndexedSubscript:i];
         }), "@@:");
-        sel = [NSString stringWithFormat:@"set%@:", [sel capitalizedString]];
-        class_addMethod(self, NSSelectorFromString(sel), imp_implementationWithBlock(^(id self_, id val) {
+        sel = [OFString stringWithFormat:@"set%@:", [sel capitalizedString]];
+        class_addMethod(self, sel_registerName([sel UTF8String]), imp_implementationWithBlock(^(id self_, id val) {
             return [self_ setObject:val atIndexedSubscript:i];
         }), "@@:@");
     }
@@ -658,7 +661,7 @@ id __wrapperBlock_invoke(struct TQBoxedBlockLiteral *__blk, ...)
 
 #pragma mark - Boxed msgSend
 
-extern NSMapTable *_TQSelectorCache;
+extern uintptr_t _TQSelectorCacheLookup(uintptr_t key);
 extern void _TQCacheSelector(id obj, SEL sel);
 
 id tq_boxedMsgSend(id self, SEL selector, ...)
@@ -667,17 +670,18 @@ id tq_boxedMsgSend(id self, SEL selector, ...)
         return nil;
 
     Class kls = object_getClass(self);
-    void *cacheKey =  (void*)((uintptr_t)kls ^ (uintptr_t)selector << 32);
-    Method method = (Method)NSMapGet(_TQSelectorCache, cacheKey);
+#ifdef __LP64__
+    uintptr_t cacheKey =  (uintptr_t)kls ^ (uintptr_t)selector << 32;
+#else
+    uintptr_t cacheKey =  (uintptr_t)kls ^ (uintptr_t)selector << 16;
+#endif
+    Method method = (Method)_TQSelectorCacheLookup(cacheKey);
     if(method == 0x0) {
         _TQCacheSelector(self, selector);
-        method = (Method)NSMapGet(_TQSelectorCache, cacheKey);
+        method = (Method)_TQSelectorCacheLookup(cacheKey);
     }
-    if(method == 0x0) {
-        [NSException raise:NSGenericException
-                    format:@"Unknown selector %@ sent to object %@", NSStringFromSelector(selector), self];
-        return nil;
-    } else if((uintptr_t)method == 0x1L) {
+    TQAssert(method != 0x0, @"Unknown selector %s sent to object %@", sel_getName(selector), self);
+    if((uintptr_t)method == 0x1L) {
         TQLog(@"Error: Tried to use tq_boxedMsgSend to call a method that does not require boxing");
         return nil;
     }
@@ -704,7 +708,7 @@ id tq_boxedMsgSend(id self, SEL selector, ...)
 
     if(TQMethodTypeRequiresBoxing(encoding)) {
         // Allocate enough space for the return value
-        NSUInteger retSize;
+        unsigned long retSize;
         const char *argEncoding = TQGetSizeAndAlignment(encoding, &retSize, NULL);
         if(retSize > 0)
             retPtr = alloca(retSize);
@@ -712,7 +716,7 @@ id tq_boxedMsgSend(id self, SEL selector, ...)
 
         // Figure out how much space the unboxed arguments need
         const char *argType = argEncoding;
-        NSUInteger totalArgSize, argSize;
+        unsigned long totalArgSize, argSize;
         totalArgSize = 0;
         for(unsigned int i = 0; i < nargs; ++i) {
             argType = TQGetSizeAndAlignment(argType, &argSize, NULL);
@@ -771,7 +775,7 @@ id tq_boxedMsgSend(id self, SEL selector, ...)
 
 #pragma mark - Scalar boxing IMPs
 id _box_C_ID_imp(TQBoxedObject *self, SEL _cmd, id *aPtr)                       { return *aPtr;                                           }
-id _box_C_SEL_imp(TQBoxedObject *self, SEL _cmd, SEL *aPtr)                     { return NSStringFromSelector(*aPtr);                     }
+id _box_C_SEL_imp(TQBoxedObject *self, SEL _cmd, SEL *aPtr)                     { return [OFString stringWithUTF8String:sel_getName(*aPtr)];}
 id _box_C_VOID_imp(TQBoxedObject *self, SEL _cmd, id *aPtr)                     { return nil;                                             }
 id _box_C_DBL_imp(TQBoxedObject *self, SEL _cmd, double *aPtr)                  { return [TQNumber numberWithDouble:*aPtr];               }
 id _box_C_FLT_imp(TQBoxedObject *self, SEL _cmd, float *aPtr)                   { return [TQNumber numberWithFloat:*aPtr];                }
@@ -790,7 +794,7 @@ id _box_C_UCHR_imp(TQBoxedObject *self, SEL _cmd, char *aPtr)                   
 
 #pragma mark -
 
-void _freeRelinquishFunction(const void *item, NSUInteger (*size)(const void *item))
+void _freeRelinquishFunction(const void *item, unsigned long (*size)(const void *item))
 {
     free((void*)item);
 }

@@ -1,9 +1,9 @@
 #import "TQProcessor.h"
 
-static NSMutableArray *_Processors;
+static OFMutableArray *_Processors;
 
 @implementation TQProcessor
-+ (NSArray *)allProcessors
++ (OFArray *)allProcessors
 {
     return _Processors;
 }
@@ -11,11 +11,11 @@ static NSMutableArray *_Processors;
 + (void)registerProcessor:(TQProcessor *)aProcessor
 {
     if(!_Processors)
-        _Processors = [NSMutableArray new];
+        _Processors = [OFMutableArray new];
     [_Processors addObject:aProcessor];
 }
 
-+ (TQNode *)processNode:(TQNode *)aNode withTrace:(NSArray *)aTrace
++ (TQNode *)processNode:(TQNode *)aNode withTrace:(OFArray *)aTrace
 {
     return aNode;
 }
