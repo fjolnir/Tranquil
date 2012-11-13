@@ -32,9 +32,10 @@ CXXFLAGS = {
         '-I/usr/local/tranquil/gmp/include',
         '`/usr/local/tranquil/llvm/bin/llvm-config --cflags`',
         #'`/usr/local/llvm.dbg/bin/llvm-config --cflags`',
-        "`#{OBJFW} --objcflags --cppflags`",
+        "`#{OBJFW} --cppflags --objcflags`",
         '-O0',
         '-g',
+        '-DOS_OBJECT_USE_OBJC=0',
         #'-DTQ_PROFILE',
         #'--analyze'
     ].join(' ')
@@ -56,6 +57,8 @@ TOOL_LDFLAGS = [
     '-lreadline',
     #'-lprofiler',
     '-all_load',
+    '-framework Foundation',
+    "`#{OBJFW} --ldflags --libs`",
     '-g'
 ].join(' ')
 
@@ -160,7 +163,7 @@ file :build_dir do
 end
 
 file :libtranquil => HEADERS_OUT + RUNTIME_O_FILES do |t|
-    sh "libtool -static -o #{BUILD_DIR}/libtranquil.a /usr/local/tranquil/objfw/lib/libobjfw.a #{RUNTIME_O_FILES}"
+    sh "libtool -static -o #{BUILD_DIR}/libtranquil.a #{RUNTIME_O_FILES}" # /usr/local/tranquil/objfw/lib/libobjfw.a
     sh "mkdir -p /usr/local/tranquil/lib"
     sh "cp Build/libtranquil.a /usr/local/tranquil/lib"
 end

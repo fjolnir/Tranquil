@@ -23,7 +23,8 @@
     {
         if(++i % 2 == 0) {
             key = head;
-            [ret setObject:val forKey:key];
+            if(val)
+                [ret setObject:val forKey:key];
         } else
             val = TQObjectIsStackBlock(head) ? [[head copy] autorelease] : head;
     }
@@ -63,7 +64,6 @@
     }
     va_end(args);
 
-    [ret makeImmutable];
     return [ret autorelease];
 }
 
@@ -76,6 +76,10 @@
     return nil;
 }
 
+- (OFArray *)add:(OFArray *)aArray
+{
+    return [self arrayByAddingObjectsFromArray:aArray];
+}
 @end
 
 @implementation TQPair

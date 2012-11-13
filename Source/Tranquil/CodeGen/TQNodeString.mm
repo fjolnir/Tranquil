@@ -77,7 +77,11 @@ using namespace llvm;
     Module *mod = aProgram.llModule;
 
     // Returns [OFMutableString stringWithUTF8String:_value]
+#ifdef __APPLE__
     Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_OFMutableString", aProgram.llInt8Ty);
+#else
+    Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_OFMutableString", aProgram.llInt8Ty);
+#endif
     Value *selector = aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQStringWithUTF8StringSel", aProgram.llInt8PtrTy));
 
     Value *strValue = [aProgram getGlobalStringPtr:_value inBlock:aBlock];

@@ -3,13 +3,11 @@
 static TQValidObject *sharedInstance;
 
 @implementation TQValidObject
-+ (void)load
-{
-    sharedInstance = [self new];
-}
 
 + (TQValidObject *)valid
 {
+    if(!sharedInstance)
+        sharedInstance = [self new];
     return sharedInstance;
 }
 

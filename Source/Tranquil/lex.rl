@@ -11,12 +11,12 @@ typedef struct {
     TQNodeRootBlock *root;
 } TQParserState;
 
-#define NSStr(lTrim, rTrim) (ts ? [[[NSMutableString alloc] initWithBytes:ts+(lTrim) length:te-ts-(lTrim)-(rTrim) encoding:NSUTF8StringEncoding] autorelease] : nil)
+#define NSStr(lTrim, rTrim) (ts ? [[[OFMutableString alloc] initWithUTF8String:(const char *)ts+(lTrim) length:te-ts-(lTrim)-(rTrim)] autorelease] : nil)
 
 #define CopyCStr() ((unsigned char *)strndup((char *)ts, te-ts))
 
 #define _EmitToken(tokenId, val) do { \
-    /*NSLog(@"emitting %d = %@ on line: %d", tokenId, val, parserState.currentLine);*/ \
+    /*of_log(@"emitting %d = %@ on line: %d", tokenId, val, parserState.currentLine);*/ \
     Parse(parser, tokenId, [TQToken withId:tokenId value:val line:parserState.currentLine], &parserState); \
     parserState.atBeginningOfExpr = NO; \
 } while(0);
@@ -32,14 +32,14 @@ typedef struct {
 
 #define EmitIntToken(tokenId, base, prefixLen) do { \
     unsigned char *str = CopyCStr(); \
-    long long numVal = strtoll((char *)str + (prefixLen), NULL, (base)); \
-    _EmitToken((tokenId), [NSNumber numberWithLongLong:numVal]); \
+    long numVal = strtoll((char *)str + (prefixLen), NULL, (base)); \
+    _EmitToken((tokenId), [OFNumber numberWithLong:numVal]); \
     free(str); \
 } while(0)
 
 #define EmitFloatToken(tokenId) do { \
     unsigned char *str = CopyCStr(); \
-    _EmitToken((tokenId), [NSNumber numberWithDouble:atof((char *)str)]); \
+    _EmitToken((tokenId), [OFNumber numberWithDouble:atof((char *)str)]); \
     free(str); \
 } while(0)
 
@@ -56,7 +56,7 @@ typedef struct {
 
 #define ExprBeg() parserState.atBeginningOfExpr = YES
 
-@interface TQToken : NSObject
+@interface TQToken : OFObject
 @property(readwrite, assign) int id, line;
 @property(readwrite, strong) id value;
 + (TQToken *)withId:(int)id value:(id)value line:(int)line;
@@ -223,8 +223,8 @@ main := |*
     hex   term                       => { EmitIntToken(NUMBERNL, 16, 2); ExprBeg(); BacktrackTerm();      };
     anybase term                     => {
         // Find the base
-        NSString *str = NSStr(0,0);
-        NSString *baseStr = [str substringToIndex:[str rangeOfString:@"r"].location];
+        OFString *str = NSStr(0,0);
+        OFString *baseStr = [str substringToIndex:[str rangeOfString:@"r"].location];
         EmitIntToken(NUMBERNL, atoi([baseStr UTF8String]), [baseStr length]+1); ExprBeg(); BacktrackTerm();
     };
 
@@ -254,7 +254,7 @@ main := |*
 
 #include "parse.mm"
 
-extern "C" TQNode *TQParseString(NSString *str)
+extern "C" TQNode *TQParseString(OFString *str)
 {
     if(![str hasSuffix:@"\n"])
         str = [str stringByAppendingString:@"\n"];

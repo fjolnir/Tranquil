@@ -644,7 +644,7 @@ using namespace llvm;
     if(!_retType)
         _retType = @"@";
     if(!_argTypes) {
-        _argTypes = [[OFMutableArray alloc] initWithCapacity:_arguments.count];
+        _argTypes = [OFMutableArray new];
         for(TQNodeArgumentDef *arg in _arguments) {
             [_argTypes addObject:@"@"];
         }

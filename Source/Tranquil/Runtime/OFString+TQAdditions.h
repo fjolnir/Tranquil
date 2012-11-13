@@ -10,6 +10,9 @@
 - (OFMutableString *)multiply:(TQNumber *)aTimes;
 - (OFMutableString *)add:(id)aObj;
 - (char)charValue;
+- (OFString *)pathExtension;
+- (OFString *)stringByDeletingPathExtension;
+- (OFString *)stringByAppendingPathExtension:(NSString *)ext;
 @end
 
 @interface OFMutableString (Tranquil)

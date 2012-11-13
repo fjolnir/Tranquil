@@ -15,8 +15,8 @@ program ::= statements(SS). { [state->root setStatements:SS]; }
 // Statements -------------------------------------------------------------------------------------------------------------------------
 //
 
-statements(SS) ::= statements(O) statement(S).          { SS = O; [SS addObject:S];                                                   }
-statements(SS) ::= statement(S).                        { SS = [NSMutableArray arrayWithObject:S];                                    }
+statements(SS) ::= statements(O) statement(S).          { SS = O; [(OFMutableArray *)SS addObject:S];                                 }
+statements(SS) ::= statement(S).                        { SS = [OFMutableArray arrayWithObject:S];                                    }
 
 statement(S) ::= exprNl(E).                             { S = E;                                                                      }
 statement(S) ::= cond(C).                               { S = C;                                                                      }
@@ -109,14 +109,14 @@ unarySelNl(U)   ::= SELFNL.                             { U = @"self";          
 kwdMsgNoNl(M) ::= kwdRcvr(R) selPartsNoNl(SP).          { M = [TQNodeMessage nodeWithReceiver:R arguments:SP];                        }
 kwdMsgNl(M)   ::= kwdRcvr(R) selPartsNl(SP).            { M = [TQNodeMessage nodeWithReceiver:R arguments:SP];                        }
 
-selParts(ARR)     ::= .                                 { ARR = [NSMutableArray array];                                               }
-selParts(ARR)     ::= selParts(T) selPart(SP).          { ARR = T; [ARR addObject:SP];                                                }
-selPartsNl(ARR)   ::= selParts(T) selPartNl(SP).        { ARR = T; [ARR addObject:SP];                                                }
-selPartsNoNl(ARR) ::= selParts(T) selPartNoNl(SP).      { ARR = T; [ARR addObject:SP];                                                }
+selParts(ARR)     ::= .                                 { ARR = [OFMutableArray array];                                               }
+selParts(ARR)     ::= selParts(T) selPart(SP).          { ARR = T; [(OFMutableArray *)ARR addObject:SP];                              }
+selPartsNl(ARR)   ::= selParts(T) selPartNl(SP).        { ARR = T; [(OFMutableArray *)ARR addObject:SP];                              }
+selPartsNoNl(ARR) ::= selParts(T) selPartNoNl(SP).      { ARR = T; [(OFMutableArray *)ARR addObject:SP];                              }
 
-selPart(SP)     ::= SELPART(T) msgArg(A).               { SP = [TQNodeArgument nodeWithPassedNode:A selectorPart:[T value]];          }
-selPartNoNl(SP) ::= SELPART(T) msgArgNoNl(A).           { SP = [TQNodeArgument nodeWithPassedNode:A selectorPart:[T value]];          }
-selPartNl(SP)   ::= SELPART(T) msgArgNl(A).             { SP = [TQNodeArgument nodeWithPassedNode:A selectorPart:[T value]];          }
+selPart(SP)     ::= SELPART(T) msgArg(A).               { SP = [TQNodeArgument nodeWithPassedNode:A selectorPart:[(TQToken *)T value]];          }
+selPartNoNl(SP) ::= SELPART(T) msgArgNoNl(A).           { SP = [TQNodeArgument nodeWithPassedNode:A selectorPart:[(TQToken *)T value]];          }
+selPartNl(SP)   ::= SELPART(T) msgArgNl(A).             { SP = [TQNodeArgument nodeWithPassedNode:A selectorPart:[(TQToken *)T value]];          }
 
 unaryRcvr(R) ::= simpleExprNoNl(L).                     { R = L;                                                                      }
 
@@ -169,19 +169,19 @@ cascadeNl(C) ::= noAsgnExprNoNl(E) SEMICOLON selPartsNl(SP). {
 body(B) ::= bodyNl(T).             { B = T;                                                                                           }
 body(B) ::= bodyNoNl(T).           { B = T;                                                                                           }
 
-bodyNoNl(B) ::= exprNoNl(S).       { B = [S isKindOfClass:[TQNodeBlock class]] ? [S statements] : [NSMutableArray arrayWithObject:S]; }
-bodyNoNl(B) ::= breakNoNl(S).      { B = [NSMutableArray arrayWithObject:S];                                                          }
-bodyNoNl(B) ::= skipNoNl(S).       { B = [NSMutableArray arrayWithObject:S];                                                          }
-bodyNoNl(B) ::= waitNoNl(S).       { B = [NSMutableArray arrayWithObject:S];                                                          }
-bodyNoNl(B) ::= retNoNl(S).        { B = [NSMutableArray arrayWithObject:S];                                                          }
-bodyNl(B)   ::= exprNl(S).         { B = [S isKindOfClass:[TQNodeBlock class]] ? [S statements] : [NSMutableArray arrayWithObject:S]; }
-bodyNl(B)   ::= breakNl(S).        { B = [NSMutableArray arrayWithObject:S];                                                          }
-bodyNl(B)   ::= skipNl(S).         { B = [NSMutableArray arrayWithObject:S];                                                          }
-bodyNl(B)   ::= waitNl(S).         { B = [NSMutableArray arrayWithObject:S];                                                          }
-bodyNl(B)   ::= retNl(S).          { B = [NSMutableArray arrayWithObject:S];                                                          }
+bodyNoNl(B) ::= exprNoNl(S).       { B = [S isKindOfClass:[TQNodeBlock class]] ? [S statements] : [OFMutableArray arrayWithObject:S]; }
+bodyNoNl(B) ::= breakNoNl(S).      { B = [OFMutableArray arrayWithObject:S];                                                          }
+bodyNoNl(B) ::= skipNoNl(S).       { B = [OFMutableArray arrayWithObject:S];                                                          }
+bodyNoNl(B) ::= waitNoNl(S).       { B = [OFMutableArray arrayWithObject:S];                                                          }
+bodyNoNl(B) ::= retNoNl(S).        { B = [OFMutableArray arrayWithObject:S];                                                          }
+bodyNl(B)   ::= exprNl(S).         { B = [S isKindOfClass:[TQNodeBlock class]] ? [S statements] : [OFMutableArray arrayWithObject:S]; }
+bodyNl(B)   ::= breakNl(S).        { B = [OFMutableArray arrayWithObject:S];                                                          }
+bodyNl(B)   ::= skipNl(S).         { B = [OFMutableArray arrayWithObject:S];                                                          }
+bodyNl(B)   ::= waitNl(S).         { B = [OFMutableArray arrayWithObject:S];                                                          }
+bodyNl(B)   ::= retNl(S).          { B = [OFMutableArray arrayWithObject:S];                                                          }
 
 elseBody(B) ::= bodyNl(T).         { B = T;                                                                                           }
-elseBody(B) ::= cond(T).           { B = [NSMutableArray arrayWithObject:T];                                                          }
+elseBody(B) ::= cond(T).           { B = [OFMutableArray arrayWithObject:T];                                                          }
 
 
 cond(I) ::= IF|UNLESS(T) expr(C) blockNl(IST).          { I = [CONDKLS(T) nodeWithCondition:C
@@ -239,7 +239,7 @@ collect(C) ::= COLLECT bodyNl(B).                       { C = [TQNodeCollect nod
 // Import Directive -------------------------------------------------------------------------------------------------------------------
 //
 
-import(I) ::= IMPORT STRNL(P).                          { I = [TQNodeImport nodeWithPath:[P value]];                                  }
+import(I) ::= IMPORT STRNL(P).                          { I = [TQNodeImport nodeWithPath:[(TQToken *)P value]];                       }
 
 
 //
@@ -273,56 +273,56 @@ blockNoNl(B) ::= backtick blockArgs(A) PIPE expr(E) BACKTICK. {
 
 // This rule engages in some dark trickery in order to avoid a conflict with the assign statement (It's also not DRY => TODO: Clean this up)
 blockArgs(A) ::= assignLhs(T).                                {
-    A = [NSMutableArray arrayWithCapacity:[T count]];
+    A = [OFMutableArray array];
     for(TQNodeVariable *n in T) {
         TQAssert([n isKindOfClass:[TQNodeVariable class]], @"Syntax Error: %@ is not a valid argument name", n);
-        [A addObject:[TQNodeArgumentDef nodeWithName:[n name]]];
+        [(OFMutableArray *)A addObject:[TQNodeArgumentDef nodeWithName:[n name]]];
     }
 }
 blockArgs(A) ::= assignNoNl(ASS).                             {
     TQNodeAssignOperator *ass = ASS;
     TQAssert([ass type] == kTQOperatorAssign, @"Syntax Error: Invalid operator type for default argument");
-    A = [NSMutableArray arrayWithCapacity:[[ass left] count] + [[ass right] count] - 1];
+    A = [OFMutableArray array];
     for(TQNodeVariable *n in [ass left]) {
         TQAssert([n isKindOfClass:[TQNodeVariable class]], @"Syntax Error: %@ is not a valid argument name", n);
-        [A addObject:[TQNodeArgumentDef nodeWithName:[n name]]];
+        [(OFMutableArray *)A addObject:[TQNodeArgumentDef nodeWithName:[n name]]];
     }
     [[A lastObject] setDefaultArgument:[[ass right] objectAtIndex:0]];
     [[ass right] removeObjectAtIndex:0];
     for(TQNodeVariable *n in [ass right]) {
         TQAssert([n isKindOfClass:[TQNodeVariable class]], @"Syntax Error: %@ is not a valid argument name", n);
-        [A addObject:[TQNodeArgumentDef nodeWithName:[n name]]];
+        [(OFMutableArray *)A addObject:[TQNodeArgumentDef nodeWithName:[n name]]];
     }
 }
 blockArgs(A) ::= assignNoNl(ASS) ASSIGN noAsgnExprNoNl(DEF).  {
     TQNodeAssignOperator *ass = ASS;
     TQAssert([ass type] == kTQOperatorAssign, @"Syntax Error: Invalid operator type for default argument");
-    A = [NSMutableArray arrayWithCapacity:[[ass left] count] + [[ass right] count] - 1];
+    A = [OFMutableArray array];
     for(TQNodeVariable *n in [ass left]) {
         TQAssert([n isKindOfClass:[TQNodeVariable class]], @"Syntax Error: %@ is not a valid argument name", n);
-        [A addObject:[TQNodeArgumentDef nodeWithName:[n name]]];
+        [(OFMutableArray *)A addObject:[TQNodeArgumentDef nodeWithName:[n name]]];
     }
     [[A lastObject] setDefaultArgument:[[ass right] objectAtIndex:0]];
     [[ass right] removeObjectAtIndex:0];
     for(TQNodeVariable *n in [ass right]) {
         TQAssert([n isKindOfClass:[TQNodeVariable class]], @"Syntax Error: %@ is not a valid argument name", n);
-        [A addObject:[TQNodeArgumentDef nodeWithName:[n name]]];
+        [(OFMutableArray *)A addObject:[TQNodeArgumentDef nodeWithName:[n name]]];
     }
     [[A lastObject] setDefaultArgument:DEF];
 }
 blockArgs(A) ::= assignNoNl(ASS) ASSIGN noAsgnExprNoNl(DEF) COMMA blockArgs(R). {
     TQNodeAssignOperator *ass = ASS;
     TQAssert([ass type] == kTQOperatorAssign, @"Syntax Error: Invalid operator type for default argument");
-    A = [NSMutableArray arrayWithCapacity:[[ass left] count] + ([[ass right] count] - 1) + [R count]];
+    A = [OFMutableArray array];
     for(TQNodeVariable *n in [ass left]) {
         TQAssert([n isKindOfClass:[TQNodeVariable class]], @"Syntax Error: %@ is not a valid argument name", n);
-        [A addObject:[TQNodeArgumentDef nodeWithName:[n name]]];
+        [(OFMutableArray *)A addObject:[TQNodeArgumentDef nodeWithName:[n name]]];
     }
     [[A lastObject] setDefaultArgument:[[ass right] objectAtIndex:0]];
     [[ass right] removeObjectAtIndex:0];
     for(TQNodeVariable *n in [ass right]) {
         TQAssert([n isKindOfClass:[TQNodeVariable class]], @"Syntax Error: %@ is not a valid argument name", n);
-        [A addObject:[TQNodeArgumentDef nodeWithName:[n name]]];
+        [(OFMutableArray *)A addObject:[TQNodeArgumentDef nodeWithName:[n name]]];
     }
     [[A lastObject] setDefaultArgument:DEF];
     [A addObjectsFromArray:R];
@@ -338,9 +338,9 @@ blockCallNl(C)  ::= accessableNoNl(A) LPAREN callArgs(ARGS) RPARENNL. { C = [TQN
 callArg(L)    ::= noAsgnExprNoNl(E).                                  { L = E;                                                        }
 callArg(L)    ::= simpleAssign(E).                                    { L = E;                                                        }
 
-callArgs(L)    ::= .                                                  { L = [NSMutableArray array];                                   }
-callArgs(L)    ::= callArg(O).                                        { L = [NSMutableArray arrayWithObject:O];                       }
-callArgs(L)    ::= callArgs(O) COMMA callArg(E).                      { L = O; [L addObject:E];                                       }
+callArgs(L)    ::= .                                                  { L = [OFMutableArray array];                                   }
+callArgs(L)    ::= callArg(O).                                        { L = [OFMutableArray arrayWithObject:O];                       }
+callArgs(L)    ::= callArgs(O) COMMA callArg(E).                      { L = O; [(OFMutableArray *)L addObject:E];                                       }
 
 
 //
@@ -358,16 +358,16 @@ class(C) ::= HASH classDef(CD) LBRACE
                                                          }
                                                          for(TQNodeMethod *m in M) {
                                                              if([m type] == kTQInstanceMethod)
-                                                                 [(NSMutableArray *)[C instanceMethods] addObject:m];
+                                                                 [(OFMutableArray *)[C instanceMethods] addObject:m];
                                                              else
-                                                                 [(NSMutableArray *)[C classMethods] addObject:m];
+                                                                 [(OFMutableArray *)[C classMethods] addObject:m];
                                                          }                                                                            }
 
-classDef(D) ::= constant(N).                           { D = [TQNodeClass nodeWithName:[N value]];                                    }
-classDef(D) ::= constant(N) LESSER constant(SN).       { D = [TQNodeClass nodeWithName:[N value]]; [D setSuperClassName:[SN value]];  }
+classDef(D) ::= constant(N).                           { D = [TQNodeClass nodeWithName:[(TQToken *)N value]];                         }
+classDef(D) ::= constant(N) LESSER constant(SN).       { D = [TQNodeClass nodeWithName:[(TQToken *)N value]]; [D setSuperClassName:[(TQToken *)SN value]];  }
 
-methods(MS) ::= .                                      { MS = [NSMutableArray array];                                                 }
-methods(MS) ::= methods(O) method(M).                  { MS = O; [MS addObject:M];                                                    }
+methods(MS) ::= .                                      { MS = [OFMutableArray array];                                                 }
+methods(MS) ::= methods(O) method(M).                  { MS = O; [(OFMutableArray *)MS addObject:M];                                                    }
 
 method(M)   ::= MINUS|PLUS(TY) selDef(SEL) blockNl(B). { M = [TQNodeMethod nodeWithType:[TY id] == MINUS ? kTQInstanceMethod
                                                                                                          : kTQClassMethod];
@@ -376,31 +376,31 @@ method(M)   ::= MINUS|PLUS(TY) selDef(SEL) blockNl(B). { M = [TQNodeMethod nodeW
                                                          [M setIsCompactBlock:[B isCompactBlock]];
                                                          [M setStatements:[B statements]];                                            }
 
-selDef(SD) ::= uSelDef(T).                             { SD = [NSMutableArray arrayWithObject:T];                                     }
+selDef(SD) ::= uSelDef(T).                             { SD = [OFMutableArray arrayWithObject:T];                                     }
 selDef(SD) ::= kSelDef(T).                             { SD = T;                                                                      }
 
-uSelDef(SD) ::= IDENT|IDENTNL|CONST|CONSTNL(S).        { SD = [TQNodeMethodArgumentDef nodeWithName:nil selectorPart:[S value]];      }
+uSelDef(SD) ::= IDENT|IDENTNL|CONST|CONSTNL(S).        { SD = [TQNodeMethodArgumentDef nodeWithName:nil selectorPart:[(TQToken *)S value]];      }
 
 kSelDef(SD) ::= rSelDef(T).                            { SD = T;                                                                      }
 kSelDef(SD) ::= rSelDef(T) oSelDef(TT).                { SD = T; [SD addObjectsFromArray:TT];                                         }
 
 // Required keyword selector parts
-rSelDef(SD) ::= kSelPart(P).                           { SD = [NSMutableArray arrayWithObject:P];                                     }
-rSelDef(SD) ::= kSelDef(O) kSelPart(P).                { SD = O; [SD addObject:P];                                                    }
+rSelDef(SD) ::= kSelPart(P).                           { SD = [OFMutableArray arrayWithObject:P];                                     }
+rSelDef(SD) ::= kSelDef(O) kSelPart(P).                { SD = O; [(OFMutableArray *)SD addObject:P];                                                    }
 // Optional keyword selector parts
 oSelDef(SD) ::= LBRACKET oSelParts(T) RBRACKET|RBRACKETNL. { SD = T;                                                                  }
-oSelParts(SD) ::= oSelPart(P).                         { SD = [NSMutableArray arrayWithObject:P];                                     }
-oSelParts(SD) ::= oSelParts(O) oSelPart(P).              { SD = O; [SD addObject:P];                                                    }
+oSelParts(SD) ::= oSelPart(P).                         { SD = [OFMutableArray arrayWithObject:P];                                     }
+oSelParts(SD) ::= oSelParts(O) oSelPart(P).            { SD = O; [(OFMutableArray *)SD addObject:P];                                                    }
 
-kSelPart(SD) ::= SELPART(S) IDENT|IDENTNL(N).          { SD = [TQNodeMethodArgumentDef nodeWithName:[N value] selectorPart:[S value]];}
+kSelPart(SD) ::= SELPART(S) IDENT|IDENTNL(N).          { SD = [TQNodeMethodArgumentDef nodeWithName:[(TQToken *)N value] selectorPart:[(TQToken *)S value]];}
 oSelPart(SD) ::= kSelPart(T).                          { SD = T; [SD setDefaultArgument:[TQNodeNil node]];                            }
-oSelPart(SD) ::= kSelPart(T) ASSIGN msgArg(E).           { SD = T; [SD setDefaultArgument:E];                                           }
+oSelPart(SD) ::= kSelPart(T) ASSIGN msgArg(E).         { SD = T; [SD setDefaultArgument:E];                                           }
 
-onloadMessages(MS) ::= .                               { MS = [NSMutableArray array];                                                 }
-onloadMessages(MS) ::= onloadMessages(O) onloadMessage(M). { MS = O;  [MS addObject:M];                                               }
-onloadMessage(M) ::= olMsgBeg(B) selPartNl(SP).        { [B addObject:SP]; M = [TQNodeMessage nodeWithReceiver:nil arguments:B];      }
-olMsgBeg(M) ::= .                                      { M = [NSMutableArray array];                                                  }
-olMsgBeg(M) ::= olMsgBeg(T) selPartNoNl(SP).           { M = T; [M addObject:SP];                                                     }
+onloadMessages(MS) ::= .                               { MS = [OFMutableArray array];                                                 }
+onloadMessages(MS) ::= onloadMessages(O) onloadMessage(M). { MS = O; [(OFMutableArray *)MS addObject:M];                                               }
+onloadMessage(M) ::= olMsgBeg(B) selPartNl(SP).        { [(OFMutableArray *)B addObject:SP]; M = [TQNodeMessage nodeWithReceiver:nil arguments:B];      }
+olMsgBeg(M) ::= .                                      { M = [OFMutableArray array];                                                  }
+olMsgBeg(M) ::= olMsgBeg(T) selPartNoNl(SP).           { M = T; [(OFMutableArray *)M addObject:SP];                                                     }
 
 //
 // Operators --------------------------------------------------------------------------------------------------------------------------
@@ -427,26 +427,26 @@ operandNl(O)   ::= simpleExprNl(E).                     { O = E;                
 
 
 //Assignment
-simpleAssign(A) ::= assignableNoNl(L) ASSIGN noAsgnExpr(R). { A = [TQNodeAssignOperator nodeWithTypeToken:ASSIGN left:[NSMutableArray arrayWithObject:L] right:[NSMutableArray arrayWithObject:R]];   }
+simpleAssign(A) ::= assignableNoNl(L) ASSIGN noAsgnExpr(R). { A = [TQNodeAssignOperator nodeWithTypeToken:ASSIGN left:[OFMutableArray arrayWithObject:L] right:[OFMutableArray arrayWithObject:R]];   }
 
 assignNoNl(E) ::= assignLhs(A)
                   ASSIGN|ASSIGNADD|ASSIGNSUB|ASSIGNMUL|ASSIGNDIV|ASSIGNOR(OP)
-                  assignRhsNoNl(B).                     { E = [TQNodeAssignOperator nodeWithTypeToken:[OP id] left:A right:B];   }
+                  assignRhsNoNl(B).                     { E = [TQNodeAssignOperator nodeWithTypeToken:[OP id] left:A right:B];        }
 
 assignNl(E) ::= assignLhs(A)
                   ASSIGN|ASSIGNADD|ASSIGNSUB|ASSIGNMUL|ASSIGNDIV|ASSIGNOR(OP)
-                  assignRhsNl(B).                       { E = [TQNodeAssignOperator nodeWithTypeToken:[OP id] left:A right:B];   }
+                  assignRhsNl(B).                       { E = [TQNodeAssignOperator nodeWithTypeToken:[OP id] left:A right:B];        }
 
-assignLhs(L) ::= assignable(A).                     { L = [NSMutableArray arrayWithObject:A]; }
-assignLhs(L) ::= assignLhs(O) COMMA assignable(E).  { L = O; [L addObject:E]; }
+assignLhs(L) ::= assignable(A).                         { L = [OFMutableArray arrayWithObject:A];                                     }
+assignLhs(L) ::= assignLhs(O) COMMA assignable(E).      { L = O; [(OFMutableArray *)L addObject:E];                                   }
 
-assignRhsNoNl(R) ::= assignRhsNoNl(O) COMMA rhsValNoNl(E). { R = O; [R addObject:E]; }
-assignRhsNoNl(R) ::= rhsValNoNl(V).                     { R = [NSMutableArray arrayWithObject:V]; }
-assignRhsNl(R)   ::= assignRhsNoNl(O) COMMA rhsValNl(E). { R = O; [R addObject:E]; }
-assignRhsNl(R)   ::= rhsValNl(E).                       { R = [NSMutableArray arrayWithObject:E]; }
+assignRhsNoNl(R) ::= assignRhsNoNl(O) COMMA rhsValNoNl(E). { R = O; [(OFMutableArray *)R addObject:E];                                }
+assignRhsNoNl(R) ::= rhsValNoNl(V).                     { R = [OFMutableArray arrayWithObject:V];                                     }
+assignRhsNl(R)   ::= assignRhsNoNl(O) COMMA rhsValNl(E).{ R = O; [(OFMutableArray *)R addObject:E];                                   }
+assignRhsNl(R)   ::= rhsValNl(E).                       { R = [OFMutableArray arrayWithObject:E];                                     }
 
-rhsValNoNl(V) ::= noAsgnExprNoNl(E). { V = E; }
-rhsValNl(V)   ::= noAsgnExprNl(E).   { V = E; }
+rhsValNoNl(V) ::= noAsgnExprNoNl(E).                    { V = E;                                                                      }
+rhsValNl(V)   ::= noAsgnExprNl(E).                      { V = E;                                                                      }
 
 
 // Logic
@@ -497,13 +497,13 @@ opNl(O) ::= operandNoNl(A)
 // Literals ---------------------------------------------------------------------------------------------------------------------------
 //
 
-literalNoNl(L) ::= NUMBER(T).                           { L = [TQNodeNumber nodeWithDouble:[[T value] doubleValue]];                  }
+literalNoNl(L) ::= NUMBER(T).                           { L = [TQNodeNumber nodeWithDouble:[[(TQToken *)T value] doubleValue]];       }
 literalNoNl(L) ::= stringNoNl(S).                       { L = S;                                                                      }
 literalNoNl(L) ::= arrayNoNl(A).                        { L = A;                                                                      }
 literalNoNl(L) ::= dictNoNl(D).                         { L = D;                                                                      }
 literalNoNl(L) ::= regexNoNl(D).                        { L = D;                                                                      }
 
-literalNl(L)   ::= NUMBERNL(T).                         { L = [TQNodeNumber nodeWithDouble:[[T value] doubleValue]];                  }
+literalNl(L)   ::= NUMBERNL(T).                         { L = [TQNodeNumber nodeWithDouble:[[(TQToken *)T value] doubleValue]];       }
 literalNl(L)   ::= stringNl(S).                         { L = S;                                                                      }
 literalNl(L)   ::= arrayNl(A).                          { L = A;                                                                      }
 literalNl(L)   ::= dictNl(D).                           { L = D;                                                                      }
@@ -516,8 +516,8 @@ arrayNoNl(A) ::= LBRACKET aryEls(EL) RBRACKET.          { A = [TQNodeArray node]
 arrayNl(A)   ::= LBRACKET RBRACKETNL.                   { A = [TQNodeArray node];                                                     }
 arrayNl(A)   ::= LBRACKET aryEls(EL) RBRACKETNL.        { A = [TQNodeArray node]; [A setItems:EL];                                    }
 
-aryEls(EL)   ::= aryEls(O) COMMA noAsgnExpr(E).         { EL = O; [EL addObject:E];                                                   }
-aryEls(EL)   ::= noAsgnExpr(E).                         { EL = [NSMutableArray arrayWithObject:E];                                    }
+aryEls(EL)   ::= aryEls(O) COMMA noAsgnExpr(E).         { EL = O; [(OFMutableArray *)EL addObject:E];                                 }
+aryEls(EL)   ::= noAsgnExpr(E).                         { EL = [OFMutableArray arrayWithObject:E];                                    }
 
 
 // Dictionaries
@@ -526,25 +526,25 @@ dictNoNl(D) ::= LBRACE dictEls(EL) RBRACE.              { D = [TQNodeDictionary 
 dictNl(D)   ::= LBRACE RBRACENL.                        { D = [TQNodeDictionary node];                                                }
 dictNl(D)   ::= LBRACE dictEls(EL) RBRACENL.            { D = [TQNodeDictionary node]; [D setItems:EL];                               }
 
-dictEls(ELS) ::= dictEls(O) COMMA  dictEl(EL).          { ELS = O; for(id k in EL) [ELS setObject:[EL objectForKey:k] forKey:k];      }
+dictEls(ELS) ::= dictEls(O) COMMA  dictEl(EL).          { ELS = O; for(id k in EL) [ELS OF_setObject:[EL objectForKey:k] forKey:k copyKey:NO ];      }
 dictEls(ELS) ::= dictEl(EL).                            { ELS = EL;                                                                   }
-dictEl(EL)  ::= noAsgnExpr(K) DICTSEP noAsgnExpr(V).    { EL = [[NSMapTable new] autorelease]; [EL setObject:V forKey:K];             }
+dictEl(EL)  ::= noAsgnExpr(K) DICTSEP noAsgnExpr(V).    { EL = [OFMutableDictionary_hashtable dictionary]; [EL OF_setObject:V forKey:K copyKey:NO];           }
 
 // Strings
-stringNoNl(S) ::= CONSTSTR(V).                          { S = [TQNodeConstString nodeWithString:(NSMutableString *)[V value]];        }
-stringNoNl(S) ::= STR(V).                               { S = [TQNodeString nodeWithString:(NSMutableString *)[V value]];             }
-stringNoNl(S) ::= LSTR(L) inStr(M) RSTR(R).             { S = [TQNodeString nodeWithLeft:[L value] embeds:M right:[R value]];         }
+stringNoNl(S) ::= CONSTSTR(V).                          { S = [TQNodeConstString nodeWithString:[(TQToken *)V value]];        }
+stringNoNl(S) ::= STR(V).                               { S = [TQNodeString nodeWithString:[(TQToken *)V value]];             }
+stringNoNl(S) ::= LSTR(L) inStr(M) RSTR(R).             { S = [TQNodeString nodeWithLeft:[(TQToken *)L value] embeds:M right:[(TQToken *)R value]];         }
 
-stringNl(S)   ::= CONSTSTRNL(V).                        { S = [TQNodeConstString nodeWithString:(NSMutableString *)[V value]];        }
-stringNl(S)   ::= STRNL(V).                             { S = [TQNodeString nodeWithString:(NSMutableString *)[V value]];             }
-stringNl(S)   ::= LSTR(L) inStr(M) RSTRNL(R).           { S = [TQNodeString nodeWithLeft:[L value] embeds:M right:[R value]];         }
+stringNl(S)   ::= CONSTSTRNL(V).                        { S = [TQNodeConstString nodeWithString:(OFMutableString *)[(TQToken *)V value]];        }
+stringNl(S)   ::= STRNL(V).                             { S = [TQNodeString nodeWithString:(OFMutableString *)[(TQToken *)V value]];             }
+stringNl(S)   ::= LSTR(L) inStr(M) RSTRNL(R).           { S = [TQNodeString nodeWithLeft:[(TQToken *)L value] embeds:M right:[(TQToken *)R value]];         }
 
-inStr(M) ::= inStr(O) MSTR(S) expr(E).                  { M = O; [M addObject:[S value]]; [M addObject:E];                            }
-inStr(M) ::= expr(E).                                   { M = [NSMutableArray arrayWithObject:E];                                     }
+inStr(M) ::= inStr(O) MSTR(S) expr(E).                  { M = O; [(OFMutableArray *)M addObject:[(TQToken *)S value]]; [(OFMutableArray *)M addObject:E]; }
+inStr(M) ::= expr(E).                                   { M = [OFMutableArray arrayWithObject:E];                                     }
 
 // Regular expressions
-regexNoNl(R) ::= REGEX(T).                             { R = [TQNodeRegex nodeWithPattern:[T value]];                                }
-regexNl(R)   ::= REGEXNL(T).                           { R = [TQNodeRegex nodeWithPattern:[T value]];                                }
+regexNoNl(R) ::= REGEX(T).                             { R = [TQNodeRegex nodeWithPattern:[(TQToken *)T value]];                                }
+regexNl(R)   ::= REGEXNL(T).                           { R = [TQNodeRegex nodeWithPattern:[(TQToken *)T value]];                                }
 
 //
 // Variables, Identifiers & Built-in Constants
@@ -555,10 +555,10 @@ regexNl(R)   ::= REGEXNL(T).                           { R = [TQNodeRegex nodeWi
 
 constant(C)     ::= constantNoNl(T).                    { C = T;                                                                      }
 constant(C)     ::= constantNl(T).                      { C = T;                                                                      }
-constantNoNl(C) ::= CONST(T).                           { C = [TQNodeConstant nodeWithString:(NSMutableString *)[T value]];           }
-constantNl(C)   ::= CONSTNL(T).                         { C = [TQNodeConstant nodeWithString:(NSMutableString *)[T value]];           }
+constantNoNl(C) ::= CONST(T).                           { C = [TQNodeConstant nodeWithString:[(TQToken *)T value]];           }
+constantNl(C)   ::= CONSTNL(T).                         { C = [TQNodeConstant nodeWithString:[(TQToken *)T value]];           }
 
-variableNoNl(V) ::= IDENT(T).                           { V = [TQNodeVariable nodeWithName:[T value]];                                }
+variableNoNl(V) ::= IDENT(T).                           { V = [TQNodeVariable nodeWithName:[(TQToken *)T value]];                                }
 variableNoNl(V) ::= SELF.                               { V = [TQNodeSelf node];                                                      }
 variableNoNl(V) ::= SUPER.                              { V = [TQNodeSuper node];                                                     }
 variableNoNl(V) ::= VALID.                              { V = [TQNodeValid node];                                                     }
@@ -568,7 +568,7 @@ variableNoNl(V) ::= NIL.                                { V = [TQNodeNil node]; 
 variableNoNl(V) ::= NOTHING.                            { V = [TQNodeNothing node];                                                   }
 variableNoNl(V) ::= vaargNoNl(T).                       { V = T;                                                                      }
 
-variableNl(V)   ::= IDENTNL(T).                         { V = [TQNodeVariable nodeWithName:[T value]];                                }
+variableNl(V)   ::= IDENTNL(T).                         { V = [TQNodeVariable nodeWithName:[(TQToken *)T value]];                                }
 variableNl(V)   ::= SELFNL.                             { V = [TQNodeSelf node];                                                      }
 variableNl(V)   ::= SUPERNL.                            { V = [TQNodeSuper node];                                                     }
 variableNl(V)   ::= VALIDNL.                            { V = [TQNodeValid node];                                                     }
@@ -618,10 +618,10 @@ subscriptNl(S)   ::= accessableNoNl(L)
                      LBRACKET noAsgnExpr(E) RBRACKETNL. { S = [TQNodeOperator nodeWithType:kTQOperatorSubscript left:L right:E];      }
 
 // Properties
-propertyNoNl(P) ::= accessableNoNl(R) HASH IDENT(I).    { P = [TQNodeMemberAccess nodeWithReceiver:R property:[I value]];             }
-propertyNl(P)   ::= accessableNoNl(R) HASH IDENTNL(I).  { P = [TQNodeMemberAccess nodeWithReceiver:R property:[I value]];             }
-propertyNoNl(P) ::=                   HASH IDENT(I).    { P = [TQNodeMemberAccess nodeWithReceiver:[TQNodeSelf node] property:[I value]]; }
-propertyNl(P)   ::=                   HASH IDENTNL(I).  { P = [TQNodeMemberAccess nodeWithReceiver:[TQNodeSelf node] property:[I value]]; }
+propertyNoNl(P) ::= accessableNoNl(R) HASH IDENT(I).    { P = [TQNodeMemberAccess nodeWithReceiver:R property:[(TQToken *)I value]];             }
+propertyNl(P)   ::= accessableNoNl(R) HASH IDENTNL(I).  { P = [TQNodeMemberAccess nodeWithReceiver:R property:[(TQToken *)I value]];             }
+propertyNoNl(P) ::=                   HASH IDENT(I).    { P = [TQNodeMemberAccess nodeWithReceiver:[TQNodeSelf node] property:[(TQToken *)I value]]; }
+propertyNl(P)   ::=                   HASH IDENTNL(I).  { P = [TQNodeMemberAccess nodeWithReceiver:[TQNodeSelf node] property:[(TQToken *)I value]]; }
 
 // Misc
 backtick        ::= BACKTICK|BACKTICKNL.
@@ -631,7 +631,7 @@ backtick        ::= BACKTICK|BACKTICKNL.
 //
 
 %syntax_error {
-    TQAssert(NO, @"Syntax error near '%@' on line %d", [TOKEN value], [TOKEN line]);
+    TQAssert(NO, @"Syntax error near '%@' on line %d", [(TQToken *)TOKEN value], [(TQToken *)TOKEN line]);
 }
 
 
@@ -640,17 +640,23 @@ backtick        ::= BACKTICK|BACKTICKNL.
 %include {
 #import <Tranquil/CodeGen/CodeGen.h>
 #import <Tranquil/Shared/TQDebug.h>
+#import <Tranquil/Runtime/OFString+TQAdditions.h>
 
 #define CONDKLS(T) ([T id] == IF    ? [TQNodeIfBlock class]    : [TQNodeUnlessBlock class])
 #define LOOPKLS(T) ([T id] == WHILE ? [TQNodeWhileBlock class] : [TQNodeUntilBlock class])
 
+// Private class from ObjFW
+@interface OFMutableDictionary_hashtable : OFMutableDictionary
+- (void)OF_setObject:(id)object forKey:(id)key copyKey:(BOOL)copyKey;
+@end
+
 // TQNode* methods to keep grammar actions to a single line
 
 @interface TQNodeAssignOperator (TQParserAdditions)
-+ (TQNodeAssignOperator *)nodeWithTypeToken:(int)token left:(NSMutableArray *)left right:(NSMutableArray *)right;
++ (TQNodeAssignOperator *)nodeWithTypeToken:(int)token left:(OFMutableArray *)left right:(OFMutableArray *)right;
 @end
 @implementation TQNodeAssignOperator (TQParserAdditions)
-+ (TQNodeAssignOperator *)nodeWithTypeToken:(int)token left:(NSMutableArray *)left right:(NSMutableArray *)right
++ (TQNodeAssignOperator *)nodeWithTypeToken:(int)token left:(OFMutableArray *)left right:(OFMutableArray *)right
 {
     int op;
     switch(token) {
@@ -695,23 +701,23 @@ backtick        ::= BACKTICK|BACKTICKNL.
 @end
 
 @interface TQNodeBlock (TQParserAdditions)
-+ (TQNodeBlock *)nodeWithArguments:(NSMutableArray *)args statement:(TQNode *)stmt;
-+ (TQNodeBlock *)nodeWithArguments:(NSMutableArray *)args statements:(NSMutableArray *)statements;
++ (TQNodeBlock *)nodeWithArguments:(OFMutableArray *)args statement:(TQNode *)stmt;
++ (TQNodeBlock *)nodeWithArguments:(OFMutableArray *)args statements:(OFMutableArray *)statements;
 @end
 @implementation TQNodeBlock (TQParserAdditions)
-+ (TQNodeBlock *)nodeWithArguments:(NSMutableArray *)args statement:(TQNode *)stmt;
++ (TQNodeBlock *)nodeWithArguments:(OFMutableArray *)args statement:(TQNode *)stmt;
 {
-    return [self nodeWithArguments:args statements:[NSMutableArray arrayWithObject:stmt]];
+    return [self nodeWithArguments:args statements:[OFMutableArray arrayWithObject:stmt]];
 }
-+ (TQNodeBlock *)nodeWithArguments:(NSMutableArray *)args statements:(NSMutableArray *)statements
++ (TQNodeBlock *)nodeWithArguments:(OFMutableArray *)args statements:(OFMutableArray *)statements
 {
     TQNodeBlock *ret = [TQNodeBlock node];
 
     for(TQNodeArgumentDef *arg in args) {
-        if([[arg name] isEqualToString:@"..."]) {
+        if([[arg name] isEqual:@"..."]) {
             [ret setIsVariadic:YES];
             TQAssert(![arg defaultArgument], @"Syntax Error: '...' can't have a default value");
-            NSUInteger idx = [args indexOfObject:arg];
+            size_t idx = [args indexOfObject:arg];
             TQAssert(idx == ([args count] - 1), @"Syntax Error: No arguments can come after '...'");
         } else
             [ret addArgument:arg error:nil];
@@ -723,17 +729,17 @@ backtick        ::= BACKTICK|BACKTICKNL.
 @end
 
 @interface TQNodeMessage (TQParserAdditions)
-+ (TQNodeMessage *)unaryMessageWithReceiver:(TQNode *)rcvr selector:(NSString *)sel;
-+ (TQNodeMessage *)nodeWithReceiver:(TQNode *)rcvr arguments:(NSMutableArray *)args;
++ (TQNodeMessage *)unaryMessageWithReceiver:(TQNode *)rcvr selector:(OFString *)sel;
++ (TQNodeMessage *)nodeWithReceiver:(TQNode *)rcvr arguments:(OFMutableArray *)args;
 @end
 @implementation TQNodeMessage (TQParserAdditions)
-+ (TQNodeMessage *)nodeWithReceiver:(TQNode *)rcvr arguments:(NSMutableArray *)args
++ (TQNodeMessage *)nodeWithReceiver:(TQNode *)rcvr arguments:(OFMutableArray *)args
 {
     TQNodeMessage *ret = [TQNodeMessage nodeWithReceiver:rcvr];
     ret.arguments = args;
     return ret;
 }
-+ (TQNodeMessage *)unaryMessageWithReceiver:(TQNode *)rcvr selector:(NSString *)sel
++ (TQNodeMessage *)unaryMessageWithReceiver:(TQNode *)rcvr selector:(OFString *)sel
 {
     TQNodeMessage *ret = [TQNodeMessage nodeWithReceiver:rcvr];
     [ret.arguments addObject:[TQNodeArgument nodeWithPassedNode:nil selectorPart:sel]];
@@ -742,10 +748,10 @@ backtick        ::= BACKTICK|BACKTICKNL.
 @end
 
 @interface TQNodeString (TQParserAdditions)
-+ (TQNodeString *)nodeWithLeft:(NSString *)left embeds:(NSMutableArray *)embeds right:(NSString *)right;
++ (TQNodeString *)nodeWithLeft:(OFString *)left embeds:(OFMutableArray *)embeds right:(OFString *)right;
 @end
 @implementation TQNodeString (TQParserAdditions)
-+ (TQNodeString *)nodeWithLeft:(NSMutableString *)left embeds:(NSMutableArray *)embeds right:(NSMutableString *)right;
++ (TQNodeString *)nodeWithLeft:(OFMutableString *)left embeds:(OFMutableArray *)embeds right:(OFMutableString *)right;
 {
     TQNodeString *ret = [TQNodeString nodeWithString:left];
     for(int i = 0; i < [embeds count]; ++i) {

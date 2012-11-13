@@ -65,9 +65,6 @@ end
 
 # Create a NSBlock category for calling the block as well
 source << "
-    @interface NSObject
-    + (Class)class;
-    @end
     @interface NSBlock : NSObject
     @end
 

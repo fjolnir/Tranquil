@@ -8,6 +8,7 @@
 #import "ObjcSupport/TQHeaderParser.h"
 #import "../Runtime/TQRuntime.h"
 #import "../Runtime/TQBoxedObject.h"
+#import "../Runtime/OFString+TQAdditions.h"
 #import "../Shared/TQDebug.h"
 #import <objc/runtime.h>
 #import <objc/message.h>
@@ -382,7 +383,7 @@ static TQProgram *sharedInstance;
 
 - (TQNodeRootBlock *)_rootFromFile:(OFString *)aPath error:(TQError **)aoErr
 {
-    OFString *script = [OFString stringWithContentsOfFile:aPath usedEncoding:NULL error:nil];
+    OFString *script = [OFString stringWithContentsOfFile:aPath];
     if(!script)
         TQAssert(NO, @"Unable to load script from %@", aPath);
     return [self _parseScript:script error:aoErr];
@@ -437,42 +438,42 @@ static TQProgram *sharedInstance;
 {
 #define NOT_FOUND() do { TQLog(@"No file found for path '%@'", aPath); return nil; } while(0)
     BOOL isDir;
-    NSFileManager *fm = [NSFileManager defaultManager];
     if([aPath hasPrefix:@"/"]) {
-        if([fm fileExistsAtPath:aPath isDirectory:&isDir] && !isDir)
+        if([OFFile fileExistsAtPath:aPath])
             return aPath;
         NOT_FOUND();
     }
     OFArray *testPathComponents = [aPath pathComponents];
-    if(![testPathComponents count])
+    if(![testPathComponents count]) {
         NOT_FOUND();
+    }
 
     BOOL hasExtension = [[aPath pathExtension] length] > 0;
     BOOL usesSubdir   = [testPathComponents count] > 1;
 
     for(OFString *searchPath in _searchPaths) {
-        if(![fm fileExistsAtPath:searchPath isDirectory:&isDir] || !isDir)
+        if(![OFFile directoryExistsAtPath:searchPath])
             continue;
 
-        for(OFString *candidate in [fm contentsOfDirectoryAtPath:searchPath error:nil]) {
+        for(OFString *candidate in [OFFile filesInDirectoryAtPath:searchPath]) {
             if([[candidate pathExtension] isEqual:@"framework"]) {
                 OFString *frameworkDirName = usesSubdir ? [testPathComponents objectAtIndex:0] : [[aPath lastPathComponent] stringByDeletingPathExtension];
                 if(![[[candidate lastPathComponent] stringByDeletingPathExtension] isEqual:frameworkDirName])
                     continue;
                 if(usesSubdir)
-                    aPath = [[testPathComponents subarrayWithRange:(of_range_t){ 1, [testPathComponents count] - 1 }] componentsJoinedByString:@"/"];
+                    aPath = [[testPathComponents objectsInRange:(of_range_t){ 1, [testPathComponents count] - 1 }] componentsJoinedByString:@"/"];
                 searchPath = [[searchPath stringByAppendingPathComponent:candidate] stringByAppendingPathComponent:@"Headers"];
                 break;
             }
         }
         OFString *finalPath = [searchPath stringByAppendingPathComponent:aPath];
         if(hasExtension) {
-            if([fm fileExistsAtPath:finalPath isDirectory:&isDir] && !isDir)
+            if([OFFile fileExistsAtPath:finalPath])
                 return finalPath;
         } else {
             for(OFString *ext in _allowedFileExtensions) {
                 OFString *currPath = [finalPath stringByAppendingPathExtension:ext];
-                if([fm fileExistsAtPath:currPath isDirectory:&isDir] && !isDir)
+                if([OFFile fileExistsAtPath:currPath])
                     return currPath;
             }
         }

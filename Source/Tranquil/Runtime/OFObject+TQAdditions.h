@@ -1,11 +1,17 @@
 #import <ObjFW/ObjFW.h>
 
 @interface OFObject (Tranquil)
-- (id)isa:(Class)aClass;
-- (id)isIdenticalTo:(id)obj;
-- (OFMutableString *)toString;
-- (id)print;
-+ (id)include:(Class)aClass recursive:(id)aRecursive;
 + (id)include:(Class)aClass;
-- (id)isNil;
 @end
+
+#ifdef __APPLE__
+@interface NSObject
++ (Class)class;
+- (NSString *)description;
+- (BOOL)isKindOfClass:(Class)kls;
+@end
+
+@interface NSObject (Tranquil)
++ (id)include:(Class)aClass;
+@end
+#endif

@@ -62,7 +62,7 @@ using namespace llvm;
     return _name;
 }
 
-- (unsigned long)hash
+- (uint32_t)hash
 {
     return [_name hash];
 }
@@ -71,8 +71,12 @@ using namespace llvm;
 {
     _isAnonymous = flag;
     // An anonymous still needs an identifier so that it can be captured properly (only used at compilation time)
-    if(_isAnonymous)
-        self.name = [[NSProcessInfo processInfo] globallyUniqueString];
+    if(_isAnonymous) {
+        // Create random name (TODO: do this properly)
+        OFFile *rand = [OFFile fileWithPath:@"/dev/random" mode:@"r"];
+        self.name = [[rand  readDataArrayWithSize:10] SHA1Hash];
+        [rand close];
+    }
 }
 
 - (BOOL)isEqual:(id)aObj

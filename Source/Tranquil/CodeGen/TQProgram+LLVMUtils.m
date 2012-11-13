@@ -580,8 +580,7 @@ FunAccessor(pthread_self, ft_long_void);
                 return self.llInt8PtrTy;
         }
         default:
-            [NSException raise:NSGenericException
-                        format:@"Unsupported type %c!", *aEncoding];
+            TQAssert(NO, @"Unsupported type %c!", *aEncoding);
             return NULL;
     }
 }

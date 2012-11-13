@@ -77,8 +77,8 @@ using namespace llvm;
     Module *mod = aProgram.llModule;
 
     std::vector<Value *>args;
-    args.push_back(mod->getOrInsertGlobal("OBJC_CLASS_$_NSMapTable", aProgram.llInt8Ty));
-    args.push_back(aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQMapWithObjectsAndKeysSel", aProgram.llInt8PtrTy)));
+    args.push_back(mod->getOrInsertGlobal("OBJC_CLASS_$_OFMutableDictionary", aProgram.llInt8Ty));
+    args.push_back(aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQDictWithObjectsAndKeysSel", aProgram.llInt8PtrTy)));
     TQNode *value;
 
     int count = 0;

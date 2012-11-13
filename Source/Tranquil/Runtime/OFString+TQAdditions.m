@@ -56,6 +56,39 @@
     return [[self mutableCopy] autorelease];
 }
 
+- (OFString *)pathExtension
+{
+    size_t loc = [self rangeOfString:@"." options:OF_STRING_SEARCH_BACKWARDS range:(of_range_t){0, [self length] }].location;
+    return loc == OF_NOT_FOUND ? nil : [self substringFromIndex:loc+1];
+}
+- (OFString *)stringByDeletingPathExtension
+{
+    size_t loc = [self rangeOfString:@"." options:OF_STRING_SEARCH_BACKWARDS range:(of_range_t){0, [self length] }].location;
+    return loc == OF_NOT_FOUND ? nil : [self substringToIndex:loc-1];
+}
+- (OFString *)stringByAppendingPathExtension:(NSString *)ext
+{
+    OFMutableString *ret = [self mutableCopy];
+    while([ret hasSuffix:@"/"])
+        [ret deleteCharactersInRange:of_range([ret length]-1, 1)];
+    [ret appendFormat:@".%@", ext];
+    [ret makeImmutable];
+    return ret;
+}
+- (const char *)fileSystemRepresentation
+{
+    return [self UTF8String];
+}
+- (BOOL)getFileSystemRepresentation:(char *)buffer maxLength:(unsigned long)maxLength
+{
+    strncpy(buffer, [self UTF8String], maxLength);
+    return YES;
+}
+- (OFString *)stringByStandardizingPath
+{
+#warning "IMPLEMENT ME"
+    return self;
+}
 @end
 
 @implementation OFMutableString (Tranquil)

@@ -118,8 +118,12 @@ static OFString *_prepareConstName(OFString *name)
                     TQBridgedClassInfo *protocolInfo = [_protocols objectForKey:nsName];
                     if(!protocolInfo)
                         break;
-                    [_currentClass.instanceMethods addEntriesFromDictionary:protocolInfo.instanceMethods];
-                    [_currentClass.classMethods    addEntriesFromDictionary:protocolInfo.classMethods];
+                    for(id key in protocolInfo.instanceMethods) {
+                        [_currentClass.instanceMethods setObject:[protocolInfo.instanceMethods objectForKey:key] forKey:key];
+                    }
+                    for(id key in protocolInfo.classMethods) {
+                        [_currentClass.classMethods setObject:[protocolInfo.classMethods objectForKey:key] forKey:key];
+                    }
                 }
             } break;
             case CXCursor_ObjCCategoryDecl: {
@@ -243,7 +247,9 @@ static OFString *_prepareConstName(OFString *name)
 
 - (TQBridgedClassInfo *)classNamed:(OFString *)aName
 {
-    return [_classes objectForKey:aName];
+    if(aName)
+        return [_classes objectForKey:aName];
+    return nil;
 }
 
 

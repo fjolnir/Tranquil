@@ -11,6 +11,12 @@ OFString * const kTQGenericErrorDomain = @"org.tranquil.generic";
     ret->_reason = [aReason retain];
     return [ret autorelease];
 }
+
+- (id)init
+{
+    return [super init];
+}
+
 - (void)dealloc
 {
     [_reason release];

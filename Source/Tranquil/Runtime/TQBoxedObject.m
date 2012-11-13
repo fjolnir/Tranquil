@@ -661,7 +661,7 @@ id __wrapperBlock_invoke(struct TQBoxedBlockLiteral *__blk, ...)
 
 #pragma mark - Boxed msgSend
 
-extern uintptr_t _TQSelectorCacheLookup(uintptr_t key);
+extern uintptr_t _TQSelectorCacheLookup(id obj, SEL aSelector);
 extern void _TQCacheSelector(id obj, SEL sel);
 
 id tq_boxedMsgSend(id self, SEL selector, ...)
@@ -669,16 +669,10 @@ id tq_boxedMsgSend(id self, SEL selector, ...)
     if(!self)
         return nil;
 
-    Class kls = object_getClass(self);
-#ifdef __LP64__
-    uintptr_t cacheKey =  (uintptr_t)kls ^ (uintptr_t)selector << 32;
-#else
-    uintptr_t cacheKey =  (uintptr_t)kls ^ (uintptr_t)selector << 16;
-#endif
-    Method method = (Method)_TQSelectorCacheLookup(cacheKey);
+    Method method = (Method)_TQSelectorCacheLookup(self, selector);
     if(method == 0x0) {
         _TQCacheSelector(self, selector);
-        method = (Method)_TQSelectorCacheLookup(cacheKey);
+        method = (Method)_TQSelectorCacheLookup(self, selector);
     }
     TQAssert(method != 0x0, @"Unknown selector %s sent to object %@", sel_getName(selector), self);
     if((uintptr_t)method == 0x1L) {

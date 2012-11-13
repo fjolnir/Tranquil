@@ -3,33 +3,64 @@
 #import "TQModule.h"
 #import <objc/runtime.h>
 
+//@interface TQRootObjectAdditions : TQModule
+//- (id)toString;
+//- (id)print;
+//- (id)printWithoutNl;
+//- (id)isa:(Class)aClass;
+//- (id)isIdenticalTo:(id)obj;
+//- (id)isNil;
+//@end
+//@implementation TQRootObjectAdditions
+#define CAT \
+- (id)toString \
+{ \
+    return [[[self description] mutableCopy] autorelease]; \
+} \
+ \
+- (id)print \
+{ \
+    printf("%s\n", [[self toString] UTF8String]); \
+    return self; \
+} \
+- (id)printWithoutNl \
+{ \
+    printf("%s", [[self toString] UTF8String]); \
+    return self; \
+} \
+ \
+- (id)isa:(Class)aClass \
+{ \
+    return [self isKindOfClass:aClass] ? TQValid : nil; \
+} \
+ \
+- (id)isIdenticalTo:(id)obj \
+{ \
+    return self == obj ? TQValid : nil; \
+} \
+ \
+- (id)isNil \
+{ \
+    return nil; \
+}
+
 @implementation OFObject (Tranquil)
-- (OFMutableString *)toString
++ (id)include:(Class)aClass
 {
-    return [[[self description] mutableCopy] autorelease];
+    [self inheritMethodsFromClass:aClass];
+    return TQValid;
 }
 
-- (id)print
+- (id)methodSignatureForSelector:(SEL)aSelector
 {
-    printf("%s\n", [[self toString] UTF8String]);
-    return self;
+    TQAssert(NO, @"Unsupported selector %s sent to %@", sel_getName(aSelector), [self class]);
+    return nil;
 }
-- (id)printWithoutNl
-{
-    printf("%s", [[self toString] UTF8String]);
-    return self;
-}
+CAT
+@end
 
-- (id)isa:(Class)aClass
-{
-    return [self isKindOfClass:aClass] ? TQValid : nil;
-}
-
-- (id)isIdenticalTo:(id)obj
-{
-    return self == obj ? TQValid : nil;
-}
-
+#ifdef __APPLE__
+@implementation NSObject (Tranquil)
 #define CopyMethods(kls, dst) do { \
     unsigned methodCount = 0; \
     Method *methods = class_copyMethodList(kls, &methodCount); \
@@ -38,8 +69,7 @@
     } \
     free(methods); \
 } while(0);
-
-+ (id)include:(Class)aClass recursive:(id)aRecursive
++ (id)include:(Class)aClass
 {
     TQAssert(aClass, @"Tried to include nil class");
 
@@ -50,17 +80,11 @@
     do {
         CopyMethods(object_getClass(aClass), object_getClass(self));
         CopyMethods(aClass, self);
-    } while(aRecursive && (aClass = class_getSuperclass(aClass)));
+    } while((aClass = class_getSuperclass(aClass)));
+
     return TQValid;
 }
 #undef CopyMethods
-+ (id)include:(Class)aClass
-{
-    return [self include:aClass recursive:nil];
-}
-
-- (id)isNil
-{
-    return nil;
-}
+CAT
 @end
+#endif

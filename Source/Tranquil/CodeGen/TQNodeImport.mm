@@ -1,6 +1,7 @@
 #import "TQNodeImport.h"
 #import "TQNode+Private.h"
 #import "TQNodeBlock.h"
+#import "../Runtime/OFString+TQAdditions.h"
 #import "ObjCSupport/TQHeaderParser.h"
 #import "TQProgram.h"
 #import <dlfcn.h>

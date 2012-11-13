@@ -68,8 +68,8 @@ SEL TQExpOpSel;
 SEL TQNumberWithDoubleSel;
 SEL TQStringWithUTF8StringSel;
 SEL TQStringWithFormatSel;
-SEL TQPointerArrayWithObjectsSel;
-SEL TQMapWithObjectsAndKeysSel;
+SEL TQArrayWithObjectsSel;
+SEL TQDictWithObjectsAndKeysSel;
 SEL TQRegexWithPatSel;
 SEL TQMoveToHeapSel;
 SEL TQWeakSel;
@@ -137,9 +137,9 @@ void _TQCacheSelector(id obj, SEL sel)
 #ifdef __LP64__
         uintptr_t cacheKey = (uintptr_t)kls ^ ((uintptr_t)sel << 32);
 #else
+        printf("32bit not tested\n");
         uintptr_t cacheKey = (uintptr_t)kls ^ ((uintptr_t)sel << 16); // TODO: verify if this works
 #endif
-
         Method method = class_getInstanceMethod(kls, sel);
         // Methods that do not have a registered implementation are assumed to take&return only objects
         uintptr_t val = 0x1L; // 0x1L => unboxed
@@ -149,17 +149,22 @@ void _TQCacheSelector(id obj, SEL sel)
 
         int err;
         khiter_t cur = kh_put(TQSelectorCache, _TQSelectorCache, cacheKey, &err);
-        if(err) {
-            kh_del(TQSelectorCache, _TQSelectorCache, cacheKey);
-            return;
-        }
+        assert(!err);
+
         kh_value(_TQSelectorCache, cur) = val;
     }
 }
 
-uintptr_t _TQSelectorCacheLookup(uintptr_t key) {
+uintptr_t _TQSelectorCacheLookup(id obj, SEL selector) {
+    Class kls = object_getClass(obj);
+#ifdef __LP64__
+    uintptr_t key = (uintptr_t)kls ^ (uintptr_t)selector << 32;
+#else
+    uintptr_t key = (uintptr_t)kls ^ (uintptr_t)selector << 16;
+#endif
+
     khiter_t k = kh_get(TQSelectorCache, _TQSelectorCache, key);
-    return kh_exist(_TQSelectorCache, k) ? kh_value(_TQSelectorCache, k) : 0;
+    return ((k != kh_end(_TQSelectorCache)) && kh_exist(_TQSelectorCache, k)) ? kh_value(_TQSelectorCache, k) : 0;
 }
 
 void TQUnboxObject(id object, const char *type, void *buffer)
@@ -542,8 +547,8 @@ void TQInitializeRuntime()
     TQNumberWithDoubleSel        = @selector(numberWithDouble:);
     TQStringWithUTF8StringSel    = @selector(stringWithUTF8String:);
     TQStringWithFormatSel        = @selector(stringWithFormat:);
-    TQPointerArrayWithObjectsSel = @selector(tq_pointerArrayWithObjects:);
-    TQMapWithObjectsAndKeysSel   = @selector(tq_mapTableWithObjectsAndKeys:);
+    TQArrayWithObjectsSel        = @selector(tq_arrayWithObjects:);
+    TQDictWithObjectsAndKeysSel  = @selector(tq_dictionaryWithObjectsAndKeys:);
     TQRegexWithPatSel            = @selector(tq_regularExpressionWithPattern:options:);
     TQMoveToHeapSel              = @selector(moveValueToHeap);
     TQWeakSel                    = @selector(with:);
