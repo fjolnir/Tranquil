@@ -96,6 +96,7 @@ def compile(file, flags=CXXFLAGS[@buildMode], cc=CXX, ios=false)
     if ios then
         flags = flags + ' -mios-simulator-version-min=6.0'
         flags << ' -arch i386 -fobjc-abi-version=2 -fobjc-legacy-dispatch'
+        flags << ' -DTQ_NO_BIGNUM' # libgmp is not well supported on iOS
         flags << ' -I/usr/local/tranquil/libffi-ios/include'
         flags << ' -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk'
     else

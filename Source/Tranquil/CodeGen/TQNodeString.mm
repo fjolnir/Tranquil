@@ -115,9 +115,9 @@ using namespace llvm;
 
     OFString *globalName;
     if(aProgram.useAOTCompilation)
-        globalName = [OFString stringWithFormat:@"TQConstNSStr_%ld", [self.value hash]];
+        globalName = [OFString stringWithFormat:@"TQConstOFStr_%ld", [self.value hash]];
     else
-        globalName = [OFString stringWithFormat:@"TQConstNSStr_%@", self.value];
+        globalName = [OFString stringWithFormat:@"TQConstOFStr_%@", self.value];
 
     Value *str = mod->getGlobalVariable([globalName UTF8String], true);
     if(!str) {

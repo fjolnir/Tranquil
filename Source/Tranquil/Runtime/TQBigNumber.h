@@ -1,3 +1,4 @@
+#ifndef TQ_NO_BIGNUM
 #import <Tranquil/Runtime/TQObject.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
@@ -31,3 +32,4 @@
 - (TQBigNumber *)pow:(id)b;
 - (TQBigNumber *)sqrt;
 @end
+#endif

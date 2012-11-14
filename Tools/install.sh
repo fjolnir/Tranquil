@@ -62,12 +62,13 @@ else
     pushd /tmp
     git clone https://github.com/pandamonia/libffi-iOS.git
     cd libffi-iOS
-    xcodebuild -target "libffi iOS" -sdk iphoneos
+
+    xcodebuild -alltargets
+
     mkdir -p /usr/local/tranquil/libffi-ios/lib
-    cp build/Release-iphoneos/libffi.a /usr/local/tranquil/libffi-ios/lib
+    lipo -create -output /usr/local/tranquil/libffi-ios/lib/libffi.a build/Release-iphoneos/libffi.a build/Release-iphonesimulator/libffi.a
     cp -R build/Release-iphoneos/usr/local/include /usr/local/tranquil/libffi-ios/include
 
-    xcodebuild -target "libffi OSX"
     mkdir -p /usr/local/tranquil/libffi/lib
     cp build/Release/libffi.a /usr/local/tranquil/libffi/lib
     cp -R build/Release/usr/local/include /usr/local/tranquil/libffi/include

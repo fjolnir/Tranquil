@@ -6,7 +6,8 @@ error = { reason |
     Exit(1)
 }
 
-arch = "x86_64"
+arch   = "x86_64"
+forIOS = no
 
 inPath  = nil
 outPath = @"a.out"
@@ -14,15 +15,16 @@ args    = ... objectEnumerator
 
 ldFlags        = [@-fexceptions, @-all_load,
                   @"-mmacosx-version-min=10.7",
-                  @-lm, @-ldl, @-lobjc, @-lffi,
+                  @-lm, @-ldl, @-lobjc,
                   @-framework, @Foundation,
                   @"/usr/local/tranquil/lib/libtranquil.a",
-                  @"/usr/local/tranquil/objfw/lib/libobjfw.a",
-                  @"/usr/local/tranquil/gmp/lib/libgmp.a"]
+                  @"/usr/local/tranquil/objfw/lib/libobjfw.a"]
 
 while arg = args nextObject {
     if arg == @-o then
         outPath = args nextObject
+    else if arg == @-ios then
+        forIOS = yes
     else if arg == @-arch then
         arch = args nextObject
     else if inPath == nil then
@@ -32,6 +34,21 @@ while arg = args nextObject {
 }
 error("No input provided") unless inPath ~= nil
 
+if forIOS {
+    "iOS build" print
+    ldflags push: @-v
+    ldflags push: @"/usr/local/tranquil/libffi-ios/lib/libffi.a"
+    ldFlags push: @-isysroot
+    if arch == @i386 then
+        sdkDir = @"/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk"
+    else
+        sdkDir = @"/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.0.sdk"
+    ldFlags push: sdkDir
+} else {
+    ldFlags push: @"/usr/lib/arc/libarclite_macosx.a"
+    ldFlags push: @"/usr/local/tranquil/gmp/lib/libgmp.a"
+    ldFlags push: @-lffi
+}
 
 uuid = `NSProcessInfo processInfo globallyUniqueString`
 
@@ -52,7 +69,7 @@ status = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/llvm/bin/llc"
 error("Assembly failed") if status ~= 0
 
 status = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/llvm/bin/clang"
-                                 arguments: ldFlags + [@-arch, arch, @-o, outPath, asmPath, @"/usr/lib/arc/libarclite_macosx.a"];
+                                 arguments: ldFlags + [@-arch, arch, @-o, outPath, asmPath];
                              waitUntilExit;
                          terminationStatus
 error("Linking failed") if status ~= 0
