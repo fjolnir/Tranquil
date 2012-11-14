@@ -1,5 +1,5 @@
 #import <ffi.h>
-#import <ObjFW/ObjFW.h>
+#import <Tranquil/Runtime/TQObject.h>
 #import <Tranquil/Shared/TQBatching.h>
 
 @interface TQFFIType : TQObject {

@@ -1,4 +1,3 @@
-#import <ObjFW/ObjFW.h>
 #import <Tranquil/Runtime/TQObject.h>
 #import <objc/runtime.h>
 #import <objc/message.h>

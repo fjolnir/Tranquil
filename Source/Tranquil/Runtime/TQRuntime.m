@@ -1,13 +1,12 @@
 #import "TQRuntime.h"
 #import "TQBoxedObject.h"
+#import "OFObject+TQAdditions.h"
 #import "OFString+TQAdditions.h"
-#import <ObjFW/ObjFW.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
 #import "TQNumber.h"
 #import "TQValidObject.h"
 #import "TQNothingness.h"
-#import "OFObject+TQAdditions.h"
 #import "../Shared/khash.h"
 #import <pthread.h>
 #import <setjmp.h>
@@ -193,7 +192,6 @@ BOOL TQStructSizeRequiresStret(int size)
 }
 
 // TODO: Rewrite NSGetSizeAndAlignment!
-extern const char *NSGetSizeAndAlignment(const char *typePtr, unsigned long *sizep, unsigned long *alignp);
 const char *TQGetSizeAndAlignment(const char *typePtr, unsigned long *sizep, unsigned long *alignp)
 {
     if(*typePtr == _TQ_C_LAMBDA_B) {
@@ -483,16 +481,16 @@ BOOL TQAugmentClassWithOperators(Class klass)
     class_addMethod(klass, TQExpOpSel, imp, "@@:@");
 
     // <
-    imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] == OF_ORDERED_ASCENDING) ? TQValid : nil; });
+    imp = imp_implementationWithBlock(^(id<OFComparing> a, id<OFComparing> b) { return ([a compare:b] == OF_ORDERED_ASCENDING) ? TQValid : nil; });
     class_addMethod(klass, TQLTOpSel, imp, "@@:@");
     // >
-    imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] == OF_ORDERED_DESCENDING) ? TQValid : nil; });
+    imp = imp_implementationWithBlock(^(id<OFComparing> a, id<OFComparing> b) { return ([a compare:b] == OF_ORDERED_DESCENDING) ? TQValid : nil; });
     class_addMethod(klass, TQGTOpSel, imp, "@@:@");
     // <=
-    imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] != OF_ORDERED_DESCENDING) ? TQValid : nil; });
+    imp = imp_implementationWithBlock(^(id<OFComparing> a, id<OFComparing> b) { return ([a compare:b] != OF_ORDERED_DESCENDING) ? TQValid : nil; });
     class_addMethod(klass, TQLTEOpSel, imp, "@@:@");
     // >=
-    imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] != OF_ORDERED_ASCENDING) ? TQValid : nil; });
+    imp = imp_implementationWithBlock(^(id<OFComparing> a, id<OFComparing> b) { return ([a compare:b] != OF_ORDERED_ASCENDING) ? TQValid : nil; });
     class_addMethod(klass, TQGTEOpSel, imp, "@@:@");
 
 
@@ -564,12 +562,12 @@ void TQInitializeRuntime()
 
     IMP imp;
     // Operators for OFString
-    imp = imp_implementationWithBlock(^(id a, TQNumber *idx)   {
+    imp = imp_implementationWithBlock(^(OFString *a, TQNumber *idx) {
         return [a substringWithRange:(of_range_t){[idx intValue], 1}];
     });
     class_addMethod([OFString class], TQGetterOpSel, imp, "@@:@");
 
-    imp = imp_implementationWithBlock(^(id a, TQNumber *idx, OFString *replacement)   {
+    imp = imp_implementationWithBlock(^(OFMutableString *a, TQNumber *idx, OFString *replacement)   {
         int loc = [idx intValue];
         [a deleteCharactersInRange:(of_range_t){loc, 1}];
         [a insertString:replacement atIndex:loc];
@@ -582,7 +580,7 @@ void TQInitializeRuntime()
     imp = imp_implementationWithBlock(^(id a, id key)         { return _objc_msgSend_hack2(a, @selector(objectForKeyedSubscript:), key); });
     class_addMethod([OFDictionary class], TQGetterOpSel, imp, "@@:@");
 
-    imp = imp_implementationWithBlock(^(id a, TQNumber *idx)   {
+    imp = imp_implementationWithBlock(^(id a, TQNumber *idx)  {
         return _objc_msgSend_hack2i(a, @selector(objectAtIndexedSubscript:), [idx unsignedIntegerValue]);
     });
     class_addMethod([OFArray class], TQGetterOpSel, imp, "@@:@");

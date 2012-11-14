@@ -1,4 +1,3 @@
-#import <ObjFW/ObjFW.h>
 #import <Tranquil/Runtime/TQRuntime.h>
 #import <Tranquil/Shared/TQBatching.h>
 
@@ -14,6 +13,9 @@
 + (OFArray *)tq_arrayWithObjects:(id)firstObject , ...;  // Arguments terminated by TQNothing
 
 - (id)each:(id (^)(id))aBlock;
+@end
+
+@interface OFMutableArray (Tranquil)
 @end
 
 @interface TQPair : TQObject {

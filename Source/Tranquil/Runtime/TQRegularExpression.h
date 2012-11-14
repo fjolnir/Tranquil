@@ -1,5 +1,5 @@
 // TODO: Find a replacement regular expression library
-#import <ObjFW/ObjFW.h>
+#import <Tranquil/Runtime/TQObject.h>
 #import <Tranquil/Runtime/TQRange.h>
 
 @interface TQRegularExpression : OFObject //NSRegularExpression

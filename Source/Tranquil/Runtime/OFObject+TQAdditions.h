@@ -1,16 +1,12 @@
-#import <ObjFW/ObjFW.h>
+#import "TQRuntime.h"
 
 @interface OFObject (Tranquil)
 + (id)include:(Class)aClass;
+- (OFString *)toString;
+- (id)print;
 @end
 
 #ifdef __APPLE__
-@interface NSObject
-+ (Class)class;
-- (NSString *)description;
-- (BOOL)isKindOfClass:(Class)kls;
-@end
-
 @interface NSObject (Tranquil)
 + (id)include:(Class)aClass;
 @end

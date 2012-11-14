@@ -43,9 +43,9 @@ extern BOOL TQObjectIsStackBlock(id aBlock); // We can't #import Runtime.h becau
 }
 #endif
 
-- (OFString *)description    { return [__obj description]; }
+- (OFString *)description    { return [(OFObject *)__obj description]; }
 - (Class)class               { return [__obj class];       }
-- (uint32_t)hash           { return [__obj hash];        }
+- (uint32_t)hash             { return [(OFObject *)__obj hash];        }
 
 - (BOOL)isEqual:(id)anObject {
     if(!__obj)

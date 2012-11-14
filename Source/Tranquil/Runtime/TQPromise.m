@@ -8,13 +8,13 @@
 
 @interface TQPromise ()  {
     @public
-    id _result;
+    OFObject *_result;
 }
 @end
 
 static OFString *const _TQPromiseNotResolvedSentinel = @"550e8400e29b41d4a716446655440000";
 
-static __inline__ id TQPromiseGetResult(TQPromise *p)
+static __inline__ OFObject *TQPromiseGetResult(TQPromise *p)
 {
     TQAssert(p->_result != _TQPromiseNotResolvedSentinel, @"Sent a message to an unfulfilled promise.");
     return p->_result;
@@ -81,6 +81,6 @@ static __inline__ id TQPromiseGetResult(TQPromise *p)
 
 - (id)self
 {
-    return TQPromiseGetResult(self);
+    return (id)TQPromiseGetResult(self);
 }
 @end

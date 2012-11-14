@@ -1,5 +1,6 @@
 #import "TQRange.h"
 #import "TQRuntime.h"
+#import "OFObject+TQAdditions.h"
 #import "../../../Build/TQStubs.h"
 #import "TQEnumerable.h"
 

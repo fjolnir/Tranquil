@@ -1,7 +1,6 @@
 // Note: TQNumber is not safe to subclass. It makes certain assumptions for the sake of performance
 // Currently numbers are always stored in floating point, need to add handling of integers(long, int, short, char) that guarantees their data layout is not messed up
 
-#import <ObjFW/ObjFW.h>
 #import <Tranquil/Runtime/TQObject.h>
 #import <Tranquil/Shared/TQBatching.h>
 

@@ -1,6 +1,5 @@
 // This should work ..if everyone did their retains like foo = [foo retain]; rather than just [foo retain];
 #import <Tranquil/Runtime/TQNumber.h>
-#import <ObjFW/ObjFW.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
 

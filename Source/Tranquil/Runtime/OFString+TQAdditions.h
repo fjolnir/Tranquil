@@ -1,4 +1,4 @@
-#import <ObjFW/ObjFW.h>
+#import <Tranquil/Runtime/TQObject.h>
 
 @class TQNumber;
 
@@ -12,8 +12,10 @@
 - (char)charValue;
 - (OFString *)pathExtension;
 - (OFString *)stringByDeletingPathExtension;
-- (OFString *)stringByAppendingPathExtension:(NSString *)ext;
+- (OFString *)stringByAppendingPathExtension:(OFString *)ext;
 @end
 
 @interface OFMutableString (Tranquil)
 @end
+
+

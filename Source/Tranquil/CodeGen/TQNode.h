@@ -1,4 +1,3 @@
-#import <ObjFW/ObjFW.h>
 #include <llvm/LLVMContext.h>
 #include <llvm/DerivedTypes.h>
 #include <llvm/Constants.h>
@@ -23,7 +22,7 @@
 #include <llvm/ExecutionEngine/JIT.h>
 #include <llvm/Support/TargetSelect.h>
 #import <Tranquil/CodeGen/TQProgram+Internal.h>
-
+#import <ObjFW/ObjFW.h>
 
 @class TQNode, TQNodeBlock, TQNodeRootBlock, TQProgram;
 

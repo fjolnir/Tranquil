@@ -1,5 +1,9 @@
 // Tranquil runtime functions
 
+#ifdef __APPLE__
+#import <Foundation/NSObject.h>
+#import <Foundation/NSEnumerator.h>
+#endif
 #import <ObjFW/ObjFW.h>
 #import <stdarg.h>
 #import <Tranquil/Runtime/TQValidObject.h>
@@ -180,9 +184,6 @@ id  objc_initWeak(id *addr, id val);
 void objc_destroyWeak(id *addr);
 void objc_copyWeak(id *to, id *from);
 void objc_moveWeak(id *to, id *from);
-
-// Blocks
-extern void *_NSConcreteStackBlock;
 
 #ifdef __cplusplus
 }

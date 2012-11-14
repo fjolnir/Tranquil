@@ -1,7 +1,6 @@
 #ifndef _TQ_PROGRAM_H_
 #define _TQ_PROGRAM_H_
 
-#import <ObjFW/ObjFW.h>
 #import <Tranquil/Runtime/TQRuntime.h>
 #import <dispatch/dispatch.h>
 

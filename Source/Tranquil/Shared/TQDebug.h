@@ -1,4 +1,3 @@
-#import <ObjFW/ObjFW.h>
 #import <Tranquil/Runtime/TQObject.h>
 
 #ifdef DEBUG

@@ -313,7 +313,6 @@ static TQProgram *sharedInstance;
                 featureStr   = "";
                 cpuName      = "";
         }
-        printf("%s\n", cpuName.c_str());
         const Target *target = TargetRegistry::lookupTarget(targetTriple, err);
         TQAssert(err.empty(), @"Unable to get target data");
 
@@ -325,7 +324,7 @@ static TQProgram *sharedInstance;
 
         //llvm::PrintStatistics();
         verifyModule(*_llModule, PrintMessageAction);
-        _llModule->dump();
+//        _llModule->dump();
 
         raw_fd_ostream out([_outputPath UTF8String], err, raw_fd_ostream::F_Binary);
         TQAssert(err.empty(), @"Error opening output file for bitcode: %@", _outputPath);
@@ -458,7 +457,7 @@ static TQProgram *sharedInstance;
         for(OFString *candidate in [OFFile filesInDirectoryAtPath:searchPath]) {
             if([[candidate pathExtension] isEqual:@"framework"]) {
                 OFString *frameworkDirName = usesSubdir ? [testPathComponents objectAtIndex:0] : [[aPath lastPathComponent] stringByDeletingPathExtension];
-                if(![[[candidate lastPathComponent] stringByDeletingPathExtension] isEqual:frameworkDirName])
+                if(![[candidate stringByDeletingPathExtension] isEqual:frameworkDirName])
                     continue;
                 if(usesSubdir)
                     aPath = [[testPathComponents objectsInRange:(of_range_t){ 1, [testPathComponents count] - 1 }] componentsJoinedByString:@"/"];

@@ -1,5 +1,6 @@
 #import "OFString+TQAdditions.h"
 #import "TQNumber.h"
+#import <string.h>
 
 @implementation OFString (Tranquil)
 
@@ -64,9 +65,9 @@
 - (OFString *)stringByDeletingPathExtension
 {
     size_t loc = [self rangeOfString:@"." options:OF_STRING_SEARCH_BACKWARDS range:(of_range_t){0, [self length] }].location;
-    return loc == OF_NOT_FOUND ? nil : [self substringToIndex:loc-1];
+    return loc == OF_NOT_FOUND ? self : [self substringToIndex:loc];
 }
-- (OFString *)stringByAppendingPathExtension:(NSString *)ext
+- (OFString *)stringByAppendingPathExtension:(OFString *)ext
 {
     OFMutableString *ret = [self mutableCopy];
     while([ret hasSuffix:@"/"])

@@ -2,8 +2,12 @@
 // Subclasses of TQObject should never accept or return anything but objects from their methods
 
 // Boolean returns from TQObject methods return nil on success and any object on success (Convention is TQNumberTrue=1.0)
+//#import <Tranquil/Runtime/OFObject+TQAdditions.h>
+#ifdef __APPLE__
+#import <Foundation/NSObject.h>
+#import <Foundation/NSEnumerator.h>
+#endif
 #import <ObjFW/ObjFW.h>
-#import "OFObject+TQAdditions.h"
 
 @class TQNumber;
 

@@ -1,6 +1,6 @@
-#import <ObjFW/ObjFW.h>
+#import <Tranquil/Runtime/TQObject.h>
 
-@interface TQPromise : OFObject
+@interface TQPromise : TQObject
 - (id)fulfilled;
 - (void)fulfillWith:(id)aResult;
 // Blocks the current thread until the promise is fulfilled & then returns the result

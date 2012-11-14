@@ -18,7 +18,7 @@ using namespace llvm;
     if(!(self = [super init]))
         return nil;
 
-    _value = [[NSNumber alloc] initWithDouble:aDouble];
+    _value = [[OFNumber alloc] initWithDouble:aDouble];
 
     return self;
 }

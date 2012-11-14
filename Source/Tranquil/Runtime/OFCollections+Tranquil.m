@@ -82,6 +82,14 @@
 }
 @end
 
+@implementation OFMutableArray (Tranquil)
+- (id)push:(id)obj
+{
+    [self addObject:obj];
+    return TQValid;
+}
+@end
+
 @implementation TQPair
 + (void)load
 {

@@ -35,7 +35,6 @@ CXXFLAGS = {
         "`#{OBJFW} --cppflags --objcflags`",
         '-O0',
         '-g',
-        '-DOS_OBJECT_USE_OBJC=0',
         #'-DTQ_PROFILE',
         #'--analyze'
     ].join(' ')
