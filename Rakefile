@@ -40,7 +40,7 @@ CXXFLAGS = {
 TOOL_LDFLAGS = [
     '-L`pwd`/Build',
     '-lstdc++',
-    '`/usr/local/tranquil/llvm/bin/llvm-config --ldflags --libs core jit nativecodegen bitwriter ipo instrumentation`',
+    '`/usr/local/tranquil/llvm/bin/llvm-config --ldflags --libs core jit nativecodegen armcodegen bitwriter ipo instrumentation`',
     #'`/usr/local/llvm.dbg/bin/llvm-config --ldflags --libs core jit nativecodegen bitwriter ipo instrumentation`',
     '-lclang',
     '-lobjc',
@@ -65,7 +65,9 @@ STUB_SCRIPT     = 'Source/Tranquil/gen_stubs.rb'
 STUB_H_OUTPATH  = 'Build/TQStubs.h'
 STUB_H_SCRIPT   = 'Source/Tranquil/gen_stubs_header.rb'
 
-MSGSEND_SOURCES = { :x86_64 => 'Source/Tranquil/Runtime/msgsend.x86_64.s', :i386 => 'Source/Tranquil/Runtime/msgsend.i386.s' }
+MSGSEND_SOURCES = { :x86_64 => 'Source/Tranquil/Runtime/msgsend.x86_64.s',
+                    :i386   => 'Source/Tranquil/Runtime/msgsend.i386.s',
+                    :armv7  => 'Source/Tranquil/Runtime/msgsend.arm.s' }
 MSGSEND_OUT     = 'Build/msgsend.o'
 
 RUNTIME_SOURCES = FileList['Source/Tranquil/BridgeSupport/*.m*'].add('Source/Tranquil/Runtime/*.m*').add('Source/Tranquil/Shared/*.m*').add(STUB_OUTPATH)
@@ -90,27 +92,33 @@ MAIN_OUTPATH = 'Build/main.o'
 
 @buildMode = :development
 
-def compile(file, flags=CXXFLAGS[@buildMode], cc=CXX, ios=false)
-    if ios then
-        flags = flags + ' -mios-simulator-version-min=6.0'
-        flags << ' -arch i386 -fobjc-abi-version=2 -fobjc-legacy-dispatch'
-        flags << ' -DTQ_NO_BIGNUM' # libgmp is not well supported on iOS
+def compile(file, flags=CXXFLAGS[@buildMode], cc=CXX, arch="x86_64", ios=false)
+    if ios == true then
+        flags = flags + ' -DTQ_NO_BIGNUM' # libgmp is not well supported on iOS
         flags << ' -I/usr/local/tranquil/libffi-ios/include'
-        flags << ' -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk'
+        if arch == :armv7 then
+            flags << ' -miphoneos-version-min=5.0'
+            flags << ' -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.0.sdk'
+        else
+            flags << ' -fobjc-abi-version=2 -fobjc-legacy-dispatch'
+            flags << ' -mios-simulator-version-min=5.0'
+            flags << ' -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk'
+        end
     else
-        flags = flags + ' -arch x86_64 -mmacosx-version-min=10.7'
+        flags = flags + ' -mmacosx-version-min=10.7'
         flags << ' -I/usr/local/tranquil/libffi/include'
     end
-    cmd = "#{cc} #{file[:in].join(' ')} #{flags} -c -o #{file[:out]}"
-    cmd << " -fobjc-arc" if ARC_FILES.member? file[:in].first
-    cmd << " -ObjC++"    if cc == CXX
-    cmd << " -ObjC"      if cc == CC
+    cmd = "#{cc} #{file[:in].join(' ')} -arch #{arch} #{flags} -c -o #{file[:out]}"
+    unless file[:in].size == 1 and file[:in][0].end_with? '.s'
+        cmd << " -fobjc-arc" if ARC_FILES.member? file[:in].first
+        cmd << " -ObjC++"    if cc == CXX
+        cmd << " -ObjC"      if cc == CC
+    end
     sh cmd
 end
 
 HEADERS.each { |header|
     file header.pathmap(HEADER_PATHMAP) => header do |f|
-        p f.name
         sh "mkdir -p #{f.name.pathmap('%d')}"
         sh "cp #{header} #{f.name}"
     end
@@ -142,7 +150,7 @@ MSGSEND_SOURCES.each do |arch, asm|
         MSGSEND_SOURCES.each do |arch, asm|
             outPath = MSGSEND_OUT + ".#{arch.to_s}"
             paths << outPath
-            sh "#{CXX} #{asm} -arch #{arch.to_s} -c -o #{outPath}"
+            compile({:in => [asm], :out => outPath}, '', CC, arch, arch != :x86_64)
         end
         sh "lipo -create -output #{MSGSEND_OUT} #{paths.join(' ')}"
     end
@@ -151,9 +159,10 @@ end
 
 RUNTIME_SOURCES.each { |src|
     file src.pathmap(PATHMAP) => src do |f|
-        compile({:in => f.prerequisites, :out => f.name + ".x64"}, CXXFLAGS[@buildMode], CC)
-        compile({:in => f.prerequisites, :out => f.name + ".i386"}, CXXFLAGS[@buildMode], CC, true)
-        sh "lipo -create -output #{f.name} #{f.name}.x64 #{f.name}.i386"
+        compile({:in => f.prerequisites, :out => f.name + ".x64"},  CXXFLAGS[@buildMode], CC, :x86_64)
+        compile({:in => f.prerequisites, :out => f.name + ".i386"}, CXXFLAGS[@buildMode], CC, :i386,  true)
+        compile({:in => f.prerequisites, :out => f.name + ".arm"},  CXXFLAGS[@buildMode], CC, :armv7, true)
+        sh "lipo -create -output #{f.name} #{f.name}.x64 #{f.name}.i386 #{f.name}.arm"
     end
 }
 CODEGEN_SOURCES.each { |src|

@@ -33,18 +33,21 @@
 + (id)accessor:(NSString *)aPropName initialValue:(id<NSCopying>)aInitial
 {
     [self addMethod:aPropName withBlock:^(id self_) {
-        __block id ret = NSMapGet(TQGetDynamicIvarTable(self_), aPropName);
+        __block id ret = [TQGetDynamicIvarTable(self_) objectForKey:aPropName];
         if(!ret && aInitial) {
             @synchronized(self_) {
                 ret = [aInitial copyWithZone:nil];
-                NSMapInsert(TQGetDynamicIvarTable(self_), aPropName, ret);
+                [TQGetDynamicIvarTable(self_) setObject:ret forKey:aPropName];
                 [ret release];
             }
         }
         return ret;
     } replaceExisting:nil];
     NSString *setterSel = [NSString stringWithFormat:@"set%@:", [aPropName stringByCapitalizingFirstLetter]];
-    [self addMethod:setterSel withBlock:^(id self_, id val) { NSMapInsert(TQGetDynamicIvarTable(self_), aPropName, val); } replaceExisting:nil];
+    [self addMethod:setterSel withBlock:^(id self_, id val) {
+        [TQGetDynamicIvarTable(self_) setObject:val forKey:aPropName];
+    }
+                        replaceExisting:nil];
 
     return TQValid;
 }

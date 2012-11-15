@@ -131,14 +131,15 @@ BOOL TQMethodTypeRequiresBoxing(const char *aEncoding)
 
 void _TQCacheSelector(id obj, SEL sel)
 {
+    NSLog(@"Caching [%p %p]", obj, sel);
+    NSLog(@"  sel %s", sel);
+    NSLog(@"  obj %@", obj);
     @synchronized((id)_TQSelectorCache) {
         Class kls = object_getClass(obj);
-        // See msgsend.s for an explanation of the key
 #ifdef __LP64__
         uintptr_t cacheKey = (uintptr_t)kls ^ ((uintptr_t)sel << 32);
 #else
-        printf("32bit not tested\n");
-        uintptr_t cacheKey = (uintptr_t)kls ^ ((uintptr_t)sel << 16); // TODO: verify if this works
+        uintptr_t cacheKey = (uintptr_t)kls ^ ((uintptr_t)sel << 16);
 #endif
         Method method = class_getInstanceMethod(kls, sel);
         // Methods that do not have a registered implementation are assumed to take&return only objects
@@ -155,12 +156,15 @@ void _TQCacheSelector(id obj, SEL sel)
     }
 }
 
-uintptr_t _TQSelectorCacheLookup(id obj, SEL selector) {
+uintptr_t _TQSelectorCacheLookup(id obj, SEL sel) {
+    NSLog(@"Looking up [%p %p]", obj, sel);
+    NSLog(@"  sel %s", sel);
+    NSLog(@"  obj %@", obj);
     Class kls = object_getClass(obj);
 #ifdef __LP64__
-    uintptr_t key = (uintptr_t)kls ^ (uintptr_t)selector << 32;
+    uintptr_t key = (uintptr_t)kls ^ (uintptr_t)sel << 32;
 #else
-    uintptr_t key = (uintptr_t)kls ^ (uintptr_t)selector << 16;
+    uintptr_t key = (uintptr_t)kls ^ (uintptr_t)sel << 16;
 #endif
 
     khiter_t k = kh_get(TQSelectorCache, _TQSelectorCache, key);

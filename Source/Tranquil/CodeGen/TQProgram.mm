@@ -92,7 +92,10 @@ static TQProgram *sharedInstance;
     TQInitializeRuntime();
     InitializeNativeTarget();
     LLVMInitializeX86Target();
-    
+LLVMInitializeARMTargetMC();
+        LLVMInitializeARMTargetInfo();
+    LLVMInitializeARMTarget();
+
     _globals     = [NSMutableDictionary new];
     _searchPaths = [[NSMutableArray alloc] initWithObjects:@".",
                         @"~/Library/Frameworks", @"/Library/Frameworks",
@@ -306,12 +309,18 @@ static TQProgram *sharedInstance;
                 cpuName      = "corei7-avx";
                 break;
             case kTQArchitectureARMv7:
-                targetTriple = "armv7-apple-darwin11.0.0"; // TODO make dynamic
+                targetTriple = "arm-apple-darwin11.4.0";//"arm-apple-darwin11.0.0"; // TODO make dynamic
                 featureStr   = "";
                 cpuName      = "";
         }
+        NSLog(@"triple: %s", targetTriple.c_str());
+        for(TargetRegistry::iterator it = TargetRegistry::begin(), ie = TargetRegistry::end(); it != ie; ++it) {
+            NSLog(@"target: %s", it->getName());
+        }
+
+
         const Target *target = TargetRegistry::lookupTarget(targetTriple, err);
-        TQAssert(err.empty(), @"Unable to get target data");
+        TQAssert(err.empty(), @"Unable to get target data: %s", err.c_str());
 
         TargetMachine *machine = target->createTargetMachine(targetTriple, cpuName, featureStr, Opts);
         TQAssert(machine, @"Unable to create llvm target machine");
