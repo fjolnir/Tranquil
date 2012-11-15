@@ -2,7 +2,7 @@
 // Currently numbers are always stored in floating point, need to add handling of integers(long, int, short, char) that guarantees their data layout is not messed up
 
 #import <Foundation/Foundation.h>
-#import <Tranquil/Runtime/TQObject.h>
+#import <Tranquil/Runtime/TQRuntime.h>
 #import <Tranquil/Shared/TQBatching.h>
 
 @class TQRange;
@@ -21,6 +21,7 @@ BOOL TQFloatFitsInTaggedNumber(float aValue);
 @property(readonly) double value;
 
 + (id)fitsInTaggedPointer:(double)aValue;
++ (id)fitsInTaggedPointer:(double)aValue onArch:(TQArchitecture)aArch;
 
 - (id)initWithBool:(BOOL)value;
 - (id)initWithChar:(char)value;

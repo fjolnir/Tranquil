@@ -7,6 +7,7 @@ void printHelpAndExit(int status)
     fprintf(stderr, "-h        Show this help message\n");
     fprintf(stderr, "-d        Print debugging information (Including the llvm assembly output)\n");
     fprintf(stderr, "-aot      Enable ahead of time compilation (Outputs LLVM IR to stdout)\n");
+    fprintf(stderr, "-arch     If AOT is enabled, this flag chooses the target architecture (x86, x86_64 or arm)\n");
     exit(status);
 }
 
@@ -17,6 +18,7 @@ int main(int argc, char **argv)
         BOOL compileToFile     = NO;
         const char *inputPath  = NULL;
         const char *outputPath = "tqapp.bc";
+        const char *archStr    = NULL;
 
         char *arg;
         NSPointerArray *scriptArgs = [[NSPointerArray new] autorelease];
@@ -31,6 +33,8 @@ int main(int argc, char **argv)
                 else if(strcmp(arg, "-h") == 0) printHelpAndExit(0);
                 else if(strcmp(arg, "-aot") == 0)
                     compileToFile = YES;
+                else if(strcmp(arg, "-arch") == 0)
+                    archStr = argv[++i];
                 else if(strcmp(arg, "-o") == 0)
                     outputPath = argv[++i];
                 else {
@@ -41,9 +45,24 @@ int main(int argc, char **argv)
                 inputPath = arg;
         }
 
+        TQArchitecture arch;
+        if(!archStr || strcmp(archStr, "host") == 0)
+            arch = kTQArchitectureHost;
+        else if(strcmp(archStr, "i386") == 0)
+            arch = kTQArchitectureI386;
+        else if(strcmp(archStr, "x86_64") == 0)
+            arch = kTQArchitectureX86_64;
+        else if(strcmp(archStr, "armv7") == 0)
+            arch = kTQArchitectureARMv7;
+        else {
+            fprintf(stderr, "Unknown architecture: %s\n", archStr);
+            return 1;
+        }
+
         TQProgram *program          = [TQProgram programWithName:@"Root"];
         program.arguments           = scriptArgs;
         program.useAOTCompilation   = compileToFile;
+        program.targetArch          = arch;
         program.outputPath          = [NSString stringWithUTF8String:outputPath];
         program.shouldShowDebugInfo = showDebugOutput;
         NSString *script;

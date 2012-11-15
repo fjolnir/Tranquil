@@ -8,6 +8,8 @@
 #import "../../../Build/TQStubs.h"
 #import <objc/runtime.h>
 #import <objc/message.h>
+#import <assert.h>
+#import <ctype.h>
 
 #define TQBoxedObject_PREFIX "TQBoxedObject_"
 #define BlockImp imp_implementationWithBlock
@@ -146,7 +148,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
 
 + (id)box:(void *)aPtr
 {
-    return [[[self allocWithZone:NULL] initWithPtr:aPtr] autorelease];
+    return [[[self alloc] initWithPtr:aPtr] autorelease];
 }
 
 + (void)unbox:(id)aValue to:(void *)aDest usingType:(const char *)aType
@@ -164,26 +166,26 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
 
     switch(*aType) {
         case _C_ID:
-        case _C_CLASS:    *(id*)aDest                  = aValue;                          break;
-        case _C_SEL:      *(SEL*)aDest                 = NSSelectorFromString(aValue);    break;
-        case _C_CHARPTR:  *(const char **)aDest        = [aValue UTF8String];             break;
-        case _C_DBL:      *(double *)aDest             = [aValue doubleValue];            break;
-        case _C_FLT:      *(float *)aDest              = [aValue floatValue];             break;
-        case _C_INT:      *(int *)aDest                = [aValue intValue];               break;
-        case _C_CHR:      *(char *)aDest               = [aValue charValue];              break;
-        case _C_UCHR:     *(unsigned char *)aDest      = [aValue unsignedCharValue];      break;
-        case _C_SHT:      *(short *)aDest              = [aValue shortValue];             break;
-        case _C_BOOL:     *(_Bool *)aDest              = [aValue boolValue];              break;
-        case _C_LNG:      *(long *)aDest               = [aValue longValue];              break;
-        case _C_LNG_LNG:  *(long long *)aDest          = [aValue longLongValue];          break;
-        case _C_UINT:     *(unsigned int *)aDest       = [aValue unsignedIntValue];       break;
-        case _C_USHT:     *(unsigned short *)aDest     = [aValue unsignedShortValue];     break;
-        case _C_ULNG:     *(unsigned long *)aDest      = [aValue unsignedLongValue];      break;
-        case _C_ULNG_LNG: *(unsigned long long *)aDest = [aValue unsignedLongLongValue];  break;
-        case _C_VOID:     TQAssert(NO, @"You cannot unbox a value of type void");         break;
+        case _C_CLASS:    *(id*)aDest                  = aValue;                                break;
+        case _C_SEL:      *(SEL*)aDest                 = sel_registerName([aValue UTF8String]); break;
+        case _C_CHARPTR:  *(const char **)aDest        = [aValue UTF8String];                   break;
+        case _C_DBL:      *(double *)aDest             = [aValue doubleValue];                  break;
+        case _C_FLT:      *(float *)aDest              = [aValue floatValue];                   break;
+        case _C_INT:      *(int *)aDest                = [aValue intValue];                     break;
+        case _C_CHR:      *(char *)aDest               = [aValue charValue];                    break;
+        case _C_UCHR:     *(unsigned char *)aDest      = [aValue unsignedCharValue];            break;
+        case _C_SHT:      *(short *)aDest              = [aValue shortValue];                   break;
+        case _C_BOOL:     *(_Bool *)aDest              = [aValue boolValue];                    break;
+        case _C_LNG:      *(long *)aDest               = [aValue longValue];                    break;
+        case _C_LNG_LNG:  *(long long *)aDest          = [aValue longLongValue];                break;
+        case _C_UINT:     *(unsigned int *)aDest       = [aValue unsignedIntValue];             break;
+        case _C_USHT:     *(unsigned short *)aDest     = [aValue unsignedShortValue];           break;
+        case _C_ULNG:     *(unsigned long *)aDest      = [aValue unsignedLongValue];            break;
+        case _C_ULNG_LNG: *(unsigned long long *)aDest = [aValue unsignedLongLongValue];        break;
+        case _C_VOID:     TQAssert(NO, @"You cannot unbox a value of type void");               break;
 
         case _TQ_C_LAMBDA_B: {
-            TQAssert(!aValue || [aValue isKindOfClass:NSClassFromString(@"NSBlock")], @"Tried to unbox a non block to a block/function pointer type (%@ -> %s)", aValue, aType);
+            TQAssert(!aValue || [aValue isKindOfClass:objc_getClass("NSBlock")], @"Tried to unbox a non block to a block/function pointer type (%@ -> %s)", aValue, aType);
             if(!aValue)
                 *(void **)aDest = NULL;
             else  {
@@ -232,15 +234,11 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
                   [NSException raise:@"Unimplemented"
                            format:@"Dictionary unboxing has not been implemented yet."];
 
-            } else {
-               [NSException raise:@"Invalid value"
-                           format:@"You tried to unbox %@ to a struct(%s), but it can not.", aValue, aType];
-            }
+            } else
+                TQAssert(NO, @"You tried to unbox %@ to a struct(%s), but it can not.", aValue, aType);
         } break;
         case _C_UNION_B: {
-            [NSException raise:@"Unimplemented"
-                        format:@"Unboxing to a union has not been implemented yet."];
-
+            TQAssert(NO, @"Unboxing to a union has not been implemented yet");
         }
         case _C_PTR: {
             if(!aValue)
@@ -266,7 +264,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
 
 - (id)initWithPtr:(void *)aPtr
 {
-    [NSException raise:@"Invalid Receiver" format:@"TQBoxedObject is an abstract class. Do not try to instantiate it directly."];
+    TQAssert(NO, @"TQBoxedObject is an abstract class. Do not try to instantiate it directly.");
     // Implemented by subclasses
     return nil;
 }
@@ -298,7 +296,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
 
 - (id)copyWithZone:(NSZone *)aZone
 {
-    TQBoxedObject *ret = [[[self class] allocWithZone:aZone] initWithPtr:_ptr];
+    TQBoxedObject *ret = [[[self class] alloc] initWithPtr:_ptr];
     [ret moveValueToHeap];
     return ret;
 }
@@ -397,8 +395,7 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
         case _C_ULNG_LNG: initImp = (IMP)_box_C_ULNG_LNG_imp; break;
 
         default:
-            [NSException raise:NSGenericException
-                        format:@"Unsupported scalar type %c!", *aType];
+            TQAssert(NO, @"Unsupported scalar type %c!", *aType);
             return nil;
     }
 
@@ -460,8 +457,8 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
         } copy] autorelease];
 
         if(name) {
-            class_addMethod(kls, NSSelectorFromString(name), BlockImp(fieldGetter), "@:");
-            class_addMethod(kls, NSSelectorFromString([NSString stringWithFormat:@"set%@:", [name capitalizedString]]), BlockImp(fieldSetter), "@:@");
+            class_addMethod(kls, sel_registerName([name UTF8String]), BlockImp(fieldGetter), "@:");
+            class_addMethod(kls, sel_registerName([[NSString stringWithFormat:@"set%@:", [name capitalizedString]] UTF8String]), BlockImp(fieldSetter), "@:@");
         }
         [fieldGetters addObject:fieldGetter];
         [fieldSetters addObject:fieldSetter];
@@ -658,7 +655,7 @@ id __wrapperBlock_invoke(struct TQBoxedBlockLiteral *__blk, ...)
 
 #pragma mark - Boxed msgSend
 
-extern NSMapTable *_TQSelectorCache;
+extern uintptr_t _TQSelectorCacheLookup(id obj, SEL aSelector);
 extern void _TQCacheSelector(id obj, SEL sel);
 
 id tq_boxedMsgSend(id self, SEL selector, ...)
@@ -666,18 +663,13 @@ id tq_boxedMsgSend(id self, SEL selector, ...)
     if(!self)
         return nil;
 
-    Class kls = object_getClass(self);
-    void *cacheKey =  (void*)((uintptr_t)kls ^ (uintptr_t)selector << 32);
-    Method method = (Method)NSMapGet(_TQSelectorCache, cacheKey);
+    Method method = (Method)_TQSelectorCacheLookup(self, selector);
     if(method == 0x0) {
         _TQCacheSelector(self, selector);
-        method = (Method)NSMapGet(_TQSelectorCache, cacheKey);
+        method = (Method)_TQSelectorCacheLookup(self, selector);
     }
-    if(method == 0x0) {
-        [NSException raise:NSGenericException
-                    format:@"Unknown selector %@ sent to object %@", NSStringFromSelector(selector), self];
-        return nil;
-    } else if((uintptr_t)method == 0x1L) {
+    TQAssert(method != 0x0, @"Unknown selector %s sent to object %@", sel_getName(selector), self);
+    if((uintptr_t)method == 0x1L) {
         TQLog(@"Error: Tried to use tq_boxedMsgSend to call a method that does not require boxing");
         return nil;
     }

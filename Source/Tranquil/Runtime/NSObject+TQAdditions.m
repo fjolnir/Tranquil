@@ -12,6 +12,7 @@
 
 - (id)print
 {
+NSLog(@"%@ printing %@ %p", self, [self class], self);
     printf("%s\n", [[self toString] UTF8String]);
     return self;
 }

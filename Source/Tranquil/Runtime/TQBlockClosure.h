@@ -1,6 +1,6 @@
 #import <Tranquil/Runtime/TQRuntime.h>
 #import <Tranquil/Runtime/TQObject.h>
-#import <ffi/ffi.h>
+#import <ffi.h>
 
 @class TQBlockClosure;
 

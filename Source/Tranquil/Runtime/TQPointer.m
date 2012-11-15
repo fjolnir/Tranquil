@@ -3,6 +3,7 @@
 #import "TQRuntime.h"
 #import "TQNumber.h"
 #import <objc/runtime.h>
+#import <CoreGraphics/CGGeometry.h>
 
 NSString * const TQTypeObj       = @"@";
 NSString * const TQTypeClass     = @"#";
@@ -265,15 +266,15 @@ NSString * const TQTypeString    = @"*";
 }
 + (TQPointer *)toNSPoints:(TQNumber *)aCount
 {
-    return [[[self alloc] initWithType:@encode(NSPoint) count:[aCount unsignedIntegerValue]] autorelease];
+    return [[[self alloc] initWithType:@encode(CGPoint) count:[aCount unsignedIntegerValue]] autorelease];
 }
 + (TQPointer *)toNSSizes:(TQNumber *)aCount
 {
-    return [[[self alloc] initWithType:@encode(NSSize) count:[aCount unsignedIntegerValue]] autorelease];
+    return [[[self alloc] initWithType:@encode(CGSize) count:[aCount unsignedIntegerValue]] autorelease];
 }
 + (TQPointer *)toNSRects:(TQNumber *)aCount
 {
-    return [[[self alloc] initWithType:@encode(NSRect) count:[aCount unsignedIntegerValue]] autorelease];
+    return [[[self alloc] initWithType:@encode(CGRect) count:[aCount unsignedIntegerValue]] autorelease];
 }
 + (TQPointer *)toObject
 {

@@ -20,6 +20,13 @@ extern "C" {
 extern id TQNothing;
 extern id TQValid;
 
+typedef enum {
+    kTQArchitectureHost,
+    kTQArchitectureI386,
+    kTQArchitectureX86_64,
+    kTQArchitectureARMv7
+} TQArchitecture;
+
 enum TQBlockFlag_t {
     // I chose a flag right in the middle of the unused space, so let's hope Apple doesn't decide to use it
     TQ_BLOCK_IS_TRANQUIL_BLOCK = (1 << 19),
@@ -46,8 +53,8 @@ struct TQBlockLiteral {
     int reserved;
     id (*invoke)(void *, ...);
     struct TQBlockDescriptor {
-    unsigned long int reserved; // NULL
-        unsigned long int size; // sizeof(struct TQBlockLiteral)
+        unsigned long reserved; // NULL
+        unsigned long size; // sizeof(struct TQBlockLiteral)
     // optional helper functions
         void (*copy_helper)(void *dst, void *src);
         void (*dispose_helper)(void *src);
@@ -76,6 +83,8 @@ id tq_msgSend(id self, SEL selector, ...);
 
 // Same as above except does not perform any (un)boxing
 id tq_msgSend_noBoxing(id self, SEL selector, ...);
+// Same as above except does not perform any (un)boxing
+id tq_msgSend_noBoxing(id self, SEL selector, ...);
 
 // Sends a message boxing the return value and unboxing arguments as necessary
 // WAY slower than objc_msgSend and should never be used directly.
@@ -83,7 +92,7 @@ id tq_msgSend_noBoxing(id self, SEL selector, ...);
 id tq_boxedMsgSend(id self, SEL selector, ...);
 
 // These implement support for dynamic instance variables (But use existing properties if available)
-NSMapTable *TQGetDynamicIvarTable(id obj);
+NSMutableDictionary *TQGetDynamicIvarTable(id obj);
 void TQSetValueForKey(id obj, NSString *key, id value);
 id TQValueForKey(id obj, NSString *key);
 

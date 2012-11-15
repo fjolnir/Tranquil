@@ -11,7 +11,11 @@ static id nilReturner(id self, SEL sel, ...)
 }
 
 @implementation TQNil
-
+ - (id)print
+{
+    NSLog(@"PRINTING NIL!!!!!!!!!");
+return nil;
+}
 + (void)load
 {
     if(self != [TQNil class])
@@ -53,6 +57,7 @@ static id nilReturner(id self, SEL sel, ...)
 
 - (id)isNil
 {
+NSLog(@"ISNIL CALLED");
     return TQValid;
 }
 

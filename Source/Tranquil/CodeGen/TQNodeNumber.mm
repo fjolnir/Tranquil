@@ -55,7 +55,7 @@ using namespace llvm;
                                  error:(NSError **)aoErr
 {
     double value = [_value doubleValue];
-    if([TQNumber fitsInTaggedPointer:value]) {
+    if([TQNumber fitsInTaggedPointer:value onArch:aProgram.targetArch]) {
         Value *numTag = ConstantInt::get(aProgram.llIntPtrTy, kTQNumberTag);
 
         Value *val;

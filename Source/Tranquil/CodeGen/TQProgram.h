@@ -15,7 +15,7 @@
 TQ_EXTERN_C NSString * const kTQSyntaxErrorException;
 typedef id (^TQErrorHandlingBlock)(id err);
 
-@interface TQProgram : NSObject {
+@interface TQProgram : TQObject {
     BOOL _initializedTQRuntime;
 
     // Values used for globals under JIT compilation
@@ -34,6 +34,7 @@ typedef id (^TQErrorHandlingBlock)(id err);
 // AOT compilation related
 @property(readwrite, retain) NSString *outputPath;
 @property(readwrite) BOOL useAOTCompilation;
+@property(readwrite) TQArchitecture targetArch;
 
 #pragma mark - Methods
 

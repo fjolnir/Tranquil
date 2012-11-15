@@ -14,7 +14,6 @@ PARSER_OUTPATH   = "#{BUILD_DIR}/parse.mm"
 
 CXXFLAGS = {
     :release => [
-        '-mmacosx-version-min=10.7',
         '-I`pwd`/Source',
         '-I`pwd`/Build',
         '-I/usr/include/libxml2',
@@ -24,7 +23,6 @@ CXXFLAGS = {
         '-O3',
     ].join(' '),
     :development => [
-        '-mmacosx-version-min=10.7',
         '-DDEBUG',
         '-I`pwd`/Source',
         '-I`pwd`/Build',
@@ -45,6 +43,7 @@ TOOL_LDFLAGS = [
     '`/usr/local/tranquil/llvm/bin/llvm-config --ldflags --libs core jit nativecodegen bitwriter ipo instrumentation`',
     #'`/usr/local/llvm.dbg/bin/llvm-config --ldflags --libs core jit nativecodegen bitwriter ipo instrumentation`',
     '-lclang',
+    '-lobjc',
     '-ltranquil',
     '-ltranquil_codegen',
     '/usr/local/tranquil/gmp/lib/libgmp.a',
@@ -53,13 +52,11 @@ TOOL_LDFLAGS = [
     '-lffi',
     '-lreadline',
     #'-lprofiler',
-    '-framework AppKit',
     '-all_load',
+    '-framework Foundation',
     '-g'
 ].join(' ')
 
-
-LIBS = ['-framework Foundation', '-framework GLUT'].join(' ')
 
 PATHMAP = 'build/%n.o'
 
@@ -67,9 +64,11 @@ STUB_OUTPATH    = 'Build/block_stubs.m'
 STUB_SCRIPT     = 'Source/Tranquil/gen_stubs.rb'
 STUB_H_OUTPATH  = 'Build/TQStubs.h'
 STUB_H_SCRIPT   = 'Source/Tranquil/gen_stubs_header.rb'
-MSGSEND_SOURCE  = 'Source/Tranquil/Runtime/msgsend.s'
+
+MSGSEND_SOURCES = { :x86_64 => 'Source/Tranquil/Runtime/msgsend.x86_64.s', :i386 => 'Source/Tranquil/Runtime/msgsend.i386.s' }
 MSGSEND_OUT     = 'Build/msgsend.o'
-RUNTIME_SOURCES = FileList['Source/Tranquil/BridgeSupport/*.m*'].add('Source/Tranquil/Dispatch/*.m*').add('Source/Tranquil/Runtime/*.m*').add('Source/Tranquil/Shared/*.m*').add(STUB_OUTPATH)
+
+RUNTIME_SOURCES = FileList['Source/Tranquil/BridgeSupport/*.m*'].add('Source/Tranquil/Runtime/*.m*').add('Source/Tranquil/Shared/*.m*').add(STUB_OUTPATH)
 RUNTIME_O_FILES = RUNTIME_SOURCES.pathmap(PATHMAP)
 RUNTIME_O_FILES << MSGSEND_OUT
 
@@ -91,11 +90,21 @@ MAIN_OUTPATH = 'Build/main.o'
 
 @buildMode = :development
 
-def compile(file, flags=CXXFLAGS, cc=CXX)
-    cmd = "#{cc} #{file[:in].join(' ')} #{flags[@buildMode]} -c -o #{file[:out]}"
+def compile(file, flags=CXXFLAGS[@buildMode], cc=CXX, ios=false)
+    if ios then
+        flags = flags + ' -mios-simulator-version-min=6.0'
+        flags << ' -arch i386 -fobjc-abi-version=2 -fobjc-legacy-dispatch'
+        flags << ' -DTQ_NO_BIGNUM' # libgmp is not well supported on iOS
+        flags << ' -I/usr/local/tranquil/libffi-ios/include'
+        flags << ' -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk'
+    else
+        flags = flags + ' -arch x86_64 -mmacosx-version-min=10.7'
+        flags << ' -I/usr/local/tranquil/libffi/include'
+    end
+    cmd = "#{cc} #{file[:in].join(' ')} #{flags} -c -o #{file[:out]}"
     cmd << " -fobjc-arc" if ARC_FILES.member? file[:in].first
-    cmd << " -ObjC++"     if cc == CXX
-    cmd << " -ObjC"       if cc == CC
+    cmd << " -ObjC++"    if cc == CXX
+    cmd << " -ObjC"      if cc == CC
     sh cmd
 end
 
@@ -127,15 +136,24 @@ file STUB_H_OUTPATH => STUB_H_SCRIPT do |f|
     sh "cp Build/TQStubs.h /usr/local/tranquil/include/Tranquil/Runtime/TQStubs.h"
 end
 
-
-file MSGSEND_OUT => MSGSEND_SOURCE do |f|
-    sh "#{CXX} #{MSGSEND_SOURCE} -c -o #{MSGSEND_OUT}"
+MSGSEND_SOURCES.each do |arch, asm|
+    file MSGSEND_OUT => asm do |f|
+        paths = []
+        MSGSEND_SOURCES.each do |arch, asm|
+            outPath = MSGSEND_OUT + ".#{arch.to_s}"
+            paths << outPath
+            sh "#{CXX} #{asm} -arch #{arch.to_s} -c -o #{outPath}"
+        end
+        sh "lipo -create -output #{MSGSEND_OUT} #{paths.join(' ')}"
+    end
 end
 
 
 RUNTIME_SOURCES.each { |src|
     file src.pathmap(PATHMAP) => src do |f|
-        compile({:in => f.prerequisites, :out => f.name}, CXXFLAGS, CC)
+        compile({:in => f.prerequisites, :out => f.name + ".x64"}, CXXFLAGS[@buildMode], CC)
+        compile({:in => f.prerequisites, :out => f.name + ".i386"}, CXXFLAGS[@buildMode], CC, true)
+        sh "lipo -create -output #{f.name} #{f.name}.x64 #{f.name}.i386"
     end
 }
 CODEGEN_SOURCES.each { |src|
@@ -169,7 +187,7 @@ end
 
 file :tranquil => [:libtranquil, :libtranquil_codegen, MAIN_OUTPATH] do |t|
     _buildMain
-    sh "#{LD} #{TOOL_LDFLAGS} #{LIBS} #{MAIN_OUTPATH} -ltranquil_codegen -o #{BUILD_DIR}/tranquil"
+    sh "#{LD} #{TOOL_LDFLAGS} #{MAIN_OUTPATH} -ltranquil_codegen -o #{BUILD_DIR}/tranquil"
 end
 
 task :setReleaseOpts do

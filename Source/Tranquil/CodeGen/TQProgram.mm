@@ -284,15 +284,32 @@ static TQProgram *sharedInstance;
         }]];
 
         [mainBlk generateCodeInProgram:self block:nil root:mainBlk error:&err];
-        //_llModule->dump();
 
         // Output
         Opts.JITEmitDebugInfo = false;
         std::string err;
-        const std::string targetTriple = sys::getDefaultTargetTriple(); //"x86_64-apple-darwin11.0.0";
-        const std::string featureStr   = "";
-        const std::string cpuName      = sys::getHostCPUName();
-
+        std::string targetTriple, featureStr, cpuName;
+        switch(_targetArch) {
+            case kTQArchitectureHost:
+                targetTriple = sys::getDefaultTargetTriple();
+                featureStr   = "";
+                cpuName      = sys::getHostCPUName();
+                break;
+            case kTQArchitectureI386:
+                targetTriple = "i386-apple-darwin11.0.0"; // TODO make dynamic
+                featureStr   = "";
+                cpuName      = "corei7-avx";
+                break;
+            case kTQArchitectureX86_64:
+                targetTriple = "x86_64-apple-darwin11.0.0"; // TODO make dynamic
+                featureStr   = "";
+                cpuName      = "corei7-avx";
+                break;
+            case kTQArchitectureARMv7:
+                targetTriple = "armv7-apple-darwin11.0.0"; // TODO make dynamic
+                featureStr   = "";
+                cpuName      = "";
+        }
         const Target *target = TargetRegistry::lookupTarget(targetTriple, err);
         TQAssert(err.empty(), @"Unable to get target data");
 
@@ -304,6 +321,7 @@ static TQProgram *sharedInstance;
 
         //llvm::PrintStatistics();
         verifyModule(*_llModule, PrintMessageAction);
+        _llModule->dump();
 
         raw_fd_ostream out([_outputPath UTF8String], err, raw_fd_ostream::F_Binary);
         TQAssert(err.empty(), @"Error opening output file for bitcode: %@", _outputPath);

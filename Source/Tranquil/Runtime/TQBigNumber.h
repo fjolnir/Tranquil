@@ -1,11 +1,12 @@
-#import <Foundation/Foundation.h>
+#ifndef TQ_NO_BIGNUM
+#import <Tranquil/Runtime/TQObject.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
 #import <gmp.h>
 
 @class TQNumber;
 
-@interface TQBigNumber : NSObject {
+@interface TQBigNumber : TQObject {
     @protected
     mpf_t _value;
 }
@@ -31,3 +32,4 @@
 - (TQBigNumber *)pow:(id)b;
 - (TQBigNumber *)sqrt;
 @end
+#endif

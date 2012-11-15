@@ -203,7 +203,7 @@ using namespace llvm;
     elements.push_back(llvm::ConstantInt::get( aProgram.llLongTy, 0));
 
     // Size
-    elements.push_back(ConstantExpr::getSizeOf([self _blockLiteralTypeInProgram:aProgram]));
+    elements.push_back(ConstantExpr::getIntegerCast(ConstantExpr::getSizeOf([self _blockLiteralTypeInProgram:aProgram]), int32Ty, TRUE));
 
     elements.push_back([self _generateCopyHelperInProgram:aProgram]);
     elements.push_back([self _generateDisposeHelperInProgram:aProgram]);

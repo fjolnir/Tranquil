@@ -8,7 +8,10 @@
 #import "TQValidObject.h"
 #import "TQNothingness.h"
 #import "NSObject+TQAdditions.h"
+#import "../Shared/khash.h"
 #import <pthread.h>
+#import <setjmp.h>
+#import <ctype.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,7 +22,17 @@ id TQNothing = nil;
 
 // A map keyed with `Class xor (Selector << 32)` with values either being 0x1 (No boxing required for selector)
 // or a pointer the Method object of the method to be boxed. This is only used by tq_msgSend and tq_boxedMsgSend
-NSMapTable *_TQSelectorCache = NULL;
+//CFMutableDictionaryRef _TQSelectorCache = NULL;
+
+#ifdef __LP64__
+#define kh_uintptr_hash_func(key) kh_int64_hash_func(key)
+#else
+#define kh_uintptr_hash_func(key) kh_int_hash_func(key)
+#endif
+#define kh_uintptr_hash_equal(a, b) (a == b)
+
+KHASH_INIT(TQSelectorCache, uintptr_t, uintptr_t, 1, kh_uintptr_hash_func, kh_uintptr_hash_equal);
+khash_t(TQSelectorCache) *_TQSelectorCache = NULL;
 
 static const NSString *_TQDynamicIvarTableKey = @"TQDynamicIvarTableKey";
 
@@ -118,26 +131,41 @@ BOOL TQMethodTypeRequiresBoxing(const char *aEncoding)
 
 void _TQCacheSelector(id obj, SEL sel)
 {
-    @synchronized((NSDictionary *)_TQSelectorCache) {
+    @synchronized((id)_TQSelectorCache) {
         Class kls = object_getClass(obj);
         // See msgsend.s for an explanation of the key
-        void *cacheKey = (void*)((uintptr_t)kls ^ ((uintptr_t)sel << 32));
-
+#ifdef __LP64__
+        uintptr_t cacheKey = (uintptr_t)kls ^ ((uintptr_t)sel << 32);
+#else
+        printf("32bit not tested\n");
+        uintptr_t cacheKey = (uintptr_t)kls ^ ((uintptr_t)sel << 16); // TODO: verify if this works
+#endif
         Method method = class_getInstanceMethod(kls, sel);
         // Methods that do not have a registered implementation are assumed to take&return only objects
-        uintptr_t unboxedVal = 0x1L;
-        if(!method) {
-            NSMapInsert(_TQSelectorCache, cacheKey, (void*)0x1L);
-            return;
+        uintptr_t val = 0x1L; // 0x1L => unboxed
+        if(method && TQMethodTypeRequiresBoxing(method_getTypeEncoding(method))) {
+            val = (uintptr_t)method;
         }
 
-        const char *enc = method_getTypeEncoding(method);
-        if(TQMethodTypeRequiresBoxing(enc))
-            NSMapInsert(_TQSelectorCache, cacheKey, (void*)method);
-        else
-            NSMapInsert(_TQSelectorCache, cacheKey, (void*)0x1L);
+        int err;
+        khiter_t cur = kh_put(TQSelectorCache, _TQSelectorCache, cacheKey, &err);
+        assert(!err);
+
+        kh_value(_TQSelectorCache, cur) = val;
     }
- }
+}
+
+uintptr_t _TQSelectorCacheLookup(id obj, SEL selector) {
+    Class kls = object_getClass(obj);
+#ifdef __LP64__
+    uintptr_t key = (uintptr_t)kls ^ (uintptr_t)selector << 32;
+#else
+    uintptr_t key = (uintptr_t)kls ^ (uintptr_t)selector << 16;
+#endif
+
+    khiter_t k = kh_get(TQSelectorCache, _TQSelectorCache, key);
+    return ((k != kh_end(_TQSelectorCache)) && kh_exist(_TQSelectorCache, k)) ? kh_value(_TQSelectorCache, k) : 0;
+}
 
 void TQUnboxObject(id object, const char *type, void *buffer)
 {
@@ -313,18 +341,18 @@ id TQGetNonLocalReturnValue()
 
 #pragma mark - Dynamic instance variables
 
-static inline NSMapTable *_TQGetDynamicIvarTable(id obj)
+static inline NSMutableDictionary *_TQGetDynamicIvarTable(id obj)
 {
-    NSMapTable *ivarTable = objc_getAssociatedObject(obj, _TQDynamicIvarTableKey);
+    NSMutableDictionary *ivarTable = objc_getAssociatedObject(obj, _TQDynamicIvarTableKey);
     if(!ivarTable) {
-        ivarTable = NSCreateMapTable(NSNonOwnedPointerMapKeyCallBacks, NSObjectMapValueCallBacks, 0);
+        ivarTable = [NSMutableDictionary new];
         objc_setAssociatedObject(obj, _TQDynamicIvarTableKey, ivarTable, OBJC_ASSOCIATION_RETAIN);
         [ivarTable release];
     }
     return ivarTable;
 }
 
-NSMapTable *TQGetDynamicIvarTable(id obj)
+NSMutableDictionary *TQGetDynamicIvarTable(id obj)
 {
     return _TQGetDynamicIvarTable(obj);
 }
@@ -340,6 +368,7 @@ static inline size_t _accessorNameLen(const char *accessorNameLoc)
 
 id TQValueForKey(id obj, NSString *key)
 {
+    assert(key);
     if(!obj)
         return nil;
 
@@ -348,12 +377,12 @@ id TQValueForKey(id obj, NSString *key)
     if(class_respondsToSelector(kls, selector))
         return tq_msgSend(obj, selector);
 
-    NSMapTable *ivarTable = _TQGetDynamicIvarTable(obj);
-    return (id)NSMapGet(ivarTable, key);
+    return [_TQGetDynamicIvarTable(obj) objectForKey:key];
 }
 
 void TQSetValueForKey(id obj, NSString *key, id value)
 {
+    assert(key);
     if(!obj)
         return;
     if(TQObjectIsStackBlock(value))
@@ -365,11 +394,11 @@ void TQSetValueForKey(id obj, NSString *key, id value)
     if(class_respondsToSelector(kls, setterSel))
         tq_msgSend(obj, setterSel, value);
 
-    NSMapTable *ivarTable = _TQGetDynamicIvarTable(obj);
+
     if(value)
-        NSMapInsert(ivarTable, key, value);
+        [_TQGetDynamicIvarTable(obj) setObject:value forKey:key];
     else
-        NSMapRemove(ivarTable, key);
+        [_TQGetDynamicIvarTable(obj) removeObjectForKey:key];
 }
 
 #pragma mark -
@@ -478,8 +507,12 @@ void TQInitializeRuntime()
     if(_TQSelectorCache)
         return;
 
-    _TQSelectorCache = NSCreateMapTable((NSMapTableKeyCallBacks){NULL,NULL,NULL},
-                                        (NSMapTableValueCallBacks){NULL,NULL,NULL}, 1000);
+    _TQSelectorCache = kh_init(TQSelectorCache);
+//    _TQSelectorCache = CFDictionaryCreateMutable(NULL, 1000, NULL, NULL);
+//                                        (NSMapTableValueCallBacks){NULL,NULL,NULL}, 1000);
+//    _TQSelectorCache = [[NSMapTable alloc] initWithKeyOptions:NSPointerFunctionsOpaqueMemory
+//                                                 valueOptions:NSPointerFunctionsOpaqueMemory
+//                                                     capacity:1000];
 
     pthread_key_create(&_TQNonLocalReturnStackKey, (void (*)(void *))&_destroyNonLocalReturnStack);
 

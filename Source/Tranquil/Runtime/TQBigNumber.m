@@ -1,3 +1,4 @@
+#ifndef TQ_NO_BIGNUM
 #import "TQBigNumber.h"
 #import "TQNumber.h"
 
@@ -180,3 +181,4 @@ static const int _TQBigNumberMaxDigits;
     return [ret autorelease];
 }
 @end
+#endif

@@ -122,13 +122,25 @@ using namespace llvm;
 }
 - (llvm::Type *)llIntTy
 {
-    llvm::LLVMContext &ctx = self.llModule->getContext();
-    return TypeBuilder<int, false>::get(ctx);
+    return self.llInt32Ty;
 }
 - (llvm::Type *)llLongTy
 {
-    llvm::LLVMContext &ctx = self.llModule->getContext();
-    return TypeBuilder<long, false>::get(ctx);
+    switch(self.targetArch) {
+        case kTQArchitectureHost:
+#ifdef __LP64__
+        return self.llInt64Ty;
+#else
+        return self.llInt32Ty;
+#endif
+        case kTQArchitectureI386:
+        case kTQArchitectureARMv7:
+            return self.llInt32Ty;
+        case kTQArchitectureX86_64:
+            return self.llInt64Ty;
+        default:
+            return NULL;
+    }
 }
 - (llvm::Type *)llIntPtrTy
 {
@@ -367,8 +379,8 @@ using namespace llvm;
 {
     // void*(long, long)
     std::vector<Type*> args_long_long;
-    args_long_long.push_back(self.llInt64Ty);
-    args_long_long.push_back(self.llInt64Ty);
+    args_long_long.push_back(self.llLongTy);
+    args_long_long.push_back(self.llLongTy);
     return FunctionType::get(self.llInt8PtrTy, args_long_long, false);
 }
 - (llvm::FunctionType *)_ft_long__i8Ptr_long
@@ -376,7 +388,7 @@ using namespace llvm;
     // long(void*, long)
     std::vector<Type*> args_i8Ptr_long;
     args_i8Ptr_long.push_back(self.llInt8PtrTy);
-    args_i8Ptr_long.push_back(self.llInt64Ty);
+    args_i8Ptr_long.push_back(self.llLongTy);
     return FunctionType::get(self.llLongTy, args_i8Ptr_long, false);
 }
 - (llvm::FunctionType *)_ft_i8__float
@@ -536,7 +548,7 @@ FunAccessor(pthread_self, ft_long_void);
         case _C_BOOL:
             return self.llInt8Ty;
         case _C_LNG:
-            return self.llInt64Ty;
+            return self.llLongTy;
         case _C_LNG_LNG:
             return self.llInt64Ty;
         case _C_UINT:
@@ -544,7 +556,7 @@ FunAccessor(pthread_self, ft_long_void);
         case _C_USHT:
             return self.llInt16Ty;
         case _C_ULNG:
-            return self.llInt64Ty;
+            return self.llLongTy;
         case _C_ULNG_LNG:
             return self.llInt64Ty;
         case _C_VOID:

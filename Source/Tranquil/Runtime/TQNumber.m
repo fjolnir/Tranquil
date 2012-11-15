@@ -92,8 +92,10 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
         assert((typeof(initImp))class_getMethodImplementation(self, @selector(initWithDouble:)) == initImp);
         assert((typeof(autoreleaseImp))class_getMethodImplementation(self, @selector(autorelease)) == autoreleaseImp);
     } else {
+#ifdef __LP64__
         // Register our tagged pointer slot
         _objc_insert_tagged_isa(kTQNumberTagSlot, [TQTaggedNumber class]);
+#endif
 
         IMP imp;
         // ==
@@ -139,6 +141,19 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
 + (id)fitsInTaggedPointer:(double)aValue
 {
     return _TQTaggedNumberCanHold(aValue) ? TQValid : nil;
+}
+
++ (id)fitsInTaggedPointer:(double)aValue onArch:(TQArchitecture)aArch
+{
+    // TODO: implement this properly
+    switch(aArch) {
+        kTQArchitectureX86_64:
+        kTQArchitectureHost:
+            return [self fitsInTaggedPointer:aValue];
+            break;
+        default:
+            return NO;
+    }
 }
 
 + (TQNumber *)numberWithBool:(BOOL)aValue
@@ -202,16 +217,16 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
     return autoreleaseImp(ret, @selector(autorelease));
 }
 
-+ (NSNumber *)numberWithUnsignedChar:(unsigned char)aValue
++ (TQNumber *)numberWithUnsignedChar:(unsigned char)aValue
 {
     return _TQTaggedNumberCreate(aValue);
 }
-+ (NSNumber *)numberWithUnsignedShort:(unsigned short)aValue
++ (TQNumber *)numberWithUnsignedShort:(unsigned short)aValue
 {
     return _TQTaggedNumberCreate(aValue);
 }
 
-+ (NSNumber *)numberWithUnsignedInt:(unsigned int)aValue
++ (TQNumber *)numberWithUnsignedInt:(unsigned int)aValue
 {
     if(_TQTaggedNumberCanHold(aValue))
         return _TQTaggedNumberCreate(aValue);
@@ -220,7 +235,7 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
     return autoreleaseImp(ret, @selector(autorelease));
 }
 
-+ (NSNumber *)numberWithUnsignedLong:(unsigned long)aValue
++ (TQNumber *)numberWithUnsignedLong:(unsigned long)aValue
 {
     if(_TQTaggedNumberCanHold(aValue))
         return _TQTaggedNumberCreate(aValue);
@@ -229,7 +244,7 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
     return autoreleaseImp(ret, @selector(autorelease));
 }
 
-+ (NSNumber *)numberWithUnsignedLongLong:(unsigned long long)aValue
++ (TQNumber *)numberWithUnsignedLongLong:(unsigned long long)aValue
 {
     if(_TQTaggedNumberCanHold(aValue))
         return _TQTaggedNumberCreate(aValue);
@@ -238,7 +253,7 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
     return autoreleaseImp(ret, @selector(autorelease));
 }
 
-+ (NSNumber *)numberWithUnsignedInteger:(NSUInteger)aValue
++ (TQNumber *)numberWithUnsignedInteger:(NSUInteger)aValue
 {
     if(_TQTaggedNumberCanHold(aValue))
         return _TQTaggedNumberCreate(aValue);
@@ -353,8 +368,10 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
     if(object_getClass(self) != object_getClass(b))
         return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _TQNumberValue(self) + [b doubleValue]);
     double result = _TQNumberValue(self) + _TQNumberValue(b);
+#ifndef TQ_NO_BIGNUM
     if(isinf(result))
         return [[TQBigNumber withNumber:self] add:b];
+#endif
     return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), result);
 
 }
@@ -363,8 +380,10 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
     if(object_getClass(self) != object_getClass(b))
         return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _TQNumberValue(self) - [b doubleValue]);
     double result = _TQNumberValue(self) - _TQNumberValue(b);
+#ifndef TQ_NO_BIGNUM
     if(isinf(result))
         return [[TQBigNumber withNumber:self] subtract:b];
+#endif
     return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), result);
 }
 
@@ -386,8 +405,10 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
     if(object_getClass(self) != object_getClass(b))
         return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _TQNumberValue(self) * [b doubleValue]);
     double result = _TQNumberValue(self) * _TQNumberValue(b);
+#ifndef TQ_NO_BIGNUM
     if(isinf(result))
         return [[TQBigNumber withNumber:self] multiply:b];
+#endif
     return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), result);
 
 }
@@ -399,12 +420,13 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
         bVal = [b doubleValue];
     else
         bVal = _TQNumberValue(b);
-    if(bVal == 0.0)
-        [NSException raise:@"Arithmetic Exception" format:@"Divide by zero error"];
+    TQAssert(bVal != 0.0, @"Divide by zero error");
 
     double result = aVal / bVal;
+#ifndef TQ_NO_BIGNUM
     if(isinf(result))
         return [[TQBigNumber withNumber:self] divide:b];
+#endif
     return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), result);
 }
 - (TQNumber *)modulo:(id)b
@@ -418,8 +440,10 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
     if(object_getClass(self) != object_getClass(b))
         return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), pow(_TQNumberValue(self), [b doubleValue]));
     double result = pow(_TQNumberValue(self), _TQNumberValue(b) );
+#ifndef TQ_NO_BIGNUM
     if(isinf(result))
         return [[TQBigNumber withNumber:self] pow:b];
+#endif
     return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), result);
 }
 - (TQNumber *)sqrt
