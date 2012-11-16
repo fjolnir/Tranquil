@@ -1,15 +1,14 @@
 \ Tranquil compiler
-import "stdlib"
 
 error = { reason |
     "Error! «reason»" print
-    Exit(1)
+    ^^1
 }
 uuid = `NSProcessInfo processInfo globallyUniqueString`
 
-clang     = "/usr/local/tranquil/llvm/bin/clang"
-arch      = "x86_64"
-forIOS    = no
+clang    = "/usr/local/tranquil/llvm/bin/clang"
+arch     = "x86_64"
+forIOS   = no
 
 inPath   = nil
 outPath  = @"a.out"

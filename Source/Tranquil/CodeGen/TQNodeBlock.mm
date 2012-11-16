@@ -497,7 +497,8 @@ using namespace llvm;
         [_literalPtr store:thisBlockPtr inProgram:aProgram block:self root:aRoot error:aoErr];
         thisBlock = _builder->CreateBitCast(thisBlockPtr, PointerType::getUnqual([self _blockLiteralTypeInProgram:aProgram]));
         argumentIterator++;
-    }
+    } else
+        [_literalPtr store:ConstantPointerNull::get(int8PtrTy) inProgram:aProgram block:self root:aRoot error:aoErr];
 
     // Load captured variables
     if(thisBlock) {
@@ -586,13 +587,13 @@ using namespace llvm;
         BasicBlock *nonLocalReturnPropBlock = BasicBlock::Create(mod->getContext(), "nonLocalRetProp", _function, 0);
         BasicBlock *bodyBlock = BasicBlock::Create(mod->getContext(), "body", _function, 0);
 
-        Value *jmpBuf  = _builder->CreateCall(aProgram.TQPushNonLocalReturnStack, thisBlockPtr);
+        Value *jmpBuf  = _builder->CreateCall(aProgram.TQPushNonLocalReturnStack, thisBlockPtr ? thisBlockPtr : ConstantPointerNull::get(int8PtrTy));
         Value *jmpRes  = _builder->CreateCall(aProgram.setjmp, jmpBuf);
         Value *jmpTest = _builder->CreateICmpEQ(jmpRes, ConstantInt::get(aProgram.llIntTy, 0));
         _builder->CreateCondBr(jmpTest, bodyBlock, nonLocalReturnBlock);
 
         IRBuilder<> nlrBuilder(nonLocalReturnBlock);
-        Value *shouldProp = nlrBuilder.CreateCall(aProgram.TQShouldPropagateNonLocalReturn, thisBlockPtr);
+        Value *shouldProp = nlrBuilder.CreateCall(aProgram.TQShouldPropagateNonLocalReturn, thisBlockPtr ? thisBlockPtr : ConstantPointerNull::get(int8PtrTy));
         shouldProp = nlrBuilder.CreateICmpEQ(shouldProp, ConstantInt::get(aProgram.llIntTy, 1));
         nlrBuilder.CreateCondBr(shouldProp, nonLocalReturnPropBlock, nonLocalReturnPerfBlock);
 
@@ -634,24 +635,8 @@ using namespace llvm;
     return _function;
 }
 
-// Generates a block on the stack
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
-                                 block:(TQNodeBlock *)aBlock
-                                  root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
+- (void)_prepareNonLocalRetInProgram:(TQProgram *)aProgram
 {
-    TQAssert(!_basicBlock && !_function, @"Tried to regenerate code for block");
-    _parent = aBlock;
-
-    if(!_retType)
-        _retType = @"@";
-    if(!_argTypes) {
-        _argTypes = [[NSMutableArray alloc] initWithCapacity:_arguments.count];
-        for(TQNodeArgumentDef *arg in _arguments) {
-            [_argTypes addObject:@"@"];
-        }
-    }
-
     // Check if there are any child blocks that contain a non-local return targeted at us
     __block void (^nonLocalRetChecker)(TQNode*, int);
     nonLocalRetChecker = ^(TQNode *n, int depth) {
@@ -666,7 +651,7 @@ using namespace llvm;
                 for(int i = depth; i < destDepth; ++i) {
                     dest = dest.parent;
                 }
-                TQAssert(dest && ![dest isKindOfClass:[TQNodeRootBlock class]], @"Tried to jump to high");
+                TQAssert(dest, @"Tried to jump to high");
                 TQNodeIntVariable *target = dest.nonLocalReturnTarget;
                 TQNodeVariable *targetPtr = dest.literalPtr;
                 TQNodeIntVariable *thread = dest.nonLocalReturnThread;
@@ -685,6 +670,28 @@ using namespace llvm;
         [n iterateChildNodes:^(TQNode *child) { nonLocalRetChecker(child, depth); }];
     };
     nonLocalRetChecker(self, -1);
+
+
+}
+// Generates a block on the stack
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
+{
+    TQAssert(!_basicBlock && !_function, @"Tried to regenerate code for block");
+    _parent = aBlock;
+
+    if(!_retType)
+        _retType = @"@";
+    if(!_argTypes) {
+        _argTypes = [[NSMutableArray alloc] initWithCapacity:_arguments.count];
+        for(TQNodeArgumentDef *arg in _arguments) {
+            [_argTypes addObject:@"@"];
+        }
+    }
+
+    [self _prepareNonLocalRetInProgram:aProgram];
 
     // Generate a list of variables to capture
     if(aBlock) {
@@ -813,6 +820,7 @@ using namespace llvm;
 {
     // The root block is just a function that executes the body of the program
     // so we only need to create&return it's invocation function
+    [self _prepareNonLocalRetInProgram:aProgram];
     return [self _generateInvokeInProgram:aProgram root:aRoot block:aBlock error:aoErr];
 }
 
