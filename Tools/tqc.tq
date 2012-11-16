@@ -70,7 +70,7 @@ asmPath = "/tmp/«uuid()».s"
 llcArchs = { @x86_64 => @x86-64, @i386 => @x86, @armv7 => @arm }
 "arch: «arch» => «llcArchs[arch]»" print
 status = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/llvm/bin/llc"
-                                 arguments: [@-O3, @-disable-fp-elim, "-march=«llcArchs[arch]»", @-relocation-model=pic, @-o, asmPath, irPath];
+                                 arguments: [@-O0, @-disable-fp-elim, "-march=«llcArchs[arch]»", @-relocation-model=pic, @-o, asmPath, irPath];
                              waitUntilExit;
                          terminationStatus
 error("Assembly failed") if status ~= 0
