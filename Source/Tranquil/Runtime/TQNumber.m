@@ -8,6 +8,18 @@
 @interface TQTaggedNumber : TQNumber
 @end
 
+#define IS_TAGGED(ptr) ((uintptr_t)(ptr) & 1)
+
+union CoercedValue {
+    void *ptr;
+    uintptr_t addr;
+    float floatValue;
+    double doubleValue;
+};
+
+// Largest integer accurately representable
+static const double TQTaggedNumberLimit = 1.0f/FLT_EPSILON;
+
 static id (*numberWithDoubleImp)(id, SEL, double);
 static id (*numberWithLongImp)(id, SEL, long);
 static id (*allocImp)(id,SEL,NSZone*);
@@ -24,20 +36,6 @@ extern void _objc_insert_tagged_isa(unsigned char slotNumber, Class isa);
 const unsigned char kTQNumberTagSlot  = 5; // Free slot
 const uintptr_t     kTQNumberTag      = (kTQNumberTagSlot << 1) | 1;
 
-#define IS_TAGGED(ptr) ((uintptr_t)(ptr) & 1)
-
-#ifdef __LP64__
-// Largest integer accurately representable
-static const double TQTaggedNumberLimit = 1.0f/FLT_EPSILON;
-#endif
-
-union CoercedValue {
-    void *ptr;
-    uintptr_t addr;
-    float floatValue;
-    double doubleValue;
-};
-
 static __inline__ BOOL _TQTaggedNumberCanHold(double aValue)
 {
 #ifdef __LP64__
@@ -51,34 +49,32 @@ static __inline__ BOOL _TQTaggedNumberCanHold(double aValue)
 
 static __inline__ id _TQTaggedNumberCreate(float value)
 {
+#ifdef __LP64__
     union CoercedValue val = { .floatValue = value };
     val.addr = (val.addr << 4) | kTQNumberTag;
     return val.ptr;
+#else
+    return nil;
+#endif
 }
 
 static __inline__ float _TQTaggedNumberValue(TQTaggedNumber *ptr)
 {
+#ifdef __LP64__
     union CoercedValue val = { .ptr = ptr };
     val.addr >>= 4;
     return val.floatValue;
+#else
+    return 0.0f;
+#endif
 }
-static __inline__ double _TQNumberValue(TQNumber *ptr)
-{
-    return IS_TAGGED(ptr) ? _TQTaggedNumberValue((TQTaggedNumber *)ptr) : ptr->_value;
-}
+
+#define _TQNumberValue(num) (IS_TAGGED(num) ? _TQTaggedNumberValue((TQTaggedNumber *)(num)) : ((TQNumber *)(num))->_value)
 
 BOOL TQFloatFitsInTaggedNumber(float aValue)
 {
     return _TQTaggedNumberCanHold(aValue);
 }
-
-@implementation TQTaggedNumber
-- (id)retain { return self;}
-- (oneway void)release {}
-- (id)autorelease { return self; }
-- (void)dealloc { if(NO) [super dealloc]; }
-- (id)copyWithZone:(NSZone *)aZone { return self; }
-@end
 
 @implementation TQNumber
 @synthesize value=_value;
@@ -158,15 +154,24 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
 
 + (TQNumber *)numberWithBool:(BOOL)aValue
 {
-    return _TQTaggedNumberCreate(aValue);
+    if(_TQTaggedNumberCanHold(aValue))
+        return _TQTaggedNumberCreate(aValue);
+    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithBool:), aValue);
+    return autoreleaseImp(ret, @selector(autorelease));
 }
 + (TQNumber *)numberWithChar:(char)aValue
 {
-    return _TQTaggedNumberCreate(aValue);
+    if(_TQTaggedNumberCanHold(aValue))
+        return _TQTaggedNumberCreate(aValue);
+    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithChar:), aValue);
+    return autoreleaseImp(ret, @selector(autorelease));
 }
 + (TQNumber *)numberWithShort:(short)aValue
 {
-    return _TQTaggedNumberCreate(aValue);
+    if(_TQTaggedNumberCanHold(aValue))
+        return _TQTaggedNumberCreate(aValue);
+    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithShort:), aValue);
+    return autoreleaseImp(ret, @selector(autorelease));
 }
 + (TQNumber *)numberWithInt:(int)aValue
 {
@@ -340,26 +345,25 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
     return self;
 }
 
+- (char)charValue                           { return _value; }
+- (short)shortValue                         { return _value; }
+- (int)intValue                             { return _value; }
+- (long)longValue                           { return _value; }
+- (long long)longLongValue                  { return _value; }
+- (float)floatValue                         { return _value; }
+- (double)doubleValue                       { return _value; }
+- (BOOL)boolValue                           { return _value; }
+- (NSInteger)integerValue                   { return _value; }
 
-- (char)charValue { return _TQNumberValue(self); }
-- (short)shortValue { return _TQNumberValue(self); }
-- (int)intValue { return _TQNumberValue(self); }
-- (long)longValue { return _TQNumberValue(self); }
-- (long long)longLongValue { return _TQNumberValue(self); }
-- (float)floatValue { return _TQNumberValue(self); }
-- (double)doubleValue { return _TQNumberValue(self); }
-- (BOOL)boolValue { return _TQNumberValue(self); }
-- (NSInteger)integerValue { return _TQNumberValue(self); }
+- (unsigned char)unsignedCharValue          { return _value; }
+- (unsigned short)unsignedShortValue        { return _value; }
+- (unsigned int)unsignedIntValue            { return _value; }
+- (unsigned long)unsignedLongValue          { return _value; }
+- (unsigned long long)unsignedLongLongValue { return _value; }
+- (NSUInteger)unsignedIntegerValue          { return _value; }
 
-- (unsigned char)unsignedCharValue { return _TQNumberValue(self); }
-- (unsigned short)unsignedShortValue { return _TQNumberValue(self); }
-- (unsigned int)unsignedIntValue { return _TQNumberValue(self); }
-- (unsigned long)unsignedLongValue { return _TQNumberValue(self); }
-- (unsigned long long)unsignedLongLongValue { return _TQNumberValue(self); }
-- (NSUInteger)unsignedIntegerValue { return _TQNumberValue(self); }
-
-- (const char *)objCType { return "d"; }
-- (void)getValue:(void *)buffer { *(double *)buffer = _TQNumberValue(self); }
+- (const char *)objCType                    { return "d";                 }
+- (void)getValue:(void *)buffer             { *(double *)buffer = _value; }
 
 #pragma mark - Operators
 
@@ -544,28 +548,28 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
 {
     if(object_getClass(self) != object_getClass(b))
         return _TQNumberValue(self) > [b doubleValue] ? TQValid : nil;
-    return _TQNumberValue(self) > _TQNumberValue(b)  ? TQValid : nil;
+    return _TQNumberValue(self) > _TQNumberValue(b)   ? TQValid : nil;
 }
 
 - (id)isLesser:(id)b
 {
     if(object_getClass(self) != object_getClass(b))
         return _TQNumberValue(self) < [b doubleValue] ? TQValid : nil;
-    return _TQNumberValue(self) < _TQNumberValue(b)  ? TQValid : nil;
+    return _TQNumberValue(self) < _TQNumberValue(b)   ? TQValid : nil;
 }
 
 - (id)isGreaterOrEqual:(id)b
 {
     if(object_getClass(self) != object_getClass(b))
         return _TQNumberValue(self) >= [b doubleValue] ? TQValid : nil;
-    return _TQNumberValue(self) >= _TQNumberValue(b)  ? TQValid : nil;
+    return _TQNumberValue(self) >= _TQNumberValue(b)   ? TQValid : nil;
 }
 
 - (id)isLesserOrEqual:(id)b
 {
     if(object_getClass(self) != object_getClass(b))
         return _TQNumberValue(self) <= [b doubleValue] ? TQValid : nil;
-    return _TQNumberValue(self) <= _TQNumberValue(b)  ? TQValid : nil;
+    return _TQNumberValue(self) <= _TQNumberValue(b)   ? TQValid : nil;
 }
 
 
@@ -634,3 +638,33 @@ TQ_BATCH_IMPL(TQNumber)
     TQ_BATCH_DEALLOC
 }
 @end
+
+@implementation TQTaggedNumber
+- (char)charValue                           { return _TQTaggedNumberValue(self); }
+- (short)shortValue                         { return _TQTaggedNumberValue(self); }
+- (int)intValue                             { return _TQTaggedNumberValue(self); }
+- (long)longValue                           { return _TQTaggedNumberValue(self); }
+- (long long)longLongValue                  { return _TQTaggedNumberValue(self); }
+- (float)floatValue                         { return _TQTaggedNumberValue(self); }
+- (double)doubleValue                       { return _TQTaggedNumberValue(self); }
+- (BOOL)boolValue                           { return _TQTaggedNumberValue(self); }
+- (NSInteger)integerValue                   { return _TQTaggedNumberValue(self); }
+
+- (unsigned char)unsignedCharValue          { return _TQTaggedNumberValue(self); }
+- (unsigned short)unsignedShortValue        { return _TQTaggedNumberValue(self); }
+- (unsigned int)unsignedIntValue            { return _TQTaggedNumberValue(self); }
+- (unsigned long)unsignedLongValue          { return _TQTaggedNumberValue(self); }
+- (unsigned long long)unsignedLongLongValue { return _TQTaggedNumberValue(self); }
+- (NSUInteger)unsignedIntegerValue          { return _TQTaggedNumberValue(self); }
+
+- (const char *)objCType        { return "f";                                    }
+- (void)getValue:(void *)buffer { *(float *)buffer = _TQTaggedNumberValue(self); }
+
++ (id)allocWithZone:(NSZone *)aZone  { return nil; }
+- (id)retain { return self;}
+- (oneway void)release {}
+- (id)autorelease { return self; }
+- (void)dealloc { if(NO) [super dealloc]; }
+- (id)copyWithZone:(NSZone *)aZone { return self; }
+@end
+
