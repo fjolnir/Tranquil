@@ -574,7 +574,7 @@ using namespace llvm;
         Value *vaargArray = _builder->CreateCall(aProgram.TQVaargsToArray, valistCast);
         _builder->CreateCall(vaEnd, valistCast);
 
-        TQNodeVariable *dotDotDot = [TQNodeVariable nodeWithName:@"..."];
+        TQNodeVariable *dotDotDot = [TQNodeVariable nodeWithName:@"TQArguments"];
         dotDotDot.shadows = YES;
         [dotDotDot store:vaargArray inProgram:aProgram block:self root:aRoot error:aoErr];
     }

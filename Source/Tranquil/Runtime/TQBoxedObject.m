@@ -86,8 +86,6 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     if(self != [TQBoxedObject class])
         return;
 
-    TQInitializeRuntime();
-
     Class TQNumberClass = [TQNumber class];
     Class TQTaggedNumberClass = NSClassFromString(@"TQTaggedNumber");
     Class NSNumberClass = [NSNumber class];

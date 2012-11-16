@@ -58,7 +58,7 @@ using namespace llvm;
     TQVaargsToArray, TQUnboxObject,
     TQBoxValue, tq_msgSend, tq_msgSend_noBoxing, objc_retainAutorelease, objc_retainAutoreleaseReturnValue,
     objc_autoreleaseReturnValue, objc_retainAutoreleasedReturnValue,
-    objc_storeStrong, TQStoreStrong, TQInitializeRuntime, TQCliArgsToArray,
+    objc_storeStrong, TQStoreStrong, TQInitializeRuntime,
     dispatch_get_global_queue, dispatch_group_create,
     dispatch_release, dispatch_group_wait,
     dispatch_group_notify, dispatch_group_async,
@@ -375,6 +375,14 @@ using namespace llvm;
     args_int_i8PtrPtr.push_back(self.llInt8PtrPtrTy);
     return FunctionType::get(self.llInt8PtrTy, args_int_i8PtrPtr, false);
 }
+- (llvm::FunctionType *)_ft_void__i32_i8PtrPtr
+{
+    // id(int, void**)
+    std::vector<Type*> args_int_i8PtrPtr;
+    args_int_i8PtrPtr.push_back(self.llIntTy);
+    args_int_i8PtrPtr.push_back(self.llInt8PtrPtrTy);
+    return FunctionType::get(self.llVoidTy, args_int_i8PtrPtr, false);
+}
 - (llvm::FunctionType *)_ft_i8Ptr__long_long
 {
     // void*(long, long)
@@ -470,8 +478,7 @@ FunAccessor(TQUnboxObject,  ft_void__i8Ptr_i8Ptr_i8Ptr)
 FunAccessor(TQBoxValue,  ft_i8Ptr__i8Ptr_i8Ptr)
 FunAccessor(tq_msgSend, ft_i8ptr__i8ptr_i8ptr_variadic)
 FunAccessor(tq_msgSend_noBoxing, ft_i8ptr__i8ptr_i8ptr_variadic)
-FunAccessor(TQInitializeRuntime, ft_void__void)
-FunAccessor(TQCliArgsToArray, ft_i8Ptr__i32_i8PtrPtr)
+FunAccessor(TQInitializeRuntime, ft_void__i32_i8PtrPtr)
 FunAccessor(dispatch_get_global_queue, ft_i8Ptr__long_long)
 FunAccessor(dispatch_group_create, ft_i8Ptr__void)
 FunAccessor(dispatch_release, ft_void__i8Ptr)

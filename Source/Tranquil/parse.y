@@ -72,9 +72,6 @@ simpleExprNoNl(E) ::= parenExprNoNl(PE).                { E = PE;               
 simpleExprNoNl(E) ::= literalNoNl(L).                   { E = L;                                                                      }
 simpleExprNoNl(E) ::= constantNoNl(L).                  { E = L;                                                                      }
 simpleExprNoNl(E) ::= unaryMsgNoNl(M).                  { E = M;                                                                      }
-//simpleExprNoNl(E) ::= variableNoNl(L).                  { E = L;                                                                      }
-//simpleExprNoNl(E) ::= subscriptNoNl(L).                 { E = L;                                                                      }
-//simpleExprNoNl(E) ::= propertyNoNl(L).                  { E = L;                                                                      }
 simpleExprNoNl(E) ::= assignableNoNl(M).                { E = M;                                                                      }
 simpleExprNoNl(E) ::= unaryOpNoNl(M).                   { E = M;                                                                      }
 simpleExprNoNl(E) ::= blockCallNoNl(C).                 { E = C;                                                                      }
@@ -83,9 +80,6 @@ simpleExprNl(E) ::= parenExprNl(PE).                    { E = PE;               
 simpleExprNl(E) ::= literalNl(L).                       { E = L;                                                                      }
 simpleExprNl(E) ::= constantNl(L).                      { E = L;                                                                      }
 simpleExprNl(E) ::= unaryMsgNl(M).                      { E = M;                                                                      }
-//simpleExprNl(E) ::= variableNl(L).                      { E = L;                                                                      }
-//simpleExprNl(E) ::= subscriptNl(L).                     { E = L;                                                                      }
-//simpleExprNl(E) ::= propertyNl(L).                      { E = L;                                                                      }
 simpleExprNl(E) ::= assignableNl(M).                    { E = M;                                                                      }
 simpleExprNl(E) ::= unaryOpNl(M).                       { E = M;                                                                      }
 simpleExprNl(E) ::= blockCallNl(C).                     { E = C;                                                                      }
@@ -584,10 +578,8 @@ variableNl(V)   ::= NILNL.                              { V = [TQNodeNil node]; 
 variableNl(V)   ::= NOTHINGNL.                          { V = [TQNodeNothing node];                                                   }
 variableNl(V)   ::= vaargNl(T).                         { V = T;                                                                      }
 
-//vaarg(V)        ::= vaargNoNl(T).                       { V = T;                                                                      }
-//vaarg(V)        ::= vaargNl(T).                         { V = T;                                                                      }
-vaargNoNl(V)    ::= VAARG.                              { V = [TQNodeVariable nodeWithName:@"..."];                                   }
-vaargNl(V)      ::= VAARGNL.                            { V = [TQNodeVariable nodeWithName:@"..."];                                   }
+vaargNoNl(V)    ::= VAARG.                              { V = [TQNodeVariable nodeWithName:@"TQArguments"];                             }
+vaargNl(V)      ::= VAARGNL.                            { V = [TQNodeVariable nodeWithName:@"TQArguments"];                             }
 
 // Accessables (Simple values; needs to be merged with simpleExpr when I resolve the conflicts that occur)
 accessableNoNl(A) ::= variableNoNl(V).                  { A = V;                                                                      }

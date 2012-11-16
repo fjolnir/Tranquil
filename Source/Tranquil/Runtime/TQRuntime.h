@@ -101,7 +101,6 @@ id TQPrepareObjectForReturn(id obj);
 // Variant of objc_storeStrong that moves stack blocks to the heap
 void TQStoreStrong(id *location, id obj);
 NSPointerArray *TQVaargsToArray(va_list *items);
-NSPointerArray *TQCliArgsToArray(int argc, char **argv);
 
 // Looks up a class if it exists, otherwise registers it
 Class TQGetOrCreateClass(const char *name, const char *superName);
@@ -137,7 +136,7 @@ id TQGetNonLocalReturnValue();
 // Adds operator methods to the passed class (such as ==:, >=:, []: etc)
 BOOL TQAugmentClassWithOperators(Class klass);
 
-void TQInitializeRuntime();
+void TQInitializeRuntime(int argc, char **argv);
 
 extern SEL TQEqOpSel;
 extern SEL TQNeqOpSel;

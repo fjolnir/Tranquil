@@ -20,7 +20,6 @@
 @property(readonly) NSMutableArray *evaluatedPaths; // Reset after root finishes
 
 @property(readonly) llvm::Module *llModule;
-@property(readonly) llvm::Value *cliArgGlobal;
 
 #pragma mark - Global values
 @property(readonly) llvm::GlobalVariable *globalQueue;

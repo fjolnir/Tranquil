@@ -10,6 +10,7 @@
 
 + (TQNodeVariable *)node;
 + (TQNodeVariable *)tempVar;
++ (TQNodeVariable *)globalWithName:(NSString *)aName;
 + (TQNodeVariable *)nodeWithName:(NSString *)aName;
 - (id)initWithName:(NSString *)aName;
 

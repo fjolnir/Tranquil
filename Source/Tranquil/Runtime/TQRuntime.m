@@ -77,6 +77,12 @@ SEL TQPromiseSel;
 
 Class TQNumberClass;
 
+dispatch_queue_t TQGlobalQueue;
+
+struct TQBlockByRef TQGlobalVar_TQArguments = {
+    nil, &TQGlobalVar_TQArguments, 0, sizeof(struct TQBlockByRef), nil
+};
+
 struct TQBlock_byref {
     void *isa;
     struct TQBlock_byref *forwarding;
@@ -427,17 +433,6 @@ NSPointerArray *TQVaargsToArray(va_list *items)
     return [arr autorelease];
 }
 
-NSPointerArray *TQCliArgsToArray(int argc, char **argv)
-{
-    NSPointerArray *arr = [NSPointerArray new];
-    if(argc <= 1)
-        return arr;
-    for(int i = 1; i < argc; ++i) {
-        [arr addPointer:(void *)[NSMutableString stringWithUTF8String:argv[i]]];
-    }
-    return [arr autorelease];
-}
-
 #pragma mark - Operators
 
 BOOL TQAugmentClassWithOperators(Class klass)
@@ -494,17 +489,21 @@ BOOL TQAugmentClassWithOperators(Class klass)
     return YES;
 }
 
-void TQInitializeRuntime()
+void TQInitializeRuntime(int argc, char **argv)
 {
+    if(argc > 0) {
+        NSPointerArray *args = [NSPointerArray new];
+        for(int i = 1; i < argc; ++i) {
+            [args addPointer:(void *)[NSMutableString stringWithUTF8String:argv[i]]];
+        }
+        TQGlobalVar_TQArguments.forwarding->value = args;
+    }
     if(_TQSelectorCache)
         return;
 
+    TQGlobalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT , 0);
+
     _TQSelectorCache = kh_init(TQSelectorCache);
-//    _TQSelectorCache = CFDictionaryCreateMutable(NULL, 1000, NULL, NULL);
-//                                        (NSMapTableValueCallBacks){NULL,NULL,NULL}, 1000);
-//    _TQSelectorCache = [[NSMapTable alloc] initWithKeyOptions:NSPointerFunctionsOpaqueMemory
-//                                                 valueOptions:NSPointerFunctionsOpaqueMemory
-//                                                     capacity:1000];
 
     pthread_key_create(&_TQNonLocalReturnStackKey, (void (*)(void *))&_destroyNonLocalReturnStack);
 

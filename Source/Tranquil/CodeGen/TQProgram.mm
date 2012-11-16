@@ -53,7 +53,7 @@ NSString * const kTQSyntaxErrorException = @"TQSyntaxErrorException";
 static TQProgram *sharedInstance;
 
 @implementation TQProgram
-@synthesize name=_name, llModule=_llModule, cliArgGlobal=_cliArgGlobal, shouldShowDebugInfo=_shouldShowDebugInfo,
+@synthesize name=_name, llModule=_llModule, shouldShowDebugInfo=_shouldShowDebugInfo,
             objcParser=_objcParser, searchPaths=_searchPaths, allowedFileExtensions=_allowedFileExtensions,
             useAOTCompilation=_useAOTCompilation, outputPath=_outputPath, arguments=_arguments, globals=_globals,
             evaluatedPaths=_evaluatedPaths;
@@ -89,11 +89,12 @@ static TQProgram *sharedInstance;
 
     _debugBuilder = new DIBuilder(*_llModule);
 
-    TQInitializeRuntime();
+    TQInitializeRuntime(0, NULL);
+
     InitializeNativeTarget();
     LLVMInitializeX86Target();
-LLVMInitializeARMTargetMC();
-        LLVMInitializeARMTargetInfo();
+    LLVMInitializeARMTargetMC();
+    LLVMInitializeARMTargetInfo();
     LLVMInitializeARMTarget();
 
     _globals     = [NSMutableDictionary new];
@@ -144,13 +145,13 @@ LLVMInitializeARMTargetMC();
         _evaluatedPaths = [NSMutableArray array];
 
     GlobalVariable *argGlobal = NULL;
+    Type *byRefType = [TQNodeVariable captureStructTypeInProgram:self];
     if(!_useAOTCompilation) {
-        TQNodeVariable *varArgVar = [TQNodeVariable nodeWithName:@"..."];
+        TQNodeVariable *varArgVar = [TQNodeVariable nodeWithName:@"TQArguments"];
         if([aNode referencesNode:varArgVar]) {
             // Create a global for the argument array
-            Type *byRefType = [TQNodeVariable captureStructTypeInProgram:self];
             argGlobal = new GlobalVariable(*_llModule, byRefType, false, GlobalVariable::InternalLinkage,
-                                           ConstantAggregateZero::get(byRefType), "TQGlobalVar_...");
+                                           ConstantAggregateZero::get(byRefType), "TQGlobalVar_TQArguments");
             _argGlobalForJIT.isa        = nil;
             _argGlobalForJIT.flags      = 0;
             _argGlobalForJIT.size       = sizeof(TQBlockByRef);
@@ -167,10 +168,14 @@ LLVMInitializeARMTargetMC();
             _globalQueue = new GlobalVariable(*_llModule, self.llInt8PtrTy, false, GlobalVariable::ExternalLinkage,
                                               NULL, "TQGlobalQueue");
     } else {
+        if(!_llModule->getNamedGlobal("TQGlobalVar_TQArguments"))
+            new GlobalVariable(*_llModule, byRefType, false, GlobalVariable::ExternalLinkage, NULL, "TQGlobalVar_TQArguments");
+        TQNodeVariable *cliArgGlobal = [TQNodeVariable globalWithName:@"TQArguments"];
+        [_globals setObject:cliArgGlobal forKey:@"TQArguments"];
+
         _globalQueue = _llModule->getNamedGlobal("TQGlobalQueue");
         if(!_globalQueue)
-            _globalQueue = new GlobalVariable(*_llModule, self.llInt8PtrTy, false, GlobalVariable::InternalLinkage,
-                                              ConstantPointerNull::get(self.llInt8PtrTy), "TQGlobalQueue");
+            _globalQueue = new GlobalVariable(*_llModule, self.llInt8PtrTy, false, GlobalVariable::ExternalLinkage, NULL, "TQGlobalQueue");
     }
 
     NSError *err = nil;
@@ -263,21 +268,11 @@ LLVMInitializeARMTargetMC();
         mainBlk.retType    = @"i";
         mainBlk.argTypes   = [NSMutableArray arrayWithObjects:@"i", @"^*", nil];
 
-        TQNodeVariable *cliArgVar = [TQNodeVariable nodeWithName:@"..."];
-        [_globals setObject:cliArgVar forKey:@"..."];
         [mainBlk.statements addObject:[TQNodeCustom nodeWithBlock:^(TQProgram *aProgram, TQNodeBlock *aBlock, TQNodeRootBlock *aRoot) {
-            aBlock.builder->CreateCall(self.TQInitializeRuntime);
             llvm::Function::arg_iterator argumentIterator = aBlock.function->arg_begin();
 
             // Create the app wide dispatch queue
-            Value *queue = aBlock.builder->CreateCall2(self.dispatch_get_global_queue, ConstantInt::get(self.llLongTy, DISPATCH_QUEUE_PRIORITY_DEFAULT), ConstantInt::get(self.llLongTy, 0));
-            aBlock.builder->CreateStore(queue, _globalQueue);
-
-            [cliArgVar store:aBlock.builder->CreateCall2(self.TQCliArgsToArray, argumentIterator, ++argumentIterator)
-                   inProgram:aProgram
-                       block:mainBlk
-                        root:(TQNodeRootBlock *)mainBlk
-                       error:nil];
+            aBlock.builder->CreateCall2(self.TQInitializeRuntime, argumentIterator, ++argumentIterator);
 
             aBlock.builder->CreateCall(aNode.function);
             aBlock.builder->CreateCall(self.objc_autoreleasePoolPop, aBlock.autoreleasePool);

@@ -27,6 +27,13 @@ using namespace llvm;
     return ret;
 }
 
++ (TQNodeVariable *)globalWithName:(NSString *)aName
+{
+    TQNodeVariable *ret = [[self alloc] initWithName:aName];
+    ret->_isGlobal = YES;
+    return [ret autorelease];
+}
+
 + (TQNodeVariable *)nodeWithName:(NSString *)aName
 {
     return [[[self alloc] initWithName:aName] autorelease];
@@ -171,7 +178,7 @@ using namespace llvm;
         allocaType = [[self class] captureStructTypeInProgram:aProgram];
     IRBuilder<> entryBuilder(&aBlock.function->getEntryBlock(), aBlock.function->getEntryBlock().begin());
 
-    if(aBlock == aRoot && !_isAnonymous) {
+    if(_isGlobal || (aBlock == aRoot && !_isAnonymous)) {
         _isGlobal = YES;
         [[aProgram globals] setObject:self forKey:_name];
         const char *globalName = [[NSString stringWithFormat:@"TQGlobalVar_%@", _name] UTF8String];
