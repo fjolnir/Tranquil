@@ -5,22 +5,29 @@ error = { reason |
     "Error! «reason»" print
     Exit(1)
 }
-clang = "/usr/local/tranquil/llvm/bin/clang"
-arch   = "x86_64"
-forIOS = no
+uuid = `NSProcessInfo processInfo globallyUniqueString`
+
+clang     = "/usr/local/tranquil/llvm/bin/clang"
+arch      = "x86_64"
+forIOS    = no
 
 inPath  = nil
 outPath = @"a.out"
-args    = ... objectEnumerator
+irPath  = "/tmp/«uuid()».bc"
+asmPath = "/tmp/«uuid()».s"
 
-ldFlags        = [@-fexceptions, @-all_load,
-                  @-lm, @-ldl, @-lobjc,
-                  @-framework, @Foundation,
-                  @"/usr/local/tranquil/lib/libtranquil.a"]
+tqFlags = [@-aot, @-arch, arch, @-o, irPath]
+ldFlags = [@-fexceptions, @-all_load,
+           @-lm, @-ldl, @-lobjc,
+           @-framework, @Foundation,
+           @"/usr/local/tranquil/lib/libtranquil.a"]
 
+args = ... objectEnumerator
 while arg = args nextObject {
     if arg == @-o then
         outPath = args nextObject
+    else if arg == @-d then
+        tqFlags push: @"-d"
     else if arg == @-ios then
         forIOS = yes
     else if arg == @-arch then
@@ -31,46 +38,38 @@ while arg = args nextObject {
         ldFlags push: arg
 }
 error("No input provided") unless inPath ~= nil
+tqFlags push: inPath
 
 if forIOS {
     clang = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang"
-    "iOS build" print
-    ldFlags push: @-fobjc-link-runtime
-    ldFlags push: @"/usr/local/tranquil/libffi-ios/lib/libffi.a"
-    ldFlags push: @-isysroot
-    if arch == @i386 {
-        ldFlags push: @"/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk"
-        ldFlags push: @-Xlinker
-        ldFlags push: @-no_implicit_dylibs
-        ldFlags push: @"-mios-simulator-version-min=5.0"
-        ldFlags push: @-fobjc-abi-version=2
-        ldFlags push: @-fobjc-legacy-dispatch
-    } else {
-        ldFlags push: @"/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.0.sdk"
-        ldFlags push: @"-miphoneos-version-min=5.0"
-    }
-} else {
-    ldFlags push: @"-mmacosx-version-min=10.7"
-    ldFlags push: @"/usr/lib/arc/libarclite_macosx.a"
-    ldFlags push: @"/usr/local/tranquil/gmp/lib/libgmp.a"
-    ldFlags push: @-lffi
-}
+    ldFlags; push: @-fobjc-link-runtime;
+             push: @"/usr/local/tranquil/libffi-ios/lib/libffi.a";
+             push: @-isysroot
+    if arch == @i386 then
+        ldFlags; push: @"/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk";
+                 push: @-Xlinker;
+                 push: @-no_implicit_dylibs;
+                 push: @"-mios-simulator-version-min=5.0";
+                 push: @-fobjc-abi-version=2;
+                 push: @-fobjc-legacy-dispatch
+    else
+        ldFlags; push: @"/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.0.sdk";
+                 push: @"-miphoneos-version-min=5.0"
+} else
+    ldFlags; push: @"-mmacosx-version-min=10.7";
+             push: @"/usr/lib/arc/libarclite_macosx.a";
+             push: @"/usr/local/tranquil/gmp/lib/libgmp.a";
+             push: @-lffi
 
-ldFlags print
-uuid = `NSProcessInfo processInfo globallyUniqueString`
-
-irPath = "/tmp/«uuid()».bc"
 status = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/bin/tranquil"
-                                 arguments: [@-aot, @-arch, arch, @-o, irPath, inPath];
+                                 arguments: tqFlags;
                              waitUntilExit;
                          terminationStatus
 error("Compilation failed") if status ~= 0
 
-asmPath = "/tmp/«uuid()».s"
 llcArchs = { @x86_64 => @x86-64, @i386 => @x86, @armv7 => @arm }
-"arch: «arch» => «llcArchs[arch]»" print
 status = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/llvm/bin/llc"
-                                 arguments: [@-O0, @-disable-fp-elim, "-march=«llcArchs[arch]»", @-relocation-model=pic, @-o, asmPath, irPath];
+                                 arguments: [@-disable-fp-elim, "-march=«llcArchs[arch]»", @-relocation-model=pic, @-o, asmPath, irPath];
                              waitUntilExit;
                          terminationStatus
 error("Assembly failed") if status ~= 0

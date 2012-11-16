@@ -52,7 +52,6 @@ static id nilReturner(id self, SEL sel, ...)
 
 - (id)isNil
 {
-NSLog(@"ISNIL CALLED");
     return TQValid;
 }
 

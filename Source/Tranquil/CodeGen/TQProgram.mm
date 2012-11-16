@@ -292,45 +292,40 @@ LLVMInitializeARMTargetMC();
         Opts.JITEmitDebugInfo = false;
         std::string err;
         std::string targetTriple, featureStr, cpuName;
+        cpuName = "";
         switch(_targetArch) {
             case kTQArchitectureHost:
                 targetTriple = sys::getDefaultTargetTriple();
-                featureStr   = "";
                 cpuName      = sys::getHostCPUName();
                 break;
             case kTQArchitectureI386:
-                targetTriple = "i386-apple-darwin11.0.0"; // TODO make dynamic
-                featureStr   = "";
-                cpuName      = "corei7-avx";
+                targetTriple = "i386-apple-darwin11.0.0";
                 break;
             case kTQArchitectureX86_64:
-                targetTriple = "x86_64-apple-darwin11.0.0"; // TODO make dynamic
-                featureStr   = "";
-                cpuName      = "corei7-avx";
+                targetTriple = "x86_64-apple-darwin11.0.0";
                 break;
             case kTQArchitectureARMv7:
-                targetTriple = "arm-apple-darwin11.4.0";//"arm-apple-darwin11.0.0"; // TODO make dynamic
-                featureStr   = "";
-                cpuName      = "";
+                targetTriple = "arm-apple-darwin11.0.0";
         }
-        NSLog(@"triple: %s", targetTriple.c_str());
-        for(TargetRegistry::iterator it = TargetRegistry::begin(), ie = TargetRegistry::end(); it != ie; ++it) {
-            NSLog(@"target: %s", it->getName());
-        }
+        //for(TargetRegistry::iterator it = TargetRegistry::begin(), ie = TargetRegistry::end(); it != ie; ++it) {
+        //    NSLog(@"target: %s", it->getName());
+        //}
 
 
         const Target *target = TargetRegistry::lookupTarget(targetTriple, err);
         TQAssert(err.empty(), @"Unable to get target data: %s", err.c_str());
 
-        TargetMachine *machine = target->createTargetMachine(targetTriple, cpuName, featureStr, Opts);
+        TargetMachine *machine = target->createTargetMachine(targetTriple, cpuName, "", Opts);
         TQAssert(machine, @"Unable to create llvm target machine");
         modulePasses.add(new TargetData(*(machine->getTargetData())));
         modulePasses.run(*_llModule);
         fpm.run(*aNode.function);
 
-        //llvm::PrintStatistics();
         verifyModule(*_llModule, PrintMessageAction);
-        _llModule->dump();
+        if(_shouldShowDebugInfo) {
+            _llModule->dump();
+            llvm::PrintStatistics();
+        }
 
         raw_fd_ostream out([_outputPath UTF8String], err, raw_fd_ostream::F_Binary);
         TQAssert(err.empty(), @"Error opening output file for bitcode: %@", _outputPath);
