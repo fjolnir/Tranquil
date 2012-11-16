@@ -484,7 +484,7 @@ static NSString *_prepareConstName(NSString *name)
 
     Module *mod = aProgram.llModule;
 
-    const char *wrapperFunctionName = [[NSString stringWithFormat:@"__tq_wrapper_%@", _name] UTF8String];
+    const char *wrapperFunctionName = [[NSString stringWithFormat:@"__tranquil_wrapper_%@", _name] UTF8String];
 
     _function = Function::Create(wrapperFunType, GlobalValue::ExternalLinkage, wrapperFunctionName, mod);
 

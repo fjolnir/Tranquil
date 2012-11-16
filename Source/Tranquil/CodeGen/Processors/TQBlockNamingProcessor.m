@@ -35,7 +35,7 @@
     }
 
     if(name)
-        blk.invokeName = [NSString stringWithFormat:@"__tq_%@", name];
+        blk.invokeName = [NSString stringWithFormat:@"__tranquil_%@", name];
     return aNode;
 }
 @end

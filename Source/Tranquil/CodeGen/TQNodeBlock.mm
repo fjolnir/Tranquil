@@ -42,12 +42,12 @@ using namespace llvm;
     _function          = NULL;
     _basicBlock        = NULL;
     _isTranquilBlock   = YES;
-    _invokeName        = @"__tq_block";
+    _invokeName        = @"__tranquil";
     _literalPtr        = [TQNodePointerVariable tempVar];
     [self.locals setObject:_literalPtr forKey:_literalPtr.name];
 
     // Block invocations are always passed the block itself as the first argument
-    [self addArgument:[TQNodeArgumentDef nodeWithName:@"__blk"] error:nil];
+    [self addArgument:[TQNodeArgumentDef nodeWithName:@"__blockPtr"] error:nil];
 
     return self;
 }
@@ -222,7 +222,7 @@ using namespace llvm;
 
     llvm::GlobalVariable *global = new llvm::GlobalVariable(*mod, init->getType(), true,
                                     llvm::GlobalValue::InternalLinkage,
-                                    init, "__tq_block_descriptor");
+                                    init, "_tranquil_lockDescriptor");
 
     _blockDescriptor = llvm::ConstantExpr::getBitCast(global, [self _blockDescriptorTypeInProgram:aProgram]);
 
@@ -801,7 +801,7 @@ using namespace llvm;
     [self.arguments removeAllObjects];
     _retType = @"@";
     _argTypes = [NSMutableArray new];
-    _invokeName = @"root";
+    _invokeName = @"__tranquil_root";
 
     return self;
 }
