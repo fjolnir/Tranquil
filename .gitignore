@@ -5,3 +5,6 @@ tranquil.xcodeproj/project.xcworkspace/xcuserdata
 tqprof.txt
 .DS_Store
 parse.out
+iosTest/demo.app/demo.dSYM
+iosTest/demo.app/_CodeSignature
+demo
