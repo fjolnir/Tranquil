@@ -248,7 +248,7 @@ using namespace llvm;
                 selector  = aProgram.llModule->getOrInsertGlobal("TQConcatOpSel", aProgram.llInt8PtrTy);
                 break;
             case kTQOperatorExponent:
-                selector  = aProgram.llModule->getOrInsertGlobal("TQExpOpSel", aProgram.llInt8PtrTy);
+                selector = aProgram.llModule->getOrInsertGlobal("TQExpOpSel", aProgram.llInt8PtrTy);
                 fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
                     GET_AB();
                     Function *pow = Intrinsic::getDeclaration(p.llModule, Intrinsic::pow, p.llFloatTy);
@@ -283,8 +283,13 @@ using namespace llvm;
 
             Value *resultCheck;
             if(fastpathResultIsNumber) {
+#ifdef __LP64__
+                resultCheck = B->CreateOr(B->CreateFCmpOGT(fastVal, ConstantFP::get(aProgram.llModule->getContext(), APFloat(1.0f/FLT_EPSILON))),
+                                          B->CreateFCmpOLT(fastVal, ConstantFP::get(aProgram.llModule->getContext(), APFloat(-1.0f/FLT_EPSILON))));
+#else
                 resultCheck = B->CreateCall(aProgram.TQFloatFitsInTaggedNumber, fastVal);
                 resultCheck = B->CreateICmpEQ(resultCheck, ConstantInt::get(aProgram.llInt8Ty, 0));
+#endif
                 fastVal = GET_TQNUM(fastVal);
             }
 
