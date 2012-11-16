@@ -130,7 +130,7 @@ using namespace llvm;
     BOOL needsAutorelease = NO;
     if([selStr hasPrefix:@"alloc"])
         needsAutorelease = YES;
-    else if([selStr hasSuffix:@"copy"])
+    else if([selStr isEqualToString:@"copy"] || [selStr hasSuffix:@"Copy"])
         needsAutorelease = YES;
     else if([selStr isEqualToString:@"new"])
         needsAutorelease = YES;
@@ -173,8 +173,8 @@ using namespace llvm;
                 Value *selector = [aProgram getGlobalStringPtr:selStr inBlock:aBlock];
 
                 CallInst *selReg = rootBuilder.CreateCall(aProgram.sel_registerName, selector, "");
-                selectorGlobal =  new GlobalVariable(*mod, aProgram.llInt8PtrTy, false, GlobalVariable::InternalLinkage,
-                                                     ConstantPointerNull::get(aProgram.llInt8PtrTy), selGlobalName);
+                selectorGlobal = new GlobalVariable(*mod, aProgram.llInt8PtrTy, false, GlobalVariable::InternalLinkage,
+                                                    ConstantPointerNull::get(aProgram.llInt8PtrTy), selGlobalName);
                 rootBuilder.CreateStore(selReg, selectorGlobal);
             }
         }
