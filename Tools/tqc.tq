@@ -22,6 +22,7 @@ ldFlags = [@-fexceptions, @-all_load,
            @-lm, @-ldl, @-lobjc,
            @-framework, @Foundation,
            @"/usr/local/tranquil/lib/libtranquil.a"]
+cflags  = [@-c, @"-I/usr/local/tranquil/include", @"/usr/local/tranquil/src/Source/Tranquil/tqmain.m", @-o, initPath]
 
 args = ... objectEnumerator
 while arg = args nextObject {
@@ -46,16 +47,20 @@ if forIOS {
     ldFlags; push: @-fobjc-link-runtime;
              push: @"/usr/local/tranquil/libffi-ios/lib/libffi.a";
              push: @-isysroot
-    if arch == @i386 then
-        ldFlags; push: @"/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk";
+    if arch == @i386 then {
+        isysroot = @"/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk"
+        ldFlags; push: isysroot;
                  push: @-Xlinker;
                  push: @-no_implicit_dylibs;
                  push: @"-mios-simulator-version-min=5.0";
                  push: @-fobjc-abi-version=2;
                  push: @-fobjc-legacy-dispatch
-    else
-        ldFlags; push: @"/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.0.sdk";
+    } else {
+        isysroot = @"/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.0.sdk"
+        ldFlags; push: isysroot;
                  push: @"-miphoneos-version-min=5.0"
+    }
+    cflags += [@-isysroot, isysroot]
 } else
     ldFlags; push: @"-mmacosx-version-min=10.7";
              push: @"/usr/lib/arc/libarclite_macosx.a";
@@ -76,13 +81,13 @@ status = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/llvm/bin/llc"
 error("Assembly failed") if status ~= 0
 
 status = NSTask launchedTaskWithLaunchPath: clang
-                                 arguments: [@-c, @-arch, arch, @"-I/usr/local/tranquil/include", @"/usr/local/tranquil/src/Source/Tranquil/tqmain.m", @-o, initPath];
+                                 arguments: cflags + [@-arch, arch];
                              waitUntilExit;
                          terminationStatus
 error("Initializer compilation failed") if status ~= 0
 
 status = NSTask launchedTaskWithLaunchPath: clang
-                                 arguments: ldFlags + [@-fpie, @-fexceptions, @-arch, arch, @-o, outPath, asmPath, initPath];
+                                 arguments: ldFlags + [@-arch, arch, @-o, outPath, asmPath, initPath];
                              waitUntilExit;
                          terminationStatus
 error("Linking failed") if status ~= 0
