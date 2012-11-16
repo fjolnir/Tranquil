@@ -69,7 +69,11 @@ static __inline__ float _TQTaggedNumberValue(TQTaggedNumber *ptr)
 #endif
 }
 
-#define _TQNumberValue(num) (IS_TAGGED(num) ? _TQTaggedNumberValue((TQTaggedNumber *)(num)) : ((TQNumber *)(num))->_value)
+#ifdef __LP64__
+    #define _TQNumberValue(num) (IS_TAGGED(num) ? _TQTaggedNumberValue((TQTaggedNumber *)(num)) : ((TQNumber *)(num))->_value)
+#else
+    #define _TQNumberValue(num) (((TQNumber *)(num))->_value)
+#endif
 
 BOOL TQFloatFitsInTaggedNumber(float aValue)
 {
