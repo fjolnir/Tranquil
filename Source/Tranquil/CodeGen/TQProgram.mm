@@ -258,31 +258,6 @@ static TQProgram *sharedInstance;
     fpm.add(createTailCallEliminationPass());
 
    if(_useAOTCompilation) {
-        // Generate a main function
-        std::vector<Type *> paramTypes;
-        paramTypes.push_back(self.llIntTy);
-        paramTypes.push_back(self.llInt8PtrPtrTy);
-
-        TQNodeRootBlock *mainBlk = [TQNodeRootBlock node];
-        mainBlk.invokeName = @"main";
-        mainBlk.retType    = @"i";
-        mainBlk.argTypes   = [NSMutableArray arrayWithObjects:@"i", @"^*", nil];
-
-        [mainBlk.statements addObject:[TQNodeCustom nodeWithBlock:^(TQProgram *aProgram, TQNodeBlock *aBlock, TQNodeRootBlock *aRoot) {
-            llvm::Function::arg_iterator argumentIterator = aBlock.function->arg_begin();
-
-            // Create the app wide dispatch queue
-            aBlock.builder->CreateCall2(self.TQInitializeRuntime, argumentIterator, ++argumentIterator);
-
-            aBlock.builder->CreateCall(aNode.function);
-            aBlock.builder->CreateCall(self.objc_autoreleasePoolPop, aBlock.autoreleasePool);
-            aBlock.builder->CreateRet(ConstantInt::get(self.llIntTy, 0));
-
-            return (Value *)NULL;
-        }]];
-
-        [mainBlk generateCodeInProgram:self block:nil root:mainBlk error:&err];
-
         // Output
         Opts.JITEmitDebugInfo = false;
         std::string err;
@@ -305,7 +280,6 @@ static TQProgram *sharedInstance;
         //for(TargetRegistry::iterator it = TargetRegistry::begin(), ie = TargetRegistry::end(); it != ie; ++it) {
         //    NSLog(@"target: %s", it->getName());
         //}
-
 
         const Target *target = TargetRegistry::lookupTarget(targetTriple, err);
         TQAssert(err.empty(), @"Unable to get target data: %s", err.c_str());

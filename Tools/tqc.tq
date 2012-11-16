@@ -11,10 +11,11 @@ clang     = "/usr/local/tranquil/llvm/bin/clang"
 arch      = "x86_64"
 forIOS    = no
 
-inPath  = nil
-outPath = @"a.out"
-irPath  = "/tmp/«uuid()».bc"
-asmPath = "/tmp/«uuid()».s"
+inPath   = nil
+outPath  = @"a.out"
+irPath   = "/tmp/«uuid()».bc"
+asmPath  = "/tmp/«uuid()».s"
+initPath = "/tmp/«uuid()».o"
 
 tqFlags = [@-aot, @-arch, arch, @-o, irPath]
 ldFlags = [@-fexceptions, @-all_load,
@@ -75,7 +76,13 @@ status = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/llvm/bin/llc"
 error("Assembly failed") if status ~= 0
 
 status = NSTask launchedTaskWithLaunchPath: clang
-                                 arguments: ldFlags + [@-fpie, @-fexceptions, @-arch, arch, @-o, outPath, asmPath];
+                                 arguments: [@-c, @-arch, arch, @"-I/usr/local/tranquil/include", @"/usr/local/tranquil/src/Source/Tranquil/tqmain.m", @-o, initPath];
+                             waitUntilExit;
+                         terminationStatus
+error("Initializer compilation failed") if status ~= 0
+
+status = NSTask launchedTaskWithLaunchPath: clang
+                                 arguments: ldFlags + [@-fpie, @-fexceptions, @-arch, arch, @-o, outPath, asmPath, initPath];
                              waitUntilExit;
                          terminationStatus
 error("Linking failed") if status ~= 0
