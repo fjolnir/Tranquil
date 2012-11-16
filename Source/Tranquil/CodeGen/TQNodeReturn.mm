@@ -89,7 +89,7 @@ using namespace llvm;
             Value *target    = [destBlock.nonLocalReturnTarget generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
             Value *targetPtr = [destBlock.literalPtr generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
             Value *thread    = [destBlock.nonLocalReturnThread generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-            Value *jmpBuf = aBlock.builder->CreateCall4(aProgram.TQGetNonLocalReturnJumpTarget, thread, targetPtr, target, retVal);
+            Value *jmpBuf    = aBlock.builder->CreateCall4(aProgram.TQGetNonLocalReturnJumpTarget, thread, targetPtr, target, retVal);
             aBlock.builder->CreateCall2(aProgram.longjmp, jmpBuf, ConstantInt::get(aProgram.llInt32Ty, 0));
         }
 

@@ -226,9 +226,9 @@ end
 def _install
     sh "mkdir -p /usr/local/tranquil/bin"
     sh "cp Build/tranquil /usr/local/tranquil/bin"
-    sh "cp Tools/repl.tq /usr/local/tranquil/bin/tqrepl"
     sh "cp Tools/tqlive.tq /usr/local/tranquil/bin/tqlive"
     sh "/usr/local/tranquil/bin/tranquil Tools/tqc.tq Tools/tqc.tq -o /usr/local/tranquil/bin/tqc"
+    sh "/usr/local/tranquil/bin/tqc Tools/repl.tq -lreadline /usr/local/tranquil/lib/libtranquil_codegen.a `/usr/local/tranquil/llvm/bin/llvm-config --ldflags --libs core jit nativecodegen armcodegen bitwriter ipo instrumentation` -lclang -lstdc++ -o /usr/local/tranquil/bin/tqrepl"
 end
 
 task :default => [:build_dir, :tranquil] do |t|
