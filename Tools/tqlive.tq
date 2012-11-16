@@ -1,10 +1,9 @@
 #!/usr/local/tranquil/bin/tranquil
 import "unistd"
-import "stdlib"
 
 error = { msg |
     msg print
-    Exit(1)
+    ^^1
 }
 
 error("No input provided") if ... count == 0
