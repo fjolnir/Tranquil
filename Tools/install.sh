@@ -10,7 +10,7 @@ mkdir -p /usr/local/tranquil
 # Just for install count stats for me; completely anonymous.
 curl -fsSkL "http://d.asgeirsson.is/JX9I" > /dev/null
 
-echo "\033[0;32mI'm about to retrieve and compile tranquil for you. This shouldn't take more than a few minutes,\ndepending on your connection & hardware.\n"
+echo "\033[0;32mI'm about to retrieve and compile Tranquil for you. This shouldn't take more than a few minutes,\ndepending on your connection & hardware.\n"
 
 echo "\033[0;34mInstalling LLVM...\033[0m"
 if [ -d /usr/local/tranquil/llvm ]
@@ -54,6 +54,28 @@ else
     popd
 fi
 
+echo "\n\033[0;34mInstalling libffi\033[0m"
+if [ -d /usr/local/tranquil/libffi ]
+then
+  echo "\033[0;32mYou already have libffi installed.\033[0m"
+else
+    pushd /tmp
+    git clone https://github.com/pandamonia/libffi-iOS.git
+    cd libffi-iOS
+
+    xcodebuild -alltargets
+
+    mkdir -p /usr/local/tranquil/libffi-ios/lib
+    lipo -create -output /usr/local/tranquil/libffi-ios/lib/libffi.a build/Release-iphoneos/libffi.a build/Release-iphonesimulator/libffi.a
+    cp -R build/Release-iphoneos/usr/local/include /usr/local/tranquil/libffi-ios/include
+
+    mkdir -p /usr/local/tranquil/libffi/lib
+    cp build/Release/libffi.a /usr/local/tranquil/libffi/lib
+    cp -R build/Release/usr/local/include /usr/local/tranquil/libffi/include
+
+    popd
+fi
+
 echo "\n\033[0;34mInstalling GNU MP...\033[0m"
 if [ -d /usr/local/tranquil/gmp ]
 then
@@ -74,12 +96,12 @@ fi
 
 if [ -d /usr/local/tranquil/src ]
 then
-    echo "\n\033[0;34mUpdating tranquil...\033[0m"
+    echo "\n\033[0;34mUpdating Tranquil...\033[0m"
     pushd /usr/local/tranquil/src
     git pull
     popd
 else
-    echo "\n\033[0;34mCloning tranquil from GitHub...\033[0m"
+    echo "\n\033[0;34mCloning Tranquil from GitHub...\033[0m"
     hash git >/dev/null && /usr/bin/env git clone git://github.com/fjolnir/Tranquil.git /usr/local/tranquil/src || {
       echo "\033[0;31mgit not installed\033[0m"
       exit
@@ -94,6 +116,7 @@ rake || {
 }
 popd
 
-echo "\n\033[0;32mCongratulations!\n\033[0;33mYou can now find the tranquil repl at '\033[0m/usr/local/tranquil/bin/tqrepl\033[0;33m'\033[0m"
+echo "\n\033[0;32mCongratulations!\n\033[0;33mYou can now find the Tranquil binary at '\033[0m/usr/local/tranquil/bin/tranquil\033[0;33m'\033[0m"
 echo "\n\033[0;33m(You'll probably want to add /usr/local/tranquil/bin to your \033[0mPATH\033[0;33m)\033[0m"
+
 
