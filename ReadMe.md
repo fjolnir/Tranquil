@@ -2,7 +2,7 @@
 
 Tranquil is a programming language built on top of LLVM & the Objective-C Runtime.
 
-It aims to provide a more expressive & easy to use way to write Mac (and soon, iOS) Apps.
+It aims to provide a more expressive & easy to use way to write Mac and iOS Apps.
 
 It's features include:
 
@@ -26,7 +26,7 @@ The following will install Tranquil into /usr/local/tranquil (Along with a few d
     > curl -fsSkL https://raw.github.com/fjolnir/Tranquil/master/Tools/install.sh | /bin/zsh
     > /usr/local/tranquil/bin/tqrepl
 
-**Note:** OS X 10.7 is required. (iOS ≥ 5 will be supported later)
+**Note:** OS X ≥ 10.7 or iOS ≥ 5 is required.
 
 ## Learning the language
 
