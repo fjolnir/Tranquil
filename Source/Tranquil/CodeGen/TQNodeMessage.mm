@@ -135,52 +135,7 @@ using namespace llvm;
     else if([selStr isEqualToString:@"new"])
         needsAutorelease = YES;
 
-    // Cache the selector into a global
-    Module *mod = aProgram.llModule;
-    const char *selGlobalName = [[@"TQSelector_" stringByAppendingString:selStr] UTF8String];
-    GlobalVariable *selectorGlobal = mod->getGlobalVariable(selGlobalName, true);
-    if(!selectorGlobal) {
-        // If compiling AOT we emit symbols, otherwise just a runtime lookup
-        if(aProgram.useAOTCompilation) {
-            ArrayType *selStrType = ArrayType::get(IntegerType::get(mod->getContext(), 8), strlen([selStr UTF8String])+1);
-            GlobalVariable *selNameGlobal = new GlobalVariable(*mod, selStrType, false, GlobalValue::InternalLinkage,
-                                                               NULL, "\x01L_OBJC_METH_VAR_NAME_");
-            selNameGlobal->setSection("__TEXT,__objc_methname,cstring_literals");
-            selNameGlobal->setAlignment(1);
-            selNameGlobal->setInitializer(ConstantDataArray::getString(mod->getContext(), [selStr UTF8String], true));
-
-            selectorGlobal = new GlobalVariable(*mod, aProgram.llInt8PtrTy, false, GlobalValue::InternalLinkage,
-                                                NULL, "\x01L_OBJC_SELECTOR_REFERENCES_");
-            selectorGlobal->setSection("__DATA, __objc_selrefs, literal_pointers, no_dead_strip");
-
-            std::vector<Constant*> zeroIndices;
-            zeroIndices.push_back(ConstantInt::get(aProgram.llIntTy, 0));
-            zeroIndices.push_back(ConstantInt::get(aProgram.llIntTy, 0));
-            selectorGlobal->setInitializer(ConstantExpr::getGetElementPtr(selNameGlobal, zeroIndices));
-
-            ArrayType *arrTy = ArrayType::get(aProgram.llInt8PtrTy, 2);
-            GlobalVariable *llvmUsed = new GlobalVariable(*mod, arrTy, false, GlobalValue::AppendingLinkage, NULL, "llvm.used");
-            llvmUsed->setSection("llvm.metadata");
-
-            std::vector<Constant*> usedElems;
-            usedElems.push_back(selNameGlobal);
-            usedElems.push_back(ConstantExpr::getCast(Instruction::BitCast, selectorGlobal, aProgram.llInt8PtrTy));
-            llvmUsed->setInitializer(ConstantArray::get(arrTy, usedElems));
-        } else {
-            if(!selectorGlobal) {
-                Function *rootFunction = aRoot.function;
-                IRBuilder<> rootBuilder(&rootFunction->getEntryBlock(), rootFunction->getEntryBlock().begin());
-                Value *selector = [aProgram getGlobalStringPtr:selStr inBlock:aBlock];
-
-                CallInst *selReg = rootBuilder.CreateCall(aProgram.sel_registerName, selector, "");
-                selectorGlobal = new GlobalVariable(*mod, aProgram.llInt8PtrTy, false, GlobalVariable::InternalLinkage,
-                                                    ConstantPointerNull::get(aProgram.llInt8PtrTy), selGlobalName);
-                rootBuilder.CreateStore(selReg, selectorGlobal);
-            }
-        }
-    }
-
-    aArgs.insert(aArgs.begin(), aBlock.builder->CreateLoad(selectorGlobal));
+    aArgs.insert(aArgs.begin(), [aProgram getSelector:selStr inBlock:aBlock root:aRoot]);
     aArgs.insert(aArgs.begin(), _receiverLLVMValue ? _receiverLLVMValue : [_receiver generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr]);
 
 

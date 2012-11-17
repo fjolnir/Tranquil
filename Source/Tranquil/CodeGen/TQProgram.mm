@@ -97,11 +97,12 @@ static TQProgram *sharedInstance;
     LLVMInitializeARMTargetInfo();
     LLVMInitializeARMTarget();
 
-    _globals     = [NSMutableDictionary new];
-    _searchPaths = [[NSMutableArray alloc] initWithObjects:@".",
-                        @"~/Library/Frameworks", @"/Library/Frameworks",
-                        @"/System/Library/Frameworks/", @"/usr/include/", @"/usr/local/include/",
-                        @"/usr/local/tranquil/llvm/include", nil];
+    _globals          = [NSMutableDictionary new];
+    _selectorSymbols  = [NSMutableDictionary new];
+    _searchPaths      = [[NSMutableArray alloc] initWithObjects:@".",
+                         @"~/Library/Frameworks", @"/Library/Frameworks",
+                         @"/System/Library/Frameworks/", @"/usr/include/", @"/usr/local/include/",
+                         @"/usr/local/tranquil/llvm/include", nil];
     _allowedFileExtensions = [[NSMutableArray alloc] initWithObjects:@"tq", @"h", nil];
 
     return self;
@@ -111,6 +112,7 @@ static TQProgram *sharedInstance;
 {
     [_searchPaths release];
     [_globals release];
+    [_selectorSymbols release];
     [_allowedFileExtensions release];
     [_objcParser release];
     delete _llModule;
@@ -498,6 +500,61 @@ static TQProgram *sharedInstance;
 - (llvm::Value *)getGlobalStringPtr:(NSString *)aStr inBlock:(TQNodeBlock *)aBlock
 {
     return [self getGlobalStringPtr:aStr withBuilder:aBlock.builder];
+}
+
+- (llvm::Value *)getSelector:(NSString *)aSelector inBlock:(TQNodeBlock *)aBlock root:(TQNodeRootBlock *)aRoot
+{
+    GlobalVariable *selectorGlobal = NULL;
+    // If compiling AOT we emit symbols, otherwise just a runtime lookup
+    if(_useAOTCompilation) {
+        if([_selectorSymbols objectForKey:aSelector]) {
+            selectorGlobal =  _llModule->getGlobalVariable([[_selectorSymbols objectForKey:aSelector] UTF8String], true);
+        } else {
+            NSString *refSymbol  = [NSString stringWithFormat:@"\x01L_OBJC_SELECTOR_REFERENCES_%ld", [[_selectorSymbols allValues] count]];
+            NSString *nameSymbol = [NSString stringWithFormat:@"\x01L_OBJC_METH_VAR_NAME_%ld", [[_selectorSymbols allValues] count]];
+
+            ArrayType *selStrType = ArrayType::get(IntegerType::get(_llModule->getContext(), 8), strlen([aSelector UTF8String])+1);
+            GlobalVariable *selNameGlobal = new GlobalVariable(*_llModule, selStrType, false, GlobalValue::InternalLinkage,
+                                                               NULL, [nameSymbol UTF8String]);
+            selNameGlobal->setSection("__TEXT,__objc_methname,cstring_literals");
+            selNameGlobal->setAlignment(1);
+            selNameGlobal->setInitializer(ConstantDataArray::getString(_llModule->getContext(), [aSelector UTF8String], true));
+
+            selectorGlobal = new GlobalVariable(*_llModule, self.llInt8PtrTy, false, GlobalValue::InternalLinkage,
+                                                NULL, [refSymbol UTF8String]);
+            selectorGlobal->setSection("__DATA, __objc_selrefs, literal_pointers, no_dead_strip");
+
+            std::vector<Constant*> zeroIndices;
+            zeroIndices.push_back(ConstantInt::get(self.llIntTy, 0));
+            zeroIndices.push_back(ConstantInt::get(self.llIntTy, 0));
+            selectorGlobal->setInitializer(ConstantExpr::getGetElementPtr(selNameGlobal, zeroIndices));
+
+            ArrayType *arrTy = ArrayType::get(self.llInt8PtrTy, 2);
+            GlobalVariable *llvmUsed = new GlobalVariable(*_llModule, arrTy, false, GlobalValue::AppendingLinkage, NULL, "llvm.used");
+            llvmUsed->setSection("llvm.metadata");
+
+            std::vector<Constant*> usedElems;
+            usedElems.push_back(selNameGlobal);
+            usedElems.push_back(ConstantExpr::getCast(Instruction::BitCast, selectorGlobal, self.llInt8PtrTy));
+            llvmUsed->setInitializer(ConstantArray::get(arrTy, usedElems));
+
+            [_selectorSymbols setObject:refSymbol forKey:aSelector];
+        }
+    } else {
+        const char *selGlobalName = [[@"TQSelector_" stringByAppendingString:aSelector] UTF8String];
+        selectorGlobal = _llModule->getGlobalVariable(selGlobalName, true);
+        if(!selectorGlobal) {
+            Function *rootFunction = aRoot.function;
+            IRBuilder<> rootBuilder(&rootFunction->getEntryBlock(), rootFunction->getEntryBlock().begin());
+            Value *selector = [self getGlobalStringPtr:aSelector inBlock:aBlock];
+
+            CallInst *selReg = rootBuilder.CreateCall(self.sel_registerName, selector, "");
+            selectorGlobal = new GlobalVariable(*_llModule, self.llInt8PtrTy, false, GlobalVariable::InternalLinkage,
+                                                ConstantPointerNull::get(self.llInt8PtrTy), selGlobalName);
+            rootBuilder.CreateStore(selReg, selectorGlobal);
+        }
+    }
+    return aBlock.builder->CreateLoad(selectorGlobal);
 }
 
 - (void)insertLogUsingBuilder:(llvm::IRBuilder<> *)aBuilder withStr:(NSString *)txt

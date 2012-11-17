@@ -21,6 +21,9 @@ typedef id (^TQErrorHandlingBlock)(id err);
     // Values used for globals under JIT compilation
     struct TQBlockByRef _argGlobalForJIT;
     dispatch_queue_t _globalQueueForJIT;
+
+    // Keeps track of selector globals under AOT
+    NSMutableDictionary *_selectorSymbols;
 }
 
 @property(readwrite, retain) NSString *name;

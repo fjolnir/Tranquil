@@ -151,7 +151,7 @@ using namespace llvm;
 
     Value *imp = builder->CreateCall(aProgram.imp_implementationWithBlock, block);
     Value *signature = [aProgram getGlobalStringPtr:methodSignature inBlock:aBlock];
-    Value *selector = builder->CreateCall(aProgram.sel_registerName, [aProgram getGlobalStringPtr:[self selector] inBlock:aBlock]);
+    Value *selector  = [aProgram getSelector:[self selector] inBlock:aBlock root:aRoot];
 
     Value *classPtr = aClass.classPtr;
     if(_type == kTQClassMethod)
