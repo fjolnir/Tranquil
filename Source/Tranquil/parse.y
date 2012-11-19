@@ -589,6 +589,7 @@ accessableNoNl(A) ::= parenExprNoNl(V).                 { A = V;                
 accessableNoNl(A) ::= blockNoNl(V).                     { A = V;                                                                      }
 accessableNoNl(A) ::= subscriptNoNl(V).                 { A = V;                                                                      }
 accessableNoNl(A) ::= propertyNoNl(V).                  { A = V;                                                                      }
+accessableNoNl(A) ::= blockCallNoNl(V).                 { A = V;                                                                      }
 
 accessableNl(A) ::= variableNl(V).                      { A = V;                                                                      }
 accessableNl(A) ::= literalNl(V).                       { A = V;                                                                      }
@@ -597,6 +598,7 @@ accessableNl(A) ::= parenExprNl(V).                     { A = V;                
 accessableNl(A) ::= blockNl(V).                         { A = V;                                                                      }
 accessableNl(A) ::= subscriptNl(V).                     { A = V;                                                                      }
 accessableNl(A) ::= propertyNl(V).                      { A = V;                                                                      }
+accessableNl(A) ::= blockCallNl(V).                     { A = V;                                                                      }
 
 // Assignables
 assignable(V)     ::= assignableNoNl(T).                { V = T;                                                                      }
