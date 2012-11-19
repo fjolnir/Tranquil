@@ -717,7 +717,7 @@ backtick        ::= BACKTICK|BACKTICKNL.
     TQNodeBlock *ret = [TQNodeBlock node];
 
     for(TQNodeArgumentDef *arg in args) {
-        if([[arg name] isEqualToString:@"..."]) {
+        if([[arg name] isEqualToString:@"TQArguments"]) {
             [ret setIsVariadic:YES];
             TQAssert(![arg defaultArgument], @"Syntax Error: '...' can't have a default value");
             NSUInteger idx = [args indexOfObject:arg];
