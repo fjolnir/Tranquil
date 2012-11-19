@@ -220,9 +220,10 @@ using namespace llvm;
 
     llvm::Constant *init = llvm::ConstantStruct::getAnon(elements);
 
+    const char *globalName = [[NSString stringWithFormat:@"%@_blockDescriptor", [self invokeName]] UTF8String];
     llvm::GlobalVariable *global = new llvm::GlobalVariable(*mod, init->getType(), true,
                                     llvm::GlobalValue::InternalLinkage,
-                                    init, "_tranquil_lockDescriptor");
+                                    init, globalName);
 
     _blockDescriptor = llvm::ConstantExpr::getBitCast(global, [self _blockDescriptorTypeInProgram:aProgram]);
 
@@ -326,7 +327,7 @@ using namespace llvm;
     Value *constFlags = ConstantInt::get(intTy, TQ_BLOCK_FIELD_IS_OBJECT);
 
     int i = TQ_CAPTURE_IDX;
-    Value *varToCopy, *destAddr, *valueToRetain;
+    Value *src, *destAddr;
     Type *captureStructTy;
     for(TQNodeVariable *var in [_capturedVariables allValues]) {
         if(![[var class] valueIsObject])
@@ -337,19 +338,8 @@ using namespace llvm;
         NSString *srcName = [NSString stringWithFormat:@"srcBlk.%@", var.name];
 
         destAddr  = builder->CreateBitCast(builder->CreateStructGEP(dstBlock, i), int8PtrTy, [dstName UTF8String]);
-        varToCopy = builder->CreateLoad(builder->CreateStructGEP(srcBlock, i++), [srcName UTF8String]);
-        if(!var.isAnonymous) {
-            captureStructTy = PointerType::getUnqual([[var class] captureStructTypeInProgram:aProgram]);
-            valueToRetain = builder->CreateBitCast(varToCopy, captureStructTy);
-            valueToRetain = builder->CreateLoad(builder->CreateStructGEP(valueToRetain, 1)); // var->forwarding
-            valueToRetain = builder->CreateBitCast(valueToRetain, captureStructTy);
-            valueToRetain = builder->CreateLoad(builder->CreateStructGEP(valueToRetain, 4)); // forwarding->capture
-
-            builder->CreateCall(aProgram.objc_retain, valueToRetain);
-        } else if([[var class] valueIsObject]) {
-            varToCopy = builder->CreateCall(aProgram.objc_retain, varToCopy);
-        }
-        builder->CreateCall3(aProgram._Block_object_assign, destAddr, builder->CreateBitCast(varToCopy, int8PtrTy), flags);
+        src = builder->CreateLoad(builder->CreateStructGEP(srcBlock, i++), [srcName UTF8String]);
+        builder->CreateCall3(aProgram._TQ_Block_object_assign, destAddr, builder->CreateBitCast(src, int8PtrTy), flags);
     }
 
     builder->CreateRetVoid();

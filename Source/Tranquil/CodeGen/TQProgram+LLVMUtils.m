@@ -48,7 +48,7 @@ using namespace llvm;
     objc_registerClassPair, objc_destroyWeak,
     class_replaceMethod, sel_registerName,
     objc_getClass, objc_retain, objc_release, objc_exception_throw,
-    _Block_copy, _Block_object_assign,
+    _Block_copy, _TQ_Block_object_assign,
     _Block_object_dispose, imp_implementationWithBlock,
     object_getClass, TQPrepareObjectForReturn,
     objc_autorelease, objc_autoreleasePoolPush,
@@ -460,7 +460,7 @@ FunAccessor(objc_autorelease, ft_i8Ptr__i8Ptr)
 FunAccessor(sel_registerName, ft_i8Ptr__i8Ptr)
 FunAccessor(objc_getClass, ft_i8Ptr__i8Ptr)
 FunAccessor(_Block_copy, ft_i8Ptr__i8Ptr)
-FunAccessor(_Block_object_assign, ft_void__i8Ptr_i8Ptr_int)
+FunAccessor(_TQ_Block_object_assign, ft_void__i8Ptr_i8Ptr_int)
 FunAccessor(_Block_object_dispose, ft_void__i8Ptr_int)
 FunAccessor(TQPrepareObjectForReturn, ft_i8Ptr__i8Ptr)
 FunAccessor(objc_autoreleasePoolPush, ft_i8Ptr__void)

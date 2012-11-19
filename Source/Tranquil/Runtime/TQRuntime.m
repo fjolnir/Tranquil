@@ -423,6 +423,23 @@ void TQStoreStrong(id *location, id obj)
         objc_storeStrong(location, obj);
 }
 
+extern void _Block_object_assign(void *destAddr, const void *object, const int flags);
+void _TQ_Block_object_assign(struct TQBlockByRef **dest, struct TQBlockByRef *src, const int flags)
+{
+    id value;
+    switch(flags) {
+        case TQ_BLOCK_FIELD_IS_BYREF:
+            value = src->forwarding->value;
+            if(TQObjectIsStackBlock(value))
+                src->forwarding->value = _objc_msgSend_hack(value, @selector(copy));
+            objc_retain(src->forwarding->value);
+        break;
+        case TQ_BLOCK_FIELD_IS_OBJECT:
+            objc_retain((id)src);
+        break;
+    }
+    _Block_object_assign((void *)dest, (void *)src, flags);
+}
 NSPointerArray *TQVaargsToArray(va_list *items)
 {
     register id arg;

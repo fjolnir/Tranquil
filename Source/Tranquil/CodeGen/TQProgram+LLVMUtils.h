@@ -41,7 +41,7 @@
     *objc_loadWeak, *objc_destroyWeak, *objc_retain, *objc_release, *objc_allocateClassPair,
     *objc_registerClassPair, *class_replaceMethod, *objc_getClass, *objc_exception_throw,
     *sel_registerName, *_Block_copy, *objc_retainAutorelease, *objc_retainAutoreleaseReturnValue, *objc_autoreleaseReturnValue,
-    *_Block_object_assign, *_Block_object_dispose, *imp_implementationWithBlock,
+    *_TQ_Block_object_assign, *_Block_object_dispose, *imp_implementationWithBlock,
     *object_getClass, *TQPrepareObjectForReturn, *objc_autorelease, *objc_storeStrong, *TQStoreStrong,
     *objc_autoreleasePoolPush, *objc_autoreleasePoolPop, *TQSetValueForKey, *TQValueForKey,
     *TQGetOrCreateClass, *TQObjectsAreEqual, *TQObjectsAreNotEqual, *TQObjectGetSuperClass,
