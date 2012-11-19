@@ -82,6 +82,25 @@ source << "
         }
 source << "
     }
+    - (id)callWithArguments:(NSPointerArray *)aArguments
+    {
+        NSUInteger count = [aArguments count];
+        id *args = alloca(count * sizeof(id));
+        int i = 0;
+        for(id arg in aArguments) {
+            args[i++] = arg;
+        }
+        switch(count) {"
+            (0..maxArgs).each { |i|
+                source << "
+                case #{i}:
+                    return TQDispatchBlock#{i}(self#{(0...i).reduce("") {|s, n| s<<", args[#{n}]"} });"
+            }
+        source << "
+            default:
+                return nil;
+        }
+    }
     @end
 
 #undef TQN

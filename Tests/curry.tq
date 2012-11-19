@@ -1,0 +1,8 @@
+curry = { f, ... |
+    curriedArgs = ...
+    `... | f callWithArguments: curriedArgs + ...`
+}
+
+curried = curry({a, ...| ... reduce: `x, n=a | x*n` }, 2, 2)
+curried(3, 4, 5) print
+
