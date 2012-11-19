@@ -107,11 +107,11 @@
 		}
 		
 		- aMethodTaking: a and: b {  \ Instance method taking two arguments ('self' refers to an instance of Klass)
-			^#ivar = a + b           \ Returns the value of self#ivar after setting it to a+b
+			#ivar = a + b            \ Returns the value of `self#ivar` after setting it to `a + b`
 		}
 		
 		- aMethodWith: arg1 [andOptionalArgument: arg2 = "default value"] { \ Wrapping trailing selector/argument pairs in brackets
-		    "2 arguments were passed" print if arg2                         \ indicates that they're optional.
+		    "2 arguments were passed" print if arg2 ~= "default value"      \ that they're optional.
 		}
 	}
 	
@@ -135,10 +135,9 @@
 	\ String interpolation
 	a = "expression"
 	b = "A string with an embedded «a»."  \ Evaluates to "A string with an embedded expression."
-	b = "A string with an embedded #{a}." \ Equivalent (Fallback for those with unfortunate keyboard layouts)
 	
 	\ Immutable strings / Symbols
-	a = @string
+	a = @strings
 	b = @"constant string with spaces"
 	
 	\ Importing other files
