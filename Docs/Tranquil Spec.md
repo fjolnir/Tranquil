@@ -17,12 +17,12 @@
 	wait
 	break   \ Prematurely terminates a loop
 	skip    \ Skips to the end of the current iteration of a loop
-	nil     \ Represents an empty value ('no' is a synonym)
+	nil     \ Represents an empty value (`no` is a synonym)
+	valid   \ Represents non-nilness, for use in cases where the actual object value is not of concern (`yes` is a synonym)
 	self    \ Available inside method blocks
 	super   \ Available inside method blocks as a message receiver
-	        \ that calls methods as defined by the current class's superclass
+	        \ responds to messages as defined by the current class's superclass
 	...     \ Array of passed variadic arguments
-	valid   \ Represents non-nilness, for use in cases where the actual object value is not of concern ('yes' is a synonym)
 	nothing \ A constant representing 'nothingness' or 'absence of value'
 	
 	\ Built-in Operators
@@ -31,8 +31,7 @@
 	
 	\ Variable assignment
 	a = b \ Variables are local in scope
-	      \ Variables must begin with a lowercase letter, as uppercase names
-	      \ are reserved for classes
+	      \ (Must begin with a lowercase letter, as uppercase names are reserved for classes and values imported from C headers)
 	a, b = 1, 2 \ Comma separated operands can be used for multiple assignment
 	a, b = b, a \ The right hand sides are evaluated before the assignment, so swapping values works
 	a, b = nil  \ If there are fewer operands on the right hand side the last one is used for the missing ones
@@ -153,7 +152,8 @@
     async ..expression..        \ Executes `expression` asynchronously
     var = async ..expression..  \ Assigns the `var` to a "promise" which will point to the result of `expression` when it has finished running.
     wait                        \ Waits for any asynchronous operations created in the current block to finish
-    whenFinished ..block..      \ Executes `block` when all asynchronous operations created in the current block are finished, without blocking. (`block` is executed on the program's main thread)
+    whenFinished ..block..      \ Executes `block` when all asynchronous operations created in the current block are finished, without blocking.
+                                \ (`block` is executed on the program's main thread)
     lock ..expression.. { \ Acquires a lock on the result of `expression`. If one has already been taken, it waits.
         ..statements..
     }
