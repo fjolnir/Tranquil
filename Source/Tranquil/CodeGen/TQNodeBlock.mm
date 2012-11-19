@@ -690,7 +690,7 @@ using namespace llvm;
             if([_locals objectForKey:name]) // Only arguments are contained in _locals at this point
                 continue; // Arguments to this block override locals in the parent (Not that  you should write code like that)
             TQNodeVariable *parentVar = [aBlock.locals objectForKey:name];
-            if(![self referencesNode:parentVar] || [aProgram.globals objectForKey:name])
+            if(![self referencesNode:parentVar] || (!parentVar.shadows && [aProgram.globals objectForKey:name]))
                 continue;
 
             [_capturedVariables setObject:parentVar forKey:name];
