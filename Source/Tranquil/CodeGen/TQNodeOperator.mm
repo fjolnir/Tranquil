@@ -128,9 +128,10 @@ using namespace llvm;
         // Compile `left ? left : right` or `left ? right : left`
         // We need to ensure the left side is only executed once
         Value *leftVal = [_left generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+
         TQNodeCustom *leftWrapper = [TQNodeCustom nodeReturningValue:leftVal];
         TQNodeTernaryOperator *tern = [TQNodeTernaryOperator nodeWithCondition:leftWrapper
-                                                                        ifExpr:(_type == kTQOperatorAnd) ? _right : leftWrapper
+                                                                        ifExpr:(_type == kTQOperatorAnd) ? _right : nil
                                                                           else:(_type == kTQOperatorAnd) ? leftWrapper  : _right];
         tern.lineNumber = self.lineNumber;
         return [tern generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];

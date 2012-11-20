@@ -235,37 +235,56 @@ using namespace llvm;
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
-    TQNode *elseExpr = _elseExpr ? _elseExpr : [TQNodeNil node];
+    assert(_ifExpr || _elseExpr);
 
-    BasicBlock *thenBB = BasicBlock::Create(aProgram.llModule->getContext(), "ternThen", aBlock.function);
-    BasicBlock *elseBB = BasicBlock::Create(aProgram.llModule->getContext(), "ternElse", aBlock.function);
+    BasicBlock *thenBB = NULL;
+    BasicBlock *elseBB = NULL;
+    if(_ifExpr)
+        thenBB = BasicBlock::Create(aProgram.llModule->getContext(), "ternThen", aBlock.function);
+    if(_elseExpr)
+        elseBB = BasicBlock::Create(aProgram.llModule->getContext(), "ternElse", aBlock.function);
     BasicBlock *contBB = BasicBlock::Create(aProgram.llModule->getContext(), "ternEnd", aBlock.function);
 
     Value *cond = [self.condition generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-    cond = aBlock.builder->CreateICmpNE(cond, ConstantPointerNull::get(aProgram.llInt8PtrTy), "ternTest");
-    aBlock.builder->CreateCondBr(cond, thenBB, elseBB ? elseBB : contBB);
+    Value *test = aBlock.builder->CreateICmpNE(cond, ConstantPointerNull::get(aProgram.llInt8PtrTy), "ternTest");
+    BasicBlock *condBB = aBlock.basicBlock;
+    IRBuilder<> *condBuilder = aBlock.builder;
 
-    IRBuilder<> thenBuilder(thenBB);
-    aBlock.basicBlock = thenBB;
-    aBlock.builder = &thenBuilder;
-    Value *thenVal = [_ifExpr generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-    thenBB = aBlock.basicBlock; // May have changed
-    aBlock.builder->CreateBr(contBB);
+    Value *thenVal;
+    if(thenBB) {
+        IRBuilder<> thenBuilder(thenBB);
+        aBlock.basicBlock = thenBB;
+        aBlock.builder = &thenBuilder;
+        thenVal = [_ifExpr generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        thenBB = aBlock.basicBlock; // May have changed
+        aBlock.builder->CreateBr(contBB);
+    } else {
+        thenVal = cond;
+        thenBB = contBB;
+    }
 
-    IRBuilder<> elseBuilder(elseBB);
-    aBlock.basicBlock = elseBB;
-    aBlock.builder = &elseBuilder;
-    Value *elseVal = [elseExpr generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-    elseBB = aBlock.basicBlock; // May have changed
-    aBlock.builder->CreateBr(contBB);
+    Value *elseVal;
+    if(elseBB) {
+        IRBuilder<> elseBuilder(elseBB);
+        aBlock.basicBlock = elseBB;
+        aBlock.builder = &elseBuilder;
+        elseVal = [_elseExpr generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        elseBB = aBlock.basicBlock; // May have changed
+        aBlock.builder->CreateBr(contBB);
+    } else {
+        elseVal = [[TQNodeNil node] generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        elseBB = contBB;
+    }
 
     IRBuilder<> *contBuilder = new IRBuilder<>(contBB);
     aBlock.basicBlock = contBB;
     aBlock.builder    = contBuilder;
 
+    condBuilder->CreateCondBr(test, thenBB, elseBB);
+
     PHINode *phi = contBuilder->CreatePHI(aProgram.llInt8PtrTy, 2);
-    phi->addIncoming(thenVal, thenBB);
-    phi->addIncoming(elseVal, elseBB);
+    phi->addIncoming(thenVal, _ifExpr   ? thenBB : condBB);
+    phi->addIncoming(elseVal, _elseExpr ? elseBB : condBB);
 
     return phi;
 }
