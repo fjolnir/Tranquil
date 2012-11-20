@@ -149,10 +149,9 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
 {
     // TODO: implement this properly
     switch(aArch) {
-        kTQArchitectureX86_64:
-        kTQArchitectureHost:
+        case kTQArchitectureX86_64:
+        case kTQArchitectureHost:
             return [self fitsInTaggedPointer:aValue];
-            break;
         default:
             return NO;
     }
