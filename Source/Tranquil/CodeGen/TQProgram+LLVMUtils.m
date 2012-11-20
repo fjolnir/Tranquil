@@ -38,7 +38,7 @@
 using namespace llvm;
 
 @implementation TQProgram (LLVMUtils)
-@dynamic llVoidTy, llInt8Ty, llInt16Ty, llInt32Ty, llInt64Ty,
+@dynamic llVoidTy, llInt1Ty, llInt8Ty, llInt16Ty, llInt32Ty, llInt64Ty,
     llFloatTy, llDoubleTy, llFPTy, llIntTy, llLongTy, llIntPtrTy, llSizeTy,
     llPtrDiffTy, llVoidPtrTy, llInt8PtrTy, llVoidPtrPtrTy,
     llInt8PtrPtrTy, llInt32PtrTy,  llVaListTy, llPointerWidthInBits, llPointerAlignInBytes,
@@ -73,6 +73,11 @@ using namespace llvm;
 {
     llvm::LLVMContext &ctx = self.llModule->getContext();
     return llvm::Type::getVoidTy(ctx);
+}
+- (llvm::Type *)llInt1Ty
+{
+    llvm::LLVMContext &ctx = self.llModule->getContext();
+    return llvm::Type::getInt1Ty(ctx);
 }
 - (llvm::Type *)llInt8Ty
 {

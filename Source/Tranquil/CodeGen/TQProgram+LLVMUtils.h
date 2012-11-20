@@ -15,8 +15,8 @@
 #pragma mark - Cached types
 // void
 @property(readonly) llvm::Type *llVoidTy;
-// i8, i16, i32, and i64
-@property(readonly) llvm::Type *llInt8Ty, *llInt16Ty, *llInt32Ty, *llInt64Ty;
+// i1, i8, i16, i32, and i64
+@property(readonly) llvm::Type *llInt1Ty, *llInt8Ty, *llInt16Ty, *llInt32Ty, *llInt64Ty;
 // float, double
 @property(readonly) llvm::Type *llFloatTy, *llDoubleTy, *llFPTy;
 // int

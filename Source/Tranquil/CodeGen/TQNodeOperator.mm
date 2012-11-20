@@ -288,6 +288,9 @@ using namespace llvm;
 #ifdef __LP64__
                 resultCheck = B->CreateOr(B->CreateFCmpOGT(fastVal, ConstantFP::get(aProgram.llModule->getContext(), APFloat(1.0f/FLT_EPSILON))),
                                           B->CreateFCmpOLT(fastVal, ConstantFP::get(aProgram.llModule->getContext(), APFloat(-1.0f/FLT_EPSILON))));
+
+                Function *expect = Intrinsic::getDeclaration(aProgram.llModule, Intrinsic::expect, aProgram.llInt1Ty);
+                resultCheck = B->CreateCall2(expect, resultCheck, ConstantInt::get(aProgram.llInt1Ty, 0));
 #else
                 resultCheck = B->CreateCall(aProgram.TQFloatFitsInTaggedNumber, fastVal);
                 resultCheck = B->CreateICmpEQ(resultCheck, ConstantInt::get(aProgram.llInt8Ty, 0));
