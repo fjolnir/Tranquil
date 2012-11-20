@@ -1,0 +1,2 @@
+framework "AppKit"
+p NSViewWidthSizable
