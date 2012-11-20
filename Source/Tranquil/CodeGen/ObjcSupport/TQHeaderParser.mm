@@ -6,6 +6,20 @@
 
 using namespace llvm;
 
+struct TQHeaderParserState {
+    TQBridgedClassInfo *currentClass;
+    NSMutableDictionary *functions;
+    NSMutableDictionary *classes;
+    NSMutableDictionary *literalConstants;
+    NSMutableDictionary *constants;
+    NSMutableDictionary *protocols;
+};
+
+#define EMPTY_PARSER_STATE ((struct TQHeaderParserState) { \
+    nil, [NSMutableDictionary dictionary], [NSMutableDictionary dictionary], \
+         [NSMutableDictionary dictionary], [NSMutableDictionary dictionary], \
+         [NSMutableDictionary dictionary] })
+
 static NSString *_prepareConstName(NSString *name)
 {
     if([name hasPrefix:@"_"])
@@ -16,7 +30,9 @@ static NSString *_prepareConstName(NSString *name)
 @interface TQHeaderParser ()
 + (const char *)_encodingForFunPtrCursor:(CXCursor)cursor;
 + (char *)_encodingForCursor:(CXCursor)cursor;
-- (void)_parseTranslationUnit:(CXTranslationUnit)translationUnit;
+- (void)_parseTranslationUnit:(CXTranslationUnit)aTranslationUnit withState:(struct TQHeaderParserState *)aState;
+- (void)_importParserState:(struct TQHeaderParserState *)aState;
+- (BOOL)_writeParserState:(struct TQHeaderParserState *)aState toFile:(NSString *)aPath;
 @end
 
 @implementation TQHeaderParser
@@ -34,17 +50,16 @@ static NSString *_prepareConstName(NSString *name)
 
     return self;
 }
-
-- (void)dealloc
+- (id)initWithCoder:(NSCoder *)aCoder
 {
-    [_functions release];
-    [_classes release];
-    [_constants release];
-    [_literalConstants release];
-    [_protocols release];
-    clang_disposeIndex(_index);
-
-    [super dealloc];
+    if(!(self = [self init]))
+        return nil;
+    _functions        = [[aCoder decodeObject] retain];
+    _classes          = [[aCoder decodeObject] retain];
+    _literalConstants = [[aCoder decodeObject] retain];
+    _constants        = [[aCoder decodeObject] retain];
+    _protocols        = [[aCoder decodeObject] retain];
+    return self;
 }
 
 - (id)parseHeader:(NSString *)aPath
@@ -54,12 +69,12 @@ static NSString *_prepareConstName(NSString *name)
     if(frameworkRange.location != NSNotFound)
         frameworksPath = [[aPath substringToIndex:NSMaxRange(frameworkRange)] stringByDeletingLastPathComponent];
 
-    // We create a temp PCH header so that future compiles go faster (TODO: Make the generated tree NSCoding compliant so we can just serialize the ready made hierarchy)
+    // We create a temp TQPCH file so that future compiles go faster
     if(![aPath isAbsolutePath])
         aPath = [[[NSFileManager defaultManager] currentDirectoryPath] stringByAppendingPathComponent:aPath];
-    NSString *tempPath = [NSString stringWithFormat:@"/tmp/tranquil_pch/%@.pch", [aPath stringByDeletingPathExtension]];
+    NSString *tempPath = [NSString stringWithFormat:@"/tmp/tranquil_pch/%@.tqpch", [aPath stringByDeletingPathExtension]];
     if([[NSFileManager defaultManager] fileExistsAtPath:tempPath])
-        return [self parsePCH:tempPath];
+        return [self parseTQPCH:tempPath];
     [[NSFileManager defaultManager] createDirectoryAtPath:[tempPath stringByDeletingLastPathComponent]
     withIntermediateDirectories:YES attributes:nil error:nil];
     const char *args[] = { "-x", "objective-c", frameworksPath ? [[@"-F" stringByAppendingString:frameworksPath] UTF8String] : nil };
@@ -70,12 +85,45 @@ static NSString *_prepareConstName(NSString *name)
         TQLog(@"Couldn't parse header %@\n", aPath);
         return nil;
     }
-    [self _parseTranslationUnit:translationUnit];
+    struct TQHeaderParserState parserState = EMPTY_PARSER_STATE;
+    [self _parseTranslationUnit:translationUnit withState:&parserState];
+    [self _importParserState:&parserState];
 
     // Cache to disk
-    clang_saveTranslationUnit(translationUnit, [tempPath fileSystemRepresentation], CXSaveTranslationUnit_None);
+    [self _writeParserState:&parserState toFile:tempPath];
 
     clang_disposeTranslationUnit(translationUnit);
+    return TQValid;
+}
+
+- (void)_importParserState:(struct TQHeaderParserState *)aState
+{
+    [_functions addEntriesFromDictionary:aState->functions];
+    [_classes addEntriesFromDictionary:aState->classes];
+    [_literalConstants addEntriesFromDictionary:aState->literalConstants];
+    [_constants addEntriesFromDictionary:aState->constants];
+    [_protocols addEntriesFromDictionary:aState->protocols];
+}
+- (BOOL)_writeParserState:(struct TQHeaderParserState *)aState toFile:(NSString *)aPath
+{
+    NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:
+        aState->functions, @"functions",
+        aState->classes, @"classes",
+        aState->literalConstants, @"literalConstants",
+        aState->constants, @"constants",
+        aState->protocols, @"protocols", nil];
+    return [NSKeyedArchiver archiveRootObject:dict toFile:aPath];
+}
+
+- (id)parseTQPCH:(NSString *)aPath
+{
+    NSDictionary *dict = [NSKeyedUnarchiver unarchiveObjectWithFile:aPath];
+    struct TQHeaderParserState state = { nil,
+        [dict objectForKey:@"functions"], [dict objectForKey:@"classes"],
+        [dict objectForKey:@"literalConstants"], [dict objectForKey:@"constants"],
+        [dict objectForKey:@"protocols"] };
+    [self _importParserState:&state];
+
     return TQValid;
 }
 
@@ -86,14 +134,17 @@ static NSString *_prepareConstName(NSString *name)
         TQLog(@"Couldn't parse pch %@\n", aPath);
         return nil;
     }
-    [self _parseTranslationUnit:translationUnit];
+    struct TQHeaderParserState parserState = EMPTY_PARSER_STATE;
+    [self _parseTranslationUnit:translationUnit withState:&parserState];
+    [self _importParserState:&parserState];
+
     clang_disposeTranslationUnit(translationUnit);
     return TQValid;
 }
 
-- (void)_parseTranslationUnit:(CXTranslationUnit)translationUnit
+- (void)_parseTranslationUnit:(CXTranslationUnit)aTranslationUnit withState:(struct TQHeaderParserState *)aState
 {
-    clang_visitChildrenWithBlock(clang_getTranslationUnitCursor(translationUnit), ^(CXCursor cursor, CXCursor parent) {
+    clang_visitChildrenWithBlock(clang_getTranslationUnitCursor(aTranslationUnit), ^(CXCursor cursor, CXCursor parent) {
         CXString spelling = clang_getCursorSpelling(cursor);
         const char *name = clang_getCString(spelling);
         if(!name)
@@ -104,22 +155,22 @@ static NSString *_prepareConstName(NSString *name)
             case CXCursor_ObjCInterfaceDecl: {
                 TQBridgedClassInfo *info = [TQBridgedClassInfo new];
                 info.name = nsName;
-                [_classes setObject:info forKey:nsName];
-                _currentClass = info;
+                [aState->classes setObject:info forKey:nsName];
+                aState->currentClass = info;
                 [info release];
                 goto recurse;
             } break;
             case CXCursor_ObjCSuperClassRef: {
                 if(parent.kind == CXCursor_ObjCInterfaceDecl)
-                    _currentClass.superclass = [_classes objectForKey:nsName];
+                    aState->currentClass.superclass = [aState->classes objectForKey:nsName];
             } break;
             case CXCursor_ObjCProtocolRef: {
                 if(parent.kind == CXCursor_ObjCInterfaceDecl) {
-                    TQBridgedClassInfo *protocolInfo = [_protocols objectForKey:nsName];
+                    TQBridgedClassInfo *protocolInfo = [aState->protocols objectForKey:nsName];
                     if(!protocolInfo)
                         break;
-                    [_currentClass.instanceMethods addEntriesFromDictionary:protocolInfo.instanceMethods];
-                    [_currentClass.classMethods    addEntriesFromDictionary:protocolInfo.classMethods];
+                    [aState->currentClass.instanceMethods addEntriesFromDictionary:protocolInfo.instanceMethods];
+                    [aState->currentClass.classMethods    addEntriesFromDictionary:protocolInfo.classMethods];
                 }
             } break;
             case CXCursor_ObjCCategoryDecl: {
@@ -127,12 +178,12 @@ static NSString *_prepareConstName(NSString *name)
             } break;
             case CXCursor_ObjCClassRef: {
                 if(parent.kind == CXCursor_ObjCCategoryDecl)
-                    _currentClass = [_classes objectForKey:nsName];
+                    aState->currentClass = [aState->classes objectForKey:nsName] ?: [_classes objectForKey:nsName];
             } break;
             case CXCursor_ObjCProtocolDecl: {
                  TQBridgedClassInfo *info = [TQBridgedClassInfo new];
-                [_protocols setObject:info forKey:nsName];
-                _currentClass = info;
+                [aState->protocols setObject:info forKey:nsName];
+                aState->currentClass = info;
                 [info release];
                 goto recurse;
             } break;
@@ -143,17 +194,17 @@ static NSString *_prepareConstName(NSString *name)
                 char *encoding_       = [[self class] _encodingForCursor:cursor];
                 NSString *encoding    = [NSString stringWithUTF8String:encoding_];
                 if(isClassMethod)
-                    [_currentClass.classMethods    setObject:encoding forKey:selector];
+                    [aState->currentClass.classMethods    setObject:encoding forKey:selector];
                 else
-                    [_currentClass.instanceMethods setObject:encoding forKey:selector];
+                    [aState->currentClass.instanceMethods setObject:encoding forKey:selector];
                 free(encoding_);
             } break;
             case CXCursor_FunctionDecl: {
                 // TODO: Support bridging variadic functions. Support or ignore inlined functions
                 char *encoding         = [[self class] _encodingForCursor:cursor];
                 TQBridgedFunction *fun = [TQBridgedFunction functionWithName:nsName encoding:encoding];
-                [_functions setObject:fun
-                               forKey:_prepareConstName(nsName)];
+                [aState->functions setObject:fun
+                                     forKey:_prepareConstName(nsName)];
                 free(encoding);
 
             } break;
@@ -161,35 +212,36 @@ static NSString *_prepareConstName(NSString *name)
                 CXSourceRange macroRange = clang_getCursorExtent(cursor);
                 CXToken *tokens = 0;
                 unsigned int tokenCount = 0;
-                clang_tokenize(translationUnit, macroRange, &tokens, &tokenCount);
+                clang_tokenize(aTranslationUnit, macroRange, &tokens, &tokenCount);
                 if(tokenCount >= 2) {
                     // TODO: Support string constants?
                     CXTokenKind tokenKind = clang_getTokenKind(tokens[1]);
-                    CXString tokenSpelling = clang_getTokenSpelling(translationUnit, tokens[1]);
+                    CXString tokenSpelling = clang_getTokenSpelling(aTranslationUnit, tokens[1]);
                     const char *value = clang_getCString(tokenSpelling);
                     if(tokenKind == CXToken_Literal) {
-                        [_literalConstants setObject:[TQNodeNumber nodeWithDouble:atof(value)] forKey:nsName];
+                        [aState->literalConstants setObject:[TQNodeNumber nodeWithDouble:atof(value)] forKey:nsName];
                     } else if(tokenKind == CXToken_Identifier) { // Treat as alias
-                        id existing = [_literalConstants objectForKey:[NSString stringWithUTF8String:value]];
+                        NSString *nsVal = [NSString stringWithUTF8String:value];
+                        id existing = [aState->literalConstants objectForKey:nsVal] ?: [_literalConstants objectForKey:nsVal];
                         if(existing)
-                            [_literalConstants setObject:existing forKey:nsName];
+                            [aState->literalConstants setObject:existing forKey:nsName];
                     }
                     clang_disposeString(tokenSpelling);
                 }
-                clang_disposeTokens(translationUnit, tokens, tokenCount);
+                clang_disposeTokens(aTranslationUnit, tokens, tokenCount);
             } break;
             case CXCursor_VarDecl: {
                 char *encoding = [[self class] _encodingForCursor:cursor];
-                [_constants setObject:[TQBridgedConstant constantWithName:nsName encoding:encoding]
-                               forKey:_prepareConstName(nsName)];
+                [aState->constants setObject:[TQBridgedConstant constantWithName:nsName encoding:encoding]
+                                      forKey:_prepareConstName(nsName)];
                 free(encoding);
             } break;
             case CXCursor_EnumDecl: {
                 goto recurse;
             } break;
             case CXCursor_EnumConstantDecl: {
-                [_literalConstants setObject:[TQNodeNumber nodeWithDouble:clang_getEnumConstantDeclValue(cursor)]
-                                      forKey:_prepareConstName(nsName)];
+                [aState->literalConstants setObject:[TQNodeNumber nodeWithDouble:clang_getEnumConstantDeclValue(cursor)]
+                                             forKey:_prepareConstName(nsName)];
             } break;
             // Ignored
             case CXCursor_StructDecl:
@@ -342,6 +394,7 @@ static NSString *_prepareConstName(NSString *name)
     clang_disposeString(cxvanillaEncoding);
     return vanillaEncoding;
 }
+
 @end
 
 @implementation TQBridgedClassInfo
@@ -353,6 +406,24 @@ static NSString *_prepareConstName(NSString *name)
     _instanceMethods = [NSMutableDictionary new];
     _classMethods    = [NSMutableDictionary new];
     return self;
+}
+
+- (id)initWithCoder:(NSCoder *)aCoder
+{
+    if(!(self = [super init]))
+        return nil;
+    _name            = [[aCoder decodeObject] retain];
+    _superclass      = [[aCoder decodeObject] retain];
+    _instanceMethods = [[aCoder decodeObject] retain];
+    _classMethods    = [[aCoder decodeObject] retain];
+    return self;
+}
+- (void)encodeWithCoder:(NSCoder *)aCoder
+{
+    [aCoder encodeObject:_name];
+    [aCoder encodeObject:_superclass];
+    [aCoder encodeObject:_instanceMethods];
+    [aCoder encodeObject:_classMethods];
 }
 
 - (NSString *)typeForInstanceMethod:(NSString *)aSelector
@@ -393,6 +464,20 @@ static NSString *_prepareConstName(NSString *name)
     cnst.name = aName;
     cnst.encoding = strdup((char *)aEncoding);
     return cnst;
+}
+
+- (id)initWithCoder:(NSCoder *)aCoder
+{
+    if(!(self = [super init]))
+        return nil;
+    _name     = [[aCoder decodeObject] retain];
+    _encoding = strdup([[aCoder decodeObject] UTF8String]);
+    return self;
+}
+- (void)encodeWithCoder:(NSCoder *)aCoder
+{
+    [aCoder encodeObject:_name];
+    [aCoder encodeObject:[NSString stringWithUTF8String:_encoding]];
 }
 
 - (void)dealloc
@@ -453,6 +538,24 @@ static NSString *_prepareConstName(NSString *name)
     });
 
     return self;
+}
+
+- (id)initWithCoder:(NSCoder *)aCoder
+{
+    if(!(self = [super init]))
+        return nil;
+    _name     = [[aCoder decodeObject] retain];
+    _retType  = [[aCoder decodeObject] retain];
+    _argTypes = [[aCoder decodeObject] retain];
+    _encoding = strdup([[aCoder decodeObject] UTF8String]);
+    return self;
+}
+- (void)encodeWithCoder:(NSCoder *)aCoder
+{
+    [aCoder encodeObject:_name];
+    [aCoder encodeObject:_retType];
+    [aCoder encodeObject:_argTypes];
+    [aCoder encodeObject:[NSString stringWithUTF8String:_encoding]];
 }
 
 - (void)dealloc

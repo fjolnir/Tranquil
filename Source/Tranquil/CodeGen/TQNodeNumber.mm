@@ -23,6 +23,18 @@ using namespace llvm;
     return self;
 }
 
+- (id)initWithCoder:(NSCoder *)aCoder
+{
+    if(!(self = [super init]))
+        return nil;
+    _value = [[aCoder decodeObject] retain];
+    return self;
+}
+- (void)encodeWithCoder:(NSCoder *)aCoder
+{
+    [aCoder encodeObject:_value];
+}
+
 - (void)dealloc
 {
     [_value release];

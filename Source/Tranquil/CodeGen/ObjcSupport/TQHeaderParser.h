@@ -16,10 +16,11 @@
     // Protocols (Only used internally)
     NSMutableDictionary *_protocols;
 
-    TQBridgedClassInfo *_currentClass;
     CXIndex _index;
 }
 - (id)parseHeader:(NSString *)aPath;
+- (id)parseTQPCH:(NSString *)aPath;
+- (id)parsePCH:(NSString *)aPath;
 
 // The following accessors return a node if the entity is found, otherwise nil
 - (TQNode *)entityNamed:(NSString *)aName;
@@ -28,7 +29,7 @@
 - (TQBridgedClassInfo *)classNamed:(NSString *)aName;
 @end
 
-@interface TQBridgedClassInfo : NSObject
+@interface TQBridgedClassInfo : NSObject <NSCoding>
 @property(readwrite, retain) NSString *name;
 @property(readwrite, retain) TQBridgedClassInfo *superclass;
 // Keyed by selector, values are type encoding strings
@@ -38,7 +39,7 @@
 - (NSString *)typeForClassMethod:(NSString *)aSelector;
 @end
 
-@interface TQBridgedConstant : TQNode {
+@interface TQBridgedConstant : TQNode <NSCoding> {
     llvm::Value *_global;
 }
 @property(readwrite, retain) NSString *name;
@@ -46,7 +47,7 @@
 + (TQBridgedConstant *)constantWithName:(NSString *)aName encoding:(const char *)aEncoding;
 @end
 
-@interface TQBridgedFunction : TQNodeBlock
+@interface TQBridgedFunction : TQNodeBlock <NSCoding>
 @property(readwrite, retain) NSString *name;
 @property(readonly) char *encoding;
 + (TQBridgedFunction *)functionWithName:(NSString *)aName encoding:(const char *)aEncoding;
