@@ -245,6 +245,10 @@ using namespace llvm;
         elseBB = BasicBlock::Create(aProgram.llModule->getContext(), "ternElse", aBlock.function);
     BasicBlock *contBB = BasicBlock::Create(aProgram.llModule->getContext(), "ternEnd", aBlock.function);
 
+    // After generating the expressions, the basic block may have changed, we track that with these
+    BasicBlock *eventualThenBlock = thenBB;
+    BasicBlock *eventualElseBlock = elseBB;
+
     Value *cond = [self.condition generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     Value *test;
     if(!_isNegated)
@@ -260,11 +264,12 @@ using namespace llvm;
         aBlock.basicBlock = thenBB;
         aBlock.builder = &thenBuilder;
         thenVal = [_ifExpr generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-        thenBB = aBlock.basicBlock; // May have changed
+        eventualThenBlock = aBlock.basicBlock; // May have changed
         aBlock.builder->CreateBr(contBB);
     } else {
         thenVal = cond;
         thenBB = contBB;
+        eventualThenBlock = contBB;
     }
 
     Value *elseVal;
@@ -273,11 +278,12 @@ using namespace llvm;
         aBlock.basicBlock = elseBB;
         aBlock.builder = &elseBuilder;
         elseVal = [_elseExpr generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-        elseBB = aBlock.basicBlock; // May have changed
+        eventualElseBlock = aBlock.basicBlock; // May have changed
         aBlock.builder->CreateBr(contBB);
     } else {
         elseVal = [[TQNodeNil node] generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         elseBB = contBB;
+        eventualElseBlock = contBB;
     }
 
     IRBuilder<> *contBuilder = new IRBuilder<>(contBB);
@@ -287,8 +293,8 @@ using namespace llvm;
     condBuilder->CreateCondBr(test, thenBB, elseBB);
 
     PHINode *phi = contBuilder->CreatePHI(aProgram.llInt8PtrTy, 2);
-    phi->addIncoming(thenVal, _ifExpr   ? thenBB : condBB);
-    phi->addIncoming(elseVal, _elseExpr ? elseBB : condBB);
+    phi->addIncoming(thenVal, _ifExpr   ? eventualThenBlock : condBB);
+    phi->addIncoming(elseVal, _elseExpr ? eventualElseBlock : condBB);
 
     return phi;
 }
