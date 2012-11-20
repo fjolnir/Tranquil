@@ -1,5 +1,4 @@
 log = { ... |
-    output = ... reduce: `arg, out="" | out + arg toString + " "`
-    output print
+    (... reduce: `arg, out="" | out + arg toString + " "`) print
 }
 log("foo", 123)
