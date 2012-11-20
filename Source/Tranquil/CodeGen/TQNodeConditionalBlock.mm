@@ -213,7 +213,7 @@ using namespace llvm;
 @end
 
 @implementation TQNodeTernaryOperator
-@synthesize ifExpr=_ifExpr, elseExpr=_elseExpr;
+@synthesize ifExpr=_ifExpr, elseExpr=_elseExpr, isNegated=_isNegated;
 
 + (TQNodeTernaryOperator *)node
 {
@@ -246,7 +246,11 @@ using namespace llvm;
     BasicBlock *contBB = BasicBlock::Create(aProgram.llModule->getContext(), "ternEnd", aBlock.function);
 
     Value *cond = [self.condition generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-    Value *test = aBlock.builder->CreateICmpNE(cond, ConstantPointerNull::get(aProgram.llInt8PtrTy), "ternTest");
+    Value *test;
+    if(!_isNegated)
+        test = aBlock.builder->CreateICmpNE(cond, ConstantPointerNull::get(aProgram.llInt8PtrTy), "ternTest");
+    else
+        test = aBlock.builder->CreateICmpEQ(cond, ConstantPointerNull::get(aProgram.llInt8PtrTy), "ternTest");
     BasicBlock *condBB = aBlock.basicBlock;
     IRBuilder<> *condBuilder = aBlock.builder;
 

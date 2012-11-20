@@ -26,6 +26,7 @@
 
 @interface TQNodeTernaryOperator : TQNodeIfBlock
 @property(readwrite, retain) TQNode *ifExpr, *elseExpr;
+@property(readwrite, assign) BOOL isNegated;
 + (TQNodeTernaryOperator *)node;
 + (TQNodeTernaryOperator *)nodeWithCondition:(TQNode *)aCond ifExpr:(TQNode *)aIfExpr else:(TQNode *)aElseExpr;
 @end

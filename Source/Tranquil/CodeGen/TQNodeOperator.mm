@@ -131,8 +131,9 @@ using namespace llvm;
 
         TQNodeCustom *leftWrapper = [TQNodeCustom nodeReturningValue:leftVal];
         TQNodeTernaryOperator *tern = [TQNodeTernaryOperator nodeWithCondition:leftWrapper
-                                                                        ifExpr:(_type == kTQOperatorAnd) ? _right : nil
-                                                                          else:(_type == kTQOperatorAnd) ? leftWrapper  : _right];
+                                                                        ifExpr:nil // Use condition result without re-evaluating
+                                                                          else:_right];
+        tern.isNegated  = (_type == kTQOperatorAnd);
         tern.lineNumber = self.lineNumber;
         return [tern generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     } else {
