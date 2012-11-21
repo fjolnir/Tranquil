@@ -60,7 +60,7 @@ then
   echo "\033[0;32mYou already have libffi installed.\033[0m"
 else
     pushd /tmp
-    git clone https://github.com/pandamonia/libffi-iOS.git
+    git clone --recursive https://github.com/pandamonia/libffi-iOS.git
     cd libffi-iOS
 
     xcodebuild -alltargets
@@ -99,6 +99,7 @@ then
     echo "\n\033[0;34mUpdating Tranquil...\033[0m"
     pushd /usr/local/tranquil/src
     git pull
+    git submodule foreach git pull
     popd
 else
     echo "\n\033[0;34mCloning Tranquil from GitHub...\033[0m"
