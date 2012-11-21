@@ -17,7 +17,7 @@ typedef struct {
 #define CopyCStr() ((unsigned char *)strndup((char *)ts, te-ts))
 
 #define _EmitToken(tokenId, val) do { \
-    /*NSLog(@"emitting %d = %@ on line: %d", tokenId, val, parserState.currentLine);*/ \
+    /*NSLog(@"emitting %ld = %@ on line: %ld", tokenId, val, parserState.currentLine);*/ \
     Parse(parser, tokenId, [TQToken withId:tokenId value:val line:parserState.currentLine], &parserState); \
     parserState.atBeginningOfExpr = NO; \
 } while(0);
@@ -58,7 +58,7 @@ typedef struct {
 #define ExprBeg() parserState.atBeginningOfExpr = YES
 
 @interface TQToken : NSObject
-@property(readwrite, assign) int id, line;
+@property(readwrite, assign) NSUInteger id, lineNumber;
 @property(readwrite, strong) id value;
 + (TQToken *)withId:(int)id value:(id)value line:(int)line;
 @end
@@ -68,7 +68,7 @@ typedef struct {
     TQToken *ret = [self new];
     ret.id = id;
     ret.value = value;
-    ret.line = line;
+    ret.lineNumber = line;
     return [ret autorelease];
 }
 @end

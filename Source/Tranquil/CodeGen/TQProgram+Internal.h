@@ -28,7 +28,7 @@
 @property(readonly) llvm::DIBuilder *debugBuilder;
 
 - (TQNodeRootBlock *)_rootFromFile:(NSString *)aPath error:(NSError **)aoErr;
-- (TQNodeRootBlock *)_parseScript:(NSString *)aScript error:(NSError **)aoErr;
+- (TQNodeRootBlock *)_parseScript:(NSString *)aScript withPath:(NSString *)aPath error:(NSError **)aoErr;
 - (NSString *)_resolveImportPath:(NSString *)aPath;
 
 - (void)insertLogUsingBuilder:(llvm::IRBuilder<> *)aBuilder withStr:(NSString *)txt;

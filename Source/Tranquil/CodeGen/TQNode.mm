@@ -68,24 +68,31 @@ using namespace llvm;
     return NO;
 }
 
-- (void)_attachDebugInformationToInstruction:(llvm::Value *)aInst inProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock root:(TQNodeRootBlock *)aRoot
+- (void)_attachDebugInformationToInstruction:(llvm::Instruction *)aInst inProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock root:(TQNodeRootBlock *)aRoot
 {
-    //NSLog(@"line: %ld %@", _lineNumber, self);
     if(_lineNumber == NSNotFound)
         return;
 
-    //aBlock.builder->SetCurrentDebugLocation(DebugLoc::get(self.lineNumber, 0, (MDNode*)aBlock.debugInfo, NULL)); <- Crashes llc
+//    aBlock.builder->SetCurrentDebugLocation(DebugLoc::get(self.lineNumber, 0, (MDNode*)aBlock.debugInfo, NULL)); //<- Crashes llc
 
-    Value *args[] = {
-        ConstantInt::get(aProgram.llIntTy, _lineNumber),
-        ConstantInt::get(aProgram.llIntTy, 0),
-        (Value *)aRoot.debugUnit,
-        //(Value *)aBlock.debugInfo,
-        DILocation(NULL)
-    };
-    LLVMContext *ctx = &aProgram.llModule->getContext();
-    DILocation loc = DILocation(MDNode::get(*ctx, args));
-    dyn_cast<Instruction>(aInst)->setMetadata(ctx->getMDKindID("dbg"), loc);
+//    Value *args[] = {
+//        ConstantInt::get(aProgram.llIntTy, _lineNumber),
+//        ConstantInt::get(aProgram.llIntTy, 0),
+//        (Value *)aBlock.debugInfo,
+//        //(Value *)aBlock.debugInfo,
+//        DILocation(NULL)
+//    };
+//    LLVMContext *ctx = &aProgram.llModule->getContext();
+   // DILocation loc = DILocation(MDNode::get(*ctx, args));
+//    DILocation *loc = DebugLoc::get(self.lineNumber, 0, aBlock.debugInfo.getContext(), NULL);
+ //   aInst->setMetadata(ctx->getMDKindID("dbg"), *loc);
+
+//    DebugLoc debugLoc = DebugLoc::get(self.lineNumber, 0, aBlock.debugInfo, NULL);
+//    aBlock.builder->SetCurrentDebugLocation(debugLoc);
+//    aInst->setDebugLoc(debugLoc);
+    DebugLoc debugLoc = DebugLoc::get(self.lineNumber, 0, aBlock.scope, NULL);
+    aBlock.builder->SetCurrentDebugLocation(debugLoc);
+    aInst->setDebugLoc(debugLoc);
 }
 
 - (void)setLineNumber:(NSUInteger)aLineNo

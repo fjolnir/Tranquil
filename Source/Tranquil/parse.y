@@ -31,10 +31,10 @@ statement(S) ::= import(I).                             { S = I;                
 statement(S) ::= retNl(I).                              { S = I;                                                                      }
 statement(S) ::= retNoNl(I) PERIOD.                     { S = I;                                                                      }
 
-retNl(R)   ::= CARET exprNl(E).                         { R = [TQNodeReturn nodeWithValue:E];                                         }
-retNl(R)   ::= CARET retNl(O).                          { R = O; [O setDepth:[O depth] + 1];                                          }
-retNoNl(R) ::= CARET exprNoNl(E).                       { R = [TQNodeReturn nodeWithValue:E];                                         }
-retNoNl(R) ::= CARET retNoNl(O).                        { R = O; [O setDepth:[O depth] + 1];                                          }
+retNl(R)   ::= CARET(T) exprNl(E).                      { R = [TQNodeReturn nodeWithValue:E]; LN(R,T);                                }
+retNl(R)   ::= CARET(T) retNl(O).                       { R = O; [O setDepth:[O depth] + 1];  LN(R,T);                                }
+retNoNl(R) ::= CARET(T) exprNoNl(E).                    { R = [TQNodeReturn nodeWithValue:E]; LN(R,T);                                }
+retNoNl(R) ::= CARET(T) retNoNl(O).                     { R = O; [O setDepth:[O depth] + 1];  LN(R,T);                                }
 
 
 //
@@ -91,29 +91,29 @@ simpleExprNl(E) ::= blockNl(B).                         { E = B;                
 //
 
 // Unary messages
-unaryMsgNoNl(M) ::= unaryRcvr(R) unarySelNoNl(S).       { M = [TQNodeMessage unaryMessageWithReceiver:R selector:S];                  }
+unaryMsgNoNl(M) ::= unaryRcvr(R) unarySelNoNl(S).       { M = [TQNodeMessage unaryMessageWithReceiver:R selector:S]; LN(M,R);         }
 unarySelNoNl(U) ::= IDENT(T).                           { U = [T value];                                                              }
 unarySelNoNl(U) ::= CONST(T).                           { U = [T value];                                                              }
 unarySelNoNl(U) ::= SELF.                               { U = @"self";                                                                }
 
-unaryMsgNl(M)   ::= unaryRcvr(R) unarySelNl(S).         { M = [TQNodeMessage unaryMessageWithReceiver:R selector:S];                  }
+unaryMsgNl(M)   ::= unaryRcvr(R) unarySelNl(S).         { M = [TQNodeMessage unaryMessageWithReceiver:R selector:S]; LN(M,R);         }
 unarySelNl(U)   ::= IDENTNL(T).                         { U = [T value];                                                              }
 unarySelNl(U)   ::= CONSTNL(T).                         { U = [T value];                                                              }
 unarySelNl(U)   ::= SELFNL.                             { U = @"self";                                                                }
 
 
 // Keyword messages
-kwdMsgNoNl(M) ::= kwdRcvr(R) selPartsNoNl(SP).          { M = [TQNodeMessage nodeWithReceiver:R arguments:SP];                        }
-kwdMsgNl(M)   ::= kwdRcvr(R) selPartsNl(SP).            { M = [TQNodeMessage nodeWithReceiver:R arguments:SP];                        }
+kwdMsgNoNl(M) ::= kwdRcvr(R) selPartsNoNl(SP).          { M = [TQNodeMessage nodeWithReceiver:R arguments:SP]; LN(M,R);               }
+kwdMsgNl(M)   ::= kwdRcvr(R) selPartsNl(SP).            { M = [TQNodeMessage nodeWithReceiver:R arguments:SP]; LN(M,R);               }
 
 selParts(ARR)     ::= .                                 { ARR = [NSMutableArray array];                                               }
 selParts(ARR)     ::= selParts(T) selPart(SP).          { ARR = T; [ARR addObject:SP];                                                }
 selPartsNl(ARR)   ::= selParts(T) selPartNl(SP).        { ARR = T; [ARR addObject:SP];                                                }
 selPartsNoNl(ARR) ::= selParts(T) selPartNoNl(SP).      { ARR = T; [ARR addObject:SP];                                                }
 
-selPart(SP)     ::= SELPART(T) msgArg(A).               { SP = [TQNodeArgument nodeWithPassedNode:A selectorPart:[T value]];          }
-selPartNoNl(SP) ::= SELPART(T) msgArgNoNl(A).           { SP = [TQNodeArgument nodeWithPassedNode:A selectorPart:[T value]];          }
-selPartNl(SP)   ::= SELPART(T) msgArgNl(A).             { SP = [TQNodeArgument nodeWithPassedNode:A selectorPart:[T value]];          }
+selPart(SP)     ::= SELPART(T) msgArg(A).               { SP = [TQNodeArgument nodeWithPassedNode:A selectorPart:[T value]]; LN(SP,T);}
+selPartNoNl(SP) ::= SELPART(T) msgArgNoNl(A).           { SP = [TQNodeArgument nodeWithPassedNode:A selectorPart:[T value]]; LN(SP,T);}
+selPartNl(SP)   ::= SELPART(T) msgArgNl(A).             { SP = [TQNodeArgument nodeWithPassedNode:A selectorPart:[T value]]; LN(SP,T);}
 
 unaryRcvr(R) ::= simpleExprNoNl(L).                     { R = L;                                                                      }
 
@@ -129,33 +129,49 @@ msgArgNl(A) ::= simpleExprNl(E).                        { A = E;                
 msgArgNl(A) ::= opNl(E).                                { A = E;                                                                      }
 
 // Cascaded messages
-cascadeNoNl(C) ::= noAsgnExprNoNl(E) SEMICOLON unarySelNoNl(S). {
+cascadeNoNl(C) ::= noAsgnExprNoNl(E) SEMICOLON(T) unarySelNoNl(S). {
     if([E isKindOfClass:[TQNodeMessage class]])
         C = E;
-    else
+    else {
         C = [TQNodeMessage unaryMessageWithReceiver:E selector:@"self"];
-    [[C cascadedMessages] addObject:[TQNodeMessage unaryMessageWithReceiver:nil selector:S]];
+        LN(C,E);
+    }
+    TQNodeMessage *cascade = [TQNodeMessage unaryMessageWithReceiver:nil selector:S];
+    LN(cascade, T);
+    [[C cascadedMessages] addObject:cascade];
 }
-cascadeNoNl(C) ::= noAsgnExprNoNl(E) SEMICOLON selPartsNoNl(SP). {
+cascadeNoNl(C) ::= noAsgnExprNoNl(E) SEMICOLON(T) selPartsNoNl(SP). {
     if([E isKindOfClass:[TQNodeMessage class]])
         C = E;
-    else
+    else {
         C = [TQNodeMessage unaryMessageWithReceiver:E selector:@"self"];
-    [[C cascadedMessages] addObject:[TQNodeMessage nodeWithReceiver:nil arguments:SP]];
+        LN(C,E);
+    }
+    TQNodeMessage *cascade = [TQNodeMessage nodeWithReceiver:nil arguments:SP];
+    LN(cascade, T);
+    [[C cascadedMessages] addObject:cascade];
 }
-cascadeNl(C) ::= noAsgnExprNoNl(E) SEMICOLON unarySelNl(S). {
+cascadeNl(C) ::= noAsgnExprNoNl(E) SEMICOLON(T) unarySelNl(S). {
     if([E isKindOfClass:[TQNodeMessage class]])
         C = E;
-    else
+    else {
         C = [TQNodeMessage unaryMessageWithReceiver:E selector:@"self"];
-    [[C cascadedMessages] addObject:[TQNodeMessage unaryMessageWithReceiver:nil selector:S]];
+        LN(C,E);
+    }
+    TQNodeMessage *cascade = [TQNodeMessage unaryMessageWithReceiver:nil selector:S];
+    LN(cascade, T);
+    [[C cascadedMessages] addObject:cascade];
 }
-cascadeNl(C) ::= noAsgnExprNoNl(E) SEMICOLON selPartsNl(SP). {
+cascadeNl(C) ::= noAsgnExprNoNl(E) SEMICOLON(T) selPartsNl(SP). {
     if([E isKindOfClass:[TQNodeMessage class]])
         C = E;
-    else
+    else {
         C = [TQNodeMessage unaryMessageWithReceiver:E selector:@"self"];
-    [[C cascadedMessages] addObject:[TQNodeMessage nodeWithReceiver:nil arguments:SP]];
+        LN(C,E);
+    }
+    TQNodeMessage *cascade = [TQNodeMessage nodeWithReceiver:nil arguments:SP];
+    LN(cascade, T);
+    [[C cascadedMessages] addObject:cascade];
 }
 
 
@@ -183,48 +199,48 @@ elseBody(B) ::= cond(T).           { B = [NSMutableArray arrayWithObject:T];    
 
 cond(I) ::= IF|UNLESS(T) expr(C) blockNl(IST).          { I = [CONDKLS(T) nodeWithCondition:C
                                                                                ifStatements:[IST statements]
-                                                                             elseStatements:nil];                                     }
+                                                                             elseStatements:nil]; LN(I,T);                            }
 cond(I) ::= IF|UNLESS(T) expr(C) block(IST)
             ELSE elseBody(EST).                         { I = [CONDKLS(T) nodeWithCondition:C
                                                                                ifStatements:[IST statements]
-                                                                             elseStatements:EST];                                     }
-cond(I) ::= IF|UNLESS(T) expr(C) THEN bodyNl(IST).      { I = [CONDKLS(T) nodeWithCondition:C ifStatements:IST elseStatements:nil];   }
+                                                                             elseStatements:EST]; LN(I,T);                            }
+cond(I) ::= IF|UNLESS(T) expr(C) THEN bodyNl(IST).      { I = [CONDKLS(T) nodeWithCondition:C ifStatements:IST elseStatements:nil]; LN(I,T);  }
 cond(I) ::= IF|UNLESS(T) expr(C) THEN body(IST)
-            ELSE elseBody(EST).                         { I = [CONDKLS(T) nodeWithCondition:C ifStatements:IST elseStatements:EST];   }
-cond(I) ::= bodyNoNl(IST) IF|UNLESS(T) exprNl(C).       { I = [CONDKLS(T) nodeWithCondition:C ifStatements:IST elseStatements:nil];   }
+            ELSE elseBody(EST).                         { I = [CONDKLS(T) nodeWithCondition:C ifStatements:IST elseStatements:EST]; LN(I,T);  }
+cond(I) ::= bodyNoNl(IST) IF|UNLESS(T) exprNl(C).       { I = [CONDKLS(T) nodeWithCondition:C ifStatements:IST elseStatements:nil]; LN(I,T);  }
 
 
 ternOpNoNl(O) ::= operandNoNl(C)
                   TERNIF operand(A)
-                  TERNELSE operandNoNl(B).              { O = [TQNodeTernaryOperator nodeWithCondition:C ifExpr:A else:B];            }
+                  TERNELSE operandNoNl(B).              { O = [TQNodeTernaryOperator nodeWithCondition:C ifExpr:A else:B]; LN(O,C);   }
 ternOpNl(O) ::= operandNoNl(C)
                 TERNIF operand(A)
-                TERNELSE operandNl(B).                  { O = [TQNodeTernaryOperator nodeWithCondition:C ifExpr:A else:B];            }
+                TERNELSE operandNl(B).                  { O = [TQNodeTernaryOperator nodeWithCondition:C ifExpr:A else:B]; LN(O,C);   }
 
-loop(I) ::= WHILE|UNTIL(T) expr(C) blockNl(ST).         { I = [LOOPKLS(T) nodeWithCondition:C statements:[ST statements]];            }
-loop(I) ::= bodyNoNl(ST) WHILE|UNTIL(T) exprNl(C).      { I = [LOOPKLS(T) nodeWithCondition:C statements:ST];                         }
-loop(I) ::= WHILE|UNTIL(T) expr(C) DO bodyNl(ST).       { I = [LOOPKLS(T) nodeWithCondition:C statements:ST];                         }
+loop(I) ::= WHILE|UNTIL(T) expr(C) blockNl(ST).         { I = [LOOPKLS(T) nodeWithCondition:C statements:[ST statements]]; LN(I,T);   }
+loop(I) ::= bodyNoNl(ST) WHILE|UNTIL(T) exprNl(C).      { I = [LOOPKLS(T) nodeWithCondition:C statements:ST];              LN(I,T);   }
+loop(I) ::= WHILE|UNTIL(T) expr(C) DO bodyNl(ST).       { I = [LOOPKLS(T) nodeWithCondition:C statements:ST];              LN(I,T);   }
 
 statement(S) ::= breakNl(B).                            { S = B;                                                                      }
 statement(S) ::= skipNl(SK).                            { S = SK;                                                                     }
 
-breakNoNl(B) ::= BREAK.                                 { B = [TQNodeBreak node];                                                     }
-breakNl(B)   ::= BREAKNL.                               { B = [TQNodeBreak node];                                                     }
-skipNoNl(S)  ::= SKIP.                                  { S = [TQNodeSkip node];                                                      }
-skipNl(S)    ::= SKIPNL.                                { S = [TQNodeSkip node];                                                      }
+breakNoNl(B) ::= BREAK(T).                              { B = [TQNodeBreak node]; LN(B,T);                                            }
+breakNl(B)   ::= BREAKNL(T).                            { B = [TQNodeBreak node]; LN(B,T);                                            }
+skipNoNl(S)  ::= SKIP(T).                               { S = [TQNodeSkip node];  LN(S,T);                                            }
+skipNl(S)    ::= SKIPNL(T).                             { S = [TQNodeSkip node];  LN(S,T);                                            }
 
 
 //
 // Concurrency Primitives -------------------------------------------------------------------------------------------------------------
 //
 
-asyncNoNl(A) ::= ASYNC simpleExprNoNl(B).               { A = [TQNodeAsync nodeWithExpression:B];                                     }
-asyncNl(A) ::= ASYNC simpleExprNl(B).                   { A = [TQNodeAsync nodeWithExpression:B];                                     }
+asyncNoNl(A) ::= ASYNC(T) simpleExprNoNl(B).            { A = [TQNodeAsync nodeWithExpression:B]; LN(A,T);                            }
+asyncNl(A) ::= ASYNC(T) simpleExprNl(B).                { A = [TQNodeAsync nodeWithExpression:B]; LN(A,T);                            }
 
-waitNoNl(A) ::= WAIT.                                   { A = [TQNodeWait node];                                                      }
-waitNl(A)   ::= WAITNL.                                 { A = [TQNodeWait node];                                                      }
-whenFinished(A) ::= WHENFINISHED simpleExprNl(B).       { A = [TQNodeWhenFinished nodeWithExpression:B];                              }
-lock(A) ::= LOCK expr(C) blockNl(ST).                   { A = [TQNodeLock nodeWithCondition:C]; [A setStatements:[ST statements]];    }
+waitNoNl(A) ::= WAIT(T).                                { A = [TQNodeWait node]; LN(A,T);                                             }
+waitNl(A)   ::= WAITNL(T).                              { A = [TQNodeWait node]; LN(A,T);                                             }
+whenFinished(A) ::= WHENFINISHED(T) simpleExprNl(B).    { A = [TQNodeWhenFinished nodeWithExpression:B]; LN(A,T);                     }
+lock(A) ::= LOCK(T) expr(C) blockNl(ST).          { A = [TQNodeLock nodeWithCondition:C]; [A setStatements:[ST statements]]; LN(A,T); }
 
 
 //
@@ -249,20 +265,28 @@ import(I) ::= IMPORT STR(P) PERIOD.                     { I = [TQNodeImport node
 block(B)   ::= blockNoNl(T).                            { B = T;                                                                      }
 block(B)   ::= blockNl(T).                              { B = T;                                                                      }
 
-blockNl(B) ::= LBRACE statements(S) RBRACENL.           { B = [TQNodeBlock node]; [B setStatements:S];                                }
-blockNl(B) ::= LBRACE blockArgs(A) PIPE statements(S) RBRACENL. {
+blockNl(B) ::= LBRACE(T) statements(S) RBRACENL.        { B = [TQNodeBlock node]; [B setStatements:S]; LN(B,T);                       }
+blockNl(B) ::= LBRACE(T) blockArgs(A) PIPE statements(S) RBRACENL. {
     B = [TQNodeBlock nodeWithArguments:A statements:S];
+    LN(B,T);
 }
 
-blockNl(B) ::= backtick expr(E) BACKTICKNL.        { B = [TQNodeBlock node]; [[B statements] addObject:E]; [B setIsCompactBlock:YES]; }
-blockNl(B) ::= backtick blockArgs(A) PIPE expr(E) BACKTICKNL. {
+blockNl(B) ::= backtick(T) expr(E) BACKTICKNL. {
+    B = [TQNodeBlock node];
+    [[B statements] addObject:E];
+    [B setIsCompactBlock:YES];
+    LN(B,T);
+}
+blockNl(B) ::= backtick(T) blockArgs(A) PIPE expr(E) BACKTICKNL. {
     B = [TQNodeBlock nodeWithArguments:A statement:E];
     [B setIsCompactBlock:YES];
+    LN(B,T);
 }
 
-blockNoNl(B) ::= LBRACE statements(S) RBRACE.          { B = [TQNodeBlock node]; [B setStatements:S];                                 }
-blockNoNl(B) ::= LBRACE  blockArgs(A) PIPE statements(S) RBRACE. {
+blockNoNl(B) ::= LBRACE(T) statements(S) RBRACE.        { B = [TQNodeBlock node]; [B setStatements:S]; LN(B,T);                        }
+blockNoNl(B) ::= LBRACE(T)  blockArgs(A) PIPE statements(S) RBRACE. {
     B = [TQNodeBlock nodeWithArguments:A statements:S];
+    LN(B,T);
 }
 
 blockNoNl(B) ::= backtick expr(E) BACKTICK.        { B = [TQNodeBlock node]; [[B statements] addObject:E]; [B setIsCompactBlock:YES]; }
@@ -332,8 +356,8 @@ blockArgs(A) ::= assignNoNl(ASS) ASSIGN noAsgnExprNoNl(DEF) COMMA blockArgs(R). 
 // Block Calls ------------------------------------------------------------------------------------------------------------------------
 //
 
-blockCallNoNl(C)  ::= accessableNoNl(A) LPAREN callArgs(ARGS) RPAREN. { C = [TQNodeCall nodeWithCallee:A]; [C setArguments:ARGS];     }
-blockCallNl(C)  ::= accessableNoNl(A) LPAREN callArgs(ARGS) RPARENNL. { C = [TQNodeCall nodeWithCallee:A]; [C setArguments:ARGS];     }
+blockCallNoNl(C)  ::= accessableNoNl(A) LPAREN callArgs(ARGS) RPAREN. { C = [TQNodeCall nodeWithCallee:A]; [C setArguments:ARGS]; LN(C,A); }
+blockCallNl(C)  ::= accessableNoNl(A) LPAREN callArgs(ARGS) RPARENNL. { C = [TQNodeCall nodeWithCallee:A]; [C setArguments:ARGS]; LN(C,A); }
 
 callArg(L)    ::= noAsgnExprNoNl(E).                                  { L = E;                                                        }
 callArg(L)    ::= simpleAssign(E).                                    { L = E;                                                        }
@@ -427,22 +451,25 @@ operandNl(O)   ::= simpleExprNl(E).                     { O = E;                
 
 
 //Assignment
-simpleAssign(A) ::= assignableNoNl(L) ASSIGN noAsgnExpr(R). { A = [TQNodeAssignOperator nodeWithTypeToken:ASSIGN left:[NSMutableArray arrayWithObject:L] right:[NSMutableArray arrayWithObject:R]];   }
+simpleAssign(A) ::= assignableNoNl(L) ASSIGN noAsgnExpr(R). {
+    A = [TQNodeAssignOperator nodeWithTypeToken:ASSIGN left:[NSMutableArray arrayWithObject:L] right:[NSMutableArray arrayWithObject:R]];
+    LN(A,L);
+}
 
 assignNoNl(E) ::= assignLhs(A)
                   ASSIGN|ASSIGNADD|ASSIGNSUB|ASSIGNMUL|ASSIGNDIV|ASSIGNOR(OP)
-                  assignRhsNoNl(B).                     { E = [TQNodeAssignOperator nodeWithTypeToken:[OP id] left:A right:B];        }
+                  assignRhsNoNl(B).                  { E = [TQNodeAssignOperator nodeWithTypeToken:[OP id] left:A right:B]; LN(E,OP); }
 
 assignNl(E) ::= assignLhs(A)
                   ASSIGN|ASSIGNADD|ASSIGNSUB|ASSIGNMUL|ASSIGNDIV|ASSIGNOR(OP)
-                  assignRhsNl(B).                       { E = [TQNodeAssignOperator nodeWithTypeToken:[OP id] left:A right:B];        }
+                  assignRhsNl(B).                    { E = [TQNodeAssignOperator nodeWithTypeToken:[OP id] left:A right:B]; LN(E,OP); }
 
 assignLhs(L) ::= assignable(A).                         { L = [NSMutableArray arrayWithObject:A];                                     }
 assignLhs(L) ::= assignLhs(O) COMMA assignable(E).      { L = O; [L addObject:E];                                                     }
 
 assignRhsNoNl(R) ::= assignRhsNoNl(O) COMMA rhsValNoNl(E). { R = O; [R addObject:E];                                                  }
 assignRhsNoNl(R) ::= rhsValNoNl(V).                     { R = [NSMutableArray arrayWithObject:V];                                     }
-assignRhsNl(R)   ::= assignRhsNoNl(O) COMMA rhsValNl(E). { R = O; [R addObject:E];                                                    }
+assignRhsNl(R)   ::= assignRhsNoNl(O) COMMA rhsValNl(E).{ R = O; [R addObject:E];                                                     }
 assignRhsNl(R)   ::= rhsValNl(E).                       { R = [NSMutableArray arrayWithObject:E];                                     }
 
 rhsValNoNl(V) ::= noAsgnExprNoNl(E).                    { V = E;                                                                      }
@@ -450,60 +477,60 @@ rhsValNl(V)   ::= noAsgnExprNl(E).                      { V = E;                
 
 
 // Logic
-opNoNl(O) ::= operandNoNl(A) AND|OR(OP) operandNoNl(B). { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B];              }
-opNl(O)   ::= operandNoNl(A) AND|OR(OP) operandNl(B).   { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B];              }
+opNoNl(O) ::= operandNoNl(A) AND|OR(OP) operandNoNl(B). { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B]; LN(O,OP);    }
+opNl(O)   ::= operandNoNl(A) AND|OR(OP) operandNl(B).   { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B]; LN(O,OP);    }
 
 // Arithmetic
 opNoNl(O) ::= operandNoNl(A)
               PLUS|MINUS(OP)
-              operandNoNl(B).                           { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B];              }
+              operandNoNl(B).                           { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B]; LN(O,OP);    }
 opNoNl(O) ::= operandNoNl(A)
               ASTERISK|FSLASH|PERCENT(OP)
-              operandNoNl(B).                           { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B];              }
-opNoNl(O) ::= operandNoNl(A) CARET(OP) operandNoNl(B).  { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B];              }
+              operandNoNl(B).                           { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B]; LN(O,OP);    }
+opNoNl(O) ::= operandNoNl(A) CARET(OP) operandNoNl(B).  { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B]; LN(O,OP);    }
 
-opNl(O) ::= operandNoNl(A) PLUS|MINUS(OP) operandNl(B). { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B];              }
+opNl(O) ::= operandNoNl(A) PLUS|MINUS(OP) operandNl(B). { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B]; LN(O,OP);    }
 opNl(O) ::= operandNoNl(A)
             ASTERISK|FSLASH|PERCENT(OP)
-            operandNl(B).                               { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B];              }
-opNl(O) ::= operandNoNl(A) CARET(OP) operandNl(B).      { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B];              }
+            operandNl(B).                               { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B]; LN(O,OP);    }
+opNl(O) ::= operandNoNl(A) CARET(OP) operandNl(B).      { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B]; LN(O,OP);    }
 
 // Unary operators
-unaryOpNoNl(O) ::= MINUS accessableNoNl(A). [LUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorUnaryMinus left:nil right:A];   }
-unaryOpNoNl(O) ::= INCR  accessableNoNl(A). [LUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorIncrement  left:nil right:A];   }
-unaryOpNoNl(O) ::= accessableNoNl(A) INCR.  [RUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorIncrement  left:A   right:nil]; }
-unaryOpNoNl(O) ::= DECR accessableNoNl(A).  [LUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorDecrement  left:nil right:A];   }
-unaryOpNoNl(O) ::= accessableNoNl(A) DECR.  [RUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorDecrement  left:A   right:nil]; }
-unaryOpNoNl(O) ::= TILDE accessableNoNl(E). [LUNARY]    { O = [TQNodeWeak nodeWithValue:E];                                           }
+unaryOpNoNl(O) ::= MINUS accessableNoNl(A). [LUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorUnaryMinus left:nil right:A];   LN(O,A); }
+unaryOpNoNl(O) ::= INCR  accessableNoNl(A). [LUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorIncrement  left:nil right:A];   LN(O,A); }
+unaryOpNoNl(O) ::= accessableNoNl(A) INCR.  [RUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorIncrement  left:A   right:nil]; LN(O,A); }
+unaryOpNoNl(O) ::= DECR accessableNoNl(A).  [LUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorDecrement  left:nil right:A];   LN(O,A); }
+unaryOpNoNl(O) ::= accessableNoNl(A) DECR.  [RUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorDecrement  left:A   right:nil]; LN(O,A); }
+unaryOpNoNl(O) ::= TILDE accessableNoNl(A). [LUNARY]    { O = [TQNodeWeak nodeWithValue:A];                                           LN(O,A); }
 
-unaryOpNl(O) ::= MINUS accessableNl(A).     [LUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorUnaryMinus left:nil right:A];   }
-unaryOpNl(O) ::= INCR  accessableNl(A).     [LUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorIncrement  left:nil right:A];   }
-unaryOpNl(O) ::= accessableNoNl(A) INCRNL.  [RUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorIncrement  left:A   right:nil]; }
-unaryOpNl(O) ::= DECR assignableNl(A).      [LUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorDecrement  left:nil right:A];   }
-unaryOpNl(O) ::= accessableNoNl(A) DECRNL.  [RUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorDecrement  left:A   right:nil]; }
-unaryOpNl(O) ::= TILDE accessableNl(E).     [LUNARY]    { O = [TQNodeWeak nodeWithValue:E];                                           }
+unaryOpNl(O) ::= MINUS accessableNl(A).     [LUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorUnaryMinus left:nil right:A];   LN(O,A); }
+unaryOpNl(O) ::= INCR  accessableNl(A).     [LUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorIncrement  left:nil right:A];   LN(O,A); }
+unaryOpNl(O) ::= accessableNoNl(A) INCRNL.  [RUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorIncrement  left:A   right:nil]; LN(O,A); }
+unaryOpNl(O) ::= DECR assignableNl(A).      [LUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorDecrement  left:nil right:A];   LN(O,A); }
+unaryOpNl(O) ::= accessableNoNl(A) DECRNL.  [RUNARY]    { O = [TQNodeOperator nodeWithType:kTQOperatorDecrement  left:A   right:nil]; LN(O,A); }
+unaryOpNl(O) ::= TILDE accessableNl(A).     [LUNARY]    { O = [TQNodeWeak nodeWithValue:A];                                           LN(O,A); }
 
 // Comparisons
 opNoNl(O) ::= operandNoNl(A)
               EQUAL|INEQUAL|GREATER|LESSER|GEQUAL|LEQUAL(OP)
-              operandNoNl(B).                           { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B];              }
+              operandNoNl(B).                           { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B]; LN(O,OP);    }
 
 opNl(O) ::= operandNoNl(A)
             EQUAL|INEQUAL|GREATER|LESSER|GEQUAL|LEQUAL(OP)
-            operandNl(B).                               { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B];              }
+            operandNl(B).                               { O = [TQNodeOperator nodeWithTypeToken:[OP id] left:A right:B]; LN(O,OP);    }
 
 
 //
 // Literals ---------------------------------------------------------------------------------------------------------------------------
 //
 
-literalNoNl(L) ::= NUMBER(T).                           { L = [TQNodeNumber nodeWithDouble:[[T value] doubleValue]];                  }
+literalNoNl(L) ::= NUMBER(T).                           { L = [TQNodeNumber nodeWithDouble:[[T value] doubleValue]]; LN(L,T);         }
 literalNoNl(L) ::= stringNoNl(S).                       { L = S;                                                                      }
 literalNoNl(L) ::= arrayNoNl(A).                        { L = A;                                                                      }
 literalNoNl(L) ::= dictNoNl(D).                         { L = D;                                                                      }
 literalNoNl(L) ::= regexNoNl(D).                        { L = D;                                                                      }
 
-literalNl(L)   ::= NUMBERNL(T).                         { L = [TQNodeNumber nodeWithDouble:[[T value] doubleValue]];                  }
+literalNl(L)   ::= NUMBERNL(T).                         { L = [TQNodeNumber nodeWithDouble:[[T value] doubleValue]]; LN(L,T);         }
 literalNl(L)   ::= stringNl(S).                         { L = S;                                                                      }
 literalNl(L)   ::= arrayNl(A).                          { L = A;                                                                      }
 literalNl(L)   ::= dictNl(D).                           { L = D;                                                                      }
@@ -511,40 +538,40 @@ literalNl(L)   ::= regexNl(D).                          { L = D;                
 
 
 // Arrays
-arrayNoNl(A) ::= LBRACKET RBRACKET.                     { A = [TQNodeArray node];                                                     }
-arrayNoNl(A) ::= LBRACKET aryEls(EL) RBRACKET.          { A = [TQNodeArray node]; [A setItems:EL];                                    }
-arrayNl(A)   ::= LBRACKET RBRACKETNL.                   { A = [TQNodeArray node];                                                     }
-arrayNl(A)   ::= LBRACKET aryEls(EL) RBRACKETNL.        { A = [TQNodeArray node]; [A setItems:EL];                                    }
+arrayNoNl(A) ::= LBRACKET(T) RBRACKET.                  { A = [TQNodeArray node];                  LN(A,T);                           }
+arrayNoNl(A) ::= LBRACKET(T) aryEls(EL) RBRACKET.       { A = [TQNodeArray node]; [A setItems:EL]; LN(A,T);                           }
+arrayNl(A)   ::= LBRACKET(T) RBRACKETNL.                { A = [TQNodeArray node];                  LN(A,T);                           }
+arrayNl(A)   ::= LBRACKET(T) aryEls(EL) RBRACKETNL.     { A = [TQNodeArray node]; [A setItems:EL]; LN(A,T);                           }
 
 aryEls(EL)   ::= aryEls(O) COMMA noAsgnExpr(E).         { EL = O; [EL addObject:E];                                                   }
 aryEls(EL)   ::= noAsgnExpr(E).                         { EL = [NSMutableArray arrayWithObject:E];                                    }
 
 
 // Dictionaries
-dictNoNl(D) ::= LBRACE RBRACE.                          { D = [TQNodeDictionary node];                                                }
-dictNoNl(D) ::= LBRACE dictEls(EL) RBRACE.              { D = [TQNodeDictionary node]; [D setItems:EL];                               }
-dictNl(D)   ::= LBRACE RBRACENL.                        { D = [TQNodeDictionary node];                                                }
-dictNl(D)   ::= LBRACE dictEls(EL) RBRACENL.            { D = [TQNodeDictionary node]; [D setItems:EL];                               }
+dictNoNl(D) ::= LBRACE(T) RBRACE.                       { D = [TQNodeDictionary node];                  LN(D,T);                      }
+dictNoNl(D) ::= LBRACE(T) dictEls(EL) RBRACE.           { D = [TQNodeDictionary node]; [D setItems:EL]; LN(D,T);                      }
+dictNl(D)   ::= LBRACE(T) RBRACENL.                     { D = [TQNodeDictionary node];                  LN(D,T);                      }
+dictNl(D)   ::= LBRACE(T) dictEls(EL) RBRACENL.         { D = [TQNodeDictionary node]; [D setItems:EL]; LN(D,T);                      }
 
 dictEls(ELS) ::= dictEls(O) COMMA  dictEl(EL).          { ELS = O; for(id k in EL) [ELS setObject:[EL objectForKey:k] forKey:k];      }
 dictEls(ELS) ::= dictEl(EL).                            { ELS = EL;                                                                   }
 dictEl(EL)  ::= noAsgnExpr(K) DICTSEP noAsgnExpr(V).    { EL = [[NSMapTable new] autorelease]; [EL setObject:V forKey:K];             }
 
 // Strings
-stringNoNl(S) ::= CONSTSTR(V).                          { S = [TQNodeConstString nodeWithString:(NSMutableString *)[V value]];        }
-stringNoNl(S) ::= STR(V).                               { S = [TQNodeString nodeWithString:(NSMutableString *)[V value]];             }
-stringNoNl(S) ::= LSTR(L) inStr(M) RSTR(R).             { S = [TQNodeString nodeWithLeft:[L value] embeds:M right:[R value]];         }
+stringNoNl(S) ::= CONSTSTR(V).                          { S = [TQNodeConstString nodeWithString:(NSMutableString *)[V value]]; LN(S,V); }
+stringNoNl(S) ::= STR(V).                               { S = [TQNodeString nodeWithString:(NSMutableString *)[V value]];      LN(S,V); }
+stringNoNl(S) ::= LSTR(L) inStr(M) RSTR(R).             { S = [TQNodeString nodeWithLeft:[L value] embeds:M right:[R value]];  LN(S,L); }
 
-stringNl(S)   ::= CONSTSTRNL(V).                        { S = [TQNodeConstString nodeWithString:(NSMutableString *)[V value]];        }
-stringNl(S)   ::= STRNL(V).                             { S = [TQNodeString nodeWithString:(NSMutableString *)[V value]];             }
-stringNl(S)   ::= LSTR(L) inStr(M) RSTRNL(R).           { S = [TQNodeString nodeWithLeft:[L value] embeds:M right:[R value]];         }
+stringNl(S)   ::= CONSTSTRNL(V).                        { S = [TQNodeConstString nodeWithString:(NSMutableString *)[V value]]; LN(S,V); }
+stringNl(S)   ::= STRNL(V).                             { S = [TQNodeString nodeWithString:(NSMutableString *)[V value]];      LN(S,V); }
+stringNl(S)   ::= LSTR(L) inStr(M) RSTRNL(R).           { S = [TQNodeString nodeWithLeft:[L value] embeds:M right:[R value]];  LN(S,L); }
 
 inStr(M) ::= inStr(O) MSTR(S) expr(E).                  { M = O; [M addObject:[S value]]; [M addObject:E];                            }
 inStr(M) ::= expr(E).                                   { M = [NSMutableArray arrayWithObject:E];                                     }
 
 // Regular expressions
-regexNoNl(R) ::= REGEX(T).                              { R = [TQNodeRegex nodeWithPattern:[T value]];                                }
-regexNl(R)   ::= REGEXNL(T).                            { R = [TQNodeRegex nodeWithPattern:[T value]];                                }
+regexNoNl(R) ::= REGEX(T).                              { R = [TQNodeRegex nodeWithPattern:[T value]]; LN(R,T);                       }
+regexNl(R)   ::= REGEXNL(T).                            { R = [TQNodeRegex nodeWithPattern:[T value]]; LN(R,T);                       }
 
 //
 // Variables, Identifiers & Built-in Constants
@@ -555,31 +582,31 @@ regexNl(R)   ::= REGEXNL(T).                            { R = [TQNodeRegex nodeW
 
 constant(C)     ::= constantNoNl(T).                    { C = T;                                                                      }
 constant(C)     ::= constantNl(T).                      { C = T;                                                                      }
-constantNoNl(C) ::= CONST(T).                           { C = [TQNodeConstant nodeWithString:(NSMutableString *)[T value]];           }
-constantNl(C)   ::= CONSTNL(T).                         { C = [TQNodeConstant nodeWithString:(NSMutableString *)[T value]];           }
+constantNoNl(C) ::= CONST(T).                           { C = [TQNodeConstant nodeWithString:(NSMutableString *)[T value]]; LN(C,T);  }
+constantNl(C)   ::= CONSTNL(T).                         { C = [TQNodeConstant nodeWithString:(NSMutableString *)[T value]]; LN(C,T);  }
 
-variableNoNl(V) ::= IDENT(T).                           { V = [TQNodeVariable nodeWithName:[T value]];                                }
-variableNoNl(V) ::= SELF.                               { V = [TQNodeSelf node];                                                      }
-variableNoNl(V) ::= SUPER.                              { V = [TQNodeSuper node];                                                     }
-variableNoNl(V) ::= VALID.                              { V = [TQNodeValid node];                                                     }
-variableNoNl(V) ::= YESTOK.                             { V = [TQNodeValid node];                                                     }
-variableNoNl(V) ::= NOTOK.                              { V = [TQNodeNil node];                                                       }
-variableNoNl(V) ::= NIL.                                { V = [TQNodeNil node];                                                       }
-variableNoNl(V) ::= NOTHING.                            { V = [TQNodeNothing node];                                                   }
+variableNoNl(V) ::= IDENT(T).                           { V = [TQNodeVariable nodeWithName:[T value]]; LN(V,T);                       }
+variableNoNl(V) ::= SELF(T).                            { V = [TQNodeSelf node];                       LN(V,T);                       }
+variableNoNl(V) ::= SUPER(T).                           { V = [TQNodeSuper node];                      LN(V,T);                       }
+variableNoNl(V) ::= VALID(T).                           { V = [TQNodeValid node];                      LN(V,T);                       }
+variableNoNl(V) ::= YESTOK(T).                          { V = [TQNodeValid node];                      LN(V,T);                       }
+variableNoNl(V) ::= NOTOK(T).                           { V = [TQNodeNil node];                        LN(V,T);                       }
+variableNoNl(V) ::= NIL(T).                             { V = [TQNodeNil node];                        LN(V,T);                       }
+variableNoNl(V) ::= NOTHING(T).                         { V = [TQNodeNothing node];                    LN(V,T);                       }
 variableNoNl(V) ::= vaargNoNl(T).                       { V = T;                                                                      }
 
-variableNl(V)   ::= IDENTNL(T).                         { V = [TQNodeVariable nodeWithName:[T value]];                                }
-variableNl(V)   ::= SELFNL.                             { V = [TQNodeSelf node];                                                      }
-variableNl(V)   ::= SUPERNL.                            { V = [TQNodeSuper node];                                                     }
-variableNl(V)   ::= VALIDNL.                            { V = [TQNodeValid node];                                                     }
-variableNl(V)   ::= YESTOKNL.                           { V = [TQNodeValid node];                                                     }
-variableNl(V)   ::= NOTOKNL.                            { V = [TQNodeNil node];                                                       }
-variableNl(V)   ::= NILNL.                              { V = [TQNodeNil node];                                                       }
-variableNl(V)   ::= NOTHINGNL.                          { V = [TQNodeNothing node];                                                   }
+variableNl(V)   ::= IDENTNL(T).                         { V = [TQNodeVariable nodeWithName:[T value]]; LN(V,T);                       }
+variableNl(V)   ::= SELFNL(T).                          { V = [TQNodeSelf node];                       LN(V,T);                       }
+variableNl(V)   ::= SUPERNL(T).                         { V = [TQNodeSuper node];                      LN(V,T);                       }
+variableNl(V)   ::= VALIDNL(T).                         { V = [TQNodeValid node];                      LN(V,T);                       }
+variableNl(V)   ::= YESTOKNL(T).                        { V = [TQNodeValid node];                      LN(V,T);                       }
+variableNl(V)   ::= NOTOKNL(T).                         { V = [TQNodeNil node];                        LN(V,T);                       }
+variableNl(V)   ::= NILNL(T).                           { V = [TQNodeNil node];                        LN(V,T);                       }
+variableNl(V)   ::= NOTHINGNL(T).                       { V = [TQNodeNothing node];                    LN(V,T);                       }
 variableNl(V)   ::= vaargNl(T).                         { V = T;                                                                      }
 
-vaargNoNl(V)    ::= VAARG.                              { V = [TQNodeVariable nodeWithName:@"TQArguments"];                           }
-vaargNl(V)      ::= VAARGNL.                            { V = [TQNodeVariable nodeWithName:@"TQArguments"];                           }
+vaargNoNl(V)    ::= VAARG(T).                           { V = [TQNodeVariable nodeWithName:@"TQArguments"]; LN(V,T);                  }
+vaargNl(V)      ::= VAARGNL(T).                         { V = [TQNodeVariable nodeWithName:@"TQArguments"]; LN(V,T);                  }
 
 // Accessables (Simple values; needs to be merged with simpleExpr when I resolve the conflicts that occur)
 accessableNoNl(A) ::= variableNoNl(V).                  { A = V;                                                                      }
@@ -613,15 +640,15 @@ assignableNl(V)   ::= propertyNl(T).                    { V = T;                
 
 // Subscripts
 subscriptNoNl(S) ::= accessableNoNl(L)
-                     LBRACKET noAsgnExpr(E) RBRACKET.   { S = [TQNodeOperator nodeWithType:kTQOperatorSubscript left:L right:E];      }
+                     LBRACKET(T) noAsgnExpr(E) RBRACKET.   { S = [TQNodeOperator nodeWithType:kTQOperatorSubscript left:L right:E]; LN(S,T); }
 subscriptNl(S)   ::= accessableNoNl(L)
-                     LBRACKET noAsgnExpr(E) RBRACKETNL. { S = [TQNodeOperator nodeWithType:kTQOperatorSubscript left:L right:E];      }
+                     LBRACKET(T) noAsgnExpr(E) RBRACKETNL. { S = [TQNodeOperator nodeWithType:kTQOperatorSubscript left:L right:E]; LN(S,T); }
 
 // Properties
-propertyNoNl(P) ::= accessableNoNl(R) HASH IDENT(I).    { P = [TQNodeMemberAccess nodeWithReceiver:R property:[I value]];             }
-propertyNl(P)   ::= accessableNoNl(R) HASH IDENTNL(I).  { P = [TQNodeMemberAccess nodeWithReceiver:R property:[I value]];             }
-propertyNoNl(P) ::=                   HASH IDENT(I).    { P = [TQNodeMemberAccess nodeWithReceiver:[TQNodeSelf node] property:[I value]]; }
-propertyNl(P)   ::=                   HASH IDENTNL(I).  { P = [TQNodeMemberAccess nodeWithReceiver:[TQNodeSelf node] property:[I value]]; }
+propertyNoNl(P) ::= accessableNoNl(R) HASH IDENT(I).    { P = [TQNodeMemberAccess nodeWithReceiver:R property:[I value]]; LN(P,I);    }
+propertyNl(P)   ::= accessableNoNl(R) HASH IDENTNL(I).  { P = [TQNodeMemberAccess nodeWithReceiver:R property:[I value]]; LN(P,I);    }
+propertyNoNl(P) ::=                   HASH IDENT(I).    { P = [TQNodeMemberAccess nodeWithReceiver:[TQNodeSelf node] property:[I value]]; LN(P,I); }
+propertyNl(P)   ::=                   HASH IDENTNL(I).  { P = [TQNodeMemberAccess nodeWithReceiver:[TQNodeSelf node] property:[I value]]; LN(P,I); }
 
 // Misc
 backtick        ::= BACKTICK|BACKTICKNL.
@@ -641,8 +668,11 @@ backtick        ::= BACKTICK|BACKTICKNL.
 #import <Tranquil/CodeGen/CodeGen.h>
 #import <Tranquil/Shared/TQDebug.h>
 
+// Copies the line number from one node/token to another
+#define LN(dest, src) ([dest setLineNumber:[src lineNumber]])
+
 #define SyntaxError(aCode) do { \
-    NSString *reason = [NSString stringWithFormat:@"Syntax error: near '%@' on line %d", [TOKEN value], [TOKEN line]]; \
+    NSString *reason = [NSString stringWithFormat:@"Syntax error: near '%@' on line %ld", [TOKEN value], [TOKEN lineNumber]]; \
     NSDictionary *info = [NSDictionary dictionaryWithObject:reason forKey:NSLocalizedDescriptionKey]; \
     state->syntaxError = [NSError errorWithDomain:kTQSyntaxErrorDomain \
                                              code:aCode \

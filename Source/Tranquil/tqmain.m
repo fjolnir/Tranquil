@@ -9,7 +9,7 @@ int main(int argc, char **argv)
     @autoreleasepool {
         TQInitializeRuntime(argc, argv);
         id result = __tranquil_root();
-        if([result isKindOfClass:[TQNumber class]])
+        if([result isKindOfClass:[NSClassFromString(@"TQNumber") class]])
             return [result intValue];
     }
     return 0;

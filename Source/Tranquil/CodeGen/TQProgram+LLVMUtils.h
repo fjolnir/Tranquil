@@ -6,9 +6,6 @@
 #include <llvm/ExecutionEngine/JITEventListener.h>
 #include <llvm/ExecutionEngine/GenericValue.h>
 
-#define DW_LANG_Tranquil 0x9c40
-#define TRANQUIL_DEBUG_DESCR "Tranquil α"
-
 @class TQNodeRootBlock, NSString, NSError;
 
 @interface TQProgram (LLVMUtils)

@@ -31,6 +31,7 @@
 @property(readwrite, assign, nonatomic) llvm::IRBuilder<> *builder;
 @property(readwrite, assign, nonatomic) llvm::Value *dispatchGroup;
 @property(readwrite, assign, nonatomic) llvm::DISubprogram debugInfo;
+@property(readwrite, assign, nonatomic) llvm::DILexicalBlock debugScope;
 @property(readwrite, assign, nonatomic) llvm::DIScope scope;
 
 // This property is only valid when called from a block's subnode within it's generateCode: method

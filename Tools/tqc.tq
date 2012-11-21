@@ -7,6 +7,7 @@ error = { reason |
 uuid = `NSProcessInfo processInfo globallyUniqueString`
 
 clang    = "/usr/local/tranquil/llvm/bin/clang"
+ld       = "/usr/bin/ld"
 arch     = "x86_64"
 forIOS   = no
 
@@ -14,12 +15,16 @@ inPath   = nil
 outPath  = @"a.out"
 irPath   = "/tmp/«uuid()».bc"
 asmPath  = "/tmp/«uuid()».s"
+objPath  = "/tmp/«uuid()».o"
 initPath = "/tmp/«uuid()».o"
 
 tqFlags  = [@-aot, @-arch, arch, @-o, irPath]
-llcFlags = [@-O0, @-disable-fp-elim, @-disable-cfi, @-relocation-model=pic]
-cflags   = [@-c, @"-I/usr/local/tranquil/include", @"/usr/local/tranquil/src/Source/Tranquil/tqmain.m", @-o, initPath]
-ldFlags  = [@-fexceptions, @-all_load, @-lm, @-ldl, @-lobjc, @-framework, @Foundation, @"/usr/local/tranquil/lib/libtranquil.a"]
+llcFlags = [@-O0, @-disable-fp-elim, @-relocation-model=pic, @-disable-cfi, @--enable-unsafe-fp-math]
+cflags   = [@-c, @"-I/usr/local/tranquil/include", @-O0]
+ldFlags  = [@-demangle, @-dynamic, @-all_load, \@-fexceptions, 
+            @-lm, @-ldl, @-lobjc, @-lSystem,
+            @-framework, @Foundation,
+            @-force_load, @"/usr/local/tranquil/lib/libtranquil.a"]
 
 args = ... objectEnumerator
 while arg = args nextObject {
@@ -41,27 +46,34 @@ tqFlags push: inPath
 
 if forIOS {
     clang = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang"
-    ldFlags; push: @-fobjc-link-runtime;
-             push: @"/usr/local/tranquil/libffi-ios/lib/libffi.a";
-             push: @-isysroot
+    ldFlags; push: @"/usr/local/tranquil/libffi-ios/lib/libffi.a";
+             push: @"/usr/local/tranquil/llvm/lib/clang/3.1/lib/darwin/libclang_rt.ios.a";
+             push: @"-lcrt1.3.1.o";
+             push: @-syslibroot
     if arch == @i386 then {
-        isysroot = @"/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk"
-        ldFlags; push: isysroot;
-                 push: @-Xlinker;
+        syslibroot = @"/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk"
+        ldFlags; push: syslibroot;
                  push: @-no_implicit_dylibs;
-                 push: @"-mios-simulator-version-min=5.0";
-                 push: @-fobjc-abi-version=2;
-                 push: @-fobjc-legacy-dispatch
+                 push: @"-ios_simulator_version_min";
+                 push: @"5.0.0";
+                 push: @"-force_load";
+                 push: @"/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/arc/libarclite_iphonesimulator.a"
     } else {
-        isysroot = @"/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.0.sdk"
-        ldFlags; push: isysroot;
-                 push: @"-miphoneos-version-min=5.0"
+        syslibroot = @"/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.0.sdk"
+        ldFlags; push: syslibroot;
+                 push: @"-ios_version_min";
+                 push: @"5.0.0";
+                 push: @"-force_load";
+                 push: @"/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/arc/libarclite_iphoneos.a"
     }
-    cflags += [@-isysroot, isysroot]
+    cflags += [@-isysroot, syslibroot]
 } else
-    ldFlags; push: @"-mmacosx-version-min=10.7";
+    ldFlags; push: @"-macosx_version_min";
+             push: @"10.7.0";
+             push: @"-lcrt1.10.6.o";
              push: @"/usr/lib/arc/libarclite_macosx.a";
              push: @"/usr/local/tranquil/gmp/lib/libgmp.a";
+             push: @"/usr/local/tranquil/llvm/lib/clang/3.1/lib/darwin/libclang_rt.osx.a";
              push: @-lffi
 
 status = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/bin/tranquil"
@@ -70,21 +82,28 @@ status = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/bin/tranquil"
                          terminationStatus
 error("Compilation failed") if status ~= 0
 
+
 llcArchs = { @x86_64 => @x86-64, @i386 => @x86, @armv7 => @arm }
 status = NSTask launchedTaskWithLaunchPath: "/usr/local/tranquil/llvm/bin/llc"
                                  arguments: llcFlags + ["-march=«llcArchs[arch]»", @-o, asmPath, irPath];
                              waitUntilExit;
                          terminationStatus
-error("Assembly failed") if status ~= 0
+error("Assembly generation failed") if status ~= 0
 
 status = NSTask launchedTaskWithLaunchPath: clang
-                                 arguments: cflags + [@-arch, arch];
+                                 arguments: cflags + [@-arch, arch, @-o, initPath, @"/usr/local/tranquil/src/Source/Tranquil/tqmain.m"];
                              waitUntilExit;
                          terminationStatus
 error("Initializer compilation failed") if status ~= 0
 
 status = NSTask launchedTaskWithLaunchPath: clang
-                                 arguments: ldFlags + [@-arch, arch, @-o, outPath, asmPath, initPath];
+                                 arguments: cflags + [@-arch, arch, @-o, objPath, asmPath];
+                             waitUntilExit;
+                         terminationStatus
+error("Assembly failed") if status ~= 0
+
+status = NSTask launchedTaskWithLaunchPath: ld
+                                 arguments: ldFlags + [@-arch, arch, @-o, outPath, objPath, initPath];
                              waitUntilExit;
                          terminationStatus
 error("Linking failed") if status ~= 0

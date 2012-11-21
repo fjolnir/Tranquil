@@ -453,25 +453,37 @@ using namespace llvm;
     _builder = new IRBuilder<>(_basicBlock);
 
     // Debug info
-    llvm::DIScope parentScope = aBlock ? aBlock.scope : DIScope();
-    llvm::DILexicalBlock lexicalBlock = aProgram.debugBuilder->createLexicalBlock(parentScope, DIFile(), self.lineNumber, 0);
-    lexicalBlock.Verify();
+//    llvm::DIScope parentScope = aBlock ? aBlock.scope : DIScope();
 
-    llvm::DIArray diTypeArr = aProgram.debugBuilder->getOrCreateArray(ArrayRef<Value*>());
-    const char *functionName = [[NSString stringWithFormat:@"%@_invoke", [self invokeName]] UTF8String];
-    _debugInfo = aProgram.debugBuilder->createFunction(aRoot.debugUnit,
-                                                       functionName,
-                                                       "",
-                                                       DIFile(), //cast<DIFile>(aRoot.debugUnit),
+    DIFile file = aProgram.debugBuilder->createFile("t", "/usr/local/tranquil/src");
+    DIScope scope = DIScope(aProgram.debugBuilder->getCU());
+    std::vector<Value *> debugRetArgTypes;
+    DIType debugI8PtrTy = aProgram.debugBuilder->createBasicType("uint8", 8, 8, llvm::dwarf::DW_ATE_unsigned);
+    debugI8PtrTy = aProgram.debugBuilder->createPointerType(debugI8PtrTy, 64); // TODO : cache types so duplicates are not created
+    debugRetArgTypes.push_back(debugI8PtrTy);
+
+    llvm::DIArray diTypeArr  = aProgram.debugBuilder->getOrCreateArray(debugRetArgTypes);
+    DIType subroutineTy = aProgram.debugBuilder->createSubroutineType(file, diTypeArr);
+    assert(subroutineTy.Verify());
+    const char *functionName = [[self invokeName] UTF8String];
+
+//    llvm::DIDescriptor FDContext(aProgram.debugBuilder->getCU());//aBlock.debugInfo ?: aRoot.debugUnit);
+    _debugInfo = aProgram.debugBuilder->createFunction(DIScope(aProgram.debugBuilder->getCU()),
+                                                       functionName, functionName,
+                                                       file,
                                                        self.lineNumber,
-                                                       aProgram.debugBuilder->createSubroutineType(DIFile(), diTypeArr),
-                                                       true,
+                                                       subroutineTy,
                                                        false,
+                                                       true,
                                                        self.lineNumber,
                                                        0,
-                                                       true,
+                                                       false,
                                                        _function);
-    _debugInfo.Verify();
+    assert(_debugInfo.Verify());
+
+    _scope = aProgram.debugBuilder->createLexicalBlock(_debugInfo, file, self.lineNumber, 0);
+    assert(_scope.Verify());
+    _builder->SetCurrentDebugLocation(DebugLoc::get(self.lineNumber, 0, _scope, NULL));
 
 
     // Start building the function
@@ -799,6 +811,7 @@ using namespace llvm;
     _retType = @"@";
     _argTypes = [NSMutableArray new];
     _invokeName = @"__tranquil_root";
+    self.lineNumber = 1;
 
     return self;
 }

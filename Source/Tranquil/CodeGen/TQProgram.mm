@@ -93,9 +93,13 @@ static TQProgram *sharedInstance;
 
     InitializeNativeTarget();
     LLVMInitializeX86Target();
+    LLVMInitializeX86TargetMC();
+    LLVMInitializeX86TargetInfo();
+    LLVMInitializeARMTarget();
     LLVMInitializeARMTargetMC();
     LLVMInitializeARMTargetInfo();
-    LLVMInitializeARMTarget();
+
+    LLVMLinkInJIT();
 
     _globals          = [NSMutableDictionary new];
     _selectorSymbols  = [NSMutableDictionary new];
@@ -188,6 +192,7 @@ static TQProgram *sharedInstance;
             _evaluatedPaths = nil;
         return NO;
     }
+    _debugBuilder->finalize();
 
     if(_shouldShowDebugInfo) {
         llvm::EnableStatistics();
@@ -198,23 +203,17 @@ static TQProgram *sharedInstance;
 
     // Compile program
     TargetOptions Opts;
-    Opts.JITEmitDebugInfo = true;
-    Opts.JITExceptionHandling = true;
-    Opts.JITEmitDebugInfoToDisk = true;
     Opts.GuaranteedTailCallOpt = true;
     Opts.NoFramePointerElim = true;
+    Opts.NoFramePointerElimNonLeaf = true;
+    if(_useAOTCompilation)
+        Opts.PositionIndependentExecutable = true;
+    else {
+        Opts.JITExceptionHandling   = true;
+        Opts.JITEmitDebugInfoToDisk = true;
+        Opts.JITEmitDebugInfo       = true;
+    }
 
-    PassRegistry &Registry = *PassRegistry::getPassRegistry();
-    initializeCore(Registry);
-    initializeScalarOpts(Registry);
-    initializeVectorization(Registry);
-    initializeIPO(Registry);
-    initializeAnalysis(Registry);
-    initializeIPA(Registry);
-    initializeTransformUtils(Registry);
-    initializeInstCombine(Registry);
-    initializeInstrumentation(Registry);
-    initializeTarget(Registry);
 
     PassManager modulePasses;
 
@@ -358,7 +357,7 @@ static TQProgram *sharedInstance;
     NSString *script = [NSString stringWithContentsOfFile:aPath usedEncoding:NULL error:nil];
     if(!script)
         TQAssert(NO, @"Unable to load script from %@", aPath);
-    return [self _parseScript:script error:aoErr];
+    return [self _parseScript:script withPath:aPath error:aoErr];
 }
 - (id)executeScriptAtPath:(NSString *)aPath error:(NSError **)aoErr
 {
@@ -378,7 +377,7 @@ static TQProgram *sharedInstance;
     return result;
 }
 
-- (TQNodeRootBlock *)_parseScript:(NSString *)aScript error:(NSError **)aoErr
+- (TQNodeRootBlock *)_parseScript:(NSString *)aScript withPath:(NSString *)aPath error:(NSError **)aoErr
 {
     // Remove shebang
     if([aScript hasPrefix:@"#!"]) {
@@ -394,9 +393,12 @@ static TQProgram *sharedInstance;
         return nil;
 
     // Initialize the debug unit on the root
-    const char *filename = "<none>";
-    const char *dir      = "<none>";
-    _debugBuilder->createCompileUnit(dwarf::DW_LANG_ObjC, filename, dir, TRANQUIL_DEBUG_DESCR, true, "", 1); // Use DW_LANG_Tranquil ?
+    aPath = [aPath stringByStandardizingPath];
+    const char *filename = aPath ? [[aPath lastPathComponent] UTF8String]                 : "<none>";
+    const char *dir      = aPath ? [[aPath stringByDeletingLastPathComponent] UTF8String] : ".";
+
+    _debugBuilder->createCompileUnit(dwarf::DW_LANG_ObjC, "t", "/usr/local/tranquil/src", TRANQUIL_DEBUG_DESCR, false, "-g", 0); // Use DW_LANG_Tranquil ?
+    _debugBuilder->createFile(filename, dir);
     root.debugUnit = DICompileUnit(_debugBuilder->getCU());
 
     [self _preprocessNode:root withTrace:[NSMutableArray array]];
@@ -407,7 +409,7 @@ static TQProgram *sharedInstance;
 
 - (id)executeScript:(NSString *)aScript error:(NSError **)aoErr
 {
-    TQNodeRootBlock *root = [self _parseScript:aScript error:aoErr];
+    TQNodeRootBlock *root = [self _parseScript:aScript withPath:nil error:aoErr];
     if(!root)
         return nil;
     return [self _executeRoot:root error:aoErr];
@@ -534,7 +536,7 @@ static TQProgram *sharedInstance;
             llvmUsed->setSection("llvm.metadata");
 
             std::vector<Constant*> usedElems;
-            usedElems.push_back(selNameGlobal);
+            usedElems.push_back(ConstantExpr::getCast(Instruction::BitCast, selNameGlobal, self.llInt8PtrTy));
             usedElems.push_back(ConstantExpr::getCast(Instruction::BitCast, selectorGlobal, self.llInt8PtrTy));
             llvmUsed->setInitializer(ConstantArray::get(arrTy, usedElems));
 
