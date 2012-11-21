@@ -36,7 +36,7 @@ syn match tqTernary "[?!]"
 syn match tqComment "\\.*"
 
 syn region tqString start='"' skip='\\"' end='"' contains=tqInterpolation
-syn region tqInterpolation matchgroup=tqInterpolated start="#{" end="}" contained contains=ALLBUT,tqBlockError
+syn region tqInterpolation matchgroup=tqInterpolated start="«" end="»" contained contains=ALLBUT,tqBlockError
 
 " Normal Regular Expression
 "syn region tqRegexp matchgroup=tqRegexpDelimit start="/" skip="\\\\\|\\/" end="/[im]*" contains=tqInterpolation,tqStringInRegexp
