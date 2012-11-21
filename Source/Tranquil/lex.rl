@@ -105,6 +105,7 @@ typedef struct {
     regexCont   = (ualnum | ascii) - '/' - '\\';
 
 string := |*
+    '\n'                             => { [strBuf appendString:@"\n"]; IncrementLine();                   };
     '\\n'                            => { [strBuf appendString:@"\n"];                                    };
     '\\t'                            => { [strBuf appendString:@"\t"];                                    };
     '\\r'                            => { [strBuf appendString:@"\r"];                                    };
@@ -126,6 +127,7 @@ string := |*
 *|;
 
 regex := |*
+    '\n'                             => { [strBuf appendString:@"\n"]; IncrementLine();                   };
     "\\/"                            => { [strBuf appendString:@"\\/"];                                   };
     "\\"                             => { [strBuf appendString:@"\\"];                                    };
     regexCont                        => { [strBuf appendString:NSStr(0, 0)];                              };
@@ -167,7 +169,6 @@ main := |*
     "+="                             => { EmitToken(ASSIGNADD);  ExprBeg();                               };
     "-="                             => { EmitToken(ASSIGNSUB);  ExprBeg();                               };
     "*="                             => { EmitToken(ASSIGNMUL);  ExprBeg();                               };
-#    "/="                             => { EmitToken(ASSIGNDIV);  ExprBeg();                               };
     "||="                            => { EmitToken(ASSIGNOR);   ExprBeg();                               };
     "+"                              => { EmitToken(PLUS);       ExprBeg();                               };
     "-"                              => { EmitToken(MINUS);      ExprBeg();                               };
