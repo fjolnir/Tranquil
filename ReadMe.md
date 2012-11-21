@@ -8,6 +8,7 @@ It's features include:
 
 * Compatibility with C/ObjC headers, meaning that there is no need to create special bindings for C APIs.
 * Automatic memory management.
+* Line by line debugging. (Using LLDB or GDB) — *still under development, but breaking on, and stepping over source lines is supported*
 * Dynamic Typing.
 * Language level concurrency support.
 * String interpolation.
