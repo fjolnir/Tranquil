@@ -30,8 +30,8 @@
 
 // The width of a pointer into the generic address space.
 @property(readonly) unsigned char llPointerWidthInBits;
-// The size and alignment of a pointer into the generic address space.
-@property(readonly) unsigned char llPointerAlignInBytes, llPointerSizeInBytes;
+// The alignment of a pointer into the generic address space.
+@property(readonly) unsigned char llPointerAlignInBytes;
 
 #pragma mark - Cached functions
 @property(readonly) llvm::Function *objc_msgSend, *objc_msgSend_fixup, *objc_msgSendSuper, *objc_storeWeak,

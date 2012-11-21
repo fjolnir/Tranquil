@@ -398,8 +398,7 @@ static TQProgram *sharedInstance;
     const char *dir      = aPath ? [[aPath stringByDeletingLastPathComponent] UTF8String] : ".";
 
     _debugBuilder->createCompileUnit(dwarf::DW_LANG_ObjC, "t", "/usr/local/tranquil/src", TRANQUIL_DEBUG_DESCR, false, "-g", 0); // Use DW_LANG_Tranquil ?
-    _debugBuilder->createFile(filename, dir);
-    root.debugUnit = DICompileUnit(_debugBuilder->getCU());
+    root.file = _debugBuilder->createFile(filename, dir);
 
     [self _preprocessNode:root withTrace:[NSMutableArray array]];
     if(_shouldShowDebugInfo)

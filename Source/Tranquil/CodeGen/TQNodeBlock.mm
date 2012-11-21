@@ -442,7 +442,8 @@ using namespace llvm;
 
     Module *mod = aProgram.llModule;
 
-    _function = Function::Create(funType, GlobalValue::ExternalLinkage, [[self invokeName] UTF8String], mod);
+    const char *functionName = [[self invokeName] UTF8String];
+    _function = Function::Create(funType, GlobalValue::ExternalLinkage, functionName, mod);
     if(returningOnStack)
         _function->addAttribute(1, Attribute::StructRet);
     for(NSNumber *idx in byValArgIndices) {
@@ -452,25 +453,24 @@ using namespace llvm;
     _basicBlock = BasicBlock::Create(mod->getContext(), "entry", _function, 0);
     _builder = new IRBuilder<>(_basicBlock);
 
-    // Debug info
-//    llvm::DIScope parentScope = aBlock ? aBlock.scope : DIScope();
-
-    DIFile file = aProgram.debugBuilder->createFile("t", "/usr/local/tranquil/src");
+    // Debug scope
     DIScope scope = DIScope(aProgram.debugBuilder->getCU());
     std::vector<Value *> debugRetArgTypes;
     DIType debugI8PtrTy = aProgram.debugBuilder->createBasicType("uint8", 8, 8, llvm::dwarf::DW_ATE_unsigned);
-    debugI8PtrTy = aProgram.debugBuilder->createPointerType(debugI8PtrTy, 64); // TODO : cache types so duplicates are not created
+    debugI8PtrTy = aProgram.debugBuilder->createPointerType(debugI8PtrTy, aProgram.llPointerWidthInBits); // TODO : cache types so duplicates are not created
     debugRetArgTypes.push_back(debugI8PtrTy);
+    for(id unused in _arguments) {
+        debugRetArgTypes.push_back(debugI8PtrTy);
+    }
+
 
     llvm::DIArray diTypeArr  = aProgram.debugBuilder->getOrCreateArray(debugRetArgTypes);
-    DIType subroutineTy = aProgram.debugBuilder->createSubroutineType(file, diTypeArr);
+    DIType subroutineTy = aProgram.debugBuilder->createSubroutineType(aRoot.file, diTypeArr);
     assert(subroutineTy.Verify());
-    const char *functionName = [[self invokeName] UTF8String];
 
-//    llvm::DIDescriptor FDContext(aProgram.debugBuilder->getCU());//aBlock.debugInfo ?: aRoot.debugUnit);
-    _debugInfo = aProgram.debugBuilder->createFunction(DIScope(aProgram.debugBuilder->getCU()),
+    _debugInfo = aProgram.debugBuilder->createFunction(aBlock.scope ?: DIScope(aProgram.debugBuilder->getCU()),
                                                        functionName, functionName,
-                                                       file,
+                                                       aRoot.file,
                                                        self.lineNumber,
                                                        subroutineTy,
                                                        false,
@@ -481,7 +481,7 @@ using namespace llvm;
                                                        _function);
     assert(_debugInfo.Verify());
 
-    _scope = aProgram.debugBuilder->createLexicalBlock(_debugInfo, file, self.lineNumber, 0);
+    _scope = aProgram.debugBuilder->createLexicalBlock(_debugInfo, aRoot.file, self.lineNumber, 0);
     assert(_scope.Verify());
     _builder->SetCurrentDebugLocation(DebugLoc::get(self.lineNumber, 0, _scope, NULL));
 
@@ -794,7 +794,7 @@ using namespace llvm;
 #pragma mark - Root block
 
 @implementation TQNodeRootBlock
-@synthesize debugUnit=_debugUnit;
+@synthesize file=_file;
 
 + (TQNodeRootBlock *)node
 {

@@ -46,6 +46,6 @@
 @end
 
 @interface TQNodeRootBlock : TQNodeBlock
-@property(readwrite, assign, nonatomic) llvm::DICompileUnit debugUnit;
+@property(readwrite, assign, nonatomic) llvm::DIFile file;
 + (TQNodeRootBlock *)node;
 @end

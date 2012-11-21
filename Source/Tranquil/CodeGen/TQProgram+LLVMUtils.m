@@ -41,8 +41,7 @@ using namespace llvm;
 @dynamic llVoidTy, llInt1Ty, llInt8Ty, llInt16Ty, llInt32Ty, llInt64Ty,
     llFloatTy, llDoubleTy, llFPTy, llIntTy, llLongTy, llIntPtrTy, llSizeTy,
     llPtrDiffTy, llVoidPtrTy, llInt8PtrTy, llVoidPtrPtrTy,
-    llInt8PtrPtrTy, llInt32PtrTy,  llVaListTy, llPointerWidthInBits, llPointerAlignInBytes,
-    llPointerSizeInBytes;
+    llInt8PtrPtrTy, llInt32PtrTy,  llVaListTy, llPointerWidthInBits, llPointerAlignInBytes;
 @dynamic objc_msgSend, objc_msgSend_fixup, objc_msgSendSuper,
     objc_storeWeak, objc_loadWeak, objc_allocateClassPair,
     objc_registerClassPair, objc_destroyWeak,
@@ -119,7 +118,20 @@ using namespace llvm;
 }
 - (unsigned char)llPointerWidthInBits
 {
-    return 64;
+    switch(self.targetArch) {
+        case kTQArchitectureHost:
+#ifdef __LP64__
+        return 64;
+#else
+        return 32;
+#endif
+        case kTQArchitectureI386:
+        case kTQArchitectureARMv7:
+            return 32;
+        case kTQArchitectureX86_64:
+            return 64;
+    }
+    return 0;
 }
 - (unsigned char)llPointerAlignInBytes
 {

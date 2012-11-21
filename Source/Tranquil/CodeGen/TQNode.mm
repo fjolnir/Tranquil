@@ -73,26 +73,9 @@ using namespace llvm;
     if(_lineNumber == NSNotFound)
         return;
 
-//    aBlock.builder->SetCurrentDebugLocation(DebugLoc::get(self.lineNumber, 0, (MDNode*)aBlock.debugInfo, NULL)); //<- Crashes llc
-
-//    Value *args[] = {
-//        ConstantInt::get(aProgram.llIntTy, _lineNumber),
-//        ConstantInt::get(aProgram.llIntTy, 0),
-//        (Value *)aBlock.debugInfo,
-//        //(Value *)aBlock.debugInfo,
-//        DILocation(NULL)
-//    };
-//    LLVMContext *ctx = &aProgram.llModule->getContext();
-   // DILocation loc = DILocation(MDNode::get(*ctx, args));
-//    DILocation *loc = DebugLoc::get(self.lineNumber, 0, aBlock.debugInfo.getContext(), NULL);
- //   aInst->setMetadata(ctx->getMDKindID("dbg"), *loc);
-
-//    DebugLoc debugLoc = DebugLoc::get(self.lineNumber, 0, aBlock.debugInfo, NULL);
-//    aBlock.builder->SetCurrentDebugLocation(debugLoc);
-//    aInst->setDebugLoc(debugLoc);
     DebugLoc debugLoc = DebugLoc::get(self.lineNumber, 0, aBlock.scope, NULL);
-    aBlock.builder->SetCurrentDebugLocation(debugLoc);
     aInst->setDebugLoc(debugLoc);
+    aBlock.builder->SetCurrentDebugLocation(debugLoc);
 }
 
 - (void)setLineNumber:(NSUInteger)aLineNo

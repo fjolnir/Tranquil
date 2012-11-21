@@ -398,7 +398,8 @@ method(M)   ::= MINUS|PLUS(TY) selDef(SEL) blockNl(B). { M = [TQNodeMethod nodeW
                                                          for(TQNodeArgumentDef *arg in SEL)
                                                             [M addArgument:arg error:nil];
                                                          [M setIsCompactBlock:[B isCompactBlock]];
-                                                         [M setStatements:[B statements]];                                            }
+                                                         [M setStatements:[B statements]];
+                                                         LN(M,TY);                                                                    }
 
 selDef(SD) ::= uSelDef(T).                             { SD = [NSMutableArray arrayWithObject:T];                                     }
 selDef(SD) ::= kSelDef(T).                             { SD = T;                                                                      }
