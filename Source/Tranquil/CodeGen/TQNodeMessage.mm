@@ -70,6 +70,11 @@ using namespace llvm;
     for(TQNode *node in _arguments) {
         aBlock(node);
     }
+    for(TQNodeMessage *message in _cascadedMessages) {
+        for(TQNode *node in message.arguments) {
+            aBlock(node);
+        }
+    }
 }
 
 - (BOOL)replaceChildNodesIdenticalTo:(TQNode *)aNodeToReplace with:(TQNode *)aNodeToInsert
