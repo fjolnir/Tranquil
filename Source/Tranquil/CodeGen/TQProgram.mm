@@ -431,6 +431,7 @@ static TQProgram *sharedInstance;
 - (NSString *)_resolveImportPath:(NSString *)aPath
 {
 #define NOT_FOUND() do { TQLog(@"No file found for path '%@'", aPath); return nil; } while(0)
+    aPath = [aPath stringByStandardizingPath];
     BOOL isDir;
     NSFileManager *fm = [NSFileManager defaultManager];
     if([aPath hasPrefix:@"/"]) {
