@@ -217,6 +217,8 @@ using namespace llvm;
     if(_alloca)
         return [self _getForwardingInProgram:aProgram block:aBlock root:aRoot];
 
+    TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock program:aProgram];
+    TQAssertSoft(existingVar, kTQSyntaxErrorDomain, kTQUndefinedVariable, NULL, @"Variable '%@' is undefined on line %ld", self.name, self.lineNumber);
     if(![self createStorageInProgram:aProgram block:aBlock root:aRoot error:aoErr])
         return NULL;
 

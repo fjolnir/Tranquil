@@ -93,39 +93,36 @@ return [[[self alloc] initWithCallee:aCallee] autorelease];
     return success;
 }
 
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock root:(TQNodeRootBlock *)aRoot
-                         withArguments:(std::vector<llvm::Value*>)aArgs error:(NSError **)aoErr
-{
-    Value *callee = [_callee generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-    aArgs.insert(aArgs.begin(), callee);
-
-    // Load&Call the dispatcher
-    NSString *dispatcherName = [NSString stringWithFormat:@"TQDispatchBlock%ld", aArgs.size() - 1];
-    Function *dispatcher = aProgram.llModule->getFunction([dispatcherName UTF8String]);
-    if(!dispatcher) {
-        std::vector<Type*> argtypes(aArgs.size(), aProgram.llInt8PtrTy);
-        FunctionType *funType = FunctionType::get(aProgram.llInt8PtrTy, argtypes, false);
-        dispatcher = Function::Create(funType, GlobalValue::ExternalLinkage, [dispatcherName UTF8String], aProgram.llModule);
-        dispatcher->setCallingConv(CallingConv::C);
-    }
-
-    Value *ret = aBlock.builder->CreateCall(dispatcher, aArgs);
-    [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];
-    return ret;
-}
-
-
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
                                  block:(TQNodeBlock *)aBlock
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
-    IRBuilder<> *builder = aBlock.builder;
-
     std::vector<Value*> args;
+
+    args.push_back([_callee generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr]);
+
     for(TQNodeArgument *arg in _arguments) {
-        args.push_back([arg generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr]);
+        Value *argVal = [arg generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        if(*aoErr)
+            return NULL;
+        args.push_back(argVal);
     }
-    return [self generateCodeInProgram:aProgram block:aBlock root:aRoot withArguments:args error:aoErr];
+
+    // Load&Call the dispatcher
+    NSString *dispatcherName = [NSString stringWithFormat:@"TQDispatchBlock%ld", [_arguments count]];
+    Function *dispatcher = aProgram.llModule->getFunction([dispatcherName UTF8String]);
+    if(!dispatcher) {
+        std::vector<Type*> argtypes(args.size(), aProgram.llInt8PtrTy);
+        FunctionType *funType = FunctionType::get(aProgram.llInt8PtrTy, argtypes, false);
+        dispatcher = Function::Create(funType, GlobalValue::ExternalLinkage,
+                                      [dispatcherName UTF8String], aProgram.llModule);
+        dispatcher->setCallingConv(CallingConv::C);
+    }
+
+    Value *ret = aBlock.builder->CreateCall(dispatcher, args);
+    [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];
+    return ret;
+
 }
 @end

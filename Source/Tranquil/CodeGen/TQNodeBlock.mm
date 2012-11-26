@@ -626,7 +626,8 @@ using namespace llvm;
             stmt = [TQNodeReturn nodeWithValue:stmt];
         [stmt generateCodeInProgram:aProgram block:self root:aRoot error:aoErr];
         if(*aoErr) {
-            TQLog(@"Error: %@", *aoErr);
+            _function->eraseFromParent();
+            _function = NULL;
             return NULL;
         }
         if([stmt isKindOfClass:[TQNodeReturn class]])
@@ -709,7 +710,8 @@ using namespace llvm;
         }
     }
 
-    if(![self _generateInvokeInProgram:aProgram root:aRoot block:aBlock error:aoErr])
+    [self _generateInvokeInProgram:aProgram root:aRoot block:aBlock error:aoErr];
+    if(*aoErr)
         return NULL;
 
     Value *literal = [self _generateBlockLiteralInProgram:aProgram parentBlock:aBlock root:aRoot];

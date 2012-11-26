@@ -133,10 +133,14 @@ using namespace llvm;
     return selStr;
 }
 
-
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram block:(TQNodeBlock *)aBlock root:(TQNodeRootBlock *)aRoot
-                         withArguments:(std::vector<llvm::Value*>)aArgs error:(NSError **)aoErr
+- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
+                                 block:(TQNodeBlock *)aBlock
+                                  root:(TQNodeRootBlock *)aRoot
+                                 error:(NSError **)aoErr
 {
+    Module *mod = aProgram.llModule;
+    std::vector<Value*> args;
+
     NSString *selStr = [self selector];
     BOOL needsAutorelease = NO;
     if([selStr hasPrefix:@"alloc"])
@@ -146,16 +150,28 @@ using namespace llvm;
     else if([selStr isEqualToString:@"new"])
         needsAutorelease = YES;
 
-    aArgs.insert(aArgs.begin(), [aProgram getSelector:selStr inBlock:aBlock root:aRoot]);
     Value *receiver = _receiverLLVMValue ?: [_receiver generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-    aArgs.insert(aArgs.begin(), receiver);
+    if(*aoErr)
+        return NULL;
+    args.push_back(receiver);
+    args.push_back([aProgram getSelector:selStr inBlock:aBlock root:aRoot]);
 
-
+    for(TQNodeArgument *arg in _arguments) {
+        if(!arg.passedNode)
+            break;
+        Value *argVal = [arg generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        if(*aoErr)
+            return NULL;
+        args.push_back(argVal);
+    }
+    // From what I can tell having read the ABI spec for x86-64, it is safe to pass this added argument. TODO: verify this holds for ARM&x86
+    // Sentinel argument to make variadic methods possible (without resorting to special cases in tq_msgsend, and using libffi; which would kill performance)
+    //args.push_back(aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQNothing", aProgram.llInt8PtrTy), "sentinel"));
     Value *ret;
     if([_receiver isMemberOfClass:[TQNodeSuper class]])
-        ret = aBlock.builder->CreateCall(aProgram.objc_msgSendSuper, aArgs);
+        ret = aBlock.builder->CreateCall(aProgram.objc_msgSendSuper, args);
     else {
-        ret = aBlock.builder->CreateCall(aProgram.tq_msgSend, aArgs);
+        ret = aBlock.builder->CreateCall(aProgram.tq_msgSend, args);
         if(needsAutorelease) {
             [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];
             ret = aBlock.builder->CreateCall(aProgram.objc_autoreleaseReturnValue, ret);
@@ -168,27 +184,10 @@ using namespace llvm;
     for(TQNodeMessage *cascadedMessage in _cascadedMessages) {
         cascadedMessage.receiverLLVMValue = receiver;
         ret = [cascadedMessage generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        if(!ret)
+            return NULL;
     }
     return ret;
-}
-
-- (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
-                                 block:(TQNodeBlock *)aBlock
-                                  root:(TQNodeRootBlock *)aRoot
-                                 error:(NSError **)aoErr
-{
-    Module *mod = aProgram.llModule;
-    std::vector<Value*> args;
-    for(TQNodeArgument *arg in _arguments) {
-        if(!arg.passedNode)
-            break;
-        args.push_back([arg generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr]);
-    }
-    // From what I can tell having read the ABI spec for x86-64, it is safe to pass this added argument. TODO: verify this holds for ARM&x86
-    // Sentinel argument to make variadic methods possible (without resorting to special cases in tq_msgsend, and using libffi; which would kill performance)
-    //args.push_back(aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQNothing", aProgram.llInt8PtrTy), "sentinel"));
-
-    return [self generateCodeInProgram:aProgram block:aBlock root:aRoot withArguments:args error:aoErr];
 }
 
 - (llvm::Value *)store:(llvm::Value *)aValue

@@ -83,12 +83,15 @@ using namespace llvm;
     // Add the methods for the class
     for(TQNodeMethod *method in [_classMethods arrayByAddingObjectsFromArray:_instanceMethods]) {
         [method generateCodeInProgram:aProgram block:aBlock class:self root:aRoot error:aoErr];
-        if(*aoErr) return NULL;
+        if(*aoErr)
+            return NULL;
     }
 
     // Execute any onload messages
     for(TQNodeMessage *msg in _onloadMessages) {
         [msg generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        if(*aoErr)
+            return NULL;
     }
 
     return _classPtr;

@@ -67,9 +67,11 @@ using namespace llvm;
         return ConstantPointerNull::get(aProgram.llInt8PtrTy);
     } else {
         TQNodeRootBlock *importedRoot = [aProgram _rootFromFile:path error:aoErr];
-        if(!importedRoot || *aoErr)
+        if(*aoErr)
             return NULL;
         Value *rootFun = [importedRoot generateCodeInProgram:aProgram block:aBlock root:importedRoot error:aoErr];
+        if(*aoErr)
+            return NULL;
         Value *ret = aBlock.builder->CreateCall(rootFun);
         [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];
         return ret;

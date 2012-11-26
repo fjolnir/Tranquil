@@ -30,6 +30,30 @@
 {
     return self == obj ? TQValid : nil;
 }
+- (id)isEqualTo:(id)b
+{
+    return [self isEqual:b] ? TQValid : nil;
+}
+- (id)notEqualTo:(id)b
+{
+    return [self isEqual:b] ? nil : TQValid;
+}
+- (id)isLesserThan:(id)b
+{
+    return ([(id)self compare:b] == NSOrderedAscending) ? TQValid : nil;
+}
+- (id)isGreaterThan:(id)b
+{
+    return ([(id)self compare:b] == NSOrderedDescending) ? TQValid : nil;
+}
+- (id)isLesserOrEqualTo:(id)b
+{
+    return ([(id)self compare:b] != NSOrderedDescending) ? TQValid : nil;
+}
+- (id)isGreaterOrEqualTo:(id)b
+{
+    return ([(id)self compare:b] != NSOrderedAscending) ? TQValid : nil;
+}
 
 #define CopyMethods(kls, dst) do { \
     unsigned methodCount = 0; \
@@ -65,28 +89,4 @@
     return nil;
 }
 
-- (id)isEqualTo:(id)b
-{
-    return [self isEqual:b] ? TQValid : nil;
-}
-- (id)notEqualTo:(id)b
-{
-    return [self isEqual:b] ? nil     : TQValid;
-}
-- (id)isLesserThan:(id)b
-{
-    return ([(id)self compare:b] == NSOrderedAscending) ? TQValid : nil;
-}
-- (id)isGreaterThan:(id)b
-{
-    return ([(id)self compare:b] == NSOrderedDescending) ? TQValid : nil;
-}
-- (id)isLesserOrEqualTo:(id)b
-{
-    return ([(id)self compare:b] != NSOrderedDescending) ? TQValid : nil;
-}
-- (id)isGreaterOrEqualTo:(id)b
-{
-    return ([(id)self compare:b] != NSOrderedAscending) ? TQValid : nil;
-}
 @end

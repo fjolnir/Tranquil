@@ -102,6 +102,7 @@ static TQProgram *sharedInstance;
     LLVMLinkInJIT();
 
     _globals          = [NSMutableDictionary new];
+    [_globals setObject:[TQNodeVariable globalWithName:@"TQArguments"] forKey:@"TQArguments"];
     _selectorSymbols  = [NSMutableDictionary new];
     _searchPaths      = [[NSMutableArray alloc] initWithObjects:@".",
                          @"~/Library/Frameworks", @"/Library/Frameworks",
@@ -145,6 +146,10 @@ static TQProgram *sharedInstance;
 {
     if(!aNode)
         return nil;
+    NSError *err;
+    if(!aoErr)
+        aoErr = &err;
+
 
     BOOL shouldResetEvalPaths = !_evaluatedPaths;
     if(shouldResetEvalPaths)
@@ -153,20 +158,15 @@ static TQProgram *sharedInstance;
     GlobalVariable *argGlobal = NULL;
     Type *byRefType = [TQNodeVariable captureStructTypeInProgram:self];
     if(!_useAOTCompilation) {
-        TQNodeVariable *varArgVar = [TQNodeVariable nodeWithName:@"TQArguments"];
-        if([aNode referencesNode:varArgVar]) {
-            // Create a global for the argument array
-            argGlobal = new GlobalVariable(*_llModule, byRefType, false, GlobalVariable::InternalLinkage,
-                                           ConstantAggregateZero::get(byRefType), "TQGlobalVar_TQArguments");
-            _argGlobalForJIT.isa        = nil;
-            _argGlobalForJIT.flags      = 0;
-            _argGlobalForJIT.size       = sizeof(TQBlockByRef);
-            _argGlobalForJIT.value      = nil;
-            _argGlobalForJIT.value      = _arguments;
-            _argGlobalForJIT.forwarding = &_argGlobalForJIT;
-            // Insert a reference to the '...' variable so that child blocks know to capture it
-            [aNode.statements insertObject:varArgVar atIndex:0];
-        }
+        // Create a global for the argument array
+        argGlobal = new GlobalVariable(*_llModule, byRefType, false, GlobalVariable::InternalLinkage,
+                                       ConstantAggregateZero::get(byRefType), "TQGlobalVar_TQArguments");
+        _argGlobalForJIT.isa        = nil;
+        _argGlobalForJIT.flags      = 0;
+        _argGlobalForJIT.size       = sizeof(TQBlockByRef);
+        _argGlobalForJIT.value      = nil;
+        _argGlobalForJIT.value      = _arguments;
+        _argGlobalForJIT.forwarding = &_argGlobalForJIT;
 
         // Global for the dispatch queue
         _globalQueue = _llModule->getNamedGlobal("TQGlobalQueue");
@@ -176,18 +176,13 @@ static TQProgram *sharedInstance;
     } else {
         if(!_llModule->getNamedGlobal("TQGlobalVar_TQArguments"))
             new GlobalVariable(*_llModule, byRefType, false, GlobalVariable::ExternalLinkage, NULL, "TQGlobalVar_TQArguments");
-        TQNodeVariable *cliArgGlobal = [TQNodeVariable globalWithName:@"TQArguments"];
-        [_globals setObject:cliArgGlobal forKey:@"TQArguments"];
-
         _globalQueue = _llModule->getNamedGlobal("TQGlobalQueue");
         if(!_globalQueue)
             _globalQueue = new GlobalVariable(*_llModule, self.llInt8PtrTy, false, GlobalVariable::ExternalLinkage, NULL, "TQGlobalQueue");
     }
 
-    NSError *err = nil;
-    [aNode generateCodeInProgram:self block:nil root:aNode error:&err];
-    if(err) {
-        TQLog(@"Error: %@", err);
+    [aNode generateCodeInProgram:self block:nil root:aNode error:aoErr];
+    if(*aoErr) {
         if(shouldResetEvalPaths)
             _evaluatedPaths = nil;
         return NO;
@@ -228,7 +223,6 @@ static TQProgram *sharedInstance;
             factory.setUseMCJIT(true);
             factory.setRelocationModel(Reloc::PIC_);
             _executionEngine = factory.create();
-            //_executionEngine->DisableLazyCompilation();
             fpm.add(new TargetData(*_executionEngine->getTargetData()));
         }
         if(argGlobal)

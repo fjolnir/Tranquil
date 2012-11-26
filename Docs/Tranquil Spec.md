@@ -29,7 +29,7 @@
 	||  \ Or:  Evaluates to the first non-nil expression: (123 || nil) == 123      (Can be chained)
 	&&  \ And: Evaluates to the last expression if all are non-nil:  (1 && 2) == 2 (Can be chained)
 	
-	\ Variable assignment
+	\ Variables		
 	a = b \ Variables are local in scope
 	      \ (Must begin with a lowercase letter, as uppercase names are reserved for classes and values imported from C headers)
 	a, b = 1, 2 \ Comma separated operands can be used for multiple assignment

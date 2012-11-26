@@ -73,6 +73,8 @@ using namespace llvm;
     Value *retVal;
     if(_value) {
         retVal = [_value generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        if(*aoErr)
+            return NULL;
         retVal = aBlock.builder->CreateCall(aProgram.TQPrepareObjectForReturn, retVal);
         ((CallInst *)retVal)->addAttribute(~0, Attribute::NoUnwind);
         [self _attachDebugInformationToInstruction:retVal inProgram:aProgram block:aBlock root:aRoot];

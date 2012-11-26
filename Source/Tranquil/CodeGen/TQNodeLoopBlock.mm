@@ -101,14 +101,24 @@ void * const TQCurrLoopKey = (void*)&TQCurrLoopKey;
 
     BasicBlock *loopBB = BasicBlock::Create(mod->getContext(), "loopBody", aBlock.function);
     IRBuilder<> *loopBuilder = new IRBuilder<>(loopBB);
-    aBlock.basicBlock = loopBB;
-    aBlock.builder = loopBuilder;
 
     BasicBlock *endloopBB = BasicBlock::Create(mod->getContext(), "endloop", aBlock.function);
     _loopEndBlock = endloopBB;
     IRBuilder<> *endloopBuilder = new IRBuilder<>(endloopBB);
 
+    // Generate the condition instructions
+    aBlock.basicBlock = condBB;
+    aBlock.builder    = condBuilder;
+    Value *testExpr = [_condition generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+    if(*aoErr)
+        return NULL;
+    // The condition may have changed the basic block so we don't use condBuilder here
+    Value *testResult = [self generateTestExpressionInProgram:aProgram withBuilder:aBlock.builder value:testExpr];
+    aBlock.builder->CreateCondBr(testResult, loopBB, endloopBB);
 
+    // Loop statements
+    aBlock.basicBlock = loopBB;
+    aBlock.builder = loopBuilder;
     for(TQNode *stmt in self.statements) {
         // Set the current loop once per iteration in case there is a nested loop which would override it.
         objc_setAssociatedObject(aBlock, TQCurrLoopKey, self, OBJC_ASSOCIATION_ASSIGN);
@@ -123,18 +133,6 @@ void * const TQCurrLoopKey = (void*)&TQCurrLoopKey;
         aBlock.builder->CreateBr(condBB);
 
     delete loopBuilder;
-
-    // Generate the condition instructions
-    aBlock.basicBlock = condBB;
-    aBlock.builder    = condBuilder;
-    Value *testExpr = [_condition generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-    // The condition may have changed the basic block
-    condBB      = aBlock.basicBlock;
-    condBuilder = aBlock.builder;
-    if(*aoErr)
-        return NULL;
-    Value *testResult = [self generateTestExpressionInProgram:aProgram withBuilder:condBuilder value:testExpr];
-    condBuilder->CreateCondBr(testResult, loopBB, endloopBB);
 
     // Make the parent block continue from the end of the statement
     aBlock.basicBlock = endloopBB;

@@ -98,6 +98,8 @@ using namespace llvm;
         return NULL;
     } else if(_type == kTQOperatorUnaryMinus) {
         Value *right = [_right generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        if(*aoErr)
+            return NULL;
         Value *selector = [aProgram getSelector:@"negate" inBlock:aBlock root:aRoot];
         Value *ret = B->CreateCall2(aProgram.objc_msgSend, right, selector);
         [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];
@@ -107,10 +109,13 @@ using namespace llvm;
         Value *beforeVal = NULL;
 
         // Return original value and increment (var++)
-        TQNode *incrementee = _right;
+        TQNode *incrementee = _left ?: _right;
+        if([incrementee isKindOfClass:[TQNodeVariable class]])
+            [(TQNodeVariable *)incrementee createStorageInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         if(_left) {
-            incrementee = _left;
             beforeVal = [incrementee generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+            if(*aoErr)
+                return NULL;
         }
         TQNodeOperator *op = [TQNodeOperator nodeWithType:_type == kTQOperatorIncrement ? kTQOperatorAdd : kTQOperatorSubtract
                                                      left:incrementee
@@ -126,6 +131,8 @@ using namespace llvm;
         return incrementedVal;
     } else if(_type == kTQOperatorAnd || _type == kTQOperatorOr) {
         Value *leftVal = [_left generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        if(*aoErr)
+            return NULL;
         TQNodeCustom *leftWrapper = [TQNodeCustom nodeReturningValue:leftVal];
         TQNodeTernaryOperator *tern = [TQNodeTernaryOperator nodeWithCondition:leftWrapper
                                                                         ifExpr:nil // Use condition result without re-evaluating
@@ -135,7 +142,11 @@ using namespace llvm;
         return [tern generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     } else {
         Value *left  = [_left generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        if(*aoErr)
+            return NULL;
         Value *right = [_right generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        if(*aoErr)
+            return NULL;
 
         Value *selector = NULL;       // Selector to be sent in the general case (where one or both of the operands are not tagged numbers)
         TQNodeCustom *fastpath = nil; // Block to use in the case where both are tagged numbers
@@ -380,6 +391,8 @@ using namespace llvm;
     // Call []:=:
     Value *selector = [aProgram getSelector:@"set:to:" inBlock:aBlock root:aRoot];
     Value *key = [_right generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+    if(*aoErr)
+        return NULL;
     Value *settee = [_left generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     if(*aoErr)
         return NULL;
@@ -425,6 +438,8 @@ using namespace llvm;
         if([[self.left objectAtIndex:i] respondsToSelector:@selector(createStorageInProgram:block:root:error:)])
             [[self.left objectAtIndex:i] createStorageInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         curr = [[self.right objectAtIndex:i] generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+        if(*aoErr)
+            return NULL;
         curr = aBlock.builder->CreateCall(aProgram.objc_retain, curr);
         values.push_back(curr);
     }
@@ -442,6 +457,8 @@ using namespace llvm;
             case kTQOperatorDivide: {
                 TQNodeOperator *op = [TQNodeOperator nodeWithType:self.type left:[self.left objectAtIndex:i] right:[TQNodeCustom nodeReturningValue:val]];
                 val = [op generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+                if(*aoErr)
+                    return NULL;
             } break;
             case kTQOperatorAssign:
                 // Do nothing

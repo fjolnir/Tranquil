@@ -22,7 +22,7 @@
                                                                      forKey:NSLocalizedDescriptionKey]; \
                 *aoErr = [NSError errorWithDomain:(errDomain) code:(errCode) userInfo:userInfo]; \
             } \
-            TQLog(fmt, ##__VA_ARGS__); \
+          /*  TQLog(fmt, ##__VA_ARGS__); */\
             return retVal; \
         } \
     } while(0)
@@ -44,6 +44,7 @@ typedef enum {
     kTQInvalidAssignee,
     kTQUnexpectedStatement,
     kTQUnexpectedExpression,
+    kTQUndefinedVariable,
     kTQObjCException,
     kTQGenericError
 } TQSyntaxErrorCode;

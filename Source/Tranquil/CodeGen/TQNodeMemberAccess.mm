@@ -64,7 +64,9 @@ using namespace llvm;
                                                                                block:aBlock
                                                                                 root:aRoot
                                                                                error:aoErr];
-    Value *object = [[TQNodeSelf node] generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+    TQNode *selfNode = [TQNodeSelf node];
+    selfNode.lineNumber = self.lineNumber;
+    Value *object = [selfNode generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     Value *ret = builder->CreateCall2(aProgram.TQValueForKey, object, key);
     [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];
     return ret;

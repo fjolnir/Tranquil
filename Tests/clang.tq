@@ -9,7 +9,7 @@ import "clang-c/Index"
         @idx = Clang_createIndex(0, 1)
         ^self
     }
-    - dealloc `Clang_disposeIndex(idx)`
+    - dealloc `Clang_disposeIndex(@idx)`
 
     - parse: path withBlock: lambda {
         clangArgs = TQPointer to: #-ObjC withType: #*
@@ -17,7 +17,7 @@ import "clang-c/Index"
         header    = Clang_parseTranslationUnit(@idx, path, clangArgs, clangArgs count, nil, 0, clangOpts)
 
         if header == nil {
-            "Unable to parse «headerPath»" print
+            "Unable to parse «path»" print
             ^nil
         }
 
