@@ -5,10 +5,7 @@
 @class TQNumber;
 
 @interface NSMapTable (Tranquil)
-+ (NSMapTable *)tq_mapTableWithObjectsAndKeys:(id)firstObject , ...; // Arguments terminated by TQNothing
-- (id)objectForKeyedSubscript:(id)key;
-- (void)setObject:(id)obj forKeyedSubscript:(id)key;
-
+- (id)at:(id)aKey;
 - (id)each:(id (^)(id))aBlock;
 @end
 
@@ -18,6 +15,7 @@
 - (void)removeObjectAtIndex:(NSUInteger)aIdx;
 - (id)removeObject:(id)aObj;
 - (id)objectAtIndexedSubscript:(NSUInteger)aIdx;
+- (id)at:(TQNumber *)aIdx;
 - (TQNumber *)size;
 - (TQNumber *)indexOf:(id)aObj;
 
@@ -39,12 +37,14 @@
     - (id)objectForKeyedSubscript:(id)key NS_AVAILABLE(10_7, 5_0);
 
 @interface NSArray (Tranquil)
+- (id)at:(TQNumber *)aIdx;
 #if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_7
 INDEXED_SUBSCRIPT_DEFS
 #endif
 @end
 
 @interface NSDictionary (Tranquil)
+- (id)at:(id)aKey;
 #if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_7
 KEYED_SUBSCRIPT_DEFS
 #endif

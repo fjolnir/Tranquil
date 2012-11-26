@@ -4,8 +4,14 @@
 #import "TQNodeArgument.h"
 #import "TQNodeVariable.h"
 #import "TQNodeBlock.h"
+#import "TQNodeCustom.h"
+#import "../Runtime/NSString+TQAdditions.h"
 
 using namespace llvm;
+
+@interface TQNodeMessage ()
+@property(readwrite) llvm::Value *receiverLLVMValue; // If this is set, the receiver node is ignored
+@end
 
 @implementation TQNodeMessage
 @synthesize receiver=_receiver, arguments=_arguments, cascadedMessages=_cascadedMessages, receiverLLVMValue=_receiverLLVMValue;
@@ -141,7 +147,8 @@ using namespace llvm;
         needsAutorelease = YES;
 
     aArgs.insert(aArgs.begin(), [aProgram getSelector:selStr inBlock:aBlock root:aRoot]);
-    aArgs.insert(aArgs.begin(), _receiverLLVMValue ? _receiverLLVMValue : [_receiver generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr]);
+    Value *receiver = _receiverLLVMValue ?: [_receiver generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+    aArgs.insert(aArgs.begin(), receiver);
 
 
     Value *ret;
@@ -159,7 +166,7 @@ using namespace llvm;
 
     Value *origRet = ret;
     for(TQNodeMessage *cascadedMessage in _cascadedMessages) {
-        cascadedMessage.receiverLLVMValue = origRet;
+        cascadedMessage.receiverLLVMValue = receiver;
         ret = [cascadedMessage generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     }
     return ret;
@@ -182,6 +189,24 @@ using namespace llvm;
     //args.push_back(aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQNothing", aProgram.llInt8PtrTy), "sentinel"));
 
     return [self generateCodeInProgram:aProgram block:aBlock root:aRoot withArguments:args error:aoErr];
+}
+
+- (llvm::Value *)store:(llvm::Value *)aValue
+             inProgram:(TQProgram *)aProgram
+                 block:(TQNodeBlock *)aBlock
+                  root:(TQNodeRootBlock *)aRoot
+                 error:(NSError **)aoErr
+{
+    // "Storing" to a message just means to transform the message to it's setter variant
+    TQAssertSoft(![[_arguments objectAtIndex:0] passedNode], kTQSyntaxErrorDomain, kTQInvalidAssignee, NULL, @"Tried to assign to a keyword message (The grammar doesn't even allow that to happen, how'd you get here?");
+    NSString *selector = [NSString stringWithFormat:@"set%@", [[[_arguments objectAtIndex:0] selectorPart] stringByCapitalizingFirstLetter]];
+    TQNodeCustom *valWrapper = [TQNodeCustom nodeReturningValue:aValue];
+    TQNodeMessage *setterMsg = [TQNodeMessage nodeWithReceiver:_receiver];
+    [setterMsg.arguments addObject:[TQNodeArgument nodeWithPassedNode:valWrapper selectorPart:selector]];
+    if([setterMsg generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr])
+        return aValue;
+    else
+        return NULL;
 }
 
 @end

@@ -18,36 +18,15 @@
 {
     [self include:[TQEnumerable class]];
 }
-+ (NSMapTable *)tq_mapTableWithObjectsAndKeys:(id)firstObject, ...
-{
-    NSMapTable *ret = [NSMapTable new];
 
-    va_list args;
-    va_start(args, firstObject);
-    id key, val, head;
-    int i = 0;
-    IMP setImp = class_getMethodImplementation(object_getClass(ret), @selector(setObject:forKey:));
-    for(head = firstObject; head != TQNothing; head = va_arg(args, id))
-    {
-        if(++i % 2 == 0) {
-            key = head;
-            setImp(ret, @selector(setObject:forKey:), val, key);
-        } else
-            val = TQObjectIsStackBlock(head) ? [[head copy] autorelease] : head;
-    }
-    va_end(args);
-
-    return [ret autorelease];
-}
-
-- (id)objectForKeyedSubscript:(id)aKey
+- (id)at:(id)aKey
 {
     return [self objectForKey:aKey];
 }
-
-- (void)setObject:(id)aObj forKeyedSubscript:(id)aKey
+- (id)set:(id)aKey to:(id)aVal
 {
-    [self setObject:TQObjectIsStackBlock(aObj) ? [[aObj copy] autorelease] : aObj forKey:aKey];
+    [self setObject:aVal forKey:aKey];
+    return nil;
 }
 
 - (id)each:(id (^)(id))aBlock
@@ -98,6 +77,24 @@
 - (id)objectAtIndex:(NSUInteger)aIdx
 {
     return (id)[self pointerAtIndex:aIdx];
+}
+
+- (id)at:(id)aIdx
+{
+    return (id)[self pointerAtIndex:[aIdx unsignedIntegerValue]];
+}
+- (id)set:(id)aKey to:(id)aVal
+{
+    [self setObject:aVal atIndexedSubscript:[aKey unsignedIntegerValue]];
+    return nil;
+}
+- (id)contains:(id)aVal
+{
+    for(id obj in self) {
+        if([aVal isEqualTo:obj])
+            return TQValid;
+    }
+    return nil;
 }
 
 - (void)setObject:(id)aObj atIndexedSubscript:(NSUInteger)aIdx
@@ -157,23 +154,14 @@
 
 - (BOOL)containsObject:(id)aObj
 {
-    for(id obj in self) {
-        if([obj isEqual:aObj])
-            return YES;
-    }
-    return NO;
-}
-
-- (id)contains:(id)aObj
-{
-    return [self containsObject:aObj] ? TQValid : nil;
+    return [self contains:aObj] != nil;
 }
 
 - (TQNumber *)indexOf:(id)aObj
 {
     NSUInteger idx = 0;
     for(id obj in self) {
-        if(tq_msgSend_noBoxing(aObj, TQEqOpSel, obj))
+        if(tq_msgSend_noBoxing(aObj, @selector(isEqualTo:), obj))
             return [TQNumber numberWithUnsignedInteger:idx];
         ++idx;
     }
@@ -208,7 +196,7 @@
     NSMutableIndexSet *indices = [NSMutableIndexSet indexSet];
     NSUInteger i = 0;
     for(id obj in self) {
-        if(tq_msgSend_noBoxing(aObj, TQEqOpSel, obj))
+        if(tq_msgSend_noBoxing(aObj, @selector(isEqualTo:), obj))
             [indices addIndex:i];
         ++i;
     }
@@ -303,6 +291,19 @@
     return nil;
 }
 
+- (id)at:(TQNumber *)aIdx
+{
+    return [self objectAtIndex:[aIdx unsignedIntegerValue]];
+}
+- (id)set:(id)aKey to:(id)aVal
+{
+    [(NSMutableArray *)self setObject:aVal atIndexedSubscript:[aKey unsignedIntegerValue]];
+    return nil;
+}
+- (id)contains:(id)aVal
+{
+    return [self containsObject:aVal] ? TQValid : nil;
+}
 
 #if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_7
 - (id)objectAtIndexedSubscript:(NSUInteger)idx
@@ -333,17 +334,59 @@
     return nil;
 }
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_7
-- (void)setObject:(id)obj forKeyedSubscript:(id <NSCopying>)key
+- (id)at:(id)aKey
 {
-    [(NSMutableDictionary *)self setObject:obj forKey:key];
+    return [self objectForKey:aKey];
 }
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_7
 - (id)objectForKeyedSubscript:(id)key
 {
     return [self objectForKey:key];
 }
 #endif
 @end
+
+@implementation NSMutableDictionary (Tranquil)
++ (NSMutableDictionary *)tq_dictionaryWithObjectsAndKeys:(id)firstObject, ...
+{
+    NSMutableDictionary *ret = [NSMutableDictionary new];
+
+    va_list args;
+    va_start(args, firstObject);
+    id key, val, head;
+    int i = 0;
+    IMP setImp = class_getMethodImplementation(object_getClass(ret), @selector(setObject:forKey:));
+    for(head = firstObject; head != TQNothing; head = va_arg(args, id))
+    {
+        if(++i % 2 == 0) {
+            key = head;
+            if(!val)
+                continue;
+            setImp(ret, @selector(setObject:forKey:), val, key);
+        } else
+            val = TQObjectIsStackBlock(head) ? [[head copy] autorelease] : head;
+    }
+    va_end(args);
+
+    return [ret autorelease];
+}
+- (id)set:(id)aKey to:(id)aVal
+{
+    if(aVal)
+        [self setObject:aVal forKey:aKey];
+    else
+        [self removeObjectForKey:aKey];
+    return nil;
+}
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_7
+- (void)setObject:(id)obj forKeyedSubscript:(id <NSCopying>)key
+{
+    [self setObject:obj forKey:key];
+}
+#endif
+@end
+
 
 @implementation NSUserDefaults (Tranquil)
 - (void)setObject:(id)obj forKeyedSubscript:(id <NSObject,NSCopying>)key

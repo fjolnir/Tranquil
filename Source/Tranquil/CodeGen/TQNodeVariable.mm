@@ -98,6 +98,11 @@ using namespace llvm;
 {
     // Nothing to iterate
 }
+- (BOOL)replaceChildNodesIdenticalTo:(TQNode *)aNodeToReplace with:(TQNode *)aNodeToInsert
+{
+    // Nothing to replace
+    return NO;
+}
 
 - (void)dealloc
 {

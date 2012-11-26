@@ -1,4 +1,4 @@
-#NSPointerArray {
+@NSPointerArray {
     - each: lambda {
     	i = 0
     	count = self size

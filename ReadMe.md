@@ -64,7 +64,7 @@ whenFinished {
 ### Message chaining (Without having to return self from every method you write)
 
 ```
-var = Character new; setName: "Deckard"; setOccupation: "Blade Runner"; self
+var = Character new setName: "Deckard"; setOccupation: "Blade Runner"; self
 ```
 
 ### Multiple assignment
@@ -97,11 +97,11 @@ fib(10) print
 
     import "DatabaseKit"
     db = DB withURL: "sqlite://data/database.sqlite"
-    query = db[@aTable] select: @field; where: { @anotherField => aValue }
-    val   = query[@field]
+    query = db[#aTable] select: #field; where: { #anotherField => aValue }
+    val   = query[#field]
     
     \ We can write that more concisely as:
-    val   = table[{ @anotherField => aValue }][@field]
+    val   = table[{ @anotherField => aValue }][#field]
     
 ### Create a Web Server (Using [WebAppKit](http://github.com/fjolnir/WebAppKit))
 
@@ -161,36 +161,36 @@ import "AppKit"
 nsapp = NSApplication sharedApplication
 
 \ Create the menubar
-quitMenuItem = NSMenuItem new; setTitle: "Quit «NSProcessInfo processInfo processName»";
-                              setAction: @terminate:;
-                       setKeyEquivalent: @q;
-                                   self
-appMenu     = NSMenu new; addItem: quitMenuItem;   self
-appMenuItem = NSMenuItem new; setSubmenu: appMenu; self
-menuBar     = NSMenu new; addItem: appMenuItem;    self
+quitMenuItem = NSMenuItem new setTitle: "Quit «NSProcessInfo processInfo processName»";
+                             setAction: #terminate:;
+                      setKeyEquivalent: #q;
+                                  self
+appMenu     = NSMenu new addItem: quitMenuItem;   self
+appMenuItem = NSMenuItem new setSubmenu: appMenu; self
+menuBar     = NSMenu new addItem: appMenuItem;    self
 
 nsapp setMainMenu: menuBar
 
 \ Create a little view
 #TestView < NSView {
     - init {
-        #gradient = NSGradient alloc initWithStartingColor: NSColor redColor
+        @gradient = NSGradient alloc initWithStartingColor: NSColor redColor
                                                endingColor: NSColor yellowColor
         ^self
     }
     - drawRect: dirtyRect {
-        #gradient drawInRect: dirtyRect angle: 45
+        @gradient drawInRect: dirtyRect angle: 45
     }
 }
 	
 \ Create a window
-win = NSWindow alloc initWithContentRect: [[0, 0], [300, 200]]
-                               styleMask: (NSTitledWindowMask bitOr: NSResizableWindowMask)
-                                 backing: NSBackingStoreBuffered
-                                   defer: no;
-                                setTitle: "Tranquil!";
-                          setContentView: TestView new;
-                                    self
+win = (NSWindow alloc initWithContentRect: [[0, 0], [300, 200]]
+                                styleMask: (NSTitledWindowMask bitOr: NSResizableWindowMask)
+                                  backing: NSBackingStoreBuffered
+                                    defer: no)
+                                 setTitle: "Tranquil!";
+                           setContentView: TestView new;
+                                     self
 
 \ Start the app
 win makeKeyAndOrderFront: nil

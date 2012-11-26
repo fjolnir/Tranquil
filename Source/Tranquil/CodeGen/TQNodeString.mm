@@ -78,14 +78,14 @@ using namespace llvm;
 
     // Returns [NSMutableString stringWithUTF8String:_value]
     Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_NSMutableString", aProgram.llInt8Ty);
-    Value *selector = aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQStringWithUTF8StringSel", aProgram.llInt8PtrTy));
+    Value *selector = [aProgram getSelector:@"stringWithUTF8String:" inBlock:aBlock root:aRoot];
 
     Value *strValue = [aProgram getGlobalStringPtr:_value inBlock:aBlock];
     strValue = aBlock.builder->CreateCall3(aProgram.objc_msgSend, klass, selector, strValue);
 
     // If there are embedded values we must create a string using strValue as its format
     if([_embeddedValues count] > 0) {
-        Value *formatSelector = aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQStringWithFormatSel", aProgram.llInt8PtrTy));
+        Value *formatSelector = [aProgram getSelector:@"stringWithFormat:" inBlock:aBlock root:aRoot];
         std::vector<Value*> args;
         args.push_back(klass);
         args.push_back(formatSelector);
@@ -111,13 +111,14 @@ using namespace llvm;
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
+    if(!aProgram.useAOTCompilation) {
+        NSString *str = [[NSString stringWithString:self.value] retain];
+        return ConstantExpr::getIntToPtr(ConstantInt::get(aProgram.llLongTy, (uintptr_t)str), aProgram.llInt8PtrTy);
+    }
+    // Todo: make this use a NSConstantString
     Module *mod = aProgram.llModule;
 
-    NSString *globalName;
-    if(aProgram.useAOTCompilation)
-        globalName = [NSString stringWithFormat:@"TQConstNSStr_%ld", [self.value hash]];
-    else
-        globalName = [NSString stringWithFormat:@"TQConstNSStr_%@", self.value];
+    NSString *globalName = [NSString stringWithFormat:@"TQConstNSStr_%ld", [self.value hash]];
 
     Value *str = mod->getGlobalVariable([globalName UTF8String], true);
     if(!str) {
@@ -125,7 +126,7 @@ using namespace llvm;
         IRBuilder<> rootBuilder(&rootFunction->getEntryBlock(), rootFunction->getEntryBlock().begin());
 
         Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_NSString", aProgram.llInt8Ty);
-        Value *selector = rootBuilder.CreateLoad(mod->getOrInsertGlobal("TQStringWithUTF8StringSel", aProgram.llInt8PtrTy));
+        Value *selector = [aProgram getSelector:@"stringWithUTF8String:" withBuilder:&rootBuilder root:aRoot];
 
         Value *result = rootBuilder.CreateCall3(aProgram.objc_msgSend, klass, selector, [aProgram getGlobalStringPtr:self.value withBuilder:&rootBuilder]);
         result = rootBuilder.CreateCall(aProgram.objc_retain, result);

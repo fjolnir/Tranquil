@@ -34,6 +34,11 @@
     return ret;
 }
 
+- (NSString *)at:(id)aIdx
+{
+    return [self substringWithRange:(NSRange){[aIdx intValue], 1}];
+}
+
 - (NSMutableString *)add:(id)aObj
 {
     return [[[self stringByAppendingString:[aObj toString]] mutableCopy] autorelease];
@@ -59,6 +64,12 @@
 
 - (NSMutableString *)toString
 {
+    return self;
+}
+
+- (NSString *)set:(NSString *)aReplacement at:(id)aIdx
+{
+    [self replaceCharactersInRange:(NSRange){ [aIdx unsignedIntegerValue], 1 } withString:aReplacement];
     return self;
 }
 @end

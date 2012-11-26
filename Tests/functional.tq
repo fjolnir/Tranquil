@@ -1,7 +1,7 @@
 max = `a, b | (a > b) ? a ! b`
 min = `a, b | (a < b) ? a ! b`
 
-#NSPointerArray {
+@NSPointerArray {
     - fold: lambda {
         i = 0
         accum = lambda(self[i++])

@@ -5,6 +5,8 @@
 
 @interface TQEnumerable (NotImplementedHere)
 - (id)each:(id (^)(id))aBlock;
+- (id)at:(id)loc;
+- (id)set:(id)loc to:(id)val;
 @end
 
 @implementation TQEnumerable
@@ -79,6 +81,14 @@
         return (id)nil;
     }];
     return accum;
+}
+
+- (id)swap:(id)a with:(id)b
+{
+    id temp = [self at:a];
+    [self set:a to:[self at:b]];
+    [self set:b to:temp];
+    return nil;
 }
 
 - (NSPointerArray *)toArray

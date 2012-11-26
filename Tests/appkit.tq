@@ -3,39 +3,39 @@ import "AppKit"
 nsapp = NSApplication sharedApplication
 
 \ Create the menubar
-quitMenuItem = NSMenuItem new; setTitle: "Quit «NSProcessInfo processInfo processName»";
-                              setAction: "terminate:";
-                       setKeyEquivalent: "q";
+quitMenuItem = NSMenuItem new setTitle: "Quit «NSProcessInfo processInfo processName»";
+                             setAction: #terminate:;
+                      setKeyEquivalent: #q;
                                    self
 
-appMenu     = NSMenu new; addItem: quitMenuItem;   self
-appMenuItem = NSMenuItem new; setSubmenu: appMenu; self
-menuBar     = NSMenu new; addItem: appMenuItem;    self
+appMenu     = NSMenu new addItem: quitMenuItem;   self
+appMenuItem = NSMenuItem new setSubmenu: appMenu; self
+menuBar     = NSMenu new addItem: appMenuItem;    self
 
 nsapp setMainMenu: menuBar
 
 \ Create a little view
-#TestView < NSView {
+@TestView < NSView {
     - init {
-        #gradient = NSGradient alloc initWithStartingColor: NSColor redColor
+        @gradient = NSGradient alloc initWithStartingColor: NSColor redColor
                                                endingColor: NSColor yellowColor
         ^self
     }
     - drawRect: dirtyRect {
-        #gradient drawInRect: dirtyRect angle: 45
+        @gradient drawInRect: dirtyRect angle: 45
     }
 }
 
-view = TestView new; setFrame: (win contentView bounds); self
+view = TestView new setFrame: (win contentView bounds); self
 
 \ Create a window
-win = NSWindow alloc initWithContentRect: [NSZeroPoint, [300, 200]]
-                               styleMask: (NSTitledWindowMask bitOr: NSResizableWindowMask)
-                                 backing: NSBackingStoreBuffered
-                                   defer: no;
-                                setTitle: "Tranquil!";
-                          setContentView: view;
-                                    self
+win = (NSWindow alloc initWithContentRect: [NSZeroPoint, [300, 200]]
+                                styleMask: (NSTitledWindowMask bitOr: NSResizableWindowMask)
+                                  backing: NSBackingStoreBuffered
+                                    defer: no)
+                                 setTitle: "Tranquil!";
+                           setContentView: view;
+                                     self
 
 \ Start the app
 win makeKeyAndOrderFront: nil

@@ -1,4 +1,4 @@
-#NSString {
+@NSString {
     - trim {
         ^self stringByTrimmingCharactersInSet: NSCharacterSet whitespaceCharacterSet
     }

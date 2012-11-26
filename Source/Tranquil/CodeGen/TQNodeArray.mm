@@ -68,7 +68,7 @@ using namespace llvm;
 
     std::vector<Value *>args;
     args.push_back(mod->getOrInsertGlobal("OBJC_CLASS_$_NSPointerArray", aProgram.llInt8Ty));
-    args.push_back(aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQPointerArrayWithObjectsSel", aProgram.llInt8PtrTy)));
+    args.push_back([aProgram getSelector:@"tq_pointerArrayWithObjects:" inBlock:aBlock root:aRoot]);
     for(TQNode *item in _items) {
         args.push_back([item generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr]);
         if(*aoErr)

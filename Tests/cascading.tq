@@ -1,4 +1,4 @@
-#Kls {
+@Kls {
     - foo {
         "foo" print
     }
@@ -11,4 +11,4 @@
 }
 
 obj = Kls new
-obj; foo; bar: 123; baz
+obj foo; bar: 123; baz

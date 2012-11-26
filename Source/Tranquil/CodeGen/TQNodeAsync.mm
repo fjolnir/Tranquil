@@ -103,7 +103,7 @@ using namespace llvm;
 {
     Module *mod = aProgram.llModule;
     Value *pKls = mod->getOrInsertGlobal("OBJC_CLASS_$_TQPromise", aProgram.llInt8Ty);
-    Value *pSel = aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQPromiseSel", aProgram.llInt8PtrTy));
+    Value *pSel = [aProgram getSelector:@"promise" inBlock:aBlock root:aRoot];
 
     Value *promise = aBlock.builder->CreateCall2(aProgram.objc_msgSend, pKls, pSel);
     Value *compiledBlock = [self _generateDispatchBlockWithPromise:promise

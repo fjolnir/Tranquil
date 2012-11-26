@@ -104,12 +104,6 @@
         case kTQOperatorUnaryMinus:
             replacement = [TQNodeNumber nodeWithDouble:-right];
             break;
-        case kTQOperatorLShift:
-            replacement = [TQNodeNumber nodeWithDouble:(long)left << (long)right];
-            break;
-        case kTQOperatorRShift:
-            replacement = [TQNodeNumber nodeWithDouble:(long)left >> (long)right];
-            break;
         case kTQOperatorExponent:
             replacement = [TQNodeNumber nodeWithDouble:powf(left, right)];
             break;

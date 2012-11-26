@@ -35,5 +35,6 @@
 - (llvm::Value *)getGlobalStringPtr:(NSString *)aStr withBuilder:(llvm::IRBuilder<> *)aBuilder;
 - (llvm::Value *)getGlobalStringPtr:(NSString *)aStr inBlock:(TQNodeBlock *)aBlock;
 - (llvm::Value *)getSelector:(NSString *)aSelector inBlock:(TQNodeBlock *)aBlock root:(TQNodeRootBlock *)aRoot;
+- (llvm::Value *)getSelector:(NSString *)aSelector withBuilder:(llvm::IRBuilder<> *)aBuilder root:(TQNodeRootBlock *)aRoot;
 @end
 

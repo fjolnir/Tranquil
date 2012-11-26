@@ -1,59 +1,57 @@
 #import "TQNodeMemberAccess.h"
 #import "TQNode+Private.h"
-#import "TQNodeBlock.h"
 #import "TQNodeString.h"
+#import "TQNodeBlock.h"
+#import "TQNodeVariable.h"
 #import "TQProgram.h"
 
 using namespace llvm;
 
 @implementation TQNodeMemberAccess
-@synthesize receiver=_receiver, property=_property;
+@synthesize ivarName=_ivarName;
 
-+ (TQNodeMemberAccess *)nodeWithReceiver:(TQNode *)aReceiver property:(NSString *)aProperty
++ (TQNodeMemberAccess *)nodeWithName:(NSString *)aName
 {
-    return [[[self alloc] initWithReceiver:aReceiver property:aProperty] autorelease];
+    return [[[self alloc] initWithName:aName] autorelease];
 }
 
-- (id)initWithReceiver:(TQNode *)aReceiver property:(NSString *)aProperty
+- (id)initWithName:(NSString *)aName
 {
     if(!(self = [super init]))
         return nil;
 
-    _receiver = [aReceiver retain];
-    _property = [aProperty retain];
+    _ivarName = [aName retain];
 
     return self;
 }
 
 - (void)dealloc
 {
-    [_receiver release];
-    [_property release];
+    [_ivarName release];
     [super dealloc];
 }
 
 - (TQNode *)referencesNode:(TQNode *)aNode
 {
-    TQNode *ref = nil;
     if([aNode isEqual:self])
-        ref = self;
-    else if((ref = [_receiver referencesNode:aNode]))
-        return ref;
-    return ref;
+        return self;
+    else if([aNode isEqual:[TQNodeSelf node]])
+        return [TQNodeSelf node];
+    return nil;
 }
 
 - (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
 {
-    aBlock(_receiver);
+    // Nothing to iterate
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<acc@ %@#%@>", _receiver, _property];
+    return [NSString stringWithFormat:@"<acc@ @%@>", _ivarName];
 }
 - (NSString *)toString
 {
-    return [NSString stringWithFormat:@"%@#%@>", [_receiver toString], _property];
+    return [NSString stringWithFormat:@"ivar_%@", _ivarName];
 }
 
 - (llvm::Value *)generateCodeInProgram:(TQProgram *)aProgram
@@ -62,11 +60,11 @@ using namespace llvm;
                                  error:(NSError **)aoErr
 {
     IRBuilder<> *builder = aBlock.builder;
-    Value *key = [[TQNodeConstString nodeWithString:_property] generateCodeInProgram:aProgram
+    Value *key = [[TQNodeConstString nodeWithString:_ivarName] generateCodeInProgram:aProgram
                                                                                block:aBlock
                                                                                 root:aRoot
                                                                                error:aoErr];
-    Value *object = [_receiver generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+    Value *object = [[TQNodeSelf node] generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     Value *ret = builder->CreateCall2(aProgram.TQValueForKey, object, key);
     [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];
     return ret;
@@ -80,11 +78,11 @@ using namespace llvm;
 {
     IRBuilder<> *builder = aBlock.builder;
 
-    Value *key = [[TQNodeConstString nodeWithString:_property] generateCodeInProgram:aProgram
+    Value *key = [[TQNodeConstString nodeWithString:_ivarName] generateCodeInProgram:aProgram
                                                                                block:aBlock
                                                                                 root:aRoot
                                                                                error:aoErr];
-    Value *object = [_receiver generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+    Value *object = [[TQNodeSelf node] generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     Value *ret = builder->CreateCall3(aProgram.TQSetValueForKey, object, key, aValue);
     [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];
     return ret;

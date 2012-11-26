@@ -133,41 +133,7 @@ void *TQPopNonLocalReturnStackAndGetPropagationJumpTarget();
 int TQNonLocalReturnStackHeight();
 id TQGetNonLocalReturnValue();
 
-// Adds operator methods to the passed class (such as ==:, >=:, []: etc)
-BOOL TQAugmentClassWithOperators(Class klass);
-
 void TQInitializeRuntime(int argc, char **argv);
-
-extern SEL TQEqOpSel;
-extern SEL TQNeqOpSel;
-extern SEL TQLTOpSel;
-extern SEL TQGTOpSel;
-extern SEL TQGTEOpSel;
-extern SEL TQLTEOpSel;
-extern SEL TQMultOpSel;
-extern SEL TQDivOpSel;
-extern SEL TQModOpSel;
-extern SEL TQAddOpSel;
-extern SEL TQSubOpSel;
-extern SEL TQUnaryMinusOpSel;
-extern SEL TQLShiftOpSel;
-extern SEL TQRShiftOpSel;
-extern SEL TQConcatOpSel;
-extern SEL TQSetterOpSel;
-extern SEL TQGetterOpSel;
-extern SEL TQExpOpSel;
-
-extern SEL TQNumberWithDoubleSel;
-extern SEL TQStringWithUTF8StringSel;
-extern SEL TQStringWithFormatSel;
-extern SEL TQPointerArrayWithObjectsSel;
-extern SEL TQMapWithObjectsAndKeysSel;
-extern SEL TQRegexWithPatSel;
-extern SEL TQMoveToHeapSel;
-extern SEL TQWeakSel;
-extern SEL TQPromiseSel;
-
-extern Class TQNumberClass;
 
 // ARC
 id objc_retain(id obj) __asm__("_objc_retain");

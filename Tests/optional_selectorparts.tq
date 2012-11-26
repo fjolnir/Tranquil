@@ -1,4 +1,4 @@
-#Foo {
+@Foo {
     + a: a [b: b = 123 c: c = 321] {
         a print
         b print

@@ -58,22 +58,9 @@ SEL TQModOpSel;
 SEL TQAddOpSel;
 SEL TQSubOpSel;
 SEL TQUnaryMinusOpSel;
-SEL TQLShiftOpSel;
-SEL TQRShiftOpSel;
-SEL TQConcatOpSel;
 SEL TQSetterOpSel;
 SEL TQGetterOpSel;
 SEL TQExpOpSel;
-
-SEL TQNumberWithDoubleSel;
-SEL TQStringWithUTF8StringSel;
-SEL TQStringWithFormatSel;
-SEL TQPointerArrayWithObjectsSel;
-SEL TQMapWithObjectsAndKeysSel;
-SEL TQRegexWithPatSel;
-SEL TQMoveToHeapSel;
-SEL TQWeakSel;
-SEL TQPromiseSel;
 
 Class TQNumberClass;
 
@@ -450,62 +437,6 @@ NSPointerArray *TQVaargsToArray(va_list *items)
     return [arr autorelease];
 }
 
-#pragma mark - Operators
-
-BOOL TQAugmentClassWithOperators(Class klass)
-{
-    // ==
-    IMP imp = imp_implementationWithBlock(^(id a, id b) { return [a isEqual:b] ? TQValid : nil; });
-    class_addMethod(klass, TQEqOpSel, imp, "@@:@");
-    // !=
-    imp = imp_implementationWithBlock(^(id a, id b)     { return [a isEqual:b] ? nil : TQValid; });
-    class_addMethod(klass, TQNeqOpSel, imp, "@@:@");
-
-    // + (Unimplemented by default)
-    imp = imp_implementationWithBlock(^(id a, id b) { return _objc_msgSend_hack2(a, @selector(add:), b); });
-    class_addMethod(klass, TQAddOpSel, imp, "@@:@");
-    // - (Unimplemented by default)
-    imp = imp_implementationWithBlock(^(id a, id b) { return _objc_msgSend_hack2(a, @selector(subtract:), b); });
-    class_addMethod(klass, TQSubOpSel, imp, "@@:@");
-    // unary - (Unimplemented by default)
-    imp = imp_implementationWithBlock(^(id a)       { return _objc_msgSend_hack(a, @selector(negate)); });
-    class_addMethod(klass, TQUnaryMinusOpSel, imp, "@@:");
-
-    // * (Unimplemented by default)
-    imp = imp_implementationWithBlock(^(id a, id b) { return _objc_msgSend_hack2(a, @selector(multiply:), b); });
-    class_addMethod(klass, TQMultOpSel, imp, "@@:@");
-    // / (Unimplemented by default)
-    imp = imp_implementationWithBlock(^(id a, id b) { return  _objc_msgSend_hack2(a, @selector(divideBy:), b); });
-    class_addMethod(klass, TQDivOpSel, imp, "@@:@");
-
-    // ^ (Unimplemented by default)
-    imp = imp_implementationWithBlock(^(id a, id b) { return  _objc_msgSend_hack2(a, @selector(pow:), b); });
-    class_addMethod(klass, TQExpOpSel, imp, "@@:@");
-
-    // <
-    imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] == NSOrderedAscending) ? TQValid : nil; });
-    class_addMethod(klass, TQLTOpSel, imp, "@@:@");
-    // >
-    imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] == NSOrderedDescending) ? TQValid : nil; });
-    class_addMethod(klass, TQGTOpSel, imp, "@@:@");
-    // <=
-    imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] != NSOrderedDescending) ? TQValid : nil; });
-    class_addMethod(klass, TQLTEOpSel, imp, "@@:@");
-    // >=
-    imp = imp_implementationWithBlock(^(id a, id b) { return ([a compare:b] != NSOrderedAscending) ? TQValid : nil; });
-    class_addMethod(klass, TQGTEOpSel, imp, "@@:@");
-
-
-    // []
-    imp = imp_implementationWithBlock(^(id a, id key)         { return _objc_msgSend_hack2(a, @selector(objectForKeyedSubscript:), key); });
-    class_addMethod(klass, TQGetterOpSel, imp, "@@:@");
-    // []=
-    imp = imp_implementationWithBlock(^(id a, id key, id val) { return _objc_msgSend_hack3(a, @selector(setObject:forKeyedSubscript:), val, key); });
-    class_addMethod(klass, TQSetterOpSel, imp, "@@:@@");
-
-    return YES;
-}
-
 void TQInitializeRuntime(int argc, char **argv)
 {
     if(argc > 0) {
@@ -526,106 +457,6 @@ void TQInitializeRuntime(int argc, char **argv)
 
     TQValid   = [TQValidObject valid];
     TQNothing = [TQNothingness nothing];
-
-    TQEqOpSel                    = sel_registerName("==:");
-    TQNeqOpSel                   = sel_registerName("!=:");
-    TQAddOpSel                   = sel_registerName("+:");
-    TQSubOpSel                   = sel_registerName("-:");
-    TQUnaryMinusOpSel            = sel_registerName("-");
-    TQMultOpSel                  = sel_registerName("*:");
-    TQDivOpSel                   = sel_registerName("/:");
-    TQModOpSel                   = sel_registerName("%:");
-    TQLTOpSel                    = sel_registerName("<:");
-    TQGTOpSel                    = sel_registerName(">:");
-    TQLTEOpSel                   = sel_registerName("<=:");
-    TQGTEOpSel                   = sel_registerName(">=:");
-    TQLShiftOpSel                = sel_registerName("<<:");
-    TQRShiftOpSel                = sel_registerName(">>:");
-    TQConcatOpSel                = sel_registerName("..:");
-    TQGetterOpSel                = sel_registerName("[]:");
-    TQSetterOpSel                = sel_registerName("[]:=:");
-    TQExpOpSel                   = sel_registerName("^:");
-
-    TQNumberWithDoubleSel        = @selector(numberWithDouble:);
-    TQStringWithUTF8StringSel    = @selector(stringWithUTF8String:);
-    TQStringWithFormatSel        = @selector(stringWithFormat:);
-    TQPointerArrayWithObjectsSel = @selector(tq_pointerArrayWithObjects:);
-    TQMapWithObjectsAndKeysSel   = @selector(tq_mapTableWithObjectsAndKeys:);
-    TQRegexWithPatSel            = @selector(tq_regularExpressionWithPattern:options:);
-    TQMoveToHeapSel              = @selector(moveValueToHeap);
-    TQWeakSel                    = @selector(with:);
-    TQPromiseSel                 = @selector(promise);
-
-    TQNumberClass     = [TQNumber class];
-
-    // Add operators that cannot be added through standard categories (because the compiler won't allow methods containing symbols)
-    TQAugmentClassWithOperators([NSObject class]);
-
-    IMP imp;
-    // Operators for NSString
-    imp = imp_implementationWithBlock(^(id a, TQNumber *idx)   {
-        return [a substringWithRange:(NSRange){[idx intValue], 1}];
-    });
-    class_addMethod([NSString class], TQGetterOpSel, imp, "@@:@");
-
-    imp = imp_implementationWithBlock(^(id a, TQNumber *idx, NSString *replacement)   {
-        int loc = [idx intValue];
-        [a deleteCharactersInRange:(NSRange){loc, 1}];
-        [a insertString:replacement atIndex:loc];
-        return a;
-    });
-    class_addMethod([NSMutableString class], TQSetterOpSel, imp, "@@:@");
-
-
-    // Operators for collections
-    imp = imp_implementationWithBlock(^(id a, id key)         { return _objc_msgSend_hack2(a, @selector(objectForKeyedSubscript:), key); });
-    class_addMethod([NSDictionary class], TQGetterOpSel, imp, "@@:@");
-    class_addMethod([NSMapTable class], TQGetterOpSel, imp, "@@:@");
-
-    imp = imp_implementationWithBlock(^(id a, TQNumber *idx)   {
-        return _objc_msgSend_hack2i(a, @selector(objectAtIndexedSubscript:), [idx unsignedIntegerValue]);
-    });
-    class_addMethod([NSArray class], TQGetterOpSel, imp, "@@:@");
-    class_addMethod([NSPointerArray class], TQGetterOpSel, imp, "@@:@");
-
-    // []=
-    imp = imp_implementationWithBlock(^(id a, id key, id val) {
-        return _objc_msgSend_hack3(a, @selector(setObject:forKeyedSubscript:), val, key);
-    });
-    class_addMethod([NSMutableDictionary class], TQSetterOpSel, imp, "@@:@@");
-    class_addMethod([NSMapTable class], TQSetterOpSel, imp, "@@:@@");
-
-    imp = imp_implementationWithBlock(^(id a, TQNumber *idx, id val)   {
-        return _objc_msgSend_hack3i(a, @selector(setObject:atIndexedSubscript:), val, [idx unsignedIntegerValue]);
-    });
-    class_addMethod([NSMutableArray class], TQSetterOpSel, imp, "@@:@");
-    class_addMethod([NSPointerArray class], TQSetterOpSel, imp, "@@:@");
-
-    // <<&>>
-    imp = class_getMethodImplementation([NSPointerArray class], @selector(push:));
-    class_addMethod([NSPointerArray class], TQLShiftOpSel, imp, "@@:@");
-    imp = imp_implementationWithBlock(^(id a, id b)   {
-        _objc_msgSend_hack3i(a, @selector(insertPointer:atIndex:), b, 0);
-        return a;
-    });
-    class_addMethod([NSPointerArray class], TQRShiftOpSel, imp, "@@:@");
-
-    // Operators for NS(Mutable)String
-    imp = imp_implementationWithBlock(^(id a, id b)   {
-         id ret = _objc_msgSend_hack2(a, @selector(stringByAppendingString:), [b toString]);
-         return _objc_msgSend_hack2([NSMutableString class], @selector(stringWithString:), ret);
-    });
-    class_addMethod([NSString class], TQConcatOpSel, imp, "@@:@");
-    imp = imp_implementationWithBlock(^(id a, id b)   {
-         _objc_msgSend_hack2(a, @selector(appendString:), [b toString]);
-         return a;
-    });
-    class_addMethod([NSMutableString class], TQLShiftOpSel, imp, "@@:@");
-    imp = imp_implementationWithBlock(^(id a, id b)   {
-        _objc_msgSend_hack3i(a, @selector(insertString:atIndex:), [b toString], 0);
-        return a;
-    });
-    class_addMethod([NSMutableString class], TQRShiftOpSel, imp, "@@:@");
 }
 
 #ifdef __cplusplus

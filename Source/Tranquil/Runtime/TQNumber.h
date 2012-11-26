@@ -105,10 +105,10 @@ BOOL TQFloatFitsInTaggedNumber(float aValue);
 - (TQNumber *)lshift:(id)b;
 - (TQNumber *)rshift:(id)b;
 
-- (id)isGreater:(id)b;
-- (id)isLesser:(id)b;
-- (id)isGreaterOrEqual:(id)b;
-- (id)isLesserOrEqual:(id)b;
+- (id)isGreaterThan:(id)b;
+- (id)isLesserThan:(id)b;
+- (id)isGreaterOrEqualTo:(id)b;
+- (id)isLesserOrEqualTo:(id)b;
 
 - (TQRange *)to:(TQNumber *)b;
 - (id)times:(id (^)())block;

@@ -1,7 +1,0 @@
-a = b = 123
-a#foo = "bar"
-b = 321
-a#foo = "baz"
-"«a#foo» «b»" print
-a#foo = nil
-^a#foo

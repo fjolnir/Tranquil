@@ -3,14 +3,14 @@ import "GLUT"
 
 nsapp = NSApplication sharedApplication
 
-#TestView < NSOpenGLView {
+@TestView < NSOpenGLView {
     + defaultPixelFormat {
         attribs = TQPointer withObjects: [NSOpenGLPFADoubleBuffer, nil] type: "I"
         ^NSOpenGLPixelFormat alloc initWithAttributes: attribs
     }
 
     - reshape {
-        pixelSize = (self convertRectToBase: #bounds)[1]
+        pixelSize = (self convertRectToBase: @bounds)[1]
         GlViewport(0, 0, pixelSize[0], pixelSize[1])
         GlMatrixMode(GL_PROJECTION).  GlLoadIdentity()
         GluPerspective(25, pixelSize[0] / pixelSize[1], 1, 100)
@@ -26,8 +26,7 @@ nsapp = NSApplication sharedApplication
         GlClear(GL_COLOR_BUFFER_BIT bitOr: GL_DEPTH_BUFFER_BIT)
         GlColor3f(1,1,1)
         GlutWireTeapot(1)
-"draw" print
-        #openGLContext flushBuffer
+        @openGLContext flushBuffer
     }
 }
 
@@ -37,14 +36,11 @@ win = NSWindow alloc initWithContentRect: [[400, 400], [300, 200]]
                                  backing: NSBackingStoreBuffered
                                    defer: no
 
-view = TestView   new;
-             setFrame: win contentView bounds;
-  setAutoresizingMask: (NSViewWidthSizable bitOr: NSViewHeightSizable);
-                 self
-wat = TestView new; setFrame: win contentView bounds; self
-"v: «view»        «wat»" print
-win#contentView addSubview: view
-win#movableByWindowBackground = yes
+view = TestView new setFrame: win contentView bounds;
+         setAutoresizingMask: (NSViewWidthSizable bitOr: NSViewHeightSizable);
+                        self
+win contentView addSubview: view
+win movableByWindowBackground = yes
 
 \ Start the app
 win makeKeyAndOrderFront: nil

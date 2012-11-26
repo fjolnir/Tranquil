@@ -99,7 +99,7 @@ typedef struct {
 
     strCont     = (ualnum | ascii) - '"';
     simpleStr   = '"' strCont* '"';
-    constStr    = "@" (simpleStr | [^\n ;,\]}.)`]+);
+    constStr    = "#" (simpleStr | [^\n ;,\]}.)`]+);
     selector    = (ualnum | "+" | "-" | "*" | "/" | "^" | "=" | "~" | "<" | ">" | "[" "]" | "_")* ":";
 
     regexCont   = (ualnum | ascii) - '/' - '\\';
@@ -179,7 +179,7 @@ main := |*
     "*"                              => { EmitToken(ASTERISK);   ExprBeg();                               };
     "%"                              => { EmitToken(PERCENT);    ExprBeg();                               };
     "~"                              => { EmitToken(TILDE);      ExprBeg();                               };
-    "#"                              => { EmitToken(HASH);                                                };
+    "@"                              => { EmitToken(ATMARK);                                              };
     "|"                              => { EmitToken(PIPE);       ExprBeg();                               };
     "^"                              => { EmitToken(CARET);      ExprBeg();                               };
     "?"                              => { EmitToken(TERNIF);     ExprBeg();                               };

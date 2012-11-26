@@ -98,8 +98,8 @@ using namespace llvm;
         return NULL;
     } else if(_type == kTQOperatorUnaryMinus) {
         Value *right = [_right generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-        Value *selector  = aProgram.llModule->getOrInsertGlobal("TQUnaryMinusOpSel", aProgram.llInt8PtrTy);
-        Value *ret = B->CreateCall2(aProgram.objc_msgSend, right, B->CreateLoad(selector));
+        Value *selector = [aProgram getSelector:@"negate" inBlock:aBlock root:aRoot];
+        Value *ret = B->CreateCall2(aProgram.objc_msgSend, right, selector);
         [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];
         return ret;
     } else if(_type == kTQOperatorIncrement || _type == kTQOperatorDecrement) {
@@ -125,10 +125,7 @@ using namespace llvm;
             return beforeVal;
         return incrementedVal;
     } else if(_type == kTQOperatorAnd || _type == kTQOperatorOr) {
-        // Compile `left ? left : right` or `left ? right : left`
-        // We need to ensure the left side is only executed once
         Value *leftVal = [_left generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-
         TQNodeCustom *leftWrapper = [TQNodeCustom nodeReturningValue:leftVal];
         TQNodeTernaryOperator *tern = [TQNodeTernaryOperator nodeWithCondition:leftWrapper
                                                                         ifExpr:nil // Use condition result without re-evaluating
@@ -159,7 +156,7 @@ using namespace llvm;
         switch(_type) {
             case kTQOperatorEqual: {
                 fastpathResultIsNumber = NO;
-                selector  = aProgram.llModule->getOrInsertGlobal("TQEqOpSel", aProgram.llInt8PtrTy);
+                selector = [aProgram getSelector:@"isEqualTo:" inBlock:aBlock root:aRoot];
                 fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
                     GET_AB();
                     return B->CreateSelect(B->CreateFCmpOEQ(a, b), GET_VALID(), nullPtr);
@@ -168,7 +165,7 @@ using namespace llvm;
             } break;
             case kTQOperatorInequal: {
                 fastpathResultIsNumber = NO;
-                selector  = aProgram.llModule->getOrInsertGlobal("TQNeqOpSel", aProgram.llInt8PtrTy);
+                selector = [aProgram getSelector:@"notEqualTo:" inBlock:aBlock root:aRoot];
                 fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
                     GET_AB();
                     return B->CreateSelect(B->CreateFCmpONE(a, b), GET_VALID(), nullPtr);
@@ -176,7 +173,7 @@ using namespace llvm;
             } break;
             case kTQOperatorLesser:
                 fastpathResultIsNumber = NO;
-                selector  = aProgram.llModule->getOrInsertGlobal("TQLTOpSel", aProgram.llInt8PtrTy);
+                selector = [aProgram getSelector:@"isLesserThan:" inBlock:aBlock root:aRoot];
                 fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
                     GET_AB();
                     return B->CreateSelect(B->CreateFCmpOLT(a, b), GET_VALID(), nullPtr);
@@ -184,38 +181,38 @@ using namespace llvm;
                 break;
             case kTQOperatorGreater:
                 fastpathResultIsNumber = NO;
-                selector  = aProgram.llModule->getOrInsertGlobal("TQGTOpSel", aProgram.llInt8PtrTy);
+                selector = [aProgram getSelector:@"isGreaterThan:" inBlock:aBlock root:aRoot];
                 fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
                     GET_AB();
                     return B->CreateSelect(B->CreateFCmpOGT(a, b), GET_VALID(), nullPtr);
                 }];
                 break;
             case kTQOperatorMultiply:
-                selector  = aProgram.llModule->getOrInsertGlobal("TQMultOpSel", aProgram.llInt8PtrTy);
+                selector = [aProgram getSelector:@"multiply:" inBlock:aBlock root:aRoot];
                 fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
                     GET_AB();
                     return B->CreateFMul(a, b);
                 }];
                 break;
             case kTQOperatorDivide:
-                selector  = aProgram.llModule->getOrInsertGlobal("TQDivOpSel", aProgram.llInt8PtrTy);
+                selector = [aProgram getSelector:@"divideBy:" inBlock:aBlock root:aRoot];
                 fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
                     GET_AB();
                     return B->CreateFDiv(a, b);
                 }];
                 break;
             case kTQOperatorModulo:
-                selector  = aProgram.llModule->getOrInsertGlobal("TQModOpSel", aProgram.llInt8PtrTy);
+                selector = [aProgram getSelector:@"modulo:" inBlock:aBlock root:aRoot];
                 break;
             case kTQOperatorAdd:
-                selector  = aProgram.llModule->getOrInsertGlobal("TQAddOpSel", aProgram.llInt8PtrTy);
+                selector = [aProgram getSelector:@"add:" inBlock:aBlock root:aRoot];
                 fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
                     GET_AB();
                     return B->CreateFAdd(a, b);
                 }];
                 break;
             case kTQOperatorSubtract:
-                selector  = aProgram.llModule->getOrInsertGlobal("TQSubOpSel", aProgram.llInt8PtrTy);
+                selector = [aProgram getSelector:@"subtract:" inBlock:aBlock root:aRoot];
                 fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
                     GET_AB();
                     return B->CreateFSub(a, b);
@@ -223,7 +220,7 @@ using namespace llvm;
                 break;
             case kTQOperatorGreaterOrEqual:
                 fastpathResultIsNumber = NO;
-                selector  = aProgram.llModule->getOrInsertGlobal("TQGTEOpSel", aProgram.llInt8PtrTy);
+                selector = [aProgram getSelector:@"isGreaterOrEqualTo:" inBlock:aBlock root:aRoot];
                 fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
                     GET_AB();
                     return B->CreateSelect(B->CreateFCmpOGE(a, b), GET_VALID(), nullPtr);
@@ -231,26 +228,17 @@ using namespace llvm;
                 break;
             case kTQOperatorLesserOrEqual:
                 fastpathResultIsNumber = NO;
-                selector  = aProgram.llModule->getOrInsertGlobal("TQLTEOpSel", aProgram.llInt8PtrTy);
+                selector = [aProgram getSelector:@"isLesserOrEqualTo:" inBlock:aBlock root:aRoot];
                 fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
                     GET_AB();
                     return B->CreateSelect(B->CreateFCmpOLE(a, b), GET_VALID(), nullPtr);
                 }];
                 break;
             case kTQOperatorSubscript:
-                selector  = aProgram.llModule->getOrInsertGlobal("TQGetterOpSel", aProgram.llInt8PtrTy);
-                break;
-            case kTQOperatorLShift:
-                selector  = aProgram.llModule->getOrInsertGlobal("TQLShiftOpSel", aProgram.llInt8PtrTy);
-                break;
-            case kTQOperatorRShift:
-                selector  = aProgram.llModule->getOrInsertGlobal("TQRShiftOpSel", aProgram.llInt8PtrTy);
-                break;
-            case kTQOperatorConcat:
-                selector  = aProgram.llModule->getOrInsertGlobal("TQConcatOpSel", aProgram.llInt8PtrTy);
+                selector = [aProgram getSelector:@"at:" inBlock:aBlock root:aRoot];
                 break;
             case kTQOperatorExponent:
-                selector = aProgram.llModule->getOrInsertGlobal("TQExpOpSel", aProgram.llInt8PtrTy);
+                selector = [aProgram getSelector:@"pow:" inBlock:aBlock root:aRoot];
                 fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
                     GET_AB();
                     Function *pow = Intrinsic::getDeclaration(p.llModule, Intrinsic::pow, p.llFloatTy);
@@ -261,7 +249,7 @@ using namespace llvm;
                 TQAssertSoft(NO, kTQGenericErrorDomain, kTQGenericError, NULL, @"Unknown binary operator");
         }
         TQNodeCustom *slowpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
-            return (Value *)B->CreateCall3(p.tq_msgSend_noBoxing, left, B->CreateLoad(selector), right);
+            return (Value *)B->CreateCall3(p.tq_msgSend_noBoxing, left, selector, right);
         }];
         if(fastpath) {
             // If the operator supports a fast path then we must create the necessary branches
@@ -363,11 +351,6 @@ using namespace llvm;
             break;
             case kTQOperatorInequal: opStr = @"!=";
             break;
-            case kTQOperatorLShift: opStr = @"<<";
-            break;
-            case kTQOperatorRShift: opStr = @">>";
-            break;
-            case kTQOperatorConcat: opStr = @"..";
             break;
             case kTQOperatorExponent: opStr = @"^";
             break;
@@ -402,7 +385,7 @@ using namespace llvm;
         return NULL;
 
     IRBuilder<> *builder = aBlock.builder;
-    return builder->CreateCall4(aProgram.objc_msgSend, settee, builder->CreateLoad(selector), key, aValue);
+    return builder->CreateCall4(aProgram.objc_msgSend, settee, selector, key, aValue);
 }
 @end
 

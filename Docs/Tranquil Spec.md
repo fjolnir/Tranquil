@@ -97,23 +97,26 @@
 	
 	\ Objects
 	
-	#Klass < Object {
-	    message: argument         \ Sends `message:` to the class after it's loaded
+	@Klass < Object {
+	    message: argument         \ Sends `message:` to the class after it is created
 	    
-		+ new {                   \ Class method ('self' refers to the class itself)
+		+ withObject: obj {                   \ Class method ('self' refers to the class itself)
 			instance = super new  \ Calls superclass's implementation (which in this case, creates the instance)
-			instance#ivar = 123   \ Sets instance variable
-			^instance             \ Returns the instance
+			instance object = obj   \ Sets an instance variable
+			^instance               \ Returns the instance
 		}
 		
 		- aMethodTaking: a and: b {  \ Instance method taking two arguments ('self' refers to an instance of Klass)
-			#ivar = a + b            \ Returns the value of `self#ivar` after setting it to `a + b`
+			@ivar = a + b            \ Returns the value of `#ivar` after setting it to `a + b`
 		}
 		
 		- aMethodWith: arg1 [andOptionalArgument: arg2 = "default value"] { \ Wrapping trailing selector/argument pairs in brackets
 		    "2 arguments were passed" print if arg2 ~= "default value"      \ that they're optional.
 		}
 	}
+	
+	\ Instance variables (Only accessible within methods)
+	@instanceVar = 123  \ @ prefix denotes instance variable
 	
 	\ Passing messages to objects
 	instance = Klass new
@@ -122,11 +125,8 @@
 	
 	instance aMethod: 123; anotherMethod: 456 \ A semicolon can be used to separate multiple messages to the same receiver
 	                                          \ This is referred to as "cascading"
-	
-	\ Accessing properties
-	obj#member = 123
-	a = obj#member
-	#member = 123 \ If no receiver is provided, it's assumed to be 'self'
+    instance method = 123 \ Assigning to a unary message is equivalent to calling the setter variant of that method
+                          \ in this case `instance setMethod: 123`
 	
 	\ Regular expressions
 	regexp = /[.]*/              \ Regular expressions are delimited by forward slashes
@@ -137,8 +137,8 @@
 	b = "A string with an embedded «a»."  \ Evaluates to "A string with an embedded expression."
 	
 	\ Immutable strings / Symbols
-	a = @strings
-	b = @"constant string with spaces"
+	a = #string
+	b = #"constant string with spaces"
 	
 	\ Importing other files
 	import "..filename.."  \ Imports `filename`.
@@ -276,21 +276,21 @@ Operator methods are methods for which the colon after the method name is option
 ```
 Meaning          |  Operator  | Resulting message    Notes
 ---------------- | ---------- | ------------------ | -----
-Equality         |  ==        | ==:                |
-Inequality       |  ~=        | ~=:                |
-Addition         |  +         | +:                 | 
-Subtraction      |  -         | -:                 |
-Negation         |  -         | -                  | Prefix operator
-Multiplication   |  *         | *:                 | 
-Division         |  /         | /:                 | 
-Modulo           |  %         | %:                 |
-Less than        |  <         | <:                 |
-Greater than     |  >         | >:                 |
-Lesser or equal  |  <=        | <=:                |
-Greater or equal |  >=        | >=:                |
-Exponent         |  ^         | ^:                 |
-Index            |  []        | []:                | Postfix operator (a[b])
-Index assign     |  []=       | []:=:              | Postfix operator (a[b] = c)
+Equality         |  ==        | isEqualTo:         |
+Inequality       |  ~=        | notEqualTo:        |
+Addition         |  +         | add:               | 
+Subtraction      |  -         | subtract:          |
+Negation         |  -         | negate             | Prefix operator
+Multiplication   |  *         | multiply:          | 
+Division         |  /         | divideBy:          | 
+Modulo           |  %         | modulo:            |
+Less than        |  <         | isLesserThan:      |
+Greater than     |  >         | isGreaterThan:     |
+Lesser or equal  |  <=        | isLTETo:           |
+Greater or equal |  >=        | isGTETo:           |
+Exponent         |  ^         | pow:               |
+Index            |  []        | at:                | Postfix operator (a[b])
+Index assign     |  []=       | set:to:            | Postfix operator (a[b] = c)
 ```
 
 
@@ -333,19 +333,19 @@ The +,-,* and / operators can also be used in assignment form, that is:
 
 Usually when assigning to a variable, or using one in a block, you want the value in question to be kept around for as long as the variable/block does. But there are cases where this can cause an issue called a "reference cycle":
 
-	c#ref = a
-	a#ref = b
-	b#ref = a
+	c ref = a
+	a ref = b
+	b ref = a
 	
-	c#ref = nil
+	c ref = nil
 
 in the example above, `a` & `b` both hold references to the other, and `c` holds one to `a`. Then at the end, `c`'s reference is removed. One would assume that since `a` & `b` are now unreachable, that they would be deallocated. However this is not the case. Because they still hold a reference to each other, the runtime can't know that they are in fact unreachable. We can fix this by instead writing the previous example as follows:
 
-	c#ref = a
-	a#ref = b
-	b#ref = ~a
+	c ref = a
+	a ref = b
+	b ref = ~a
 	
-	c#ref = nil
+	c ref = nil
 
 Now `b` holds a "weak" reference to `a`. That means that it does not hold on to `a`, so when `a` has no other remaining references, it is deallocated and `b`'s reference is set to `nil`, breaking the cycle.
 
@@ -354,17 +354,17 @@ A good way of knowing when to use weak references is to think about object refer
 	#Klass {
 		- new {
 			super new
-			self#someBlock = {
+			#someBlock = {
 				~self someMethod
 			}
 			^self
 		}
 		- startUpdating {
-			PeriodicUpdater callBlockPeriodically: self#someBlock
+			PeriodicUpdater callBlockPeriodically: #someBlock
 		}
 	}
 
-In this example we had a block that is a property of `Klass`. This block was being used to periodically call a method on `self` but because this block is owned by the `Klass` object, we use a weak reference to `self` in order to not cause the block to complete a cyclical strong reference between it and `self`.
+In this example we had a block that is stored in an instance variable of `Klass`. This block was being used to periodically call a method on `self` but because this block is owned by the `Klass` instance, we use a weak reference to `self` in order to not cause the block to complete a cyclical strong reference between it and `self`.
 
 ## Concurrency
 
@@ -435,7 +435,7 @@ A promise is an object that forwards all messages to the object that it is resol
 	#Iterator {
 		- map: lambda {
 			^self reduce: { obj, accum=[] |
-				^accum push lambda(obj); self
+				^accum push: lambda(obj); self
 			}
 		}
 	

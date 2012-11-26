@@ -54,7 +54,7 @@ using namespace llvm;
                                  error:(NSError **)aoErr
 {
     Module *mod     = aProgram.llModule;
-    Value *selector = aBlock.builder->CreateLoad(mod->getOrInsertGlobal("TQWeakSel", aProgram.llInt8PtrTy), "weakSel");
+    Value *selector = [aProgram getSelector:@"with:" inBlock:aBlock root:aRoot];
     Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_TQWeak", aProgram.llInt8Ty);
 
 

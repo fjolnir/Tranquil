@@ -176,6 +176,16 @@ NSString * const TQTypeString    = @"*";
     [TQBoxedObject unbox:aObj to:[self _addrForIndex:aIdx] usingType:_itemType];
 }
 
+- (id)at:(id)aIdx
+{
+    return [self objectAtIndexedSubscript:[aIdx unsignedIntegerValue]];
+}
+- (id)set:(id)aIdx to:(id)aVal
+{
+    [self setObject:aVal atIndexedSubscript:[aIdx unsignedIntegerValue]];
+    return nil;
+}
+
 - (id)value
 {
     return [self objectAtIndexedSubscript:0];

@@ -13,15 +13,7 @@ static id nilReturner(id self, SEL sel, ...)
 @implementation TQNil
 + (void)load
 {
-    if(self != [TQNil class])
-        return;
-
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        TQGlobalNil = [class_createInstance(self, 0) init];
-        class_replaceMethod(self, TQAddOpSel, class_getMethodImplementation(self, @selector(add:)),      "@@:@");
-        class_replaceMethod(self, TQSubOpSel, class_getMethodImplementation(self, @selector(subtract:)), "@@:@");
-    });
+    TQGlobalNil = [class_createInstance(self, 0) init];
 }
 
 + (id)_nil

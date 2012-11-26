@@ -96,41 +96,6 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
         // Register our tagged pointer slot
         _objc_insert_tagged_isa(kTQNumberTagSlot, [TQTaggedNumber class]);
 #endif
-
-        TQInitializeRuntime(0, NULL);
-
-        IMP imp;
-        // ==
-        imp = imp_implementationWithBlock(^(TQNumber *a, id b) {
-            if(!b)
-                return (id)nil;
-            else if(object_getClass(a) != object_getClass(b))
-                return _TQNumberValue(a) == [b doubleValue] ? (id)TQValid : nil;
-            return (_TQNumberValue(a) == _TQNumberValue(b)) ? (id)TQValid : nil;
-        });
-        class_replaceMethod(self, TQEqOpSel, imp, "@@:@");
-        // !=
-        imp = imp_implementationWithBlock(^(TQNumber *a, id b) {
-            if(!b)
-                return (id)nil;
-            else if(object_getClass(a) != object_getClass(b))
-                return _TQNumberValue(a) != [b doubleValue] ? (id)TQValid : (id)nil;
-            return (_TQNumberValue(a) != _TQNumberValue(b)) ? (id)TQValid : (id)nil;
-        });
-        class_replaceMethod(self, TQNeqOpSel, imp, "@@:@");
-
-        class_replaceMethod(self, TQAddOpSel,  class_getMethodImplementation(self, @selector(add:)),             "@@:@");
-        class_replaceMethod(self, TQSubOpSel,  class_getMethodImplementation(self, @selector(subtract:)),        "@@:@");
-        class_replaceMethod(self, TQUnaryMinusOpSel, class_getMethodImplementation(self, @selector(negate)),     "@@:" );
-        class_replaceMethod(self, TQMultOpSel, class_getMethodImplementation(self, @selector(multiply:)),        "@@:@");
-        class_replaceMethod(self, TQDivOpSel,  class_getMethodImplementation(self, @selector(divideBy:)),        "@@:@");
-        class_replaceMethod(self, TQModOpSel,  class_getMethodImplementation(self, @selector(modulo:)),          "@@:@");
-
-        class_replaceMethod(self, TQLTOpSel,  class_getMethodImplementation(self, @selector(isLesser:)),         "@@:@");
-        class_replaceMethod(self, TQGTOpSel,  class_getMethodImplementation(self, @selector(isGreater:)),        "@@:@");
-        class_replaceMethod(self, TQLTEOpSel, class_getMethodImplementation(self, @selector(isLesserOrEqual:)),  "@@:@");
-        class_replaceMethod(self, TQGTEOpSel, class_getMethodImplementation(self, @selector(isGreaterOrEqual:)), "@@:@");
-        class_replaceMethod(self, TQExpOpSel, class_getMethodImplementation(self, @selector(pow:)),              "@@:@");
     }
     numberWithDoubleImp = (id (*)(id, SEL, double))method_getImplementation(class_getClassMethod(self, @selector(numberWithDouble:)));
     numberWithLongImp   = (id (*)(id, SEL, long))method_getImplementation(class_getClassMethod(self, @selector(numberWithLong:)));
@@ -549,28 +514,45 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
 }
 
 
-- (id)isGreater:(id)b
+- (id)isEqualTo:(id)b
+{
+    if(!b)
+        return (id)nil;
+    else if(object_getClass(self) != object_getClass(b))
+        return _TQNumberValue(self) == [b doubleValue] ? (id)TQValid : nil;
+    return (_TQNumberValue(self) == _TQNumberValue(b)) ? (id)TQValid : nil;
+
+}
+- (id)notEqualTo:(id)b
+{
+    if(!b)
+        return (id)nil;
+    else if(object_getClass(self) != object_getClass(b))
+        return _TQNumberValue(self) != [b doubleValue] ? (id)TQValid : (id)nil;
+    return (_TQNumberValue(self) != _TQNumberValue(b)) ? (id)TQValid : (id)nil;
+}
+- (id)isGreaterThan:(id)b
 {
     if(object_getClass(self) != object_getClass(b))
         return _TQNumberValue(self) > [b doubleValue] ? TQValid : nil;
     return _TQNumberValue(self) > _TQNumberValue(b)   ? TQValid : nil;
 }
 
-- (id)isLesser:(id)b
+- (id)isLesserThan:(id)b
 {
     if(object_getClass(self) != object_getClass(b))
         return _TQNumberValue(self) < [b doubleValue] ? TQValid : nil;
     return _TQNumberValue(self) < _TQNumberValue(b)   ? TQValid : nil;
 }
 
-- (id)isGreaterOrEqual:(id)b
+- (id)isGreaterOrEqualTo:(id)b
 {
     if(object_getClass(self) != object_getClass(b))
         return _TQNumberValue(self) >= [b doubleValue] ? TQValid : nil;
     return _TQNumberValue(self) >= _TQNumberValue(b)   ? TQValid : nil;
 }
 
-- (id)isLesserOrEqual:(id)b
+- (id)isLesserOrEqualTo:(id)b
 {
     if(object_getClass(self) != object_getClass(b))
         return _TQNumberValue(self) <= [b doubleValue] ? TQValid : nil;

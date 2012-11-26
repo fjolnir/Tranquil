@@ -30,6 +30,8 @@ extern "C" {
 
 - (id)objectAtIndexedSubscript:(NSInteger)aIdx;
 - (void)setObject:(id)aValue atIndexedSubscript:(NSInteger)aIdx;
+- (id)at:(id)key;
+- (id)set:(id)key to:(id)val;
 
 - (void)moveValueToHeap;
 @end

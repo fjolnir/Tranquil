@@ -42,6 +42,8 @@ extern NSString * const TQTypeString;
 
 - (id)objectAtIndexedSubscript:(NSUInteger)aIdx;
 - (void)setObject:(id)aObj atIndexedSubscript:(NSUInteger)aIdx;
+- (id)at:(id)aIdx;
+- (id)set:(id)aIdx to:(id)aVal;
 
 - (TQNumber *)count;
 - (id)value; // Returns the first item

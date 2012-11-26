@@ -81,40 +81,6 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
 @implementation TQBoxedObject
 @synthesize valuePtr=_ptr;
 
-+ (void)load
-{
-    if(self != [TQBoxedObject class])
-        return;
-
-    TQInitializeRuntime(0, NULL);
-
-    Class TQNumberClass = [TQNumber class];
-    Class TQTaggedNumberClass = NSClassFromString(@"TQTaggedNumber");
-    Class NSNumberClass = [NSNumber class];
-
-    IMP imp;
-    // []
-    imp = imp_implementationWithBlock(^(id a, id key) {
-        Class keyKls = object_getClass(key);
-        if(keyKls == TQTaggedNumberClass || keyKls == TQNumberClass  || keyKls == NSNumberClass)
-            return [a objectAtIndexedSubscript:[(TQNumber *)key unsignedIntegerValue]];
-        else
-            return [a objectForKeyedSubscript:key];
-    });
-    class_replaceMethod(self, TQGetterOpSel, imp, "@@:@");
-
-    // []=
-    imp = imp_implementationWithBlock(^(id a, id key, id val) {
-        Class keyKls = object_getClass(key);
-        if(keyKls == TQNumberClass || keyKls == TQTaggedNumberClass || keyKls == NSNumberClass)
-            return [a setObject:val atIndexedSubscript:[(TQNumber *)key unsignedIntegerValue]];
-        else
-            return [a setObject:val forKeyedSubscript:key];
-    });
-    class_replaceMethod(self, TQSetterOpSel, imp, "@@:@@");
-
-}
-
 + (id)box:(void *)aPtr withType:(const char *)aType
 {
     aType = [self _skipQualifiers:aType];
@@ -584,6 +550,22 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     objc_setAssociatedObject(kls, &_TQFFIResourcesAssocKey, ffiResArr, OBJC_ASSOCIATION_RETAIN);
 
     return kls;
+}
+
+- (id)at:(id)key
+{
+    if([key isKindOfClass:[TQNumber class]] || [key isKindOfClass:[NSNumber class]])
+        return [self objectAtIndexedSubscript:[(TQNumber *)key unsignedIntegerValue]];
+    else
+        return [self objectForKeyedSubscript:key];
+}
+- (id)set:(id)key to:(id)val
+{
+    if([key isKindOfClass:[TQNumber class]] || [key isKindOfClass:[NSNumber class]])
+        [self setObject:val atIndexedSubscript:[(TQNumber *)key unsignedIntegerValue]];
+    else
+        [self setObject:val forKeyedSubscript:key];
+    return nil;
 }
 
 - (id)objectAtIndexedSubscript:(NSInteger)aIdx

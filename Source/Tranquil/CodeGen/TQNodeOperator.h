@@ -19,9 +19,6 @@ enum {
     kTQOperatorSubscript,
     kTQOperatorIncrement,
     kTQOperatorDecrement,
-    kTQOperatorLShift,
-    kTQOperatorRShift,
-    kTQOperatorConcat,
     kTQOperatorExponent
 };
 typedef char TQOperatorType;

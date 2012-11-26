@@ -507,9 +507,12 @@ static TQProgram *sharedInstance;
 
 - (llvm::Value *)getSelector:(NSString *)aSelector inBlock:(TQNodeBlock *)aBlock root:(TQNodeRootBlock *)aRoot
 {
-    GlobalVariable *selectorGlobal = NULL;
-    // If compiling AOT we emit symbols, otherwise just a runtime lookup
+    return [self getSelector:aSelector withBuilder:aBlock.builder root:aRoot];
+}
+- (llvm::Value *)getSelector:(NSString *)aSelector withBuilder:(llvm::IRBuilder<> *)aBuilder root:(TQNodeRootBlock *)aRoot
+{
     if(_useAOTCompilation) {
+        GlobalVariable *selectorGlobal = NULL;
         if([_selectorSymbols objectForKey:aSelector]) {
             selectorGlobal =  _llModule->getGlobalVariable([[_selectorSymbols objectForKey:aSelector] UTF8String], true);
         } else {
@@ -543,21 +546,11 @@ static TQProgram *sharedInstance;
 
             [_selectorSymbols setObject:refSymbol forKey:aSelector];
         }
+        return aBuilder->CreateLoad(selectorGlobal);
     } else {
-        const char *selGlobalName = [[@"TQSelector_" stringByAppendingString:aSelector] UTF8String];
-        selectorGlobal = _llModule->getGlobalVariable(selGlobalName, true);
-        if(!selectorGlobal) {
-            Function *rootFunction = aRoot.function;
-            IRBuilder<> rootBuilder(&rootFunction->getEntryBlock(), rootFunction->getEntryBlock().begin());
-            Value *selector = [self getGlobalStringPtr:aSelector inBlock:aBlock];
-
-            CallInst *selReg = rootBuilder.CreateCall(self.sel_registerName, selector, "");
-            selectorGlobal = new GlobalVariable(*_llModule, self.llInt8PtrTy, false, GlobalVariable::InternalLinkage,
-                                                ConstantPointerNull::get(self.llInt8PtrTy), selGlobalName);
-            rootBuilder.CreateStore(selReg, selectorGlobal);
-        }
+        SEL sel = sel_registerName([aSelector UTF8String]);
+        return ConstantExpr::getIntToPtr(ConstantInt::get(self.llLongTy, (uintptr_t)sel), self.llInt8PtrTy);
     }
-    return aBlock.builder->CreateLoad(selectorGlobal);
 }
 
 - (void)insertLogUsingBuilder:(llvm::IRBuilder<> *)aBuilder withStr:(NSString *)txt

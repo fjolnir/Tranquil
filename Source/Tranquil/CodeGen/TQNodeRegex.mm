@@ -67,7 +67,7 @@ using namespace llvm;
 
     // Returns [TQRegularExpression tq_regularExpressionWithPattern:options:]
     Value *patVal   = [super generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-    Value *selector = builder->CreateLoad(mod->getOrInsertGlobal("TQRegexWithPatSel", aProgram.llInt8PtrTy));
+    Value *selector = [aProgram getSelector:@"tq_regularExpressionWithPattern:options:" inBlock:aBlock root:aRoot];
     Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_TQRegularExpression", aProgram.llInt8Ty);
     Value *optsVal  = ConstantInt::get(aProgram.llIntTy, _opts);
 

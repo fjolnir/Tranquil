@@ -89,7 +89,8 @@ using namespace llvm;
             Function *rootFunction = aRoot.function;
             IRBuilder<> rootBuilder(&rootFunction->getEntryBlock(), rootFunction->getEntryBlock().begin());
 
-            Value *selector = rootBuilder.CreateLoad(mod->getOrInsertGlobal("TQNumberWithDoubleSel", aProgram.llInt8PtrTy));
+            Value *selector = [aProgram getSelector:@"numberWithDouble:" withBuilder:&rootBuilder root:aRoot];
+
             Value *klass    = mod->getOrInsertGlobal("OBJC_CLASS_$_TQNumber", aProgram.llInt8Ty);
             ConstantFP *doubleValue = ConstantFP::get(aProgram.llModule->getContext(), APFloat(value));
 
