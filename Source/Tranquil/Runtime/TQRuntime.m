@@ -46,24 +46,6 @@ struct _TQNonLocalReturnStack {
     pthread_t thread;
 };
 
-SEL TQEqOpSel;
-SEL TQNeqOpSel;
-SEL TQLTOpSel;
-SEL TQGTOpSel;
-SEL TQGTEOpSel;
-SEL TQLTEOpSel;
-SEL TQMultOpSel;
-SEL TQDivOpSel;
-SEL TQModOpSel;
-SEL TQAddOpSel;
-SEL TQSubOpSel;
-SEL TQUnaryMinusOpSel;
-SEL TQSetterOpSel;
-SEL TQGetterOpSel;
-SEL TQExpOpSel;
-
-Class TQNumberClass;
-
 dispatch_queue_t TQGlobalQueue;
 
 struct TQBlockByRef TQGlobalVar_TQArguments = {

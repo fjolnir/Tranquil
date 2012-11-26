@@ -378,7 +378,7 @@ using namespace llvm;
     assert(_type == kTQOperatorSubscript);
 
     // Call []:=:
-    Value *selector  = aProgram.llModule->getOrInsertGlobal("TQSetterOpSel", aProgram.llInt8PtrTy);
+    Value *selector = [aProgram getSelector:@"set:to:" inBlock:aBlock root:aRoot];
     Value *key = [_right generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     Value *settee = [_left generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     if(*aoErr)
