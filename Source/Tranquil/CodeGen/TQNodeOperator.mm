@@ -431,13 +431,15 @@ using namespace llvm;
     // We must first evaluate the values in order for cases like a,b = b,a to work
     std::vector<Value*> values;
     Value *curr;
-    for(int i = 0; i < MIN([self.right count], [self.left count]); ++i) {
+    unsigned valueCount = MIN([self.right count], [self.left count]);
+    for(int i = 0; i < valueCount; ++i) {
         if([[self.left objectAtIndex:i] respondsToSelector:@selector(createStorageInProgram:block:root:error:)])
             [[self.left objectAtIndex:i] createStorageInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         curr = [[self.right objectAtIndex:i] generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         if(*aoErr)
             return NULL;
-        curr = aBlock.builder->CreateCall(aProgram.objc_retain, curr);
+        if(valueCount > 1)
+            curr = aBlock.builder->CreateCall(aProgram.objc_retain, curr);
         values.push_back(curr);
     }
 
@@ -470,8 +472,10 @@ using namespace llvm;
                                      error:aoErr];
     }
 
-    for(int i = 0; i < values.size(); ++i) {
-        aBlock.builder->CreateCall(aProgram.objc_release, values[i]);
+    if(valueCount > 1) {
+        for(int i = 0; i < values.size(); ++i) {
+            aBlock.builder->CreateCall(aProgram.objc_release, values[i]);
+        }
     }
     // TODO: Add some way of detecting whether the return value actually gets referenced; and if so return an array containing the right hand sides if n>1
     if(self.type == kTQOperatorAssign && [self.left count] == 1 && [self.right count] == 1)
