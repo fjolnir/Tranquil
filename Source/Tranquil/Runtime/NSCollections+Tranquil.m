@@ -19,6 +19,28 @@
     [self include:[TQEnumerable class]];
 }
 
++ (NSMapTable *)tq_mapTableWithObjectsAndKeys:(id)firstObject, ...
+{
+    NSMapTable *ret = [NSMapTable new];
+
+    va_list args;
+    va_start(args, firstObject);
+    id key, val, head;
+    int i = 0;
+    IMP setImp = class_getMethodImplementation(object_getClass(ret), @selector(setObject:forKey:));
+    for(head = firstObject; head != TQNothing; head = va_arg(args, id))
+    {
+        if(++i % 2 == 0) {
+            key = head;
+            setImp(ret, @selector(setObject:forKey:), val, key);
+        } else
+            val = TQObjectIsStackBlock(head) ? [[head copy] autorelease] : head;
+    }
+    va_end(args);
+
+    return [ret autorelease];
+}
+
 - (id)at:(id)aKey
 {
     return [self objectForKey:aKey];
