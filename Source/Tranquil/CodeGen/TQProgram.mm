@@ -180,9 +180,15 @@ static TQProgram *sharedInstance;
         if(!_globalQueue)
             _globalQueue = new GlobalVariable(*_llModule, self.llInt8PtrTy, false, GlobalVariable::ExternalLinkage, NULL, "TQGlobalQueue");
     }
-
+    
+    NSDictionary *globalsBefore = [[_globals copy] autorelease];
     [aNode generateCodeInProgram:self block:nil root:aNode error:aoErr];
     if(*aoErr) {
+        // We need to delete all globals created during the failed compilation
+        for(id key in [_globals allKeys]) {
+            if(![[_globals objectForKey:key] isEqual:[globalsBefore objectForKey:key]])
+                [_globals removeObjectForKey:key];
+        }
         if(shouldResetEvalPaths)
             _evaluatedPaths = nil;
         return NO;
