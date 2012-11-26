@@ -266,8 +266,8 @@ using namespace llvm;
             // If the operator supports a fast path then we must create the necessary branches
             Value *zeroInt = ConstantInt::get(aProgram.llIntPtrTy, 0);
             // if (!a | a isa TaggedNumber) & (!b | b isa TaggedNumber)
-            Value *aCond = B->CreateOr(B->CreateICmpEQ(B->CreateAnd(PtrToInt(left),  numTag), numTag), B->CreateICmpEQ(left,  nullPtr));
-            Value *bCond = B->CreateOr(B->CreateICmpEQ(B->CreateAnd(PtrToInt(right), numTag), numTag), B->CreateICmpEQ(right, nullPtr));
+            Value *aCond = B->CreateICmpEQ(B->CreateAnd(PtrToInt(left),  numTag), numTag);
+            Value *bCond = B->CreateICmpEQ(B->CreateAnd(PtrToInt(right), numTag), numTag);
             Value *cond = B->CreateAnd(aCond, bCond);
 
             BasicBlock *fastBB  = BasicBlock::Create(aProgram.llModule->getContext(), "opFastpath", aBlock.function);
@@ -280,7 +280,6 @@ using namespace llvm;
             aBlock.basicBlock = fastBB;
             aBlock.builder = &fastBuilder;
             Value *fastVal = [fastpath generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-            [self _attachDebugInformationToInstruction:fastVal inProgram:aProgram block:aBlock root:aRoot];
 
             Value *resultCheck;
             if(fastpathResultIsNumber) {
@@ -302,7 +301,6 @@ using namespace llvm;
             aBlock.basicBlock = slowBB;
             aBlock.builder = &slowBuilder;
             Value *slowVal = [slowpath generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-            [self _attachDebugInformationToInstruction:fastVal inProgram:aProgram block:aBlock root:aRoot];
 
             IRBuilder<> *contBuilder = new IRBuilder<>(contBB);
             aBlock.basicBlock = contBB;
@@ -321,7 +319,6 @@ using namespace llvm;
             return phi;
         } else {
             Value *ret = [slowpath generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-            [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];
             return ret;
         }
     }
@@ -477,7 +474,7 @@ using namespace llvm;
         aBlock.builder->CreateCall(aProgram.objc_release, values[i]);
     }
     // TODO: Add some way of detecting whether the return value actually gets referenced; and if so return an array containing the right hand sides if n>1
-    if([self.left count] == 1 && [self.right count] == 1)
+    if(self.type == kTQOperatorAssign && [self.left count] == 1 && [self.right count] == 1)
         return values[0];
     return ConstantPointerNull::get(aProgram.llInt8PtrTy);
 }

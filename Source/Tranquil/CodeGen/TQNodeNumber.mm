@@ -74,7 +74,7 @@ using namespace llvm;
         if(value == INFINITY || value == -INFINITY)
             val = ConstantFP::getInfinity(aProgram.llFloatTy, value == -INFINITY);
         else
-            val = ConstantFP::get(aProgram.llFloatTy, value);
+            val = ConstantFP::get(aProgram.llFloatTy, (float)value);
         val = B->CreateZExt(B->CreateBitCast(val, aProgram.llIntTy), aProgram.llIntPtrTy);
         val = B->CreateOr(B->CreateShl(val, 4), numTag);
 

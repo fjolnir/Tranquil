@@ -46,6 +46,32 @@ static id nilReturner(id self, SEL sel, ...)
 {
     return TQValid;
 }
+- (id)isIdenticalTo:(id)b
+{
+    return !b ? TQValid : nil;
+}
+- (id)isEqualTo:(id)b
+{
+    return !b ? TQValid : nil;
+}
+- (id)notEqualTo:(id)b
+{
+    return b ? TQValid : nil;
+}
+- (id)isLesserThan:(id)b
+{
+    return b ? TQValid : nil;
+}
+- (id)isLesserOrEqualTo:(id)b
+{
+    return TQValid;
+}
+
+- (void)dealloc
+{
+    [NSException raise:NSInternalInconsistencyException format:@"TQGlobalNil was deallocated!"];
+    [super dealloc];
+}
 
 + (BOOL)resolveInstanceMethod:(SEL)aSel
 {
