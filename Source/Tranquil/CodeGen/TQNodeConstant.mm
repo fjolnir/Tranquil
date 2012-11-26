@@ -23,8 +23,14 @@ using namespace llvm;
     TQNode *bridgedNode = [aProgram.objcParser entityNamed:self.value];
     if(bridgedNode)
         return [bridgedNode generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
-    else
-        return aBlock.builder->CreateCall(aProgram.objc_getClass, [aProgram getGlobalStringPtr:self.value inBlock:aBlock]);
+    else {
+        if(aProgram.useAOTCompilation)
+            return aBlock.builder->CreateCall(aProgram.objc_getClass, [aProgram getGlobalStringPtr:self.value inBlock:aBlock]);
+        else {
+            Class kls = objc_getClass([self.value UTF8String]);
+            return ConstantExpr::getIntToPtr(ConstantInt::get(aProgram.llLongTy, (uintptr_t)kls), aProgram.llInt8PtrTy);
+        }
+    }
 }
 
 - (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
