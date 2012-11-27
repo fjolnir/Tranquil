@@ -420,6 +420,10 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
 #endif
     return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), result);
 }
+- (TQNumber *)abs
+{
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), fabs(_TQNumberValue(self)));
+}
 - (TQNumber *)sqrt
 {
     return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), sqrt(_TQNumberValue(self)));
