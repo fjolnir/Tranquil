@@ -13,7 +13,7 @@
 - (id)print
 {
     printf("%s\n", [[self toString] UTF8String]);
-    return self;
+    return nil;
 }
 - (id)printWithoutNl
 {
