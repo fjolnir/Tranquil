@@ -148,6 +148,74 @@ static NSArray *methodsForClass(Class kls);
 {
     return ([(id)self compare:b] != NSOrderedAscending) ? TQValid : nil;
 }
+
+
+#pragma mark - Dynamic message dispatchers
+
+- (id)perform:(NSString *)aSelector withArguments:(NSArray *)aArguments
+{
+    NSUInteger count = [aArguments count];
+    SEL sel = NSSelectorFromString(aSelector);
+#define A(n) [aArguments objectAtIndex:(n)]
+    switch(count) {
+        case 0: return tq_msgSend(self, sel);
+        case 1: return tq_msgSend(self, sel, A(0));
+        case 2: return tq_msgSend(self, sel, A(0), A(1));
+        case 3: return tq_msgSend(self, sel, A(0), A(1), A(2));
+        case 4: return tq_msgSend(self, sel, A(0), A(1), A(2), A(3));
+        case 5: return tq_msgSend(self, sel, A(0), A(1), A(2), A(3), A(4));
+        case 6: return tq_msgSend(self, sel, A(0), A(1), A(2), A(3), A(4), A(5));
+        case 7: return tq_msgSend(self, sel, A(0), A(1), A(2), A(3), A(4), A(5), A(6));
+        case 8: return tq_msgSend(self, sel, A(0), A(1), A(2), A(3), A(4), A(5), A(6), A(7));
+        case 9: return tq_msgSend(self, sel, A(0), A(1), A(2), A(3), A(4), A(5), A(6), A(7), A(8));
+        default:
+            [NSException raise:NSInternalInconsistencyException
+                        format:@"Dynamic message dispatch attempted with %ld arguments (9 supported)", (long)count];
+    }
+#undef A
+    return nil;
+}
+
+- (id)perform:(NSString *)aSelector
+{
+    return tq_msgSend(self, NSSelectorFromString(aSelector));
+}
+- (id)perform:(NSString *)aSelector :(id)a1
+{
+    return tq_msgSend(self, NSSelectorFromString(aSelector), a1);
+}
+- (id)perform:(NSString *)aSelector :(id)a1 :(id)a2
+{
+    return tq_msgSend(self, NSSelectorFromString(aSelector), a1, a2);
+}
+- (id)perform:(NSString *)aSelector :(id)a1 :(id)a2 :(id)a3
+{
+    return tq_msgSend(self, NSSelectorFromString(aSelector), a1, a2, a3);
+}
+- (id)perform:(NSString *)aSelector :(id)a1 :(id)a2 :(id)a3 :(id)a4
+{
+    return tq_msgSend(self, NSSelectorFromString(aSelector), a1, a2, a3, a4);
+}
+- (id)perform:(NSString *)aSelector :(id)a1 :(id)a2 :(id)a3 :(id)a4 :(id)a5
+{
+    return tq_msgSend(self, NSSelectorFromString(aSelector), a1, a2, a3, a4, a5);
+}
+- (id)perform:(NSString *)aSelector :(id)a1 :(id)a2 :(id)a3 :(id)a4 :(id)a5 :(id)a6
+{
+    return tq_msgSend(self, NSSelectorFromString(aSelector), a1, a2, a3, a4, a5, a6);
+}
+- (id)perform:(NSString *)aSelector :(id)a1 :(id)a2 :(id)a3 :(id)a4 :(id)a5 :(id)a6 :(id)a7
+{
+    return tq_msgSend(self, NSSelectorFromString(aSelector), a1, a2, a3, a4, a5, a6, a7);
+}
+- (id)perform:(NSString *)aSelector :(id)a1 :(id)a2 :(id)a3 :(id)a4 :(id)a5 :(id)a6 :(id)a7 :(id)a8
+{
+    return tq_msgSend(self, NSSelectorFromString(aSelector), a1, a2, a3, a4, a5, a6, a7, a8);
+}
+- (id)perform:(NSString *)aSelector :(id)a1 :(id)a2 :(id)a3 :(id)a4 :(id)a5 :(id)a6 :(id)a7 :(id)a8 :(id)a9
+{
+    return tq_msgSend(self, NSSelectorFromString(aSelector), a1, a2, a3, a4, a5, a6, a7, a8, a9);
+}
 @end
 
 static NSArray *methodsForClass(Class kls)
