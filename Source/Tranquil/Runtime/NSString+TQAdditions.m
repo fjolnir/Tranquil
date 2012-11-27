@@ -67,6 +67,12 @@
     return self;
 }
 
+- (id)append:(NSString *)aString
+{
+    [self appendString:aString];
+    return nil;
+}
+
 - (NSString *)set:(NSString *)aReplacement at:(id)aIdx
 {
     [self replaceCharactersInRange:(NSRange){ [aIdx unsignedIntegerValue], 1 } withString:aReplacement];

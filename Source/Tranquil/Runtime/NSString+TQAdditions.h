@@ -12,5 +12,6 @@
 @end
 
 @interface NSMutableString (Tranquil)
+- (id)append:(NSString *)aString;
 - (NSMutableString *)trim;
 @end
