@@ -46,6 +46,7 @@
     NSString *setterSel = [NSString stringWithFormat:@"set%@:", [aPropName stringByCapitalizingFirstLetter]];
     [self addMethod:setterSel withBlock:^(id self_, id val) {
         [TQGetDynamicIvarTable(self_) setObject:val forKey:aPropName];
+        return nil;
     }
                         replaceExisting:nil];
 
@@ -55,5 +56,17 @@
 + (id)accessor:(NSString *)aPropName
 {
     return [self accessor:aPropName initialValue:nil];
+}
+
++ (id)accessors:(NSArray *)aAccessors initialValue:(id<NSCopying>)aInitial
+{
+    for(NSString *name in aAccessors) {
+        [self accessor:name initialValue:aInitial];
+    }
+    return nil;
+}
++ (id)accessors:(NSArray *)aAccessors
+{
+    return [self accessors:aAccessors initialValue:nil];
 }
 @end
