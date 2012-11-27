@@ -11,4 +11,21 @@
 + (id)addMethod:(NSString *)aSel withBlock:(id)aBlock;
 + (id)accessor:(NSString *)aPropName initialValue:(id<NSCopying>)aInitial;
 + (id)accessor:(NSString *)aPropName;
++ (NSArray *)classMethods;
++ (NSArray *)instanceMethods;
+- (NSArray *)methods;
+- (id)respondsTo:(NSString *)aSelector;
+- (id)isa:(Class)aClass;
+- (id)isNil;
+- (id)isIdenticalTo:(id)obj;
+- (id)isEqualTo:(id)b;
+- (id)notEqualTo:(id)b;
+- (id)isLesserThan:(id)b;
+- (id)isGreaterThan:(id)b;
+- (id)isLesserOrEqualTo:(id)b;
+- (id)isGreaterOrEqualTo:(id)b;
+
+- (NSMutableString *)toString;
+- (id)print;
+
 @end

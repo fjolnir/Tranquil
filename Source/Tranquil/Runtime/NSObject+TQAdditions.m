@@ -2,59 +2,10 @@
 #import "TQNumber.h"
 #import "TQRuntime.h"
 #import "TQModule.h"
+#import "TQObject.h"
 #import <objc/runtime.h>
 
 @implementation NSObject (Tranquil)
-- (NSMutableString *)toString
-{
-    return [[[self description] mutableCopy] autorelease];
-}
-
-- (id)print
-{
-    printf("%s\n", [[self toString] UTF8String]);
-    return nil;
-}
-- (id)printWithoutNl
-{
-    printf("%s", [[self toString] UTF8String]);
-    return self;
-}
-
-- (id)isa:(Class)aClass
-{
-    return [self isKindOfClass:aClass] ? TQValid : nil;
-}
-
-- (id)isIdenticalTo:(id)obj
-{
-    return self == obj ? TQValid : nil;
-}
-- (id)isEqualTo:(id)b
-{
-    return [self isEqual:b] ? TQValid : nil;
-}
-- (id)notEqualTo:(id)b
-{
-    return [self isEqual:b] ? nil : TQValid;
-}
-- (id)isLesserThan:(id)b
-{
-    return ([(id)self compare:b] == NSOrderedAscending) ? TQValid : nil;
-}
-- (id)isGreaterThan:(id)b
-{
-    return ([(id)self compare:b] == NSOrderedDescending) ? TQValid : nil;
-}
-- (id)isLesserOrEqualTo:(id)b
-{
-    return ([(id)self compare:b] != NSOrderedDescending) ? TQValid : nil;
-}
-- (id)isGreaterOrEqualTo:(id)b
-{
-    return ([(id)self compare:b] != NSOrderedAscending) ? TQValid : nil;
-}
-
 #define CopyMethods(kls, dst) do { \
     unsigned methodCount = 0; \
     Method *methods = class_copyMethodList(kls, &methodCount); \
@@ -84,9 +35,9 @@
     return [self include:aClass recursive:nil];
 }
 
-- (id)isNil
++ (void)load
 {
-    return nil;
+    [self include:[TQObject class]];
 }
 
 @end
