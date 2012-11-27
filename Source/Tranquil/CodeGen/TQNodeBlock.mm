@@ -558,6 +558,7 @@ using namespace llvm;
                                              [aProgram getGlobalStringPtr:argTypeEncoding withBuilder:_builder]);
         }
         TQNodeVariable *local = [TQNodeVariable nodeWithName:[argDef name]];
+        local.lineNumber = self.lineNumber;
         local.shadows = YES;
         [local store:argValue
             retained:!argDef.unretained
@@ -578,6 +579,7 @@ using namespace llvm;
         _builder->CreateCall(vaEnd, valistCast);
 
         TQNodeVariable *dotDotDot = [TQNodeVariable nodeWithName:@"TQArguments"];
+        dotDotDot.lineNumber = self.lineNumber;
         dotDotDot.shadows = YES;
         [dotDotDot store:vaargArray inProgram:aProgram block:self root:aRoot error:aoErr];
     }
@@ -622,8 +624,11 @@ using namespace llvm;
     NSUInteger stmtCount = [_statements count];
     for(int i = 0; i < stmtCount; ++i) {
         TQNode *stmt = [_statements objectAtIndex:i];
-        if([_retType isEqualToString:@"@"] && ((i == (stmtCount-1) && ![stmt isKindOfClass:[TQNodeReturn class]])))
+        if([_retType isEqualToString:@"@"] && ((i == (stmtCount-1) && ![stmt isKindOfClass:[TQNodeReturn class]]))) {
+            int line = stmt.lineNumber;
             stmt = [TQNodeReturn nodeWithValue:stmt];
+            stmt.lineNumber = line;
+        }
         [stmt generateCodeInProgram:aProgram block:self root:aRoot error:aoErr];
         if(*aoErr) {
             _function->eraseFromParent();
@@ -633,8 +638,11 @@ using namespace llvm;
         if([stmt isKindOfClass:[TQNodeReturn class]])
             break;
     }
-    if(!_basicBlock->getTerminator())
-        [[TQNodeReturn node] generateCodeInProgram:aProgram block:self root:aRoot error:aoErr];
+    if(!_basicBlock->getTerminator()) {
+        TQNode *ret = [TQNodeReturn node];
+        ret.lineNumber = self.lineNumber;
+        [ret generateCodeInProgram:aProgram block:self root:aRoot error:aoErr];
+    }
     return _function;
 }
 

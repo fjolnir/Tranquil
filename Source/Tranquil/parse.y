@@ -234,16 +234,16 @@ lock(A) ::= LOCK(T) expr(C) blockNl(ST).          { A = [TQNodeLock nodeWithCond
 // Memory Management Primitives -------------------------------------------------------------------------------------------------------
 //
 
-collect(C) ::= COLLECT bodyNl(B).                       { C = [TQNodeCollect node]; [C setStatements:B];                              }
+collect(C) ::= COLLECT(T) bodyNl(B).                    { C = [TQNodeCollect node]; [C setStatements:B]; LN(C,T);                     }
 
 
 //
 // Import Directive -------------------------------------------------------------------------------------------------------------------
 //
 
-import(I) ::= IMPORT STRNL(P).                          { I = [TQNodeImport nodeWithPath:[P value]];                                  }
-import(I) ::= IMPORT CONSTSTRNL(P).                     { I = [TQNodeImport nodeWithPath:[P value]];                                  }
-import(I) ::= import(T) PERIOD.                         { I = T;                                  }
+import(I) ::= IMPORT(T) STRNL(P).                       { I = [TQNodeImport nodeWithPath:[P value]]; LN(I,T);                         }
+import(I) ::= IMPORT(T) CONSTSTRNL(P).                  { I = [TQNodeImport nodeWithPath:[P value]]; LN(I,T);                         }
+import(I) ::= import(T) PERIOD.                         { I = T;                                                                      }
 
 
 //
@@ -375,8 +375,8 @@ class(C) ::= ATMARK classDef(CD) LBRACE
                                                                  [(NSMutableArray *)[C classMethods] addObject:m];
                                                          }                                                                            }
 
-classDef(D) ::= constant(N).                           { D = [TQNodeClass nodeWithName:[N value]];                                    }
-classDef(D) ::= constant(N) LESSER constant(SN).       { D = [TQNodeClass nodeWithName:[N value]]; [D setSuperClassName:[SN value]];  }
+classDef(D) ::= constant(N).                           { D = [TQNodeClass nodeWithName:[N value]]; LN(D,N);                           }
+classDef(D) ::= constant(N) LESSER constant(SN).       { D = [TQNodeClass nodeWithName:[N value]]; [D setSuperClassName:[SN value]];  LN(D,N); }
 
 methods(MS) ::= .                                      { MS = [NSMutableArray array];                                                 }
 methods(MS) ::= methods(O) method(M).                  { MS = O; [MS addObject:M];                                                    }
@@ -406,7 +406,7 @@ oSelParts(SD) ::= oSelPart(P).                         { SD = [NSMutableArray ar
 oSelParts(SD) ::= oSelParts(O) oSelPart(P).            { SD = O; [SD addObject:P];                                                    }
 
 kSelPart(SD) ::= SELPART(S) IDENT|IDENTNL(N).          { SD = [TQNodeMethodArgumentDef nodeWithName:[N value] selectorPart:[S value]];}
-oSelPart(SD) ::= kSelPart(T).                          { SD = T; [SD setDefaultArgument:[TQNodeNil node]];                            }
+oSelPart(SD) ::= kSelPart(T).                          { SD = T; id n = [TQNodeNil node]; [SD setDefaultArgument:n]; LN(T,n);         }
 oSelPart(SD) ::= kSelPart(T) ASSIGN msgArg(E).         { SD = T; [SD setDefaultArgument:E];                                           }
 
 onloadMessages(MS) ::= .                               { MS = [NSMutableArray array];                                                 }

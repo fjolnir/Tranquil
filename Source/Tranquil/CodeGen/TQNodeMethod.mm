@@ -166,6 +166,7 @@ using namespace llvm;
         NSArray *argDefs = [self.arguments subarrayWithRange:(NSRange){0, firstDefArgParamIdx}];
         for(int i = firstDefArgParamIdx; i < [self.arguments count]; ++i) {
             TQNodeMethod *method = [[self class] nodeWithType:_type];
+            method.lineNumber = self.lineNumber;
             method.isCompactBlock = YES;
             method.arguments = [[argDefs mutableCopy] autorelease];
 
@@ -174,9 +175,11 @@ using namespace llvm;
             for(int j = 2; j < [self.arguments count]; ++j) {
                 TQNodeMethodArgumentDef *def = [self.arguments objectAtIndex:j];
                 TQNode *passedNode = (j >= i) ? [TQNodeNothing node] : [TQNodeVariable nodeWithName:def.name];
+                passedNode.lineNumber = self.lineNumber;
                 [args addObject:[TQNodeArgument nodeWithPassedNode:passedNode selectorPart:def.selectorPart]];
             }
             TQNodeMessage *msg = [TQNodeMessage nodeWithReceiver:[TQNodeSelf node]];
+            msg.lineNumber = self.lineNumber;
             msg.arguments = args;
             [method.statements addObject:msg];
             [method generateCodeInProgram:aProgram block:aBlock class:aClass root:aRoot error:aoErr];
