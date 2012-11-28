@@ -1,0 +1,7 @@
+collect {
+    a = "foo"
+    b = "bar"
+    c = ~a
+    a = nil
+}
+"b: «b» c: «c»" print

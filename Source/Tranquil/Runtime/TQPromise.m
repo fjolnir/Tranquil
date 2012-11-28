@@ -38,6 +38,11 @@ static __inline__ id TQPromiseGetResult(TQPromise *p)
     [super dealloc];
 }
 
+- (id)forwardingTargetForSelector:(SEL)aSelector
+{
+    return TQPromiseGetResult(self);
+}
+
 - (void)fulfillWith:(id)aResult
 {
     if(!__sync_bool_compare_and_swap(&_result, _TQPromiseNotResolvedSentinel, aResult)) {
@@ -59,17 +64,6 @@ static __inline__ id TQPromiseGetResult(TQPromise *p)
     return _result;
 }
 
-- (void)forwardInvocation:(NSInvocation *)anInvocation
-{
-    [anInvocation setTarget:TQPromiseGetResult(self)];
-    [anInvocation invoke];
-}
-
-- (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector
-{
-    return [TQPromiseGetResult(self) methodSignatureForSelector:aSelector];
-}
-
 - (id)print
 {
     if(_result != _TQPromiseNotResolvedSentinel)
@@ -81,24 +75,6 @@ static __inline__ id TQPromiseGetResult(TQPromise *p)
 {
     if(_result != _TQPromiseNotResolvedSentinel)
         return [_result description];
-    return [NSString stringWithFormat:@"<%@: %p (Unresolved)>", NSStringFromClass([super class]), self];
-}
-- (Class)class
-{
-    return [TQPromiseGetResult(self) class];
-}
-- (NSUInteger)hash
-{
-    return [TQPromiseGetResult(self) hash];
-}
-
-- (BOOL)isEqual:(id)anObject
-{
-    return [TQPromiseGetResult(self) isEqual:anObject];
-}
-
-- (id)self
-{
-    return TQPromiseGetResult(self);
+    return [NSString stringWithFormat:@"<%@: %p (Unresolved)>", NSStringFromClass(object_getClass(self)), self];
 }
 @end

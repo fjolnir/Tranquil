@@ -1,7 +1,5 @@
-#import <Foundation/Foundation.h>
-#import <objc/runtime.h>
-#import <objc/message.h>
+#import <Tranquil/Runtime/TQProxy.h>
 
-@interface TQWeak : NSProxy
+@interface TQWeak : TQProxy
 + (TQWeak *)with:(id)aObj;
 @end

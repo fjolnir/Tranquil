@@ -17,28 +17,13 @@ extern BOOL TQObjectIsStackBlock(id aBlock); // We can't #import Runtime.h becau
 {
     TQWeak *ret = [self alloc];
     if(TQObjectIsStackBlock(aObj))
-        aObj = [aObj copy];
+        aObj = [aObj copy]; // Leaks :/
     ret.__obj = aObj;
     return ret;
 }
 - (id)forwardingTargetForSelector:(SEL)aSelector
 {
     return __obj ?: TQGlobalNil;
-}
-
-- (NSString *)description    { return [__obj description]; }
-- (Class)class               { return [__obj class];       }
-- (NSUInteger)hash           { return [__obj hash];        }
-
-- (BOOL)isEqual:(id)anObject {
-    if(!__obj)
-        return [TQGlobalNil isEqual:anObject];
-    return [__obj isEqual:anObject];
-}
-
-- (id)self
-{
-    return __obj;
 }
 
 @end
