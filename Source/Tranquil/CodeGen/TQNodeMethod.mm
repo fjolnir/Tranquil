@@ -114,11 +114,9 @@ using namespace llvm;
     // If a matching bridged method is found, use the types from there
     NSString *bridgedEncoding;
     if(_type == kTQInstanceMethod)
-        bridgedEncoding = [[aProgram.objcParser classNamed:aClass.superClassName] typeForInstanceMethod:[self selector]] ?:
-                          [aProgram.objcParser instanceMethodTypeFromProtocols:[self selector]];
+        bridgedEncoding = [[aProgram.objcParser classNamed:aClass.superClassName] typeForInstanceMethod:[self selector]];
     else
-        bridgedEncoding = [[aProgram.objcParser classNamed:aClass.superClassName] typeForClassMethod:[self selector]] ?:
-                          [aProgram.objcParser classMethodTypeFromProtocols:[self selector]];;
+        bridgedEncoding = [[aProgram.objcParser classNamed:aClass.superClassName] typeForClassMethod:[self selector]];
 
     if(bridgedEncoding && *[bridgedEncoding UTF8String] == _C_VOID) // No such thing as a void return in tranquil
         _retType = @"@";
