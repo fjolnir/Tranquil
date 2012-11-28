@@ -113,7 +113,7 @@
 - (id)contains:(id)aVal
 {
     for(id obj in self) {
-        if([aVal isEqualTo:obj])
+        if(tq_msgSend_noBoxing(aVal, @selector(isEqualTo:), obj))
             return TQValid;
     }
     return nil;

@@ -1,6 +1,7 @@
 #import "TQPromise.h"
 #import "TQValidObject.h"
 #import "NSObject+TQAdditions.h"
+#import "NSString+TQAdditions.h"
 
 #import <objc/runtime.h>
 
@@ -73,7 +74,7 @@ static __inline__ id TQPromiseGetResult(TQPromise *p)
 {
     if(_result != _TQPromiseNotResolvedSentinel)
         return [_result print];
-    return [[self description] print];
+    return [(TQObject *)[self description] print];
 }
 
 - (NSString *)description

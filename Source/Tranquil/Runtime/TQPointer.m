@@ -163,7 +163,7 @@ NSString * const TQTypeString    = @"*";
 - (void *)_addrForIndex:(NSUInteger)aIdx
 {
    if(aIdx >= _count)
-        [NSException raise:NSRangeException format:@"Index %ld is out of bounds (%ld)", aIdx, _count];
+        [NSException raise:NSRangeException format:@"Index %ld is out of bounds (%ld)", (long)aIdx, (long)_count];
     return _addr + (aIdx * _itemSize);
 }
 
