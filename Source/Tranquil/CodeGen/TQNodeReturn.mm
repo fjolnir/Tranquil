@@ -115,7 +115,18 @@ using namespace llvm;
 
     if([aBlock.retType isEqualToString:@"v"])
         return aBlock.builder->CreateRetVoid();
-    aBlock.builder->CreateRet(retVal);
+    else if(![aBlock.retType isEqualToString:@"@"]) {
+        // We now need to create a stack allocated buffer to unbox to and return
+        const char *encoding = [aBlock.retType UTF8String];
+        Type *retType = [aProgram llvmTypeFromEncoding:encoding];
+        AllocaInst *retBuf = aBlock.builder->CreateAlloca(retType);
+        aBlock.builder->CreateCall3(aProgram.TQUnboxObject,
+                                    retVal,
+                                    [aProgram getGlobalStringPtr:aBlock.retType withBuilder:aBlock.builder],
+                                 aBlock.builder->CreateBitCast(retBuf, aProgram.llInt8PtrTy));
+        aBlock.builder->CreateRet(aBlock.builder->CreateLoad(retBuf));
+    } else
+        aBlock.builder->CreateRet(retVal);
     return retVal;
 }
 @end

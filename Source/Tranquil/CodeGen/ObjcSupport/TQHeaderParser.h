@@ -13,7 +13,7 @@
     // Other constants
     NSMutableDictionary *_constants;
 
-    // Protocols (Only used internally)
+    // Protocols
     NSMutableDictionary *_protocols;
 
     CXIndex _index;
@@ -27,6 +27,8 @@
 - (TQBridgedFunction *)functionNamed:(NSString *)aName;
 - (TQBridgedConstant *)constantNamed:(NSString *)aName;
 - (TQBridgedClassInfo *)classNamed:(NSString *)aName;
+- (NSString *)classMethodTypeFromProtocols:(NSString *)aSelector;
+- (NSString *)instanceMethodTypeFromProtocols:(NSString *)aSelector;
 @end
 
 @interface TQBridgedClassInfo : NSObject <NSCoding>

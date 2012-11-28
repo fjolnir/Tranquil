@@ -181,7 +181,7 @@ static NSString *_prepareConstName(NSString *name)
                     aState->currentClass = [aState->classes objectForKey:nsName] ?: [_classes objectForKey:nsName];
             } break;
             case CXCursor_ObjCProtocolDecl: {
-                 TQBridgedClassInfo *info = [TQBridgedClassInfo new];
+                TQBridgedClassInfo *info = [TQBridgedClassInfo new];
                 [aState->protocols setObject:info forKey:nsName];
                 aState->currentClass = info;
                 [info release];
@@ -296,6 +296,26 @@ static NSString *_prepareConstName(NSString *name)
 - (TQBridgedClassInfo *)classNamed:(NSString *)aName
 {
     return [_classes objectForKey:aName];
+}
+
+
+- (NSString *)classMethodTypeFromProtocols:(NSString *)aSelector
+{
+    NSString *selector = nil;
+    for(TQBridgedClassInfo *protocol in [_protocols allValues]) {
+        selector = [protocol.classMethods objectForKey:aSelector];
+        if(selector) break;
+    }
+    return selector;
+}
+- (NSString *)instanceMethodTypeFromProtocols:(NSString *)aSelector
+{
+    NSString *selector = nil;
+    for(TQBridgedClassInfo *protocol in [_protocols allValues]) {
+        selector = [protocol.instanceMethods objectForKey:aSelector];
+        if(selector) break;
+    }
+    return selector;
 }
 
 
