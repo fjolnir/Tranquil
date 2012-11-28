@@ -51,6 +51,15 @@
     return nil;
 }
 
+- (id)objectForKeyedSubscript:(id)aKey
+{
+    return [self objectForKey:aKey];
+}
+- (void)setObject:(id)aObj forKeyedSubscript:(id)aKey
+{
+    [self setObject:aObj forKey:aKey];
+}
+
 - (id)each:(id (^)(id))aBlock
 {
     id res;
@@ -61,6 +70,7 @@
     }
     return nil;
 }
+
 @end
 
 @implementation NSPointerArray (Tranquil)
@@ -78,6 +88,8 @@
     IMP addImp = class_getMethodImplementation(object_getClass(ret), @selector(addPointer:));
     for(id item = firstObject; item != TQNothing; item = va_arg(args, id))
     {
+        if(TQObjectIsStackBlock(item))
+            item = [[item copy] autorelease];
         addImp(ret, @selector(addPointer:), item);
     }
     va_end(args);
@@ -258,6 +270,26 @@
     return [result autorelease];
 }
 
+- (NSPointerArray *)multiply:(TQNumber *)aTimes
+{
+    NSUInteger times = [aTimes unsignedIntegerValue];
+    if(times == 0)
+        return [[NSPointerArray new] autorelease];
+    NSPointerArray *ret = [self copy];
+    for(int i = 1; i < times; ++i) {
+        [ret append:self];
+    }
+    return [ret autorelease];
+}
+
+- (id)append:(id<NSFastEnumeration>)aOther
+{
+    for(id obj in aOther) {
+        [self addPointer:obj];
+    }
+    return self;
+}
+ 
 #pragma mark - Iterators
 
 - (NSEnumerator *)objectEnumerator

@@ -27,6 +27,8 @@
 - (id)first;
 
 - (id)each:(id (^)(id))aBlock;
+- (NSPointerArray *)multiply:(TQNumber *)aTimes;
+- (id)append:(id<NSFastEnumeration>)aOther;
 @end
 
 #define INDEXED_SUBSCRIPT_DEFS \
