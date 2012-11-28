@@ -40,4 +40,13 @@
     [self include:[TQObject class]];
 }
 
+- (id)at:(id)key
+{
+    return [(id)self objectForKeyedSubscript:key];
+}
+- (id)set:(id)key to:(id)value
+{
+    [(id)self setObject:value forKeyedSubscript:key];
+    return nil;
+}
 @end
