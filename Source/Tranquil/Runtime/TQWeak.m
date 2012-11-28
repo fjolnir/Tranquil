@@ -21,25 +21,9 @@ extern BOOL TQObjectIsStackBlock(id aBlock); // We can't #import Runtime.h becau
     ret.__obj = aObj;
     return ret;
 }
-
-- (void)forwardInvocation:(NSInvocation *)anInvocation
+- (id)forwardingTargetForSelector:(SEL)aSelector
 {
-    [anInvocation setTarget:__obj];
-    [anInvocation invoke];
-}
-
-- (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector
-{
-    static NSMethodSignature *nilRetSignature;
-    if(!__obj) {
-        if(!nilRetSignature) {
-            @synchronized(self) {
-                nilRetSignature = [NSMethodSignature signatureWithObjCTypes:"@:"];
-            }
-        }
-        return nilRetSignature;
-    }
-    return [__obj methodSignatureForSelector:aSelector];
+    return __obj ?: TQGlobalNil;
 }
 
 - (NSString *)description    { return [__obj description]; }
