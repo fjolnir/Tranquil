@@ -44,7 +44,7 @@ If you want to make your life easier, you should add
 \f0  like so:\
 \
 
-\f1 	echo "PATH=/usr/local/tranquil/bin:\\$PATH" >> ~/.profile\
+\f1 	echo "export PATH=/usr/local/tranquil/bin:\\$PATH" >> ~/.zshrc  # (or ~/.bashrc if you're behind the times)\
 
 \f0 \
 The commands provided by tranquil are:\
@@ -70,4 +70,4 @@ The commands provided by tranquil are:\
 \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\b \cf0 The installer will now open the tranquil REPL so you can have some fun.}]]></resource></locale></resources><flags/><postinstall><action id="com.apple.packagemaker.actions.openfile"><value>org.tranquil.dist.tqrepl</value><type>component</type></action></postinstall><item type="file">01tranquil.xml</item><mod>properties.systemDomain</mod><mod>properties.title</mod><mod>properties.anywhereDomain</mod><mod>postinstallActions.actions</mod></pkmkdoc>
+\b \cf0 The installer will now open the tranquil REPL so you can have some fun.}]]></resource></locale></resources><flags/><postinstall><action id="com.apple.packagemaker.actions.openfile"><value>/usr/local/tranquil/bin/tqrepl</value><component>org.tranquil.dist.tqrepl</component><type>absolute-path</type></action></postinstall><item type="file">01tranquil.xml</item><mod>postinstallActions.actions</mod><mod>properties.title</mod><mod>properties.anywhereDomain</mod><mod>properties.systemDomain</mod></pkmkdoc>
