@@ -1,1 +1,72 @@
-<pkmkdoc spec="1.12"><properties><title>tranquil</title><build>/Users/fyolnish/Dropbox/Desktop/tranquil.pkg</build><certificate>iPhone Developer: Fjolnir Asgeirsson (P8S86YQV64)</certificate><organization>org.tranquil</organization><userSees ui="easy"/><min-target os="3"/><domain system="true"/></properties><distribution><versions min-spec="1.000000"/><scripts></scripts></distribution><contents><choice title="tranquil" id="choice1" starts_selected="true" starts_enabled="true" starts_hidden="false"><pkgref id="org.tranquil.dist"/></choice></contents><resources bg-scale="none" bg-align="topleft"><locale lang="en"/></resources><flags/><postinstall><action id="com.apple.packagemaker.actions.openfile"><value>org.tranquil.dist.tqrepl</value><type>component</type></action></postinstall><item type="file">01tranquil.xml</item><mod>properties.systemDomain</mod><mod>properties.title</mod><mod>properties.anywhereDomain</mod><mod>postinstallActions.actions</mod></pkmkdoc>
+<pkmkdoc spec="1.12"><properties><title>tranquil</title><build>/Users/fyolnish/Dropbox/Desktop/tranquil.pkg</build><certificate>iPhone Developer: Fjolnir Asgeirsson (P8S86YQV64)</certificate><organization>org.tranquil</organization><userSees ui="easy"/><min-target os="3"/><domain system="true"/></properties><distribution><versions min-spec="1.000000"/><scripts></scripts></distribution><contents><choice title="tranquil" id="choice1" starts_selected="true" starts_enabled="true" starts_hidden="false"><pkgref id="org.tranquil.dist"/></choice></contents><resources bg-scale="none" bg-align="topleft"><locale lang="en"><resource mime-type="text/rtf" kind="embedded" type="license"><![CDATA[{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf340
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc0\levelnfcn0\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{decimal\}.}{\leveltext\leveltemplateid1\'02\'00.;}{\levelnumbers\'01;}\fi-360\li720\lin720 }{\listname ;}\listid1}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}}
+\deftab720
+\pard\pardeftab720\sa200
+
+\f0\b\fs56 \cf0 BSD 3 Clause License\
+\pard\pardeftab720\sa300
+
+\b0\fs28 \cf0 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:\
+\pard\tx220\tx720\pardeftab720\li720\fi-720
+\ls1\ilvl0\cf0 {\listtext	1.	}Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.\
+{\listtext	2.	}Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.\
+{\listtext	3.	}The name of the author may not be used to endorse or promote products derived from this software without specific prior written permission.\
+\pard\pardeftab720
+
+\b \cf0 \
+This software is provided by the author \'93as is\'94 and any express or implied warranties, including, but not limited to, the implied warranties of merchantability and fitness for a particular purpose are disclaimed. In no event shall the author be liable for any direct, indirect, incidental, special, exemplary, or consequential damages (including, but not limited to, procurement of substitute goods or services; loss of use, data, or profits; or business interruption) however caused and on any theory of liability, whether in contract, strict liability, or tort (including negligence or otherwise) arising in any way out of the use of this software, even if advised of the possibility of such damage.}]]></resource><resource mime-type="text/rtf" kind="embedded" type="welcome"><![CDATA[{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf340
+{\fonttbl\f0\fnil\fcharset0 LucidaGrande;\f1\fnil\fcharset0 Menlo-Regular;}
+{\colortbl;\red255\green255\blue255;}
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+
+\f0\fs26 \cf0 Thanks for downloading tranquil;\
+this installer will place it along with it's dependencies into 
+\f1 /usr/local/tranquil
+\f0 .}]]></resource><resource mime-type="text/rtf" kind="embedded" type="conclusion"><![CDATA[{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf340
+{\fonttbl\f0\fnil\fcharset0 LucidaGrande;\f1\fnil\fcharset0 Menlo-Regular;}
+{\colortbl;\red255\green255\blue255;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid1\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid1}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}}
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+
+\f0\fs26 \cf0 tranquil has been installed to 
+\f1 /usr/local/tranquil
+\f0 .\
+\
+If you want to make your life easier, you should add 
+\f1 /usr/local/tranquil/bin
+\f0  to your 
+\f1 $PATH
+\f0  like so:\
+\
+
+\f1 	echo "PATH=/usr/local/tranquil/bin:\\$PATH" >> ~/.profile\
+
+\f0 \
+The commands provided by tranquil are:\
+\pard\tx220\tx720\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\li720\fi-720\pardirnatural
+\ls1\ilvl0\cf0 {\listtext	\'95	}
+\f1 tranquil
+\f0  \'97 the interpreter (`tranquil <path>`  executes a file)\
+{\listtext	\'95	}
+\f1 tqc
+\f0  \'97 the compiler. (
+\f1 `tqc <tranquil-arguments> <file> <linker-arguments>`
+\f0  \uc0\u8594  
+\f1 `tqc -arch armv7 -ios MyApp.tq -framework UIKit -o MyApp`
+\f0 )\
+{\listtext	\'95	}
+\f1 tqrepl
+\f0  \'97 the REPL.\
+{\listtext	\'95	}
+\f1 tqlive
+\f0  \'97 monitors a file for changes, re-executing it when it finds any.\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+\cf0 \
+\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+
+\b \cf0 The installer will now open the tranquil REPL so you can have some fun.}]]></resource></locale></resources><flags/><postinstall><action id="com.apple.packagemaker.actions.openfile"><value>org.tranquil.dist.tqrepl</value><type>component</type></action></postinstall><item type="file">01tranquil.xml</item><mod>properties.systemDomain</mod><mod>properties.title</mod><mod>properties.anywhereDomain</mod><mod>postinstallActions.actions</mod></pkmkdoc>
