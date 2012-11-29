@@ -73,6 +73,7 @@ if forIOS {
     }
     cflags += [#-isysroot, syslibroot]
 } else
+    llcFlags push: #-mattr=-avx \ Make sure the new AVX instructions aren't used
     ldFlags push: #"-macosx_version_min";
             push: #"10.7.0";
             push: #"-lcrt1.10.6.o";
