@@ -45,10 +45,10 @@ TOOL_LDFLAGS = [
     '-L`pwd`/Build',
     '-lstdc++',
     '-lobjc',
+    "-rpath #{TRANQUIL}/lib",
     '-ltranquil',
     '-ltranquil_codegen',
     "#{TRANQUIL}/gmp/lib/libgmp.a",
-    "-rpath #{TRANQUIL}/llvm/lib",
     '-lffi',
     '-lreadline',
     #'-lprofiler',
@@ -185,7 +185,7 @@ file :libtranquil => HEADERS_OUT + RUNTIME_O_FILES do |t|
 end
 
 file :libtranquil_codegen => [PARSER_OUTPATH] + CODEGEN_O_FILES do |t|
-    sh "#{CC} -dynamiclib -undefined suppress -flat_namespace -o #{BUILD_DIR}/#{CODEGENLIB} #{CODEGEN_O_FILES} `#{LLVMCONFIG} --libfiles core jit nativecodegen armcodegen bitwriter ipo` #{LLVM}/lib/libclang*.a"
+    sh "#{CC} -install_name \"@rpath/#{CODEGENLIB}\" -dynamiclib -undefined suppress -flat_namespace -o #{BUILD_DIR}/#{CODEGENLIB} #{CODEGEN_O_FILES} `#{LLVMCONFIG} --libfiles core jit nativecodegen armcodegen bitwriter ipo` #{LLVM}/lib/libclang*.a"
     sh "mkdir -p #{TRANQUIL}/lib"
     sh "cp Build/#{CODEGENLIB} #{TRANQUIL}/lib"
 end
@@ -198,7 +198,7 @@ end
 
 file :tranquil => [:libtranquil, :libtranquil_codegen, MAIN_OUTPATH] do |t|
     _buildMain
-    sh "#{LD} #{TOOL_LDFLAGS} #{MAIN_OUTPATH} -ltranquil_codegen -o #{BUILD_DIR}/tranquil"
+    sh "#{LD} #{TOOL_LDFLAGS} #{MAIN_OUTPATH} -ltranquil_codegen  -rpath #{TRANQUIL}/lib -o #{BUILD_DIR}/tranquil"
 end
 
 task :setReleaseOpts do
@@ -230,7 +230,7 @@ def _install
     sh "cp Build/tranquil #{TRANQUIL}/bin"
     sh "cp Tools/tqlive.tq #{TRANQUIL}/bin/tqlive"
     sh "#{TRANQUIL}/bin/tranquil Tools/tqc.tq Tools/tqc.tq -o #{TRANQUIL}/bin/tqc"
-    sh "#{TRANQUIL}/bin/tqc Tools/repl.tq -lreadline #{TRANQUIL}/lib/#{CODEGENLIB} -lstdc++ -o #{TRANQUIL}/bin/tqrepl"
+    sh "#{TRANQUIL}/bin/tqc Tools/repl.tq -lreadline -L#{TRANQUIL}/lib -ltranquil_codegen -lstdc++ -o #{TRANQUIL}/bin/tqrepl -rpath #{TRANQUIL}/lib"
 end
 
 task :default => [:build_dir, :tranquil] do |t|
