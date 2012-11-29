@@ -1,4 +1,4 @@
-<pkmkdoc spec="1.12"><properties><title>tranquil</title><build>/Users/fyolnish/Dropbox/Desktop/tranquil.pkg</build><certificate>iPhone Developer: Fjolnir Asgeirsson (P8S86YQV64)</certificate><organization>org.tranquil</organization><userSees ui="easy"/><min-target os="3"/><domain system="true"/></properties><distribution><versions min-spec="1.000000"/><scripts></scripts></distribution><contents><choice title="tranquil" id="choice1" starts_selected="true" starts_enabled="true" starts_hidden="false"><pkgref id="org.tranquil.dist"/></choice></contents><resources bg-scale="none" bg-align="topleft"><locale lang="en"><resource mime-type="text/rtf" kind="embedded" type="license"><![CDATA[{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf340
+<pkmkdoc spec="1.12"><properties><title>tranquil</title><build>/Users/fyolnish/Dropbox/Desktop/tranquil α 10.pkg</build><certificate>iPhone Developer: Fjolnir Asgeirsson (P8S86YQV64)</certificate><organization>org.tranquil</organization><userSees ui="easy"/><min-target os="3"/><domain system="true"/></properties><distribution><versions min-spec="1.000000"/><scripts></scripts></distribution><contents><choice title="tranquil" id="choice1" starts_selected="true" starts_enabled="true" starts_hidden="false"><pkgref id="org.tranquil.dist"/></choice></contents><resources bg-scale="none" bg-align="topleft"><locale lang="en"><resource mime-type="text/rtf" kind="embedded" type="license"><![CDATA[{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf340
 {\fonttbl\f0\fswiss\fcharset0 Helvetica;}
 {\colortbl;\red255\green255\blue255;}
 {\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc0\levelnfcn0\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{decimal\}.}{\leveltext\leveltemplateid1\'02\'00.;}{\levelnumbers\'01;}\fi-360\li720\lin720 }{\listname ;}\listid1}}
@@ -9,7 +9,8 @@
 \f0\b\fs56 \cf0 BSD 3 Clause License\
 \pard\pardeftab720\sa300
 
-\b0\fs28 \cf0 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:\
+\b0\fs28 \cf0 Copyright \'a9 2012, Fj\'f6lnir \'c1sgeirsson. All rights reserved.\
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:\
 \pard\tx220\tx720\pardeftab720\li720\fi-720
 \ls1\ilvl0\cf0 {\listtext	1.	}Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.\
 {\listtext	2.	}Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.\
