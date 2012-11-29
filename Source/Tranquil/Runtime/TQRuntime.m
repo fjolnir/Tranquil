@@ -31,8 +31,8 @@ id TQNothing = nil;
 #endif
 #define kh_uintptr_hash_equal(a, b) (a == b)
 
-KHASH_INIT(TQSelectorCache, uintptr_t, uintptr_t, 1, kh_uintptr_hash_func, kh_uintptr_hash_equal);
-khash_t(TQSelectorCache) *_TQSelectorCache = NULL;
+KHASH_INIT(selectorCache, uintptr_t, uintptr_t, 1, kh_uintptr_hash_func, kh_uintptr_hash_equal);
+khash_t(selectorCache) *_TQSelectorCache = NULL;
 
 static const NSString *_TQDynamicIvarTableKey = @"TQDynamicIvarTableKey";
 
@@ -118,9 +118,9 @@ void _TQCacheSelector(id obj, SEL sel)
             val = (uintptr_t)method;
         }
 
-        int err;
-        khiter_t cur = kh_put(TQSelectorCache, _TQSelectorCache, key, &err);
-        assert(!err);
+        int ret;
+        khiter_t cur = kh_put_selectorCache(_TQSelectorCache, key, &ret);
+        if(!ret) kh_del_selectorCache(_TQSelectorCache, key);
 
         kh_value(_TQSelectorCache, cur) = val;
     }
@@ -130,7 +130,7 @@ uintptr_t _TQSelectorCacheLookup(id obj, SEL sel) {
     Class kls = object_getClass(obj);
     uintptr_t key = (uintptr_t)kls ^ (uintptr_t)sel << _keyShift;
 
-    khiter_t k = kh_get(TQSelectorCache, _TQSelectorCache, key);
+    khiter_t k = kh_get_selectorCache(_TQSelectorCache, key);
     return ((k != kh_end(_TQSelectorCache)) && kh_exist(_TQSelectorCache, k)) ? kh_value(_TQSelectorCache, k) : 0;
 }
 
@@ -433,7 +433,7 @@ void TQInitializeRuntime(int argc, char **argv)
 
     TQGlobalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT , 0);
 
-    _TQSelectorCache = kh_init(TQSelectorCache);
+    _TQSelectorCache = kh_init_selectorCache();
 
     pthread_key_create(&_TQNonLocalReturnStackKey, (void (*)(void *))&_destroyNonLocalReturnStack);
 

@@ -196,6 +196,7 @@ using namespace llvm;
     llvm::Module *mod = aProgram.llModule;
     Type *int8Ty = aProgram.llInt8Ty;
     Type *int32Ty = aProgram.llInt32Ty;
+    Type *longTy  = aProgram.llLongTy;
 
     SmallVector<llvm::Constant*, 6> elements;
 
@@ -203,7 +204,7 @@ using namespace llvm;
     elements.push_back(llvm::ConstantInt::get( aProgram.llLongTy, 0));
 
     // Size
-    elements.push_back(ConstantExpr::getIntegerCast(ConstantExpr::getSizeOf([self _blockLiteralTypeInProgram:aProgram]), int32Ty, TRUE));
+    elements.push_back(ConstantExpr::getIntegerCast(ConstantExpr::getSizeOf([self _blockLiteralTypeInProgram:aProgram]), longTy, TRUE));
 
     elements.push_back([self _generateCopyHelperInProgram:aProgram]);
     elements.push_back([self _generateDisposeHelperInProgram:aProgram]);
@@ -444,10 +445,13 @@ using namespace llvm;
 
     const char *functionName = [[self invokeName] UTF8String];
     _function = Function::Create(funType, GlobalValue::ExternalLinkage, functionName, mod);
-    if(returningOnStack)
-        _function->addAttribute(1, Attribute::StructRet);
+    if(returningOnStack) {
+        Attributes structRetAttr = Attributes::get(mod->getContext(), ArrayRef<Attributes::AttrVal>(Attributes::StructRet));
+        _function->addAttribute(1, structRetAttr);
+    }
+    Attributes byvalAttr = Attributes::get(mod->getContext(), ArrayRef<Attributes::AttrVal>(Attributes::ByVal));
     for(NSNumber *idx in byValArgIndices) {
-        _function->addAttribute([idx intValue], Attribute::ByVal);
+        _function->addAttribute([idx intValue], byvalAttr);
     }
 
     _basicBlock = BasicBlock::Create(mod->getContext(), "entry", _function, 0);

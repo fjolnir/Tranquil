@@ -7,20 +7,32 @@ fi
 
 mkdir -p /usr/local/tranquil
 
-# Just for install count stats for me; completely anonymous.
-curl -fsSkL "http://d.asgeirsson.is/JX9I" > /dev/null
+echo "\033[0;32mI'm about to retrieve and compile Tranquil for you. This will take around 20 minutes,\ndepending on your connection & hardware of course.\n"
 
-echo "\033[0;32mI'm about to retrieve and compile Tranquil for you. This shouldn't take more than a few minutes,\ndepending on your connection & hardware.\n"
-
-echo "\033[0;34mInstalling LLVM...\033[0m"
+echo "\033[0;34mInstalling LLVM (This is the part that takes a while)...\033[0m"
 if [ -d /usr/local/tranquil/llvm ]
 then
   echo "\033[0;32mYou already have llvm installed.\033[0m"
 else
+    hash svn || {
+      echo "\033[0;31msubversion not installed\033[0m"
+      exit
+    }
     pushd /tmp
-    curl http://llvm.org/releases/3.1/clang+llvm-3.1-x86_64-apple-darwin11.tar.gz -o llvm3.1.tgz
-    tar -xzf llvm3.1.tgz
-    mv clang+llvm-3.1-x86_64-apple-darwin11 /usr/local/tranquil/llvm
+    mkdir llvm32
+    pushd llvm32
+    svn co http://llvm.org/svn/llvm-project/llvm/tags/RELEASE_32/rc1/ llvm
+    svn co http://llvm.org/svn/llvm-project/cfe/tags/RELEASE_32/rc1/ llvm/tools/clang
+    svn co http://llvm.org/svn/llvm-project/compiler-rt/tags/RELEASE_32/rc1/ llvm/projects/compiler-rt
+
+    mkdir build
+    pushd build
+env UNIVERSAL=1 UNIVERSAL_ARCH="i386 x86_64" ../llvm/configure --prefix=/usr/local/tranquil/llvm --enable-targets=arm,x86,x86_64,host,cpp --enable-libffi --enable-optimized
+    env UNIVERSAL=1 UNIVERSAL_ARCH="i386 x86_64" make -j2
+    make install
+
+    popd
+    popd
     popd
 fi
 
@@ -103,10 +115,11 @@ then
     popd
 else
     echo "\n\033[0;34mCloning Tranquil from GitHub...\033[0m"
-    hash git >/dev/null && /usr/bin/env git clone git://github.com/fjolnir/Tranquil.git /usr/local/tranquil/src || {
+    hash git >/dev/null || {
       echo "\033[0;31mgit not installed\033[0m"
       exit
     }
+    git clone git://github.com/fjolnir/Tranquil.git /usr/local/tranquil/src
 fi
 
 echo "\033[0;34mCompiling...\033[0m"

@@ -3,7 +3,7 @@
 #import "TQNodeBlock.h"
 #import "TQProgram.h"
 #import "../Shared/TQDebug.h"
-#import <llvm/Support/IRBuilder.h>
+#import <llvm/IRBuilder.h>
 
 using namespace llvm;
 
@@ -198,13 +198,14 @@ using namespace llvm;
     if(!_isAnonymous) {
         entryBuilder.CreateStore(entryBuilder.CreateBitCast(_alloca, i8PtrTy),
                                  entryBuilder.CreateStructGEP(_alloca, 1, [self _llvmRegisterName:@"forwardingAssign"]));
-        entryBuilder.CreateStore(ConstantInt::get(intTy, 0), entryBuilder.CreateStructGEP(_alloca, 2, [self _llvmRegisterName:@"flags"]));
         Constant *size = ConstantExpr::getTruncOrBitCast(ConstantExpr::getSizeOf(allocaType), intTy);
         entryBuilder.CreateStore(size, entryBuilder.CreateStructGEP(_alloca, 3, [self _llvmRegisterName:@"size"]));
 
-        if(!_isGlobal) // Globals are pre initialized
+        if(!_isGlobal) { // Globals are already zero initialized
+            entryBuilder.CreateStore(ConstantInt::get(intTy, 0), entryBuilder.CreateStructGEP(_alloca, 2, [self _llvmRegisterName:@"flags"]));
             entryBuilder.CreateStore(ConstantPointerNull::get(aProgram.llInt8PtrTy),
                                      entryBuilder.CreateStructGEP(_alloca, 4, [self _llvmRegisterName:@"marked_variable"]));
+        }
     }
 
     return _alloca;
@@ -261,6 +262,7 @@ using namespace llvm;
         aBlock.builder->CreateStore(aValue, aBlock.builder->CreateStructGEP(forwarding, 4));
         return NULL;
     }
+    Module *mod = aProgram.llModule;
     Function *storeFun = aProgram.objc_storeStrong;
     // If the variable is a capture, or a global we need to use TQStoreStrong because if the assigned value is a
     // stack block it would escape and cause a crash
@@ -268,7 +270,8 @@ using namespace llvm;
         storeFun = aProgram.TQStoreStrong;
 
     CallInst *storeCall = aBlock.builder->CreateCall2(storeFun, aBlock.builder->CreateStructGEP(forwarding, 4), aValue);
-    storeCall->addAttribute(~0, Attribute::NoUnwind);
+    Attributes nounwindAttr = Attributes::get(mod->getContext(), ArrayRef<Attributes::AttrVal>(Attributes::NoUnwind));
+    storeCall->addAttribute(~0, nounwindAttr);
 
     return NULL;
 }
@@ -282,9 +285,11 @@ using namespace llvm;
     TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock program:aProgram];
     if(existingVar)
         return [existingVar generateRetainInProgram:aProgram block:aBlock root:aRoot];
+    Module *mod = aProgram.llModule;
 
     CallInst *retainCall = aBlock.builder->CreateCall(aProgram.objc_retain, [self _getForwardingInProgram:aProgram block:aBlock root:aRoot]);
-    retainCall->addAttribute(~0, Attribute::NoUnwind);
+    Attributes nounwindAttr = Attributes::get(mod->getContext(), ArrayRef<Attributes::AttrVal>(Attributes::NoUnwind));
+    retainCall->addAttribute(~0, nounwindAttr);
 }
 
 - (void)generateReleaseInProgram:(TQProgram *)aProgram
@@ -296,9 +301,11 @@ using namespace llvm;
     TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock program:aProgram];
     if(existingVar)
         return [existingVar generateReleaseInProgram:aProgram block:aBlock root:aRoot];
+    Module *mod = aProgram.llModule;
 
     CallInst *releaseCall = aBlock.builder->CreateCall(aProgram.objc_release, [self _getForwardingInProgram:aProgram block:aBlock root:aRoot]);
-    releaseCall->addAttribute(~0, Attribute::NoUnwind);
+    Attributes nounwindAttr = Attributes::get(mod->getContext(), ArrayRef<Attributes::AttrVal>(Attributes::NoUnwind));
+    releaseCall->addAttribute(~0, nounwindAttr);
     SmallVector<llvm::Value*,1> args;
     releaseCall->setMetadata("clang.imprecise_release", llvm::MDNode::get(aProgram.llModule->getContext(), args));
 }

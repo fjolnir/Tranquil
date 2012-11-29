@@ -1,5 +1,5 @@
 #import "TQNodeBlock.h"
-#include <llvm/Support/IRBuilder.h>
+#include <llvm/IRBuilder.h>
 
 // Set on a block to know which while loop to break out of
 extern void * const TQCurrLoopKey;

@@ -131,7 +131,7 @@ using namespace llvm;
         Value *result = rootBuilder.CreateCall3(aProgram.objc_msgSend, klass, selector, [aProgram getGlobalStringPtr:self.value withBuilder:&rootBuilder]);
         result = rootBuilder.CreateCall(aProgram.objc_retain, result);
 
-        str = new GlobalVariable(*mod, aProgram.llInt8PtrTy, false, GlobalVariable::InternalLinkage,
+        str = new GlobalVariable(*mod, aProgram.llInt8PtrTy, false, GlobalVariable::PrivateLinkage,
                                  ConstantPointerNull::get(aProgram.llInt8PtrTy), [globalName UTF8String]);
 
         rootBuilder.CreateStore(result, str);

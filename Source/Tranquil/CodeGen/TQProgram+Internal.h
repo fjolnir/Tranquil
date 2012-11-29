@@ -2,8 +2,8 @@
 
 #import <Tranquil/CodeGen/TQProgram.h>
 #import <Tranquil/CodeGen/TQProgram+LLVMUtils.h>
-#include <llvm/Support/IRBuilder.h>
-#include <llvm/Analysis/DIBuilder.h>
+#include <llvm/IRBuilder.h>
+#include <llvm/DIBuilder.h>
 #include <llvm/ExecutionEngine/JIT.h>
 #include <llvm/ExecutionEngine/JITMemoryManager.h>
 #include <llvm/ExecutionEngine/JITEventListener.h>

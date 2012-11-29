@@ -719,19 +719,22 @@ static NSString *_prepareConstName(NSString *name)
     // Populate call block
     FunctionType *funType = FunctionType::get(retType, argTypes, false);
     Function *function = aProgram.llModule->getFunction([_name UTF8String]);
+    Attributes byvalAttr = Attributes::get(mod->getContext(), ArrayRef<Attributes::AttrVal>(Attributes::ByVal));
     if(!function) {
         function = Function::Create(funType, GlobalValue::ExternalLinkage, [_name UTF8String], aProgram.llModule);
         function->setCallingConv(CallingConv::C);
-        if(returningOnStack)
-            function->addAttribute(1, Attribute::StructRet);
+        if(returningOnStack) {
+            Attributes structRetAttr = Attributes::get(mod->getContext(), ArrayRef<Attributes::AttrVal>(Attributes::StructRet));
+            function->addAttribute(1, structRetAttr);
+        }
         [byValArgIndices enumerateIndexesWithOptions:0 usingBlock:^(NSUInteger idx, BOOL *stop) {
-            function->addAttribute(returningOnStack ? idx+1 : idx, Attribute::ByVal);
+            function->addAttribute(returningOnStack ? idx+1 : idx, byvalAttr);
         }];
     }
 
     CallInst *call = callBuilder.CreateCall(function, args);
     [byValArgIndices enumerateIndexesWithOptions:0 usingBlock:^(NSUInteger idx, BOOL *stop) {
-        call->addAttribute(returningOnStack ? idx+1 : idx, Attribute::ByVal);
+        call->addAttribute(returningOnStack ? idx+1 : idx, byvalAttr);
     }];
     const char *retTypeCStr = [_retType UTF8String];
     if([_retType hasPrefix:@"v"])

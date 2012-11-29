@@ -5,7 +5,6 @@
 #import <objc/runtime.h>
 #import <objc/message.h>
 #import <llvm/Transforms/IPO/PassManagerBuilder.h>
-#import <llvm/Target/TargetData.h>
 
 #include <llvm/Module.h>
 #include <llvm/DerivedTypes.h>
@@ -14,8 +13,6 @@
 #include <llvm/Instructions.h>
 #include <llvm/PassManager.h>
 #include <llvm/Analysis/Verifier.h>
-#include <llvm/Target/TargetData.h>
-#include <llvm/Target/TargetData.h>
 #include <llvm/Target/TargetMachine.h>
 #include <llvm/Target/TargetOptions.h>
 #include <llvm/Transforms/Scalar.h>
@@ -32,7 +29,7 @@
 #include <llvm/Support/ToolOutputFile.h>
 #include <llvm/Support/TargetRegistry.h>
 #include <llvm/Support/Host.h>
-#include <llvm/Support/TypeBuilder.h>
+#include <llvm/TypeBuilder.h>
 #include "llvm/ADT/Statistic.h"
 
 using namespace llvm;
@@ -178,26 +175,37 @@ using namespace llvm;
     llvm::LLVMContext &ctx = self.llModule->getContext();
     return TypeBuilder<int*, false>::get(ctx);
 }
-- (llvm::StructType *)llVaListTy
+- (llvm::Type *)llVaListTy
 {
-#ifdef __LP64__
-    StructType *vaListTy = self.llModule->getTypeByName("struct.__va_list_tag");
-    if(!vaListTy)
-        vaListTy = StructType::create(self.llModule->getContext(), "struct.__va_list_tag");
-    if(vaListTy->isOpaque()) {
-        std::vector<Type*>vaListFields;
-        vaListFields.push_back(self.llInt32Ty);
-        vaListFields.push_back(self.llInt32Ty);
+    switch(self.targetArch) {
+        case kTQArchitectureX86_64:
+        #ifdef __LP64__
+        case kTQArchitectureHost:
+        #endif
+        {
+            StructType *vaListTy = self.llModule->getTypeByName("struct.__va_list_tag");
+            if(!vaListTy)
+                vaListTy = StructType::create(self.llModule->getContext(), "struct.__va_list_tag");
+            if(vaListTy->isOpaque()) {
+                std::vector<Type*>vaListFields;
+                vaListFields.push_back(self.llInt32Ty);
+                vaListFields.push_back(self.llInt32Ty);
 
-        vaListFields.push_back(self.llInt8PtrTy);
-        vaListFields.push_back(self.llInt8PtrTy);
+                vaListFields.push_back(self.llInt8PtrTy);
+                vaListFields.push_back(self.llInt8PtrTy);
 
-        vaListTy->setBody(vaListFields, false);
+                vaListTy->setBody(vaListFields, false);
+            }
+            return vaListTy;
+        }
+        case kTQArchitectureI386:
+        case kTQArchitectureARMv7:
+        #ifndef __LP64__
+        case kTQArchitectureHost:
+        #endif
+            return self.llInt8Ty;
     }
-    return vaListTy;
-#else
-#error va_list type only implemented for x86_64
-#endif
+    return NULL;
 }
 
 #pragma mark - Functions
@@ -522,7 +530,9 @@ FunAccessor(pthread_self, ft_long_void);
     if(!func_setjmp) {
         func_setjmp = Function::Create([self _ft_int__i32Ptr], GlobalValue::ExternalLinkage, "_setjmp", self.llModule);
         func_setjmp->setCallingConv(CallingConv::C);
-        func_setjmp->addAttribute(~0, Attribute::ReturnsTwice);
+        Attributes attrs = Attributes::get(self.llModule->getContext(), ArrayRef<Attributes::AttrVal>(Attributes::ReturnsTwice));
+
+        func_setjmp->addAttribute(~0, attrs);
     }
     return func_setjmp;
 }
@@ -533,7 +543,8 @@ FunAccessor(pthread_self, ft_long_void);
     if(!func_longjmp) {
         func_longjmp = Function::Create([self _ft_void__i32Ptr_int], GlobalValue::ExternalLinkage, "_longjmp", self.llModule);
         func_longjmp->setCallingConv(CallingConv::C);
-        func_longjmp->addAttribute(~0, Attribute::NoReturn);
+        Attributes attrs = Attributes::get(self.llModule->getContext(), ArrayRef<Attributes::AttrVal>(Attributes::NoReturn));
+        func_longjmp->addAttribute(~0, attrs);
     }
     return func_longjmp;
 }

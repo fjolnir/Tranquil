@@ -136,7 +136,7 @@ NSString * const TQTypeString    = @"*";
         ret->_addr = malloc(_count*_itemSize);
         memcpy(ret->_addr, _addr, _count*_itemSize);
     } else
-        ret->_addr = ret->_addr;
+        ret->_addr = self->_addr;
     return ret;
 }
 

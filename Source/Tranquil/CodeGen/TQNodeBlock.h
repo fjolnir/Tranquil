@@ -1,8 +1,8 @@
 #import <Tranquil/CodeGen/TQNode.h>
 #include "TQNodeReturn.h"
 #include "../Runtime/TQRuntime.h"
-#include <llvm/Support/IRBuilder.h>
-#include <llvm/Analysis/DebugInfo.h>
+#include <llvm/IRBuilder.h>
+#include <llvm/DebugInfo.h>
 
 @class TQNodeArgumentDef, TQNodeVariable, TQNodeIntVariable, TQNodeLongVariable;
 

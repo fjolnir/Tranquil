@@ -12,7 +12,7 @@
 #import <objc/runtime.h>
 #import <objc/message.h>
 #import <llvm/Transforms/IPO/PassManagerBuilder.h>
-#import <llvm/Target/TargetData.h>
+#import <llvm/DataLayout.h>
 #import <mach/mach_time.h>
 
 #ifdef TQ_PROFILE
@@ -26,8 +26,6 @@
 #include <llvm/Instructions.h>
 #include <llvm/PassManager.h>
 #include <llvm/Analysis/Verifier.h>
-#include <llvm/Target/TargetData.h>
-#include <llvm/Target/TargetData.h>
 #include <llvm/Target/TargetMachine.h>
 #include <llvm/Target/TargetOptions.h>
 #include <llvm/Transforms/Scalar.h>
@@ -229,7 +227,7 @@ static TQProgram *sharedInstance;
             factory.setUseMCJIT(true);
             factory.setRelocationModel(Reloc::PIC_);
             _executionEngine = factory.create();
-            fpm.add(new TargetData(*_executionEngine->getTargetData()));
+            fpm.add(new DataLayout(*_executionEngine->getDataLayout()));
         }
         if(argGlobal)
             _executionEngine->addGlobalMapping(argGlobal, (void*)&_argGlobalForJIT);
@@ -276,7 +274,7 @@ static TQProgram *sharedInstance;
                 targetTriple = "x86_64-apple-darwin11.0.0";
                 break;
             case kTQArchitectureARMv7:
-                targetTriple = "arm-apple-darwin11.0.0";
+                targetTriple = "thumbv7-apple-ios";//"arm-apple-darwin11.0.0";
         }
         //for(TargetRegistry::iterator it = TargetRegistry::begin(), ie = TargetRegistry::end(); it != ie; ++it) {
         //    NSLog(@"target: %s", it->getName());
@@ -285,11 +283,12 @@ static TQProgram *sharedInstance;
         const Target *target = TargetRegistry::lookupTarget(targetTriple, err);
         TQAssert(err.empty(), @"Unable to get target data: %s", err.c_str());
 
+        _llModule->setTargetTriple(targetTriple);
         TargetMachine *machine = target->createTargetMachine(targetTriple, cpuName, "", Opts);
         TQAssert(machine, @"Unable to create llvm target machine");
-        modulePasses.add(new TargetData(*(machine->getTargetData())));
-        modulePasses.run(*_llModule);
+        modulePasses.add(new DataLayout(*machine->getDataLayout()));
         fpm.run(*aNode.function);
+        modulePasses.run(*_llModule);
 
         verifyModule(*_llModule, PrintMessageAction);
         if(_shouldShowDebugInfo) {

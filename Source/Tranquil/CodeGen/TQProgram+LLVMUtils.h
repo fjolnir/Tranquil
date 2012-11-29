@@ -1,10 +1,11 @@
 #import <Tranquil/CodeGen/TQProgram.h>
-#include <llvm/Support/IRBuilder.h>
-#include <llvm/Analysis/DIBuilder.h>
-#include <llvm/ExecutionEngine/JIT.h>
-#include <llvm/ExecutionEngine/JITMemoryManager.h>
-#include <llvm/ExecutionEngine/JITEventListener.h>
-#include <llvm/ExecutionEngine/GenericValue.h>
+#undef verify // This causes an error in IRBuilder.h
+#import <llvm/IRBuilder.h>
+#import <llvm/DIBuilder.h>
+#import <llvm/ExecutionEngine/JIT.h>
+#import <llvm/ExecutionEngine/JITMemoryManager.h>
+#import <llvm/ExecutionEngine/JITEventListener.h>
+#import <llvm/ExecutionEngine/GenericValue.h>
 
 @class TQNodeRootBlock, NSString, NSError;
 
@@ -26,7 +27,7 @@
 @property(readonly) llvm::PointerType *llVoidPtrTy, *llInt8PtrTy, *llInt32PtrTy;
 // void** in address space 0
 @property(readonly) llvm::PointerType *llVoidPtrPtrTy, *llInt8PtrPtrTy;
-@property(readonly) llvm::StructType *llVaListTy;
+@property(readonly) llvm::Type *llVaListTy;
 
 // The width of a pointer into the generic address space.
 @property(readonly) unsigned char llPointerWidthInBits;

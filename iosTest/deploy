@@ -1,4 +1,4 @@
-tqc -d -arch armv7 -ios t -o demo.app/demo -framework UIKit
+tqc -arch armv7 -ios t -o demo.app/demo -framework UIKit
 dsymutil demo.app/demo
 CODESIGN_ALLOCATE=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/codesign_allocate codesign --force --entitlements Entitlements.plist --sign "iPhone Developer" demo.app
 fruitstrap -d -v -b demo.app
