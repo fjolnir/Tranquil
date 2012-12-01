@@ -14,7 +14,7 @@ using namespace llvm;
 @end
 
 @implementation TQNodeMessage
-@synthesize receiver=_receiver, arguments=_arguments, cascadedMessages=_cascadedMessages, receiverLLVMValue=_receiverLLVMValue;
+@synthesize receiver=_receiver, arguments=_arguments, cascadedMessages=_cascadedMessages, receiverLLVMValue=_receiverLLVMValue, needsAutorelease=_needsAutorelease;
 
 + (TQNodeMessage *)nodeWithReceiver:(TQNode *)aNode
 {
@@ -105,7 +105,7 @@ using namespace llvm;
     for(TQNodeArgument *arg in _arguments) {
         [out appendFormat:@"%@ ", arg];
     }
-    [out appendString:@".>"];
+    [out appendFormat:@".%@>", _needsAutorelease ? @" (autoreleased)" : @""];
     return out;
 }
 
@@ -142,13 +142,6 @@ using namespace llvm;
     std::vector<Value*> args;
 
     NSString *selStr = [self selector];
-    BOOL needsAutorelease = NO;
-    if([selStr hasPrefix:@"alloc"])
-        needsAutorelease = YES;
-    else if([selStr isEqualToString:@"copy"] || [selStr hasSuffix:@"Copy"])
-        needsAutorelease = YES;
-    else if([selStr isEqualToString:@"new"])
-        needsAutorelease = YES;
 
     Value *receiver = _receiverLLVMValue ?: [_receiver generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     if(*aoErr)
@@ -172,7 +165,7 @@ using namespace llvm;
         ret = aBlock.builder->CreateCall(aProgram.objc_msgSendSuper, args);
     else {
         ret = aBlock.builder->CreateCall(aProgram.tq_msgSend, args);
-        if(needsAutorelease) {
+        if(_needsAutorelease) {
             [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];
             ret = aBlock.builder->CreateCall(aProgram.objc_autoreleaseReturnValue, ret);
             Attributes nounwindAttr = Attributes::get(mod->getContext(), ArrayRef<Attributes::AttrVal>(Attributes::NoUnwind));
