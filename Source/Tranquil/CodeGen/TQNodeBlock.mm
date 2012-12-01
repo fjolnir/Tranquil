@@ -633,8 +633,17 @@ using namespace llvm;
             stmt = [TQNodeReturn nodeWithValue:stmt];
             stmt.lineNumber = line;
         }
-        [stmt generateCodeInProgram:aProgram block:self root:aRoot error:aoErr];
-        if(*aoErr) {
+
+        @try {
+            [stmt generateCodeInProgram:aProgram block:self root:aRoot error:aoErr];
+        } @catch (NSException *e) {
+            *aoErr = [NSError errorWithDomain:kTQSyntaxErrorDomain
+                                         code:kTQObjCException
+                                     userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[e reason], NSLocalizedDescriptionKey,
+                                                                                         e, @"exception", nil]];
+        }
+
+       if(*aoErr) {
             _function->eraseFromParent();
             _function = NULL;
             return NULL;
