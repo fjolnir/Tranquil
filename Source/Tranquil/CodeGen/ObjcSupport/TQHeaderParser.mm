@@ -520,9 +520,19 @@ static NSString *_prepareConstName(NSString *name)
     Module *mod = aProgram.llModule;
     Function *rootFunction = aRoot.function;
     IRBuilder<> rootBuilder(&rootFunction->getEntryBlock(), rootFunction->getEntryBlock().begin());
-    Value *constant = mod->getOrInsertGlobal([_name UTF8String], [aProgram llvmTypeFromEncoding:_encoding]);
-    constant = rootBuilder.CreateBitCast(constant, aProgram.llInt8PtrTy);
-    Value *boxed = rootBuilder.CreateCall2(aProgram.TQBoxValue, constant, [aProgram getGlobalStringPtr:[NSString stringWithUTF8String:_encoding]
+    Type *constType = [aProgram llvmTypeFromEncoding:_encoding];
+    Value *constant = mod->getOrInsertGlobal([_name UTF8String], constType);
+    NSString *nsEncoding = [NSString stringWithUTF8String:_encoding];
+    if(*_encoding == _C_PTR || *_encoding == _C_CHARPTR) {
+        // If it is a pointer we need to pass a pointer to it
+        constant = rootBuilder.CreateBitCast(constant, aProgram.llInt8PtrTy);
+        Value *ref = rootBuilder.CreateAlloca(aProgram.llInt8PtrTy);
+        rootBuilder.CreateStore(constant, ref);
+        constant = rootBuilder.CreateBitCast(ref, aProgram.llInt8PtrTy);
+    } else {
+        constant = rootBuilder.CreateBitCast(constant, aProgram.llInt8PtrTy);
+    }
+    Value *boxed = rootBuilder.CreateCall2(aProgram.TQBoxValue, constant, [aProgram getGlobalStringPtr:nsEncoding
                                                                                            withBuilder:&rootBuilder]);
     _global = new GlobalVariable(*mod, aProgram.llInt8PtrTy, false, GlobalVariable::InternalLinkage,
                                  ConstantPointerNull::get(aProgram.llInt8PtrTy), [[@"TQBridgedConst_" stringByAppendingString:_name] UTF8String]);

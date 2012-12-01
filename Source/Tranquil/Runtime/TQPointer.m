@@ -46,7 +46,7 @@ NSString * const TQTypeString    = @"*";
     if(!aPtr)
         return nil;
     TQAssert(*aType == _C_PTR || *aType == _C_ARY_B, @"Tried to create a pointer using a non-pointer type");
-    NSUInteger count = 1;
+    NSUInteger count = 0;
 
     if(*aType++ == _C_ARY_B) {
         assert(isdigit(*aType));
@@ -99,7 +99,7 @@ NSString * const TQTypeString    = @"*";
         return nil;
 
     assert(aType != nil);
-    assert(aCount > 0);
+    assert(aCount >= 0);
 
     _itemType      = strdup(aType);
     _addr          = (char *)aAddr;
@@ -157,12 +157,12 @@ NSString * const TQTypeString    = @"*";
 
 - (TQNumber *)count
 {
-    return [TQNumber numberWithInt:_count];
+    return [TQNumber numberWithInt:MAX(1, _count)];
 }
 
 - (void *)_addrForIndex:(NSUInteger)aIdx
 {
-   if(aIdx >= _count)
+   if(_count > 0 && aIdx >= _count)
         [NSException raise:NSRangeException format:@"Index %ld is out of bounds (%ld)", (long)aIdx, (long)_count];
     return _addr + (aIdx * _itemSize);
 }
@@ -198,10 +198,14 @@ NSString * const TQTypeString    = @"*";
 
 - (id)print
 {
-    if(*_itemType == _C_CHARPTR)
+    if(*_itemType == _C_CHR) {
+        if(_count > 0)
+            fwrite(_addr, sizeof(char), _count, stdout);
+        else
+            printf("%s", _addr);
+    }
+    else if(*_itemType == _C_CHARPTR)
         printf("%s", *(char **)_addr);
-    else if(*_itemType == _C_CHR)
-        fwrite(_addr, sizeof(char), _count, stdout);
     else
         printf("%s\n", [[self description] UTF8String]);
     return nil;
@@ -212,15 +216,17 @@ NSString * const TQTypeString    = @"*";
     const char *cStr = [self UTF8String];
     if(cStr)
         return [NSMutableString stringWithUTF8String:cStr];
+    else if(*_itemType == _C_CHR && _count > 0)
+        return [[[NSMutableString alloc] initWithBytes:_addr length:_count encoding:NSUTF8StringEncoding] autorelease];
     return nil;
 }
 
 - (const char *)UTF8String
 {
-    if(*_itemType == _C_CHARPTR)
-        return *(char **)_addr;
-    if(*_itemType == _C_CHR)
+    if(*_itemType == _C_CHR && _count == 0)
         return _addr;
+    else if(*_itemType == _C_CHARPTR)
+        return *(char **)_addr;
     return NULL;
 }
 
