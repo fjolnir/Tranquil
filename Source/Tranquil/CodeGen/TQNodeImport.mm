@@ -46,7 +46,8 @@ using namespace llvm;
                                  error:(NSError **)aoErr
 {
     NSString *path = [aProgram _resolveImportPath:_path];
-    if(!path || [aProgram.evaluatedPaths containsObject:path])
+    TQAssertSoft(path, kTQGenericErrorDomain, kTQGenericError, NULL, @"No file found for '%@'", _path);
+    if([aProgram.evaluatedPaths containsObject:path])
         return ConstantPointerNull::get(aProgram.llInt8PtrTy);
 
     [aProgram.evaluatedPaths addObject:path];
