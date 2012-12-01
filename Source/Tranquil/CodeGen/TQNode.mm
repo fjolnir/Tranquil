@@ -25,7 +25,7 @@ using namespace llvm;
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
-    TQLog(@"Code generation has not been implemented for %@.", [self class]);
+    TQAssert(NO, @"Code generation has not been implemented for %@.", [self class]);
     return NULL;
 }
 
@@ -35,36 +35,36 @@ using namespace llvm;
                   root:(TQNodeRootBlock *)aRoot
                  error:(NSError **)aoErr
 {
-    TQLog(@"Store has not been implemented for %@.", [self class]);
+    TQAssert(NO, @"Store has not been implemented for %@.", [self class]);
     return NULL;
 }
 
 - (TQNode *)referencesNode:(TQNode *)aNode
 {
-    TQLog(@"Node reference check has not been implemented for %@.", [self class]);
+    TQAssert(NO, @"Node reference check has not been implemented for %@.", [self class]);
     return nil;
 }
 
 - (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
 {
-    TQLog(@"Node iteration has not been implemented for %@.", [self class]);
+    TQAssert(NO, @"Node iteration has not been implemented for %@.", [self class]);
 }
 
 - (BOOL)insertChildNode:(TQNode *)aNodeToInsert before:(TQNode *)aNodeToShift
 {
-    TQLog(@"%@ does not support child node insertion.", [self class]);
+    TQAssert(NO, @"%@ does not support child node insertion.", [self class]);
     return NO;
 }
 
 - (BOOL)insertChildNode:(TQNode *)aNodeToInsert after:(TQNode *)aNodeToShift
 {
-    TQLog(@"%@ does not support child node insertion.", [self class]);
+    TQAssert(NO, @"%@ does not support child node insertion.", [self class]);
     return NO;
 }
 
 - (BOOL)replaceChildNodesIdenticalTo:(TQNode *)aNodeToReplace with:(TQNode *)aNodeToInsert
 {
-    TQLog(@"%@ does not support child node replacement.", [self class]);
+    TQAssert(NO, @"%@ does not support child node replacement.", [self class]);
     return NO;
 }
 
