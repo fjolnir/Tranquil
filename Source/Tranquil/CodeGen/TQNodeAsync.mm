@@ -8,6 +8,7 @@
 #import "TQNodeArgument.h"
 #import "TQNodeVariable.h"
 #import "TQNodeMessage.h"
+#import "TQNodeValid.h"
 
 using namespace llvm;
 
@@ -79,6 +80,7 @@ using namespace llvm;
         [origArgs release];
     }
 
+    // TODO: actually modify the block to replace returns with promise fulfillments
     if([_expression isKindOfClass:[TQNodeBlock class]])
         _expression = [TQNodeCall nodeWithCallee:_expression];
 
@@ -119,9 +121,17 @@ using namespace llvm;
 @end
 
 @implementation TQNodeWait
+@synthesize timeoutExpr=_timeoutExpr;
+
 + (TQNodeWait *)node
 {
     return (TQNodeWait *)[super node];
+}
++ (TQNodeWait *)nodeWithTimeoutExpr:(TQNode *)aExpr
+{
+    TQNodeWait *ret = [self node];
+    ret.timeoutExpr = aExpr;
+    return ret;
 }
 
 - (BOOL)isEqual:(id)b
@@ -144,11 +154,28 @@ using namespace llvm;
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
+    Value *validVal = [[TQNodeValid node] generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     if(aBlock.dispatchGroup) {
-        Value *call = aBlock.builder->CreateCall2(aProgram.dispatch_group_wait, aBlock.dispatchGroup, ConstantInt::get(aProgram.llInt64Ty, DISPATCH_TIME_FOREVER));
+        Value *timeout;
+        if(_timeoutExpr) {
+            Value *dur = [_timeoutExpr generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+            if(*aoErr)
+                return NULL;
+            Value *ns = aBlock.builder->CreateCall(aProgram._TQObjectToNanoseconds, dur);
+            timeout = aBlock.builder->CreateCall2(aProgram.dispatch_time,
+                                                  ConstantInt::get(aProgram.llInt64Ty, DISPATCH_TIME_NOW),
+                                                  ns);
+        } else {
+            timeout = ConstantInt::get(aProgram.llInt64Ty, DISPATCH_TIME_FOREVER);
+        }
+        Value *call = aBlock.builder->CreateCall2(aProgram.dispatch_group_wait, aBlock.dispatchGroup, timeout);
         [self _attachDebugInformationToInstruction:call inProgram:aProgram block:aBlock root:aRoot];
+        Value *cond = aBlock.builder->CreateICmpEQ(call, ConstantInt::get(aProgram.llInt64Ty, 0));
+        return aBlock.builder->CreateSelect(cond,
+                         validVal,
+                         ConstantPointerNull::get(aProgram.llInt8PtrTy));
     }
-    return ConstantPointerNull::get(aProgram.llInt8PtrTy);
+    return validVal;
 }
 
 - (NSString *)description

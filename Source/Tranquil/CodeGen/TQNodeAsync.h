@@ -7,6 +7,7 @@
 @end
 
 @interface TQNodeWait : TQNode
+@property(readwrite, retain) TQNode *timeoutExpr;
 + (TQNodeWait *)node;
 @end
 

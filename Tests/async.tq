@@ -18,3 +18,11 @@ Sleep(3)
 shouldStop = yes
 wait
 Sleep(1) \ Allow the whenFinished block to execute
+
+async {
+    Sleep(5)
+    "This should never be displayed" print
+}
+unless wait(2) {
+    "Timed out after 2 seconds" print
+}
