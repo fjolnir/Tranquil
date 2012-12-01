@@ -5,6 +5,10 @@ using namespace llvm;
 @implementation TQNodeArgument
 @synthesize passedNode=_passedNode, selectorPart=_selectorPart;
 
++ (TQNodeArgument *)nodeWithselectorPart:(NSString *)aIdentifier
+{
+    return [self nodeWithPassedNode:nil selectorPart:aIdentifier];
+}
 + (TQNodeArgument *)nodeWithPassedNode:(TQNode *)aNode selectorPart:(NSString *)aIdentifier
 {
     return [[[self alloc] initWithPassedNode:aNode selectorPart:aIdentifier] autorelease];
