@@ -86,6 +86,13 @@ Class TQGetOrCreateClass(const char *name, const char *superName)
     return klass;
 }
 
+Class TQGetClass(const char *name)
+{
+    Class kls = objc_getClass(name);
+    TQAssert(kls, @"Class '%s' does not exist", name);
+    return kls;
+}
+
 Class TQObjectGetSuperClass(id aObj)
 {
     return class_getSuperclass(object_getClass(aObj));
@@ -145,6 +152,12 @@ void TQUnboxObject(id object, const char *type, void *buffer)
 id TQBoxValue(void *value, const char *type)
 {
     return [TQBoxedObject box:value withType:type];
+}
+
+int64_t _TQObjectToNanoseconds(id obj)
+{
+    double seconds = [obj doubleValue];
+    return (int64_t)(seconds * 1000000000.0);
 }
 
 // TODO: This turns out to not actually be sufficient, there are additional cases to be handled for structs composed of smaller types (on x86-64)

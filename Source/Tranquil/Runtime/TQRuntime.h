@@ -104,6 +104,8 @@ NSPointerArray *TQVaargsToArray(va_list *items);
 
 // Looks up a class if it exists, otherwise registers it
 Class TQGetOrCreateClass(const char *name, const char *superName);
+// Looks up a class and crashes if it doesn't exist.
+Class TQGetClass(const char *name);
 // Returns the superclass of the class of an object
 Class TQObjectGetSuperClass(id aObj);
 // Determines whether a method with a certain signature needs to be boxed

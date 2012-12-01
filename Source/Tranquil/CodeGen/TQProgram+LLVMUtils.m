@@ -49,19 +49,20 @@ using namespace llvm;
     object_getClass, TQPrepareObjectForReturn,
     objc_autorelease, objc_autoreleasePoolPush,
     objc_autoreleasePoolPop, TQSetValueForKey,
-    TQValueForKey, TQGetOrCreateClass,
+    TQValueForKey, TQGetOrCreateClass, TQGetClass,
     TQObjectsAreEqual, TQObjectsAreNotEqual, TQObjectGetSuperClass,
     TQVaargsToArray, TQUnboxObject,
     TQBoxValue, tq_msgSend, tq_msgSend_noBoxing, objc_retainAutorelease, objc_retainAutoreleaseReturnValue,
     objc_autoreleaseReturnValue, objc_retainAutoreleasedReturnValue,
     objc_storeStrong, TQStoreStrong, TQInitializeRuntime,
     dispatch_get_global_queue, dispatch_group_create,
-    dispatch_release, dispatch_group_wait,
+    dispatch_release, dispatch_group_wait, dispatch_time,
     dispatch_group_notify, dispatch_group_async,
     objc_sync_enter, objc_sync_exit, TQFloatFitsInTaggedNumber,
     setjmp, longjmp, TQShouldPropagateNonLocalReturn, TQGetNonLocalReturnJumpTarget,
     TQGetNonLocalReturnPropagationJumpTarget, TQPushNonLocalReturnStack, TQPopNonLocalReturnStack,
-    TQPopNonLocalReturnStackAndGetPropagationJumpTarget, TQNonLocalReturnStackHeight, TQGetNonLocalReturnValue, pthread_self;
+    TQPopNonLocalReturnStackAndGetPropagationJumpTarget, TQNonLocalReturnStackHeight, TQGetNonLocalReturnValue, pthread_self,
+    _TQObjectToNanoseconds;
 
 
 #pragma mark - Types
@@ -416,14 +417,23 @@ using namespace llvm;
     args_long_long.push_back(self.llLongTy);
     return FunctionType::get(self.llInt8PtrTy, args_long_long, false);
 }
-- (llvm::FunctionType *)_ft_long__i8Ptr_long
+- (llvm::FunctionType *)_ft_long__i8Ptr_i64
 {
-    // long(void*, long)
-    std::vector<Type*> args_i8Ptr_long;
-    args_i8Ptr_long.push_back(self.llInt8PtrTy);
-    args_i8Ptr_long.push_back(self.llLongTy);
-    return FunctionType::get(self.llLongTy, args_i8Ptr_long, false);
+    // long(void*, int64_t)
+    std::vector<Type*> args_i8Ptr_i64;
+    args_i8Ptr_i64.push_back(self.llInt8PtrTy);
+    args_i8Ptr_i64.push_back(self.llInt64Ty);
+    return FunctionType::get(self.llLongTy, args_i8Ptr_i64, false);
 }
+- (llvm::FunctionType *)_ft_i64__i64_i64
+{
+    // int64_t(int64_t, int64_t)
+    std::vector<Type*> args_i64_i64;
+    args_i64_i64.push_back(self.llInt64Ty);
+    args_i64_i64.push_back(self.llInt64Ty);
+    return FunctionType::get(self.llInt64Ty, args_i64_i64, false);
+}
+
 - (llvm::FunctionType *)_ft_i8__float
 {
     // BOOL(float)
@@ -466,6 +476,13 @@ using namespace llvm;
     args_long_i8Ptr_int_i8Ptr.push_back(self.llInt8PtrTy);
     return FunctionType::get(self.llInt32PtrTy, args_long_i8Ptr_int_i8Ptr, false);
 }
+- (llvm::FunctionType *)_ft_i64__i8Ptr
+{
+    // int64_t(id)
+    std::vector<Type*> args_i8Ptr;
+    args_i8Ptr.push_back(self.llInt8PtrTy);
+    return FunctionType::get(self.llInt64Ty, args_i8Ptr, false);
+}
 
 FunAccessor(objc_allocateClassPair, ft_i8Ptr__i8Ptr_i8Ptr_sizeT)
 FunAccessor(objc_registerClassPair, ft_void__i8Ptr)
@@ -495,6 +512,7 @@ FunAccessor(TQStoreStrong, ft_void__i8PtrPtr_i8Ptr)
 FunAccessor(TQSetValueForKey, ft_void__i8Ptr_i8Ptr_i8Ptr)
 FunAccessor(TQValueForKey, ft_i8Ptr__i8Ptr_i8Ptr)
 FunAccessor(TQGetOrCreateClass, ft_i8Ptr__i8Ptr_i8Ptr)
+FunAccessor(TQGetClass, ft_i8Ptr__i8Ptr)
 FunAccessor(TQObjectsAreEqual, ft_i8Ptr__i8Ptr_i8Ptr)
 FunAccessor(TQObjectsAreNotEqual, ft_i8Ptr__i8Ptr_i8Ptr)
 FunAccessor(TQObjectGetSuperClass, ft_i8Ptr__i8Ptr)
@@ -507,7 +525,8 @@ FunAccessor(TQInitializeRuntime, ft_void__i32_i8PtrPtr)
 FunAccessor(dispatch_get_global_queue, ft_i8Ptr__long_long)
 FunAccessor(dispatch_group_create, ft_i8Ptr__void)
 FunAccessor(dispatch_release, ft_void__i8Ptr)
-FunAccessor(dispatch_group_wait, ft_long__i8Ptr_long)
+FunAccessor(dispatch_group_wait, ft_long__i8Ptr_i64)
+FunAccessor(dispatch_time, ft_i64__i64_i64)
 FunAccessor(dispatch_group_notify, ft_void__i8Ptr_i8Ptr_i8Ptr)
 FunAccessor(dispatch_group_async, ft_void__i8Ptr_i8Ptr_i8Ptr)
 FunAccessor(objc_sync_enter, ft_int__i8Ptr)
@@ -523,6 +542,7 @@ FunAccessor(TQPopNonLocalReturnStackAndGetPropagationJumpTarget, ft_i32Ptr__void
 FunAccessor(TQNonLocalReturnStackHeight, ft_int__void);
 FunAccessor(TQGetNonLocalReturnValue, ft_i8Ptr__void);
 FunAccessor(pthread_self, ft_long_void);
+FunAccessor(_TQObjectToNanoseconds, ft_i64__i8Ptr);
 
 - (llvm::Function *)setjmp
 {
