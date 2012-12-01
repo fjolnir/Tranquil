@@ -11,7 +11,7 @@ scriptPath   = ...[0]
 task         = nil
 lastModified = nil
 
-modificationDate = `(NSFileManager defaultManager attributesOfItemAtPath:scriptPath error:nil)[@NSFileModificationDate]`
+modificationDate = `(NSFileManager defaultManager attributesOfItemAtPath:scriptPath error:nil)[#NSFileModificationDate]`
 doesExist        = `NSFileManager defaultManager fileExistsAtPath:scriptPath`
 
 execute = {
@@ -20,7 +20,7 @@ execute = {
 
     lastModified = modificationDate()
     task terminate
-    task = NSTask new;
+    task = NSTask new
         setLaunchPath: "/usr/local/tranquil/bin/tranquil";
          setArguments: [scriptPath];
     setStandardOutput: NSFileHandle fileHandleWithStandardOutput;
@@ -30,7 +30,7 @@ execute = {
                  self
 }
 
-until forever {
+until nil {
     execute() if (modificationDate() > lastModified) || lastModified == nil
     Usleep(500000)
 }

@@ -25,9 +25,6 @@
 - (id)isLesserOrEqualTo:(id)b;
 - (id)isGreaterOrEqualTo:(id)b;
 
-- (NSMutableString *)toString;
-- (id)print;
-
 - (id)perform:(NSString *)aSelector withArguments:(NSArray *)aArguments;
 - (id)perform:(NSString *)aSelector;
 - (id)perform:(NSString *)aSelector :(id)a1;

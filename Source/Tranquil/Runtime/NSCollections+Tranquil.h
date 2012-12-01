@@ -8,6 +8,7 @@
 + (NSMapTable *)tq_mapTableWithObjectsAndKeys:(id)firstObject , ...; // Arguments terminated by TQNothing
 - (id)at:(id)aKey;
 - (id)each:(id (^)(id))aBlock;
+- (id)add:(NSMapTable *)aOther;
 @end
 
 @interface NSPointerArray (Tranquil)

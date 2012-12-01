@@ -178,7 +178,7 @@ static TQProgram *sharedInstance;
         if(!_globalQueue)
             _globalQueue = new GlobalVariable(*_llModule, self.llInt8PtrTy, false, GlobalVariable::ExternalLinkage, NULL, "TQGlobalQueue");
     }
-    
+
     NSDictionary *globalsBefore = [[_globals copy] autorelease];
     [aNode generateCodeInProgram:self block:nil root:aNode error:aoErr];
     if(*aoErr) {
@@ -327,7 +327,7 @@ static TQProgram *sharedInstance;
     } @catch (NSException *e) {
         if(aoErr) *aoErr = [NSError errorWithDomain:kTQRuntimeErrorDomain
                                                code:kTQObjCException
-                                           userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[e reason], @"reason",
+                                           userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[e reason], NSLocalizedDescriptionKey,
                                                                                                e, @"exception", nil]];
     }
 #ifdef TQ_PROFILE
@@ -429,18 +429,17 @@ static TQProgram *sharedInstance;
 
 - (NSString *)_resolveImportPath:(NSString *)aPath
 {
-#define NOT_FOUND() do { TQLog(@"No file found for path '%@'", aPath); return nil; } while(0)
     aPath = [aPath stringByStandardizingPath];
     BOOL isDir;
     NSFileManager *fm = [NSFileManager defaultManager];
     if([aPath hasPrefix:@"/"]) {
         if([fm fileExistsAtPath:aPath isDirectory:&isDir] && !isDir)
             return aPath;
-        NOT_FOUND();
+        return nil;
     }
     NSArray *testPathComponents = [aPath pathComponents];
     if(![testPathComponents count])
-        NOT_FOUND();
+        return nil;
 
     BOOL hasExtension = [[aPath pathExtension] length] > 0;
     BOOL usesSubdir   = [testPathComponents count] > 1;
@@ -473,8 +472,7 @@ static TQProgram *sharedInstance;
         }
     }
 
-    NOT_FOUND();
-#undef NOT_FOUND
+    return nil;
 }
 
 - (llvm::Value *)getGlobalStringPtr:(NSString *)aStr withBuilder:(llvm::IRBuilder<> *)aBuilder

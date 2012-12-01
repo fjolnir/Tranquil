@@ -1,4 +1,4 @@
-#include <Foundation/NSObjCRuntime.h>
+#import <Foundation/NSObjCRuntime.h>
 
 // Because NSProxy does too much.
 @interface TQProxy

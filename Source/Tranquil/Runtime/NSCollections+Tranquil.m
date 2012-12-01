@@ -47,7 +47,10 @@
 }
 - (id)set:(id)aKey to:(id)aVal
 {
-    [self setObject:aVal forKey:aKey];
+    if(aVal)
+        [self setObject:aVal forKey:aKey];
+    else
+        [self removeObjectForKey:aKey];
     return nil;
 }
 
@@ -69,6 +72,15 @@
             break;
     }
     return nil;
+}
+
+- (id)add:(NSMapTable *)aOther
+{
+    NSMapTable *res = [self copy];
+    for(id key in aOther) {
+        [res setObject:[aOther objectForKey:key] forKey:key];
+    }
+    return [res autorelease];
 }
 
 @end

@@ -49,4 +49,20 @@
     [(id)self setObject:value forKeyedSubscript:key];
     return nil;
 }
+
+- (NSMutableString *)toString
+{
+    return [[[self description] mutableCopy] autorelease];
+}
+
+- (id)print
+{
+    fprintf(stdout, "%s\n", [[self toString] UTF8String]);
+    return nil;
+}
+- (id)printWithoutNl
+{
+    fprintf(stdout, "%s", [[self toString] UTF8String]);
+    return self;
+}
 @end

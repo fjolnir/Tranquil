@@ -4,17 +4,20 @@ import "stdlib"
 
 "welcome; this is tranquil." print
 
-historyPath   = "/tmp/tqrepl_history"
+historyPath = "/tmp/tqrepl_history"
+saveHistory = ... count > 0 and ...[0] ~= #-nosavehistory
 
-History_truncate_file(historyPath, 300) \ Just to make sure things don't get unmanageable
-Read_history(historyPath)
+if saveHistory {
+    History_truncate_file(historyPath, 300) \ Just to make sure things don't get unmanageable
+    Read_history(historyPath)
+}
 
 getInput = { indent = 0, shouldDecrement = no |
     ptr = Readline((" " * indent * 4) + "> ")
     str = ptr toString
     if str length > 0 {
         Add_history(str)
-        Write_history(historyPath)
+        Write_history(historyPath) if saveHistory
     }
     Free(ptr)
 

@@ -25,13 +25,13 @@ using namespace llvm;
         return [bridgedNode generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
     else {
         if(aProgram.useAOTCompilation)
-            return aBlock.builder->CreateCall(aProgram.objc_getClass, [aProgram getGlobalStringPtr:self.value inBlock:aBlock]);
+            return aBlock.builder->CreateCall(aProgram.TQGetClass, [aProgram getGlobalStringPtr:self.value inBlock:aBlock]);
         else {
             Class kls = objc_getClass([self.value UTF8String]);
             if(kls)
                 return ConstantExpr::getIntToPtr(ConstantInt::get(aProgram.llLongTy, (uintptr_t)kls), aProgram.llInt8PtrTy);
             else
-                return aBlock.builder->CreateCall(aProgram.objc_getClass, [aProgram getGlobalStringPtr:self.value inBlock:aBlock]);
+                return aBlock.builder->CreateCall(aProgram.TQGetClass, [aProgram getGlobalStringPtr:self.value inBlock:aBlock]);
         }
     }
 }

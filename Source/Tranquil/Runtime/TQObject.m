@@ -99,22 +99,6 @@ static NSArray *methodsForClass(Class kls);
     return [self respondsToSelector:NSSelectorFromString(aSelector)] ? TQValid : nil;
 }
 
-- (NSMutableString *)toString
-{
-    return [[[self description] mutableCopy] autorelease];
-}
-
-- (id)print
-{
-    printf("%s\n", [[self toString] UTF8String]);
-    return nil;
-}
-- (id)printWithoutNl
-{
-    printf("%s", [[self toString] UTF8String]);
-    return self;
-}
-
 - (id)isNil
 {
     return nil;

@@ -110,7 +110,7 @@ using namespace llvm;
 
         // Return original value and increment (var++)
         TQNode *incrementee = _left ?: _right;
-        if([incrementee isKindOfClass:[TQNodeVariable class]])
+        if([incrementee respondsToSelector:@selector(createStorageInProgram:block:root:error:)])
             [(TQNodeVariable *)incrementee createStorageInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         if(_left) {
             beforeVal = [incrementee generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
