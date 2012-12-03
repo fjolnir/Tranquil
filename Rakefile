@@ -110,6 +110,7 @@ def compile(file, flags=CXXFLAGS[@buildMode], cc=CXX, arch="x86_64", ios=false)
     else
         flags = flags + ' -mmacosx-version-min=10.7'
         flags << " -I#{TRANQUIL}/libffi/include"
+        flags << ' -F/System/Library/Frameworks/ApplicationServices.framework/Frameworks'
     end
     cmd = "#{cc} #{file[:in].join(' ')} -arch #{arch} #{flags} -c -o #{file[:out]}"
     unless file[:in].size == 1 and file[:in][0].end_with? '.s'
