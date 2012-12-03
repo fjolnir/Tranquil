@@ -1,7 +1,5 @@
 #import "NSBlock+TQAdditions.h"
 #import "TQNumber.h"
-#import "TQRuntime.h"
-#import "../../../Build/TQStubs.h"
 #import <objc/runtime.h>
 
 @implementation NSBlock (Tranquil)

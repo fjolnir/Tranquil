@@ -1,4 +1,5 @@
 #import "TQBoxedObject.h"
+#import "TQRuntimePrivate.h"
 #import "TQFFIType.h"
 #import "TQRuntime.h"
 #import "TQNumber.h"
@@ -557,14 +558,17 @@ static id _box_C_ULNG_LNG_imp(TQBoxedObject *self, SEL _cmd, unsigned long long 
     if([key isKindOfClass:[TQNumber class]] || [key isKindOfClass:[NSNumber class]])
         return [self objectAtIndexedSubscript:[(TQNumber *)key unsignedIntegerValue]];
     else
-        return [self objectForKeyedSubscript:key];
+        [NSException raise:NSInvalidArgumentException format:@"Keyed access for boxed object is not supported"];
+    return nil;
+        //return [self objectForKeyedSubscript:key];
 }
 - (id)set:(id)key to:(id)val
 {
     if([key isKindOfClass:[TQNumber class]] || [key isKindOfClass:[NSNumber class]])
         [self setObject:val atIndexedSubscript:[(TQNumber *)key unsignedIntegerValue]];
     else
-        [self setObject:val forKeyedSubscript:key];
+        [NSException raise:NSInvalidArgumentException format:@"Keyed access for boxed object is not supported"];
+        //[self setObject:val forKeyedSubscript:key];
     return nil;
 }
 

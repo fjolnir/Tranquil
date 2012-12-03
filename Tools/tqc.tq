@@ -48,8 +48,7 @@ tqFlags push: inPath
 
 if forIOS {
     clang = #"/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang"
-    ldFlags push: #"/usr/local/tranquil/libffi-ios/lib/libffi.a";
-            push: "«llvm»/lib/clang/3.2/lib/darwin/libclang_rt.ios.a";
+    ldFlags push: "«llvm»/lib/clang/3.2/lib/darwin/libclang_rt.ios.a";
             push: #"-lcrt1.3.1.o";
             push: #-syslibroot
     if arch == #i386 then {
@@ -78,9 +77,7 @@ if forIOS {
             push: #"10.7.0";
             push: #"-lcrt1.10.6.o";
             push: #"/usr/lib/arc/libarclite_macosx.a";
-            push: #"/usr/local/tranquil/gmp/lib/libgmp.a";
-            push: "«llvm»/lib/clang/3.2/lib/darwin/libclang_rt.osx.a";
-            push: #-lffi
+            push: "«llvm»/lib/clang/3.2/lib/darwin/libclang_rt.osx.a"
 
 flags = [#-arch, arch] + tqFlags
 status = (NSTask launchedTaskWithLaunchPath: tranquil arguments: flags) waitUntilExit; terminationStatus

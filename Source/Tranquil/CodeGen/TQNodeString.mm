@@ -118,7 +118,7 @@ using namespace llvm;
     // Todo: make this use a NSConstantString
     Module *mod = aProgram.llModule;
 
-    NSString *globalName = [NSString stringWithFormat:@"TQConstNSStr_%ld", [self.value hash]];
+    NSString *globalName = [NSString stringWithFormat:@"TQConstNSStr_%ld", (unsigned long)[self.value hash]];
 
     Value *str = mod->getGlobalVariable([globalName UTF8String], true);
     if(!str) {

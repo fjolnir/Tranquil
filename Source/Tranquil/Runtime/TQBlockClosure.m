@@ -1,4 +1,5 @@
 #import "TQBlockClosure.h"
+#import "TQRuntimePrivate.h"
 #import "TQFFIType.h"
 #import "TQBoxedObject.h"
 #import "../../../Build/TQStubs.h"

@@ -6,7 +6,6 @@
 #import "TQNodeCustom.h"
 #import "Processors/TQProcessor.h"
 #import "ObjcSupport/TQHeaderParser.h"
-#import "../Runtime/TQRuntime.h"
 #import "../Runtime/TQBoxedObject.h"
 #import "../Shared/TQDebug.h"
 #import <objc/runtime.h>
@@ -189,7 +188,7 @@ static TQProgram *sharedInstance;
         }
         if(shouldResetEvalPaths)
             _evaluatedPaths = nil;
-        return NO;
+        return nil;
     }
     _debugBuilder->finalize();
 
@@ -480,7 +479,7 @@ static TQProgram *sharedInstance;
     NSString *globalName;
     // When compiling AOT certain symbols in the global name can cause llvm to generate invalid ASM => we use the hash in that case (which destroys the output's readbility)
     if(_useAOTCompilation)
-        globalName = [NSString stringWithFormat:@"TQConstCStr_%ld", [aStr hash]];
+        globalName = [NSString stringWithFormat:@"TQConstCStr_%ld", (unsigned long)[aStr hash]];
     else
         globalName = [NSString stringWithFormat:@"TQConstCStr_%@", aStr];
 
@@ -513,8 +512,8 @@ static TQProgram *sharedInstance;
         if([_selectorSymbols objectForKey:aSelector]) {
             selectorGlobal =  _llModule->getGlobalVariable([[_selectorSymbols objectForKey:aSelector] UTF8String], true);
         } else {
-            NSString *refSymbol  = [NSString stringWithFormat:@"\x01L_OBJC_SELECTOR_REFERENCES_%ld", [[_selectorSymbols allValues] count]];
-            NSString *nameSymbol = [NSString stringWithFormat:@"\x01L_OBJC_METH_VAR_NAME_%ld", [[_selectorSymbols allValues] count]];
+            NSString *refSymbol  = [NSString stringWithFormat:@"\x01L_OBJC_SELECTOR_REFERENCES_%ld", (unsigned long)[[_selectorSymbols allValues] count]];
+            NSString *nameSymbol = [NSString stringWithFormat:@"\x01L_OBJC_METH_VAR_NAME_%ld", (unsigned long)[[_selectorSymbols allValues] count]];
 
             ArrayType *selStrType = ArrayType::get(IntegerType::get(_llModule->getContext(), 8), strlen([aSelector UTF8String])+1);
             GlobalVariable *selNameGlobal = new GlobalVariable(*_llModule, selStrType, false, GlobalValue::InternalLinkage,

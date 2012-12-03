@@ -1,5 +1,5 @@
 #import <Foundation/Foundation.h>
-#import <Tranquil/Runtime/TQRuntime.h>
+#import <Tranquil/Runtime/TQObject.h>
 #import <Tranquil/Shared/TQBatching.h>
 
 @class TQNumber;

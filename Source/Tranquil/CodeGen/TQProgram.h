@@ -3,6 +3,7 @@
 
 #import <Foundation/Foundation.h>
 #import <Tranquil/Runtime/TQRuntime.h>
+#import <Tranquil/Runtime/TQRuntimePrivate.h>
 
 #ifdef __cplusplus
 #define TQ_EXTERN_C extern "C"

@@ -665,7 +665,7 @@ backtick        ::= BACKTICK|BACKTICKNL.
 #define LN(dest, src) ([dest setLineNumber:[src lineNumber]])
 
 #define SyntaxError(aCode) do { \
-    NSString *reason = [NSString stringWithFormat:@"Syntax error: near '%@' on line %ld", [TOKEN value], [TOKEN lineNumber]]; \
+    NSString *reason = [NSString stringWithFormat:@"Syntax error: near '%@' on line %ld", [TOKEN value], (unsigned long)[TOKEN lineNumber]]; \
     NSDictionary *info = [NSDictionary dictionaryWithObject:reason forKey:NSLocalizedDescriptionKey]; \
     state->syntaxError = [NSError errorWithDomain:kTQSyntaxErrorDomain \
                                              code:aCode \

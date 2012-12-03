@@ -337,7 +337,7 @@ static NSString *_prepareConstName(NSString *name)
     else if(type.kind == CXType_Pointer)
         [realEncoding appendString:@"^"];
     else
-        TQAssert(nil, @"PANIC (%s: %s)",  clang_getCString(clang_getCursorSpelling(cursor)), clang_getCString(clang_getTypeKindSpelling(type.kind)));
+        TQAssert(NO, @"PANIC (%s: %s)",  clang_getCString(clang_getCursorSpelling(cursor)), clang_getCString(clang_getTypeKindSpelling(type.kind)));
 
     __block BOOL isFirstChild = YES;
     clang_visitChildrenWithBlock(cursor, ^(CXCursor child, CXCursor parent) {

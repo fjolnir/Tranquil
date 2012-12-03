@@ -1,4 +1,5 @@
 #import "TQRuntime.h"
+#import "TQRuntimePrivate.h"
 #import "TQBoxedObject.h"
 #import "NSString+TQAdditions.h"
 #import <Foundation/Foundation.h>

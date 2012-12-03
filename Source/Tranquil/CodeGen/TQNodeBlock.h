@@ -1,6 +1,6 @@
 #import <Tranquil/CodeGen/TQNode.h>
-#include "TQNodeReturn.h"
-#include "../Runtime/TQRuntime.h"
+#import "TQNodeReturn.h"
+#import "../Runtime/TQRuntime.h"
 #include <llvm/IRBuilder.h>
 #include <llvm/DebugInfo.h>
 

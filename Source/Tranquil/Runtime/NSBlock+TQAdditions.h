@@ -1,6 +1,4 @@
-#import <Foundation/Foundation.h>
-@interface NSBlock : NSObject
-@end
+#import <Tranquil/Runtime/TQStubs.h>
 
 @interface NSBlock (Tranquil)
 - (id)if:(id)cond;

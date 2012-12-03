@@ -219,7 +219,7 @@ using namespace llvm;
         return [self _getForwardingInProgram:aProgram block:aBlock root:aRoot];
 
     TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock program:aProgram];
-    TQAssertSoft(existingVar, kTQSyntaxErrorDomain, kTQUndefinedVariable, NULL, @"Variable '%@' is undefined on line %ld", self.name, self.lineNumber);
+    TQAssertSoft(existingVar, kTQSyntaxErrorDomain, kTQUndefinedVariable, NULL, @"Variable '%@' is undefined on line %ld", self.name, (unsigned long)self.lineNumber);
     if(![self createStorageInProgram:aProgram block:aBlock root:aRoot error:aoErr])
         return NULL;
 
@@ -403,7 +403,7 @@ using namespace llvm;
                   root:(TQNode *)aRoot
                  error:(NSError **)aoErr
 {
-    TQAssertSoft(NO, kTQSyntaxErrorDomain, kTQInvalidAssignee, NO, @"Tried to assign to super! on line %ld", self.lineNumber);
+    TQAssertSoft(NO, kTQSyntaxErrorDomain, kTQInvalidAssignee, NULL, @"Tried to assign to super! on line %ld", (unsigned long)self.lineNumber);
     return NULL;
 }
 

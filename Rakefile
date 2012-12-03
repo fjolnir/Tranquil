@@ -19,7 +19,8 @@ PARSER_OUTPATH   = "#{BUILD_DIR}/parse.mm"
 
 CXXFLAGS = {
     :release => [
-        '-I`pwd`/Source',
+        "-I#{TRANQUIL}/include",
+#        '-I`pwd`/Source',
         '-I`pwd`/Build',
         '-I/usr/include/libxml2',
         "-I#{TRANQUIL}/gmp/include",
@@ -29,7 +30,10 @@ CXXFLAGS = {
     ].join(' '),
     :development => [
         '-DDEBUG',
+        '-Wno-objc-root-class',
+        '-Wno-cast-of-sel-type',
         '-I`pwd`/Source',
+        "-I#{TRANQUIL}/include",
         '-I`pwd`/Build',
         '-I/usr/include/libxml2',
         "-I#{TRANQUIL}/gmp/include",
@@ -48,7 +52,6 @@ TOOL_LDFLAGS = [
     "-rpath #{TRANQUIL}/lib",
     '-ltranquil',
     '-ltranquil_codegen',
-    "#{TRANQUIL}/gmp/lib/libgmp.a",
     '-lffi',
     '-lreadline',
     #'-lprofiler',
@@ -179,7 +182,7 @@ file :build_dir do
 end
 
 file :libtranquil => HEADERS_OUT + RUNTIME_O_FILES do |t|
-    sh "libtool -static -o #{BUILD_DIR}/#{RUNTIMELIB} #{RUNTIME_O_FILES}"
+    sh "libtool -static -o #{BUILD_DIR}/#{RUNTIMELIB} #{RUNTIME_O_FILES} #{TRANQUIL}/gmp/lib/libgmp.a #{TRANQUIL}/libffi/lib/libffi.a #{TRANQUIL}/libffi-ios/lib/libffi.a"
     sh "mkdir -p #{TRANQUIL}/lib"
     sh "cp Build/#{RUNTIMELIB} #{TRANQUIL}/lib"
 end

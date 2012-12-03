@@ -1,9 +1,7 @@
 #import "NSCollections+Tranquil.h"
-#import "TQRuntime.h"
 #import "../../../Build/TQStubs.h"
 #import "TQNumber.h"
 #import <objc/runtime.h>
-#import "NSObject+TQAdditions.h"
 #import "TQEnumerable.h"
 
 @interface TQPointerArrayEnumerator : NSEnumerator {
