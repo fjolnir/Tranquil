@@ -99,7 +99,7 @@ typedef struct {
 
     strCont     = (ualnum | ascii) - '"';
     simpleStr   = '"' strCont* '"';
-    constStr    = "#" (simpleStr | [^\n ;,\]}.)`]+);
+    constStr    = "#" (simpleStr | (strCont - rGuillmt - [\n ;,\]}.)`])+);
     selector    = (ualnum | "+" | "-" | "*" | "/" | "^" | "=" | "~" | "<" | ">" | "[" "]" | "_")* ":";
 
     regexCont   = (ualnum | ascii) - '/' - '\\';
