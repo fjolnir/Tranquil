@@ -25,7 +25,7 @@ llcFlags = [#-disable-fp-elim, #-relocation-model=pic]
 cflags   = [#-c, #"-I/usr/local/tranquil/include", #-O0]
 ldFlags  = [#-demangle, #-dynamic, #-all_load,
             #-lm, #-ldl, #-ObjC, #-lSystem,
-            #-framework, #Foundation,
+            #-framework, #Foundation, #-no_compact_unwind,
             #-force_load, #"/usr/local/tranquil/lib/libtranquil.a"]
 
 args = ... objectEnumerator
