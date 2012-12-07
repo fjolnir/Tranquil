@@ -89,6 +89,15 @@ static NSArray *methodsForClass(Class kls);
     return [self accessors:aAccessors initialValue:nil];
 }
 
++ (id)isEqualTo:(id)b
+{
+    return [self isEqual:b] ? TQValid : nil;
+}
++ (id)notEqualTo:(id)b
+{
+    return [self isEqual:b] ? nil : TQValid;
+}
+
 - (id)isa:(Class)aClass
 {
     return [self isKindOfClass:aClass] ? TQValid : nil;
@@ -108,6 +117,7 @@ static NSArray *methodsForClass(Class kls);
 {
     return self == obj ? TQValid : nil;
 }
+
 - (id)isEqualTo:(id)b
 {
     return [self isEqual:b] ? TQValid : nil;
