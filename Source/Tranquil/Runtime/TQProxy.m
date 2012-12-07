@@ -23,7 +23,7 @@
 
 - (void)dealloc
 {
-    free(self);
+    object_dispose(self);
 }
 
 - (BOOL)isProxy
