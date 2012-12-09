@@ -103,13 +103,13 @@ fib(10) print
     \ We can write that more concisely as:
     val   = table[{ @anotherField => aValue }][#field]
     
-### Create a Web Server (Using [WebAppKit](http://github.com/fjolnir/WebAppKit))
+### Create a Web Server (Using [HTTPKit](http://github.com/fjolnir/HTTPKit))
 
-    import "WebAppKit"
-    WAApplication applicationOnPort: 8080;
-                          handleGET: "/"
-                               with: `request, response | "Hello world"`;
-                      waitAndListen
+    import "HTTPKit"
+    HTTP new handleGet: "/"
+                  with: `connection| "Hello World!"`;
+          listenOnPort: 8080
+               onError: `"Unable to start server" print`
     
 ### Evaluate a regular expression
 
