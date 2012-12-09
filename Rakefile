@@ -31,6 +31,7 @@ CXXFLAGS = {
     :development => [
         '-DDEBUG',
         '-Wno-objc-root-class',
+        '-Wno-objc-protocol-method-implementation',
         '-Wno-cast-of-sel-type',
         '-I`pwd`/Source',
         "-I#{TRANQUIL}/include",

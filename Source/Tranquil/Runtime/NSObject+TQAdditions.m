@@ -5,6 +5,17 @@
 #import <objc/runtime.h>
 
 @implementation NSObject (Tranquil)
+
+// These make it possible for weaks/promises/etc to be transparent
++ (BOOL)isEqual:(id)aObj
+{
+    return self == [aObj self];
+}
+- (BOOL)isEqual:(id)aObj
+{
+    return self == [aObj self];
+}
+
 #define CopyMethods(kls, dst) do { \
     unsigned methodCount = 0; \
     Method *methods = class_copyMethodList(kls, &methodCount); \
