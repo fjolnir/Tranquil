@@ -17,7 +17,7 @@ typedef struct {
 #define CopyCStr() ((unsigned char *)strndup((char *)ts, te-ts))
 
 #define _EmitToken(tokenId, val) do { \
-    /*NSLog(@"emitting %ld = %@ on line: %ld", tokenId, val, parserState.currentLine);*/ \
+    /*NSLog(@"emitting %d = '%@' on line: %d", tokenId, val, parserState.currentLine);*/ \
     Parse(parser, tokenId, [TQToken withId:tokenId value:val line:parserState.currentLine], &parserState); \
     parserState.atBeginningOfExpr = NO; \
 } while(0);
@@ -85,22 +85,23 @@ typedef struct {
     oct         = "0o"i [0-7]+;
     anybase     = udigit+ "r"i ([0-9]|[a-zA-Z])+;
 
-    char        = ualnum | '?' | '!' | '_';
-    constant    = '_'* uupper char*;
-    identifier  = '_'* ulower char*;
+    lGuillemet  = 0xC2 0xAB; # «
+    rGuillemet  = 0xC2 0xBB; # »
+    specialChar = 0xC2 | '"' | "'" | ',' | ';' | ':' | '|' | '#' | '@' | '~' | '`' | '{' | '}' | '[' | ']' | '(' | ')' | '+' | '-' | '*' | '/' | '%' | '=' | '<' | '>' | '^' | '\\' | '\r' | '\n' | space;
+
+    char        = (any - specialChar) | (0xC2 ^(0xAB|0xBB));
+    constant    = uupper char*;
+    identifier  = (char -- (uupper|udigit)) char*;
     comment     = '\\' [^\n]*;
     nl          = ((space|comment)* '\n' space*);
     whitespace  = (nl|space|comment);
     whitespaceNoNl  = (" "|"\t"|comment);
     term        = whitespace* (nl|"}");
 
-    lGuillmt    = 0xC2 0xAB; # «
-    rGuillmt    = 0xC2 0xBB; # »
-
     strCont     = (ualnum | ascii) - '"';
     simpleStr   = '"' strCont* '"';
-    constStr    = "#" (simpleStr | (strCont - rGuillmt - [\n ;,\]}.)`])+);
-    selector    = (ualnum | "+" | "-" | "*" | "/" | "^" | "=" | "~" | "<" | ">" | "[" "]" | "_")* ":";
+    constStr    = "#" (simpleStr | (strCont - rGuillemet - [\n ;,\]}.)`])+);
+    selector    = char* ":";
 
     regexCont   = (ualnum | ascii) - '/' - '\\';
 
@@ -112,7 +113,7 @@ string := |*
     '\\"'                            => { [strBuf appendString:@"\""];                                    };
     "\\'"                            => { [strBuf appendString:@"'"];                                     };
     "\\\\"                           => { [strBuf appendString:@"\\"];                                    };
-    "\\" lGuillmt                    => { [strBuf appendString:@"«"];                                     };
+    "\\" lGuillemet                  => { [strBuf appendString:@"«"];                                     };
     '\\x' %{ temp1 = p; } [0-9a-zA-Z]* => {
         long long code = strtoll((char*)temp1, NULL, 16);
         [strBuf appendFormat:@"%c", (int)code];
@@ -120,7 +121,7 @@ string := |*
     "\\" ualnum+                     => { TQAssert(NO, @"Invalid escape %@", NSStr(0,0));                 };
     strCont                          => { [strBuf appendString:NSStr(0, 0)];                              };
 
-    lGuillmt                         => { _EmitToken(temp3 == 1 ? LSTR  : MSTR, strBuf); fret;            };
+    lGuillemet                       => { _EmitToken(temp3 == 1 ? LSTR  : MSTR, strBuf); fret;            };
     '"' term                         => { _EmitToken(temp3 == 1 ? STRNL : RSTRNL, strBuf);
                                           BacktrackTerm(); fret;                                          };
     '"'                              => { _EmitToken(temp3 == 1 ? STR   : RSTR, strBuf); fret;            };
@@ -265,7 +266,7 @@ main := |*
     constStr                         => { EmitConstStringToken(CONSTSTR, 0, 0);                           };
 
     '"'                              => { temp3 = 1; strBuf = [NSMutableString string]; fcall string;     };
-    rGuillmt                         => { temp3 = 2; strBuf = [NSMutableString string]; fcall string;     };
+    rGuillemet                       => { temp3 = 2; strBuf = [NSMutableString string]; fcall string;     };
 
     "."                              => { EmitToken(PERIOD);                                              };
     nl                               => { IncrementLine();                                                };

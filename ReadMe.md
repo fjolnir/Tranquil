@@ -15,6 +15,7 @@ It's features include:
 * Multiple assignment.
 * Message cascading.
 * Unlimited number range.
+* Unicode through&through (変数=123 works fine)
 * Good performance, even at this extremely early stage.
 * And more..
 
