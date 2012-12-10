@@ -213,17 +213,20 @@ NSString * const TQTypeString    = @"*";
 
 - (NSMutableString *)toString
 {
+    if(*_itemType == _C_CHR && _count > 0)
+        return [[[NSMutableString alloc] initWithBytes:_addr
+                                                length:_count
+                                              encoding:NSUTF8StringEncoding] autorelease];
+
     const char *cStr = [self UTF8String];
     if(cStr)
         return [NSMutableString stringWithUTF8String:cStr];
-    else if(*_itemType == _C_CHR && _count > 0)
-        return [[[NSMutableString alloc] initWithBytes:_addr length:_count encoding:NSUTF8StringEncoding] autorelease];
     return nil;
 }
 
 - (const char *)UTF8String
 {
-    if(*_itemType == _C_CHR && _count == 0)
+    if(*_itemType == _C_CHR)
         return _addr;
     else if(*_itemType == _C_CHARPTR)
         return *(char **)_addr;
