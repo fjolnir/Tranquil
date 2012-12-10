@@ -15,8 +15,6 @@
 #define TQBoxedObject_PREFIX "TQBoxedObject_"
 #define BlockImp imp_implementationWithBlock
 
-static const int _TQBlockClosure_TypeEncAssocKey = 123;
-
 // To identify whether a block is a wrapper or not
 #define TQ_BLOCK_IS_WRAPPER_BLOCK (1 << 20)
 
@@ -633,9 +631,9 @@ id __wrapperBlock_invoke(struct TQBoxedBlockLiteral *__blk, ...)
     va_end(argList);
     ffi_call(__blk->cif, FFI_FN(funPtr), ffiRet, ffiArgPtrs);
 
-    // retain/autorelease to move the pointer onto the heap
     if(*retType == _C_ID || TYPE_IS_TOLLFREE(retType))
         return *(id *)ffiRet;
+    // retain/autorelease to move the pointer onto the heap
     return [[[TQBoxedObject box:ffiRet withType:retType] retain] autorelease];
 }
 
