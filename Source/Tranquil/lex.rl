@@ -5,6 +5,16 @@
 #include <assert.h>
 #import <Tranquil/CodeGen/TQNodeBlock.h>
 
+#define PushStr(dblQuot, rstr) \
+    [strings addObject:[NSDictionary dictionaryWithObjectsAndKeys: \
+        [NSNumber numberWithBool:dblQuot], @"dblQuot", \
+        [NSNumber numberWithBool:rstr], @"isRstr", \
+        [NSMutableString string], @"value", nil]];
+#define PopStr() ({ id last = [Str() retain]; [strings removeLastObject]; [last autorelease]; })
+#define Str() [[strings lastObject] objectForKey:@"value"]
+#define IsDblQuot() [[[strings lastObject] objectForKey:@"dblQuot"] boolValue]
+#define IsRstr() [[[strings lastObject] objectForKey:@"isRstr"] boolValue]
+
 typedef struct {
     int currentLine;
     BOOL atBeginningOfExpr;
@@ -17,8 +27,10 @@ typedef struct {
 #define CopyCStr() ((unsigned char *)strndup((char *)ts, te-ts))
 
 #define _EmitToken(tokenId, val) do { \
-    /*NSLog(@"emitting %d = '%@' on line: %d", tokenId, val, parserState.currentLine);*/ \
-    Parse(parser, tokenId, [TQToken withId:tokenId value:val line:parserState.currentLine], &parserState); \
+    int tokenId_ = tokenId; \
+    id val_ = val; \
+    /*NSLog(@"emitting %d = '%@' on line: %d", tokenId, val_, parserState.currentLine); */\
+    Parse(parser, tokenId_, [TQToken withId:tokenId value:val_ line:parserState.currentLine], &parserState); \
     parserState.atBeginningOfExpr = NO; \
 } while(0);
 
@@ -34,7 +46,7 @@ typedef struct {
 #define EmitIntToken(tokenId, base, prefixLen) do { \
     unsigned char *str = CopyCStr(); \
     long long numVal = strtoll((char *)str + (prefixLen), NULL, (base)); \
-    _EmitToken((tokenId), [NSNumber numberWithLongLong:numVal]); \
+    _EmitToken(tokenId, [NSNumber numberWithLongLong:numVal]); \
     free(str); \
 } while(0)
 
@@ -87,7 +99,7 @@ typedef struct {
 
     lGuillemet  = 0xC2 0xAB; # «
     rGuillemet  = 0xC2 0xBB; # »
-    specialChar = 0xC2 | '"' | "'" | ',' | ';' | ':' | '|' | '#' | '@' | '~' | '`' | '{' | '}' | '[' | ']' | '(' | ')' | '+' | '-' | '*' | '/' | '%' | '=' | '<' | '>' | '^' | '\\' | '\r' | '\n' | space;
+    specialChar = 0xC2 | '"' | "'" | '.' | ',' | ';' | ':' | '|' | '#' | '@' | '~' | '`' | '{' | '}' | '[' | ']' | '(' | ')' | '+' | '-' | '*' | '/' | '%' | '=' | '<' | '>' | '^' | '\\' | '\r' | '\n' | space;
 
     char        = (any - specialChar) | (0xC2 ^(0xAB|0xBB));
     constant    = uupper char*;
@@ -98,43 +110,70 @@ typedef struct {
     whitespaceNoNl  = (" "|"\t"|comment);
     term        = whitespace* (nl|"}");
 
-    strCont     = (ualnum | ascii) - '"';
-    simpleStr   = '"' strCont* '"';
-    constStr    = "#" (simpleStr | (strCont - rGuillemet - [\n ;,\]}.)`])+);
+    simpleStr   = ('"' (any - '"')* '"') | ("'" (any - "'")* "'");
+    constStr    = "#" (simpleStr | (char | [:@#~+\-*/%=<>^])+);
     selector    = char* ":";
 
     regexCont   = (ualnum | ascii) - '/' - '\\';
 
 string := |*
-    '\n'                             => { [strBuf appendString:@"\n"]; IncrementLine();                   };
-    '\\n'                            => { [strBuf appendString:@"\n"];                                    };
-    '\\t'                            => { [strBuf appendString:@"\t"];                                    };
-    '\\r'                            => { [strBuf appendString:@"\r"];                                    };
-    '\\"'                            => { [strBuf appendString:@"\""];                                    };
-    "\\'"                            => { [strBuf appendString:@"'"];                                     };
-    "\\\\"                           => { [strBuf appendString:@"\\"];                                    };
-    "\\" lGuillemet                  => { [strBuf appendString:@"«"];                                     };
+    '\n'                             => { [Str() appendString:@"\n"]; IncrementLine();                   };
+    '\\n'                            => { [Str() appendString:@"\n"];                                    };
+    '\\t'                            => { [Str() appendString:@"\t"];                                    };
+    '\\r'                            => { [Str() appendString:@"\r"];                                    };
+    '\\"'                            => { [Str() appendString:@"\""];                                    };
+    "\\'"                            => { [Str() appendString:@"'"];                                     };
+    "\\\\"                           => { [Str() appendString:@"\\"];                                    };
+    "\\" lGuillemet                  => { [Str() appendString:@"«"];                                     };
     '\\x' %{ temp1 = p; } [0-9a-zA-Z]* => {
         long long code = strtoll((char*)temp1, NULL, 16);
-        [strBuf appendFormat:@"%c", (int)code];
+        [Str() appendFormat:@"%c", (int)code];
     };
-    "\\" ualnum+                     => { TQAssert(NO, @"Invalid escape %@", NSStr(0,0));                 };
-    strCont                          => { [strBuf appendString:NSStr(0, 0)];                              };
+    "\\" any                         => { TQAssert(NO, @"Invalid escape %@", NSStr(0,0));                };
 
-    lGuillemet                       => { _EmitToken(temp3 == 1 ? LSTR  : MSTR, strBuf); fret;            };
-    '"' term                         => { _EmitToken(temp3 == 1 ? STRNL : RSTRNL, strBuf);
-                                          BacktrackTerm(); fret;                                          };
-    '"'                              => { _EmitToken(temp3 == 1 ? STR   : RSTR, strBuf); fret;            };
+    lGuillemet                       => { _EmitToken(IsRstr() ? MSTR : LSTR, Str()); fret;               };
+    '"' term => {
+        if(IsDblQuot()) {
+            _EmitToken(IsRstr() ? RSTRNL : STRNL, PopStr());
+            BacktrackTerm();
+            fret;
+        } else
+            [Str() appendString:NSStr(0,0)];
+    };
+    '"' => {
+        if(IsDblQuot()) {
+            _EmitToken(IsRstr() ? RSTR : STR, PopStr());
+            fret;
+        } else
+            [Str() appendString:NSStr(0,0)];
+    };
+    "'" term => {
+        if(!IsDblQuot()) {
+            _EmitToken(IsRstr() ? RSTRNL : STRNL, PopStr());
+            BacktrackTerm();
+            fret;
+        } else
+            [Str() appendString:NSStr(0,0)];
+    };
+    "'" => {
+        if(!IsDblQuot()) {
+            _EmitToken(IsRstr() ? RSTR : STR, PopStr());
+            fret;
+        } else
+            [Str() appendString:NSStr(0,0)];
+    };
+
+    any => { [Str() appendString:NSStr(0, 0)];                                                           };
 *|;
 
 regex := |*
-    '\n'                             => { [strBuf appendString:@"\n"]; IncrementLine();                   };
-    "\\/"                            => { [strBuf appendString:@"\\/"];                                   };
-    "\\"                             => { [strBuf appendString:@"\\"];                                    };
-    regexCont                        => { [strBuf appendString:NSStr(0, 0)];                              };
-    "/" [im]* term                   => { [strBuf appendString:@"/"]; _EmitToken(REGEXNL, strBuf);
-                                          BacktrackTerm(); fret;                                          };
-    "/" [im]*                        => { [strBuf appendString:@"/"]; _EmitToken(REGEX, strBuf);   fret;  };
+    '\n'                             => { [Str() appendString:@"\n"]; IncrementLine();                   };
+    "\\/"                            => { [Str() appendString:@"\\/"];                                   };
+    "\\"                             => { [Str() appendString:@"\\"];                                    };
+    regexCont                        => { [Str() appendString:NSStr(0, 0)];                              };
+    "/" [im]* term                   => { [Str() appendString:@"/"]; _EmitToken(REGEXNL, PopStr());
+                                          BacktrackTerm(); fret;                                         };
+    "/" [im]*                        => { [Str() appendString:@"/"]; _EmitToken(REGEX, PopStr()); fret;  };
 *|;
 
 main := |*
@@ -149,7 +188,8 @@ main := |*
                 EmitToken(FSLASH);
             ExprBeg();
         } else {
-            strBuf = [NSMutableString stringWithString:@"/"];
+            PushStr(false, false);
+            [Str() appendString:@"/"];
             fcall regex;
         }
     };
@@ -265,8 +305,14 @@ main := |*
     constStr %{temp1 = p;} term      => { EmitConstStringToken(CONSTSTRNL, 0, te-temp1); ExprBeg(); BacktrackTerm(); };
     constStr                         => { EmitConstStringToken(CONSTSTR, 0, 0);                           };
 
-    '"'                              => { temp3 = 1; strBuf = [NSMutableString string]; fcall string;     };
-    rGuillemet                       => { temp3 = 2; strBuf = [NSMutableString string]; fcall string;     };
+    '"'                              => { PushStr(YES, NO); fcall string;                                 };
+    "'"                              => { PushStr(NO, NO);  fcall string;                                 };
+    rGuillemet                       => {
+        BOOL dbl = IsDblQuot();
+        PopStr();
+        PushStr(dbl, YES);
+        fcall string;
+    };
 
     "."                              => { EmitToken(PERIOD);                                              };
     nl                               => { IncrementLine();                                                };
@@ -292,10 +338,9 @@ extern "C" TQNode *TQParseString(NSString *str, NSError **aoErr)
     unsigned char *eof = pe;
     int top;
     int stack[1024];
-    NSMutableString *strBuf;
+    NSMutableArray *strings = [NSMutableArray array];
 
     unsigned char *temp1, *temp2;
-    int temp3 = 0;
 
     // Parser setup
     void *parser = ParseAlloc(malloc);
