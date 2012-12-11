@@ -4,8 +4,6 @@
 //  think of to implement newline separated statements in a LALR(1) grammar; Including an NL
 //  token would have been worse)
 
-// TODO Make async* an expression returning a promise (Depends on actually implementing promises)
-
 %token_type id
 %extra_argument { TQParserState *state }
 
