@@ -173,7 +173,7 @@ menuBar     = NSMenu new addItem: appMenuItem;    self
 nsapp setMainMenu: menuBar
 
 \ Create a little view
-#TestView < NSView {
+@TestView < NSView {
     - init {
         @gradient = NSGradient alloc initWithStartingColor: NSColor redColor
                                                endingColor: NSColor yellowColor
