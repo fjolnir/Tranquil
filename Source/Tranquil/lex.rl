@@ -102,7 +102,7 @@ typedef struct {
     specialChar = 0xC2 | '"' | "'" | '.' | ',' | ';' | ':' | '|' | '#' | '@' | '~' | '`' | '{' | '}' | '[' | ']' | '(' | ')' | '+' | '-' | '*' | '/' | '%' | '=' | '<' | '>' | '^' | '\\' | '\r' | '\n' | space;
 
     char        = (any - specialChar) | (0xC2 ^(0xAB|0xBB));
-    constant    = uupper char*;
+    constant    = '_'* uupper char*;
     identifier  = (char -- (uupper|udigit)) char*;
     comment     = '\\' [^\n]*;
     nl          = ((space|comment)* '\n' space*);
@@ -277,11 +277,11 @@ main := |*
 
 
 # Identifiers
-    identifier %{temp1 = p;} term    => { EmitStringToken(IDENTNL, 0, te-temp1); ExprBeg(); BacktrackTerm(); };
-    identifier                       => { EmitStringToken(IDENT,   0, 0);                                 };
-
     constant   %{temp1 = p;} term    => { EmitStringToken(CONSTNL, 0, te-temp1); ExprBeg(); BacktrackTerm(); };
     constant                         => { EmitStringToken(CONST,   0, 0);                                 };
+
+    identifier %{temp1 = p;} term    => { EmitStringToken(IDENTNL, 0, te-temp1); ExprBeg(); BacktrackTerm(); };
+    identifier                       => { EmitStringToken(IDENT,   0, 0);                                 };
 
 # Literals
     int   term                       => { EmitIntToken(NUMBERNL, 10, 0); ExprBeg(); BacktrackTerm();      };
