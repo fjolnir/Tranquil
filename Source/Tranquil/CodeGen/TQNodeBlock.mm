@@ -168,7 +168,8 @@ using namespace llvm;
     fields.push_back([self _blockDescriptorTypeInProgram:aProgram]);
 
     // Fields for captured vars
-    for(TQNodeVariable *var in [_capturedVariables allValues]) {
+    for(NSString *name in [[_capturedVariables allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)]) {
+        TQNodeVariable *var = [_capturedVariables objectForKey:name];
         if(var.isAnonymous)
             fields.push_back([[var class] valueTypeInProgram:aProgram]);
         else
@@ -273,7 +274,7 @@ using namespace llvm;
     // Now that we've initialized the basic block info, we need to capture the variables in the parent block scope
     if(_capturedVariables) {
         int i = TQ_CAPTURE_IDX;
-        for(NSString *name in _capturedVariables) {
+        for(NSString *name in [[_capturedVariables allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)]) {
             TQNodeVariable *varToCapture = [_capturedVariables objectForKey:name];
             [varToCapture createStorageInProgram:aProgram block:aParentBlock root:aRoot error:nil];
             NSString *fieldName = [NSString stringWithFormat:@"block.%@", name];
@@ -330,9 +331,12 @@ using namespace llvm;
     int i = TQ_CAPTURE_IDX;
     Value *src, *destAddr;
     Type *captureStructTy;
-    for(TQNodeVariable *var in [_capturedVariables allValues]) {
-        if(![[var class] valueIsObject])
+    for(NSString *name in [[_capturedVariables allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)]) {
+        TQNodeVariable *var = [_capturedVariables objectForKey:name];
+        if(![[var class] valueIsObject]) {
+            ++i;
             continue;
+        }
         Value *flags = var.isAnonymous ? constFlags : byrefFlags;
 
         NSString *dstName = [NSString stringWithFormat:@"dstBlk.%@Addr", var.name];
@@ -376,13 +380,16 @@ using namespace llvm;
     int i = TQ_CAPTURE_IDX;
     Value *varToDisposeOf, *valueToRelease;
     Type *captureStructTy;
-    for(TQNodeVariable *var in [_capturedVariables allValues]) {
-        if(![[var class] valueIsObject])
+    for(NSString *name in [[_capturedVariables allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)]) {
+        TQNodeVariable *var = [_capturedVariables objectForKey:name];
+        if(![[var class] valueIsObject]) {
+            ++i;
             continue;
+        }
         Value *flags = var.isAnonymous ? constFlags : byrefFlags;
 
-        NSString *name = [NSString stringWithFormat:@"block.%@", var.name];
-        varToDisposeOf =  builder->CreateLoad(builder->CreateStructGEP(block, i++), [name UTF8String]);
+        NSString *irName = [NSString stringWithFormat:@"block.%@", var.name];
+        varToDisposeOf =  builder->CreateLoad(builder->CreateStructGEP(block, i++), [irName UTF8String]);
 
         if(!var.isAnonymous) {
             captureStructTy = PointerType::getUnqual([[var class] captureStructTypeInProgram:aProgram]);
@@ -510,8 +517,8 @@ using namespace llvm;
     if(thisBlock) {
         int i = TQ_CAPTURE_IDX;
         TQNodeVariable *varToLoad;
-        for(TQNodeVariable *parentVar in [_capturedVariables allValues])
-        {
+        for(NSString *name in [[_capturedVariables allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)]) {
+            TQNodeVariable *parentVar = [_capturedVariables objectForKey:name];
             varToLoad = [parentVar copy];
             Value *valueToLoad = _builder->CreateStructGEP(thisBlock, i++, [varToLoad.name UTF8String]);
             if(![varToLoad isAnonymous])
