@@ -757,7 +757,7 @@ using namespace llvm;
         return;
     IRBuilder<> entryBuilder(&_function->getEntryBlock(), _function->getEntryBlock().begin());
     _dispatchGroup = entryBuilder.CreateCall(aProgram.dispatch_group_create);
-    [self.cleanupStatements addObject:[TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *b, TQNodeRootBlock *r) {
+    [self.cleanupStatements addObject:[TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *b, TQNodeRootBlock *r, NSError **) {
         _builder->CreateCall(aProgram.dispatch_release, _dispatchGroup);
         return (Value *)NULL;
     }]];

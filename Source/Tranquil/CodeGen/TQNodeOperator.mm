@@ -168,7 +168,7 @@ using namespace llvm;
             case kTQOperatorEqual: {
                 fastpathResultIsNumber = NO;
                 selector = [aProgram getSelector:@"isEqualTo:" inBlock:aBlock root:aRoot];
-                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
+                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r, NSError **) {
                     GET_AB();
                     return B->CreateSelect(B->CreateFCmpOEQ(a, b), GET_VALID(), nullPtr);
                 }];
@@ -177,7 +177,7 @@ using namespace llvm;
             case kTQOperatorInequal: {
                 fastpathResultIsNumber = NO;
                 selector = [aProgram getSelector:@"notEqualTo:" inBlock:aBlock root:aRoot];
-                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
+                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r, NSError **) {
                     GET_AB();
                     return B->CreateSelect(B->CreateFCmpONE(a, b), GET_VALID(), nullPtr);
                 }];
@@ -185,7 +185,7 @@ using namespace llvm;
             case kTQOperatorLesser:
                 fastpathResultIsNumber = NO;
                 selector = [aProgram getSelector:@"isLesserThan:" inBlock:aBlock root:aRoot];
-                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
+                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r, NSError **) {
                     GET_AB();
                     return B->CreateSelect(B->CreateFCmpOLT(a, b), GET_VALID(), nullPtr);
                 }];
@@ -193,21 +193,21 @@ using namespace llvm;
             case kTQOperatorGreater:
                 fastpathResultIsNumber = NO;
                 selector = [aProgram getSelector:@"isGreaterThan:" inBlock:aBlock root:aRoot];
-                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
+                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r, NSError **) {
                     GET_AB();
                     return B->CreateSelect(B->CreateFCmpOGT(a, b), GET_VALID(), nullPtr);
                 }];
                 break;
             case kTQOperatorMultiply:
                 selector = [aProgram getSelector:@"multiply:" inBlock:aBlock root:aRoot];
-                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
+                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r, NSError **) {
                     GET_AB();
                     return B->CreateFMul(a, b);
                 }];
                 break;
             case kTQOperatorDivide:
                 selector = [aProgram getSelector:@"divideBy:" inBlock:aBlock root:aRoot];
-                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
+                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r, NSError **) {
                     GET_AB();
                     return B->CreateFDiv(a, b);
                 }];
@@ -217,14 +217,14 @@ using namespace llvm;
                 break;
             case kTQOperatorAdd:
                 selector = [aProgram getSelector:@"add:" inBlock:aBlock root:aRoot];
-                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
+                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r, NSError **) {
                     GET_AB();
                     return B->CreateFAdd(a, b);
                 }];
                 break;
             case kTQOperatorSubtract:
                 selector = [aProgram getSelector:@"subtract:" inBlock:aBlock root:aRoot];
-                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
+                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r, NSError **) {
                     GET_AB();
                     return B->CreateFSub(a, b);
                 }];
@@ -232,7 +232,7 @@ using namespace llvm;
             case kTQOperatorGreaterOrEqual:
                 fastpathResultIsNumber = NO;
                 selector = [aProgram getSelector:@"isGreaterOrEqualTo:" inBlock:aBlock root:aRoot];
-                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
+                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r, NSError **) {
                     GET_AB();
                     return B->CreateSelect(B->CreateFCmpOGE(a, b), GET_VALID(), nullPtr);
                 }];
@@ -240,7 +240,7 @@ using namespace llvm;
             case kTQOperatorLesserOrEqual:
                 fastpathResultIsNumber = NO;
                 selector = [aProgram getSelector:@"isLesserOrEqualTo:" inBlock:aBlock root:aRoot];
-                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
+                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r, NSError **) {
                     GET_AB();
                     return B->CreateSelect(B->CreateFCmpOLE(a, b), GET_VALID(), nullPtr);
                 }];
@@ -250,7 +250,7 @@ using namespace llvm;
                 break;
             case kTQOperatorExponent:
                 selector = [aProgram getSelector:@"pow:" inBlock:aBlock root:aRoot];
-                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
+                fastpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r, NSError **) {
                     GET_AB();
                     Function *pow = Intrinsic::getDeclaration(p.llModule, Intrinsic::pow, p.llFloatTy);
                     return (Value *)B->CreateCall2(pow, a, b);
@@ -259,7 +259,7 @@ using namespace llvm;
             default:
                 TQAssertSoft(NO, kTQGenericErrorDomain, kTQGenericError, NULL, @"Unknown binary operator");
         }
-        TQNodeCustom *slowpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r) {
+        TQNodeCustom *slowpath = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *aBlock, TQNodeRootBlock *r, NSError **) {
             return (Value *)B->CreateCall3(p.tq_msgSend_noBoxing, left, selector, right);
         }];
         if(fastpath) {

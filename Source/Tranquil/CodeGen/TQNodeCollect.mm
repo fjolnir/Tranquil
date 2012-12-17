@@ -54,7 +54,7 @@ using namespace llvm;
 {
     Value *pool = aBlock.builder->CreateCall(aProgram.objc_autoreleasePoolPush);
 
-    TQNode *exitNode = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *b, TQNodeRootBlock *r) {
+    TQNode *exitNode = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *b, TQNodeRootBlock *r, NSError **) {
         aBlock.builder->CreateCall(aProgram.objc_autoreleasePoolPop, pool);
         return (Value *)NULL;
     }];

@@ -43,15 +43,16 @@
         exp = abs(exp);
 
         TQNode *left = op.left;
-        TQNodeCustom *num = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *b, TQNodeRootBlock *r) {
+        TQNodeCustom *num = [TQNodeCustom nodeWithBlock:^(TQProgram *p, TQNodeBlock *b, TQNodeRootBlock *r, NSError **aoErr) {
             // little bit of a hack to make sure we only evaluate the left side once
             NSValue *val = objc_getAssociatedObject(left, @"ExponentExpansionTemp");
             if(!val) {
-                val = [NSValue valueWithPointer:[left generateCodeInProgram:p block:b root:r error:nil]];
+                val = [NSValue valueWithPointer:[left generateCodeInProgram:p block:b root:r error:aoErr]];
                 objc_setAssociatedObject(op.left, @"ExponentExpansionTemp", val, OBJC_ASSOCIATION_RETAIN);
             }
             return (llvm::Value *)[val pointerValue];
         }];
+        num.references = [NSArray arrayWithObject:left];
         TQNode *replacement = num;
         for(int i = 1; i < exp; ++i) {
             replacement = [TQNodeOperator nodeWithType:kTQOperatorMultiply left:replacement right:num];

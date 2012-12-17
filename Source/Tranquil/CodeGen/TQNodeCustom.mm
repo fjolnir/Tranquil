@@ -4,7 +4,7 @@
 using namespace llvm;
 
 @implementation TQNodeCustom
-@synthesize block=_block;
+@synthesize block=_block, references=_references;
 
 + (TQNodeCustom *)nodeWithBlock:(TQNodeCustomBlock)aBlock
 {
@@ -15,7 +15,7 @@ using namespace llvm;
 
 + (TQNodeCustom *)nodeReturningValue:(llvm::Value *)aVal
 {
-    return [self nodeWithBlock:^(TQProgram *, TQNodeBlock *, TQNodeRootBlock *) {
+    return [self nodeWithBlock:^(TQProgram *, TQNodeBlock *, TQNodeRootBlock *, NSError **) {
         return aVal;
     }];
 }
@@ -23,6 +23,7 @@ using namespace llvm;
 - (void)dealloc
 {
     [_block release];
+    [_references release];
     [super dealloc];
 }
 
@@ -33,7 +34,9 @@ using namespace llvm;
 
 - (TQNode *)referencesNode:(TQNode *)aNode
 {
-    return [aNode isEqual:self] ? self : nil;
+    if([aNode isEqual:self])
+        return self;
+    return [_references tq_referencesNode:aNode];
 }
 
 - (void)iterateChildNodes:(TQNodeIteratorBlock)aBlock
@@ -52,6 +55,6 @@ using namespace llvm;
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
-    return _block(aProgram, aBlock, aRoot);
+    return _block(aProgram, aBlock, aRoot, aoErr);
 }
 @end
