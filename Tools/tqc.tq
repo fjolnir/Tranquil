@@ -88,7 +88,7 @@ flags =  llcFlags + ["-march=«llcArchs[arch]»", #-o, asmPath, irPath]
 status = (NSTask launchedTaskWithLaunchPath: llc arguments: flags) waitUntilExit; terminationStatus
 error("Assembly generation failed") if status ~= 0
 
-flags = cflags + [#-O3, #-g, #-arch, arch, #-o, initPath, #"/usr/local/tranquil/src/Source/Tranquil/tqmain.m"]
+flags = cflags + [#-O3, #-g, #-arch, arch, #-o, initPath, #"/usr/local/tranquil/share/tqmain.m"]
 status = (NSTask launchedTaskWithLaunchPath: clang arguments: flags) waitUntilExit; terminationStatus
 error("Initializer compilation failed") if status ~= 0
 

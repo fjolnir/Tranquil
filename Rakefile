@@ -232,6 +232,8 @@ end
 
 def _install
     sh "mkdir -p #{TRANQUIL}/bin"
+    sh "mkdir -p #{TRANQUIL}/share"
+    sh "cp Source/Tranquil/tqmain.m #{TRANQUIL}/share"
     sh "cp Build/tranquil #{TRANQUIL}/bin"
     sh "cp Tools/tqlive.tq #{TRANQUIL}/bin/tqlive"
     sh "#{TRANQUIL}/bin/tranquil Tools/tqc.tq Tools/tqc.tq -o #{TRANQUIL}/bin/tqc"
