@@ -12,7 +12,7 @@
 @implementation TQEnumerable
 + (id)canBeIncludedInto:(Class)aClass
 {
-    return [aClass instancesRespondToSelector:@selector(each:)] ? TQValid : nil;
+    return [aClass instancesRespondToSelector:@selector(each:)] ? [TQValidObject valid] : nil;
 }
 
 - (id)select:(id (^)(id))aBlock

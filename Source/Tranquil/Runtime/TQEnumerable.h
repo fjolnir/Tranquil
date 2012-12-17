@@ -1,3 +1,4 @@
+#import <Foundation/NSPointerArray.h>
 #import <Tranquil/Runtime/TQModule.h>
 
 @interface TQEnumerable : TQModule

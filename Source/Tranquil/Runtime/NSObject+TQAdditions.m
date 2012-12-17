@@ -29,7 +29,7 @@
 {
     TQAssert(aClass, @"Tried to include nil class");
 
-    if([aClass isKindOfClass:[TQModule class]])
+    if([aClass isSubclassOfClass:[TQModule class]])
         TQAssert([aClass canBeIncludedInto:self],
                  @"%@ cannot be included into %@", aClass, self);
 
