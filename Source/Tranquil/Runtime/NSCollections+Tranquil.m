@@ -1,4 +1,5 @@
 #import "NSCollections+Tranquil.h"
+#import "NSObject+TQAdditions.h"
 #import "../../../Build/TQStubs.h"
 #import "TQNumber.h"
 #import <objc/runtime.h>

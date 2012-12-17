@@ -2,6 +2,7 @@
 #import "TQRuntime.h"
 #import "../../../Build/TQStubs.h"
 #import "TQEnumerable.h"
+#import "NSObject+TQAdditions.h"
 
 @implementation TQRange
 @synthesize start=_start, length=_length;
