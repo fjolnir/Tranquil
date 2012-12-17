@@ -5,15 +5,21 @@
 #include <assert.h>
 #import <Tranquil/CodeGen/TQNodeBlock.h>
 
-#define PushStr(dblQuot, rstr) \
+enum {
+    kTQStrTypeSimple,
+    kTQStrTypeLeftOrMiddle,
+    kTQStrTypeRight
+};
+#define PushStr(dblQuot, type) \
     [strings addObject:[NSDictionary dictionaryWithObjectsAndKeys: \
         [NSNumber numberWithBool:dblQuot], @"dblQuot", \
-        [NSNumber numberWithBool:rstr], @"isRstr", \
+        [NSNumber numberWithInt:type], @"type", \
         [NSMutableString string], @"value", nil]];
 #define PopStr() ({ id last = [Str() retain]; [strings removeLastObject]; [last autorelease]; })
 #define Str() [[strings lastObject] objectForKey:@"value"]
 #define IsDblQuot() [[[strings lastObject] objectForKey:@"dblQuot"] boolValue]
-#define IsRstr() [[[strings lastObject] objectForKey:@"isRstr"] boolValue]
+#define IsRstr() ([[[strings lastObject] objectForKey:@"type"] intValue] == kTQStrTypeRight)
+#define IsSimpleStr() ([[[strings lastObject] objectForKey:@"type"] intValue] == kTQStrTypeSimple)
 
 typedef struct {
     int currentLine;
@@ -29,7 +35,7 @@ typedef struct {
 #define _EmitToken(tokenId, val) do { \
     int tokenId_ = tokenId; \
     id val_ = val; \
-    /*NSLog(@"emitting %d = '%@' on line: %d", tokenId, val_, parserState.currentLine); */\
+    /*NSLog(@"emitting %d = '%@' on line: %d", tokenId, val_, parserState.currentLine);*/ \
     Parse(parser, tokenId_, [TQToken withId:tokenId value:val_ line:parserState.currentLine], &parserState); \
     parserState.atBeginningOfExpr = NO; \
 } while(0);
@@ -110,8 +116,7 @@ typedef struct {
     whitespaceNoNl  = (" "|"\t"|comment);
     term        = whitespace* (nl|"}");
 
-    simpleStr   = ('"' (any - '"')* '"') | ("'" (any - "'")* "'");
-    constStr    = "#" (simpleStr | (char | [:@#~+\-*/%=<>^])+);
+    constStr    = "#" (char | [:@#~+\-*/%=<>^])+;
     selector    = char* ":";
 
     regexCont   = (ualnum | ascii) - '/' - '\\';
@@ -131,10 +136,16 @@ string := |*
     };
     "\\" any                         => { TQAssert(NO, @"Invalid escape %@", NSStr(0,0));                };
 
-    lGuillemet                       => { _EmitToken(IsRstr() ? MSTR : LSTR, Str()); fret;               };
+    lGuillemet                       => { 
+        TQAssert(!IsSimpleStr(), @"Interpolation is not allowed in constant strings");
+        _EmitToken(IsRstr() ? MSTR : LSTR, Str());
+        fret;
+    };
     '"' term => {
         if(IsDblQuot()) {
-            _EmitToken(IsRstr() ? RSTRNL : STRNL, PopStr());
+            int tokId = IsSimpleStr() ? CONSTSTRNL
+                                      : (IsRstr() ? RSTRNL : STRNL);
+            _EmitToken(tokId, PopStr());
             BacktrackTerm();
             fret;
         } else
@@ -142,14 +153,18 @@ string := |*
     };
     '"' => {
         if(IsDblQuot()) {
-            _EmitToken(IsRstr() ? RSTR : STR, PopStr());
+            int tokId = IsSimpleStr() ? CONSTSTR
+                                      : (IsRstr() ? RSTR : STR);
+            _EmitToken(tokId, PopStr());
             fret;
         } else
             [Str() appendString:NSStr(0,0)];
     };
     "'" term => {
         if(!IsDblQuot()) {
-            _EmitToken(IsRstr() ? RSTRNL : STRNL, PopStr());
+            int tokId = IsSimpleStr() ? CONSTSTRNL
+                                      : (IsRstr() ? RSTRNL : STRNL);
+            _EmitToken(tokId, PopStr());
             BacktrackTerm();
             fret;
         } else
@@ -157,7 +172,9 @@ string := |*
     };
     "'" => {
         if(!IsDblQuot()) {
-            _EmitToken(IsRstr() ? RSTR : STR, PopStr());
+            int tokId = IsSimpleStr() ? CONSTSTR
+                                      : (IsRstr() ? RSTR : STR);
+            _EmitToken(tokId, PopStr());
             fret;
         } else
             [Str() appendString:NSStr(0,0)];
@@ -188,7 +205,7 @@ main := |*
                 EmitToken(FSLASH);
             ExprBeg();
         } else {
-            PushStr(false, false);
+            PushStr(false, kTQStrTypeLeftOrMiddle);
             [Str() appendString:@"/"];
             fcall regex;
         }
@@ -302,15 +319,17 @@ main := |*
     oct                              => { EmitIntToken(NUMBER, 8,  2);                                    };
     hex                              => { EmitIntToken(NUMBER, 16, 2);                                    };
 
+    "#" '"'                          => { PushStr(YES, kTQStrTypeSimple); fcall string;                   };
+    "#" "'"                          => { PushStr(NO, kTQStrTypeSimple);  fcall string;                   };
     constStr %{temp1 = p;} term      => { EmitConstStringToken(CONSTSTRNL, 0, te-temp1); ExprBeg(); BacktrackTerm(); };
     constStr                         => { EmitConstStringToken(CONSTSTR, 0, 0);                           };
 
-    '"'                              => { PushStr(YES, NO); fcall string;                                 };
-    "'"                              => { PushStr(NO, NO);  fcall string;                                 };
+    '"'                              => { PushStr(YES, kTQStrTypeLeftOrMiddle); fcall string;             };
+    "'"                              => { PushStr(NO, kTQStrTypeLeftOrMiddle);  fcall string;             };
     rGuillemet                       => {
         BOOL dbl = IsDblQuot();
         PopStr();
-        PushStr(dbl, YES);
+        PushStr(dbl, kTQStrTypeRight);
         fcall string;
     };
 
