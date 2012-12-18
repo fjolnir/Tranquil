@@ -19,11 +19,11 @@ It's features include:
 * Good performance, even at this extremely early stage.
 * And more..
 
-However, Tranquil is still extremely experimental and you shouldn't use it for anything other than fun for now. But to me at least, it is a lot of fun to play with.
+However, Tranquil is still extremely experimental and you shouldn't use it for anything other than exploration and learning.
 
 ## How to build and run
 
-The simplest way of getting started is to use the binary [installer](http://asgeirsson.is/tranquil%20α%2010.pkg). Everything will be placed into `/usr/local/tranquil`
+The simplest way of getting started is to use the binary [installer](http://asgeirsson.is/tranquil%20α%2010.pkg). Everything will be placed into `/usr/local/tranquil` (Requires Xcode 4 to be installed)
 
 If you wish to contribute, you can use the install script instead which checks out the latest source and sets up the development environment.
 

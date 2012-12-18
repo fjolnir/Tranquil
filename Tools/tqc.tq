@@ -5,12 +5,14 @@ error = { reason |
     ^^1
 }
 uuid = `NSProcessInfo processInfo globallyUniqueString`
-llvm     = #"/usr/local/tranquil/llvm"
-tranquil = #"/usr/local/tranquil/bin/tranquil"
+llvm     = "/usr/local/tranquil/llvm"
+tranquil = "/usr/local/tranquil/bin/tranquil"
+xcode    = "/Applications/Xcode.app/Contents/Developer"
 llc      = "«llvm»/bin/llc"
 clang    = "«llvm»/bin/clang"
-ld       = #"/usr/bin/ld"
-arch     = #"x86_64"
+clang    = "«xcode»/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang"
+ld       = "/usr/bin/ld"
+arch     = "x86_64"
 forIOS   = no
 
 inPath   = nil
@@ -47,28 +49,27 @@ error("No input provided") unless inPath ~= nil
 tqFlags push: inPath
 
 if forIOS {
-    clang = #"/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang"
     ldFlags push: "«llvm»/lib/clang/3.2/lib/darwin/libclang_rt.ios.a";
             push: #"-lcrt1.3.1.o";
             push: #-syslibroot
     if arch == #i386 then {
-        syslibroot = #"/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk"
+        syslibroot = "«xcode»/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk"
         cflags  push: #"-miphoneos-version-min=5.0"
         ldFlags push: syslibroot;
                 push: #-no_implicit_dylibs;
                 push: #"-ios_simulator_version_min";
                 push: #"5.0.0";
                 push: #"-force_load";
-                push: #"/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/arc/libarclite_iphonesimulator.a"
+                push: "«xcode»/Toolchains/XcodeDefault.xctoolchain/usr/lib/arc/libarclite_iphonesimulator.a"
     } else {
         llcFlags push: #"-mtriple=thumbv7-apple-ios5.0.0"
-        syslibroot = #"/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.0.sdk"
+        syslibroot = "«xcode»/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.0.sdk"
         cflags  push: #"-miphoneos-version-min=5.0"
         ldFlags push: syslibroot;
                 push: #"-ios_version_min";
                 push: #"5.0.0";
                 push: #"-force_load";
-                push: #"/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/arc/libarclite_iphoneos.a"
+                push: "«xcode»/Toolchains/XcodeDefault.xctoolchain/usr/lib/arc/libarclite_iphoneos.a"
     }
     cflags += [#-isysroot, syslibroot]
 } else {
