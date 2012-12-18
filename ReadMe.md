@@ -23,7 +23,9 @@ However, Tranquil is still extremely experimental and you shouldn't use it for a
 
 ## How to build and run
 
-The following will install Tranquil into /usr/local/tranquil (Along with a few dependencies).
+The simplest way of getting started is to use the binary [installer](http://asgeirsson.is/tranquil%20α%2010.pkg). Everything will be placed into `/usr/local/tranquil`
+
+If you wish to contribute, you can use the install script instead which checks out the latest source and sets up the development environment.
 
     > curl -fsSkL https://raw.github.com/fjolnir/Tranquil/master/Tools/install.sh | /bin/zsh
     > /usr/local/tranquil/bin/tqrepl
