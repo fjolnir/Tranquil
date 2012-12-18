@@ -71,13 +71,14 @@ if forIOS {
                 push: #"/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/arc/libarclite_iphoneos.a"
     }
     cflags += [#-isysroot, syslibroot]
-} else
+} else {
     llcFlags push: #-mattr=-avx \ Make sure the new AVX instructions aren't used
     ldFlags push: #"-macosx_version_min";
             push: #"10.7.0";
             push: #"-lcrt1.10.6.o";
             push: #"/usr/lib/arc/libarclite_macosx.a";
             push: "«llvm»/lib/clang/3.2/lib/darwin/libclang_rt.osx.a"
+}
 
 flags = [#-arch, arch] + tqFlags
 status = (NSTask launchedTaskWithLaunchPath: tranquil arguments: flags) waitUntilExit; terminationStatus
