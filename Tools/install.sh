@@ -82,7 +82,7 @@ else
     cp -R build/Release-iphoneos/usr/local/include /usr/local/tranquil/libffi-ios/include
 
     mkdir -p /usr/local/tranquil/libffi/lib
-    cp build/Release/libffi.a /usr/local/tranquil/libffi/lib
+    lipo -extract x86_64 build/Release/libffi.a /usr/local/tranquil/libffi/lib/libffi.a
     cp -R build/Release/usr/local/include /usr/local/tranquil/libffi/include
 
     popd
