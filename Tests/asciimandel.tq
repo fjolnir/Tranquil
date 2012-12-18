@@ -14,10 +14,7 @@ mandelbrot = { bailout=16, maxIter=1000 |
     }
     (-39 to: 38) each: { y |
         (-39 to: 38) each: { x |
-            if iterate(x/40, y/40) then
-                #"●" printWithoutNl
-            else
-                #"◦" printWithoutNl
+            (iterate(x/40, y/40) ? #"●" ! #"◦") printWithoutNl
         }
         #"" print
     }

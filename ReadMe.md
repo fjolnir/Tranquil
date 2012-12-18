@@ -104,7 +104,7 @@ fib(10) print
     val   = query[#field]
     
     \ We can write that more concisely as:
-    val   = table[{ @anotherField => aValue }][#field]
+    val   = table[{ #anotherField => aValue }][#field]
     
 ### Create a Web Server (Using [HTTPKit](http://github.com/fjolnir/HTTPKit))
 
