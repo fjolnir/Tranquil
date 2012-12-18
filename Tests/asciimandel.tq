@@ -1,0 +1,27 @@
+mandelbrot = { bailout=16, maxIter=1000 |
+    iterate = { x, y |
+        cr, ci = y-0.5, x
+        zi, zr = 0
+
+        maxIter times: {
+            temp = zr*zi
+            zr2, zi2 = zr^2, zi^2
+            zr = zr2 - zi2 + cr
+            zi = 2*temp + ci
+            ^^no if zi2 + zr2 > bailout
+        }
+        ^yes
+    }
+    (-39 to: 38) each: { y |
+        (-39 to: 38) each: { x |
+            if iterate(x/40, y/40) then
+                #"●" printWithoutNl
+            else
+                #"◦" printWithoutNl
+        }
+        #"" print
+    }
+}
+
+mandelbrot()
+
