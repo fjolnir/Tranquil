@@ -23,7 +23,6 @@ statement(S) ::= loop(L).                               { S = L;                
 statement(S) ::= whenFinished(W).                       { S = W;                                                                      }
 statement(S) ::= lock(L).                               { S = L;                                                                      }
 statement(S) ::= collect(C).                            { S = C;                                                                      }
-statement(S) ::= import(I).                             { S = I;                                                                      }
 statement(S) ::= retNl(I).                              { S = I;                                                                      }
 statement(S) ::= retNoNl(I) PERIOD.                     { S = I;                                                                      }
 
@@ -55,6 +54,7 @@ noAsgnExprNoNl(E) ::= ternOpNoNl(O).                    { E = O;                
 noAsgnExprNoNl(E) ::= simpleExprNoNl(T).                { E = T;                                                                      }
 noAsgnExprNoNl(E) ::= asyncNoNl(O).                     { E = O;                                                                      }
 noAsgnExprNoNl(E) ::= waitNoNl(W).                      { E = W;                                                                      }
+noAsgnExprNoNl(E) ::= importNoNl(I).                    { E = I;                                                                      }
 noAsgnExprNl(E) ::= kwdMsgNl(M).                        { E = M;                                                                      }
 noAsgnExprNl(E) ::= opNl(O).                            { E = O;                                                                      }
 noAsgnExprNl(E) ::= cascadeNl(C).                       { E = C;                                                                      }
@@ -62,6 +62,7 @@ noAsgnExprNl(E) ::= ternOpNl(O).                        { E = O;                
 noAsgnExprNl(E) ::= simpleExprNl(T).                    { E = T;                                                                      }
 noAsgnExprNl(E) ::= asyncNl(O).                         { E = O;                                                                      }
 noAsgnExprNl(E) ::= waitNl(W).                          { E = W;                                                                      }
+noAsgnExprNl(E) ::= importNl(I).                        { E = I;                                                                      }
 
 parenExprNoNl(PE) ::= LPAREN expr(E) RPAREN.            { PE = E;                                                                     }
 parenExprNl(PE)   ::= LPAREN expr(E) RPARENNL.          { PE = E;                                                                     }
@@ -241,9 +242,10 @@ collect(C) ::= COLLECT(T) bodyNl(B).                    { C = [TQNodeCollect nod
 // Import Directive -------------------------------------------------------------------------------------------------------------------
 //
 
-import(I) ::= IMPORT(T) STRNL(P).                       { I = [TQNodeImport nodeWithPath:[P value]]; LN(I,T);                         }
-import(I) ::= IMPORT(T) CONSTSTRNL(P).                  { I = [TQNodeImport nodeWithPath:[P value]]; LN(I,T);                         }
-import(I) ::= import(T) PERIOD.                         { I = T;                                                                      }
+importNoNl(I) ::= IMPORT(T) STR(P).                       { I = [TQNodeImport nodeWithPath:[P value]]; LN(I,T);                         }
+importNoNl(I) ::= IMPORT(T) CONSTSTR(P).                  { I = [TQNodeImport nodeWithPath:[P value]]; LN(I,T);                         }
+importNl(I) ::= IMPORT(T) STRNL(P).                       { I = [TQNodeImport nodeWithPath:[P value]]; LN(I,T);                         }
+importNl(I) ::= IMPORT(T) CONSTSTRNL(P).                  { I = [TQNodeImport nodeWithPath:[P value]]; LN(I,T);                         }
 
 
 //
