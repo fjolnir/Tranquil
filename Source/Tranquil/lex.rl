@@ -14,9 +14,10 @@ enum {
     [strings addObject:[NSDictionary dictionaryWithObjectsAndKeys: \
         [NSNumber numberWithBool:dblQuot], @"dblQuot", \
         [NSNumber numberWithInt:type], @"type", \
-        [NSMutableString string], @"value", nil]];
+        [NSMutableData data], @"value", nil]];
 #define PopStr() ({ id last = [Str() retain]; [strings removeLastObject]; [last autorelease]; })
-#define Str() [[strings lastObject] objectForKey:@"value"]
+#define StrData() [[strings lastObject] objectForKey:@"value"]
+#define Str() [[[NSMutableString alloc] initWithData:StrData() encoding:NSUTF8StringEncoding] autorelease]
 #define IsDblQuot() [[[strings lastObject] objectForKey:@"dblQuot"] boolValue]
 #define IsRstr() ([[[strings lastObject] objectForKey:@"type"] intValue] == kTQStrTypeRight)
 #define IsSimpleStr() ([[[strings lastObject] objectForKey:@"type"] intValue] == kTQStrTypeSimple)
@@ -122,17 +123,18 @@ typedef struct {
     regexCont   = (ualnum | ascii) - '/' - '\\';
 
 string := |*
-    '\n'                             => { [Str() appendString:@"\n"]; IncrementLine();                   };
-    '\\n'                            => { [Str() appendString:@"\n"];                                    };
-    '\\t'                            => { [Str() appendString:@"\t"];                                    };
-    '\\r'                            => { [Str() appendString:@"\r"];                                    };
-    '\\"'                            => { [Str() appendString:@"\""];                                    };
-    "\\'"                            => { [Str() appendString:@"'"];                                     };
-    "\\\\"                           => { [Str() appendString:@"\\"];                                    };
-    "\\" lGuillemet                  => { [Str() appendString:@"«"];                                     };
+    '\n'                             => { [StrData() appendBytes:"\n" length:1]; IncrementLine();        };
+    '\\n'                            => { [StrData() appendBytes:"\n" length:1];                         };
+    '\\t'                            => { [StrData() appendBytes:"\t" length:1];                         };
+    '\\r'                            => { [StrData() appendBytes:"\r" length:1];                         };
+    '\\"'                            => { [StrData() appendBytes:"\"" length:1];                         };
+    "\\'"                            => { [StrData() appendBytes:"'"  length:1];                         };
+    "\\\\"                           => { [StrData() appendBytes:"\\" length:1];                         };
+    "\\" lGuillemet                  => { [StrData() appendBytes:"«"  length:2];                         };
     '\\x' %{ temp1 = p; } [0-9a-zA-Z]* => {
         long long code = strtoll((char*)temp1, NULL, 16);
-        [Str() appendFormat:@"%c", (int)code];
+        NSString *strVal = [NSString stringWithFormat:@"%c", (int)code];
+        [StrData() appendData:[strVal dataUsingEncoding:NSUTF8StringEncoding]];
     };
     "\\" any                         => { TQAssert(NO, @"Invalid escape %@", NSStr(0,0));                };
 
@@ -149,7 +151,7 @@ string := |*
             BacktrackTerm();
             fret;
         } else
-            [Str() appendString:NSStr(0,0)];
+            [StrData() appendBytes:@"\"" length:1];
     };
     '"' => {
         if(IsDblQuot()) {
@@ -158,7 +160,7 @@ string := |*
             _EmitToken(tokId, PopStr());
             fret;
         } else
-            [Str() appendString:NSStr(0,0)];
+            [StrData() appendBytes:@"\"" length:1];
     };
     "'" term => {
         if(!IsDblQuot()) {
@@ -168,7 +170,7 @@ string := |*
             BacktrackTerm();
             fret;
         } else
-            [Str() appendString:NSStr(0,0)];
+            [StrData() appendBytes:@"'" length:1];
     };
     "'" => {
         if(!IsDblQuot()) {
@@ -177,20 +179,22 @@ string := |*
             _EmitToken(tokId, PopStr());
             fret;
         } else
-            [Str() appendString:NSStr(0,0)];
+            [StrData() appendBytes:@"'" length:1];
     };
 
-    any => { [Str() appendString:NSStr(0, 0)];                                                           };
+    any => { [StrData() appendBytes:ts length:1];                                                         };
 *|;
 
 regex := |*
-    '\n'                             => { [Str() appendString:@"\n"]; IncrementLine();                   };
-    "\\/"                            => { [Str() appendString:@"\\/"];                                   };
-    "\\"                             => { [Str() appendString:@"\\"];                                    };
-    regexCont                        => { [Str() appendString:NSStr(0, 0)];                              };
-    "/" [im]* term                   => { [Str() appendString:@"/"]; _EmitToken(REGEXNL, PopStr());
-                                          BacktrackTerm(); fret;                                         };
-    "/" [im]*                        => { [Str() appendString:@"/"]; _EmitToken(REGEX, PopStr()); fret;  };
+    '\n'                             => { [StrData() appendBytes:"\n"  length:1]; IncrementLine();        };
+    "\\/"                            => { [StrData() appendBytes:"\\/" length:1];                         };
+    "\\"                             => { [StrData() appendBytes:"\\"  length:1];                         };
+    regexCont                        => { [StrData() appendBytes:ts    length:1];                         };
+    "/" [im]* term                   => { [StrData() appendBytes:"/"   length:1];
+                                          _EmitToken(REGEXNL, PopStr());
+                                          BacktrackTerm(); fret;                                          };
+    "/" [im]*                        => { [StrData() appendBytes:"/" length:1];
+                                          _EmitToken(REGEX, PopStr()); fret;                              };
 *|;
 
 main := |*
@@ -206,7 +210,7 @@ main := |*
             ExprBeg();
         } else {
             PushStr(false, kTQStrTypeLeftOrMiddle);
-            [Str() appendString:@"/"];
+            [StrData() appendBytes:"/" length:1];
             fcall regex;
         }
     };
