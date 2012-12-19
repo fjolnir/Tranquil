@@ -250,6 +250,8 @@ using namespace llvm;
     BasicBlock *eventualElseBlock = elseBB;
 
     Value *cond = [self.condition generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
+    if(*aoErr)
+        return NULL;
     Value *test;
     if(!_isNegated)
         test = aBlock.builder->CreateICmpNE(cond, ConstantPointerNull::get(aProgram.llInt8PtrTy), "ternTest");
