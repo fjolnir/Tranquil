@@ -40,7 +40,32 @@ You can also talk to me directly by visiting [#tranquil](irc://irc.freenode.net/
 
 And here're a couple of examples:
 
-### Array iteration
+### Print a Mandelbrot fractal
+
+```
+mandelbrot = { x, y, bailout=16, maxIter=1000 |
+    cr, ci = y-0.5, x
+    zi, zr = 0
+ 
+    maxIter times: {
+        temp = zr*zi
+        zr2, zi2 = zr^2, zi^2
+        zr = zr2 - zi2 + cr
+        zi = 2*temp + ci
+        ^^no if zi2 + zr2 > bailout
+    }
+    ^yes
+}
+ 
+(-1 to: 1 withStep: 1/40) each: { y |
+    (-1 to: 1 withStep: 1/40) each: { x |
+        (mandelbrot(x, y) ? #● ! #◦) printWithoutNl
+    }
+    #"" print
+}
+```
+
+### Iterate an array
 
 ```
 alternatives = ["Objective-C", "Ruby", "Nu", "Perl", "Python"]
@@ -48,7 +73,7 @@ alternatives each: `alternative | "Tranquil is nicer than «alternative»" print
 "Or so I hope at least." print
 ```
 
-### Reduction
+### Reduce
 
 ```
 sum = (0 to: 1000000) reduce: `obj, accum=0 | obj+accum`
@@ -64,19 +89,19 @@ whenFinished {
 }
 ```
 
-### Message chaining (Without having to return self from every method you write)
+### Chain messages (Without having to return self from every method you write)
 
 ```
 var = Character new setName: "Deckard"; setOccupation: "Blade Runner"; self
 ```
 
-### Multiple assignment
+### Do multiple assignment
 
 ```
 a, b = b, a  \ Swap b&a
 ```
 
-### Non-local returns
+### Return non-locally
 
 ```
 a = {
@@ -120,7 +145,7 @@ fib(10) print
 "Foobar starts with foo." print if /foo[a-z]+/i matches: "Foobar"
 ```
 
-### Using the OpenGL & GLUT APIs
+### Use the OpenGL & GLUT APIs
 
 ```
 import "GLUT" \ This simply reads in your GLUT.h header. No bindings are required.
@@ -154,50 +179,4 @@ GlutMotionFunc { x, y |
 
 GlutIdleFunc(GlutPostRedisplay)
 GlutMainLoop()
-```
-
-### Talking to Cocoa
-
-```
-import "AppKit"
-
-nsapp = NSApplication sharedApplication
-
-\ Create the menubar
-quitMenuItem = NSMenuItem new setTitle: "Quit «NSProcessInfo processInfo processName»";
-                             setAction: #terminate:;
-                      setKeyEquivalent: #q;
-                                  self
-appMenu     = NSMenu new addItem: quitMenuItem;   self
-appMenuItem = NSMenuItem new setSubmenu: appMenu; self
-menuBar     = NSMenu new addItem: appMenuItem;    self
-
-nsapp setMainMenu: menuBar
-
-\ Create a little view
-@TestView < NSView {
-    - init {
-        @gradient = NSGradient alloc initWithStartingColor: NSColor redColor
-                                               endingColor: NSColor yellowColor
-        ^self
-    }
-    - drawRect: dirtyRect {
-        @gradient drawInRect: dirtyRect angle: 45
-    }
-}
-	
-\ Create a window
-win = (NSWindow alloc initWithContentRect: [[0, 0], [300, 200]]
-                                styleMask: (NSTitledWindowMask bitOr: NSResizableWindowMask)
-                                  backing: NSBackingStoreBuffered
-                                    defer: no)
-                                 setTitle: "Tranquil!";
-                           setContentView: TestView new;
-                                     self
-
-\ Start the app
-win makeKeyAndOrderFront: nil
-nsapp setActivationPolicy: NSApplicationActivationPolicyRegular
-nsapp activateIgnoringOtherApps: yes
-nsapp run
 ```
