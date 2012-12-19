@@ -365,6 +365,10 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
 {
     return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), -_TQNumberValue(self));
 }
+- (TQNumber *)round
+{
+    return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), round(_TQNumberValue(self)));
+}
 - (TQNumber *)ceil
 {
     return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), ceil(_TQNumberValue(self)));

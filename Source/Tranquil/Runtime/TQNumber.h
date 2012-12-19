@@ -80,6 +80,7 @@ BOOL TQFloatFitsInTaggedNumber(float aValue);
 - (id)multiply:(id)b;
 - (id)divideBy:(id)b;
 - (id)pow:(id)b;
+- (TQNumber *)round;
 - (TQNumber *)ceil;
 - (TQNumber *)floor;
 - (TQNumber *)modulo:(id)b;
