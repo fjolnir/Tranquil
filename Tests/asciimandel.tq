@@ -12,10 +12,13 @@ mandelbrot = { x, y, bailout=16, maxIter=1000 |
     ^yes
 }
 
+chars = [#✦, #✤, #✥, #✧]
 (-1 to: 1 withStep: 1/40) each: { y |
     (-1 to: 1 withStep: 1/40) each: { x |
-        (mandelbrot(x, y) ? #● ! #◦) printWithoutNl
+        if mandelbrot(x, y) then
+            chars[((x^2 + y^2) sqrt * 3) round] printWithoutNl
+        else
+            #" " printWithoutNl
     }
     #"" print
 }
-
