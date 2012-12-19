@@ -111,5 +111,6 @@ BOOL TQFloatFitsInTaggedNumber(float aValue);
 - (id)isLesserOrEqualTo:(id)b;
 
 - (TQRange *)to:(TQNumber *)b;
+- (TQRange *)to:(TQNumber *)b withStep:(TQNumber *)aStep;
 - (id)times:(id (^)())block;
 @end

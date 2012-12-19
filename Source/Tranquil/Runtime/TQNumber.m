@@ -592,8 +592,14 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
 
 - (TQRange *)to:(TQNumber *)b
 {
-    return [TQRange from:self to:b];
+    return [TQRange from:self to:b step:nil];
 }
+
+- (TQRange *)to:(TQNumber *)b withStep:(TQNumber *)aStep
+{
+    return [TQRange from:self to:b step:aStep];
+}
+
 
 #pragma mark -
 
