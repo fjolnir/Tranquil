@@ -44,24 +44,24 @@
        modf(end,   &unused) <= DBL_EPSILON &&
        modf(step,  &unused) <= DBL_EPSILON) {
         if(end >= start) {
-            for(long i = start; i < (long)end; i += (long)step) {
+            for(long i = start; i <= (long)end; i += (long)step) {
                 if(TQDispatchBlock1(aBlock, [TQNumber numberWithInt:i]) == TQNothing)
                     break;
             }
         } else {
-            for(long i = start; i > (long)end; i += (long)step) {
+            for(long i = start; i >= (long)end; i -= (long)step) {
                 if(TQDispatchBlock1(aBlock, [TQNumber numberWithInt:i]) == TQNothing)
                     break;
             }
         }
     } else {
         if(end >= start) {
-            for(double i = start; i < end; i += step) {
+            for(double i = start; i <= end; i += step) {
                 if(TQDispatchBlock1(aBlock, [TQNumber numberWithDouble:i]) == TQNothing)
                     break;
             }
         } else {
-            for(double i = start; i > end; i += step) {
+            for(double i = start; i >= end; i -= step) {
                 if(TQDispatchBlock1(aBlock, [TQNumber numberWithDouble:i]) == TQNothing)
                     break;
             }
