@@ -17,8 +17,10 @@ union CoercedValue {
     double doubleValue;
 };
 
-// Largest integer accurately representable
+// Largest value accurately representable by a tagged pointer
 static const double TQTaggedNumberLimit = 1.0f/FLT_EPSILON;
+// Largest value accurately representable by an allocated object
+static const double TQNumberLimit       = 1.0/DBL_EPSILON;
 
 static id (*numberWithDoubleImp)(id, SEL, double);
 static id (*numberWithLongImp)(id, SEL, long);
@@ -45,6 +47,13 @@ static __inline__ BOOL _TQTaggedNumberCanHold(double aValue)
 #else
     return NO; // TODO: Figure out a way to do tagging on 32bit
 #endif
+}
+
+static __inline__ BOOL _TQNumberCanHold(double aValue)
+{
+    union CoercedValue val = { .doubleValue = aValue };
+    val.addr &= 0x7fffffffffffffffL; // Unset the sign bit
+    return val.doubleValue <= TQNumberLimit;
 }
 
 static __inline__ id _TQTaggedNumberCreate(float value)
@@ -126,21 +135,21 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
 {
     if(_TQTaggedNumberCanHold(aValue))
         return _TQTaggedNumberCreate(aValue);
-    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithBool:), aValue);
+    TQNumber *ret = initImp(allocImp([TQNumber class], @selector(allocWithZone:), nil), @selector(initWithBool:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 + (TQNumber *)numberWithChar:(char)aValue
 {
     if(_TQTaggedNumberCanHold(aValue))
         return _TQTaggedNumberCreate(aValue);
-    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithChar:), aValue);
+    TQNumber *ret = initImp(allocImp([TQNumber class], @selector(allocWithZone:), nil), @selector(initWithChar:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 + (TQNumber *)numberWithShort:(short)aValue
 {
     if(_TQTaggedNumberCanHold(aValue))
         return _TQTaggedNumberCreate(aValue);
-    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithShort:), aValue);
+    TQNumber *ret = initImp(allocImp([TQNumber class], @selector(allocWithZone:), nil), @selector(initWithShort:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 + (TQNumber *)numberWithInt:(int)aValue
@@ -148,7 +157,7 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
     if(_TQTaggedNumberCanHold(aValue))
         return _TQTaggedNumberCreate(aValue);
 
-    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithInt:), aValue);
+    TQNumber *ret = initImp(allocImp([TQNumber class], @selector(allocWithZone:), nil), @selector(initWithInt:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 + (TQNumber *)numberWithLong:(long)aValue
@@ -156,7 +165,7 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
     if(_TQTaggedNumberCanHold(aValue))
         return _TQTaggedNumberCreate(aValue);
 
-    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithLong:), aValue);
+    TQNumber *ret = initImp(allocImp([TQNumber class], @selector(allocWithZone:), nil), @selector(initWithLong:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 + (TQNumber *)numberWithLongLong:(long long)aValue
@@ -164,7 +173,7 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
     if(_TQTaggedNumberCanHold(aValue))
         return _TQTaggedNumberCreate(aValue);
 
-    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithLongLong:), aValue);
+    TQNumber *ret = initImp(allocImp([TQNumber class], @selector(allocWithZone:), nil), @selector(initWithLongLong:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 + (TQNumber *)numberWithFloat:(float)aValue
@@ -172,7 +181,7 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
     if(_TQTaggedNumberCanHold(aValue))
         return _TQTaggedNumberCreate(aValue);
 
-    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithFloat:), aValue);
+    TQNumber *ret = initImp(allocImp([TQNumber class], @selector(allocWithZone:), nil), @selector(initWithFloat:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 + (TQNumber *)numberWithDouble:(double)aValue
@@ -180,7 +189,7 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
     if(_TQTaggedNumberCanHold(aValue))
         return _TQTaggedNumberCreate(aValue);
 
-    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithDouble:), aValue);
+    TQNumber *ret = initImp(allocImp([TQNumber class], @selector(allocWithZone:), nil), @selector(initWithDouble:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 + (TQNumber *)numberWithInteger:(NSInteger)aValue
@@ -188,7 +197,7 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
     if(_TQTaggedNumberCanHold(aValue))
         return _TQTaggedNumberCreate(aValue);
 
-    TQNumber *ret = initImp(allocImp(self, @selector(allocWithZone:), nil), @selector(initWithInteger:), aValue);
+    TQNumber *ret = initImp(allocImp([TQNumber class], @selector(allocWithZone:), nil), @selector(initWithInteger:), aValue);
     return autoreleaseImp(ret, @selector(autorelease));
 }
 
@@ -339,11 +348,11 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
 
 - (id)add:(id)b
 {
-    if(object_getClass(self) != object_getClass(b))
+    if(![b isKindOfClass:[TQNumber class]])
         return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _TQNumberValue(self) + [b doubleValue]);
     double result = _TQNumberValue(self) + _TQNumberValue(b);
 #ifndef TQ_NO_BIGNUM
-    if(isinf(result))
+    if(!_TQNumberCanHold(result))
         return [[TQBigNumber withNumber:self] add:b];
 #endif
     return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), result);
@@ -351,11 +360,11 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
 }
 - (id)subtract:(id)b
 {
-    if(object_getClass(self) != object_getClass(b))
+    if(![b isKindOfClass:[TQNumber class]])
         return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _TQNumberValue(self) - [b doubleValue]);
     double result = _TQNumberValue(self) - _TQNumberValue(b);
 #ifndef TQ_NO_BIGNUM
-    if(isinf(result))
+    if(!_TQNumberCanHold(result))
         return [[TQBigNumber withNumber:self] subtract:b];
 #endif
     return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), result);
@@ -380,11 +389,11 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
 
 - (id)multiply:(id)b
 {
-    if(object_getClass(self) != object_getClass(b))
+    if(![b isKindOfClass:[TQNumber class]])
         return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), _TQNumberValue(self) * [b doubleValue]);
     double result = _TQNumberValue(self) * _TQNumberValue(b);
 #ifndef TQ_NO_BIGNUM
-    if(isinf(result))
+    if(!_TQNumberCanHold(result))
         return [[TQBigNumber withNumber:self] multiply:b];
 #endif
     return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), result);
@@ -394,7 +403,7 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
 {
     double aVal, bVal;
     aVal = _TQNumberValue(self);
-    if(object_getClass(self) != object_getClass(b))
+    if(![b isKindOfClass:[TQNumber class]])
         bVal = [b doubleValue];
     else
         bVal = _TQNumberValue(b);
@@ -402,24 +411,24 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
 
     double result = aVal / bVal;
 #ifndef TQ_NO_BIGNUM
-    if(isinf(result))
+    if(!_TQNumberCanHold(result))
         return [[TQBigNumber withNumber:self] divide:b];
 #endif
     return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), result);
 }
 - (TQNumber *)modulo:(id)b
 {
-    if(object_getClass(self) != object_getClass(b))
+    if(![b isKindOfClass:[TQNumber class]])
         return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), fmod(_TQNumberValue(self), [b doubleValue]));
     return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), fmod(_TQNumberValue(self), _TQNumberValue(b)));
 }
 - (id)pow:(id)b
 {
-    if(object_getClass(self) != object_getClass(b))
+    if(![b isKindOfClass:[TQNumber class]])
         return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), pow(_TQNumberValue(self), [b doubleValue]));
     double result = pow(_TQNumberValue(self), _TQNumberValue(b) );
 #ifndef TQ_NO_BIGNUM
-    if(isinf(result))
+    if(!_TQNumberCanHold(result))
         return [[TQBigNumber withNumber:self] pow:b];
 #endif
     return numberWithDoubleImp(object_getClass(self), @selector(numberWithDouble:), result);
@@ -488,35 +497,35 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
 
 - (TQNumber *)bitAnd:(id)b
 {
-    if(object_getClass(self) != object_getClass(b))
+    if(![b isKindOfClass:[TQNumber class]])
         return numberWithLongImp(object_getClass(self), @selector(numberWithLong:), (long)_TQNumberValue(self) & [b longValue]);
     return numberWithLongImp(object_getClass(self), @selector(numberWithLong:), (long)_TQNumberValue(self) & (long)_TQNumberValue(b));
 }
 
 - (TQNumber *)bitOr:(id)b
 {
-    if(object_getClass(self) != object_getClass(b))
+    if(![b isKindOfClass:[TQNumber class]])
         return numberWithLongImp(object_getClass(self), @selector(numberWithLong:), (long)_TQNumberValue(self) | [b longValue]);
     return numberWithLongImp(object_getClass(self), @selector(numberWithLong:), (long)_TQNumberValue(self) | (long)_TQNumberValue(b));
 }
 
 - (TQNumber *)xor:(id)b
 {
-    if(object_getClass(self) != object_getClass(b))
+    if(![b isKindOfClass:[TQNumber class]])
         return numberWithLongImp(object_getClass(self), @selector(numberWithLong:), (long)_TQNumberValue(self) ^ [b longValue]);
     return numberWithLongImp(object_getClass(self), @selector(numberWithLong:), (long)_TQNumberValue(self) ^ (long)_TQNumberValue(b));
 }
 
 - (TQNumber *)lshift:(id)b
 {
-    if(object_getClass(self) != object_getClass(b))
+    if(![b isKindOfClass:[TQNumber class]])
         return numberWithLongImp(object_getClass(self), @selector(numberWithLong:), (long)_TQNumberValue(self) << [b longValue]);
     return numberWithLongImp(object_getClass(self), @selector(numberWithLong:), (long)_TQNumberValue(self) << (long)_TQNumberValue(b));
 }
 
 - (TQNumber *)rshift:(id)b
 {
-    if(object_getClass(self) != object_getClass(b))
+    if(![b isKindOfClass:[TQNumber class]])
         return numberWithLongImp(object_getClass(self), @selector(numberWithLong:), (long)_TQNumberValue(self) >> [b longValue]);
     return numberWithLongImp(object_getClass(self), @selector(numberWithLong:), (long)_TQNumberValue(self) >> (long)_TQNumberValue(b));
 }
@@ -526,7 +535,7 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
 {
     if(!b)
         return (id)nil;
-    else if(object_getClass(self) != object_getClass(b))
+    else if(![b isKindOfClass:[TQNumber class]])
         return _TQNumberValue(self) == [b doubleValue] ? (id)TQValid : nil;
     return (_TQNumberValue(self) == _TQNumberValue(b)) ? (id)TQValid : nil;
 
@@ -535,34 +544,34 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
 {
     if(!b)
         return (id)nil;
-    else if(object_getClass(self) != object_getClass(b))
+    else if(![b isKindOfClass:[TQNumber class]])
         return _TQNumberValue(self) != [b doubleValue] ? (id)TQValid : (id)nil;
     return (_TQNumberValue(self) != _TQNumberValue(b)) ? (id)TQValid : (id)nil;
 }
 - (id)isGreaterThan:(id)b
 {
-    if(object_getClass(self) != object_getClass(b))
+    if(![b isKindOfClass:[TQNumber class]])
         return _TQNumberValue(self) > [b doubleValue] ? TQValid : nil;
     return _TQNumberValue(self) > _TQNumberValue(b)   ? TQValid : nil;
 }
 
 - (id)isLesserThan:(id)b
 {
-    if(object_getClass(self) != object_getClass(b))
+    if(![b isKindOfClass:[TQNumber class]])
         return _TQNumberValue(self) < [b doubleValue] ? TQValid : nil;
     return _TQNumberValue(self) < _TQNumberValue(b)   ? TQValid : nil;
 }
 
 - (id)isGreaterOrEqualTo:(id)b
 {
-    if(object_getClass(self) != object_getClass(b))
+    if(![b isKindOfClass:[TQNumber class]])
         return _TQNumberValue(self) >= [b doubleValue] ? TQValid : nil;
     return _TQNumberValue(self) >= _TQNumberValue(b)   ? TQValid : nil;
 }
 
 - (id)isLesserOrEqualTo:(id)b
 {
-    if(object_getClass(self) != object_getClass(b))
+    if(![b isKindOfClass:[TQNumber class]])
         return _TQNumberValue(self) <= [b doubleValue] ? TQValid : nil;
     return _TQNumberValue(self) <= _TQNumberValue(b)   ? TQValid : nil;
 }
@@ -570,18 +579,18 @@ BOOL TQFloatFitsInTaggedNumber(float aValue)
 
 - (BOOL)isEqual:(id)aObj
 {
-    if(object_getClass(self) == object_getClass(aObj))
+    if(![aObj isKindOfClass:[TQNumber class]])
         return _TQNumberValue(self) == _TQNumberValue(aObj);
     else if([aObj respondsToSelector:@selector(doubleValue)])
         return _TQNumberValue(self) == [aObj doubleValue];
     return NO;
 }
 
-- (NSComparisonResult)compare:(id)object
+- (NSComparisonResult)compare:(id)aObj
 {
-    if(object_getClass(object) != object_getClass(self))
+    if(![aObj isKindOfClass:[TQNumber class]])
         return NSOrderedAscending;
-    TQNumber *b = object;
+    TQNumber *b = aObj;
     double value      = _TQNumberValue(self);
     double otherValue = _TQNumberValue(b);
     if(value > otherValue)
