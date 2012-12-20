@@ -167,7 +167,6 @@ static const int _TQBigNumberMaxDigits;
 - (TQBigNumber *)pow:(id)b
 {
     TQBigNumber *ret = [[self class] new];
-    NSLog(@"%@^%@", self, b);
     if(object_getClass(self) != object_getClass(b))
         mpf_pow_ui(ret->_value, _value, [b unsignedLongValue]);
     else
