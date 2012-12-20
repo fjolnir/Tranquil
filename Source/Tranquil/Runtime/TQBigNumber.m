@@ -9,9 +9,7 @@
     mpf_clear(tmp); \
 }
 
-@class TQNumber;
-
-#define TQBigNumberPrecision 2048
+#define TQBigNumberPrecision 8192
 
 static const int _TQBigNumberMaxDigits;
 
@@ -32,7 +30,8 @@ static const int _TQBigNumberMaxDigits;
 {
     if(!(self = [super init]))
         return nil;
-    mpf_init2(_value, TQBigNumberPrecision);
+    if(!_value)
+        mpf_init2(_value, TQBigNumberPrecision);
     return self;
 }
 
@@ -102,7 +101,7 @@ static const int _TQBigNumberMaxDigits;
 
 - (TQBigNumber *)add:(id)b
 {
-    TQBigNumber *ret = [[[self class] alloc] init];
+    TQBigNumber *ret = [[self class] new];
     if(object_getClass(self) != object_getClass(b))
         DBL_OP(ret->_value, mpf_add, [b doubleValue])
     else
@@ -111,7 +110,7 @@ static const int _TQBigNumberMaxDigits;
 }
 - (TQBigNumber *)subtract:(id)b
 {
-    TQBigNumber *ret = [[[self class] alloc] init];
+    TQBigNumber *ret = [[self class] new];
     if(object_getClass(self) != object_getClass(b))
         DBL_OP(ret->_value, mpf_sub, [b doubleValue])
     else
@@ -121,33 +120,33 @@ static const int _TQBigNumberMaxDigits;
 
 - (TQBigNumber *)negate
 {
-    TQBigNumber *ret = [[[self class] alloc] init];
+    TQBigNumber *ret = [[self class] new];
     mpf_neg(ret->_value, _value);
     return [ret autorelease];
 }
 
 - (TQBigNumber *)abs
 {
-    TQBigNumber *ret = [[[self class] alloc] init];
+    TQBigNumber *ret = [[self class] new];
     mpf_abs(ret->_value, _value);
     return [ret autorelease];
 }
 - (TQBigNumber *)ceil
 {
-    TQBigNumber *ret = [[[self class] alloc] init];
+    TQBigNumber *ret = [[self class] new];
     mpf_ceil(ret->_value, _value);
     return [ret autorelease];
 }
 - (TQBigNumber *)floor
 {
-    TQBigNumber *ret = [[[self class] alloc] init];
+    TQBigNumber *ret = [[self class] new];
     mpf_floor(ret->_value, _value);
     return [ret autorelease];
 }
 
 - (TQBigNumber *)multiply:(id)b
 {
-    TQBigNumber *ret = [[[self class] alloc] init];
+    TQBigNumber *ret = [[self class] new];
     if(object_getClass(self) != object_getClass(b))
         DBL_OP(ret->_value, mpf_mul, [b doubleValue])
     else
@@ -157,7 +156,7 @@ static const int _TQBigNumberMaxDigits;
 
 - (TQBigNumber *)divide:(id)b
 {
-    TQBigNumber *ret = [[[self class] alloc] init];
+    TQBigNumber *ret = [[self class] new];
     if(object_getClass(self) != object_getClass(b)) 
         DBL_OP(ret->_value, mpf_div, [b doubleValue])
     else
@@ -167,7 +166,8 @@ static const int _TQBigNumberMaxDigits;
 
 - (TQBigNumber *)pow:(id)b
 {
-    TQBigNumber *ret = [[[self class] alloc] init];
+    TQBigNumber *ret = [[self class] new];
+    NSLog(@"%@^%@", self, b);
     if(object_getClass(self) != object_getClass(b))
         mpf_pow_ui(ret->_value, _value, [b unsignedLongValue]);
     else
@@ -176,9 +176,17 @@ static const int _TQBigNumberMaxDigits;
 }
 - (TQBigNumber *)sqrt
 {
-    TQBigNumber *ret = [[[self class] alloc] init];
+    TQBigNumber *ret = [[self class] new];
     mpf_sqrt(ret->_value, _value);
     return [ret autorelease];
+}
+
+#pragma mark - Batch allocation code
+TQ_BATCH_IMPL(TQBigNumber)
+- (void)dealloc
+{
+    mpf_set_d(_value, 0.0);
+    TQ_BATCH_DEALLOC
 }
 @end
 #endif

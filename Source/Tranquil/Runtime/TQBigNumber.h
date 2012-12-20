@@ -1,5 +1,6 @@
 #ifndef TQ_NO_BIGNUM
 #import <Tranquil/Runtime/TQObject.h>
+#import <Tranquil/Shared/TQBatching.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
 #import <gmp.h>
@@ -9,6 +10,7 @@
 @interface TQBigNumber : TQObject {
     @protected
     mpf_t _value;
+    TQ_BATCH_IVARS
 }
 @property(readonly) double doubleValue;
 @property(readonly) TQNumber *numberValue;
