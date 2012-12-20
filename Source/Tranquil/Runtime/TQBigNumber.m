@@ -30,7 +30,7 @@ static const int _TQBigNumberMaxDigits;
 {
     if(!(self = [super init]))
         return nil;
-    if(!_value)
+    if(!_value[0]._mp_d)
         mpf_init2(_value, TQBigNumberPrecision);
     return self;
 }
