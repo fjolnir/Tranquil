@@ -24,6 +24,10 @@
     const char *str = [self UTF8String];
     return *str;
 }
+- (char)toChar
+{
+    return [self charValue];
+}
 
 - (NSMutableString *)multiply:(TQNumber *)aTimes
 {
