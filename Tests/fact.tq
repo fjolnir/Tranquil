@@ -1,0 +1,4 @@
+@TQNumber {
+    - fact `(1 to: self) reduce: `n,f=1 | f*n``
+}
+20 fact print
