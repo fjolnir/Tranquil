@@ -1,7 +1,10 @@
 #import "TQObject.h"
 #import "TQNumber.h"
+#import "TQEnumerable.h"
 #import "TQRuntime.h"
 #import "NSString+TQAdditions.h"
+#import "NSCollections+Tranquil.h"
+#import "../../../Build/TQStubs.h"
 #import <objc/runtime.h>
 
 static NSArray *methodsForClass(Class kls);
@@ -143,6 +146,17 @@ static NSArray *methodsForClass(Class kls);
     return ([(id)self compare:b] != NSOrderedAscending) ? TQValid : nil;
 }
 
+- (id)case:(id)aCases else:(id (^)())aDefaultCase
+{
+    id (^choice)() = [[aCases find:^(TQPair *pair) { return [self isEqualTo:[pair left]]; }] right];
+    if(!choice)
+        choice = aDefaultCase;
+    return TQDispatchBlock0(choice);
+}
+- (id)case:(id)aCases
+{
+    return [self case:aCases else:nil];
+}
 
 #pragma mark - Dynamic message dispatchers
 

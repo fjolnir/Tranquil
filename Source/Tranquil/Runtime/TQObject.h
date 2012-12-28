@@ -1,7 +1,8 @@
 // The root class of Tranquil which classes created using Tranquil inherit from by default
 // Subclasses of TQObject should never accept or return anything but objects from their methods
 
-// Boolean returns from TQObject methods return nil on success and any object on success (Convention is TQNumberTrue=1.0)
+// Boolean methods on TQObject and it's subclasses return nil on failure and TQValid on success
+
 #import <Foundation/Foundation.h>
 
 @class TQNumber;
@@ -24,6 +25,9 @@
 - (id)isGreaterThan:(id)b;
 - (id)isLesserOrEqualTo:(id)b;
 - (id)isGreaterOrEqualTo:(id)b;
+
+- (id)case:(id)aCases;
+- (id)case:(id)aCases else:(id (^)())aDefaultCase;
 
 - (id)perform:(NSString *)aSelector withArguments:(NSArray *)aArguments;
 - (id)perform:(NSString *)aSelector;
