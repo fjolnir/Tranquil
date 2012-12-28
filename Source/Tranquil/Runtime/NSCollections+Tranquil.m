@@ -180,6 +180,24 @@
         [self removeObjectAtIndex:count-1];
 }
 
+- (id)remove:(id)aObj
+{
+    int count = [self count];
+    id ret = nil;
+    NSPointerFunctions *pointerFuns = [self pointerFunctions];
+    BOOL (*comparator)(const void *, const void*, NSUInteger (*)(const void *)) = [pointerFuns isEqualFunction];
+    NSUInteger (*sizeFun)(const void *) = [pointerFuns sizeFunction];
+    for(int i = 0; i < count;) {
+        if(comparator([self pointerAtIndex:i], aObj, sizeFun)) {
+            [self removeObjectAtIndex:i];
+            ret = TQValid;
+            --count;
+        } else
+            ++i;
+    }
+    return ret;
+}
+
 - (id)each:(id (^)(id))aBlock
 {
     for(id obj in self) {
@@ -236,19 +254,9 @@
     return nil;
 }
 
-- (id)removeObject:(id)aObj
+- (void)removeObject:(id)aObj
 {
-    NSMutableIndexSet *indices = [NSMutableIndexSet indexSet];
-    NSUInteger i = 0;
-    for(id obj in self) {
-        if(tq_msgSend_noBoxing(aObj, @selector(isEqualTo:), obj))
-            [indices addIndex:i];
-        ++i;
-    }
-    [indices enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
-        [self removePointerAtIndex:idx];
-    }];
-    return nil;
+    [self remove:aObj];
 }
 
 - (id)last
@@ -360,11 +368,7 @@
 {
     return [self objectAtIndex:[aIdx unsignedIntegerValue]];
 }
-- (id)set:(id)aKey to:(id)aVal
-{
-    [(NSMutableArray *)self setObject:aVal atIndexedSubscript:[aKey unsignedIntegerValue]];
-    return nil;
-}
+
 - (id)contains:(id)aVal
 {
     return [self containsObject:aVal] ? TQValid : nil;
@@ -375,12 +379,28 @@
 {
     return [self objectAtIndex:idx];
 }
-- (void)setObject:(id)obj atIndexedSubscript:(NSUInteger)idx
-{
-    [(NSMutableArray *)self replaceObjectAtIndex:idx withObject:obj];
-}
 #endif
 
+@end
+
+@implementation NSMutableArray (Tranquil)
+- (id)set:(id)aKey to:(id)aVal
+{
+    [self setObject:aVal atIndexedSubscript:[aKey unsignedIntegerValue]];
+    return nil;
+}
+- (id)remove:(id)aObj
+{
+    [self removeObject:aObj];
+    return nil;
+}
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_7
+- (void)setObject:(id)obj atIndexedSubscript:(NSUInteger)idx
+{
+    [self replaceObjectAtIndex:idx withObject:obj];
+}
+#endif
 @end
 
 @implementation NSDictionary (Tranquil)

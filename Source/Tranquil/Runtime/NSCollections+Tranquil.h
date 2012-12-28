@@ -15,7 +15,7 @@
 + (NSPointerArray *)tq_pointerArrayWithObjects:(id)firstObject , ...;  // Arguments terminated by TQNothing
 - (void)setObject:(id)aPtr atIndexedSubscript:(NSUInteger)aIdx;
 - (void)removeObjectAtIndex:(NSUInteger)aIdx;
-- (id)removeObject:(id)aObj;
+- (void)removeObject:(id)aObj;
 - (id)objectAtIndexedSubscript:(NSUInteger)aIdx;
 - (id)at:(TQNumber *)aIdx;
 - (TQNumber *)size;
@@ -24,6 +24,7 @@
 - (id)push:(id)aObj;
 - (id)pop;
 - (id)insert:(id)aObj at:(TQNumber *)aIdx;
+- (id)remove:(id)aObj;
 - (id)last;
 - (id)first;
 
@@ -43,7 +44,13 @@
 @interface NSArray (Tranquil)
 - (id)at:(TQNumber *)aIdx;
 #if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_7
-INDEXED_SUBSCRIPT_DEFS
+- (id)objectAtIndexedSubscript:(NSUInteger)idx NS_AVAILABLE(10_7, 5_0);
+#endif
+@end
+@interface NSMutableArray (Tranquil)
+- (id)remove:(id)aObj;
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_7
+- (void)setObject:(id)obj atIndexedSubscript:(NSUInteger)idx NS_AVAILABLE(10_7, 5_0);
 #endif
 @end
 
@@ -52,6 +59,9 @@ INDEXED_SUBSCRIPT_DEFS
 #if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_7
 KEYED_SUBSCRIPT_DEFS
 #endif
+@end
+@interface NSMutableDictionary (Tranquil)
+- (id)set:(id)aKey to:(id)aVal;
 @end
 
 @interface NSUserDefaults (Tranquil)
