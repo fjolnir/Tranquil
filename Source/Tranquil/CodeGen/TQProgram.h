@@ -15,6 +15,7 @@
 
 TQ_EXTERN_C NSString * const kTQSyntaxErrorException;
 typedef id (^TQErrorHandlingBlock)(id err);
+typedef id (^TQProgramBlock)(NSError **aoErr);
 
 @interface TQProgram : TQObject {
     BOOL _initializedTQRuntime;
@@ -49,5 +50,6 @@ typedef id (^TQErrorHandlingBlock)(id err);
 - (id)executeScriptAtPath:(NSString *)aScript onError:(TQErrorHandlingBlock)aHandler;
 - (id)executeScript:(NSString *)aScript error:(NSError **)aoErr;
 - (id)executeScript:(NSString *)aScript onError:(TQErrorHandlingBlock)aHandler;
+- (TQProgramBlock)compileScript:(NSString *)aScript error:(NSError **)aoErr;
 @end
 #endif

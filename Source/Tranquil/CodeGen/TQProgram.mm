@@ -139,7 +139,7 @@ static TQProgram *sharedInstance;
    [aTrace removeLastObject];
 }
 
-- (id)_executeRoot:(TQNodeRootBlock *)aNode error:(NSError **)aoErr
+- (TQProgramBlock)_prepareRoot:(TQNodeRootBlock *)aNode error:(NSError **)aoErr
 {
     if(!aNode)
         return nil;
@@ -315,39 +315,40 @@ static TQProgram *sharedInstance;
 
     id(*rootPtr)() = (id(*)())_executionEngine->getPointerToFunction(aNode.function);
 
-    uint64_t startTime = mach_absolute_time();
-    // Execute code
+    return [[^(NSError **aoErr) {
+        uint64_t startTime = mach_absolute_time();
+        // Execute code
 #ifdef TQ_PROFILE
-    ProfilerStart("tqprof.txt");
+        ProfilerStart("tqprof.txt");
 #endif
-    id ret = nil;
-    @try {
-        ret = rootPtr();
-    } @catch (NSException *e) {
-        if(aoErr) *aoErr = [NSError errorWithDomain:kTQRuntimeErrorDomain
-                                               code:kTQObjCException
-                                           userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[e reason], NSLocalizedDescriptionKey,
-                                                                                               e, @"exception", nil]];
-    }
+        id ret = nil;
+        @try {
+            ret = rootPtr();
+        } @catch (NSException *e) {
+            if(aoErr) *aoErr = [NSError errorWithDomain:kTQRuntimeErrorDomain
+                                                   code:kTQObjCException
+                                               userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[e reason], NSLocalizedDescriptionKey,
+                                                                                                   e, @"exception", nil]];
+        }
 #ifdef TQ_PROFILE
-    ProfilerStop();
+        ProfilerStop();
 #endif
 
-    if(shouldResetEvalPaths)
-        _evaluatedPaths = nil;
+        if(shouldResetEvalPaths)
+            _evaluatedPaths = nil;
 
-    uint64_t ns = mach_absolute_time() - startTime;
-    struct mach_timebase_info timebase;
-    mach_timebase_info(&timebase);
-    double sec = ns * timebase.numer / timebase.denom / 1000000000.0;
+        uint64_t ns = mach_absolute_time() - startTime;
+        struct mach_timebase_info timebase;
+        mach_timebase_info(&timebase);
+        double sec = ns * timebase.numer / timebase.denom / 1000000000.0;
 
-    if(_shouldShowDebugInfo) {
-        fprintf(stderr, "---------------------\n");
-        TQLog(@"Run time: %f sec. Ret: %p", sec, ret);
-        TQLog(@"'root' retval:  %p: %@ (%@)", ret, ret ? ret : nil, [ret class]);
-    }
-
-    return ret;
+        if(_shouldShowDebugInfo) {
+            fprintf(stderr, "---------------------\n");
+            TQLog(@"Run time: %f sec. Ret: %p", sec, ret);
+            TQLog(@"'root' retval:  %p: %@ (%@)", ret, ret ? ret : nil, [ret class]);
+        }
+        return ret;
+    } copy] autorelease];
 }
 
 - (TQNodeRootBlock *)_rootFromFile:(NSString *)aPath error:(NSError **)aoErr
@@ -362,7 +363,10 @@ static TQProgram *sharedInstance;
     TQNodeRootBlock *root = [self _rootFromFile:aPath error:aoErr];
     if(!root)
         return nil;
-    return [self _executeRoot:root error:aoErr];
+    TQProgramBlock block = [self _prepareRoot:root error:aoErr];
+    if(block)
+        return block(aoErr);
+    return nil;
 }
 - (id)executeScriptAtPath:(NSString *)aPath onError:(TQErrorHandlingBlock)aHandler;
 {
@@ -405,12 +409,21 @@ static TQProgram *sharedInstance;
     return root;
 }
 
-- (id)executeScript:(NSString *)aScript error:(NSError **)aoErr
+
+- (TQProgramBlock)compileScript:(NSString *)aScript error:(NSError **)aoErr
 {
     TQNodeRootBlock *root = [self _parseScript:aScript withPath:nil error:aoErr];
     if(!root)
         return nil;
-    return [self _executeRoot:root error:aoErr];
+    return [self _prepareRoot:root error:aoErr];
+}
+
+- (id)executeScript:(NSString *)aScript error:(NSError **)aoErr
+{
+    TQProgramBlock root = [self compileScript:aScript error:aoErr];
+    if(root)
+        return root(aoErr);
+    return nil;
 }
 
 - (id)executeScript:(NSString *)aScript onError:(TQErrorHandlingBlock)aHandler
