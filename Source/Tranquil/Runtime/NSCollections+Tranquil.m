@@ -184,12 +184,9 @@
 {
     int count = [self count];
     id ret = nil;
-    NSPointerFunctions *pointerFuns = [self pointerFunctions];
-    BOOL (*comparator)(const void *, const void*, NSUInteger (*)(const void *)) = [pointerFuns isEqualFunction];
-    NSUInteger (*sizeFun)(const void *) = [pointerFuns sizeFunction];
     for(int i = 0; i < count;) {
-        if(comparator([self pointerAtIndex:i], aObj, sizeFun)) {
-            [self removeObjectAtIndex:i];
+        if([(TQObject *)aObj isEqualTo:[self objectAtIndex:i]]) {
+            [self removePointerAtIndex:i];
             ret = TQValid;
             --count;
         } else
