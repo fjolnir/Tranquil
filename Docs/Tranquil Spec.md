@@ -2,6 +2,8 @@
 
 ## Basic Syntax
 
+*Items followed by a double-asterisk are not/partially implemented and subject to change.*
+
     \ A backslash outside a string starts a comment
     
     \ Reserved Keywords
@@ -58,10 +60,13 @@
     \ Block calls
     aBlock()                         \ Calls a block with no arguments
     aBlock(something, somethingElse) \ Calls a block with a two arguments
-    aBlock { ..statements.. }        \ A valid callee followed by a literal block, is equivalent to a call with a single block argument
+    aBlock { ..statements.. }        \ A valid callee followed by a literal block, is equivalent to a call with a single block argument **
+    aBlock(a, b) { ..statements.. }  \ A standard call followed by a literal block, is equivalent to passing the block as the last argument **
     
-    \ Macros (Called the same way as a block would)
-    *Choice { cond, a, b | cond ? a ! b }  \ A contrived example
+    \ Macros (Called the same way as a block would) **
+    *choice { cond, a, b | cond ? a ! b }  \ A contrived example.
+                                           \ Usage: `choice(foo == bar, 1, 2)`
+    *myIf { cond, lambda | cond || lambda() } \ Usage: myIf(foo == bar) { ... }
     
     \ Flow control
     if ..expression.. {      \ Executes the passed literal block if the expression is non-nil
