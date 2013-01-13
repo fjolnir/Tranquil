@@ -222,7 +222,7 @@ static TQProgram *sharedInstance;
             EngineBuilder factory(_llModule);
             factory.setEngineKind(llvm::EngineKind::JIT);
             factory.setTargetOptions(Opts);
-            factory.setOptLevel(CodeGenOpt::Aggressive);
+            factory.setOptLevel(CodeGenOpt::Default);
             factory.setUseMCJIT(true);
             factory.setRelocationModel(Reloc::PIC_);
             _executionEngine = factory.create();
@@ -237,7 +237,7 @@ static TQProgram *sharedInstance;
 
     // Optimization pass
     PassManagerBuilder builder = PassManagerBuilder();
-    builder.OptLevel = 3;
+    builder.OptLevel = _useAOTCompilation ? 3 : 2;
     PassManagerBuilder Builder;
     builder.Inliner = createFunctionInliningPass();
     builder.populateFunctionPassManager(fpm);
