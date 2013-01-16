@@ -24,7 +24,7 @@
         return (id)nil;
     }];
     [ret autorelease];
-    return [ret count] > 0 ? ret : nil;
+    return ret;
 }
 
 - (id)select:(id (^)(id))aSelectBlock map:(id (^)(id))aMapBlock
@@ -36,7 +36,7 @@
         return (id)nil;
     }];
     [ret autorelease];
-    return [ret count] > 0 ? ret : nil;
+    return ret;
 }
 
 - (id)find:(id (^)(id))aBlock
