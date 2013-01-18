@@ -49,9 +49,9 @@ error("No input provided") unless inPath ~= nil
 tqFlags push: inPath
 
 if forIOS {
-    ldFlags push: "«llvm»/lib/clang/3.2/lib/darwin/libclang_rt.ios.a";
-            push: #"-lcrt1.3.1.o";
+    ldFlags push: #"-lcrt1.3.1.o";
             push: #-syslibroot
+\push: "«llvm»/lib/clang/3.2/lib/darwin/libclang_rt.ios.a";
     if arch == #i386 then {
         syslibroot = "«xcode»/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk"
         cflags  push: #"-miphoneos-version-min=5.0"
@@ -77,8 +77,7 @@ if forIOS {
     ldFlags push: #"-macosx_version_min";
             push: #"10.7.0";
             push: #"-lcrt1.10.6.o";
-            push: #"/usr/lib/arc/libarclite_macosx.a";
-            push: "«llvm»/lib/clang/3.2/lib/darwin/libclang_rt.osx.a"
+            push: #"/usr/lib/arc/libarclite_macosx.a"
 }
 
 flags = [#-arch, arch] + tqFlags
