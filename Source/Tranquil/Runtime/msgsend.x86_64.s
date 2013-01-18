@@ -63,7 +63,8 @@ _tq_msgSend_noBoxing:
     je nilSend
     jmp _objc_msgSend
 
-// tq_msgSend: inspects a method and either redirects to objc_msgSend or tq_boxedMsgSend depending on it's signature
+// tq_msgSend: inspects a method and either redirects to objc_msgSend
+// or tq_boxedMsgSend depending on it's signature
 .globl _tq_msgSend
 _tq_msgSend:
     test %a1, %a1

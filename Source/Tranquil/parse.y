@@ -188,10 +188,15 @@ cond(I) ::= IF|UNLESS(T) expr(C) block(IST)
             ELSE elseBody(EST).                         { I = [CONDKLS(T) nodeWithCondition:C
                                                                                ifStatements:[IST statements]
                                                                              elseStatements:EST]; LN(I,T);                            }
-cond(I) ::= IF|UNLESS(T) expr(C) THEN bodyNl(IST).      { I = [CONDKLS(T) nodeWithCondition:C ifStatements:IST elseStatements:nil]; LN(I,T);  }
+cond(I) ::= IF|UNLESS(T) expr(C) THEN bodyNl(IST).      { I = [CONDKLS(T) nodeWithCondition:C ifStatements:IST
+                                                                             elseStatements:nil]; LN(I,T);                            }
 cond(I) ::= IF|UNLESS(T) expr(C) THEN body(IST)
-            ELSE elseBody(EST).                         { I = [CONDKLS(T) nodeWithCondition:C ifStatements:IST elseStatements:EST]; LN(I,T);  }
-cond(I) ::= bodyNoNl(IST) IF|UNLESS(T) exprNl(C).       { I = [CONDKLS(T) nodeWithCondition:C ifStatements:IST elseStatements:nil]; LN(I,T);  }
+            ELSE elseBody(EST).                         { I = [CONDKLS(T) nodeWithCondition:C
+                                                                               ifStatements:IST
+                                                                             elseStatements:EST]; LN(I,T);                            }
+cond(I) ::= bodyNoNl(IST) IF|UNLESS(T) exprNl(C).       { I = [CONDKLS(T) nodeWithCondition:C
+                                                                               ifStatements:IST
+                                                                             elseStatements:nil]; LN(I,T);                            }
 
 
 ternOpNoNl(O) ::= operandNoNl(C)
@@ -242,10 +247,10 @@ collect(C) ::= COLLECT(T) bodyNl(B).                    { C = [TQNodeCollect nod
 // Import Directive -------------------------------------------------------------------------------------------------------------------
 //
 
-importNoNl(I) ::= IMPORT(T) STR(P).                       { I = [TQNodeImport nodeWithPath:[P value]]; LN(I,T);                         }
-importNoNl(I) ::= IMPORT(T) CONSTSTR(P).                  { I = [TQNodeImport nodeWithPath:[P value]]; LN(I,T);                         }
-importNl(I) ::= IMPORT(T) STRNL(P).                       { I = [TQNodeImport nodeWithPath:[P value]]; LN(I,T);                         }
-importNl(I) ::= IMPORT(T) CONSTSTRNL(P).                  { I = [TQNodeImport nodeWithPath:[P value]]; LN(I,T);                         }
+importNoNl(I) ::= IMPORT(T) STR(P).                     { I = [TQNodeImport nodeWithPath:[P value]]; LN(I,T);                         }
+importNoNl(I) ::= IMPORT(T) CONSTSTR(P).                { I = [TQNodeImport nodeWithPath:[P value]]; LN(I,T);                         }
+importNl(I) ::= IMPORT(T) STRNL(P).                     { I = [TQNodeImport nodeWithPath:[P value]]; LN(I,T);                         }
+importNl(I) ::= IMPORT(T) CONSTSTRNL(P).                { I = [TQNodeImport nodeWithPath:[P value]]; LN(I,T);                         }
 
 
 //
@@ -273,7 +278,7 @@ blockNl(B) ::= backtick(T) blockArgs(A) PIPE expr(E) BACKTICKNL. {
     LN(B,T);
 }
 
-blockNoNl(B) ::= LBRACE(T) statements(S) RBRACE.        { B = [TQNodeBlock node]; [B setStatements:S]; LN(B,T);                        }
+blockNoNl(B) ::= LBRACE(T) statements(S) RBRACE.        { B = [TQNodeBlock node]; [B setStatements:S]; LN(B,T);                       }
 blockNoNl(B) ::= LBRACE(T)  blockArgs(A) PIPE statements(S) RBRACE. {
     B = [TQNodeBlock nodeWithArguments:A statements:S];
     LN(B,T);
@@ -432,13 +437,13 @@ olMsgBeg(M) ::= olMsgBeg(T) selPartNoNl(SP).           { M = T; [M addObject:SP]
 %right CARET RUNARY.
 %right LBRACKET RBRACKET.
 
-operand(O)     ::= operandNoNl(T).                      { O = T;                                                                      }
-operand(O)     ::= operandNl(T).                        { O = T;                                                                      }
+operand(O)     ::= operandNoNl(T).                     { O = T;                                                                       }
+operand(O)     ::= operandNl(T).                       { O = T;                                                                       }
 
-operandNoNl(O) ::= opNoNl(T).                           { O = T;                                                                      }
-operandNoNl(O) ::= simpleExprNoNl(E).                   { O = E;                                                                      }
-operandNl(O)   ::= opNl(T).                             { O = T;                                                                      }
-operandNl(O)   ::= simpleExprNl(E).                     { O = E;                                                                      }
+operandNoNl(O) ::= opNoNl(T).                          { O = T;                                                                       }
+operandNoNl(O) ::= simpleExprNoNl(E).                  { O = E;                                                                       }
+operandNl(O)   ::= opNl(T).                            { O = T;                                                                       }
+operandNl(O)   ::= simpleExprNl(E).                    { O = E;                                                                       }
 
 
 // Assignment
@@ -644,7 +649,7 @@ ivarNoNl(P) ::= ATMARK IDENT(I).                        { P = [TQNodeMemberAcces
 ivarNl(P)   ::= ATMARK IDENTNL(I).                      { P = [TQNodeMemberAccess nodeWithName:[I value]]; LN(P,I);                   }
 
 // Misc
-backtick        ::= BACKTICK|BACKTICKNL.
+backtick ::= BACKTICK|BACKTICKNL.
 
 //
 // Error Handling  --------------------------------------------------------------------------------------------------------------------
@@ -658,19 +663,21 @@ backtick        ::= BACKTICK|BACKTICKNL.
 // ------------------------------------------------------------------------------------------------------------------------------------
 
 %include {
+
 #import <Tranquil/CodeGen/CodeGen.h>
 #import <Tranquil/Shared/TQDebug.h>
 
 // Copies the line number from one node/token to another
 #define LN(dest, src) ([dest setLineNumber:[src lineNumber]])
 
-#define SyntaxError(aCode) do { \
-    NSString *reason = [NSString stringWithFormat:@"Syntax error: near '%@' on line %ld", [TOKEN value], (unsigned long)[TOKEN lineNumber]]; \
-    NSDictionary *info = [NSDictionary dictionaryWithObject:reason forKey:NSLocalizedDescriptionKey]; \
-    state->syntaxError = [NSError errorWithDomain:kTQSyntaxErrorDomain \
-                                             code:aCode \
-                                         userInfo:info]; \
-   [NSException raise:@"Syntax Error" format:nil]; \
+#define SyntaxError(aCode) do {                                                                         \
+    NSString *reason = [NSString stringWithFormat:@"Syntax error: near '%@' on line %ld",               \
+                                                 [TOKEN value], (unsigned long)[TOKEN lineNumber]];     \
+    NSDictionary *info = [NSDictionary dictionaryWithObject:reason forKey:NSLocalizedDescriptionKey];   \
+    state->syntaxError = [NSError errorWithDomain:kTQSyntaxErrorDomain                                  \
+                                             code:aCode                                                 \
+                                         userInfo:info];                                                \
+   [NSException raise:@"Syntax Error" format:nil];                                                      \
 } while(0)
 
 #define CONDKLS(T) ([T id] == IF    ? [TQNodeIfBlock class]    : [TQNodeUnlessBlock class])
@@ -791,4 +798,5 @@ backtick        ::= BACKTICK|BACKTICKNL.
     return ret;
 }
 @end
+
 }
