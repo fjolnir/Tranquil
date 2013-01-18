@@ -12,6 +12,7 @@ extern const unsigned char kTQNumberTagSlot;    // The tag as an integer
 extern const uintptr_t     kTQNumberTag;        // The actual bits of the tag (use inverted to get the value of a tagged number)
 
 BOOL TQFloatFitsInTaggedNumber(float aValue);
+TQNumber *TQNumberCreateTagged(float aValue);
 
 @interface TQNumber : TQObject {
     @public

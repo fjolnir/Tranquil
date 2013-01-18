@@ -67,6 +67,12 @@ static __inline__ id _TQTaggedNumberCreate(float value)
 #endif
 }
 
+TQNumber *TQNumberCreateTagged(float aValue)
+{
+    NSCAssert(_TQTaggedNumberCanHold(aValue), @"%f is out of tagged number range!", aValue);
+    return _TQTaggedNumberCreate(aValue);
+}
+
 static __inline__ float _TQTaggedNumberValue(TQTaggedNumber *ptr)
 {
 #ifdef __LP64__
