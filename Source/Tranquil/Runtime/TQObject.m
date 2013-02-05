@@ -10,6 +10,12 @@
 static NSArray *methodsForClass(Class kls);
 
 @implementation TQObject
+
++ (Class)metaClass
+{
+    return object_getClass(self);
+}
+
 + (id)addMethod:(NSString *)aSel withBlock:(id)aBlock replaceExisting:(id)shouldReplace
 {
     if(!aBlock) {

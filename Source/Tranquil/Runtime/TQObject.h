@@ -8,6 +8,8 @@
 @class TQNumber;
 
 @interface TQObject : NSObject
++ (Class)metaClass;
+
 + (id)addMethod:(NSString *)aSel withBlock:(id)aBlock replaceExisting:(id)shouldReplace;
 + (id)addMethod:(NSString *)aSel withBlock:(id)aBlock;
 + (id)initializer:(NSArray *)aProperties;
