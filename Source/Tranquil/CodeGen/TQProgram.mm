@@ -230,9 +230,11 @@ static TQProgram *sharedInstance;
         }
         if(argGlobal)
             _executionEngine->addGlobalMapping(argGlobal, (void*)&_argGlobalForJIT);
-        if(!_globalQueueForJIT)
+        if(!_globalQueueForJIT) {
             _globalQueueForJIT = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-        _executionEngine->addGlobalMapping(_globalQueue, (void*)&_globalQueueForJIT);
+            _executionEngine->addGlobalMapping(_globalQueue, (void*)&_globalQueueForJIT);
+        } else
+            _executionEngine->updateGlobalMapping(_globalQueue, (void*)&_globalQueueForJIT);
     }
 
     // Optimization pass
@@ -304,7 +306,7 @@ static TQProgram *sharedInstance;
 
     if(!_shouldShowDebugInfo) {
         fpm.run(*aNode.function);
-        modulePasses.run(*_llModule);
+        //modulePasses.run(*_llModule);
     }
 
     if(_shouldShowDebugInfo) {
