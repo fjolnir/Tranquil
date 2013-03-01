@@ -146,7 +146,7 @@ static NSArray *methodsForClass(Class kls);
     return ([(id)self compare:b] != NSOrderedAscending) ? TQValid : nil;
 }
 
-- (id)case:(id)aCases else:(id (^)())aDefaultCase
+- (id)case:(id)aCases default:(id (^)())aDefaultCase
 {
     id (^choice)() = [[aCases find:^(TQPair *pair) { return [self isEqualTo:[pair left]]; }] right];
     if(!choice)
@@ -155,7 +155,7 @@ static NSArray *methodsForClass(Class kls);
 }
 - (id)case:(id)aCases
 {
-    return [self case:aCases else:nil];
+    return [self case:aCases default:nil];
 }
 
 #pragma mark - Dynamic message dispatchers

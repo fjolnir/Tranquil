@@ -27,7 +27,7 @@
 - (id)isGreaterOrEqualTo:(id)b;
 
 - (id)case:(id)aCases;
-- (id)case:(id)aCases else:(id (^)())aDefaultCase;
+- (id)case:(id)aCases default:(id (^)())aDefaultCase;
 
 - (id)perform:(NSString *)aSelector withArguments:(NSArray *)aArguments;
 - (id)perform:(NSString *)aSelector;
