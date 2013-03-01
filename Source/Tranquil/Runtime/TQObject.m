@@ -48,9 +48,30 @@ static NSArray *methodsForClass(Class kls);
     return [[self class] instanceMethods];
 }
 
-+ (id)accessor:(NSString *)aPropName initialValue:(id<NSCopying>)aInitial
++ (id)initializer:(NSArray *)aProperties
 {
-    [self addMethod:aPropName withBlock:^(id self_) {
+    TQAssert([aProperties count] > 0, @"No properties to initialize passed");
+    NSMutableString *sel = [NSMutableString stringWithString:@"with"];
+    [sel appendFormat:@"%@:", [aProperties[0] stringByCapitalizingFirstLetter]];
+    for(int i = 1; i < [aProperties count]; ++i) {
+        [sel appendFormat:@"%@:", aProperties[i]];
+    }
+    [[self metaClass] addMethod:sel withBlock:^(id self, ...) {
+        id instance = [self new];
+        va_list params;
+        va_start(params, self);
+        for(NSString *prop in aProperties) {
+            TQSetValueForKey(instance, prop, va_arg(params, id));
+        }
+        va_end(params);
+        return [instance autorelease];
+    }];
+    return nil;
+}
+
++ (id)reader:(NSString *)aPropName initialValue:(id<NSCopying>)aInitial
+{
+    return [self addMethod:aPropName withBlock:^(id self_) {
         __block id ret = [TQGetDynamicIvarTable(self_) objectForKey:aPropName];
         if(!ret && aInitial) {
             @synchronized(self_) {
@@ -61,6 +82,31 @@ static NSArray *methodsForClass(Class kls);
         }
         return ret;
     } replaceExisting:nil];
+}
+
++ (id)reader:(NSString *)aPropName
+{
+    return [self reader:aPropName initialValue:nil];
+}
+
++ (id)readers:(id)aAccessors
+{
+    if([aAccessors isa:[NSMapTable class]] || [aAccessors isa:[NSDictionary class]]) {
+        for(NSString *name in aAccessors) {
+            [self reader:name initialValue:[aAccessors objectForKey:name]];
+        }
+    } else {
+        for(NSString *name in aAccessors) {
+            [self reader:name initialValue:nil];
+        }
+    }
+    return nil;
+}
+
++ (id)accessor:(NSString *)aPropName initialValue:(id<NSCopying>)aInitial
+{
+    [self reader:aPropName initialValue:aInitial];
+
     NSString *setterSel = [NSString stringWithFormat:@"set%@:", [aPropName stringByCapitalizingFirstLetter]];
     [self addMethod:setterSel withBlock:^(id self_, id val) {
         NSMutableDictionary *ivars = TQGetDynamicIvarTable(self_);
@@ -80,16 +126,18 @@ static NSArray *methodsForClass(Class kls);
     return [self accessor:aPropName initialValue:nil];
 }
 
-+ (id)accessors:(NSArray *)aAccessors initialValue:(id<NSCopying>)aInitial
++ (id)accessors:(id)aAccessors
 {
-    for(NSString *name in aAccessors) {
-        [self accessor:name initialValue:aInitial];
+    if([aAccessors isa:[NSMapTable class]] || [aAccessors isa:[NSDictionary class]]) {
+        for(NSString *name in aAccessors) {
+            [self accessor:name initialValue:[aAccessors objectForKey:name]];
+        }
+    } else {
+        for(NSString *name in aAccessors) {
+            [self accessor:name initialValue:nil];
+        }
     }
     return nil;
-}
-+ (id)accessors:(NSArray *)aAccessors
-{
-    return [self accessors:aAccessors initialValue:nil];
 }
 
 + (id)isEqualTo:(id)b

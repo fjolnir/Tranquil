@@ -10,8 +10,13 @@
 @interface TQObject : NSObject
 + (id)addMethod:(NSString *)aSel withBlock:(id)aBlock replaceExisting:(id)shouldReplace;
 + (id)addMethod:(NSString *)aSel withBlock:(id)aBlock;
++ (id)initializer:(NSArray *)aProperties;
 + (id)accessor:(NSString *)aPropName initialValue:(id<NSCopying>)aInitial;
 + (id)accessor:(NSString *)aPropName;
++ (id)accessors:(id)aAccessors;
++ (id)reader:(NSString *)aPropName initialValue:(id<NSCopying>)aInitial;
++ (id)reader:(NSString *)aPropName;
++ (id)readers:(id)aAccessors;
 + (NSArray *)classMethods;
 + (NSArray *)instanceMethods;
 - (NSArray *)methods;
