@@ -146,8 +146,10 @@
 {
     NSUInteger count = [self count];
     if(aIdx < count) {
+        [aObj retain];
         [self replacePointerAtIndex:aIdx
                         withPointer:TQObjectIsStackBlock(aObj) ? [[aObj copy] autorelease] : aObj];
+        [aObj release];
     } else if(aIdx == count)
         [self addObject:aObj];
     else
