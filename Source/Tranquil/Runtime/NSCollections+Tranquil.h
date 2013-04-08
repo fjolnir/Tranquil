@@ -27,6 +27,8 @@
 - (id)remove:(id)aObj;
 - (id)last;
 - (id)first;
+- (id)itemAfter:(id)aPrev;
+- (id)itemBefore:(id)aPrev;
 
 - (id)each:(id (^)(id))aBlock;
 - (NSPointerArray *)multiply:(TQNumber *)aTimes;

@@ -260,12 +260,32 @@
 
 - (id)last
 {
-    return (id)[self pointerAtIndex:[self count]-1];
+    if([self count] > 0)
+        return (id)[self pointerAtIndex:[self count]-1];
+    return nil;
 }
 
 - (id)first
 {
-    return (id)[self pointerAtIndex:0];
+    if([self count] > 0)
+        return (id)[self pointerAtIndex:0];
+    return nil;
+}
+
+- (id)itemAfter:(id)aPrev
+{
+    NSInteger idx = [[self indexOf:aPrev] integerValue];
+    if(idx == -1 || idx == [self count] - 1)
+        return nil;
+    return [self pointerAtIndex:idx+1];
+}
+
+- (id)itemBefore:(id)aPrev
+{
+    NSInteger idx = [[self indexOf:aPrev] integerValue];
+    if(idx == -1 || idx == 0)
+        return nil;
+    return [self pointerAtIndex:idx-1];
 }
 
 - (id)add:(NSPointerArray *)aArray // add: as in +
