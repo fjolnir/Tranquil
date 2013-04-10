@@ -287,6 +287,10 @@ using namespace llvm;
         elseBB = contBB;
         eventualElseBlock = contBB;
     }
+    if(*aoErr) {
+        aBlock.builder = NULL;
+        return NULL;
+    }
 
     IRBuilder<> *contBuilder = new IRBuilder<>(contBB);
     aBlock.basicBlock = contBB;
