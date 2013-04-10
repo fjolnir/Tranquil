@@ -44,6 +44,7 @@
 {
     return [self objectForKey:aKey];
 }
+
 - (id)set:(id)aKey to:(id)aVal
 {
     if(aVal)
@@ -128,6 +129,27 @@
 {
     return (id)[self pointerAtIndex:[aIdx unsignedIntegerValue]];
 }
+
+- (NSPointerArray *)from:(TQNumber *)a to:(TQNumber *)b
+{
+    uint32_t start = [a unsignedIntegerValue];
+    uint32_t end   = [b unsignedIntegerValue];
+
+    NSPointerArray *result = [NSPointerArray new];
+    for(uint32_t i = start; i <= end; ++i) {
+        [result addPointer:[self pointerAtIndex:i]];
+    }
+    return [result autorelease];
+}
+- (NSPointerArray *)from:(TQNumber *)a
+{
+    return [self from:a to:[TQNumber numberWithUnsignedInteger:[self count]-1]];
+}
+- (NSPointerArray *)to:(TQNumber *)b
+{
+    return [self from:[TQNumber numberWithInt:0] to:b];
+}
+
 - (id)set:(id)aKey to:(id)aVal
 {
     [self setObject:aVal atIndexedSubscript:[aKey unsignedIntegerValue]];
@@ -383,9 +405,35 @@
     return nil;
 }
 
+- (id)first
+{
+    if([self count] > 0)
+        return (id)[self objectAtIndex:0];
+    return nil;
+}
+
 - (id)at:(TQNumber *)aIdx
 {
     return [self objectAtIndex:[aIdx unsignedIntegerValue]];
+}
+
+- (NSArray *)from:(TQNumber *)a to:(TQNumber *)b
+{
+    uint32_t start = [a unsignedIntegerValue];
+    uint32_t end   = [b unsignedIntegerValue];
+    uint32_t count = [self count];
+    if(end - start > 0 && start < count && end < count)
+        return [self subarrayWithRange:(NSRange) { start, end - start }];
+    else
+        return [NSArray array];
+}
+- (NSArray *)from:(TQNumber *)a
+{
+    return [self from:a to:[TQNumber numberWithUnsignedInteger:[self count]-1]];
+}
+- (NSArray *)to:(TQNumber *)b
+{
+    return [self from:[TQNumber numberWithInt:0] to:b];
 }
 
 - (id)contains:(id)aVal

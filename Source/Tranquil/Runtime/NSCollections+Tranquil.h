@@ -18,6 +18,9 @@
 - (void)removeObject:(id)aObj;
 - (id)objectAtIndexedSubscript:(NSUInteger)aIdx;
 - (id)at:(TQNumber *)aIdx;
+- (NSPointerArray *)from:(TQNumber *)a to:(TQNumber *)b;
+- (NSPointerArray *)from:(TQNumber *)a;
+- (NSPointerArray *)to:(TQNumber *)b;
 - (TQNumber *)size;
 - (TQNumber *)indexOf:(id)aObj;
 
