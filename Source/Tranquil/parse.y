@@ -173,6 +173,7 @@ bodyNoNl(B) ::= breakNoNl(S).      { B = [NSMutableArray arrayWithObject:S];    
 bodyNoNl(B) ::= skipNoNl(S).       { B = [NSMutableArray arrayWithObject:S];                                                          }
 bodyNoNl(B) ::= retNoNl(S).        { B = [NSMutableArray arrayWithObject:S];                                                          }
 bodyNl(B)   ::= exprNl(S).         { B = [S isKindOfClass:[TQNodeBlock class]] ? [S statements] : [NSMutableArray arrayWithObject:S]; }
+bodyNl(B)   ::= loop(S).           { B = [NSMutableArray arrayWithObject:S];                                                          }
 bodyNl(B)   ::= breakNl(S).        { B = [NSMutableArray arrayWithObject:S];                                                          }
 bodyNl(B)   ::= skipNl(S).         { B = [NSMutableArray arrayWithObject:S];                                                          }
 bodyNl(B)   ::= retNl(S).          { B = [NSMutableArray arrayWithObject:S];                                                          }
@@ -181,7 +182,7 @@ elseBody(B) ::= bodyNl(T).         { B = T;                                     
 elseBody(B) ::= cond(T).           { B = [NSMutableArray arrayWithObject:T];                                                          }
 
 
-cond(I) ::= IF|UNLESS(T) expr(C) blockNl(IST).          { I = [CONDKLS(T) nodeWithCondition:C
+cond(I) ::= IF|UNLESS(T) expr(C) block(IST).            { I = [CONDKLS(T) nodeWithCondition:C
                                                                                ifStatements:[IST statements]
                                                                              elseStatements:nil]; LN(I,T);                            }
 cond(I) ::= IF|UNLESS(T) expr(C) block(IST)
@@ -206,7 +207,7 @@ ternOpNl(O) ::= operandNoNl(C)
                 TERNIF operand(A)
                 TERNELSE operandNl(B).                  { O = [TQNodeTernaryOperator nodeWithCondition:C ifExpr:A else:B]; LN(O,C);   }
 
-loop(I) ::= WHILE|UNTIL(T) expr(C) blockNl(ST).         { I = [LOOPKLS(T) nodeWithCondition:C statements:[ST statements]]; LN(I,T);   }
+loop(I) ::= WHILE|UNTIL(T) expr(C) block(ST).           { I = [LOOPKLS(T) nodeWithCondition:C statements:[ST statements]]; LN(I,T);   }
 loop(I) ::= bodyNoNl(ST) WHILE|UNTIL(T) exprNl(C).      { I = [LOOPKLS(T) nodeWithCondition:C statements:ST];              LN(I,T);   }
 loop(I) ::= WHILE|UNTIL(T) expr(C) DO bodyNl(ST).       { I = [LOOPKLS(T) nodeWithCondition:C statements:ST];              LN(I,T);   }
 
