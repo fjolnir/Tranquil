@@ -102,11 +102,11 @@ def compile(file, flags=CXXFLAGS[@buildMode], cc=CXX, arch="x86_64", ios=false)
         flags << " -I#{TRANQUIL}/libffi-ios/include"
         if arch == :armv7 then
             flags << ' -miphoneos-version-min=5.0'
-            flags << ' -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.0.sdk'
+            flags << ' -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk'
         else
             flags << ' -fobjc-abi-version=2 -fobjc-legacy-dispatch'
             flags << ' -mios-simulator-version-min=5.0'
-            flags << ' -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk'
+            flags << ' -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.1.sdk'
         end
     else
         flags = flags + ' -mmacosx-version-min=10.7'
