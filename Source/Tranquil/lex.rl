@@ -36,7 +36,7 @@ typedef struct {
 #define _EmitToken(tokenId, val) do { \
     int tokenId_ = tokenId; \
     id val_ = val; \
-    /*NSLog(@"emitting %d = '%@' on line: %d", tokenId, val_, parserState.currentLine);*/ \
+    /*NSLog(@"emitting %d = '%@' on line: %d", tokenId, val_, parserState.currentLine); */\
     Parse(parser, tokenId_, [TQToken withId:tokenId value:val_ line:parserState.currentLine], &parserState); \
     parserState.atBeginningOfExpr = NO; \
 } while(0);
@@ -68,6 +68,8 @@ typedef struct {
 #define BacktrackTerm() do { \
     if(*p == '}') \
         --p; \
+    else if(strncmp("else", (const char*)p-3, 4) == 0) \
+        p -= 4; \
     for(unsigned char *cursor = ts; cursor != te; ++cursor) { \
         if(*cursor == '\n') \
             IncrementLine(); \
@@ -115,7 +117,7 @@ typedef struct {
     nl          = ((space|comment)* '\n' space*);
     whitespace  = (nl|space|comment);
     whitespaceNoNl  = (" "|"\t"|comment);
-    term        = whitespace* (nl|"}");
+    term        = whitespace* (nl|"}"|"else");
 
     constStr    = "#" (char | [:@#~+\-*/%=<>^])+;
     selector    = char* ":";
@@ -262,8 +264,9 @@ main := |*
     "if"      term?                  => { EmitToken(IF);        ExprBeg(); BacktrackTerm();               };
     "unless"  term?                  => { EmitToken(UNLESS);    ExprBeg(); BacktrackTerm();               };
     "then"    term?                  => { EmitToken(THEN);      ExprBeg(); BacktrackTerm();               };
-    "do"    term?                    => { EmitToken(DO);        ExprBeg(); BacktrackTerm();               };
-    "else"    term?                  => { EmitToken(ELSE);      ExprBeg(); BacktrackTerm();               };
+    "do"      term?                  => { EmitToken(DO);        ExprBeg(); BacktrackTerm();               };
+    "else"    term                   => { EmitToken(ELSE);      ExprBeg(); BacktrackTerm();               };
+    "else"                           => { EmitToken(ELSE);      ExprBeg();                                };
     "and"|"&&"term?                  => { EmitToken(AND);       ExprBeg(); BacktrackTerm();               };
     "or"|"||" term?                  => { EmitToken(OR);        ExprBeg(); BacktrackTerm();               };
     "while"   term?                  => { EmitToken(WHILE);     ExprBeg(); BacktrackTerm();               };
