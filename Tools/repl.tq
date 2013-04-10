@@ -35,6 +35,14 @@ getInput = { indent = 0, shouldDecrement = no |
     }
 }
 
+... each: { path |
+    TQProgram sharedProgram executeScriptAtPath: path
+                                        onError: { err |
+          "Error loading «path»: «err»" print
+          ^^1
+      }
+}
+
 while line = getInput() {
     if line length > 0 {
         result = TQProgram sharedProgram executeScript: line
