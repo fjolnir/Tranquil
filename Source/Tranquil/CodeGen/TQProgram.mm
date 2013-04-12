@@ -459,6 +459,7 @@ static TQProgram *sharedInstance;
     BOOL usesSubdir   = [testPathComponents count] > 1;
 
     for(NSString *searchPath in _searchPaths) {
+        searchPath = [searchPath stringByExpandingTildeInPath];
         if(![fm fileExistsAtPath:searchPath isDirectory:&isDir] || !isDir)
             continue;
 
