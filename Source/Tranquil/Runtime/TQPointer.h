@@ -49,6 +49,8 @@ extern NSString * const TQTypeString;
 - (id)value; // Returns the first item
 
 - (const char *)UTF8String;
+
+- (id)pointsToNULL;
 @end
 
 @interface TQPointer (ConvenienceConstructors)

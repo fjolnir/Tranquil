@@ -240,6 +240,12 @@ NSString * const TQTypeString    = @"*";
     free(_itemType);
     [super dealloc];
 }
+
+
+- (id)pointsToNULL
+{
+    return _addr == NULL ? TQValid : nil;
+}
 @end
 
 @implementation TQPointer (ConvenienceConstructors)
