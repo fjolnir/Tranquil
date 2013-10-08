@@ -79,11 +79,12 @@ static NSString *_prepareConstName(NSString *name)
     withIntermediateDirectories:YES attributes:nil error:nil];
     const char *args[] = {
         "-x", "objective-c",
+        "-isysroot", "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk/",
         "-I/usr/local/tranquil/llvm/lib/clang/3.2/include/", // TODO: Figure out why and if this is necessary, and if it is necessary, make it not hard-coded..
         frameworksPath ? [[@"-F" stringByAppendingString:frameworksPath] UTF8String] : nil
     };
 
-    CXTranslationUnit translationUnit = clang_parseTranslationUnit(_index, [aPath fileSystemRepresentation], args, frameworksPath ? 4 : 3, NULL, 0,
+    CXTranslationUnit translationUnit = clang_parseTranslationUnit(_index, [aPath fileSystemRepresentation], args, frameworksPath ? 6 : 5, NULL, 0,
                                                                    CXTranslationUnit_DetailedPreprocessingRecord|CXTranslationUnit_SkipFunctionBodies);
     if (!translationUnit) {
         TQLog(@"Couldn't parse header %@\n", aPath);

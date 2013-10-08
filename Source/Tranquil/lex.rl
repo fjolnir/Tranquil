@@ -181,7 +181,7 @@ string := |*
             _EmitToken(tokId, PopStr());
             fret;
         } else
-            [StrData() appendBytes:@"'" length:1];
+            [StrData() appendBytes:"'" length:1];
     };
 
     any => { [StrData() appendBytes:ts length:1];                                                         };

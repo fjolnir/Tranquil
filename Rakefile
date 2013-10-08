@@ -101,17 +101,18 @@ def compile(file, flags=CXXFLAGS[@buildMode], cc=CXX, arch="x86_64", ios=false)
         flags = flags + ' -DTQ_NO_BIGNUM' # libgmp is not well supported on iOS
         flags << " -I#{TRANQUIL}/libffi-ios/include"
         if arch == :armv7 then
-            flags << ' -miphoneos-version-min=5.0'
-            flags << ' -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk'
+            flags << ' -miphoneos-version-min=6.0'
+            flags << ' -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk'
         else
             flags << ' -fobjc-abi-version=2 -fobjc-legacy-dispatch'
-            flags << ' -mios-simulator-version-min=5.0'
-            flags << ' -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.1.sdk'
+            flags << ' -mios-simulator-version-min=6.0'
+            flags << ' -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.0.sdk'
         end
     else
         flags = flags + ' -mmacosx-version-min=10.7'
         flags << " -I#{TRANQUIL}/libffi/include"
-        flags << ' -F/System/Library/Frameworks/ApplicationServices.framework/Frameworks'
+        flags << " -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk"
+        flags << " -F/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/ApplicationServices.framework/Frameworks"
     end
     cmd = "#{cc} #{file[:in].join(' ')} -arch #{arch} #{flags} -c -o #{file[:out]}"
     unless file[:in].size == 1 and file[:in][0].end_with? '.s'
@@ -196,7 +197,7 @@ file :libtranquil_codegen => [PARSER_OUTPATH] + CODEGEN_O_FILES do |t|
 end
 
 def _buildMain
-    sh "#{CXX} #{MAIN_SOURCE} #{CXXFLAGS[@buildMode]} -ObjC++ -c -o #{MAIN_OUTPATH}"
+    sh "#{CXX} #{MAIN_SOURCE} #{CXXFLAGS[@buildMode]} -ObjC++ -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk -c -o #{MAIN_OUTPATH}"
 end
 file MAIN_OUTPATH => MAIN_SOURCE do |t|
 end
