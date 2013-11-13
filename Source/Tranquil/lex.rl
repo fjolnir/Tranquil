@@ -153,7 +153,7 @@ string := |*
             BacktrackTerm();
             fret;
         } else
-            [StrData() appendBytes:"\"" length:1];
+            [StrData() appendBytes:ts length:2];
     };
     '"' => {
         if(IsDblQuot()) {
@@ -172,7 +172,7 @@ string := |*
             BacktrackTerm();
             fret;
         } else
-            [StrData() appendBytes:"'" length:1];
+            [StrData() appendBytes:ts length:2];
     };
     "'" => {
         if(!IsDblQuot()) {
