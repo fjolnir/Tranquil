@@ -36,7 +36,7 @@ typedef struct {
 #define _EmitToken(tokenId, val) do { \
     int tokenId_ = tokenId; \
     id val_ = val; \
-    /*NSLog(@"emitting %d = '%@' on line: %d", tokenId, val_, parserState.currentLine); */\
+    /* NSLog(@"emitting %d = '%@' on line: %d", tokenId, val_, parserState.currentLine); */ \
     Parse(parser, tokenId_, [TQToken withId:tokenId value:val_ line:parserState.currentLine], &parserState); \
     parserState.atBeginningOfExpr = NO; \
 } while(0);
@@ -153,7 +153,7 @@ string := |*
             BacktrackTerm();
             fret;
         } else
-            [StrData() appendBytes:@"\"" length:1];
+            [StrData() appendBytes:"\"" length:1];
     };
     '"' => {
         if(IsDblQuot()) {
@@ -162,7 +162,7 @@ string := |*
             _EmitToken(tokId, PopStr());
             fret;
         } else
-            [StrData() appendBytes:@"\"" length:1];
+            [StrData() appendBytes:"\"" length:1];
     };
     "'" term => {
         if(!IsDblQuot()) {
@@ -172,7 +172,7 @@ string := |*
             BacktrackTerm();
             fret;
         } else
-            [StrData() appendBytes:@"'" length:1];
+            [StrData() appendBytes:"'" length:1];
     };
     "'" => {
         if(!IsDblQuot()) {
