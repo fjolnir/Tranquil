@@ -1,2 +1,3 @@
 fib = `n | n <= 1 ? n ! fib(n-1) + fib(n-2)`
+\fib = `x, n=0, p=1 | x == 0 ? n ! fib(x-1, p, n+p)`
 fib(35) print
