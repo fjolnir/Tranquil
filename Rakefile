@@ -19,14 +19,16 @@ PARSER_OUTPATH   = "#{BUILD_DIR}/parse.mm"
 
 CXXFLAGS = {
     :release => [
+        '-Wno-objc-root-class',
+        '-Wno-objc-protocol-method-implementation',
+        '-Wno-cast-of-sel-type',
+        '-I`pwd`/Source',
         "-I#{TRANQUIL}/include",
-#        '-I`pwd`/Source',
         '-I`pwd`/Build',
         '-I/usr/include/libxml2',
         "-I#{TRANQUIL}/gmp/include",
         "`#{LLVMCONFIG} --cflags`",
-        '-O1',
-        '-g',
+        '-O3',
     ].join(' '),
     :development => [
         '-DDEBUG',

@@ -23,8 +23,8 @@ objPath  = "/tmp/«uuid()».o"
 initPath = "/tmp/«uuid()».o"
 
 tqFlags  = [#-aot, #-o, irPath]
-llcFlags = [#-disable-fp-elim, #-relocation-model=pic]
-cflags   = [#-c, #"-I/usr/local/tranquil/include", #-O0]
+llcFlags = [#-disable-fp-elim, #-relocation-model=pic, #-O3]
+cflags   = [#-c, #"-I/usr/local/tranquil/include", #-O3]
 ldFlags  = [#-demangle, #-dynamic, #-all_load,
             #-lm, #-ldl, #-ObjC, #-lSystem,
             #-framework, #Foundation, #-no_compact_unwind,
