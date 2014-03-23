@@ -104,9 +104,9 @@ static TQProgram *sharedInstance;
     _searchPaths      = [[NSMutableArray alloc] initWithObjects:@".",
                          @"~/Library/Frameworks", @"/Library/Frameworks",
                          @"/System/Library/Frameworks/",
-                         @"/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk/System/Library/Frameworks",
-                         @"/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk/usr/include",
-                         @"/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk/usr/local/include",
+                         @"/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/System/Library/Frameworks",
+                         @"/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/include",
+                         @"/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/local/include",
                          @"/usr/include/", @"/usr/local/include/",
                          @"/usr/local/tranquil/llvm/include", nil];
     _allowedFileExtensions = [[NSMutableArray alloc] initWithObjects:@"tq", @"h", nil];

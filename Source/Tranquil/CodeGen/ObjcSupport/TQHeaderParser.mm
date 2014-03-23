@@ -79,7 +79,7 @@ static NSString *_prepareConstName(NSString *name)
     withIntermediateDirectories:YES attributes:nil error:nil];
     const char *args[] = {
         "-x", "objective-c",
-        "-isysroot", "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk/",
+        "-isysroot", "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/",
         "-I/usr/local/tranquil/llvm/lib/clang/3.2/include/", // TODO: Figure out why and if this is necessary, and if it is necessary, make it not hard-coded..
         frameworksPath ? [[@"-F" stringByAppendingString:frameworksPath] UTF8String] : nil
     };

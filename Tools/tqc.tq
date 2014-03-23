@@ -53,7 +53,7 @@ if forIOS {
             push: #-syslibroot
 \push: "«llvm»/lib/clang/3.2/lib/darwin/libclang_rt.ios.a";
     if arch == #i386 then {
-        syslibroot = "«xcode»/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.0.sdk"
+        syslibroot = "«xcode»/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.1.sdk"
         cflags  push: #"-miphoneos-version-min=6.0"
         ldFlags push: syslibroot;
                 push: #-no_implicit_dylibs;
@@ -63,7 +63,7 @@ if forIOS {
                 push: "«xcode»/Toolchains/XcodeDefault.xctoolchain/usr/lib/arc/libarclite_iphonesimulator.a"
     } else {
         llcFlags push: #"-mtriple=thumbv7-apple-ios6.0.0"
-        syslibroot = "«xcode»/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk"
+        syslibroot = "«xcode»/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk"
         cflags  push: #"-miphoneos-version-min=6.0"
         ldFlags push: syslibroot;
                 push: #"-ios_version_min";
@@ -72,7 +72,7 @@ if forIOS {
                 push: "«xcode»/Toolchains/XcodeDefault.xctoolchain/usr/lib/arc/libarclite_iphoneos.a"
     }
 } else {
-    syslibroot = "«xcode»/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk"
+    syslibroot = "«xcode»/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk"
     llcFlags push: #-mattr=-avx \ Make sure the new AVX instructions aren't used
     ldFlags push: #"-macosx_version_min";
             push: #"10.7.0";
