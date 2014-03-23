@@ -23,14 +23,14 @@ However, Tranquil is still extremely experimental and you shouldn't use it for a
 
 ## How to build and run
 
-The simplest way of getting started is to use the binary [installer](http://d.asgeirsson.is/XadO+). Everything will be placed into `/usr/local/tranquil` (Requires Xcode 4 to be installed)
+The simplest way of getting started is to use the binary [installer](http://d.asgeirsson.is/YGEk). Everything will be placed into `/usr/local/tranquil` (Requires Xcode 5.1 to be installed)
 
 If you wish to contribute, you can use the install script instead which checks out the latest source and sets up the development environment.
 
     > curl -fsSkL https://raw.github.com/fjolnir/Tranquil/master/Tools/install.sh | /bin/zsh
     > /usr/local/tranquil/bin/tqrepl
 
-**Note:** OS X ≥ 10.7 or iOS ≥ 5 is required.
+**Note:** OS X ≥ 10.7 or iOS ≥ 5 is required to run compiled tranquil programs. 10.9 is required to compile.
 
 ## Learning the language
 
