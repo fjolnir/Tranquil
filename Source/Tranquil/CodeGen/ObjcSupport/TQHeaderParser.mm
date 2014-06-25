@@ -424,6 +424,7 @@ static NSString *_prepareConstName(NSString *name)
 
 @implementation TQBridgedClassInfo
 @synthesize name=_name, instanceMethods=_instanceMethods, classMethods=_classMethods, superclass=_superclass;
+
 - (id)init
 {
     if(!(self = [super init]))
@@ -433,27 +434,40 @@ static NSString *_prepareConstName(NSString *name)
     return self;
 }
 
-- (id)initWithCoder:(NSCoder *)aCoder
+- (id)initWithCoder:(NSKeyedArchiver *)aCoder
 {
     if(!(self = [super init]))
         return nil;
-    _name            = [[aCoder decodeObject] retain];
-    _superclass      = [[aCoder decodeObject] retain];
-    _instanceMethods = [[aCoder decodeObject] retain];
-    _classMethods    = [[aCoder decodeObject] retain];
+    _name            = [[aCoder decodeObjectForKey:@"name"] retain];
+    _superclass      = [[aCoder decodeObjectForKey:@"superclass"] retain];
+    // Defer decoding the expensive dictionaries until they're actually used
+    _decoder         = [aCoder retain];
     return self;
 }
-- (void)encodeWithCoder:(NSCoder *)aCoder
+- (void)encodeWithCoder:(NSKeyedArchiver  *)aCoder
 {
-    [aCoder encodeObject:_name];
-    [aCoder encodeObject:_superclass];
-    [aCoder encodeObject:_instanceMethods];
-    [aCoder encodeObject:_classMethods];
+    [aCoder encodeObject:_name forKey:@"name"];
+    [aCoder encodeObject:_superclass forKey:@"superclass"];
+    [aCoder encodeObject:_classMethods forKey:@"classMethods"];
+    [aCoder encodeObject:_instanceMethods forKey:@"instanceMethods"];
+}
+
+- (NSMutableDictionary *)classMethods
+{
+    if(!_classMethods)
+        _classMethods = [_decoder decodeObjectForKey:@"classMethods"] ?: [NSMutableDictionary new];
+    return _classMethods;
+}
+- (NSMutableDictionary *)instanceMethods
+{
+    if(!_instanceMethods)
+        _instanceMethods = [_decoder decodeObjectForKey:@"instanceMethods"] ?: [NSMutableDictionary new];
+    return _instanceMethods;
 }
 
 - (NSString *)typeForInstanceMethod:(NSString *)aSelector
 {
-    NSString *enc = [_instanceMethods objectForKey:aSelector];
+    NSString *enc = [self.instanceMethods objectForKey:aSelector];
     if(enc)
         return enc;
     return [_superclass typeForInstanceMethod:aSelector];
@@ -461,7 +475,7 @@ static NSString *_prepareConstName(NSString *name)
 
 - (NSString *)typeForClassMethod:(NSString *)aSelector
 {
-    NSString *enc = [_classMethods objectForKey:aSelector];
+    NSString *enc = [self.classMethods objectForKey:aSelector];
     if(enc)
         return enc;
     return [_superclass typeForClassMethod:aSelector];
@@ -472,6 +486,7 @@ static NSString *_prepareConstName(NSString *name)
     [_name release];
     [_instanceMethods release];
     [_classMethods release];
+    [_decoder release];
     [super dealloc];
 }
 @end
@@ -496,13 +511,13 @@ static NSString *_prepareConstName(NSString *name)
     if(!(self = [super init]))
         return nil;
     _name     = [[aCoder decodeObject] retain];
-    _encoding = strdup([[aCoder decodeObject] UTF8String]);
+    _encoding = strdup((char *)[aCoder decodeBytesWithReturnedLength:NULL]);
     return self;
 }
 - (void)encodeWithCoder:(NSCoder *)aCoder
 {
     [aCoder encodeObject:_name];
-    [aCoder encodeObject:[NSString stringWithUTF8String:_encoding]];
+    [aCoder encodeBytes:_encoding length:strlen(_encoding)+1];
 }
 
 - (void)dealloc
@@ -564,13 +579,6 @@ static NSString *_prepareConstName(NSString *name)
         return nil;
     _name     = [aName retain];
     _encoding = strdup(aEncoding);
-    _argTypes = [NSMutableArray new];
-    TQIterateTypesInEncoding(_encoding, ^(const char *type, NSUInteger size, NSUInteger align, BOOL *stop) {
-        if(!_retType)
-            _retType = [[NSString stringWithUTF8String:type] retain];
-        else
-            [_argTypes addObject:[NSString stringWithUTF8String:type]];
-    });
 
     return self;
 }
@@ -580,17 +588,13 @@ static NSString *_prepareConstName(NSString *name)
     if(!(self = [super init]))
         return nil;
     _name     = [[aCoder decodeObject] retain];
-    _retType  = [[aCoder decodeObject] retain];
-    _argTypes = [[aCoder decodeObject] retain];
-    _encoding = strdup([[aCoder decodeObject] UTF8String]);
+    _encoding = strdup((char *)[aCoder decodeBytesWithReturnedLength:NULL]);
     return self;
 }
 - (void)encodeWithCoder:(NSCoder *)aCoder
 {
     [aCoder encodeObject:_name];
-    [aCoder encodeObject:_retType];
-    [aCoder encodeObject:_argTypes];
-    [aCoder encodeObject:[NSString stringWithUTF8String:_encoding]];
+    [aCoder encodeBytes:_encoding length:strlen(_encoding)+1];
 }
 
 - (void)dealloc
@@ -606,6 +610,21 @@ static NSString *_prepareConstName(NSString *name)
     return [_argTypes count];
 }
 
+- (void)_computeReturnAndArgTypes
+{
+    // To avoid performing this work for bridged functions that are never used, we do it the first time it's used
+    if(!_argTypes) {
+        _argTypes = [NSMutableArray new];
+        TQIterateTypesInEncoding(_encoding, ^(const char *type, NSUInteger size, NSUInteger align, BOOL *stop) {
+            if(!_retType)
+                _retType = [NSString stringWithUTF8String:type];
+            else
+                [_argTypes addObject:[NSString stringWithUTF8String:type]];
+        });
+    }
+}
+
+
 // Compiles a a wrapper block for the function
 // The reason we don't use TQBoxedObject is that when the function is known at compile time
 // we can generate a far more efficient wrapper that doesn't rely on libffi
@@ -613,6 +632,8 @@ static NSString *_prepareConstName(NSString *name)
 {
     if(_function)
         return _function;
+
+    [self _computeReturnAndArgTypes];
 
     llvm::PointerType *int8PtrTy = aProgram.llInt8PtrTy;
 

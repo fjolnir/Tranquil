@@ -15,24 +15,24 @@
     NSString *_retType, *_invokeName;
     NSMutableArray *_argTypes;
 }
-@property(readwrite, retain) NSString *invokeName, *retType;
-@property(readwrite, assign) BOOL isCompactBlock; // Was the block written in the form of `expr` ?
-@property(readwrite, assign) BOOL isTranquilBlock; // Should the block be treated as a tranquil block? (arg count check etc)
-@property(readwrite, retain) TQNodeBlock *parent;
-@property(readwrite, copy) NSMutableArray *arguments, *argTypes;
-@property(readwrite, copy, nonatomic) NSMutableArray *statements, *cleanupStatements;
-@property(readwrite, retain) NSMutableDictionary *locals, *capturedVariables;
-@property(readwrite, retain) TQNodeIntVariable *nonLocalReturnTarget;
-@property(readwrite, retain) TQNodeLongVariable *nonLocalReturnThread;
-@property(readwrite, retain) TQNodeVariable *literalPtr; // Anonymous variable containing the address of the block
-@property(readwrite, assign) BOOL isVariadic;
-@property(readwrite, assign, nonatomic) llvm::BasicBlock *basicBlock;
-@property(readwrite, assign, nonatomic) llvm::Function *function;
-@property(readwrite, assign, nonatomic) llvm::IRBuilder<> *builder;
-@property(readwrite, assign, nonatomic) llvm::Value *dispatchGroup;
-@property(readwrite, assign, nonatomic) llvm::DISubprogram debugInfo;
-@property(readwrite, assign, nonatomic) llvm::DILexicalBlock debugScope;
-@property(readwrite, assign, nonatomic) llvm::DIScope scope;
+@property(nonatomic, readwrite, retain) NSString *invokeName, *retType;
+@property(nonatomic, readwrite, assign) BOOL isCompactBlock; // Was the block written in the form of `expr` ?
+@property(nonatomic, readwrite, assign) BOOL isTranquilBlock; // Should the block be treated as a tranquil block? (arg count check etc)
+@property(nonatomic, readwrite, retain) TQNodeBlock *parent;
+@property(nonatomic, readwrite, copy) NSMutableArray *arguments, *argTypes;
+@property(nonatomic, readwrite, copy, nonatomic) NSMutableArray *statements, *cleanupStatements;
+@property(nonatomic, readwrite, retain) NSMutableDictionary *locals, *capturedVariables;
+@property(nonatomic, readwrite, retain) TQNodeIntVariable *nonLocalReturnTarget;
+@property(nonatomic, readwrite, retain) TQNodeLongVariable *nonLocalReturnThread;
+@property(nonatomic, readwrite, retain) TQNodeVariable *literalPtr; // Anonymous variable containing the address of the block
+@property(nonatomic, readwrite, assign) BOOL isVariadic;
+@property(nonatomic, readwrite, assign, nonatomic) llvm::BasicBlock *basicBlock;
+@property(nonatomic, readwrite, assign, nonatomic) llvm::Function *function;
+@property(nonatomic, readwrite, assign, nonatomic) llvm::IRBuilder<> *builder;
+@property(nonatomic, readwrite, assign, nonatomic) llvm::Value *dispatchGroup;
+@property(nonatomic, readwrite, assign, nonatomic) llvm::DISubprogram debugInfo;
+@property(nonatomic, readwrite, assign, nonatomic) llvm::DILexicalBlock debugScope;
+@property(nonatomic, readwrite, assign, nonatomic) llvm::DIScope scope;
 
 // This property is only valid when called from a block's subnode within it's generateCode: method
 @property(readwrite, assign) llvm::Value *autoreleasePool;

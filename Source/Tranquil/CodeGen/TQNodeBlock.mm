@@ -43,8 +43,6 @@ using namespace llvm;
     _basicBlock        = NULL;
     _isTranquilBlock   = YES;
     _invokeName        = @"__tranquil";
-    _literalPtr        = [TQNodePointerVariable tempVar];
-    [self.locals setObject:_literalPtr forKey:_literalPtr.name];
 
     // Block invocations are always passed the block itself as the first argument
     [self addArgument:[TQNodeArgumentDef nodeWithName:@"__blockPtr"] error:nil];
@@ -124,6 +122,14 @@ using namespace llvm;
     [old release];
 }
 
+- (TQNodeVariable *)literalPtr
+{
+    if(!_literalPtr) {
+        _literalPtr        = [TQNodePointerVariable tempVar];
+        [self.locals setObject:_literalPtr forKey:_literalPtr.name];
+    }
+    return _literalPtr;
+}
 
 - (llvm::Type *)_blockDescriptorTypeInProgram:(TQProgram *)aProgram
 {
@@ -132,7 +138,7 @@ using namespace llvm;
         return descriptorType;
 
     Type *i8PtrTy = aProgram.llInt8PtrTy;
-    Type *i8Ty = aProgram.llInt8Ty;
+    Type *i8Ty    = aProgram.llInt8Ty;
     Type *int32Ty = aProgram.llInt32Ty;
     Type *longTy  = aProgram.llLongTy; // Should be unsigned
 
@@ -415,6 +421,8 @@ using namespace llvm;
     if(_function)
         return _function;
 
+    [self literalPtr]; // Make sure the pointer to the block literal is available as a local
+
     llvm::PointerType *int8PtrTy = aProgram.llInt8PtrTy;
 
     // Build the invoke function
@@ -507,11 +515,11 @@ using namespace llvm;
     Value *thisBlockPtr = NULL;
     if([_arguments count] > 0) {
         thisBlockPtr = argumentIterator;
-        [_literalPtr store:thisBlockPtr inProgram:aProgram block:self root:aRoot error:aoErr];
+        [self.literalPtr store:thisBlockPtr inProgram:aProgram block:self root:aRoot error:aoErr];
         thisBlock = _builder->CreateBitCast(thisBlockPtr, PointerType::getUnqual([self _blockLiteralTypeInProgram:aProgram]));
         argumentIterator++;
     } else
-        [_literalPtr store:ConstantPointerNull::get(int8PtrTy) inProgram:aProgram block:self root:aRoot error:aoErr];
+        [self.literalPtr store:ConstantPointerNull::get(int8PtrTy) inProgram:aProgram block:self root:aRoot error:aoErr];
 
     // Load captured variables
     if(thisBlock) {

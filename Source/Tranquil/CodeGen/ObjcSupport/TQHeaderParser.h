@@ -31,11 +31,13 @@
 - (NSString *)instanceMethodTypeFromProtocols:(NSString *)aSelector;
 @end
 
-@interface TQBridgedClassInfo : NSObject <NSCoding>
+@interface TQBridgedClassInfo : NSObject <NSCoding> {
+    NSKeyedArchiver *_decoder;
+}
 @property(readwrite, retain) NSString *name;
 @property(readwrite, retain) TQBridgedClassInfo *superclass;
 // Keyed by selector, values are type encoding strings
-@property(readwrite, retain) NSMutableDictionary *instanceMethods, *classMethods;
+@property(nonatomic, readwrite, retain) NSMutableDictionary *instanceMethods, *classMethods;
 
 - (NSString *)typeForInstanceMethod:(NSString *)aSelector;
 - (NSString *)typeForClassMethod:(NSString *)aSelector;
