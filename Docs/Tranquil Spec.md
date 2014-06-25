@@ -15,6 +15,7 @@
     and
     or
     import
+    global
     async
     wait
     break   \ Prematurely terminates a loop
@@ -221,7 +222,7 @@ A common use case is for error handlers, or for returning inside looping blocks 
         ^^nil
     }
 
-## Macros
+## Macros (Incomplete)
 
 A macro can be thought of as an inline block; it gets expanded to it's contents at compile time.
 This means that a macro usage incurs no runtime cost, does not evaluate it's arguments until they're
