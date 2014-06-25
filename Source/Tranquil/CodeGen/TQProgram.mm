@@ -447,34 +447,47 @@ static TQProgram *sharedInstance;
 
 - (NSString *)_resolveImportPath:(NSString *)aPath
 {
+    return [self _resolveImportPath:aPath withSearchPaths:_searchPaths];
+}
+
+- (NSString *)_resolveImportPath:(NSString *)aPath withSearchPaths:(NSArray *)aSearchPaths
+{
+//    NSLog(@"%@ in %@", aPath, aSearchPaths);
     aPath = [aPath stringByStandardizingPath];
     BOOL isDir;
     NSFileManager *fm = [NSFileManager defaultManager];
     if([aPath hasPrefix:@"/"]) {
         if([fm fileExistsAtPath:aPath isDirectory:&isDir] && !isDir)
             return aPath;
-        return nil;
+        else
+            return nil;
     }
     NSArray *testPathComponents = [aPath pathComponents];
     if(![testPathComponents count])
         return nil;
 
     BOOL hasExtension = [[aPath pathExtension] length] > 0;
-    BOOL usesSubdir   = [testPathComponents count] > 1;
-
-    for(NSString *searchPath in _searchPaths) {
+    for(NSString *searchPath in aSearchPaths) {
         searchPath = [searchPath stringByExpandingTildeInPath];
         if(![fm fileExistsAtPath:searchPath isDirectory:&isDir] || !isDir)
             continue;
 
         for(NSString *candidate in [fm contentsOfDirectoryAtPath:searchPath error:nil]) {
             if([[candidate pathExtension] isEqualToString:@"framework"]) {
-                NSString *frameworkDirName = usesSubdir ? [testPathComponents objectAtIndex:0] : [[aPath lastPathComponent] stringByDeletingPathExtension];
-                if(![[[candidate lastPathComponent] stringByDeletingPathExtension] isEqualToString:frameworkDirName])
+                NSString *frameworkPath = [searchPath stringByAppendingPathComponent:candidate];
+                if(![[[candidate lastPathComponent] stringByDeletingPathExtension] isEqualToString:testPathComponents[0]])
                     continue;
-                if(usesSubdir)
-                    aPath = [[testPathComponents subarrayWithRange:(NSRange){ 1, [testPathComponents count] - 1 }] componentsJoinedByString:@"/"];
-                searchPath = [[searchPath stringByAppendingPathComponent:candidate] stringByAppendingPathComponent:@"Headers"];
+                if([testPathComponents count] > 1) {
+                    NSString *newPath = [[testPathComponents subarrayWithRange:(NSRange){ 1, [testPathComponents count] - 1 }] componentsJoinedByString:@"/"];
+                    NSString *newSearchPath = [frameworkPath stringByAppendingPathComponent:@"Frameworks"];
+                    NSString *result = [self _resolveImportPath:newPath withSearchPaths:@[
+                        [frameworkPath stringByAppendingPathComponent:@"Headers"],
+                        [frameworkPath stringByAppendingPathComponent:@"Frameworks"]
+                    ]];
+                    if(result)
+                        return result;
+                }
+                searchPath = [frameworkPath stringByAppendingPathComponent:@"Headers"];
                 break;
             }
         }
