@@ -23,7 +23,7 @@ However, Tranquil is still extremely experimental and you shouldn't use it for a
 
 ## How to build and run
 
-The simplest way of getting started is to use the binary [installer](http://d.asgeirsson.is/YGEk). Everything will be placed into `/usr/local/tranquil` (Requires Xcode 5.1 to be installed)
+The simplest way of getting started is to use the binary [installer](http://d.asgeirsson.is/UGKR). Everything will be placed into `/usr/local/tranquil` (Requires Xcode 5.1 to be installed)
 
 If you wish to contribute, you can use the install script instead which checks out the latest source and sets up the development environment.
 
