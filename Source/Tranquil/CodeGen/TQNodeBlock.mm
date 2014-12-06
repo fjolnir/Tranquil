@@ -6,8 +6,8 @@
 #import "TQNodeArgumentDef.h"
 #import "TQNodeCustom.h"
 #import "TQNode+Private.h"
-#import <llvm/Intrinsics.h>
-#import <llvm/InstrTypes.h>
+#include <llvm/IR/Intrinsics.h>
+#include <llvm/IR/InstrTypes.h>
 #include <iostream>
 
 // The struct index where captured variables begin
@@ -460,20 +460,18 @@ using namespace llvm;
 
     const char *functionName = [[self invokeName] UTF8String];
     _function = Function::Create(funType, GlobalValue::ExternalLinkage, functionName, mod);
-    if(returningOnStack) {
-        Attributes structRetAttr = Attributes::get(mod->getContext(), ArrayRef<Attributes::AttrVal>(Attributes::StructRet));
-        _function->addAttribute(1, structRetAttr);
-    }
-    Attributes byvalAttr = Attributes::get(mod->getContext(), ArrayRef<Attributes::AttrVal>(Attributes::ByVal));
+    if(returningOnStack) 
+        _function->addAttribute(1, Attribute::StructRet);
+    
     for(NSNumber *idx in byValArgIndices) {
-        _function->addAttribute([idx intValue], byvalAttr);
+        _function->addAttribute([idx intValue], Attribute::ByVal);
     }
 
     _basicBlock = BasicBlock::Create(mod->getContext(), "entry", _function, 0);
     _builder = new IRBuilder<>(_basicBlock);
 
     // Debug scope
-    DIScope scope = DIScope(aProgram.debugBuilder->getCU());
+    DIScope scope = DIScope();
     std::vector<Value *> debugRetArgTypes;
     DIType debugI8PtrTy = aProgram.debugBuilder->createBasicType("uint8", 8, 8, llvm::dwarf::DW_ATE_unsigned);
     debugI8PtrTy = aProgram.debugBuilder->createPointerType(debugI8PtrTy, aProgram.llPointerWidthInBits); // TODO : cache types so duplicates are not created
@@ -484,10 +482,10 @@ using namespace llvm;
 
 
     llvm::DIArray diTypeArr  = aProgram.debugBuilder->getOrCreateArray(debugRetArgTypes);
-    DIType subroutineTy = aProgram.debugBuilder->createSubroutineType(aRoot.file, diTypeArr);
+    DICompositeType subroutineTy = aProgram.debugBuilder->createSubroutineType(aRoot.file, diTypeArr);
     assert(subroutineTy.Verify());
 
-    _debugInfo = aProgram.debugBuilder->createFunction(aBlock.scope ?: DIScope(aProgram.debugBuilder->getCU()),
+    _debugInfo = aProgram.debugBuilder->createFunction(aBlock.scope ?: DIScope(),
                                                        functionName, functionName,
                                                        aRoot.file,
                                                        self.lineNumber,
@@ -500,7 +498,7 @@ using namespace llvm;
                                                        _function);
     assert(_debugInfo.Verify());
 
-    _scope = aProgram.debugBuilder->createLexicalBlock(_debugInfo, aRoot.file, self.lineNumber, 0);
+    _scope = aProgram.debugBuilder->createLexicalBlock(_debugInfo, aRoot.file, self.lineNumber, 0, 0); // TODO: read up on DWARF discriminator values
     assert(_scope.Verify());
     _builder->SetCurrentDebugLocation(DebugLoc::get(self.lineNumber, 0, _scope, NULL));
 

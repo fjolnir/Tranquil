@@ -6,31 +6,28 @@
 #import <objc/message.h>
 #import <llvm/Transforms/IPO/PassManagerBuilder.h>
 
-#include <llvm/Module.h>
-#include <llvm/DerivedTypes.h>
-#include <llvm/Constants.h>
-#include <llvm/CallingConv.h>
-#include <llvm/Instructions.h>
-#include <llvm/PassManager.h>
-#include <llvm/Analysis/Verifier.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/DerivedTypes.h>
+#include <llvm/IR/Constants.h>
+#include <llvm/IR/CallingConv.h>
+#include <llvm/IR/Instructions.h>
+#include <llvm/IR/PassManager.h>
+#include <llvm/IR/Verifier.h>
+#include <llvm/IR/Intrinsics.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/TypeBuilder.h>
 #include <llvm/Target/TargetMachine.h>
 #include <llvm/Target/TargetOptions.h>
 #include <llvm/Transforms/Scalar.h>
 #include <llvm/Transforms/IPO.h>
 #include <llvm/Support/raw_ostream.h>
-#if !defined(LLVM_TOT)
-# include <llvm/Support/system_error.h>
-#endif
 #include <llvm/Support/PrettyStackTrace.h>
 #include <llvm/Support/MemoryBuffer.h>
-#include <llvm/Intrinsics.h>
 #include <llvm/Bitcode/ReaderWriter.h>
-#include <llvm/LLVMContext.h>
 #include <llvm/Support/ToolOutputFile.h>
 #include <llvm/Support/TargetRegistry.h>
 #include <llvm/Support/Host.h>
-#include <llvm/TypeBuilder.h>
-#include "llvm/ADT/Statistic.h"
+#include <llvm/ADT/Statistic.h>
 
 using namespace llvm;
 
@@ -550,9 +547,8 @@ FunAccessor(_TQObjectToNanoseconds, ft_i64__i8Ptr);
     if(!func_setjmp) {
         func_setjmp = Function::Create([self _ft_int__i32Ptr], GlobalValue::ExternalLinkage, "_setjmp", self.llModule);
         func_setjmp->setCallingConv(CallingConv::C);
-        Attributes attrs = Attributes::get(self.llModule->getContext(), ArrayRef<Attributes::AttrVal>(Attributes::ReturnsTwice));
 
-        func_setjmp->addAttribute(~0, attrs);
+        func_setjmp->addAttribute(~0, Attribute::ReturnsTwice);
     }
     return func_setjmp;
 }
@@ -563,8 +559,7 @@ FunAccessor(_TQObjectToNanoseconds, ft_i64__i8Ptr);
     if(!func_longjmp) {
         func_longjmp = Function::Create([self _ft_void__i32Ptr_int], GlobalValue::ExternalLinkage, "_longjmp", self.llModule);
         func_longjmp->setCallingConv(CallingConv::C);
-        Attributes attrs = Attributes::get(self.llModule->getContext(), ArrayRef<Attributes::AttrVal>(Attributes::NoReturn));
-        func_longjmp->addAttribute(~0, attrs);
+        func_longjmp->addAttribute(~0, Attribute::NoReturn);
     }
     return func_longjmp;
 }

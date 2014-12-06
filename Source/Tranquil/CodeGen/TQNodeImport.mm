@@ -58,7 +58,7 @@ using namespace llvm;
             NSString *frameworkPath;
             for(int i = [components count] - 1; i >= 0; --i) {
                 if([[components objectAtIndex:i] hasSuffix:@".framework"]) {
-                    frameworkPath = [[components subarrayWithRange:(NSRange) { 0, i+1 }] componentsJoinedByString:@"/"];
+                    frameworkPath = [[components subarrayWithRange:(NSRange) { 0, (NSUInteger)i+1 }] componentsJoinedByString:@"/"];
                     frameworkPath = [frameworkPath stringByAppendingFormat:@"/%@", [[components objectAtIndex:i] stringByDeletingPathExtension]];
                 }
             }

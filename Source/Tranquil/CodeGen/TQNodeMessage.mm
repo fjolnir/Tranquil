@@ -168,8 +168,7 @@ using namespace llvm;
         if(_needsAutorelease) {
             [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];
             ret = aBlock.builder->CreateCall(aProgram.objc_autoreleaseReturnValue, ret);
-            Attributes nounwindAttr = Attributes::get(mod->getContext(), ArrayRef<Attributes::AttrVal>(Attributes::NoUnwind));
-            ((CallInst *)ret)->addAttribute(~0, nounwindAttr);
+            ((CallInst *)ret)->addAttribute(~0, Attribute::NoUnwind);
         }
     }
     [self _attachDebugInformationToInstruction:ret inProgram:aProgram block:aBlock root:aRoot];

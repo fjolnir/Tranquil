@@ -1,5 +1,5 @@
 #import "TQNodeBlock.h"
-#include <llvm/IRBuilder.h>
+#include <llvm/IR/IRBuilder.h>
 
 @interface TQNodeIfBlock : TQNode {
     @protected

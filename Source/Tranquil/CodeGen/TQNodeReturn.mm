@@ -70,15 +70,13 @@ using namespace llvm;
                                   root:(TQNodeRootBlock *)aRoot
                                  error:(NSError **)aoErr
 {
-    Module *mod = aProgram.llModule;
     Value *retVal;
     if(_value) {
         retVal = [_value generateCodeInProgram:aProgram block:aBlock root:aRoot error:aoErr];
         if(*aoErr)
             return NULL;
         retVal = aBlock.builder->CreateCall(aProgram.TQPrepareObjectForReturn, retVal);
-        Attributes nounwindAttr = Attributes::get(mod->getContext(), ArrayRef<Attributes::AttrVal>(Attributes::NoUnwind));
-        ((CallInst *)retVal)->addAttribute(~0, nounwindAttr);
+        ((CallInst *)retVal)->addAttribute(~0, Attribute::NoUnwind);
         [self _attachDebugInformationToInstruction:retVal inProgram:aProgram block:aBlock root:aRoot];
         if(_depth == 0)
             [aBlock generateCleanupInProgram:aProgram];
@@ -98,7 +96,7 @@ using namespace llvm;
         }
 
         retVal = aBlock.builder->CreateCall(aProgram.objc_autoreleaseReturnValue, retVal);
-        ((CallInst *)retVal)->addAttribute(~0, nounwindAttr);
+        ((CallInst *)retVal)->addAttribute(~0, Attribute::NoUnwind);
         [self _attachDebugInformationToInstruction:retVal inProgram:aProgram block:aBlock root:aRoot];
     } else {
         [aBlock generateCleanupInProgram:aProgram];

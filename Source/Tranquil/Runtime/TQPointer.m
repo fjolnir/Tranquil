@@ -31,12 +31,14 @@ NSString * const TQTypeString    = @"*";
         return;
     IMP imp;
     imp = imp_implementationWithBlock(^(id a, id idx)   {
-        return objc_msgSend(a, @selector(objectAtIndexedSubscript:), [idx unsignedIntegerValue]);
+         id (* const imp)(id, SEL, NSUInteger) = (void *)&objc_msgSend;
+        return imp(a, @selector(objectAtIndexedSubscript:), [idx unsignedIntegerValue]);
     });
     class_addMethod(self, sel_registerName("[]:"), imp, "@@:@");
     // []=
     imp = imp_implementationWithBlock(^(id a, id idx, id val)   {
-        return objc_msgSend(a, @selector(setObject:atIndexedSubscript:), val, [idx unsignedIntegerValue]);
+        id (* const imp)(id, SEL, id, NSUInteger) = (void *)&objc_msgSend;
+        return imp(a, @selector(setObject:atIndexedSubscript:), val, [idx unsignedIntegerValue]);
     });
     class_addMethod(self, sel_registerName("[]:=:"), imp, "@@:@@");
 }

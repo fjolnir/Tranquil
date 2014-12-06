@@ -8,7 +8,7 @@
 #ifdef __cplusplus
 #define TQ_EXTERN_C extern "C"
 #else
-#define TQ_EXTERN_C
+#define TQ_EXTERN_C extern
 #endif
 
 @class TQHeaderParser, TQNodeBlock;
@@ -37,7 +37,6 @@ typedef id (^TQProgramBlock)(NSError **aoErr);
 // Search path related
 @property(readwrite, retain) NSMutableArray *searchPaths, *allowedFileExtensions;
 // AOT compilation related
-@property(readwrite, retain) NSString *outputPath;
 @property(readwrite) BOOL useAOTCompilation;
 @property(readwrite) TQArchitecture targetArch;
 

@@ -10,23 +10,22 @@ tranquil = "/usr/local/tranquil/bin/tranquil"
 xcode    = "/Applications/Xcode.app/Contents/Developer"
 llc      = "«llvm»/bin/llc"
 clang    = "«llvm»/bin/clang"
-clang    = "«xcode»/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang"
 ld       = "/usr/bin/ld"
 arch     = "x86_64"
 forIOS   = no
 
 inPath   = nil
 outPath  = #"a.out"
-irPath   = "/tmp/«uuid()».bc"
+irPath   = "/tmp/«uuid()».ir"
 asmPath  = "/tmp/«uuid()».s"
 objPath  = "/tmp/«uuid()».o"
 initPath = "/tmp/«uuid()».o"
 
-tqFlags  = [#-aot, #-o, irPath]
+tqFlags  = [#-aot]
 llcFlags = [#-disable-fp-elim, #-relocation-model=pic, #-O3]
 cflags   = [#-c, #"-I/usr/local/tranquil/include", #-O3]
 ldFlags  = [#-demangle, #-dynamic, #-all_load,
-            #-lm, #-ldl, #-ObjC, #-lSystem,
+            #-lm, #-ldl, #-lSystem,
             #-framework, #Foundation, #-no_compact_unwind,
             #-force_load, #"/usr/local/tranquil/lib/libtranquil.a"]
 
@@ -51,7 +50,6 @@ tqFlags push: inPath
 if forIOS {
     ldFlags push: #"-lcrt1.3.1.o";
             push: #-syslibroot
-\push: "«llvm»/lib/clang/3.2/lib/darwin/libclang_rt.ios.a";
     if arch == #i386 then {
         syslibroot = "«xcode»/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.1.sdk"
         cflags  push: #"-miphoneos-version-min=6.0"
@@ -83,8 +81,16 @@ if forIOS {
 cflags += [#-isysroot, syslibroot]
 ldFlags += [#-syslibroot, syslibroot]
 
-flags = [#-arch, arch] + tqFlags
-status = (NSTask launchedTaskWithLaunchPath: tranquil arguments: flags) waitUntilExit; terminationStatus
+NSFileManager defaultManager createFileAtPath: irPath
+                                     contents: nil
+                                   attributes: nil
+
+irPath print
+tqTask = NSTask new setLaunchPath: tranquil;
+                     setArguments: [#-arch, arch] + tqFlags;
+                     setStandardOutput: (NSFileHandle fileHandleForWritingAtPath: irPath);
+                     self
+status = tqTask launch; waitUntilExit; terminationStatus
 error("Compilation failed") if status ~= 0
 
 llcArchs = { #x86_64 => #x86-64, #i386 => #x86, #armv7 => #arm }

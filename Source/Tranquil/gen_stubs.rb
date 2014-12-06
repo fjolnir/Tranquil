@@ -80,8 +80,8 @@ source << "
         // We also want to work with NSPointerArray which doesn't implement -getObjects:
         unsigned long count = [aArguments count];
         id args[count * sizeof(id)];
-        unsigned int c;
-        unsigned int i = 0;
+        NSUInteger c;
+        NSUInteger i = 0;
         NSFastEnumerationState enumState = {0};
         while((c = [aArguments countByEnumeratingWithState:&enumState
                                                    objects:NULL

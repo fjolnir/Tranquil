@@ -26,7 +26,7 @@
     va_start(args, firstObject);
     id key, val, head;
     int i = 0;
-    IMP setImp = class_getMethodImplementation(object_getClass(ret), @selector(setObject:forKey:));
+    void (* const setImp)(id, SEL, id, id) = (void *)class_getMethodImplementation(object_getClass(ret), @selector(setObject:forKey:));
     for(head = firstObject; head != TQNothing; head = va_arg(args, id))
     {
         if(++i % 2 == 0) {
@@ -97,7 +97,7 @@
 
     va_list args;
     va_start(args, firstObject);
-    IMP addImp = class_getMethodImplementation(object_getClass(ret), @selector(addPointer:));
+    void (* const addImp)(id, SEL, id) = (void *)class_getMethodImplementation(object_getClass(ret), @selector(addPointer:));
     for(id item = firstObject; item != TQNothing; item = va_arg(args, id))
     {
         if(TQObjectIsStackBlock(item))
@@ -419,9 +419,9 @@
 
 - (NSArray *)from:(TQNumber *)a to:(TQNumber *)b
 {
-    uint32_t start = [a unsignedIntegerValue];
-    uint32_t end   = [b unsignedIntegerValue];
-    uint32_t count = [self count];
+    NSUInteger start = [a unsignedIntegerValue];
+    NSUInteger end   = [b unsignedIntegerValue];
+    NSUInteger count = [self count];
     if(end - start > 0 && start < count && end < count)
         return [self subarrayWithRange:(NSRange) { start, end - start }];
     else
@@ -508,7 +508,7 @@
     va_start(args, firstObject);
     id key, val, head;
     int i = 0;
-    IMP setImp = class_getMethodImplementation(object_getClass(ret), @selector(setObject:forKey:));
+    void (* const setImp)(id, SEL, id, id) = (void *)class_getMethodImplementation(object_getClass(ret), @selector(setObject:forKey:));
     for(head = firstObject; head != TQNothing; head = va_arg(args, id))
     {
         if(++i % 2 == 0) {

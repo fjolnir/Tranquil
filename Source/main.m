@@ -17,7 +17,6 @@ int main(int argc, char **argv)
         BOOL showDebugOutput   = NO;
         BOOL compileToFile     = NO;
         const char *inputPath  = NULL;
-        const char *outputPath = "tqapp.bc";
         const char *archStr    = NULL;
 
         char *arg;
@@ -35,8 +34,6 @@ int main(int argc, char **argv)
                     compileToFile = YES;
                 else if(strcmp(arg, "-arch") == 0)
                     archStr = argv[++i];
-                else if(strcmp(arg, "-o") == 0)
-                    outputPath = argv[++i];
                 else {
                     fprintf(stderr, "Unknown argument %s\n", arg);
                     printHelpAndExit(1);
@@ -63,7 +60,6 @@ int main(int argc, char **argv)
         program.arguments           = scriptArgs;
         program.useAOTCompilation   = compileToFile;
         program.targetArch          = arch;
-        program.outputPath          = [NSString stringWithUTF8String:outputPath];
         program.shouldShowDebugInfo = showDebugOutput;
         NSString *script;
         NSError *err = nil;

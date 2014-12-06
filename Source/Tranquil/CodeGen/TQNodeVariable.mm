@@ -3,7 +3,7 @@
 #import "TQNodeBlock.h"
 #import "TQProgram.h"
 #import "../Shared/TQDebug.h"
-#import <llvm/IRBuilder.h>
+#import <llvm/IR/IRBuilder.h>
 
 using namespace llvm;
 
@@ -262,7 +262,6 @@ using namespace llvm;
         aBlock.builder->CreateStore(aValue, aBlock.builder->CreateStructGEP(forwarding, 4));
         return NULL;
     }
-    Module *mod = aProgram.llModule;
     Function *storeFun = aProgram.objc_storeStrong;
     // If the variable is a capture, or a global we need to use TQStoreStrong because if the assigned value is a
     // stack block it would escape and cause a crash
@@ -270,8 +269,7 @@ using namespace llvm;
         storeFun = aProgram.TQStoreStrong;
 
     CallInst *storeCall = aBlock.builder->CreateCall2(storeFun, aBlock.builder->CreateStructGEP(forwarding, 4), aValue);
-    Attributes nounwindAttr = Attributes::get(mod->getContext(), ArrayRef<Attributes::AttrVal>(Attributes::NoUnwind));
-    storeCall->addAttribute(~0, nounwindAttr);
+    storeCall->addAttribute(~0, Attribute::NoUnwind);
 
     return NULL;
 }
@@ -285,11 +283,9 @@ using namespace llvm;
     TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock program:aProgram];
     if(existingVar)
         return [existingVar generateRetainInProgram:aProgram block:aBlock root:aRoot];
-    Module *mod = aProgram.llModule;
 
     CallInst *retainCall = aBlock.builder->CreateCall(aProgram.objc_retain, [self _getForwardingInProgram:aProgram block:aBlock root:aRoot]);
-    Attributes nounwindAttr = Attributes::get(mod->getContext(), ArrayRef<Attributes::AttrVal>(Attributes::NoUnwind));
-    retainCall->addAttribute(~0, nounwindAttr);
+    retainCall->addAttribute(~0, Attribute::NoUnwind);
 }
 
 - (void)generateReleaseInProgram:(TQProgram *)aProgram
@@ -301,11 +297,9 @@ using namespace llvm;
     TQNodeVariable *existingVar = [self _getExistingIdenticalInBlock:aBlock program:aProgram];
     if(existingVar)
         return [existingVar generateReleaseInProgram:aProgram block:aBlock root:aRoot];
-    Module *mod = aProgram.llModule;
 
     CallInst *releaseCall = aBlock.builder->CreateCall(aProgram.objc_release, [self _getForwardingInProgram:aProgram block:aBlock root:aRoot]);
-    Attributes nounwindAttr = Attributes::get(mod->getContext(), ArrayRef<Attributes::AttrVal>(Attributes::NoUnwind));
-    releaseCall->addAttribute(~0, nounwindAttr);
+    releaseCall->addAttribute(~0, Attribute::NoUnwind);
     SmallVector<llvm::Value*,1> args;
     releaseCall->setMetadata("clang.imprecise_release", llvm::MDNode::get(aProgram.llModule->getContext(), args));
 }

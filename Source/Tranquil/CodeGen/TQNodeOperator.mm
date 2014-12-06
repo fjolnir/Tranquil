@@ -11,7 +11,7 @@
 #import "../Runtime/TQRuntime.h"
 #import "TQNodeValid.h"
 #import "../Runtime/TQNumber.h"
-#import <llvm/Intrinsics.h>
+#import <llvm/IR/Intrinsics.h>
 
 using namespace llvm;
 

@@ -11,8 +11,6 @@
 
 #define TQBigNumberPrecision 8192
 
-static const int _TQBigNumberMaxDigits;
-
 @implementation TQBigNumber
 @dynamic doubleValue, numberValue;
 
@@ -64,7 +62,7 @@ static const int _TQBigNumberMaxDigits;
     long len = strlen(str);
     NSMutableString *ret = [NSMutableString stringWithUTF8String:len == 0 ? "0" : str];
     if(len < exp) {
-        for(int i = exp; i > len; --i)
+        for(mp_exp_t i = exp; i > len; --i)
             [ret appendString:@"0"];
     } else if(len > exp)
         [ret insertString:@"." atIndex:MAX(0, exp)];

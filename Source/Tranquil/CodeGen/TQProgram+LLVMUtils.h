@@ -1,7 +1,7 @@
 #import <Tranquil/CodeGen/TQProgram.h>
 #undef verify // This causes an error in IRBuilder.h
-#import <llvm/IRBuilder.h>
-#import <llvm/DIBuilder.h>
+#import <llvm/IR/IRBuilder.h>
+#import <llvm/IR/DIBuilder.h>
 #import <llvm/ExecutionEngine/JIT.h>
 #import <llvm/ExecutionEngine/JITMemoryManager.h>
 #import <llvm/ExecutionEngine/JITEventListener.h>

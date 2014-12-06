@@ -76,7 +76,7 @@
         BOOL isArray = *_encoding ==_C_ARY_B; // An array is essentially a struct containing fields all with the same type.
 
         _referencedTypes = [NSMutableArray new];
-        ffi_type type;
+
         _ffiType = (ffi_type*)malloc(sizeof(ffi_type));
         _ffiType->type = FFI_TYPE_STRUCT;
         _ffiType->size = _ffiType->alignment= 0;

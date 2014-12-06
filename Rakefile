@@ -1,7 +1,7 @@
 TRANQUIL    = '/usr/local/tranquil'
 LLVM        = "#{TRANQUIL}/llvm"
-CC          = "#{LLVM}/bin/clang"
-CXX         = "#{LLVM}/bin/clang++"
+CC          = "clang"
+CXX         = "clang++"
 LD          = CC
 RAGEL       = "#{TRANQUIL}/ragel/bin/ragel"
 LEMON       = "#{TRANQUIL}/lemon/bin/lemon"
@@ -25,9 +25,7 @@ CXXFLAGS = {
         '-I`pwd`/Source',
         "-I#{TRANQUIL}/include",
         '-I`pwd`/Build',
-        '-I/usr/include/libxml2',
         "-I#{TRANQUIL}/gmp/include",
-        "`#{LLVMCONFIG} --cflags`",
         '-O3',
     ].join(' '),
     :development => [
@@ -38,9 +36,7 @@ CXXFLAGS = {
         '-I`pwd`/Source',
         "-I#{TRANQUIL}/include",
         '-I`pwd`/Build',
-        '-I/usr/include/libxml2',
         "-I#{TRANQUIL}/gmp/include",
-        "`#{LLVMCONFIG} --cflags`",
         '-O0',
         '-g',
         #'-DTQ_PROFILE',
@@ -49,8 +45,8 @@ CXXFLAGS = {
 }
 
 TOOL_LDFLAGS = [
-    '-L`pwd`/Build',
-    '-lstdc++',
+    "-L#{BUILD_DIR}",
+    '-ObjC++',
     '-lobjc',
     "-rpath #{TRANQUIL}/lib",
     '-ltranquil',
@@ -104,23 +100,23 @@ def compile(file, flags=CXXFLAGS[@buildMode], cc=CXX, arch="x86_64", ios=false)
         flags << " -I#{TRANQUIL}/libffi-ios/include"
         if arch == :armv7 then
             flags << ' -miphoneos-version-min=6.0'
-            flags << ' -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk'
+            flags << ' -isysroot `xcrun --sdk iphoneos --show-sdk-path`'
         else
             flags << ' -fobjc-abi-version=2 -fobjc-legacy-dispatch'
             flags << ' -mios-simulator-version-min=6.0'
-            flags << ' -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.1.sdk'
+            flags << ' -isysroot `xcrun --sdk iphonesimulator --show-sdk-path`'
         end
     else
         flags = flags + ' -mmacosx-version-min=10.7'
         flags << " -I#{TRANQUIL}/libffi/include"
-        flags << " -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk"
-        flags << " -F/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/ApplicationServices.framework/Frameworks"
+        flags << " -isysroot `xcrun --sdk macosx --show-sdk-path`"
+        flags << " -F`xcrun --sdk macosx --show-sdk-path`/System/Library/Frameworks/ApplicationServices.framework/Frameworks"
     end
     cmd = "#{cc} #{file[:in].join(' ')} -arch #{arch} #{flags} -c -o #{file[:out]}"
     unless file[:in].size == 1 and file[:in][0].end_with? '.s'
-        cmd << " -fobjc-arc" if ARC_FILES.member? file[:in].first
-        cmd << " -ObjC++"    if cc == CXX
-        cmd << " -ObjC"      if cc == CC
+        cmd << " -fobjc-arc"                        if ARC_FILES.member? file[:in].first
+        cmd << " -std=c++11 -stdlib=libc++ -ObjC++" if cc == CXX
+        cmd << " -ObjC"                             if cc == CC
     end
     sh cmd
 end
@@ -175,8 +171,9 @@ RUNTIME_SOURCES.each { |src|
 }
 CODEGEN_SOURCES.each { |src|
     file src.pathmap(PATHMAP) => src do |f|
-        compile({:in => f.prerequisites, :out => f.name + ".x64"},  CXXFLAGS[@buildMode], CXX, :x86_64)
-        compile({:in => f.prerequisites, :out => f.name + ".i386"},  CXXFLAGS[@buildMode], CXX, :i386, true)
+        flags = CXXFLAGS[@buildMode] + " `#{LLVMCONFIG} --cxxflags`"
+        compile({:in => f.prerequisites, :out => f.name + ".x64"},  flags, CXX, :x86_64)
+        compile({:in => f.prerequisites, :out => f.name + ".i386"}, flags, CXX, :i386, true)
         sh "lipo -create -output #{f.name} #{f.name}.x64 #{f.name}.i386"
     end
 }
@@ -193,20 +190,20 @@ file :libtranquil => HEADERS_OUT + RUNTIME_O_FILES do |t|
 end
 
 file :libtranquil_codegen => [PARSER_OUTPATH] + CODEGEN_O_FILES do |t|
-    sh "#{CC} -install_name \"@rpath/#{CODEGENLIB}\" -dynamiclib -undefined suppress -flat_namespace -o #{BUILD_DIR}/#{CODEGENLIB} #{CODEGEN_O_FILES} `#{LLVMCONFIG} --libfiles core jit nativecodegen armcodegen bitwriter ipo` #{LLVM}/lib/libclang*.a"
+    sh "#{CC} -install_name \"@rpath/#{CODEGENLIB}\" -dynamiclib -undefined suppress -flat_namespace -o #{BUILD_DIR}/#{CODEGENLIB} #{CODEGEN_O_FILES} `#{LLVMCONFIG} --libfiles core jit nativecodegen armcodegen bitwriter ipo` #{LLVM}/lib/libclang*.a -framework Foundation"
     sh "mkdir -p #{TRANQUIL}/lib"
     sh "cp Build/#{CODEGENLIB} #{TRANQUIL}/lib"
 end
 
 def _buildMain
-    sh "#{CXX} #{MAIN_SOURCE} #{CXXFLAGS[@buildMode]} -ObjC++ -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk -c -o #{MAIN_OUTPATH}"
+    sh "#{CXX} #{MAIN_SOURCE} #{CXXFLAGS[@buildMode]} -isysroot `xcrun --sdk macosx --show-sdk-path` -c -o #{MAIN_OUTPATH}"
 end
 file MAIN_OUTPATH => MAIN_SOURCE do |t|
 end
 
 file :tranquil => [:libtranquil, :libtranquil_codegen, MAIN_OUTPATH] do |t|
     _buildMain
-    sh "#{LD} #{TOOL_LDFLAGS} #{MAIN_OUTPATH} -ltranquil_codegen  -rpath #{TRANQUIL}/lib -o #{BUILD_DIR}/tranquil"
+    sh "#{LD} #{TOOL_LDFLAGS} #{MAIN_OUTPATH} -rpath #{TRANQUIL}/lib -o #{BUILD_DIR}/tranquil"
 end
 
 task :setReleaseOpts do

@@ -20,21 +20,21 @@ else
     }
     mkdir -p /tmp/llvm.build
     pushd /tmp/llvm.build
-        curl http://llvm.org/releases/3.2/llvm-3.2.src.tar.gz -o llvm-3.2.src.tar.gz
-        curl http://llvm.org/releases/3.2/clang-3.2.src.tar.gz -o clang-3.2.src.tar.gz
-        curl http://llvm.org/releases/3.2/compiler-rt-3.2.src.tar.gz -o compiler-rt-3.2.src.tar.gz
+        curl -O http://llvm.org/releases/3.5.0/llvm-3.5.0.src.tar.xz
+        curl -O http://llvm.org/releases/3.5.0/cfe-3.5.0.src.tar.xz
+        curl -O http://llvm.org/releases/3.5.0/compiler-rt-3.5.0.src.tar.xz
 
-        tar -xzf llvm-3.2.src.tar.gz
-        pushd llvm-3.2.src/tools
-            tar -xzf ../../clang-3.2.src.tar.gz
-            tar -xzf ../../compiler-rt-3.2.src.tar.gz compiler-rt
-            mv clang-3.2.src clang
-            mv compiler-rt-3.2.src compiler-rt
+        tar -xJf llvm-3.5.0.src.tar.xz
+        pushd llvm-3.5.0.src/tools
+            tar -xJf ../../cfe-3.5.0.src.tar.xz
+            tar -xJf ../../compiler-rt-3.5.0.src.tar.xz
+            mv cfe-3.5.0.src clang
+            mv compiler-rt-3.5.0.src compiler-rt
         popd
 
         mkdir build
         pushd build
-            env UNIVERSAL=1 UNIVERSAL_ARCH="i386 x86_64" ../llvm-3.2.src/configure --host=x86_64-apple-darwin --prefix=/usr/local/tranquil/llvm --enable-targets=arm,x86,x86_64,cpp --enable-libffi --enable-optimized
+            env UNIVERSAL=1 UNIVERSAL_ARCH="i386 x86_64" ../llvm-3.5.0.src/configure --host=x86_64-apple-darwin --prefix=/usr/local/tranquil/llvm --enable-targets=arm,x86,x86_64,cpp --enable-libffi --enable-optimized
             env UNIVERSAL=1 UNIVERSAL_ARCH="i386 x86_64" make -j2
             make install
         popd

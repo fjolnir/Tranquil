@@ -10,38 +10,39 @@
 #import "../Shared/TQDebug.h"
 #import <objc/runtime.h>
 #import <objc/message.h>
+#import <llvm/IR/LegacyPassManager.h>
 #import <llvm/Transforms/IPO/PassManagerBuilder.h>
-#import <llvm/DataLayout.h>
+#import <llvm/Pass.h>
+
 #import <mach/mach_time.h>
 
 #ifdef TQ_PROFILE
 #import <google/profiler.h>
 #endif
 
-#include <llvm/Module.h>
-#include <llvm/DerivedTypes.h>
-#include <llvm/Constants.h>
-#include <llvm/CallingConv.h>
-#include <llvm/Instructions.h>
-#include <llvm/PassManager.h>
-#include <llvm/Analysis/Verifier.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/DataLayout.h>
+#include <llvm/IR/DerivedTypes.h>
+#include <llvm/IR/Constants.h>
+#include <llvm/IR/CallingConv.h>
+#include <llvm/IR/Instructions.h>
+#include <llvm/IR/Verifier.h>
+#include <llvm/IR/Intrinsics.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/IRPrintingPasses.h>
 #include <llvm/Target/TargetMachine.h>
 #include <llvm/Target/TargetOptions.h>
 #include <llvm/Transforms/Scalar.h>
 #include <llvm/Transforms/IPO.h>
 #include <llvm/Support/raw_ostream.h>
-#if !defined(LLVM_TOT)
-# include <llvm/Support/system_error.h>
-#endif
 #include <llvm/Support/PrettyStackTrace.h>
 #include <llvm/Support/MemoryBuffer.h>
-#include <llvm/Intrinsics.h>
 #include <llvm/Bitcode/ReaderWriter.h>
-#include <llvm/LLVMContext.h>
 #include <llvm/Support/ToolOutputFile.h>
 #include <llvm/Support/TargetRegistry.h>
 #include <llvm/Support/Host.h>
-#include "llvm/ADT/Statistic.h"
+#include <llvm/Support/FileSystem.h>
+#include <llvm/ADT/Statistic.h>
 
 using namespace llvm;
 
@@ -52,7 +53,7 @@ static TQProgram *sharedInstance;
 @implementation TQProgram
 @synthesize name=_name, llModule=_llModule, shouldShowDebugInfo=_shouldShowDebugInfo,
             objcParser=_objcParser, searchPaths=_searchPaths, allowedFileExtensions=_allowedFileExtensions,
-            useAOTCompilation=_useAOTCompilation, outputPath=_outputPath, arguments=_arguments, globals=_globals,
+            useAOTCompilation=_useAOTCompilation, arguments=_arguments, globals=_globals,
             evaluatedPaths=_evaluatedPaths;
 @synthesize globalQueue=_globalQueue, debugBuilder=_debugBuilder;
 
@@ -82,7 +83,6 @@ static TQProgram *sharedInstance;
     _name = [aName retain];
     _objcParser = [TQHeaderParser new];
     _llModule = new Module([_name UTF8String], getGlobalContext());
-    llvm::LLVMContext &ctx = _llModule->getContext();
 
     _debugBuilder = new DIBuilder(*_llModule);
 
@@ -200,26 +200,23 @@ static TQProgram *sharedInstance;
         llvm::EnableStatistics();
         _llModule->dump();
         // Verify that the program is valid
-        verifyModule(*_llModule, PrintMessageAction);
+        verifyModule(*_llModule, &llvm::errs());
     }
 
     // Compile program
     TargetOptions Opts;
     Opts.GuaranteedTailCallOpt = true;
     Opts.NoFramePointerElim = true;
-    Opts.NoFramePointerElimNonLeaf = true;
     if(_useAOTCompilation)
         Opts.PositionIndependentExecutable = true;
     else {
-        Opts.JITExceptionHandling   = true;
         Opts.JITEmitDebugInfoToDisk = true;
         Opts.JITEmitDebugInfo       = true;
     }
 
 
-    PassManager modulePasses;
-
-    FunctionPassManager fpm = FunctionPassManager(_llModule);
+    legacy::PassManager modulePasses;
+    legacy::FunctionPassManager fpm(_llModule);
 
     if(!_useAOTCompilation) {
         if(!_executionEngine) {
@@ -227,10 +224,13 @@ static TQProgram *sharedInstance;
             factory.setEngineKind(llvm::EngineKind::JIT);
             factory.setTargetOptions(Opts);
             factory.setOptLevel(CodeGenOpt::Default);
-            factory.setUseMCJIT(true);
+            //factory.setUseMCJIT(true);
             factory.setRelocationModel(Reloc::PIC_);
             _executionEngine = factory.create();
-            fpm.add(new DataLayout(*_executionEngine->getDataLayout()));
+            TQAssert(_executionEngine, @"Unable to initialize JIT");
+
+            _llModule->setDataLayout(_executionEngine->getDataLayout());
+            fpm.add(new DataLayoutPass(_llModule));
         }
         if(argGlobal)
             _executionEngine->addGlobalMapping(argGlobal, (void*)&_argGlobalForJIT);
@@ -260,6 +260,7 @@ static TQProgram *sharedInstance;
     fpm.add(createCFGSimplificationPass());
     // Eliminate tail calls.
     fpm.add(createTailCallEliminationPass());
+    fpm.doInitialization();
 
    if(_useAOTCompilation) {
         // Output
@@ -291,26 +292,24 @@ static TQProgram *sharedInstance;
         _llModule->setTargetTriple(targetTriple);
         TargetMachine *machine = target->createTargetMachine(targetTriple, cpuName, "", Opts);
         TQAssert(machine, @"Unable to create llvm target machine");
-        modulePasses.add(new DataLayout(*machine->getDataLayout()));
+        _llModule->setDataLayout(machine->getDataLayout());
         fpm.run(*aNode.function);
+        
+        modulePasses.add(createPrintModulePass(llvm::outs()));
         modulePasses.run(*_llModule);
 
-        verifyModule(*_llModule, PrintMessageAction);
+        verifyModule(*_llModule, &llvm::errs());
         if(_shouldShowDebugInfo) {
             _llModule->dump();
             llvm::PrintStatistics();
         }
 
-        raw_fd_ostream out([_outputPath UTF8String], err, raw_fd_ostream::F_Binary);
-        TQAssert(err.empty(), @"Error opening output file for bitcode: %@", _outputPath);
-        WriteBitcodeToFile(_llModule, out);
-        out.close();
         exit(0);
     }
 
     if(!_shouldShowDebugInfo) {
         fpm.run(*aNode.function);
-        //modulePasses.run(*_llModule);
+        modulePasses.run(*_llModule);
     }
 
     if(_shouldShowDebugInfo) {
@@ -479,7 +478,6 @@ static TQProgram *sharedInstance;
                     continue;
                 if([testPathComponents count] > 1) {
                     NSString *newPath = [[testPathComponents subarrayWithRange:(NSRange){ 1, [testPathComponents count] - 1 }] componentsJoinedByString:@"/"];
-                    NSString *newSearchPath = [frameworkPath stringByAppendingPathComponent:@"Frameworks"];
                     NSString *result = [self _resolveImportPath:newPath withSearchPaths:@[
                         [frameworkPath stringByAppendingPathComponent:@"Headers"],
                         [frameworkPath stringByAppendingPathComponent:@"Frameworks"]
@@ -545,8 +543,8 @@ static TQProgram *sharedInstance;
         if([_selectorSymbols objectForKey:aSelector]) {
             selectorGlobal =  _llModule->getGlobalVariable([[_selectorSymbols objectForKey:aSelector] UTF8String], true);
         } else {
-            NSString *refSymbol  = [NSString stringWithFormat:@"\x01L_OBJC_SELECTOR_REFERENCES_%ld", (unsigned long)[[_selectorSymbols allValues] count]];
-            NSString *nameSymbol = [NSString stringWithFormat:@"\x01L_OBJC_METH_VAR_NAME_%ld", (unsigned long)[[_selectorSymbols allValues] count]];
+            NSString *refSymbol  = [NSString stringWithFormat:@"OBJC_SELECTOR_REFERENCES_%ld", (unsigned long)[[_selectorSymbols allValues] count]];
+            NSString *nameSymbol = [NSString stringWithFormat:@"OBJC_METH_VAR_NAME_%ld", (unsigned long)[[_selectorSymbols allValues] count]];
 
             ArrayType *selStrType = ArrayType::get(IntegerType::get(_llModule->getContext(), 8), strlen([aSelector UTF8String])+1);
             GlobalVariable *selNameGlobal = new GlobalVariable(*_llModule, selStrType, false, GlobalValue::InternalLinkage,
