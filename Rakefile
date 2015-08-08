@@ -190,7 +190,7 @@ file :libtranquil => HEADERS_OUT + RUNTIME_O_FILES do |t|
 end
 
 file :libtranquil_codegen => [PARSER_OUTPATH] + CODEGEN_O_FILES do |t|
-    sh "#{CC} -install_name \"@rpath/#{CODEGENLIB}\" -dynamiclib -undefined suppress -flat_namespace -o #{BUILD_DIR}/#{CODEGENLIB} #{CODEGEN_O_FILES} `#{LLVMCONFIG} --libfiles core jit nativecodegen bitwriter ipo option` #{LLVM}/lib/libclang*.a -framework Foundation"
+    sh "#{CC} -install_name \"@rpath/#{CODEGENLIB}\" -dynamiclib -undefined suppress -flat_namespace -o #{BUILD_DIR}/#{CODEGENLIB} #{CODEGEN_O_FILES} `#{LLVMCONFIG} --libfiles core jit nativecodegen armcodegen bitwriter ipo option` #{LLVM}/lib/libclang*.a -framework Foundation"
     sh "mkdir -p #{TRANQUIL}/lib"
     sh "cp Build/#{CODEGENLIB} #{TRANQUIL}/lib"
 end
