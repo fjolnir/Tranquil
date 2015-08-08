@@ -194,7 +194,6 @@ static TQProgram *sharedInstance;
             _evaluatedPaths = nil;
         return nil;
     }
-    _debugBuilder->finalize();
 
     if(_shouldShowDebugInfo) {
         llvm::EnableStatistics();
@@ -207,9 +206,10 @@ static TQProgram *sharedInstance;
     TargetOptions Opts;
     Opts.GuaranteedTailCallOpt = true;
     Opts.NoFramePointerElim = true;
-    if(_useAOTCompilation)
+    if(_useAOTCompilation) {
         Opts.PositionIndependentExecutable = true;
-    else {
+    _debugBuilder->finalize();
+    } else {
         Opts.JITEmitDebugInfoToDisk = true;
         Opts.JITEmitDebugInfo       = true;
     }
