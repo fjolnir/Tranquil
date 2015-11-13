@@ -1,5 +1,7 @@
 # Tranquil
 
+*This project is pretty much abandoned. It's too much work to keep up with the changing LLVM APIs*
+
 Tranquil is a programming language built on top of LLVM & the Objective-C Runtime.
 
 It aims to provide a more expressive & easy to use way to write Mac and iOS Apps.
