@@ -6,7 +6,7 @@ Tranquil is a programming language built on top of LLVM & the Objective-C Runtim
 
 It aims to provide a more expressive & easy to use way to write Mac and iOS Apps.
 
-It's features include:
+Its features include:
 
 * Compatibility with C/ObjC headers, meaning that there is no need to create special bindings for C APIs.
 * Automatic memory management.
